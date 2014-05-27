@@ -40,17 +40,3 @@ ext.testLibraries = [
         spring_test: "org.springframework:spring-test:4.0.3.RELEASE"
 ]
 
-def getProcessBuilder() {
-    Properties properties = new Properties();
-    properties.load(new FileInputStream(file('env/local.properties')))
-    def builder = new ProcessBuilder("${projectDir}/gradlew.bat", 'run')
-    builder.environment().putAll(properties)
-    builder.redirectOutput(ProcessBuilder.Redirect.INHERIT)
-    return builder
-}
-
-task runMCI << {
-    ProcessBuilder builder = getProcessBuilder()
-    Process process = builder.start();
-    process.waitFor();
-}

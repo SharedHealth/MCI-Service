@@ -115,6 +115,15 @@ war {
     }
 }
 
+Properties variables = new Properties();
+variables.load(new FileInputStream(file('../env/local.properties')))
+
+task runMCI(type: JavaExec) {
+    main "org.mci.web.launch.Main"
+    classpath sourceSets.main.runtimeClasspath
+    environment variables
+}
+
 buildscript {
     repositories {
         mavenCentral()
