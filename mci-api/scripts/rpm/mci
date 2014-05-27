@@ -1,0 +1,29 @@
+#!/bin/sh
+#
+# mci        This shell script takes care of starting and stopping
+#              the mci system
+#
+# chkconfig: - 64 36
+# description: The mci shared health record system
+# processname: mci
+# config: /etc/default/mci
+# pidfile: /var/run/mci/mci.pid
+### BEGIN INIT INFO
+# Provides: mci
+# Required-Start: $local_fs $remote_fs $network $named $syslog $time
+# Required-Stop: $local_fs $remote_fs $network $named $syslog $time
+# Short-Description: start and stop mci system,
+# Description: mci system
+### END INIT INFO
+
+. /etc/default/mci
+
+case "$1" in
+  start)
+    nohup java -Dserver.port=$MCI_PORT -jar /opt/mci/lib/mci-api.war > /var/log/mci/mci.log &
+    echo $! > /var/run/mci/mci.pid
+    ;;
+  stop)
+    (cat /var/run/mci/mci.pid |  xargs -n 1 kill) || (true)
+    ;;
+esac

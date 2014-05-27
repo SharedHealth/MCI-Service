@@ -1,0 +1,132 @@
+apply plugin: 'java'
+apply plugin: 'spring-boot'
+apply plugin: 'war'
+apply plugin: 'rpm'
+apply plugin: 'idea'
+
+dependencies {
+    compile libraries.snappy, libraries.spring_boot, libraries.spring_data_cassandra
+    compile ('io.netty:netty:3.9.0.Final'){
+        force = 'true'
+    }
+    compile('com.toddfast.mutagen:mutagen-cassandra:0.4.0'){
+        exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+    }
+    testCompile testLibraries.mockito, testLibraries.junit, testLibraries.spring_test
+}
+
+test.doFirst {
+    project(":mci-api").tasks.migrateDatabase.execute()
+}
+
+test {
+    testLogging {
+        exceptionFormat "full" // default is "short"
+    }
+}
+
+configurations {
+    migration {
+        extendsFrom compile
+    }
+}
+
+jar {
+    baseName = 'mci-api'
+    version = '0.1-SNAPSHOT'
+}
+
+private Properties loadConfig() {
+    Properties properties = new Properties()
+    properties.load(new FileInputStream(file("${projectDir}/../env/local.properties")));
+    properties
+}
+
+task assembly(dependsOn: 'build') << {
+    new File("${buildDir}/etc/").mkdir();
+}
+
+task exportProperties(dependsOn: 'assembly') << {
+    PrintStream output = new PrintStream(new FileOutputStream(file("${buildDir}/etc/mci")));
+    Properties properties = loadConfig()
+    properties.each { prop, val ->
+        output.println("export " + prop + "=" + val)
+    }
+}
+
+task dist(dependsOn: 'exportProperties', type: Rpm) {
+    packageName = 'mci'
+    version = '0.1'
+    release = 1
+    arch = NOARCH
+    os = LINUX
+
+    into '/opt/mci'
+
+    postInstall = file('scripts/utils/postInstall.sh')
+    preUninstall = file('scripts/utils/preUninstall.sh')
+    postUninstall = file('scripts/utils/postUninstall.sh')
+
+    from("${buildDir}/etc") {
+        fileMode = 0755
+        createDirectoryEntry = true
+        into 'etc'
+    }
+
+    from("scripts/rpm") {
+        fileMode = 0755
+        createDirectoryEntry = true
+        exclude 'placeholder'
+        into 'bin'
+    }
+
+    from("${buildDir}/libs") {
+        fileMode = 0755
+        createDirectoryEntry = true
+        into 'lib'
+    }
+
+    from("scripts/rpm") {
+        fileMode = 0755
+        createDirectoryEntry = true
+        exclude 'mci'
+        into 'var'
+    }
+
+}
+
+task migrateDatabase << {
+    tasks.compileJava.execute()
+    tasks.processResources.execute()
+    tasks.applyDbMigrations.execute()
+}
+
+task applyDbMigrations(type: JavaExec) {
+    workingDir=project.sourceSets.main.output.classesDir
+    classpath(sourceSets.main.runtimeClasspath)
+    main  "org.mci.web.launch.migration.Migrations"
+    environment(loadConfig())
+}
+
+war {
+    from sourceSets.main.resources
+    manifest {
+        attributes('Main-Class': 'launch.Main')
+    }
+}
+
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url "http://repo.spring.io/snapshot" }
+        maven { url "http://repo.spring.io/milestone" }
+        jcenter()
+    }
+    dependencies {
+        classpath(
+                "org.springframework.boot:spring-boot-gradle-plugin:1.0.2.BUILD-SNAPSHOT",
+                'com.netflix.nebula:gradle-ospackage-plugin:1.9.1+'
+        )
+    }
+}
+

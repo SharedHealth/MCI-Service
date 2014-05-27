@@ -1,0 +1,56 @@
+subprojects {
+
+    apply plugin: 'java'
+
+    def localEnv = new Properties();
+    localEnv.load(new FileInputStream(file("${projectDir}/../env/local.properties")))
+
+    repositories {
+        mavenCentral()
+        maven { url "http://repo.spring.io/snapshot" }
+        maven { url "http://repo.spring.io/libs-snapshot" }
+        maven { url "http://repo.spring.io/milestone" }
+    }
+
+    task checkStyle(type: Checkstyle) {
+        configFile file("${project.projectDir}/../config/checkstyle/checkstyle.xml")
+    }
+
+    test {
+        environment localEnv
+    }
+
+    jar.dependsOn 'checkStyle'
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '1.12'
+}
+
+ext.libraries = [
+        spring_boot          : "org.springframework.boot:spring-boot-starter-web:1.0.2.RELEASE",
+        spring_data_cassandra: "org.springframework.data:spring-data-cassandra:1.0.0.BUILD-SNAPSHOT+",
+        mutagen_cassandra    : "com.toddfast.mutagen:mutagen-cassandra:0.4.0",
+        snappy               : 'org.xerial.snappy:snappy-java:1.1.1-M1'
+]
+
+ext.testLibraries = [
+        junit      : "junit:junit:4.10",
+        mockito    : "org.mockito:mockito-all:1.8.4",
+        spring_test: "org.springframework:spring-test:4.0.3.RELEASE"
+]
+
+def getProcessBuilder() {
+    Properties properties = new Properties();
+    properties.load(new FileInputStream(file('env/local.properties')))
+    def builder = new ProcessBuilder("${projectDir}/gradlew.bat", 'run')
+    builder.environment().putAll(properties)
+    builder.redirectOutput(ProcessBuilder.Redirect.INHERIT)
+    return builder
+}
+
+task runMCI << {
+    ProcessBuilder builder = getProcessBuilder()
+    Process process = builder.start();
+    process.waitFor();
+}
