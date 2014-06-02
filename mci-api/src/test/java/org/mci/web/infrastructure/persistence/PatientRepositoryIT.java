@@ -20,7 +20,7 @@ import static org.junit.Assert.*;
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 @ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
-public class PatientRepositoryTest {
+public class PatientRepositoryIT {
     private final String healthId = "testHealthId";
 
     @Autowired
@@ -32,7 +32,8 @@ public class PatientRepositoryTest {
 
     @Before
     public void setup() {
-        cqlTemplate.execute("INSERT into patient (health_id) VALUES ('" + healthId + "');");
+        String cql = String.format("INSERT into patient (health_id) VALUES ('%s')", healthId);
+        cqlTemplate.execute(cql);
     }
 
     @Test

@@ -1,1 +1,1 @@
-create table patient (health_id varchar PRIMARY KEY);
+create table patient (health_id varchar PRIMARY KEY, full_name varchar, gender varchar, address_division_id varchar, address_district_id varchar, address_upazilla_id varchar, address_union_id varchar);

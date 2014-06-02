@@ -17,7 +17,11 @@ public class PatientService {
         this.patientRepository = patientRepository;
     }
 
-    public ListenableFuture<Boolean> createPatient(Patient patient) {
-        return patientRepository.save(patient);
+    public ListenableFuture<String> create(Patient patient) {
+        return patientRepository.create(patient);
+    }
+
+    public ListenableFuture<Patient> find(String healthId) {
+        return patientRepository.find(healthId);
     }
 }

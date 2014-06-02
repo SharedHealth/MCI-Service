@@ -4,6 +4,7 @@ package org.mci.web.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import org.mci.web.model.Address;
 import org.mci.web.model.Patient;
 import org.mci.web.service.PatientService;
 import org.mci.web.utils.concurrent.PreResolvedListenableFuture;
@@ -37,19 +38,27 @@ public class PatientControllerTest {
 
     @Test
     public void shouldRespondWithOkWhenCreatingEncounter() throws Exception {
-        String healthId = "healthId";
         Patient patient = new Patient();
-        patient.setHealthId(healthId);
+        patient.setFullName("fullname");
+        patient.setGender("1");
+        Address address = new Address();
+        address.setDivisionId("10");
+        address.setDistrictId("1020");
+        address.setUpazillaId("102030");
+        address.setUnionId("10203040");
+        patient.setAddress(address);
 
-        String content = new ObjectMapper().writeValueAsString(patient);
+        String json = new ObjectMapper().writeValueAsString(patient);
+        String healthId = "healthId-100";
 
-        when(patientService.createPatient(patient)).thenReturn(new PreResolvedListenableFuture<Boolean>(Boolean.TRUE));
+        when(patientService.create(patient)).thenReturn(new PreResolvedListenableFuture<String>(healthId));
         mockMvc.perform
                 (
-                        post("/patient").content(content).contentType(MediaType.APPLICATION_JSON)
+                        post("/patient").content(json).contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isOk())
-                .andExpect(request().asyncResult(Boolean.TRUE));
-        verify(patientService).createPatient(patient);
+                .andExpect(request().asyncResult(healthId));
+        verify(patientService).create(patient);
     }
 }
+
