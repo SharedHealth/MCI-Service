@@ -6,6 +6,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mci.web.config.EnvironmentMock;
 import org.mci.web.config.WebMvcConfig;
+import org.mci.web.model.Address;
+import org.mci.web.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cassandra.core.CqlOperations;
@@ -15,25 +17,34 @@ import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 @ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
 public class PatientRepositoryIT {
-    private final String healthId = "testHealthId";
-
-    @Autowired
-    private PatientRepository patientRepository;
-
     @Autowired
     @Qualifier("MCICassandraTemplate")
     private CqlOperations cqlTemplate;
 
+    @Autowired
+    private PatientRepository patientRepository;
+    private String healthId;
+
     @Before
-    public void setup() {
-        String cql = String.format("INSERT into patient (health_id) VALUES ('%s')", healthId);
-        cqlTemplate.execute(cql);
+    public void setup() throws ExecutionException, InterruptedException {
+        Patient patient = new Patient();
+        patient.setFirstName("Scott");
+        patient.setLastName("Tiger");
+        patient.setGender("1");
+        Address address = new Address();
+        address.setDivisionId("10");
+        address.setDistrictId("1020");
+        address.setUpazillaId("102030");
+        address.setUnionId("10203040");
+        patient.setAddress(address);
+        healthId = patientRepository.create(patient).get();
     }
 
     @Test

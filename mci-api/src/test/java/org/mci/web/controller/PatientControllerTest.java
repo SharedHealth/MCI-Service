@@ -16,30 +16,27 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class PatientControllerTest {
 
-    private MockMvc mockMvc;
-
     @Mock
     private PatientService patientService;
-
-    private PatientController patientController;
+    private Patient patient;
+    private MockMvc mockMvc;
 
     @Before
     public void setup() {
         initMocks(this);
-        patientController = new PatientController(patientService);
-        mockMvc = MockMvcBuilders.standaloneSetup(patientController).build();
-    }
+        mockMvc = MockMvcBuilders.standaloneSetup(new PatientController(patientService)).build();
 
-    @Test
-    public void shouldRespondWithOkWhenCreatingEncounter() throws Exception {
-        Patient patient = new Patient();
-        patient.setFullName("fullname");
+        patient = new Patient();
+        patient.setNationalId("nationalId-100");
+        patient.setFirstName("Scott");
+        patient.setLastName("Tiger");
         patient.setGender("1");
         Address address = new Address();
         address.setDivisionId("10");
@@ -47,10 +44,12 @@ public class PatientControllerTest {
         address.setUpazillaId("102030");
         address.setUnionId("10203040");
         patient.setAddress(address);
+    }
 
+    @Test
+    public void shouldCreatingPatientAndReturnHealthId() throws Exception {
         String json = new ObjectMapper().writeValueAsString(patient);
         String healthId = "healthId-100";
-
         when(patientService.create(patient)).thenReturn(new PreResolvedListenableFuture<String>(healthId));
         mockMvc.perform
                 (
@@ -59,6 +58,16 @@ public class PatientControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(request().asyncResult(healthId));
         verify(patientService).create(patient);
+    }
+
+    @Test
+    public void shouldFindPatientByHealthId() throws Exception {
+        String healthId = "healthId-100";
+        when(patientService.find(healthId)).thenReturn(new PreResolvedListenableFuture<Patient>(patient));
+        mockMvc.perform(get("/patient/healthId-100"))
+                .andExpect(status().isOk())
+                .andExpect(request().asyncResult(patient));
+        verify(patientService).find("healthId-100");
     }
 }
 

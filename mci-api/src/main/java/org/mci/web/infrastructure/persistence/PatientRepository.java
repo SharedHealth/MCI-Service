@@ -20,8 +20,22 @@ import java.util.concurrent.ExecutionException;
 
 @Component
 public class PatientRepository {
-
     private static final Logger logger = LoggerFactory.getLogger(PatientRepository.class);
+
+    private static final String CREATE_CQL = "INSERT into patient (" +
+            "health_id, " +
+            "national_id, " +
+            "first_name, " +
+            "middle_name, " +
+            "last_name, " +
+            "gender, " +
+            "address_division_id, " +
+            "address_district_id, " +
+            "address_upazilla_id, " +
+            "address_union_id) " +
+            "values ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')";
+
+    private static final String FIND_BY_HEALTH_ID_CQL = "SELECT * FROM patient WHERE health_id='%s'";
 
     private CqlOperations cqlOperations;
 
@@ -33,13 +47,8 @@ public class PatientRepository {
     public ListenableFuture<String> create(Patient patient) {
         final String healthId = UUID.randomUUID().toString();
         Address address = patient.getAddress();
-        String cql = String.format("INSERT into patient (health_id, full_name, gender, " +
-                        "address_division_id, " +
-                        "address_district_id, " +
-                        "address_upazilla_id, " +
-                        "address_union_id) " +
-                        "values ('%s', '%s', '%s', '%s', '%s', '%s', '%s')",
-                healthId, patient.getFullName(), patient.getGender(),
+        String cql = String.format(CREATE_CQL, healthId, patient.getNationalId(), patient.getFirstName(),
+                patient.getMiddleName(), patient.getLastName(), patient.getGender(),
                 address.getDivisionId(), address.getDistrictId(), address.getUpazillaId(), address.getUnionId());
         logger.debug("Save patient CQL: [" + cql + "]");
 
@@ -61,9 +70,8 @@ public class PatientRepository {
     }
 
     public ListenableFuture<Patient> find(final String healthId) {
-        String cql = String.format("SELECT * FROM patient WHERE health_id='%s'", healthId);
+        String cql = String.format(FIND_BY_HEALTH_ID_CQL, healthId);
         logger.debug("Find patient CQL: [" + cql + "]");
-
         final SettableFuture<Patient> result = SettableFuture.create();
 
         cqlOperations.queryAsynchronously(cql, new AsynchronousQueryListener() {
@@ -74,7 +82,10 @@ public class PatientRepository {
                     if (null != row) {
                         Patient patient = new Patient();
                         patient.setHealthId(row.getString("health_id"));
-                        patient.setFullName(row.getString("full_name"));
+                        patient.setNationalId(row.getString("national_id"));
+                        patient.setFirstName(row.getString("first_name"));
+                        patient.setMiddleName(row.getString("middle_name"));
+                        patient.setLastName(row.getString("last_name"));
                         patient.setGender(row.getString("gender"));
 
                         Address address = new Address();

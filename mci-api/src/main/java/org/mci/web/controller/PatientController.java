@@ -31,8 +31,8 @@ public class PatientController {
 
         patientService.create(patient).addCallback(new ListenableFutureCallback<String>() {
             @Override
-            public void onSuccess(String result) {
-                deferredResult.setResult(result);
+            public void onSuccess(String healthId) {
+                deferredResult.setResult(healthId);
             }
 
             @Override

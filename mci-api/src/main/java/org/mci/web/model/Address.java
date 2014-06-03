@@ -13,6 +13,41 @@ public class Address {
     @JsonProperty("union_id")
     private String unionId;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Address address = (Address) o;
+
+        if (!districtId.equals(address.districtId)) return false;
+        if (!divisionId.equals(address.divisionId)) return false;
+        if (!unionId.equals(address.unionId)) return false;
+        if (!upazillaId.equals(address.upazillaId)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = divisionId.hashCode();
+        result = 31 * result + districtId.hashCode();
+        result = 31 * result + upazillaId.hashCode();
+        result = 31 * result + unionId.hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Address{");
+        sb.append("divisionId='").append(divisionId).append('\'');
+        sb.append(", districtId='").append(districtId).append('\'');
+        sb.append(", upazillaId='").append(upazillaId).append('\'');
+        sb.append(", unionId='").append(unionId).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
+
     public String getDivisionId() {
         return divisionId;
     }
@@ -43,39 +78,5 @@ public class Address {
 
     public void setUnionId(String unionId) {
         this.unionId = unionId;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Address address = (Address) o;
-
-        if (!districtId.equals(address.districtId)) return false;
-        if (!divisionId.equals(address.divisionId)) return false;
-        if (!unionId.equals(address.unionId)) return false;
-        if (!upazillaId.equals(address.upazillaId)) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = divisionId.hashCode();
-        result = 31 * result + districtId.hashCode();
-        result = 31 * result + upazillaId.hashCode();
-        result = 31 * result + unionId.hashCode();
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return "Address{" +
-                "divisionId='" + divisionId + '\'' +
-                ", districtId='" + districtId + '\'' +
-                ", upazillaId='" + upazillaId + '\'' +
-                ", unionId='" + unionId + '\'' +
-                '}';
     }
 }
