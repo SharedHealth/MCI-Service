@@ -31,10 +31,12 @@ public class PatientRepositoryIT {
     @Autowired
     private PatientRepository patientRepository;
     private String healthId;
+    private String nationalId = "nid-222";
 
     @Before
     public void setup() throws ExecutionException, InterruptedException {
         Patient patient = new Patient();
+        patient.setNationalId(nationalId);
         patient.setFirstName("Scott");
         patient.setLastName("Tiger");
         patient.setGender("1");
@@ -49,12 +51,17 @@ public class PatientRepositoryIT {
 
     @Test
     public void shouldFindPatientWithMatchingHealthId() throws ExecutionException, InterruptedException {
-        assertNotNull(patientRepository.find(healthId).get());
+        assertNotNull(patientRepository.findByHealthId(healthId).get());
     }
 
     @Test
     public void shouldNotFindPatientWithoutMatchingHealthId() throws ExecutionException, InterruptedException {
-        assertNull(patientRepository.find(healthId + "invalid").get());
+        assertNull(patientRepository.findByHealthId(healthId + "invalid").get());
+    }
+
+    @Test
+    public void shouldFindPatientWithMatchingNationalId() throws ExecutionException, InterruptedException {
+        assertNotNull(patientRepository.findByNationalId(nationalId).get());
     }
 
     @After

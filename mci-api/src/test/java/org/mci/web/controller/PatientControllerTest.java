@@ -47,7 +47,7 @@ public class PatientControllerTest {
     }
 
     @Test
-    public void shouldCreatingPatientAndReturnHealthId() throws Exception {
+    public void shouldCreatePatientAndReturnHealthId() throws Exception {
         String json = new ObjectMapper().writeValueAsString(patient);
         String healthId = "healthId-100";
         when(patientService.create(patient)).thenReturn(new PreResolvedListenableFuture<String>(healthId));
@@ -63,11 +63,21 @@ public class PatientControllerTest {
     @Test
     public void shouldFindPatientByHealthId() throws Exception {
         String healthId = "healthId-100";
-        when(patientService.find(healthId)).thenReturn(new PreResolvedListenableFuture<Patient>(patient));
-        mockMvc.perform(get("/patient/healthId-100"))
+        when(patientService.findByHealthId(healthId)).thenReturn(new PreResolvedListenableFuture<Patient>(patient));
+        mockMvc.perform(get("/patient/" + healthId))
                 .andExpect(status().isOk())
                 .andExpect(request().asyncResult(patient));
-        verify(patientService).find("healthId-100");
+        verify(patientService).findByHealthId(healthId);
+    }
+
+    @Test
+    public void shouldFindPatientByNationalId() throws Exception {
+        String nationalId = "nationalId-123";
+        when(patientService.findByNationalId(nationalId)).thenReturn(new PreResolvedListenableFuture<Patient>(patient));
+        mockMvc.perform(get("/patient?nid=" + nationalId))
+                .andExpect(status().isOk())
+                .andExpect(request().asyncResult(patient));
+        verify(patientService).findByNationalId(nationalId);
     }
 }
 

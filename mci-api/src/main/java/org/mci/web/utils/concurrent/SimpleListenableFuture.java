@@ -27,9 +27,7 @@ public abstract class SimpleListenableFuture<T, S> extends FutureAdapter<T, S> i
             public void run() {
                 try {
                     callback.onSuccess(get());
-                } catch (InterruptedException e) {
-                    callback.onFailure(e);
-                } catch (ExecutionException e) {
+                } catch (InterruptedException | ExecutionException e) {
                     callback.onFailure(e);
                 }
             }

@@ -9,3 +9,5 @@ create table patient (
     address_district_id varchar,
     address_upazilla_id varchar,
     address_union_id varchar);
+
+CREATE INDEX national_id_key ON patient (national_id);

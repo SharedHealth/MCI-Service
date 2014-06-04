@@ -36,6 +36,7 @@ public class PatientRepository {
             "values ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')";
 
     private static final String FIND_BY_HEALTH_ID_CQL = "SELECT * FROM patient WHERE health_id='%s'";
+    private static final String FIND_BY_NATIONAL_ID_CQL = "SELECT * FROM patient WHERE national_id='%s'";
 
     private CqlOperations cqlOperations;
 
@@ -69,35 +70,16 @@ public class PatientRepository {
         };
     }
 
-    public ListenableFuture<Patient> find(final String healthId) {
+    public ListenableFuture<Patient> findByHealthId(final String healthId) {
         String cql = String.format(FIND_BY_HEALTH_ID_CQL, healthId);
-        logger.debug("Find patient CQL: [" + cql + "]");
+        logger.debug("Find patient by health id CQL: [" + cql + "]");
         final SettableFuture<Patient> result = SettableFuture.create();
 
         cqlOperations.queryAsynchronously(cql, new AsynchronousQueryListener() {
             @Override
             public void onQueryComplete(ResultSetFuture rsf) {
                 try {
-                    Row row = rsf.get().one();
-                    if (null != row) {
-                        Patient patient = new Patient();
-                        patient.setHealthId(row.getString("health_id"));
-                        patient.setNationalId(row.getString("national_id"));
-                        patient.setFirstName(row.getString("first_name"));
-                        patient.setMiddleName(row.getString("middle_name"));
-                        patient.setLastName(row.getString("last_name"));
-                        patient.setGender(row.getString("gender"));
-
-                        Address address = new Address();
-                        address.setDivisionId(row.getString("address_division_id"));
-                        address.setDistrictId(row.getString("address_district_id"));
-                        address.setUpazillaId(row.getString("address_upazilla_id"));
-                        address.setUnionId(row.getString("address_union_id"));
-                        patient.setAddress(address);
-                        result.set(patient);
-                    } else {
-                        result.set(null);
-                    }
+                    setPatientOnResult(rsf.get().one(), result);
                 } catch (InterruptedException | ExecutionException e) {
                     logger.error("Error while finding patient by healthId: " + healthId, e);
                     result.set(null);
@@ -111,5 +93,52 @@ public class PatientRepository {
                 return adapteeResult;
             }
         };
+    }
+
+    public ListenableFuture<Patient> findByNationalId(final String nationalId) {
+        String cql = String.format(FIND_BY_NATIONAL_ID_CQL, nationalId);
+        logger.debug("Find patient by national id CQL: [" + cql + "]");
+        final SettableFuture<Patient> result = SettableFuture.create();
+
+        cqlOperations.queryAsynchronously(cql, new AsynchronousQueryListener() {
+            @Override
+            public void onQueryComplete(ResultSetFuture rsf) {
+                try {
+                    setPatientOnResult(rsf.get().one(), result);
+                } catch (InterruptedException | ExecutionException e) {
+                    logger.error("Error while finding patient by nationalId: " + nationalId, e);
+                    result.set(null);
+                }
+            }
+        });
+
+        return new SimpleListenableFuture<Patient, Patient>(result) {
+            @Override
+            protected Patient adapt(Patient adapteeResult) throws ExecutionException {
+                return adapteeResult;
+            }
+        };
+    }
+
+    private void setPatientOnResult(Row row, SettableFuture<Patient> result) throws InterruptedException, ExecutionException {
+        if (row == null) {
+            result.set(null);
+            return;
+        }
+        Patient patient = new Patient();
+        patient.setHealthId(row.getString("health_id"));
+        patient.setNationalId(row.getString("national_id"));
+        patient.setFirstName(row.getString("first_name"));
+        patient.setMiddleName(row.getString("middle_name"));
+        patient.setLastName(row.getString("last_name"));
+        patient.setGender(row.getString("gender"));
+
+        Address address = new Address();
+        address.setDivisionId(row.getString("address_division_id"));
+        address.setDistrictId(row.getString("address_district_id"));
+        address.setUpazillaId(row.getString("address_upazilla_id"));
+        address.setUnionId(row.getString("address_union_id"));
+        patient.setAddress(address);
+        result.set(patient);
     }
 }

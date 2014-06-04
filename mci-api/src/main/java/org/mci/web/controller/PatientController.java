@@ -44,11 +44,30 @@ public class PatientController {
     }
 
     @RequestMapping(value = "/{healthId}", method = RequestMethod.GET)
-    public DeferredResult<Patient> find(@PathVariable String healthId) throws ExecutionException, InterruptedException {
+    public DeferredResult<Patient> findByHealthId(@PathVariable String healthId) throws ExecutionException, InterruptedException {
         logger.debug("Finding patient. HealthId: [" + healthId + "]");
         final DeferredResult<Patient> deferredResult = new DeferredResult<Patient>();
 
-        patientService.find(healthId).addCallback(new ListenableFutureCallback<Patient>() {
+        patientService.findByHealthId(healthId).addCallback(new ListenableFutureCallback<Patient>() {
+            @Override
+            public void onSuccess(Patient result) {
+                deferredResult.setResult(result);
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+                deferredResult.setErrorResult(error);
+            }
+        });
+        return deferredResult;
+    }
+
+    @RequestMapping(method = RequestMethod.GET)
+    public DeferredResult<Patient> findByNationalId(@RequestParam("nid") String nationalId) throws ExecutionException, InterruptedException {
+        logger.debug("Finding patient. NationalId: [" + nationalId + "]");
+        final DeferredResult<Patient> deferredResult = new DeferredResult<Patient>();
+
+        patientService.findByNationalId(nationalId).addCallback(new ListenableFutureCallback<Patient>() {
             @Override
             public void onSuccess(Patient result) {
                 deferredResult.setResult(result);

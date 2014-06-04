@@ -21,7 +21,11 @@ public class PatientService {
         return patientRepository.create(patient);
     }
 
-    public ListenableFuture<Patient> find(String healthId) {
-        return patientRepository.find(healthId);
+    public ListenableFuture<Patient> findByHealthId(String healthId) {
+        return patientRepository.findByHealthId(healthId);
+    }
+
+    public ListenableFuture<Patient> findByNationalId(String nationalId) {
+        return patientRepository.findByNationalId(nationalId);
     }
 }
