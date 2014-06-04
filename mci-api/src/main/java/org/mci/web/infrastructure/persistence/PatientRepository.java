@@ -3,6 +3,7 @@ package org.mci.web.infrastructure.persistence;
 import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Row;
 import com.google.common.util.concurrent.SettableFuture;
+import org.apache.commons.lang3.StringUtils;
 import org.mci.web.model.Address;
 import org.mci.web.model.Patient;
 import org.mci.web.utils.concurrent.SimpleListenableFuture;
@@ -28,12 +29,18 @@ public class PatientRepository {
             "first_name, " +
             "middle_name, " +
             "last_name, " +
+            "date_of_birth, " +
             "gender, " +
-            "address_division_id, " +
-            "address_district_id, " +
-            "address_upazilla_id, " +
-            "address_union_id) " +
-            "values ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')";
+            "occupation, " +
+            "edu_level, " +
+            "primary_contact, " +
+            "address_line, " +
+            "division_id, " +
+            "district_id, " +
+            "upazilla_id, " +
+            "union_id) " +
+            "values ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')";
+
 
     private static final String FIND_BY_HEALTH_ID_CQL = "SELECT * FROM patient WHERE health_id='%s'";
     private static final String FIND_BY_NATIONAL_ID_CQL = "SELECT * FROM patient WHERE national_id='%s'";
@@ -48,9 +55,22 @@ public class PatientRepository {
     public ListenableFuture<String> create(Patient patient) {
         final String healthId = UUID.randomUUID().toString();
         Address address = patient.getAddress();
-        String cql = String.format(CREATE_CQL, healthId, patient.getNationalId(), patient.getFirstName(),
-                patient.getMiddleName(), patient.getLastName(), patient.getGender(),
-                address.getDivisionId(), address.getDistrictId(), address.getUpazillaId(), address.getUnionId());
+        String cql = String.format(CREATE_CQL,
+                healthId,
+                patient.getNationalId(),
+                patient.getFirstName(),
+                patient.getMiddleName(),
+                patient.getLastName(),
+                patient.getDateOfBirth(),
+                patient.getGender(),
+                patient.getOccupation(),
+                patient.getEducationLevel(),
+                patient.getPrimaryContact(),
+                address.getAddressLine(),
+                address.getDivisionId(),
+                address.getDistrictId(),
+                address.getUpazillaId(),
+                address.getUnionId());
         logger.debug("Save patient CQL: [" + cql + "]");
 
         final SettableFuture<String> result = SettableFuture.create();
@@ -120,24 +140,30 @@ public class PatientRepository {
         };
     }
 
-    private void setPatientOnResult(Row row, SettableFuture<Patient> result) throws InterruptedException, ExecutionException {
-        if (row == null) {
+    private void setPatientOnResult(Row r, SettableFuture<Patient> result) throws InterruptedException, ExecutionException {
+        if (r == null) {
             result.set(null);
             return;
         }
+        PatientRow row = new PatientRow(r);
         Patient patient = new Patient();
         patient.setHealthId(row.getString("health_id"));
         patient.setNationalId(row.getString("national_id"));
         patient.setFirstName(row.getString("first_name"));
         patient.setMiddleName(row.getString("middle_name"));
         patient.setLastName(row.getString("last_name"));
+        patient.setDateOfBirth(row.getString("date_of_birth"));
         patient.setGender(row.getString("gender"));
+        patient.setOccupation(row.getString("occupation"));
+        patient.setEducationLevel(row.getString("edu_level"));
+        patient.setPrimaryContact(row.getString("primary_contact"));
 
         Address address = new Address();
-        address.setDivisionId(row.getString("address_division_id"));
-        address.setDistrictId(row.getString("address_district_id"));
-        address.setUpazillaId(row.getString("address_upazilla_id"));
-        address.setUnionId(row.getString("address_union_id"));
+        address.setAddressLine(row.getString("address_line"));
+        address.setDivisionId(row.getString("division_id"));
+        address.setDistrictId(row.getString("district_id"));
+        address.setUpazillaId(row.getString("upazilla_id"));
+        address.setUnionId(row.getString("union_id"));
         patient.setAddress(address);
         result.set(patient);
     }

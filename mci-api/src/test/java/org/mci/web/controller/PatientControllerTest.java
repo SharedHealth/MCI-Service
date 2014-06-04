@@ -38,7 +38,10 @@ public class PatientControllerTest {
         patient.setFirstName("Scott");
         patient.setLastName("Tiger");
         patient.setGender("1");
+        patient.setDateOfBirth("2014-12-01");
+
         Address address = new Address();
+        address.setAddressLine("house-10");
         address.setDivisionId("10");
         address.setDistrictId("1020");
         address.setUpazillaId("102030");

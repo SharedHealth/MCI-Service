@@ -17,8 +17,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -30,28 +29,39 @@ public class PatientRepositoryIT {
 
     @Autowired
     private PatientRepository patientRepository;
+
+    private Patient patient;
     private String healthId;
     private String nationalId = "nid-222";
 
     @Before
     public void setup() throws ExecutionException, InterruptedException {
-        Patient patient = new Patient();
+        patient = new Patient();
         patient.setNationalId(nationalId);
         patient.setFirstName("Scott");
         patient.setLastName("Tiger");
+        patient.setDateOfBirth("2014-12-01");
         patient.setGender("1");
+        patient.setOccupation("salaried");
+        patient.setEducationLevel("BA");
+        patient.setPrimaryContact("someone");
+
         Address address = new Address();
+        address.setAddressLine("house-10");
         address.setDivisionId("10");
         address.setDistrictId("1020");
         address.setUpazillaId("102030");
         address.setUnionId("10203040");
         patient.setAddress(address);
         healthId = patientRepository.create(patient).get();
+        patient.setHealthId(healthId);
     }
 
     @Test
     public void shouldFindPatientWithMatchingHealthId() throws ExecutionException, InterruptedException {
-        assertNotNull(patientRepository.findByHealthId(healthId).get());
+        Patient p = patientRepository.findByHealthId(healthId).get();
+        assertNotNull(p);
+        assertEquals(patient, p);
     }
 
     @Test
@@ -61,12 +71,13 @@ public class PatientRepositoryIT {
 
     @Test
     public void shouldFindPatientWithMatchingNationalId() throws ExecutionException, InterruptedException {
-        assertNotNull(patientRepository.findByNationalId(nationalId).get());
+        final Patient p = patientRepository.findByNationalId(nationalId).get();
+        assertNotNull(p);
+        assertEquals(patient, p);
     }
 
     @After
     public void teardown() {
         cqlTemplate.execute("truncate patient");
     }
-
 }
