@@ -31,7 +31,6 @@ public class PatientRepositoryIT {
     private PatientRepository patientRepository;
 
     private Patient patient;
-    private String healthId;
     private String nationalId = "nid-222";
 
     @Before
@@ -53,24 +52,38 @@ public class PatientRepositoryIT {
         address.setUpazillaId("102030");
         address.setUnionId("10203040");
         patient.setAddress(address);
-        healthId = patientRepository.create(patient).get();
-        patient.setHealthId(healthId);
     }
 
     @Test
-    public void shouldFindPatientWithMatchingHealthId() throws ExecutionException, InterruptedException {
+    public void shouldFindPatientWithMatchingProvidedHealthId() throws ExecutionException, InterruptedException {
+        String healthId = "hid87654";
+        patient.setHealthId(healthId);
+        String hid = patientRepository.create(patient).get();
+        assertEquals(healthId, hid);
+
         Patient p = patientRepository.findByHealthId(healthId).get();
         assertNotNull(p);
         assertEquals(patient, p);
     }
 
     @Test
+    public void shouldFindPatientWithMatchingGeneratedHealthId() throws ExecutionException, InterruptedException {
+        String healthId = patientRepository.create(patient).get();
+        Patient p = patientRepository.findByHealthId(healthId).get();
+        assertNotNull(p);
+        patient.setHealthId(healthId);
+        assertEquals(patient, p);
+    }
+
+    @Test
     public void shouldNotFindPatientWithoutMatchingHealthId() throws ExecutionException, InterruptedException {
+        String healthId = patientRepository.create(patient).get();
         assertNull(patientRepository.findByHealthId(healthId + "invalid").get());
     }
 
     @Test
     public void shouldFindPatientWithMatchingNationalId() throws ExecutionException, InterruptedException {
+        patientRepository.create(patient).get();
         final Patient p = patientRepository.findByNationalId(nationalId).get();
         assertNotNull(p);
         assertEquals(patient, p);
