@@ -5,11 +5,14 @@ apply plugin: 'rpm'
 apply plugin: 'idea'
 
 dependencies {
-    compile libraries.snappy, libraries.spring_boot, libraries.spring_data_cassandra
-    compile ('io.netty:netty:3.9.0.Final'){
+    compile('org.springframework.boot:spring-boot-starter-web:1.0.2.RELEASE') {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    }
+    compile libraries.snappy, libraries.spring_boot_logging, libraries.spring_data_cassandra
+    compile('io.netty:netty:3.9.0.Final') {
         force = 'true'
     }
-    compile('com.toddfast.mutagen:mutagen-cassandra:0.4.0'){
+    compile('com.toddfast.mutagen:mutagen-cassandra:0.4.0') {
         exclude group: 'org.slf4j', module: 'slf4j-log4j12'
     }
     testCompile testLibraries.mockito, testLibraries.junit, testLibraries.spring_test
@@ -102,9 +105,9 @@ task migrateDatabase << {
 }
 
 task applyDbMigrations(type: JavaExec) {
-    workingDir=project.sourceSets.main.output.classesDir
+    workingDir = project.sourceSets.main.output.classesDir
     classpath(sourceSets.main.runtimeClasspath)
-    main  "org.mci.web.launch.migration.Migrations"
+    main "org.mci.web.launch.migration.Migrations"
     environment(loadConfig())
 }
 

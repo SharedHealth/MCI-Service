@@ -53,7 +53,7 @@ public class PatientRepository {
     }
 
     public ListenableFuture<String> create(Patient patient) {
-        if(StringUtils.isBlank(patient.getHealthId())) {
+        if (StringUtils.isBlank(patient.getHealthId())) {
             patient.setHealthId(UUID.randomUUID().toString());
         }
         final String healthId = patient.getHealthId();
