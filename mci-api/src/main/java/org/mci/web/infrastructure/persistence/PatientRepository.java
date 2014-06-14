@@ -18,12 +18,15 @@ import org.springframework.util.concurrent.ListenableFuture;
 
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static org.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
 
 @Component
 public class PatientRepository {
     private static final Logger logger = LoggerFactory.getLogger(PatientRepository.class);
+    private static long TIMEOUT_IN_MILLIS = 10;
 
 
     private CqlOperations cqlOperations;
@@ -62,7 +65,13 @@ public class PatientRepository {
         cqlOperations.executeAsynchronously(cql, new AsynchronousQueryListener() {
             @Override
             public void onQueryComplete(ResultSetFuture rsf) {
-                result.set(healthId);
+                try {
+                    rsf.get(TIMEOUT_IN_MILLIS, TimeUnit.MILLISECONDS);
+                    result.set(healthId);
+                } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                    logger.error("Error while creating patient.", e);
+                    result.setException(e);
+                }
             }
         });
 
@@ -83,8 +92,8 @@ public class PatientRepository {
             @Override
             public void onQueryComplete(ResultSetFuture rsf) {
                 try {
-                    setPatientOnResult(rsf.get().one(), result);
-                } catch (InterruptedException | ExecutionException e) {
+                    setPatientOnResult(rsf.get(TIMEOUT_IN_MILLIS, TimeUnit.MILLISECONDS).one(), result);
+                } catch (InterruptedException | ExecutionException | TimeoutException e) {
                     logger.error("Error while finding patient by healthId: " + healthId, e);
                     result.set(null);
                 }
@@ -108,8 +117,8 @@ public class PatientRepository {
             @Override
             public void onQueryComplete(ResultSetFuture rsf) {
                 try {
-                    setPatientOnResult(rsf.get().one(), result);
-                } catch (InterruptedException | ExecutionException e) {
+                    setPatientOnResult(rsf.get(TIMEOUT_IN_MILLIS, TimeUnit.MILLISECONDS).one(), result);
+                } catch (InterruptedException | ExecutionException | TimeoutException e) {
                     logger.error("Error while finding patient by nationalId: " + nationalId, e);
                     result.set(null);
                 }
