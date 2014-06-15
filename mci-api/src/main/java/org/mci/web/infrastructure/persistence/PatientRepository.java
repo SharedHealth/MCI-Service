@@ -4,7 +4,7 @@ import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Row;
 import com.google.common.util.concurrent.SettableFuture;
 import org.apache.commons.lang3.StringUtils;
-import org.mci.exception.PatientNotFoundException;
+import org.mci.web.exception.PatientNotFoundException;
 import org.mci.web.model.Address;
 import org.mci.web.model.Patient;
 import org.mci.web.utils.concurrent.SimpleListenableFuture;

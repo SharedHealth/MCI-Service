@@ -1,8 +1,8 @@
 package org.mci.web.utils.concurrent;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import org.springframework.util.concurrent.FutureAdapter;
-import com.google.common.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import java.util.concurrent.ExecutionException;

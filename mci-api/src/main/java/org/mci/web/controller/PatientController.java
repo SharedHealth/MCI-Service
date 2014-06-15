@@ -1,6 +1,6 @@
 package org.mci.web.controller;
 
-import org.mci.exception.PatientNotFoundException;
+import org.mci.web.exception.PatientNotFoundException;
 import org.mci.web.model.Patient;
 import org.mci.web.service.PatientService;
 import org.slf4j.LoggerFactory;
@@ -12,7 +12,8 @@ import org.springframework.web.context.request.async.DeferredResult;
 
 import java.util.concurrent.ExecutionException;
 
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
@@ -39,8 +40,8 @@ public class PatientController {
             }
 
             @Override
-            public void onFailure(Throwable error) {
-                deferredResult.setErrorResult(createErrorResponse(error));
+            public void onFailure(Throwable e) {
+                deferredResult.setErrorResult(extractAppException(e));
             }
         });
         return deferredResult;
@@ -58,8 +59,8 @@ public class PatientController {
             }
 
             @Override
-            public void onFailure(Throwable error) {
-                deferredResult.setErrorResult(createErrorResponse(error));
+            public void onFailure(Throwable e) {
+                deferredResult.setErrorResult(extractAppException(e));
             }
         });
         return deferredResult;
@@ -77,18 +78,17 @@ public class PatientController {
             }
 
             @Override
-            public void onFailure(Throwable error) {
-                deferredResult.setErrorResult(createErrorResponse(error));
+            public void onFailure(Throwable e) {
+                deferredResult.setErrorResult(extractAppException(e));
             }
         });
         return deferredResult;
     }
 
-    private ResponseEntity<String> createErrorResponse(Throwable e) {
-        if ((e instanceof ExecutionException) && (e.getCause() instanceof PatientNotFoundException)) {
-            return new ResponseEntity<>(e.getCause().getMessage(), NOT_FOUND);
-        } else {
-            return new ResponseEntity<>("Internal server error", INTERNAL_SERVER_ERROR);
+    private Throwable extractAppException(Throwable e) {
+        if (e instanceof ExecutionException && e.getCause() != null) {
+            return e.getCause();
         }
+        return e;
     }
 }
