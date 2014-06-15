@@ -9,17 +9,19 @@ import org.mci.web.model.Patient;
 import org.mci.web.service.PatientService;
 import org.mci.web.utils.concurrent.PreResolvedListenableFuture;
 import org.mockito.Mock;
-import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class PatientControllerTest {
 
@@ -53,33 +55,27 @@ public class PatientControllerTest {
     public void shouldCreatePatientAndReturnHealthId() throws Exception {
         String json = new ObjectMapper().writeValueAsString(patient);
         String healthId = "healthId-100";
-        when(patientService.create(patient)).thenReturn(new PreResolvedListenableFuture<String>(healthId));
-        mockMvc.perform
-                (
-                        post("/patient").content(json).contentType(MediaType.APPLICATION_JSON)
-                )
-                .andExpect(status().isOk())
-                .andExpect(request().asyncResult(healthId));
+        when(patientService.create(patient)).thenReturn(new PreResolvedListenableFuture<>(healthId));
+        mockMvc.perform (post("/patient").content(json).contentType(APPLICATION_JSON))
+                .andExpect(request().asyncResult(new ResponseEntity<>(healthId, CREATED)));
         verify(patientService).create(patient);
     }
 
     @Test
     public void shouldFindPatientByHealthId() throws Exception {
         String healthId = "healthId-100";
-        when(patientService.findByHealthId(healthId)).thenReturn(new PreResolvedListenableFuture<Patient>(patient));
+        when(patientService.findByHealthId(healthId)).thenReturn(new PreResolvedListenableFuture<>(patient));
         mockMvc.perform(get("/patient/" + healthId))
-                .andExpect(status().isOk())
-                .andExpect(request().asyncResult(patient));
+                .andExpect(request().asyncResult(new ResponseEntity<>(patient, OK)));
         verify(patientService).findByHealthId(healthId);
     }
 
     @Test
     public void shouldFindPatientByNationalId() throws Exception {
         String nationalId = "nationalId-123";
-        when(patientService.findByNationalId(nationalId)).thenReturn(new PreResolvedListenableFuture<Patient>(patient));
+        when(patientService.findByNationalId(nationalId)).thenReturn(new PreResolvedListenableFuture<>(patient));
         mockMvc.perform(get("/patient?nid=" + nationalId))
-                .andExpect(status().isOk())
-                .andExpect(request().asyncResult(patient));
+                .andExpect(request().asyncResult(new ResponseEntity<>(patient, OK)));
         verify(patientService).findByNationalId(nationalId);
     }
 }

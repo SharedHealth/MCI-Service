@@ -2,7 +2,7 @@ package org.mci.web.utils.concurrent;
 
 import com.google.common.util.concurrent.MoreExecutors;
 import org.springframework.util.concurrent.FutureAdapter;
-import org.springframework.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import java.util.concurrent.ExecutionException;
@@ -13,15 +13,15 @@ import java.util.concurrent.ExecutionException;
  * @param <T> Target type of the promised value
  * @param <S> Source type of the promised value
  */
-public abstract class SimpleListenableFuture<T, S> extends FutureAdapter<T, S> implements ListenableFuture<T> {
+public abstract class SimpleListenableFuture<T, S> extends FutureAdapter<T, S> implements org.springframework.util.concurrent.ListenableFuture<T> {
 
-    protected SimpleListenableFuture(com.google.common.util.concurrent.ListenableFuture<S> adaptee) {
+    protected SimpleListenableFuture(ListenableFuture<S> adaptee) {
         super(adaptee);
     }
 
     @Override
     public void addCallback(final ListenableFutureCallback<? super T> callback) {
-        final com.google.common.util.concurrent.ListenableFuture adaptee = (com.google.common.util.concurrent.ListenableFuture) getAdaptee();
+        final ListenableFuture adaptee = (ListenableFuture) getAdaptee();
         adaptee.addListener(new Runnable() {
             @Override
             public void run() {

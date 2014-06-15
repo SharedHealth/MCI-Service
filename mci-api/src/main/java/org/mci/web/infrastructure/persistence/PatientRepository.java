@@ -4,6 +4,7 @@ import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Row;
 import com.google.common.util.concurrent.SettableFuture;
 import org.apache.commons.lang3.StringUtils;
+import org.mci.exception.PatientNotFoundException;
 import org.mci.web.model.Address;
 import org.mci.web.model.Patient;
 import org.mci.web.utils.concurrent.SimpleListenableFuture;
@@ -19,7 +20,6 @@ import org.springframework.util.concurrent.ListenableFuture;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import static org.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
 
@@ -68,7 +68,7 @@ public class PatientRepository {
                 try {
                     rsf.get(TIMEOUT_IN_MILLIS, TimeUnit.MILLISECONDS);
                     result.set(healthId);
-                } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                } catch (Exception e) {
                     logger.error("Error while creating patient.", e);
                     result.setException(e);
                 }
@@ -92,10 +92,14 @@ public class PatientRepository {
             @Override
             public void onQueryComplete(ResultSetFuture rsf) {
                 try {
-                    setPatientOnResult(rsf.get(TIMEOUT_IN_MILLIS, TimeUnit.MILLISECONDS).one(), result);
-                } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                    Row row = rsf.get(TIMEOUT_IN_MILLIS, TimeUnit.MILLISECONDS).one();
+                    if (row == null) {
+                        throw new PatientNotFoundException("No patient found with health id: " + healthId);
+                    }
+                    setPatientOnResult(row, result);
+                } catch (Exception e) {
                     logger.error("Error while finding patient by healthId: " + healthId, e);
-                    result.set(null);
+                    result.setException(e);
                 }
             }
         });
@@ -117,10 +121,14 @@ public class PatientRepository {
             @Override
             public void onQueryComplete(ResultSetFuture rsf) {
                 try {
-                    setPatientOnResult(rsf.get(TIMEOUT_IN_MILLIS, TimeUnit.MILLISECONDS).one(), result);
-                } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                    Row row = rsf.get(TIMEOUT_IN_MILLIS, TimeUnit.MILLISECONDS).one();
+                    if (row == null) {
+                        throw new PatientNotFoundException("No patient found with national id: " + nationalId);
+                    }
+                    setPatientOnResult(row, result);
+                } catch (Exception e) {
                     logger.error("Error while finding patient by nationalId: " + nationalId, e);
-                    result.set(null);
+                    result.setException(e);
                 }
             }
         });
@@ -134,10 +142,6 @@ public class PatientRepository {
     }
 
     private void setPatientOnResult(Row r, SettableFuture<Patient> result) throws InterruptedException, ExecutionException {
-        if (r == null) {
-            result.set(null);
-            return;
-        }
         PatientRow row = new PatientRow(r);
         Patient patient = new Patient();
         patient.setHealthId(row.getString(HEALTH_ID));

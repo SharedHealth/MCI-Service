@@ -15,9 +15,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -75,10 +77,9 @@ public class PatientRepositoryIT {
         assertEquals(patient, p);
     }
 
-    @Test
-    public void shouldNotFindPatientWithoutMatchingHealthId() throws ExecutionException, InterruptedException {
-        String healthId = patientRepository.create(patient).get();
-        assertNull(patientRepository.findByHealthId(healthId + "invalid").get());
+    @Test(expected =ExecutionException.class)
+    public void shouldThrowException_IfPatientDoesNotExistForGivenHealthId() throws ExecutionException, InterruptedException {
+        patientRepository.findByHealthId(UUID.randomUUID().toString()).get();
     }
 
     @Test
@@ -87,6 +88,11 @@ public class PatientRepositoryIT {
         final Patient p = patientRepository.findByNationalId(nationalId).get();
         assertNotNull(p);
         assertEquals(patient, p);
+    }
+
+    @Test(expected =ExecutionException.class)
+    public void shouldThrowException_IfPatientDoesNotExistGivenNationalId() throws ExecutionException, InterruptedException {
+        patientRepository.findByNationalId(UUID.randomUUID().toString()).get();
     }
 
     @After
