@@ -1,41 +1,43 @@
 package org.mci.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import junit.framework.Assert;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
+import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mci.web.config.EnvironmentMock;
 import org.mci.web.config.WebMvcConfig;
 import org.mci.web.model.Address;
 import org.mci.web.model.Patient;
+import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 @ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
-public class PatientRestApiErrorResponseIT {
+public class PatientRestApiTest {
 
-    public static final String PATIENT_REST_URL = "http://localhost:8080/patient";
-    private static HttpClient httpClient;
+    @Autowired
+    protected WebApplicationContext webApplicationContext;
+    private MockMvc mockMvc;
     private Patient patient;
-
-    @BeforeClass
-    public static void init() {
-        httpClient = HttpClientBuilder.create().build();
-    }
 
     @Before
     public void setup() {
+        MockitoAnnotations.initMocks(this);
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+
         patient = new Patient();
         patient.setFirstName("Scott");
         patient.setLastName("Tiger");
@@ -52,17 +54,13 @@ public class PatientRestApiErrorResponseIT {
     }
 
     @Test
-    public void shouldReturnBadRequestErrorForInvalidRequestData() throws Exception {
+    public void shouldReturnBadRequestForInvalidRequestData() throws Exception {
         patient.getAddress().setAddressLine("h");
         String json = new ObjectMapper().writeValueAsString(patient);
 
-        HttpPost post = new HttpPost(PATIENT_REST_URL);
-        StringEntity entity = new StringEntity(json);
-        entity.setContentType("application/json");
-        post.setEntity(entity);
-
-        HttpResponse response = httpClient.execute(post);
-        Assert.assertEquals(400, response.getStatusLine().getStatusCode());
-        Assert.assertEquals("{\"code\":400,\"message\":\"invalid.request\"}", EntityUtils.toString(response.getEntity()));
+        MvcResult result = mockMvc.perform(post("/patient").accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+        Assert.assertEquals("{\"code\":400,\"message\":\"invalid.request\"}", result.getResponse().getContentAsString());
     }
 }
