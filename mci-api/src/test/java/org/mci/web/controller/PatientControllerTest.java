@@ -56,7 +56,7 @@ public class PatientControllerTest {
         String json = new ObjectMapper().writeValueAsString(patient);
         String healthId = "healthId-100";
         when(patientService.create(patient)).thenReturn(new PreResolvedListenableFuture<>(healthId));
-        mockMvc.perform (post("/patient").content(json).contentType(APPLICATION_JSON))
+        mockMvc.perform(post("/patient").content(json).contentType(APPLICATION_JSON))
                 .andExpect(request().asyncResult(new ResponseEntity<>(healthId, CREATED)));
         verify(patientService).create(patient);
     }

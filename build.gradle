@@ -31,12 +31,14 @@ ext.libraries = [
         spring_boot_logging  : "org.springframework.boot:spring-boot-starter-log4j:1.0.2.RELEASE",
         spring_data_cassandra: "org.springframework.data:spring-data-cassandra:1.0.0.BUILD-SNAPSHOT+",
         mutagen_cassandra    : "com.toddfast.mutagen:mutagen-cassandra:0.4.0",
+        hibernate_validator  : "org.hibernate:hibernate-validator:5.1.1.Final",
         snappy               : 'org.xerial.snappy:snappy-java:1.1.1-M1'
 ]
 
 ext.testLibraries = [
         junit      : "junit:junit:4.10",
         mockito    : "org.mockito:mockito-all:1.8.4",
+        http_client: "org.apache.httpcomponents:httpclient:4.3.3",
         spring_test: "org.springframework:spring-test:4.0.3.RELEASE"
 ]
 

@@ -8,14 +8,14 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-web:1.0.2.RELEASE') {
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
     }
-    compile libraries.snappy, libraries.spring_boot_logging, libraries.spring_data_cassandra
+    compile libraries.snappy, libraries.spring_boot_logging, libraries.spring_data_cassandra, libraries.hibernate_validator
     compile('io.netty:netty:3.9.0.Final') {
         force = 'true'
     }
     compile('com.toddfast.mutagen:mutagen-cassandra:0.4.0') {
         exclude group: 'org.slf4j', module: 'slf4j-log4j12'
     }
-    testCompile testLibraries.mockito, testLibraries.junit, testLibraries.spring_test
+    testCompile testLibraries.mockito, testLibraries.junit, testLibraries.spring_test, testLibraries.http_client
 }
 
 test.doFirst {

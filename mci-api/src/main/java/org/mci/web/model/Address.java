@@ -1,22 +1,29 @@
 package org.mci.web.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import javax.validation.constraints.Size;
+import org.hibernate.validator.constraints.NotEmpty;
 
 public class Address {
 
     @JsonProperty("address_line")
+    @Size(min = 3, max = 20)
     private String addressLine;
 
     @JsonProperty("division_id")
+    @NotEmpty
     private String divisionId;
 
     @JsonProperty("district_id")
+    @NotEmpty
     private String districtId;
 
     @JsonProperty("upazilla_id")
+    @NotEmpty
     private String upazillaId;
 
     @JsonProperty("union_id")
+    @NotEmpty
     private String unionId;
 
     @Override
@@ -26,23 +33,13 @@ public class Address {
 
         Address address = (Address) o;
 
-        if (!addressLine.equals(address.addressLine)) return false;
-        if (!districtId.equals(address.districtId)) return false;
-        if (!divisionId.equals(address.divisionId)) return false;
-        if (!unionId.equals(address.unionId)) return false;
-        if (!upazillaId.equals(address.upazillaId)) return false;
+        if (addressLine != null ? !addressLine.equals(address.addressLine) : address.addressLine != null) return false;
+        if (districtId != null ? !districtId.equals(address.districtId) : address.districtId != null) return false;
+        if (divisionId != null ? !divisionId.equals(address.divisionId) : address.divisionId != null) return false;
+        if (unionId != null ? !unionId.equals(address.unionId) : address.unionId != null) return false;
+        if (upazillaId != null ? !upazillaId.equals(address.upazillaId) : address.upazillaId != null) return false;
 
         return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = addressLine.hashCode();
-        result = 31 * result + divisionId.hashCode();
-        result = 31 * result + districtId.hashCode();
-        result = 31 * result + upazillaId.hashCode();
-        result = 31 * result + unionId.hashCode();
-        return result;
     }
 
     @Override
