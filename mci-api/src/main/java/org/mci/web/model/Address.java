@@ -1,8 +1,13 @@
 package org.mci.web.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.validation.constraints.Size;
-import org.hibernate.validator.constraints.NotEmpty;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.mci.web.annotation.AddressId;
+import static org.mci.web.annotation.AddressType.DISTRICT;
+import static org.mci.web.annotation.AddressType.DIVISION;
+import static org.mci.web.annotation.AddressType.UNION;
+import static org.mci.web.annotation.AddressType.UPAZILLA;
 
 public class Address {
 
@@ -11,19 +16,19 @@ public class Address {
     private String addressLine;
 
     @JsonProperty("division_id")
-    @NotEmpty
+    @AddressId(DIVISION)
     private String divisionId;
 
     @JsonProperty("district_id")
-    @NotEmpty
+    @AddressId(DISTRICT)
     private String districtId;
 
     @JsonProperty("upazilla_id")
-    @NotEmpty
+    @AddressId(UPAZILLA)
     private String upazillaId;
 
     @JsonProperty("union_id")
-    @NotEmpty
+    @AddressId(UNION)
     private String unionId;
 
     @Override
