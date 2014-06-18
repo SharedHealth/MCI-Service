@@ -5,10 +5,10 @@ apply plugin: 'rpm'
 apply plugin: 'idea'
 
 dependencies {
-    compile('org.springframework.boot:spring-boot-starter-web:1.0.2.RELEASE') {
+    compile('org.springframework.boot:spring-boot-starter-web:1.1.1.RELEASE') {
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
     }
-    compile('org.springframework.boot:spring-boot-starter-security:1.0.2.RELEASE') {
+    compile('org.springframework.boot:spring-boot-starter-security:1.1.1.RELEASE') {
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
     }
     compile libraries.snappy, libraries.spring_boot_logging, libraries.spring_data_cassandra, libraries.hibernate_validator
