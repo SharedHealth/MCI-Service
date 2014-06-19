@@ -32,6 +32,13 @@ public class AddressTest {
     }
 
     @Test
+    public void shouldFailIfAddressLineIsBlank() {
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "addressLine", null);
+        assertEquals(1, constraintViolations.size());
+        assertEquals("may not be empty", constraintViolations.iterator().next().getMessage());
+    }
+
+    @Test
     public void shouldFailIfAddressLineSizeLessThan3() {
         Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "addressLine", "ab");
         assertEquals(1, constraintViolations.size());
