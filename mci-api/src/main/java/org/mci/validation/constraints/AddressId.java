@@ -1,4 +1,4 @@
-package org.mci.web.annotation;
+package org.mci.validation.constraints;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;
@@ -8,6 +8,8 @@ import java.lang.annotation.Target;
 
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import org.mci.validation.constraintvalidator.AddressIdValidator;
+import org.mci.validation.AddressType;
 
 @Target({FIELD})
 @Retention(RUNTIME)

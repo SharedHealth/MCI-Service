@@ -1,8 +1,11 @@
-package org.mci.web.annotation;
+package org.mci.validation.constraintvalidator;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.util.regex.Pattern;
+
+import org.mci.validation.constraints.AddressId;
+import org.mci.validation.AddressType;
 
 public class AddressIdValidator implements ConstraintValidator<AddressId, String> {
 

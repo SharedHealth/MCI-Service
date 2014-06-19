@@ -4,11 +4,11 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.validator.constraints.NotBlank;
-import org.mci.web.annotation.AddressId;
-import static org.mci.web.annotation.AddressType.DISTRICT;
-import static org.mci.web.annotation.AddressType.DIVISION;
-import static org.mci.web.annotation.AddressType.UNION;
-import static org.mci.web.annotation.AddressType.UPAZILLA;
+import org.mci.validation.constraints.AddressId;
+import static org.mci.validation.AddressType.DISTRICT;
+import static org.mci.validation.AddressType.DIVISION;
+import static org.mci.validation.AddressType.UNION;
+import static org.mci.validation.AddressType.UPAZILLA;
 
 public class Address {
 
