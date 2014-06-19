@@ -3,6 +3,7 @@ package org.mci.web.model;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.hibernate.validator.constraints.NotBlank;
 import org.mci.web.annotation.AddressId;
 import static org.mci.web.annotation.AddressType.DISTRICT;
 import static org.mci.web.annotation.AddressType.DIVISION;
@@ -12,6 +13,7 @@ import static org.mci.web.annotation.AddressType.UPAZILLA;
 public class Address {
 
     @JsonProperty("address_line")
+    @NotBlank
     @Size(min = 3, max = 20)
     private String addressLine;
 

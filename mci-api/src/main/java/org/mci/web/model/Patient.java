@@ -1,11 +1,11 @@
 package org.mci.web.model;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import org.hibernate.validator.constraints.NotEmpty;
-
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.hibernate.validator.constraints.NotBlank;
 
 public class Patient {
 
@@ -16,18 +16,23 @@ public class Patient {
     private String healthId;
 
     @JsonProperty("first_name")
+    @NotBlank
     private String firstName;
 
     @JsonProperty("middle_name")
     private String middleName;
 
     @JsonProperty("last_name")
+    @NotBlank
     private String lastName;
 
     @JsonProperty("date_of_birth")
+    @NotBlank
     private String dateOfBirth;
 
     @JsonProperty("gender")
+    @NotBlank
+    @Pattern(regexp = "[1-3]{1}")
     private String gender;
 
     @JsonProperty("occupation")
