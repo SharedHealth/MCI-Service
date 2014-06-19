@@ -6,6 +6,7 @@ import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.validator.constraints.NotBlank;
+import org.mci.validation.constraints.Date;
 
 public class Patient {
 
@@ -28,6 +29,7 @@ public class Patient {
 
     @JsonProperty("date_of_birth")
     @NotBlank
+    @Date(format = "yyyy-MM-dd")
     private String dateOfBirth;
 
     @JsonProperty("gender")

@@ -45,6 +45,19 @@ public class PatientTest {
     }
 
     @Test
+    public void shouldFailIfDateOfBirthIsInvalidDate() {
+        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "dateOfBirth", "1999-02-30");
+        assertEquals(1, constraintViolations.size());
+        assertEquals("Must provide date of format yyyy-MM-dd", constraintViolations.iterator().next().getMessage());
+    }
+
+    @Test
+    public void shouldPassIfDateOfBirthIsValidDate() {
+        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "dateOfBirth", "1983-09-21");
+        assertEquals(0, constraintViolations.size());
+    }
+
+    @Test
     public void shouldPassIfGenderValid() {
         Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "gender", "3");
         assertEquals(0, constraintViolations.size());
