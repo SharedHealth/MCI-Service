@@ -9,7 +9,7 @@
         </layout>
     </appender>
 
-    <logger name="org.mci">
+    <logger name="org.sharedhealth.mci">
         <level value="DEBUG"/>
     </logger>
 

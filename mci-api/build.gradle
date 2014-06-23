@@ -110,7 +110,7 @@ task migrateDatabase << {
 task applyDbMigrations(type: JavaExec) {
     workingDir = project.sourceSets.main.output.classesDir
     classpath(sourceSets.main.runtimeClasspath)
-    main "org.mci.web.launch.migration.Migrations"
+    main "org.sharedhealth.mci.web.launch.migration.Migrations"
     environment(loadConfig())
 }
 
@@ -125,7 +125,7 @@ Properties variables = new Properties();
 variables.load(new FileInputStream(file('../env/local.properties')))
 
 task runMCI(type: JavaExec) {
-    main "org.mci.web.launch.Main"
+    main "org.sharedhealth.mci.web.launch.Main"
     classpath sourceSets.main.runtimeClasspath
     environment variables
 }
