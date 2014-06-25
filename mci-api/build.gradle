@@ -5,17 +5,20 @@ apply plugin: 'rpm'
 apply plugin: 'idea'
 
 dependencies {
-    compile('org.springframework.boot:spring-boot-starter-web:1.0.2.RELEASE') {
+    compile('org.springframework.boot:spring-boot-starter-web:1.1.1.RELEASE') {
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
     }
-    compile libraries.snappy, libraries.spring_boot_logging, libraries.spring_data_cassandra
+    compile('org.springframework.boot:spring-boot-starter-security:1.1.1.RELEASE') {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    }
+    compile libraries.snappy, libraries.spring_boot_logging, libraries.spring_data_cassandra, libraries.hibernate_validator
     compile('io.netty:netty:3.9.0.Final') {
         force = 'true'
     }
     compile('com.toddfast.mutagen:mutagen-cassandra:0.4.0') {
         exclude group: 'org.slf4j', module: 'slf4j-log4j12'
     }
-    testCompile testLibraries.mockito, testLibraries.junit, testLibraries.spring_test
+    testCompile testLibraries.mockito, testLibraries.junit, testLibraries.spring_test, testLibraries.http_client
 }
 
 test.doFirst {
@@ -107,7 +110,7 @@ task migrateDatabase << {
 task applyDbMigrations(type: JavaExec) {
     workingDir = project.sourceSets.main.output.classesDir
     classpath(sourceSets.main.runtimeClasspath)
-    main "org.mci.web.launch.migration.Migrations"
+    main "org.sharedhealth.mci.web.launch.migration.Migrations"
     environment(loadConfig())
 }
 
@@ -122,7 +125,7 @@ Properties variables = new Properties();
 variables.load(new FileInputStream(file('../env/local.properties')))
 
 task runMCI(type: JavaExec) {
-    main "org.mci.web.launch.Main"
+    main "org.sharedhealth.mci.web.launch.Main"
     classpath sourceSets.main.runtimeClasspath
     environment variables
 }
