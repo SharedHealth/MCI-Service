@@ -1,9 +1,13 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+
 import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Row;
 import com.google.common.util.concurrent.SettableFuture;
 import org.apache.commons.lang3.StringUtils;
+import org.sharedhealth.mci.utils.UidGenerator;
 import org.sharedhealth.mci.web.exception.PatientNotFoundException;
 import org.sharedhealth.mci.web.model.Address;
 import org.sharedhealth.mci.web.model.Patient;
@@ -17,10 +21,6 @@ import org.springframework.cassandra.core.CqlOperations;
 import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFuture;
 
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
 
 @Component
@@ -28,7 +28,7 @@ public class PatientRepository {
     private static final Logger logger = LoggerFactory.getLogger(PatientRepository.class);
     private static long TIMEOUT_IN_MILLIS = 10;
 
-
+    private static final UidGenerator uid = new UidGenerator();
     private CqlOperations cqlOperations;
 
     @Autowired
@@ -38,7 +38,7 @@ public class PatientRepository {
 
     public ListenableFuture<String> create(Patient patient) {
         if (StringUtils.isBlank(patient.getHealthId())) {
-            patient.setHealthId(UUID.randomUUID().toString());
+            patient.setHealthId(uid.getId());
         }
         final String healthId = patient.getHealthId();
         Address address = patient.getAddress();
