@@ -6,6 +6,8 @@ import com.eaio.uuid.UUIDGen;
 
 public class UidGenerator {
 
+    public static final int EPOCH_TIME = 1325376000;
+
     private final long clockSeqAndNode = UUIDGen.getClockSeqAndNode();
     private final byte[] node = new byte[]{
             (byte)((clockSeqAndNode >> 40) & 0xff),
@@ -27,14 +29,14 @@ public class UidGenerator {
     private final Object lock = new Object();
 
     public byte[] getByteId() {
-        int maxShort = 0xff;
+        int maxShort = 0xffff;
         if(seq == maxShort) {
             throw new RuntimeException("Too fast");
         }
 
         long time;
         synchronized(lock) {
-            time = System.currentTimeMillis();
+            time = System.currentTimeMillis() - EPOCH_TIME;
             if(time != lastTimestamp) {
                 lastTimestamp = time;
                 seq = 0;
@@ -54,9 +56,11 @@ public class UidGenerator {
         ByteBuffer bb = ByteBuffer.wrap(ba);
         long ts = bb.getLong();
         int node_0 = bb.getInt();
-        short node_1 = bb.getShort();
         short seq = bb.getShort();
         System.out.write(node_0);
-        return String.format("%012d%s%s%02d", ts, Integer.toHexString(node_0), Integer.toHexString(node_1), seq);
+
+        long value = (ts << 22) | (node_0 << 12) | seq;
+
+        return Long.toString(value);
     }
 }
