@@ -10,12 +10,16 @@ import org.sharedhealth.mci.validation.constraints.Date;
 
 public class Patient {
 
+    @JsonProperty("hid")
+    private String healthId;
+
     @JsonProperty("nid")
     @Pattern(regexp = "[\\d]{13}|[\\d]{17}", message = "1001")
     private String nationalId;
 
-    @JsonProperty("hid")
-    private String healthId;
+    @JsonProperty("bin_brn")
+    @Pattern(regexp = "[\\d]{17}", message = "1001")
+    private String birthRegistrationNumber;
 
     @JsonProperty("first_name")
     @NotBlank
@@ -161,5 +165,13 @@ public class Patient {
 
     public void setPrimaryContact(String primaryContact) {
         this.primaryContact = primaryContact;
+    }
+
+    public String getBirthRegistrationNumber() {
+        return birthRegistrationNumber;
+    }
+
+    public void setBirthRegistrationNumber(String birthRegistrationNumber) {
+        this.birthRegistrationNumber = birthRegistrationNumber;
     }
 }

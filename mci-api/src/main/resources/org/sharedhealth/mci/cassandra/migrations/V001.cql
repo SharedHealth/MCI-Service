@@ -1,6 +1,7 @@
 create table patient (
     health_id varchar PRIMARY KEY,
     national_id varchar,
+    bin_brn varchar,
     first_name varchar,
     middle_name varchar,
     last_name varchar,

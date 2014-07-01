@@ -45,6 +45,7 @@ public class PatientRepository {
         String cql = String.format(getCreateQuery(),
                 healthId,
                 patient.getNationalId(),
+                patient.getBirthRegistrationNumber(),
                 patient.getFirstName(),
                 patient.getMiddleName(),
                 patient.getLastName(),
@@ -146,6 +147,7 @@ public class PatientRepository {
         Patient patient = new Patient();
         patient.setHealthId(row.getString(HEALTH_ID));
         patient.setNationalId(row.getString(NATIONAL_ID));
+        patient.setBirthRegistrationNumber(row.getString(BIN_BRN));
         patient.setFirstName(row.getString(FIRST_NAME));
         patient.setMiddleName(row.getString(MIDDLE_NAME));
         patient.setLastName(row.getString(LAST_NAME));

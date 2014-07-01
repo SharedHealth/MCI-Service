@@ -17,11 +17,12 @@ public class PatientQueryBuilder {
     public static final String DISTRICT_ID = "district_id";
     public static final String UPAZILLA_ID = "upazilla_id";
     public static final String UNION_ID = "union_id";
+    public static final String BIN_BRN = "bin_brn";
 
     public static String getCreateQuery() {
-        return String.format("INSERT INTO patient (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) values " +
-                "('%%s', '%%s', '%%s', '%%s', '%%s', '%%s', '%%s', '%%s', '%%s', '%%s', '%%s', '%%s', '%%s', '%%s', '%%s');",
-                HEALTH_ID, NATIONAL_ID, FIRST_NAME, MIDDLE_NAME, LAST_NAME, DATE_OF_BIRTH, GENDER, OCCUPATION, EDU_LEVEL,
+        return String.format("INSERT INTO patient (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) values " +
+                "('%%s', '%%s', '%%s', '%%s', '%%s', '%%s', '%%s', '%%s', '%%s', '%%s', '%%s', '%%s', '%%s', '%%s', '%%s', '%%s');",
+                HEALTH_ID, NATIONAL_ID, BIN_BRN, FIRST_NAME, MIDDLE_NAME, LAST_NAME, DATE_OF_BIRTH, GENDER, OCCUPATION, EDU_LEVEL,
                 PRIMARY_CONTACT, ADDRESS_LINE, DIVISION_ID, DISTRICT_ID, UPAZILLA_ID, UNION_ID);
     }
 
