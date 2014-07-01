@@ -33,7 +33,7 @@ public class PatientRepositoryIT {
     private PatientRepository patientRepository;
 
     private Patient patient;
-    private String nationalId = "nid-222";
+    private String nationalId = "1234567890123";
 
     @Before
     public void setup() throws ExecutionException, InterruptedException {

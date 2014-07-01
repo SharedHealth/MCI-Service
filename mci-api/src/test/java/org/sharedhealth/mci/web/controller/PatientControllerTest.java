@@ -4,12 +4,11 @@ package org.sharedhealth.mci.web.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
-import org.sharedhealth.mci.web.controller.PatientController;
+import org.mockito.Mock;
 import org.sharedhealth.mci.web.model.Address;
 import org.sharedhealth.mci.web.model.Patient;
 import org.sharedhealth.mci.web.service.PatientService;
 import org.sharedhealth.mci.web.utils.concurrent.PreResolvedListenableFuture;
-import org.mockito.Mock;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -37,7 +36,7 @@ public class PatientControllerTest {
         mockMvc = MockMvcBuilders.standaloneSetup(new PatientController(patientService)).build();
 
         patient = new Patient();
-        patient.setNationalId("nationalId-100");
+        patient.setNationalId("1234567890123");
         patient.setFirstName("Scott");
         patient.setLastName("Tiger");
         patient.setGender("1");
@@ -73,7 +72,7 @@ public class PatientControllerTest {
 
     @Test
     public void shouldFindPatientByNationalId() throws Exception {
-        String nationalId = "nationalId-123";
+        String nationalId = "1234567890123";
         when(patientService.findByNationalId(nationalId)).thenReturn(new PreResolvedListenableFuture<>(patient));
         mockMvc.perform(get("/patient?nid=" + nationalId))
                 .andExpect(request().asyncResult(new ResponseEntity<>(patient, OK)));

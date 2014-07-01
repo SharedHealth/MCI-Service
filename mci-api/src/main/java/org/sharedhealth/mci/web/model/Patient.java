@@ -11,6 +11,7 @@ import org.sharedhealth.mci.validation.constraints.Date;
 public class Patient {
 
     @JsonProperty("nid")
+    @Pattern(regexp = "[\\d]{13}|[\\d]{17}", message = "1001")
     private String nationalId;
 
     @JsonProperty("hid")

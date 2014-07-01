@@ -7,10 +7,10 @@ import javax.validation.ValidatorFactory;
 import java.util.Set;
 
 import org.hibernate.validator.HibernateValidator;
-import static org.junit.Assert.assertEquals;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.sharedhealth.mci.web.model.Patient;
+
+import static org.junit.Assert.assertEquals;
 
 public class PatientTest {
 
@@ -76,5 +76,24 @@ public class PatientTest {
         Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "gender", "5");
         assertEquals(1, constraintViolations.size());
         assertEquals("must match \"[1-3]{1}\"", constraintViolations.iterator().next().getMessage());
+    }
+
+    @Test
+    public void shouldFailIfNationalIdIsInvalid() {
+        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "nationalId", "1");
+        assertEquals(1, constraintViolations.size());
+        assertEquals("1001", constraintViolations.iterator().next().getMessage());
+    }
+
+    @Test
+    public void shouldPassIfNationalIdIs_13_DigitLong() {
+        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "nationalId", "1234567890123");
+        assertEquals(0, constraintViolations.size());
+    }
+
+    @Test
+    public void shouldPassIfNationalIdIs_17_DigitLong() {
+        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "nationalId", "12345678901234567");
+        assertEquals(0, constraintViolations.size());
     }
 }
