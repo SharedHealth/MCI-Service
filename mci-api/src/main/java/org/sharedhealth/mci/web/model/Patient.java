@@ -21,6 +21,9 @@ public class Patient {
     @Pattern(regexp = "[\\d]{17}", message = "1001")
     private String birthRegistrationNumber;
 
+    @JsonProperty("full_name_bangla")
+    private String fullNameBangla;
+
     @JsonProperty("first_name")
     @NotBlank
     private String firstName;
@@ -31,6 +34,85 @@ public class Patient {
     @JsonProperty("last_name")
     @NotBlank
     private String lastName;
+
+    @JsonProperty("uid")
+    private String uid;
+
+    @JsonProperty("fathers_name_bangla")
+    private String fathersNameBangla;
+
+    @JsonProperty("fathers_first_name")
+    private String fathersFirstName;
+
+    @JsonProperty("fathers_middle_name")
+    private String fathersMiddleName;
+
+    @JsonProperty("fathers_last_name")
+    private String fathersLastName;
+
+    @JsonProperty("fathers_uid")
+    private String fathersUid;
+
+    @JsonProperty("fathers_nid")
+    private String fathersNid;
+
+    @JsonProperty("fathers_brn")
+    private String fatherBrn;
+
+    @JsonProperty("mothers_name_bangla")
+    private String mothersNameBangla;
+
+    @JsonProperty("mothers_first_name")
+    private String mothersFirstName;
+
+    @JsonProperty("mothers_middle_name")
+    private String mothersMiddleName;
+
+    @JsonProperty("mothers_last_name")
+    private String mothersLastName;
+
+    @JsonProperty("mothers_uid")
+    private String mothersUid;
+
+    @JsonProperty("mothers_nid")
+    private String mothersNid;
+
+    @JsonProperty("mothers_brn")
+    private String mothersBrn;
+
+    @JsonProperty("place_of_birth")
+    private String placeOfBirth;
+
+    @JsonProperty("marital_status")
+    private String maritalStatus;
+
+    @JsonProperty("marriage_id")
+    private String marriageId;
+
+    @JsonProperty("spouse_name_bangla")
+    private String spouseNameBangla;
+
+    @JsonProperty("spouse_name")
+    private String spouseName;
+
+    @JsonProperty("spouse_uid_nid")
+    private String spouseUidNid;
+
+    @JsonProperty("religion")
+    private String religion;
+
+    @JsonProperty("blood_group")
+    private String bloodGroup;
+
+    @JsonProperty("nationality")
+    private String nationality;
+
+    @JsonProperty("disability")
+    private String disability;
+
+    @JsonProperty("ethnicity")
+    private String ethnicity;
+
 
     @JsonProperty("date_of_birth")
     @NotBlank
@@ -173,5 +255,220 @@ public class Patient {
 
     public void setBirthRegistrationNumber(String birthRegistrationNumber) {
         this.birthRegistrationNumber = birthRegistrationNumber;
+    }
+
+    public String getFullNameBangla() {
+        return fullNameBangla;
+    }
+
+    public void setFullNameBangla(String fullNameBangla) {
+        this.fullNameBangla = fullNameBangla;
+    }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
+    public String getFathersNameBangla() {
+        return fathersNameBangla;
+    }
+
+    public void setFathersNameBangla(String fathersNameBangla) {
+        this.fathersNameBangla = fathersNameBangla;
+    }
+
+    public String getFathersMiddleName() {
+        return fathersMiddleName;
+    }
+
+    public void setFathersMiddleName(String fathersMiddleName) {
+        this.fathersMiddleName = fathersMiddleName;
+    }
+
+    public String getFathersLastName() {
+        return fathersLastName;
+    }
+
+    public void setFathersLastName(String fathersLastName) {
+        this.fathersLastName = fathersLastName;
+    }
+
+    public String getFathersUid() {
+        return fathersUid;
+    }
+
+    public void setFathersUid(String fathersUid) {
+        this.fathersUid = fathersUid;
+    }
+
+    public String getFathersNid() {
+        return fathersNid;
+    }
+
+    public void setFathersNid(String fathersNid) {
+        this.fathersNid = fathersNid;
+    }
+
+    public String getFatherBrn() {
+        return fatherBrn;
+    }
+
+    public void setFatherBrn(String fatherBrn) {
+        this.fatherBrn = fatherBrn;
+    }
+
+    public String getMothersNameBangla() {
+        return mothersNameBangla;
+    }
+
+    public void setMothersNameBangla(String mothersNameBangla) {
+        this.mothersNameBangla = mothersNameBangla;
+    }
+
+    public String getMothersFirstName() {
+        return mothersFirstName;
+    }
+
+    public void setMothersFirstName(String mothersFirstName) {
+        this.mothersFirstName = mothersFirstName;
+    }
+
+    public String getMothersMiddleName() {
+        return mothersMiddleName;
+    }
+
+    public void setMothersMiddleName(String mothersMiddleName) {
+        this.mothersMiddleName = mothersMiddleName;
+    }
+
+    public String getMothersLastName() {
+        return mothersLastName;
+    }
+
+    public void setMothersLastName(String mothersLastName) {
+        this.mothersLastName = mothersLastName;
+    }
+
+    public String getMothersUid() {
+        return mothersUid;
+    }
+
+    public void setMothersUid(String mothersUid) {
+        this.mothersUid = mothersUid;
+    }
+
+    public String getMothersNid() {
+        return mothersNid;
+    }
+
+    public void setMothersNid(String mothersNid) {
+        this.mothersNid = mothersNid;
+    }
+
+    public String getMothersBrn() {
+        return mothersBrn;
+    }
+
+    public void setMothersBrn(String mothersBrn) {
+        this.mothersBrn = mothersBrn;
+    }
+
+    public String getPlaceOfBirth() {
+        return placeOfBirth;
+    }
+
+    public void setPlaceOfBirth(String placeOfBirth) {
+        this.placeOfBirth = placeOfBirth;
+    }
+
+    public String getMaritalStatus() {
+        return maritalStatus;
+    }
+
+    public void setMaritalStatus(String maritalStatus) {
+        this.maritalStatus = maritalStatus;
+    }
+
+    public String getMarriageId() {
+        return marriageId;
+    }
+
+    public void setMarriageId(String marriageId) {
+        this.marriageId = marriageId;
+    }
+
+    public String getSpouseNameBangla() {
+        return spouseNameBangla;
+    }
+
+    public void setSpouseNameBangla(String spouseNameBangla) {
+        this.spouseNameBangla = spouseNameBangla;
+    }
+
+    public String getSpouseName() {
+        return spouseName;
+    }
+
+    public void setSpouseName(String spouseName) {
+        this.spouseName = spouseName;
+    }
+
+    public String getSpouseUidNid() {
+        return spouseUidNid;
+    }
+
+    public void setSpouseUidNid(String spouseUidNid) {
+        this.spouseUidNid = spouseUidNid;
+    }
+
+    public String getReligion() {
+        return religion;
+    }
+
+    public void setReligion(String religion) {
+        this.religion = religion;
+    }
+
+    public String getBloodGroup() {
+        return bloodGroup;
+    }
+
+    public void setBloodGroup(String bloodGroup) {
+        this.bloodGroup = bloodGroup;
+    }
+
+    public String getNationality() {
+        return nationality;
+    }
+
+    public void setNationality(String nationality) {
+        this.nationality = nationality;
+    }
+
+    public String getDisability() {
+        return disability;
+    }
+
+    public void setDisability(String disability) {
+        this.disability = disability;
+    }
+
+    public String getEthnicity() {
+        return ethnicity;
+    }
+
+    public void setEthnicity(String ethnicity) {
+        this.ethnicity = ethnicity;
+    }
+    public String getFathersFirstName() {
+        return fathersFirstName;
+    }
+
+    public void setFathersFirstName(String fathersFirstName) {
+        this.fathersFirstName = fathersFirstName;
     }
 }

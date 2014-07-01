@@ -46,6 +46,7 @@ public class PatientRepository {
                 healthId,
                 patient.getNationalId(),
                 patient.getBirthRegistrationNumber(),
+                patient.getFullNameBangla(),
                 patient.getFirstName(),
                 patient.getMiddleName(),
                 patient.getLastName(),
@@ -54,6 +55,32 @@ public class PatientRepository {
                 patient.getOccupation(),
                 patient.getEducationLevel(),
                 patient.getPrimaryContact(),
+                patient.getFathersNameBangla(),
+                patient.getFathersFirstName(),
+                patient.getFathersMiddleName(),
+                patient.getFathersLastName(),
+                patient.getFatherBrn(),
+                patient.getFathersNid(),
+                patient.getFathersUid(),
+                patient.getMothersNameBangla(),
+                patient.getMothersFirstName(),
+                patient.getMothersMiddleName(),
+                patient.getMothersLastName(),
+                patient.getMothersBrn(),
+                patient.getMothersNid(),
+                patient.getMothersUid(),
+                patient.getUid(),
+                patient.getPlaceOfBirth(),
+                patient.getMaritalStatus(),
+                patient.getMarriageId(),
+                patient.getSpouseName(),
+                patient.getSpouseNameBangla(),
+                patient.getSpouseUidNid(),
+                patient.getReligion(),
+                patient.getBloodGroup(),
+                patient.getNationality(),
+                patient.getDisability(),
+                patient.getEthnicity(),
                 address.getAddressLine(),
                 address.getDivisionId(),
                 address.getDistrictId(),
@@ -147,6 +174,7 @@ public class PatientRepository {
         Patient patient = new Patient();
         patient.setHealthId(row.getString(HEALTH_ID));
         patient.setNationalId(row.getString(NATIONAL_ID));
+        patient.setFullNameBangla(row.getString(FULL_NAME_BANGLA));
         patient.setBirthRegistrationNumber(row.getString(BIN_BRN));
         patient.setFirstName(row.getString(FIRST_NAME));
         patient.setMiddleName(row.getString(MIDDLE_NAME));
