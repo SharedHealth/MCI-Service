@@ -82,7 +82,7 @@ public class PatientTest {
     public void shouldFailIfNationalIdIsInvalid() {
         Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "nationalId", "1");
         assertEquals(1, constraintViolations.size());
-        assertEquals("1001", constraintViolations.iterator().next().getMessage());
+        assertEquals("must match \"[\\d]{13}|[\\d]{17}\"", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
@@ -94,6 +94,26 @@ public class PatientTest {
     @Test
     public void shouldPassIfNationalIdIs_17_DigitLong() {
         Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "nationalId", "12345678901234567");
+        assertEquals(0, constraintViolations.size());
+    }
+
+    @Test
+    public void shouldFailIf_UID_LengthIsNotEqual_11() {
+        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "uid", "1");
+        assertEquals(1, constraintViolations.size());
+        assertEquals("must match \"[a-zA-Z0-9]{11}\"", constraintViolations.iterator().next().getMessage());
+    }
+
+    @Test
+    public void shouldFailIf_UUID_ContainSpecialCharacter() {
+        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "uid", "123456*8901");
+        assertEquals(1, constraintViolations.size());
+        assertEquals("must match \"[a-zA-Z0-9]{11}\"", constraintViolations.iterator().next().getMessage());
+    }
+
+    @Test
+    public void shouldPassIf_UID_Is_11_DigitAlphaNumeric() {
+        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "uid", "UID45678901");
         assertEquals(0, constraintViolations.size());
     }
 }

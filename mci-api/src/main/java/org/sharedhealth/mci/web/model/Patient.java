@@ -14,12 +14,16 @@ public class Patient {
     private String healthId;
 
     @JsonProperty("nid")
-    @Pattern(regexp = "[\\d]{13}|[\\d]{17}", message = "1001")
+    @Pattern(regexp = "[\\d]{13}|[\\d]{17}")
     private String nationalId;
 
     @JsonProperty("bin_brn")
-    @Pattern(regexp = "[\\d]{17}", message = "1001")
+    @Pattern(regexp = "[\\d]{17}")
     private String birthRegistrationNumber;
+
+    @JsonProperty("uid")
+    @Pattern(regexp = "[a-zA-Z0-9]{11}")
+    private String uid;
 
     @JsonProperty("full_name_bangla")
     private String fullNameBangla;
@@ -34,9 +38,6 @@ public class Patient {
     @JsonProperty("last_name")
     @NotBlank
     private String lastName;
-
-    @JsonProperty("uid")
-    private String uid;
 
     @JsonProperty("fathers_name_bangla")
     private String fathersNameBangla;
