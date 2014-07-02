@@ -45,11 +45,22 @@ public class PatientQueryBuilder {
     public static final String NATIONALITY = "nationality";
     public static final String DISABILITY = "disability";
     public static final String ETHNICITY = "ethnicity";
+    public static final String HOLDING_NUMBER = "holding_number";
+    public static final String STREET = "street";
+    public static final String AREA_MOUJA = "area_mouja";
+    public static final String VILLAGE = "village";
+    public static final String POST_OFFICE = "post_office";
+    public static final String POST_CODE = "post_code";
+    public static final String WARD = "ward";
+    public static final String THANA = "thana";
+    public static final String CITY_CORPORATION = "city_corporation";
+    public static final String COUNTRY = "country";
+
 
 
     public static String getCreateQuery() {
-        return String.format("INSERT INTO patient ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) values " +
-                "('%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s' );",
+        return String.format("INSERT INTO patient ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) values " +
+                "('%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s' );",
                 HEALTH_ID,
                 NATIONAL_ID,
                 BIN_BRN,
@@ -92,7 +103,18 @@ public class PatientQueryBuilder {
                 DIVISION_ID,
                 DISTRICT_ID,
                 UPAZILLA_ID,
-                UNION_ID);
+                UNION_ID,
+                HOLDING_NUMBER,
+                STREET,
+                AREA_MOUJA,
+                VILLAGE,
+                POST_OFFICE,
+                POST_CODE,
+                WARD,
+                THANA,
+                CITY_CORPORATION,
+                COUNTRY
+                );
     }
 
     public static String getFindByHealthIdQuery() {

@@ -33,6 +33,37 @@ public class Address {
     @AddressId(UNION)
     private String unionId;
 
+    @JsonProperty("holding_number")
+    private String holdingNumber;
+
+    @JsonProperty("street")
+    private String street;
+
+    @JsonProperty("area_mouja")
+    private String areaMouja;
+
+    @JsonProperty("village")
+    private String village;
+
+    @JsonProperty("post_office")
+    private String postOffice;
+
+    @JsonProperty("post_code")
+    private String postCode;
+
+    @JsonProperty("ward")
+    private String ward;
+
+    @JsonProperty("thana")
+    private String thana;
+
+    @JsonProperty("city_corporation")
+    private String cityCorporation;
+
+    @JsonProperty("country")
+    private String country;
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -99,5 +130,85 @@ public class Address {
 
     public void setUnionId(String unionId) {
         this.unionId = unionId;
+    }
+
+    public String getHoldingNumber() {
+        return holdingNumber;
+    }
+
+    public void setHoldingNumber(String holdingNumber) {
+        this.holdingNumber = holdingNumber;
+    }
+
+    public String getStreet() {
+        return street;
+    }
+
+    public void setStreet(String street) {
+        this.street = street;
+    }
+
+    public String getAreaMouja() {
+        return areaMouja;
+    }
+
+    public void setAreaMouja(String areaMouja) {
+        this.areaMouja = areaMouja;
+    }
+
+    public String getVillage() {
+        return village;
+    }
+
+    public void setVillage(String village) {
+        this.village = village;
+    }
+
+    public String getPostOffice() {
+        return postOffice;
+    }
+
+    public void setPostOffice(String postOffice) {
+        this.postOffice = postOffice;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getCityCorporation() {
+        return cityCorporation;
+    }
+
+    public void setCityCorporation(String cityCorporation) {
+        this.cityCorporation = cityCorporation;
+    }
+
+    public String getThana() {
+        return thana;
+    }
+
+    public void setThana(String thana) {
+        this.thana = thana;
+    }
+
+    public String getWard() {
+        return ward;
+    }
+
+    public void setWard(String ward) {
+        this.ward = ward;
+    }
+
+    public String getPostCode() {
+        return postCode;
+    }
+
+    public void setPostCode(String postCode) {
+        this.postCode = postCode;
     }
 }

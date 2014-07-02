@@ -85,7 +85,18 @@ public class PatientRepository {
                 address.getDivisionId(),
                 address.getDistrictId(),
                 address.getUpazillaId(),
-                address.getUnionId());
+                address.getUnionId(),
+                address.getHoldingNumber(),
+                address.getStreet(),
+                address.getAreaMouja(),
+                address.getVillage(),
+                address.getPostOffice(),
+                address.getPostCode(),
+                address.getWard(),
+                address.getThana(),
+                address.getCityCorporation(),
+                address.getCountry());
+
         logger.debug("Save patient CQL: [" + cql + "]");
 
         final SettableFuture<String> result = SettableFuture.create();

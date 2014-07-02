@@ -41,6 +41,16 @@ create table patient (
     division_id varchar,
     district_id varchar,
     upazilla_id varchar,
-    union_id varchar);
+    union_id varchar,
+    holding_number varchar,
+    street varchar,
+    area_mouja varchar,
+    village varchar,
+    post_office varchar,
+    post_code varchar,
+    ward varchar,
+    thana varchar,
+    city_corporation varchar,
+    country varchar);
 
 CREATE INDEX national_id_key ON patient (national_id);
