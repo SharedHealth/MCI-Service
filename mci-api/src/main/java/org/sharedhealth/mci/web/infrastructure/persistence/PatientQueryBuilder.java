@@ -55,12 +55,27 @@ public class PatientQueryBuilder {
     public static final String THANA = "thana";
     public static final String CITY_CORPORATION = "city_corporation";
     public static final String COUNTRY = "country";
+    public static final String PERMANENT_ADDRESS_LINE = "permanent_address_line";
+    public static final String PERMANENT_DIVISION_ID = "permanent_division_id";
+    public static final String PERMANENT_DISTRICT_ID = "permanent_district_id";
+    public static final String PERMANENT_UPAZILLA_ID = "permanent_upazilla_id";
+    public static final String PERMANENT_UNION_ID = "permanent_union_id";
+    public static final String PERMANENT_HOLDING_NUMBER = "permanent_holding_number";
+    public static final String PERMANENT_STREET = "permanent_street";
+    public static final String PERMANENT_AREA_MOUJA = "permanent_area_mouja";
+    public static final String PERMANENT_VILLAGE = "permanent_village";
+    public static final String PERMANENT_POST_OFFICE = "permanent_post_office";
+    public static final String PERMANENT_POST_CODE = "permanent_post_code";
+    public static final String PERMANENT_WARD = "permanent_ward";
+    public static final String PERMANENT_THANA = "permanent_thana";
+    public static final String PERMANENT_CITY_CORPORATION = "permanent_city_corporation";
+    public static final String PERMANENT_COUNTRY = "permanent_country";
 
 
 
     public static String getCreateQuery() {
-        return String.format("INSERT INTO patient ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) values " +
-                "('%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s' );",
+        return String.format("INSERT INTO patient ( %s, %s, %s, %s, %s,%s, %s, %s, %s, %s,%s,%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) values " +
+                "('%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s' );",
                 HEALTH_ID,
                 NATIONAL_ID,
                 BIN_BRN,
@@ -113,7 +128,22 @@ public class PatientQueryBuilder {
                 WARD,
                 THANA,
                 CITY_CORPORATION,
-                COUNTRY
+                COUNTRY,
+                PERMANENT_ADDRESS_LINE,
+                PERMANENT_DIVISION_ID,
+                PERMANENT_DISTRICT_ID,
+                PERMANENT_UPAZILLA_ID,
+                PERMANENT_UNION_ID,
+                PERMANENT_HOLDING_NUMBER,
+                PERMANENT_STREET,
+                PERMANENT_AREA_MOUJA,
+                PERMANENT_VILLAGE,
+                PERMANENT_POST_OFFICE,
+                PERMANENT_POST_CODE,
+                PERMANENT_WARD,
+                PERMANENT_THANA,
+                PERMANENT_CITY_CORPORATION,
+                PERMANENT_COUNTRY
                 );
     }
 

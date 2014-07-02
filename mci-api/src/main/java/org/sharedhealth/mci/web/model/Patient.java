@@ -138,6 +138,10 @@ public class Patient {
     @Valid
     private Address address;
 
+    @JsonProperty("permanent_address")
+    private Address permanentAddress;
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -471,5 +475,13 @@ public class Patient {
 
     public void setFathersFirstName(String fathersFirstName) {
         this.fathersFirstName = fathersFirstName;
+    }
+
+    public Address getPermanentAddress() {
+        return permanentAddress;
+    }
+
+    public void setPermanentAddress(Address permanentAddress) {
+        this.permanentAddress = permanentAddress;
     }
 }

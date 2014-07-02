@@ -42,6 +42,11 @@ public class PatientRepository {
         }
         final String healthId = patient.getHealthId();
         Address address = patient.getAddress();
+        Address permanentAddress = patient.getPermanentAddress();
+
+        if (permanentAddress == null ){
+            permanentAddress = new Address();
+        }
         String cql = String.format(getCreateQuery(),
                 healthId,
                 patient.getNationalId(),
@@ -95,7 +100,22 @@ public class PatientRepository {
                 address.getWard(),
                 address.getThana(),
                 address.getCityCorporation(),
-                address.getCountry());
+                address.getCountry(),
+                permanentAddress.getAddressLine(),
+                permanentAddress.getDivisionId(),
+                permanentAddress.getDistrictId(),
+                permanentAddress.getUpazillaId(),
+                permanentAddress.getUnionId(),
+                permanentAddress.getHoldingNumber(),
+                permanentAddress.getStreet(),
+                permanentAddress.getAreaMouja(),
+                permanentAddress.getVillage(),
+                permanentAddress.getPostOffice(),
+                permanentAddress.getPostCode(),
+                permanentAddress.getWard(),
+                permanentAddress.getThana(),
+                permanentAddress.getCityCorporation(),
+                permanentAddress.getCountry());
 
         logger.debug("Save patient CQL: [" + cql + "]");
 

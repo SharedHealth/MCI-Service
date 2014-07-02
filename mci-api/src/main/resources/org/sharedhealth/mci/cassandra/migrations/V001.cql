@@ -51,6 +51,22 @@ create table patient (
     ward varchar,
     thana varchar,
     city_corporation varchar,
-    country varchar);
+    country varchar,
+    permanent_address_line varchar,
+    permanent_division_id varchar,
+    permanent_district_id varchar,
+    permanent_upazilla_id varchar,
+    permanent_union_id varchar,
+    permanent_holding_number varchar,
+    permanent_street varchar,
+    permanent_area_mouja varchar,
+    permanent_village varchar,
+    permanent_post_office varchar,
+    permanent_post_code varchar,
+    permanent_ward varchar,
+    permanent_thana varchar,
+    permanent_city_corporation varchar,
+    permanent_country varchar
+    );
 
 CREATE INDEX national_id_key ON patient (national_id);
