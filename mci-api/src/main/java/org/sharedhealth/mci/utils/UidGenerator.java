@@ -2,20 +2,21 @@ package org.sharedhealth.mci.utils;
 
 import java.nio.ByteBuffer;
 
-import com.eaio.uuid.UUIDGen;
+import static java.lang.System.getenv;
 
 public class UidGenerator {
 
     public static final int EPOCH_TIME = 1325376000;
 
-    private final long clockSeqAndNode = UUIDGen.getClockSeqAndNode();
+    private final long MCI_NODE = Long.parseLong(getenv("MCI_NODE"));
+
     private final byte[] node = new byte[]{
-            (byte)((clockSeqAndNode >> 40) & 0xff),
-            (byte)((clockSeqAndNode >> 32) & 0xff),
-            (byte)((clockSeqAndNode >> 24) & 0xff),
-            (byte)((clockSeqAndNode >> 16) & 0xff),
-            (byte)((clockSeqAndNode >> 8) & 0xff),
-            (byte)((clockSeqAndNode) & 0xff),
+            (byte) ((MCI_NODE >> 40) & 0xff),
+            (byte) ((MCI_NODE >> 32) & 0xff),
+            (byte) ((MCI_NODE >> 24) & 0xff),
+            (byte) ((MCI_NODE >> 16) & 0xff),
+            (byte) ((MCI_NODE >> 8) & 0xff),
+            (byte) ((MCI_NODE) & 0xff),
     };
     private final ThreadLocal<ByteBuffer> bufferThreadLocal = new ThreadLocal<ByteBuffer>() {
         @Override
@@ -30,14 +31,14 @@ public class UidGenerator {
 
     public byte[] getByteId() {
         int maxShort = 0xffff;
-        if(seq == maxShort) {
+        if (seq == maxShort) {
             throw new RuntimeException("Too fast");
         }
 
         long time;
-        synchronized(lock) {
+        synchronized (lock) {
             time = System.currentTimeMillis() - EPOCH_TIME;
-            if(time != lastTimestamp) {
+            if (time != lastTimestamp) {
                 lastTimestamp = time;
                 seq = 0;
             }
@@ -46,7 +47,7 @@ public class UidGenerator {
             bb.rewind();
             bb.putLong(time);
             bb.put(node);
-            bb.putShort((short)seq);
+            bb.putShort((short) seq);
             return bb.array();
         }
     }
@@ -57,7 +58,6 @@ public class UidGenerator {
         long ts = bb.getLong();
         int node_0 = bb.getInt();
         short seq = bb.getShort();
-        System.out.write(node_0);
 
         long value = (ts << 22) | (node_0 << 12) | seq;
 
