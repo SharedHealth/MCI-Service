@@ -88,6 +88,16 @@ public class Address {
         sb.append(", districtId='").append(districtId).append('\'');
         sb.append(", upazillaId='").append(upazillaId).append('\'');
         sb.append(", unionId='").append(unionId).append('\'');
+        sb.append(", holdingNumber='").append(holdingNumber).append('\'');
+        sb.append(", street='").append(street).append('\'');
+        sb.append(", areaMouja='").append(areaMouja).append('\'');
+        sb.append(", village='").append(village).append('\'');
+        sb.append(", postOffice='").append(postOffice).append('\'');
+        sb.append(", postCode='").append(postCode).append('\'');
+        sb.append(", ward='").append(ward).append('\'');
+        sb.append(", thana='").append(thana).append('\'');
+        sb.append(", cityCorporation='").append(cityCorporation).append('\'');
+        sb.append(", country='").append(country).append('\'');
         sb.append('}');
         return sb.toString();
     }

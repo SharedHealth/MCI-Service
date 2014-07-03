@@ -64,7 +64,7 @@ public class PatientRepository {
                 patient.getFathersFirstName(),
                 patient.getFathersMiddleName(),
                 patient.getFathersLastName(),
-                patient.getFatherBrn(),
+                patient.getFathersBrn(),
                 patient.getFathersNid(),
                 patient.getFathersUid(),
                 patient.getMothersNameBangla(),
@@ -205,6 +205,29 @@ public class PatientRepository {
         Patient patient = new Patient();
         patient.setHealthId(row.getString(HEALTH_ID));
         patient.setNationalId(row.getString(NATIONAL_ID));
+        patient.setUid(row.getString(UID));
+        patient.setFathersNameBangla(row.getString(FATHERS_NAME_BANGLA));
+        patient.setFathersFirstName(row.getString(FATHERS_FIRST_NAME));
+        patient.setFathersMiddleName(row.getString(FATHERS_MIDDLE_NAME));
+        patient.setFathersLastName(row.getString(FATHERS_LAST_NAME));
+        patient.setFathersUid(row.getString(FATHERS_UID));
+        patient.setFathersNid(row.getString(FATHERS_NID));
+        patient.setFathersBrn(row.getString(FATHERS_BRN));
+        patient.setMothersNameBangla(row.getString(MOTHERS_NAME_BANGLA));
+        patient.setMothersFirstName(row.getString(MOTHERS_FIRST_NAME));
+        patient.setMothersMiddleName(row.getString(MOTHERS_MIDDLE_NAME));
+        patient.setMothersLastName(row.getString(MOTHERS_LAST_NAME));
+        patient.setMothersUid(row.getString(MOTHERS_UID));
+        patient.setMothersNid(row.getString(MOTHERS_NID));
+        patient.setMothersBrn(row.getString(MOTHERS_BRN));
+        patient.setPlaceOfBirth(row.getString(PLACE_OF_BIRTH));
+        patient.setMaritalStatus(row.getString(MARITAL_STATUS));
+        patient.setMarriageId(row.getString(MARRIAGE_ID));
+        patient.setSpouseNameBangla(row.getString(SPOUSE_NAME_BANGLA));
+        patient.setSpouseName(row.getString(SPOUSE_NAME));
+        patient.setSpouseUidNid(row.getString(SPOUSE_UID_NID));
+        patient.setReligion(row.getString(RELIGION));
+        patient.setBloodGroup(row.getString(BLOOD_GROUP));
         patient.setFullNameBangla(row.getString(FULL_NAME_BANGLA));
         patient.setBirthRegistrationNumber(row.getString(BIN_BRN));
         patient.setFirstName(row.getString(FIRST_NAME));
@@ -215,6 +238,10 @@ public class PatientRepository {
         patient.setOccupation(row.getString(OCCUPATION));
         patient.setEducationLevel(row.getString(EDU_LEVEL));
         patient.setPrimaryContact(row.getString(PRIMARY_CONTACT));
+        patient.setNationality(row.getString(NATIONALITY));
+        patient.setDisability(row.getString(DISABILITY));
+        patient.setEthnicity(row.getString(ETHNICITY));
+
 
         Address address = new Address();
         address.setAddressLine(row.getString(ADDRESS_LINE));
@@ -222,6 +249,16 @@ public class PatientRepository {
         address.setDistrictId(row.getString(DISTRICT_ID));
         address.setUpazillaId(row.getString(UPAZILLA_ID));
         address.setUnionId(row.getString(UNION_ID));
+        address.setHoldingNumber(row.getString(HOLDING_NUMBER));
+        address.setStreet(row.getString(STREET));
+        address.setAreaMouja(row.getString(AREA_MOUJA));
+        address.setVillage(row.getString(VILLAGE));
+        address.setPostOffice(row.getString(POST_OFFICE));
+        address.setPostCode(row.getString(POST_CODE));
+        address.setWard(row.getString(WARD));
+        address.setThana(row.getString(THANA));
+        address.setCityCorporation(row.getString(CITY_CORPORATION));
+        address.setCountry(row.getString(COUNTRY));
         patient.setAddress(address);
         result.set(patient);
     }

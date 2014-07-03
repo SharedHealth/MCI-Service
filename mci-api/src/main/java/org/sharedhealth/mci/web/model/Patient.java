@@ -58,7 +58,7 @@ public class Patient {
     private String fathersNid;
 
     @JsonProperty("fathers_brn")
-    private String fatherBrn;
+    private String fathersBrn;
 
     @JsonProperty("mothers_name_bangla")
     private String mothersNameBangla;
@@ -318,12 +318,12 @@ public class Patient {
         this.fathersNid = fathersNid;
     }
 
-    public String getFatherBrn() {
-        return fatherBrn;
+    public String getFathersBrn() {
+        return fathersBrn;
     }
 
-    public void setFatherBrn(String fatherBrn) {
-        this.fatherBrn = fatherBrn;
+    public void setFathersBrn(String fathersBrn) {
+        this.fathersBrn = fathersBrn;
     }
 
     public String getMothersNameBangla() {
