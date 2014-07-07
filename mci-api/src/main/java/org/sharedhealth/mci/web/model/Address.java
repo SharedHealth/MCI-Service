@@ -1,7 +1,7 @@
 package org.sharedhealth.mci.web.model;
 
 import javax.validation.constraints.Size;
-
+import javax.validation.constraints.Pattern;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.validator.constraints.NotBlank;
 import org.sharedhealth.mci.validation.constraints.AddressId;
@@ -9,6 +9,9 @@ import static org.sharedhealth.mci.validation.AddressType.DISTRICT;
 import static org.sharedhealth.mci.validation.AddressType.DIVISION;
 import static org.sharedhealth.mci.validation.AddressType.UNION;
 import static org.sharedhealth.mci.validation.AddressType.UPAZILLA;
+import static org.sharedhealth.mci.validation.AddressType.VILLAGE;
+import static org.sharedhealth.mci.validation.AddressType.WARD;
+import static org.sharedhealth.mci.validation.AddressType.COUNTRY;
 
 public class Address {
 
@@ -34,33 +37,43 @@ public class Address {
     private String unionId;
 
     @JsonProperty("holding_number")
+    @Pattern(regexp = "^[\\s\\S]{0,50}$")
     private String holdingNumber;
 
     @JsonProperty("street")
+    @Pattern(regexp = "^[\\s\\S]{0,50}$")
     private String street;
 
     @JsonProperty("area_mouja")
+    @Pattern(regexp = "^[\\s\\S]{0,25}$")
     private String areaMouja;
 
     @JsonProperty("village")
+    @AddressId(VILLAGE)
     private String village;
 
     @JsonProperty("post_office")
+    @Pattern(regexp = "^[\\s\\S]{0,50}$")
     private String postOffice;
 
     @JsonProperty("post_code")
+    @Pattern(regexp = "^[\\s\\S]{0,10}$")
     private String postCode;
 
     @JsonProperty("ward")
+    @AddressId(WARD)
     private String ward;
 
     @JsonProperty("thana")
+    @Pattern(regexp = "^[\\s\\S]{0,50}$")
     private String thana;
 
     @JsonProperty("city_corporation")
+    @Pattern(regexp = "[0-9]{2}")
     private String cityCorporation;
 
     @JsonProperty("country")
+    @AddressId(COUNTRY)
     private String country;
 
 
@@ -76,6 +89,7 @@ public class Address {
         if (divisionId != null ? !divisionId.equals(address.divisionId) : address.divisionId != null) return false;
         if (unionId != null ? !unionId.equals(address.unionId) : address.unionId != null) return false;
         if (upazillaId != null ? !upazillaId.equals(address.upazillaId) : address.upazillaId != null) return false;
+        if (village != null ? !village.equals(address.village) : address.village != null) return false;
 
         return true;
     }

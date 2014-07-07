@@ -33,6 +33,7 @@ public class Patient {
     private String firstName;
 
     @JsonProperty("middle_name")
+    @Pattern(regexp = "^[\\s\\S]{0,25}$")
     private String middleName;
 
     @JsonProperty("last_name")
@@ -43,77 +44,96 @@ public class Patient {
     private String fathersNameBangla;
 
     @JsonProperty("fathers_first_name")
+    @Pattern(regexp = "^[\\s\\S]{0,25}$")
     private String fathersFirstName;
 
     @JsonProperty("fathers_middle_name")
+    @Pattern(regexp = "^[\\s\\S]{0,25}$")
     private String fathersMiddleName;
 
     @JsonProperty("fathers_last_name")
+    @Pattern(regexp = "^[\\s\\S]{0,25}$")
     private String fathersLastName;
 
     @JsonProperty("fathers_uid")
+    @Pattern(regexp = "[a-zA-Z0-9]{11}")
     private String fathersUid;
 
     @JsonProperty("fathers_nid")
+    @Pattern(regexp = "[\\d]{13}|[\\d]{17}")
     private String fathersNid;
 
     @JsonProperty("fathers_brn")
+    @Pattern(regexp = "[\\d]{17}")
     private String fathersBrn;
 
     @JsonProperty("mothers_name_bangla")
     private String mothersNameBangla;
 
     @JsonProperty("mothers_first_name")
+    @Pattern(regexp = "^[\\s\\S]{0,25}$")
     private String mothersFirstName;
 
     @JsonProperty("mothers_middle_name")
+    @Pattern(regexp = "^[\\s\\S]{0,25}$")
     private String mothersMiddleName;
 
     @JsonProperty("mothers_last_name")
+    @Pattern(regexp = "^[\\s\\S]{0,25}$")
     private String mothersLastName;
 
     @JsonProperty("mothers_uid")
+    @Pattern(regexp = "[a-zA-Z0-9]{11}")
     private String mothersUid;
 
     @JsonProperty("mothers_nid")
+    @Pattern(regexp = "[\\d]{13}|[\\d]{17}")
     private String mothersNid;
 
     @JsonProperty("mothers_brn")
+    @Pattern(regexp = "[\\d]{17}")
     private String mothersBrn;
 
     @JsonProperty("place_of_birth")
     private String placeOfBirth;
 
     @JsonProperty("marital_status")
+    @Pattern(regexp = "[1-5]{1}")
     private String maritalStatus;
 
     @JsonProperty("marriage_id")
+    @Pattern(regexp = "[0-9]{8}")
     private String marriageId;
 
     @JsonProperty("spouse_name_bangla")
     private String spouseNameBangla;
 
     @JsonProperty("spouse_name")
+    @Pattern(regexp = "^[\\s\\S]{0,35}$")
     private String spouseName;
 
     @JsonProperty("spouse_uid_nid")
     private String spouseUidNid;
 
     @JsonProperty("religion")
+    @Pattern(regexp = "[1-7]{1}")
     private String religion;
 
     @JsonProperty("blood_group")
+    @Pattern(regexp = "[1-8]{1}")
     private String bloodGroup;
 
     @JsonProperty("nationality")
+    @Pattern(regexp = "^[\\s\\S]{0,35}$")
     private String nationality;
 
     @JsonProperty("disability")
+    @Pattern(regexp = "[0-5]{1}")
     private String disability;
 
     @JsonProperty("ethnicity")
+    @Pattern(regexp = "[0-9]{2}")
     private String ethnicity;
-
 
     @JsonProperty("date_of_birth")
     @NotBlank
@@ -126,9 +146,11 @@ public class Patient {
     private String gender;
 
     @JsonProperty("occupation")
+    @Pattern(regexp = "[0-9]{2}")
     private String occupation;
 
     @JsonProperty("edu_level")
+    @Pattern(regexp = "[0-19]")
     private String educationLevel;
 
     @JsonProperty("primary_contact")
@@ -140,7 +162,6 @@ public class Patient {
 
     @JsonProperty("permanent_address")
     private Address permanentAddress;
-
 
     @Override
     public boolean equals(Object o) {

@@ -50,6 +50,9 @@ public class PatientRestApiTest {
         address.setDistrictId("1020");
         address.setUpazillaId("102030");
         address.setUnionId("10203040");
+        address.setVillage("10");
+        address.setWard("10");
+        address.setCountry("103");
         patient.setAddress(address);
     }
 

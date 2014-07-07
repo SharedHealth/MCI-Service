@@ -151,4 +151,20 @@ public class AddressTest {
             return false;
         }
     }
+
+    @Test
+    public void shouldHaveVillageConstrainAnnotation() {
+        assertAddressIdConstraint("village", new AddressIdConstraint("VILLAGE"));
+    }
+
+    @Test
+    public void shouldHaveWardConstrainAnnotation() {
+        assertAddressIdConstraint("ward", new AddressIdConstraint("WARD"));
+    }
+
+    @Test
+    public void shouldHaveCountryConstrainAnnotation() {
+        assertAddressIdConstraint("country", new AddressIdConstraint("COUNTRY"));
+    }
+
 }
