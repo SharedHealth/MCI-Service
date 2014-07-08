@@ -171,6 +171,7 @@ public class Patient {
         Patient patient = (Patient) o;
 
         if (address != null ? !address.equals(patient.address) : patient.address != null) return false;
+        if (birthRegistrationNumber != null ? !birthRegistrationNumber.equals(patient.birthRegistrationNumber) : patient.birthRegistrationNumber != null) return false;
         if (dateOfBirth != null ? !dateOfBirth.equals(patient.dateOfBirth) : patient.dateOfBirth != null) return false;
         if (educationLevel != null ? !educationLevel.equals(patient.educationLevel) : patient.educationLevel != null)
             return false;

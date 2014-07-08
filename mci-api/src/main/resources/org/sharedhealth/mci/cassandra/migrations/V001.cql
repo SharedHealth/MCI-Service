@@ -70,3 +70,5 @@ create table patient (
     );
 
 CREATE INDEX national_id_key ON patient (national_id);
+CREATE INDEX uid_key ON patient (uid);
+CREATE INDEX bin_brn_key ON patient (bin_brn);

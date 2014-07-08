@@ -1,7 +1,8 @@
 package org.sharedhealth.mci.web.controller;
 
-import java.util.concurrent.ExecutionException;
 import javax.validation.Valid;
+import java.util.concurrent.ExecutionException;
+
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.model.Patient;
 import org.sharedhealth.mci.web.service.PatientService;
@@ -11,12 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import static org.springframework.http.HttpStatus.CREATED;
@@ -80,8 +76,7 @@ public class PatientController {
         return deferredResult;
     }
 
-    @RequestMapping(method = RequestMethod.GET)
-    public DeferredResult<ResponseEntity<Patient>> findByNationalId(@RequestParam("nid") String nationalId)
+    private DeferredResult<ResponseEntity<Patient>> findByNationalId(String nationalId)
             throws ExecutionException, InterruptedException {
         logger.debug("Trying to find patient by national id [" + nationalId + "]");
         final DeferredResult<ResponseEntity<Patient>> deferredResult = new DeferredResult<>();
@@ -98,6 +93,44 @@ public class PatientController {
             }
         });
         return deferredResult;
+    }
+
+    private DeferredResult<ResponseEntity<Patient>> findByBirthRegistrationNumber(String birthRegistrationNumber)
+            throws ExecutionException, InterruptedException {
+        logger.debug("Trying to find patient by birth registration number [" + birthRegistrationNumber + "]");
+        final DeferredResult<ResponseEntity<Patient>> deferredResult = new DeferredResult<>();
+
+        patientService.findByBirthRegistrationNumber(birthRegistrationNumber).addCallback(new ListenableFutureCallback<Patient>() {
+            @Override
+            public void onSuccess(Patient result) {
+                deferredResult.setResult(new ResponseEntity<>(result, OK));
+            }
+
+            @Override
+            public void onFailure(Throwable e) {
+                deferredResult.setErrorResult(extractAppException(e));
+            }
+        });
+
+        return deferredResult;
+    }
+
+    @RequestMapping(method = RequestMethod.GET)
+    public DeferredResult<ResponseEntity<Patient>> findPatient(
+            @RequestParam(value = "nid", required = false) String nationalId,
+            @RequestParam(value = "bin_brn", required = false) String birthRegistrationNumber
+    )
+            throws ExecutionException, InterruptedException {
+
+        if(nationalId != null) {
+            return findByNationalId(nationalId);
+        }
+
+        if(birthRegistrationNumber != null) {
+            return findByBirthRegistrationNumber(birthRegistrationNumber);
+        }
+
+        throw new ValidationException("Invalid request");
     }
 
     private Throwable extractAppException(Throwable e) {

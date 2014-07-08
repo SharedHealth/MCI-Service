@@ -34,11 +34,13 @@ public class PatientRepositoryIT {
 
     private Patient patient;
     private String nationalId = "1234567890123";
+    private String birthRegistrationNumber = "12345678901234567";
 
     @Before
     public void setup() throws ExecutionException, InterruptedException {
         patient = new Patient();
         patient.setNationalId(nationalId);
+        patient.setBirthRegistrationNumber(birthRegistrationNumber);
         patient.setFirstName("Scott");
         patient.setLastName("Tiger");
         patient.setDateOfBirth("2014-12-01");
@@ -86,6 +88,14 @@ public class PatientRepositoryIT {
     public void shouldFindPatientWithMatchingNationalId() throws ExecutionException, InterruptedException {
         patientRepository.create(patient).get();
         final Patient p = patientRepository.findByNationalId(nationalId).get();
+        assertNotNull(p);
+        assertEquals(patient, p);
+    }
+
+    @Test
+    public void shouldFindPatientWithMatchingBirthRegistrationNumber() throws ExecutionException, InterruptedException {
+        patientRepository.create(patient).get();
+        final Patient p = patientRepository.findByBirthRegistrationNumber(birthRegistrationNumber).get();
         assertNotNull(p);
         assertEquals(patient, p);
     }

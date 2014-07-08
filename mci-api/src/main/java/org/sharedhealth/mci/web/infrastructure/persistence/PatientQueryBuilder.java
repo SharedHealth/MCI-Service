@@ -154,4 +154,8 @@ public class PatientQueryBuilder {
     public static String getFindByNationalIdQuery() {
         return String.format("SELECT * FROM patient WHERE %s = '%%s'", NATIONAL_ID);
     }
+
+    public static String getFindByBirthRegistrationNumberQuery() {
+        return String.format("SELECT * FROM patient WHERE %s = '%%s'", BIN_BRN);
+    }
 }

@@ -200,6 +200,35 @@ public class PatientRepository {
         };
     }
 
+    public ListenableFuture<Patient> findByBirthRegistrationNumber(final String birthRegistrationNumber) {
+        String cql = String.format(getFindByBirthRegistrationNumberQuery(), birthRegistrationNumber);
+        logger.debug("Find patient by birth registration number CQL: [" + cql + "]");
+        final SettableFuture<Patient> result = SettableFuture.create();
+
+        cqlOperations.queryAsynchronously(cql, new AsynchronousQueryListener() {
+            @Override
+            public void onQueryComplete(ResultSetFuture rsf) {
+                try {
+                    Row row = rsf.get(TIMEOUT_IN_MILLIS, TimeUnit.MILLISECONDS).one();
+                    if (row == null) {
+                        throw new PatientNotFoundException("No patient found with birth registration number: " + birthRegistrationNumber);
+                    }
+                    setPatientOnResult(row, result);
+                } catch (Exception e) {
+                    logger.error("Error while finding patient by birth registration number: " + birthRegistrationNumber, e);
+                    result.setException(e);
+                }
+            }
+        });
+
+        return new SimpleListenableFuture<Patient, Patient>(result) {
+            @Override
+            protected Patient adapt(Patient adapteeResult) throws ExecutionException {
+                return adapteeResult;
+            }
+        };
+    }
+
     private void setPatientOnResult(Row r, SettableFuture<Patient> result) throws InterruptedException, ExecutionException {
         PatientRow row = new PatientRow(r);
         Patient patient = new Patient();

@@ -29,6 +29,8 @@ public class PatientControllerTest {
     private PatientService patientService;
     private Patient patient;
     private MockMvc mockMvc;
+    private String nationalId = "1234567890123";
+    private String birthRegistrationNumber = "12345678901234567";
 
     @Before
     public void setup() {
@@ -36,7 +38,8 @@ public class PatientControllerTest {
         mockMvc = MockMvcBuilders.standaloneSetup(new PatientController(patientService)).build();
 
         patient = new Patient();
-        patient.setNationalId("1234567890123");
+        patient.setNationalId(nationalId);
+        patient.setBirthRegistrationNumber(birthRegistrationNumber);
         patient.setFirstName("Scott");
         patient.setLastName("Tiger");
         patient.setGender("1");
@@ -75,11 +78,18 @@ public class PatientControllerTest {
 
     @Test
     public void shouldFindPatientByNationalId() throws Exception {
-        String nationalId = "1234567890123";
         when(patientService.findByNationalId(nationalId)).thenReturn(new PreResolvedListenableFuture<>(patient));
         mockMvc.perform(get("/patient?nid=" + nationalId))
                 .andExpect(request().asyncResult(new ResponseEntity<>(patient, OK)));
         verify(patientService).findByNationalId(nationalId);
+    }
+
+    @Test
+    public void shouldFindPatientByBirthRegistrationNumber() throws Exception {
+        when(patientService.findByBirthRegistrationNumber(birthRegistrationNumber)).thenReturn(new PreResolvedListenableFuture<>(patient));
+        mockMvc.perform(get("/patient?bin_brn=" + birthRegistrationNumber))
+                .andExpect(request().asyncResult(new ResponseEntity<>(patient, OK)));
+        verify(patientService).findByBirthRegistrationNumber(birthRegistrationNumber);
     }
 }
 

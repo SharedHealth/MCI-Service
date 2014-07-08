@@ -28,4 +28,8 @@ public class PatientService {
     public ListenableFuture<Patient> findByNationalId(String nationalId) {
         return patientRepository.findByNationalId(nationalId);
     }
+
+    public ListenableFuture<Patient> findByBirthRegistrationNumber(String birthRegistrationNumber) {
+        return patientRepository.findByBirthRegistrationNumber(birthRegistrationNumber);
+    }
 }
