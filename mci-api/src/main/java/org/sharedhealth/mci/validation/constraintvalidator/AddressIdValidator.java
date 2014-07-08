@@ -19,6 +19,7 @@ public class AddressIdValidator implements ConstraintValidator<AddressId, String
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
         // Dummy implementation
+        if(value == null) return true;
         return Pattern.compile("[\\d]{2,10}").matcher(value).matches();
     }
 }
