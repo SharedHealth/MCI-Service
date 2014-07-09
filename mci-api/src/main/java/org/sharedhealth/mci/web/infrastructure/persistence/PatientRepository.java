@@ -2,7 +2,7 @@ package org.sharedhealth.mci.web.infrastructure.persistence;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-
+import java.io.*;
 import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Row;
 import com.google.common.util.concurrent.SettableFuture;
@@ -47,6 +47,18 @@ public class PatientRepository {
         if (permanentAddress == null ){
             permanentAddress = new Address();
         }
+        String fullName = "";
+        if(patient.getFirstName() != null){
+             fullName = patient.getFirstName();
+        }
+        if(patient.getMiddleName() != null){
+            fullName = fullName + " " + patient.getMiddleName();
+        }
+        if(patient.getLastName() != null){
+            fullName = fullName + " " +patient.getLastName();
+        }
+
+
         String cql = String.format(getCreateQuery(),
                 healthId,
                 patient.getNationalId(),
@@ -115,7 +127,8 @@ public class PatientRepository {
                 permanentAddress.getWard(),
                 permanentAddress.getThana(),
                 permanentAddress.getCityCorporation(),
-                permanentAddress.getCountry());
+                permanentAddress.getCountry(),
+                fullName.toLowerCase());
 
         logger.debug("Save patient CQL: [" + cql + "]");
 
@@ -216,6 +229,35 @@ public class PatientRepository {
                     setPatientOnResult(row, result);
                 } catch (Exception e) {
                     logger.error("Error while finding patient by birth registration number: " + birthRegistrationNumber, e);
+                    result.setException(e);
+                }
+            }
+        });
+
+        return new SimpleListenableFuture<Patient, Patient>(result) {
+            @Override
+            protected Patient adapt(Patient adapteeResult) throws ExecutionException {
+                return adapteeResult;
+            }
+        };
+    }
+
+    public ListenableFuture<Patient> findByName(final String fullName) {
+        String cql = String.format(getFindByNameQuery(), fullName);
+        logger.debug("Find patient by name  CQL: [" + cql + "]");
+        final SettableFuture<Patient> result = SettableFuture.create();
+
+        cqlOperations.queryAsynchronously(cql, new AsynchronousQueryListener() {
+            @Override
+            public void onQueryComplete(ResultSetFuture rsf) {
+                try {
+                    Row row = rsf.get(TIMEOUT_IN_MILLIS, TimeUnit.MILLISECONDS).one();
+                    if (row == null) {
+                        throw new PatientNotFoundException("No patient found with name: " + fullName);
+                    }
+                    setPatientOnResult(row, result);
+                } catch (Exception e) {
+                    logger.error("Error while finding patient by name: " + fullName, e);
                     result.setException(e);
                 }
             }

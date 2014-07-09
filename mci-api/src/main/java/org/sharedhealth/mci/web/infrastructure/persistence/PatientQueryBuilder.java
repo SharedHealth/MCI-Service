@@ -70,12 +70,12 @@ public class PatientQueryBuilder {
     public static final String PERMANENT_THANA = "permanent_thana";
     public static final String PERMANENT_CITY_CORPORATION = "permanent_city_corporation";
     public static final String PERMANENT_COUNTRY = "permanent_country";
-
+    public static final String FULL_NAME = "full_name";
 
 
     public static String getCreateQuery() {
-        return String.format("INSERT INTO patient ( %s, %s, %s, %s, %s,%s, %s, %s, %s, %s,%s,%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) values " +
-                "('%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s' );",
+        return String.format("INSERT INTO patient ( %s, %s, %s, %s, %s, %s,%s, %s, %s, %s, %s,%s,%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) values " +
+                "('%%s','%%s','%%s','%%s','%%s', '%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s' );",
                 HEALTH_ID,
                 NATIONAL_ID,
                 BIN_BRN,
@@ -143,7 +143,8 @@ public class PatientQueryBuilder {
                 PERMANENT_WARD,
                 PERMANENT_THANA,
                 PERMANENT_CITY_CORPORATION,
-                PERMANENT_COUNTRY
+                PERMANENT_COUNTRY,
+                FULL_NAME
                 );
     }
 
@@ -157,5 +158,8 @@ public class PatientQueryBuilder {
 
     public static String getFindByBirthRegistrationNumberQuery() {
         return String.format("SELECT * FROM patient WHERE %s = '%%s'", BIN_BRN);
+    }
+    public static String getFindByNameQuery() {
+        return String.format("SELECT * FROM patient WHERE %s = '%%s'", FULL_NAME);
     }
 }

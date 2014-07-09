@@ -5,6 +5,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.deser.std.StringArrayDeserializer;
 import org.hibernate.validator.constraints.NotBlank;
 import org.sharedhealth.mci.validation.constraints.Date;
 
@@ -162,6 +163,9 @@ public class Patient {
 
     @JsonProperty("permanent_address")
     private Address permanentAddress;
+
+    @JsonProperty("full_name")
+    private String fullName;
 
     @Override
     public boolean equals(Object o) {
@@ -501,6 +505,14 @@ public class Patient {
 
     public Address getPermanentAddress() {
         return permanentAddress;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
     public void setPermanentAddress(Address permanentAddress) {

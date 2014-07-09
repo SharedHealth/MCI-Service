@@ -12,7 +12,7 @@ import org.sharedhealth.mci.web.utils.concurrent.PreResolvedListenableFuture;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
+import java.io.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -31,6 +31,7 @@ public class PatientControllerTest {
     private MockMvc mockMvc;
     private String nationalId = "1234567890123";
     private String birthRegistrationNumber = "12345678901234567";
+    private String name = "Roni Kumar Saha";
 
     @Before
     public void setup() {
@@ -90,6 +91,14 @@ public class PatientControllerTest {
         mockMvc.perform(get("/patient?bin_brn=" + birthRegistrationNumber))
                 .andExpect(request().asyncResult(new ResponseEntity<>(patient, OK)));
         verify(patientService).findByBirthRegistrationNumber(birthRegistrationNumber);
+    }
+
+    @Test
+    public void shouldFindPatientByName() throws Exception {
+        when(patientService.findByName(name.toLowerCase())).thenReturn(new PreResolvedListenableFuture<>(patient));
+        mockMvc.perform(get("/patient?name=" + name))
+                .andExpect(request().asyncResult(new ResponseEntity<>(patient, OK)));
+        verify(patientService).findByName(name.toLowerCase());
     }
 }
 

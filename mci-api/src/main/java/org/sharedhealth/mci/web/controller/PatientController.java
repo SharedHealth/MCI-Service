@@ -2,7 +2,7 @@ package org.sharedhealth.mci.web.controller;
 
 import javax.validation.Valid;
 import java.util.concurrent.ExecutionException;
-
+import java.io.*;
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.model.Patient;
 import org.sharedhealth.mci.web.service.PatientService;
@@ -118,7 +118,8 @@ public class PatientController {
     @RequestMapping(method = RequestMethod.GET)
     public DeferredResult<ResponseEntity<Patient>> findPatient(
             @RequestParam(value = "nid", required = false) String nationalId,
-            @RequestParam(value = "bin_brn", required = false) String birthRegistrationNumber
+            @RequestParam(value = "bin_brn", required = false) String birthRegistrationNumber,
+            @RequestParam(value = "name", required = false) String name
     )
             throws ExecutionException, InterruptedException {
 
@@ -128,6 +129,9 @@ public class PatientController {
 
         if(birthRegistrationNumber != null) {
             return findByBirthRegistrationNumber(birthRegistrationNumber);
+        }
+        if(name != null) {
+            return findByName(name);
         }
 
         throw new ValidationException("Invalid request");
@@ -139,4 +143,24 @@ public class PatientController {
         }
         return e;
     }
+
+    public DeferredResult<ResponseEntity<Patient>> findByName(String name)
+            throws ExecutionException, InterruptedException {
+        logger.debug("Trying to find patient by name [" + name + "]");
+        final DeferredResult<ResponseEntity<Patient>> deferredResult = new DeferredResult<>();
+
+        patientService.findByName(name.toLowerCase()).addCallback(new ListenableFutureCallback<Patient>() {
+            @Override
+            public void onSuccess(Patient result) {
+                deferredResult.setResult(new ResponseEntity<>(result, OK));
+            }
+
+            @Override
+            public void onFailure(Throwable e) {
+                deferredResult.setErrorResult(extractAppException(e));
+            }
+        });
+        return deferredResult;
+    }
+
 }

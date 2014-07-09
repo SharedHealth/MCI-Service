@@ -66,9 +66,11 @@ create table patient (
     permanent_ward varchar,
     permanent_thana varchar,
     permanent_city_corporation varchar,
-    permanent_country varchar
+    permanent_country varchar,
+    full_name varchar
     );
 
 CREATE INDEX national_id_key ON patient (national_id);
 CREATE INDEX uid_key ON patient (uid);
 CREATE INDEX bin_brn_key ON patient (bin_brn);
+CREATE INDEX full_name_key ON patient (full_name);
