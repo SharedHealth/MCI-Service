@@ -27,7 +27,7 @@ public class Patient {
 
     @JsonProperty("full_name_bangla")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[a-zA-Z0-9]{120}", message = "1003")
+    @Pattern(regexp = "^[\\s\\S]{0,120}$", message = "1003")
     private String fullNameBangla;
 
     @JsonProperty("first_name")
@@ -36,7 +36,7 @@ public class Patient {
 
     @JsonProperty("middle_name")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[a-zA-Z0-9]{25}",message = "1005")
+    @Pattern(regexp = "^[\\s\\S]{0,25}$", message = "1005")
     private String middleName;
 
     @JsonProperty("last_name")
@@ -69,7 +69,7 @@ public class Patient {
 
     @JsonProperty("fathers_name_bangla")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[a-zA-Z0-9]{120}", message = "1013")
+    @Pattern(regexp = "^[\\s\\S]{0,120}$", message = "1013")
     private String fathersNameBangla;
 
     @JsonProperty("fathers_first_name")
@@ -104,7 +104,7 @@ public class Patient {
 
     @JsonProperty("mothers_name_bangla")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[a-zA-Z0-9]{120}", message = "1020")
+    @Pattern(regexp = "^[\\s\\S]{0,120}$", message = "1020")
     private String mothersNameBangla;
 
     @JsonProperty("mothers_first_name")
