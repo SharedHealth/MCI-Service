@@ -64,6 +64,6 @@ public class PatientRestApiTest {
         MvcResult result = mockMvc.perform(post("/patient").accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
-        Assert.assertEquals("{\"code\":400,\"message\":\"invalid.request\"}", result.getResponse().getContentAsString());
+        Assert.assertEquals("{\"code\":400,\"message\":\"invalid.request\",\"errors\":[{\"code\":0,\"message\":\"Invalid address.addressLine\"}]}", result.getResponse().getContentAsString());
     }
 }

@@ -2,7 +2,7 @@ package org.sharedhealth.mci.web.controller;
 
 import javax.validation.Valid;
 import java.util.concurrent.ExecutionException;
-import java.io.*;
+
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.model.Patient;
 import org.sharedhealth.mci.web.service.PatientService;
@@ -38,7 +38,7 @@ public class PatientController {
         final DeferredResult<ResponseEntity<String>> deferredResult = new DeferredResult<>();
 
         if (bindingResult.hasErrors()) {
-            throw new ValidationException(bindingResult.toString());
+            throw new ValidationException(bindingResult);
         }
 
 
