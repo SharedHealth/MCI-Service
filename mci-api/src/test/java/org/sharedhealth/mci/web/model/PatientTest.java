@@ -28,28 +28,28 @@ public class PatientTest {
     public void shouldFailIfFirstNameIsBlank() {
         Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "firstName", "");
         assertEquals(1, constraintViolations.size());
-        assertEquals("may not be empty", constraintViolations.iterator().next().getMessage());
+        assertEquals("1004", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
     public void shouldFailIfLastNameIsBlank() {
         Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "lastName", "");
         assertEquals(1, constraintViolations.size());
-        assertEquals("may not be empty", constraintViolations.iterator().next().getMessage());
+        assertEquals("1006", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
     public void shouldFailIfDateOfBirthIsBlank() {
         Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "dateOfBirth", "   ");
         assertEquals(1, constraintViolations.size());
-        assertEquals("may not be empty", constraintViolations.iterator().next().getMessage());
+        assertEquals("1007", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
     public void shouldFailIfDateOfBirthIsInvalidDate() {
         Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "dateOfBirth", "1999-02-30");
         assertEquals(1, constraintViolations.size());
-        assertEquals("Must provide date of format yyyy-MM-dd", constraintViolations.iterator().next().getMessage());
+        assertEquals("1008", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
@@ -68,21 +68,21 @@ public class PatientTest {
     public void shouldFailIfGenderIsBlank() {
         Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "gender", null);
         assertEquals(1, constraintViolations.size());
-        assertEquals("may not be empty", constraintViolations.iterator().next().getMessage());
+        assertEquals("1009", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
     public void shouldFailIfGenderIsInvalid() {
         Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "gender", "5");
         assertEquals(1, constraintViolations.size());
-        assertEquals("must match \"[1-3]{1}\"", constraintViolations.iterator().next().getMessage());
+        assertEquals("1010", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
     public void shouldFailIfNationalIdIsInvalid() {
         Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "nationalId", "1");
         assertEquals(1, constraintViolations.size());
-        assertEquals("must match \"[\\d]{13}|[\\d]{17}\"", constraintViolations.iterator().next().getMessage());
+        assertEquals("1001", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
@@ -101,14 +101,14 @@ public class PatientTest {
     public void shouldFailIf_UID_LengthIsNotEqual_11() {
         Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "uid", "1");
         assertEquals(1, constraintViolations.size());
-        assertEquals("must match \"[a-zA-Z0-9]{11}\"", constraintViolations.iterator().next().getMessage());
+        assertEquals("1027", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
     public void shouldFailIf_UUID_ContainSpecialCharacter() {
         Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "uid", "123456*8901");
         assertEquals(1, constraintViolations.size());
-        assertEquals("must match \"[a-zA-Z0-9]{11}\"", constraintViolations.iterator().next().getMessage());
+        assertEquals("1027", constraintViolations.iterator().next().getMessage());
     }
 
     @Test

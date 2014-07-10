@@ -3,7 +3,8 @@ package org.sharedhealth.mci.web.model;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Pattern;
-
+import com.fasterxml.jackson.annotation.JsonInclude;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.deser.std.StringArrayDeserializer;
 import org.hibernate.validator.constraints.NotBlank;
@@ -15,147 +16,180 @@ public class Patient {
     private String healthId;
 
     @JsonProperty("nid")
-    @Pattern(regexp = "[\\d]{13}|[\\d]{17}")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "[\\d]{13}|[\\d]{17}", message = "1001")
     private String nationalId;
 
     @JsonProperty("bin_brn")
-    @Pattern(regexp = "[\\d]{17}")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "[\\d]{17}", message = "1002")
     private String birthRegistrationNumber;
 
-    @JsonProperty("uid")
-    @Pattern(regexp = "[a-zA-Z0-9]{11}")
-    private String uid;
-
     @JsonProperty("full_name_bangla")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "[a-zA-Z0-9]{120}", message = "1003")
     private String fullNameBangla;
 
     @JsonProperty("first_name")
-    @NotBlank
+    @NotBlank(message = "1004")
     private String firstName;
 
     @JsonProperty("middle_name")
-    @Pattern(regexp = "^[\\s\\S]{0,25}$")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "[a-zA-Z0-9]{25}",message = "1005")
     private String middleName;
 
     @JsonProperty("last_name")
-    @NotBlank
+    @NotBlank(message = "1006")
     private String lastName;
 
+    @JsonProperty("date_of_birth")
+    @NotBlank(message = "1007")
+    @Date(format = "yyyy-MM-dd", message = "1008")
+    private String dateOfBirth;
+
+    @JsonProperty("gender")
+    @NotBlank(message = "1009")
+    @Pattern(regexp = "[1-3]{1}", message = "1010")
+    private String gender;
+
+    @JsonProperty("occupation")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "[0-9]{2}", message = "1011")
+    private String occupation;
+
+    @JsonProperty("edu_level")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "[0-19]", message = "1012")
+    private String educationLevel;
+
+    @JsonProperty("primary_contact")
+    @JsonInclude(NON_EMPTY)
+    private String primaryContact;
+
     @JsonProperty("fathers_name_bangla")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "[a-zA-Z0-9]{120}", message = "1013")
     private String fathersNameBangla;
 
     @JsonProperty("fathers_first_name")
-    @Pattern(regexp = "^[\\s\\S]{0,25}$")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "^[\\s\\S]{0,25}$", message = "1014")
     private String fathersFirstName;
 
     @JsonProperty("fathers_middle_name")
-    @Pattern(regexp = "^[\\s\\S]{0,25}$")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "^[\\s\\S]{0,25}$", message = "1015")
     private String fathersMiddleName;
 
     @JsonProperty("fathers_last_name")
-    @Pattern(regexp = "^[\\s\\S]{0,25}$")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "^[\\s\\S]{0,25}$", message = "1016")
     private String fathersLastName;
 
     @JsonProperty("fathers_uid")
-    @Pattern(regexp = "[a-zA-Z0-9]{11}")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "[a-zA-Z0-9]{11}", message = "1017")
     private String fathersUid;
 
     @JsonProperty("fathers_nid")
-    @Pattern(regexp = "[\\d]{13}|[\\d]{17}")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "[\\d]{13}|[\\d]{17}", message = "1018")
     private String fathersNid;
 
     @JsonProperty("fathers_brn")
-    @Pattern(regexp = "[\\d]{17}")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "[\\d]{17}", message = "1019")
     private String fathersBrn;
 
     @JsonProperty("mothers_name_bangla")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "[a-zA-Z0-9]{120}", message = "1020")
     private String mothersNameBangla;
 
     @JsonProperty("mothers_first_name")
-    @Pattern(regexp = "^[\\s\\S]{0,25}$")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "^[\\s\\S]{0,25}$", message = "1021")
     private String mothersFirstName;
 
     @JsonProperty("mothers_middle_name")
-    @Pattern(regexp = "^[\\s\\S]{0,25}$")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "^[\\s\\S]{0,25}$", message = "1022")
     private String mothersMiddleName;
 
     @JsonProperty("mothers_last_name")
-    @Pattern(regexp = "^[\\s\\S]{0,25}$")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "^[\\s\\S]{0,25}$", message = "1023")
     private String mothersLastName;
 
     @JsonProperty("mothers_uid")
-    @Pattern(regexp = "[a-zA-Z0-9]{11}")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "[a-zA-Z0-9]{11}", message = "1024")
     private String mothersUid;
 
     @JsonProperty("mothers_nid")
-    @Pattern(regexp = "[\\d]{13}|[\\d]{17}")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "[\\d]{13}|[\\d]{17}", message = "1025")
     private String mothersNid;
 
     @JsonProperty("mothers_brn")
-    @Pattern(regexp = "[\\d]{17}")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "[\\d]{17}", message = "1026")
     private String mothersBrn;
+
+    @JsonProperty("uid")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "[a-zA-Z0-9]{11}", message = "1027")
+    private String uid;
 
     @JsonProperty("place_of_birth")
     private String placeOfBirth;
 
     @JsonProperty("marital_status")
-    @Pattern(regexp = "[1-5]{1}")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "[1-5]{1}", message = "1028")
     private String maritalStatus;
 
     @JsonProperty("marriage_id")
-    @Pattern(regexp = "[0-9]{8}")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "[0-9]{8}", message = "1029")
     private String marriageId;
+
+    @JsonProperty("spouse_name")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "^[\\s\\S]{0,35}$", message = "1030")
+    private String spouseName;
 
     @JsonProperty("spouse_name_bangla")
     private String spouseNameBangla;
-
-    @JsonProperty("spouse_name")
-    @Pattern(regexp = "^[\\s\\S]{0,35}$")
-    private String spouseName;
 
     @JsonProperty("spouse_uid_nid")
     private String spouseUidNid;
 
     @JsonProperty("religion")
-    @Pattern(regexp = "[1-7]{1}")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "[1-7]{1}", message = "1031")
     private String religion;
 
     @JsonProperty("blood_group")
-    @Pattern(regexp = "[1-8]{1}")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "[1-8]{1}", message = "1032")
     private String bloodGroup;
 
     @JsonProperty("nationality")
-    @Pattern(regexp = "^[\\s\\S]{0,35}$")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "^[\\s\\S]{0,35}$", message = "1033")
     private String nationality;
 
     @JsonProperty("disability")
-    @Pattern(regexp = "[0-5]{1}")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "[0-5]{1}", message = "1034")
     private String disability;
 
     @JsonProperty("ethnicity")
-    @Pattern(regexp = "[0-9]{2}")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "[0-9]{2}", message = "1035")
     private String ethnicity;
-
-    @JsonProperty("date_of_birth")
-    @NotBlank
-    @Date(format = "yyyy-MM-dd")
-    private String dateOfBirth;
-
-    @JsonProperty("gender")
-    @NotBlank
-    @Pattern(regexp = "[1-3]{1}")
-    private String gender;
-
-    @JsonProperty("occupation")
-    @Pattern(regexp = "[0-9]{2}")
-    private String occupation;
-
-    @JsonProperty("edu_level")
-    @Pattern(regexp = "[0-19]")
-    private String educationLevel;
-
-    @JsonProperty("primary_contact")
-    private String primaryContact;
 
     @JsonProperty("present_address")
     @Valid
