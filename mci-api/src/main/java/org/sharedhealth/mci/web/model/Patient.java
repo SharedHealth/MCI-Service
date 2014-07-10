@@ -142,6 +142,7 @@ public class Patient {
     @Pattern(regexp = "[a-zA-Z0-9]{11}", message = "1027")
     private String uid;
 
+    @JsonInclude(NON_EMPTY)
     @JsonProperty("place_of_birth")
     private String placeOfBirth;
 
@@ -161,9 +162,11 @@ public class Patient {
     private String spouseName;
 
     @JsonProperty("spouse_name_bangla")
+    @JsonInclude(NON_EMPTY)
     private String spouseNameBangla;
 
     @JsonProperty("spouse_uid_nid")
+    @JsonInclude(NON_EMPTY)
     private String spouseUidNid;
 
     @JsonProperty("religion")
