@@ -119,6 +119,7 @@ public class PatientController {
     public DeferredResult<ResponseEntity<Patient>> findPatient(
             @RequestParam(value = "nid", required = false) String nationalId,
             @RequestParam(value = "bin_brn", required = false) String birthRegistrationNumber,
+            @RequestParam(value = "uid", required = false) String uid,
             @RequestParam(value = "name", required = false) String name
     )
             throws ExecutionException, InterruptedException {
@@ -132,6 +133,9 @@ public class PatientController {
         }
         if(name != null) {
             return findByName(name);
+        }
+        if(uid != null) {
+            return findByUid(uid);
         }
 
         throw new ValidationException("Invalid request");
@@ -150,6 +154,25 @@ public class PatientController {
         final DeferredResult<ResponseEntity<Patient>> deferredResult = new DeferredResult<>();
 
         patientService.findByName(name.toLowerCase()).addCallback(new ListenableFutureCallback<Patient>() {
+            @Override
+            public void onSuccess(Patient result) {
+                deferredResult.setResult(new ResponseEntity<>(result, OK));
+            }
+
+            @Override
+            public void onFailure(Throwable e) {
+                deferredResult.setErrorResult(extractAppException(e));
+            }
+        });
+        return deferredResult;
+    }
+
+    public DeferredResult<ResponseEntity<Patient>> findByUid(String uid)
+            throws ExecutionException, InterruptedException {
+        logger.debug("Trying to find patient by name [" + uid + "]");
+        final DeferredResult<ResponseEntity<Patient>> deferredResult = new DeferredResult<>();
+
+        patientService.findByUid(uid).addCallback(new ListenableFutureCallback<Patient>() {
             @Override
             public void onSuccess(Patient result) {
                 deferredResult.setResult(new ResponseEntity<>(result, OK));

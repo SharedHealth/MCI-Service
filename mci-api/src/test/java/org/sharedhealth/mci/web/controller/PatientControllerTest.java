@@ -32,6 +32,7 @@ public class PatientControllerTest {
     private String nationalId = "1234567890123";
     private String birthRegistrationNumber = "12345678901234567";
     private String name = "Roni Kumar Saha";
+    private String uid = "11111111111";
 
     @Before
     public void setup() {
@@ -91,6 +92,14 @@ public class PatientControllerTest {
         mockMvc.perform(get("/patient?bin_brn=" + birthRegistrationNumber))
                 .andExpect(request().asyncResult(new ResponseEntity<>(patient, OK)));
         verify(patientService).findByBirthRegistrationNumber(birthRegistrationNumber);
+    }
+
+    @Test
+    public void shouldFindPatientByUid() throws Exception {
+        when(patientService.findByUid(uid)).thenReturn(new PreResolvedListenableFuture<>(patient));
+        mockMvc.perform(get("/patient?uid=" + uid))
+                .andExpect(request().asyncResult(new ResponseEntity<>(patient, OK)));
+        verify(patientService).findByUid(uid);
     }
 
     @Test

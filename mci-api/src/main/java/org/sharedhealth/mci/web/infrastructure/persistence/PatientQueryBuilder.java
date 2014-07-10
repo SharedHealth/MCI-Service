@@ -162,4 +162,7 @@ public class PatientQueryBuilder {
     public static String getFindByNameQuery() {
         return String.format("SELECT * FROM patient WHERE %s = '%%s'", FULL_NAME);
     }
+    public static String getFindByUidQuery() {
+        return String.format("SELECT * FROM patient WHERE %s = '%%s'", UID);
+    }
 }

@@ -36,4 +36,7 @@ public class PatientService {
     public ListenableFuture<Patient> findByName(String name) {
         return patientRepository.findByName(name);
     }
+    public ListenableFuture<Patient> findByUid(String uid) {
+        return patientRepository.findByUid(uid);
+    }
 }
