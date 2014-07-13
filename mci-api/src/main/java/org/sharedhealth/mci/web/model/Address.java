@@ -12,68 +12,83 @@ import static org.sharedhealth.mci.validation.AddressType.UPAZILLA;
 import static org.sharedhealth.mci.validation.AddressType.VILLAGE;
 import static org.sharedhealth.mci.validation.AddressType.WARD;
 import static org.sharedhealth.mci.validation.AddressType.COUNTRY;
-
+import com.fasterxml.jackson.annotation.JsonInclude;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 public class Address {
 
     @JsonProperty("address_line")
-    @NotBlank
-    @Size(min = 3, max = 20)
+    @NotBlank(message = "2001")
+    @Size(min = 3, max = 20, message = "2002")
     private String addressLine;
 
     @JsonProperty("division_id")
-    @AddressId(DIVISION)
+    @JsonInclude(NON_EMPTY)
+    @AddressId(value = DIVISION, message = "2003")
     private String divisionId;
 
     @JsonProperty("district_id")
-    @AddressId(DISTRICT)
+    @JsonInclude(NON_EMPTY)
+    @AddressId(value = DISTRICT, message = "2004")
     private String districtId;
 
     @JsonProperty("upazilla_id")
-    @AddressId(UPAZILLA)
+    @JsonInclude(NON_EMPTY)
+    @AddressId(value = UPAZILLA, message = "2005")
     private String upazillaId;
 
     @JsonProperty("union_id")
-    @AddressId(UNION)
+    @JsonInclude(NON_EMPTY)
+    @AddressId(value = UNION, message = "2006")
     private String unionId;
 
     @JsonProperty("holding_number")
-    @Pattern(regexp = "^[\\s\\S]{0,50}$")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "2007")
     private String holdingNumber;
 
     @JsonProperty("street")
-    @Pattern(regexp = "^[\\s\\S]{0,50}$")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "2008")
     private String street;
 
     @JsonProperty("area_mouja")
-    @Pattern(regexp = "^[\\s\\S]{0,25}$")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "^[\\s\\S]{0,25}$", message = "2009")
     private String areaMouja;
 
     @JsonProperty("village")
-    @AddressId(VILLAGE)
+    @JsonInclude(NON_EMPTY)
+    @AddressId(value = VILLAGE, message = "2010")
     private String village;
 
     @JsonProperty("post_office")
-    @Pattern(regexp = "^[\\s\\S]{0,50}$")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "2011")
     private String postOffice;
 
     @JsonProperty("post_code")
-    @Pattern(regexp = "^[\\s\\S]{0,10}$")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "^[\\s\\S]{0,10}$", message = "2012")
     private String postCode;
 
     @JsonProperty("ward")
-    @AddressId(WARD)
+    @JsonInclude(NON_EMPTY)
+    @AddressId(value = WARD, message = "2013")
     private String ward;
 
     @JsonProperty("thana")
-    @Pattern(regexp = "^[\\s\\S]{0,50}$")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "2014")
     private String thana;
 
     @JsonProperty("city_corporation")
-    @Pattern(regexp = "[0-9]{2}")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "[0-9]{2}", message = "2015")
     private String cityCorporation;
 
     @JsonProperty("country")
-    @AddressId(COUNTRY)
+    @JsonInclude(NON_EMPTY)
+    @AddressId(value=COUNTRY, message = "2016")
     private String country;
 
 

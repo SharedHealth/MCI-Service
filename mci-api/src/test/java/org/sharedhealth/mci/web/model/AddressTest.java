@@ -36,14 +36,14 @@ public class AddressTest {
     public void shouldFailIfAddressLineIsBlank() {
         Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "addressLine", null);
         assertEquals(1, constraintViolations.size());
-        assertEquals("may not be empty", constraintViolations.iterator().next().getMessage());
+        assertEquals("2001", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
     public void shouldFailIfAddressLineSizeLessThan3() {
         Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "addressLine", "ab");
         assertEquals(1, constraintViolations.size());
-        assertEquals("size must be between 3 and 20", constraintViolations.iterator().next().getMessage());
+        assertEquals("2002", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
@@ -67,7 +67,7 @@ public class AddressTest {
     public void shouldFailIfDivisionIdIsInvalid() {
         Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "divisionId", "abcd");
         assertEquals(1, constraintViolations.size());
-        assertEquals("1001", constraintViolations.iterator().next().getMessage());
+        assertEquals("2003", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
@@ -85,7 +85,7 @@ public class AddressTest {
     public void shouldFailIfDistrictIdIsInvalid() {
         Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "districtId", "abcd");
         assertEquals(1, constraintViolations.size());
-        assertEquals("1001", constraintViolations.iterator().next().getMessage());
+        assertEquals("2004", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
@@ -103,7 +103,7 @@ public class AddressTest {
     public void shouldFailIfUpazillaIdIsInvalid() {
         Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "upazillaId", "abcd");
         assertEquals(1, constraintViolations.size());
-        assertEquals("1001", constraintViolations.iterator().next().getMessage());
+        assertEquals("2005", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
@@ -121,7 +121,7 @@ public class AddressTest {
     public void shouldFailIfUnionIdIsInvalid() {
         Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "unionId", "abc");
         assertEquals(1, constraintViolations.size());
-        assertEquals("1001", constraintViolations.iterator().next().getMessage());
+        assertEquals("2006", constraintViolations.iterator().next().getMessage());
     }
 
     private void assertAddressIdConstraint(String propertyName, AddressIdConstraint constraint) {
