@@ -146,6 +146,7 @@ public class Patient {
 
     @JsonInclude(NON_EMPTY)
     @JsonProperty("place_of_birth")
+    @Pattern(regexp = "^[\\s\\S]{0,7}$", message = "1038")
     private String placeOfBirth;
 
     @JsonProperty("marital_status")
@@ -165,10 +166,12 @@ public class Patient {
 
     @JsonProperty("spouse_name_bangla")
     @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "1039")
     private String spouseNameBangla;
 
     @JsonProperty("spouse_uid_nid")
     @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "[\\d]{10}|[\\d]{17}", message = "1040")
     private String spouseUidNid;
 
     @JsonProperty("religion")
