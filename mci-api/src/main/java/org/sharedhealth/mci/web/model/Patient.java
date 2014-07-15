@@ -32,6 +32,7 @@ public class Patient {
 
     @JsonProperty("first_name")
     @NotBlank(message = "1004")
+    @Pattern(regexp = "^[\\s\\S]{0,25}$", message = "1036")
     private String firstName;
 
     @JsonProperty("middle_name")
@@ -41,6 +42,7 @@ public class Patient {
 
     @JsonProperty("last_name")
     @NotBlank(message = "1006")
+    @Pattern(regexp = "^[\\s\\S]{0,25}$", message = "1037")
     private String lastName;
 
     @JsonProperty("date_of_birth")
@@ -199,9 +201,11 @@ public class Patient {
     private Address address;
 
     @JsonProperty("permanent_address")
+    @JsonInclude(NON_EMPTY)
     private Address permanentAddress;
 
     @JsonProperty("full_name")
+    @JsonInclude(NON_EMPTY)
     private String fullName;
 
     @Override
