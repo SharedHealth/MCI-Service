@@ -65,10 +65,6 @@ public class Patient {
     @Pattern(regexp = "[0-19]", message = "1012")
     private String educationLevel;
 
-    @JsonProperty("primary_contact")
-    @JsonInclude(NON_EMPTY)
-    private String primaryContact;
-
     @JsonProperty("fathers_name_bangla")
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "^[\\s\\S]{0,120}$", message = "1013")
@@ -230,8 +226,6 @@ public class Patient {
         if (middleName != null ? !middleName.equals(patient.middleName) : patient.middleName != null) return false;
         if (nationalId != null ? !nationalId.equals(patient.nationalId) : patient.nationalId != null) return false;
         if (occupation != null ? !occupation.equals(patient.occupation) : patient.occupation != null) return false;
-        if (primaryContact != null ? !primaryContact.equals(patient.primaryContact) : patient.primaryContact != null)
-            return false;
 
         return true;
     }
@@ -314,14 +308,6 @@ public class Patient {
 
     public void setEducationLevel(String educationLevel) {
         this.educationLevel = educationLevel;
-    }
-
-    public String getPrimaryContact() {
-        return primaryContact;
-    }
-
-    public void setPrimaryContact(String primaryContact) {
-        this.primaryContact = primaryContact;
     }
 
     public String getBirthRegistrationNumber() {

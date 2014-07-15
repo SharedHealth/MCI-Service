@@ -71,7 +71,6 @@ public class PatientRepository {
                 patient.getGender(),
                 patient.getOccupation(),
                 patient.getEducationLevel(),
-                patient.getPrimaryContact(),
                 patient.getFathersNameBangla(),
                 patient.getFathersFirstName(),
                 patient.getFathersMiddleName(),
@@ -337,7 +336,6 @@ public class PatientRepository {
         patient.setGender(row.getString(GENDER));
         patient.setOccupation(row.getString(OCCUPATION));
         patient.setEducationLevel(row.getString(EDU_LEVEL));
-        patient.setPrimaryContact(row.getString(PRIMARY_CONTACT));
         patient.setNationality(row.getString(NATIONALITY));
         patient.setDisability(row.getString(DISABILITY));
         patient.setEthnicity(row.getString(ETHNICITY));

@@ -12,7 +12,6 @@ public class PatientQueryBuilder {
     public static final String GENDER = "gender";
     public static final String OCCUPATION = "occupation";
     public static final String EDU_LEVEL = "edu_level";
-    public static final String PRIMARY_CONTACT = "primary_contact";
     public static final String ADDRESS_LINE = "address_line";
     public static final String DIVISION_ID = "division_id";
     public static final String DISTRICT_ID = "district_id";
@@ -74,8 +73,8 @@ public class PatientQueryBuilder {
 
 
     public static String getCreateQuery() {
-        return String.format("INSERT INTO patient ( %s, %s, %s, %s, %s, %s,%s, %s, %s, %s, %s,%s,%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) values " +
-                "('%%s','%%s','%%s','%%s','%%s', '%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s' );",
+        return String.format("INSERT INTO patient ( %s, %s, %s, %s, %s,%s, %s, %s, %s, %s,%s,%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) values " +
+                "('%%s','%%s','%%s','%%s', '%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s' );",
                 HEALTH_ID,
                 NATIONAL_ID,
                 BIN_BRN,
@@ -87,7 +86,6 @@ public class PatientQueryBuilder {
                 GENDER,
                 OCCUPATION,
                 EDU_LEVEL,
-                PRIMARY_CONTACT,
                 FATHERS_NAME_BANGLA,
                 FATHERS_FIRST_NAME,
                 FATHERS_MIDDLE_NAME,

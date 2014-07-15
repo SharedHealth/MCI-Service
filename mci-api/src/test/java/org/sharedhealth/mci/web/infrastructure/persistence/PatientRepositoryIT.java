@@ -47,7 +47,6 @@ public class PatientRepositoryIT {
         patient.setGender("1");
         patient.setOccupation("salaried");
         patient.setEducationLevel("BA");
-        patient.setPrimaryContact("someone");
 
         Address address = new Address();
         address.setAddressLine("house-10");
