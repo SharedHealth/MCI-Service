@@ -20,7 +20,7 @@ import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
-@RequestMapping("/patient")
+@RequestMapping("/api/v1/patients")
 public class PatientController {
     private static final Logger logger = LoggerFactory.getLogger(PatientController.class);
 

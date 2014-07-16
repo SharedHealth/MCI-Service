@@ -32,6 +32,7 @@ public class PatientRestApiTest {
     protected WebApplicationContext webApplicationContext;
     private MockMvc mockMvc;
     private Patient patient;
+    public static final String API_END_POINT = "/api/v1/patients";
 
     @Before
     public void setup() {
@@ -61,7 +62,7 @@ public class PatientRestApiTest {
         patient.getAddress().setAddressLine("h");
         String json = new ObjectMapper().writeValueAsString(patient);
 
-        MvcResult result = mockMvc.perform(post("/patient").accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+        MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         Assert.assertEquals("{\"code\":400,\"message\":\"invalid.request\",\"errors\":[{\"code\":2002,\"message\":\"Invalid address.addressLine\"}]}", result.getResponse().getContentAsString());

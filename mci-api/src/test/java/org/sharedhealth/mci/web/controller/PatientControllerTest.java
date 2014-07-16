@@ -12,7 +12,7 @@ import org.sharedhealth.mci.web.utils.concurrent.PreResolvedListenableFuture;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import java.io.*;
+
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -33,6 +33,7 @@ public class PatientControllerTest {
     private String birthRegistrationNumber = "12345678901234567";
     private String name = "Roni Kumar Saha";
     private String uid = "11111111111";
+    public static final String API_END_POINT = "/api/v1/patients";
 
     @Before
     public void setup() {
@@ -64,7 +65,7 @@ public class PatientControllerTest {
         String json = new ObjectMapper().writeValueAsString(patient);
         String healthId = "healthId-100";
         when(patientService.create(patient)).thenReturn(new PreResolvedListenableFuture<>(healthId));
-        mockMvc.perform(post("/patient").content(json).contentType(APPLICATION_JSON))
+        mockMvc.perform(post(API_END_POINT).content(json).contentType(APPLICATION_JSON))
                 .andExpect(request().asyncResult(new ResponseEntity<>(healthId, CREATED)));
         verify(patientService).create(patient);
     }
@@ -73,7 +74,7 @@ public class PatientControllerTest {
     public void shouldFindPatientByHealthId() throws Exception {
         String healthId = "healthId-100";
         when(patientService.findByHealthId(healthId)).thenReturn(new PreResolvedListenableFuture<>(patient));
-        mockMvc.perform(get("/patient/" + healthId))
+        mockMvc.perform(get(API_END_POINT + "/" + healthId))
                 .andExpect(request().asyncResult(new ResponseEntity<>(patient, OK)));
         verify(patientService).findByHealthId(healthId);
     }
@@ -81,7 +82,7 @@ public class PatientControllerTest {
     @Test
     public void shouldFindPatientByNationalId() throws Exception {
         when(patientService.findByNationalId(nationalId)).thenReturn(new PreResolvedListenableFuture<>(patient));
-        mockMvc.perform(get("/patient?nid=" + nationalId))
+        mockMvc.perform(get(API_END_POINT + "?nid=" + nationalId))
                 .andExpect(request().asyncResult(new ResponseEntity<>(patient, OK)));
         verify(patientService).findByNationalId(nationalId);
     }
@@ -89,7 +90,7 @@ public class PatientControllerTest {
     @Test
     public void shouldFindPatientByBirthRegistrationNumber() throws Exception {
         when(patientService.findByBirthRegistrationNumber(birthRegistrationNumber)).thenReturn(new PreResolvedListenableFuture<>(patient));
-        mockMvc.perform(get("/patient?bin_brn=" + birthRegistrationNumber))
+        mockMvc.perform(get(API_END_POINT + "?bin_brn=" + birthRegistrationNumber))
                 .andExpect(request().asyncResult(new ResponseEntity<>(patient, OK)));
         verify(patientService).findByBirthRegistrationNumber(birthRegistrationNumber);
     }
@@ -97,7 +98,7 @@ public class PatientControllerTest {
     @Test
     public void shouldFindPatientByUid() throws Exception {
         when(patientService.findByUid(uid)).thenReturn(new PreResolvedListenableFuture<>(patient));
-        mockMvc.perform(get("/patient?uid=" + uid))
+        mockMvc.perform(get(API_END_POINT + "?uid=" + uid))
                 .andExpect(request().asyncResult(new ResponseEntity<>(patient, OK)));
         verify(patientService).findByUid(uid);
     }
@@ -105,7 +106,7 @@ public class PatientControllerTest {
     @Test
     public void shouldFindPatientByName() throws Exception {
         when(patientService.findByName(name.toLowerCase())).thenReturn(new PreResolvedListenableFuture<>(patient));
-        mockMvc.perform(get("/patient?name=" + name))
+        mockMvc.perform(get(API_END_POINT + "?name=" + name))
                 .andExpect(request().asyncResult(new ResponseEntity<>(patient, OK)));
         verify(patientService).findByName(name.toLowerCase());
     }
