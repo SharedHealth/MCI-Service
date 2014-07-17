@@ -3,12 +3,13 @@ package org.sharedhealth.mci.web.model;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Pattern;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.deser.std.StringArrayDeserializer;
 import org.hibernate.validator.constraints.NotBlank;
 import org.sharedhealth.mci.validation.constraints.Date;
+
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
 public class Patient {
 
@@ -62,7 +63,7 @@ public class Patient {
 
     @JsonProperty("edu_level")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[0-19]", message = "1012")
+    @Pattern(regexp = "[0-9]{2}", message = "1012")
     private String educationLevel;
 
     @JsonProperty("fathers_name_bangla")
