@@ -141,4 +141,37 @@ public class PatientTest {
         }
     }
 
+    @Test
+    public void shouldPassIfMaritalStatusIsValid() {
+        for(int i = 1; i<6; i++) {
+            Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "maritalStatus", Integer.toString(i));
+            assertEquals(0, constraintViolations.size());
+        }
+    }
+
+    @Test
+    public void shouldFailIfMaritalStatusIsInvalid() {
+        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "maritalStatus", "8");
+        assertEquals(1, constraintViolations.size());
+        assertEquals("1028", constraintViolations.iterator().next().getMessage());
+    }
+
+    @Test
+    public void shouldPassIfReligionIsValid() {
+        for(int i = 1; i<8; i++) {
+            Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "religion", Integer.toString(i));
+            assertEquals(0, constraintViolations.size());
+        }
+    }
+
+    @Test
+    public void shouldFailIfReligionIsInvalid() {
+        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "religion", "9");
+        assertEquals(1, constraintViolations.size());
+        assertEquals("1031", constraintViolations.iterator().next().getMessage());
+    }
+
+
+
+
 }
