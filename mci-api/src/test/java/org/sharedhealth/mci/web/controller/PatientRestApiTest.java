@@ -1,15 +1,17 @@
 package org.sharedhealth.mci.web.controller;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.MockitoAnnotations;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
 import org.sharedhealth.mci.web.config.WebMvcConfig;
+import org.sharedhealth.mci.web.exception.GlobalExceptionHandler.ErrorInfo;
 import org.sharedhealth.mci.web.model.Address;
 import org.sharedhealth.mci.web.model.Patient;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -78,5 +80,50 @@ public class PatientRestApiTest {
                 .andExpect(status().isBadRequest())
                 .andReturn();
         Assert.assertEquals("{\"code\":400,\"message\":\"invalid.request\",\"errors\":[{\"code\":2002,\"message\":\"Invalid address.addressLine\"}]}", result.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void shouldReturnBadRequestWithErrorDetailsForMultipleInvalidRequestData() throws Exception {
+        patient.getAddress().setAddressLine("h");
+        patient.setGender("0");
+        String json = new ObjectMapper().writeValueAsString(patient);
+
+        MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        ErrorInfo errorInfo = new ObjectMapper().readValue(result.getResponse().getContentAsString(), ErrorInfo.class);
+        Assert.assertEquals(2, errorInfo.getErrors().size());
+        Assert.assertEquals(2002, errorInfo.getErrors().get(0).getCode());
+        Assert.assertEquals(1010, errorInfo.getErrors().get(1).getCode());
+    }
+
+    @Test
+    public void shouldReturnBadRequestForInvalidJson() throws Exception {
+        String json = new ObjectMapper().writeValueAsString(patient);
+
+        MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content("invalidate" + json).contentType(APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+        Assert.assertEquals("{\"code\":125,\"message\":\"invalid.json\"}", result.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void shouldReturnBadRequestForInvalidDataProperty() throws Exception {
+        String json = new ObjectMapper().writeValueAsString(new InvalidPatient());
+
+        MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+        Assert.assertEquals("{\"code\":126,\"message\":\"Unrecognized field: \\\"invalid_property\\\"\"}", result.getResponse().getContentAsString());
+    }
+
+    private class InvalidPatient {
+
+        @JsonProperty("nid")
+        public String nationalId = "1234567890123";
+
+        @JsonProperty("invalid_property")
+        public String birthRegistrationNumber = "some thing";
     }
 }

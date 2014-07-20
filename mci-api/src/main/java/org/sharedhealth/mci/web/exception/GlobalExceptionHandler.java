@@ -114,6 +114,8 @@ public class GlobalExceptionHandler {
         @JsonInclude(NON_EMPTY)
         private List<ErrorInfo> errors;
 
+        public ErrorInfo() {}
+
         public ErrorInfo(int code, String message) {
             this.code = code;
             this.message = message;
@@ -125,6 +127,18 @@ public class GlobalExceptionHandler {
             }
 
             this.errors.add(errorInfo);
+        }
+
+        public List<ErrorInfo> getErrors() {
+            return this.errors;
+        }
+
+        public int getCode() {
+            return this.code;
+        }
+
+        public String getMessage() {
+            return this.message;
         }
     }
 }
