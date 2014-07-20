@@ -104,7 +104,7 @@ public class GlobalExceptionHandler {
     }
 
     @JsonRootName(value = "error")
-    public static class ErrorInfo {
+    public static class ErrorInfo implements Comparable<ErrorInfo> {
         @JsonProperty
         private int code;
         @JsonProperty
@@ -139,6 +139,11 @@ public class GlobalExceptionHandler {
 
         public String getMessage() {
             return this.message;
+        }
+
+        @Override
+        public int compareTo(ErrorInfo e) {
+            return this.code > e.getCode() ? 1 : (this.code < e.getCode() ? -1 : 0);
         }
     }
 }

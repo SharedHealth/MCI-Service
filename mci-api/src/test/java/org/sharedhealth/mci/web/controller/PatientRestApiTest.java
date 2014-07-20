@@ -1,5 +1,8 @@
 package org.sharedhealth.mci.web.controller;
 
+import java.util.Collections;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
@@ -93,9 +96,13 @@ public class PatientRestApiTest {
                 .andReturn();
 
         ErrorInfo errorInfo = new ObjectMapper().readValue(result.getResponse().getContentAsString(), ErrorInfo.class);
-        Assert.assertEquals(2, errorInfo.getErrors().size());
-        Assert.assertEquals(2002, errorInfo.getErrors().get(0).getCode());
-        Assert.assertEquals(1010, errorInfo.getErrors().get(1).getCode());
+
+        List<ErrorInfo> errorInfoErrors = errorInfo.getErrors();
+        Collections.sort(errorInfoErrors);
+
+        Assert.assertEquals(2, errorInfoErrors.size());
+        Assert.assertEquals(1010, errorInfoErrors.get(0).getCode());
+        Assert.assertEquals(2002, errorInfoErrors.get(1).getCode());
     }
 
     @Test
