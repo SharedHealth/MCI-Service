@@ -44,6 +44,9 @@ public class PatientRestApiTest {
         patient.setLastName("Tiger");
         patient.setGender("1");
         patient.setDateOfBirth("2014-12-01");
+        patient.setEducationLevel("01");
+        patient.setOccupation("02");
+        patient.setFathersFirstName("Bob");
 
         Address address = new Address();
         address.setAddressLine("house-10");
@@ -55,6 +58,15 @@ public class PatientRestApiTest {
         address.setWard("10");
         address.setCountry("103");
         patient.setAddress(address);
+    }
+
+    @Test
+    public void shouldCreatePatient() throws Exception {
+        String json = new ObjectMapper().writeValueAsString(patient);
+
+        MvcResult result = mockMvc.perform(post(API_END_POINT).content(json).contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
     }
 
     @Test

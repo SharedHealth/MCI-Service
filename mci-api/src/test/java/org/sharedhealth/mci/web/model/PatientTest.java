@@ -60,8 +60,10 @@ public class PatientTest {
 
     @Test
     public void shouldPassIfGenderValid() {
-        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "gender", "3");
-        assertEquals(0, constraintViolations.size());
+        for (int i = 1; i < 4; i++) {
+            Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "gender", Integer.toString(i));
+            assertEquals(0, constraintViolations.size());
+        }
     }
 
     @Test
@@ -116,4 +118,27 @@ public class PatientTest {
         Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "uid", "UID45678901");
         assertEquals(0, constraintViolations.size());
     }
+
+    @Test
+    public void shouldFailIfOccupationCodeIsLessThenOne() {
+        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "occupation", "00");
+        assertEquals(1, constraintViolations.size());
+        assertEquals("1011", constraintViolations.iterator().next().getMessage());
+    }
+
+    @Test
+    public void shouldFailIfOccupationCodeIsGreaterThen92() {
+        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "occupation", "93");
+        assertEquals(1, constraintViolations.size());
+        assertEquals("1011", constraintViolations.iterator().next().getMessage());
+    }
+
+    @Test
+    public void shouldPassIfOccupationCodeIsValid() {
+        for (int i = 1; i <93; i++) {
+            Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "occupation", String.format("%02d", i));
+            assertEquals(0, constraintViolations.size());
+        }
+    }
+
 }

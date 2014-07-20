@@ -58,12 +58,12 @@ public class Patient {
 
     @JsonProperty("occupation")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[0-9]{2}", message = "1011")
+    @Pattern(regexp = "[1-8]{1}[\\d]{1}|0[1-9]{1}|9[0-2]{1}", message = "1011")
     private String occupation;
 
     @JsonProperty("edu_level")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[0-9]{2}", message = "1012")
+    @Pattern(regexp = "[0-1]{1}[0-9]{1}", message = "1012")
     private String educationLevel;
 
     @JsonProperty("fathers_name_bangla")
