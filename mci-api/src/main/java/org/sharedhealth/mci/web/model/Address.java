@@ -43,17 +43,17 @@ public class Address {
 
     @JsonProperty("holding_number")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "2007")
+    @Pattern(regexp = "^[a-zA-Z0-9\\-_]{0,50}$", message = "2007")
     private String holdingNumber;
 
     @JsonProperty("street")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "2008")
+    @Pattern(regexp = "^[a-zA-Z0-9\\-_]{0,50}$", message = "2008")
     private String street;
 
     @JsonProperty("area_mouja")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[\\s\\S]{0,25}$", message = "2009")
+    @Pattern(regexp = "^[a-zA-Z0-9\\-_]{0,25}$", message = "2009")
     private String areaMouja;
 
     @JsonProperty("village")
@@ -63,12 +63,12 @@ public class Address {
 
     @JsonProperty("post_office")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "2011")
+    @Pattern(regexp = "^[a-zA-Z0-9\\-_]{0,50}$", message = "2011")
     private String postOffice;
 
     @JsonProperty("post_code")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[\\s\\S]{0,10}$", message = "2012")
+    @Pattern(regexp = "[a-zA-Z0-9\\-_]{0,10}$", message = "2012")
     private String postCode;
 
     @JsonProperty("ward")
@@ -78,7 +78,7 @@ public class Address {
 
     @JsonProperty("thana")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "2014")
+    @Pattern(regexp = "^[a-zA-Z0-9\\-_]{0,50}$", message = "2014")
     private String thana;
 
     @JsonProperty("city_corporation")
