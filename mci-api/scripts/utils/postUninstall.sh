@@ -5,4 +5,4 @@ rm -f /etc/default/mci
 rm -f /var/run/mci
 
 #Remove mci from chkconfig
-chkconfig --del mci
+chkconfig --del mci || true
