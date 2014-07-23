@@ -163,4 +163,8 @@ public class PatientQueryBuilder {
     public static String getFindByUidQuery() {
         return String.format("SELECT * FROM patient WHERE %s = '%%s'", UID);
     }
+
+    public static String getFindAllQuery() {
+        return String.format("SELECT * FROM patient");
+    }
 }

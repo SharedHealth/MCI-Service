@@ -1,8 +1,11 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.io.*;
+
+import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Row;
 import com.google.common.util.concurrent.SettableFuture;
@@ -19,6 +22,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cassandra.core.AsynchronousQueryListener;
 import org.springframework.cassandra.core.CqlOperations;
 import org.springframework.stereotype.Component;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFuture;
 
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
@@ -300,6 +304,11 @@ public class PatientRepository {
     }
 
     private void setPatientOnResult(Row r, SettableFuture<Patient> result) throws InterruptedException, ExecutionException {
+        Patient patient = getPatientFromRow(r);
+        result.set(patient);
+    }
+
+    private Patient getPatientFromRow(Row r) {
         PatientRow row = new PatientRow(r);
         Patient patient = new Patient();
         patient.setHealthId(row.getString(HEALTH_ID));
@@ -358,6 +367,23 @@ public class PatientRepository {
         address.setCityCorporation(row.getString(CITY_CORPORATION));
         address.setCountry(row.getString(COUNTRY));
         patient.setAddress(address);
-        result.set(patient);
+        return patient;
+    }
+
+    public ListenableFuture<List<Patient>> findAll(MultiValueMap parameters) {
+
+        return new SimpleListenableFuture<List<Patient>, ResultSet>(
+                cqlOperations.queryAsynchronously(getFindAllQuery())) {
+            @Override
+            protected List<Patient> adapt(ResultSet resultSet) throws ExecutionException {
+                List<Patient> patients = new ArrayList<Patient>();
+                for (Row result : resultSet.all()) {
+                    Patient patient = getPatientFromRow(result);
+                    patients.add(patient);
+                }
+
+                return patients;
+            }
+        };
     }
 }

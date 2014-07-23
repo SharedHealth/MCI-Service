@@ -1,11 +1,16 @@
 package org.sharedhealth.mci.web.service;
 
 
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
 import org.sharedhealth.mci.web.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureAdapter;
 
 @Component
 public class PatientService {
@@ -38,5 +43,14 @@ public class PatientService {
     }
     public ListenableFuture<Patient> findByUid(String uid) {
         return patientRepository.findByUid(uid);
+    }
+
+    public ListenableFuture<List<Patient>> findAll(MultiValueMap parameters) {
+        return new ListenableFutureAdapter<List<Patient>, List<Patient>>(patientRepository.findAll(parameters)) {
+            @Override
+            protected List<Patient> adapt(List<Patient> patients) throws ExecutionException {
+                return patients;
+            }
+        };
     }
 }

@@ -1,6 +1,7 @@
 package org.sharedhealth.mci.web.controller;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import org.sharedhealth.mci.web.exception.ValidationException;
@@ -10,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -183,6 +185,26 @@ public class PatientController {
                 deferredResult.setErrorResult(extractAppException(e));
             }
         });
+        return deferredResult;
+    }
+
+    @RequestMapping(value = "/search", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
+    public DeferredResult<List<Patient>> findAll(@RequestParam MultiValueMap parameters) {
+        logger.debug("Find all patients  by search query ");
+        final DeferredResult<List<Patient>> deferredResult = new DeferredResult<>();
+
+        patientService.findAll(parameters).addCallback(new ListenableFutureCallback<List<Patient>>() {
+            @Override
+            public void onSuccess(List<Patient> result) {
+                deferredResult.setResult(result);
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+                deferredResult.setErrorResult(error);
+            }
+        });
+
         return deferredResult;
     }
 
