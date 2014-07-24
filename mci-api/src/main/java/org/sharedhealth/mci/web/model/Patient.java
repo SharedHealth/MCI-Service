@@ -153,7 +153,7 @@ public class Patient {
 
     @JsonProperty("marriage_id")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[0-9]{8}", message = "1029")
+    @Pattern(regexp = "[a-zA-Z0-9]{8}", message = "1029")
     private String marriageId;
 
     @JsonProperty("spouse_name")
