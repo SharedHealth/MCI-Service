@@ -11,7 +11,9 @@ import com.datastax.driver.core.Row;
 import com.google.common.util.concurrent.SettableFuture;
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.utils.UidGenerator;
+import org.sharedhealth.mci.web.exception.PatientAlreadyExistException;
 import org.sharedhealth.mci.web.exception.PatientNotFoundException;
+import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.model.Address;
 import org.sharedhealth.mci.web.model.Patient;
 import org.sharedhealth.mci.web.utils.concurrent.SimpleListenableFuture;
@@ -24,6 +26,8 @@ import org.springframework.cassandra.core.CqlOperations;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.validation.DirectFieldBindingResult;
+import org.springframework.validation.FieldError;
 
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
 
@@ -41,9 +45,28 @@ public class PatientRepository {
     }
 
     public ListenableFuture<String> create(Patient patient) {
-        if (StringUtils.isBlank(patient.getHealthId())) {
-            patient.setHealthId(uid.getId());
+
+        Patient existingPatient;
+
+        final SettableFuture<String> result = SettableFuture.create();
+
+        try {
+            existingPatient = getExistingPatient(patient);
+        } catch (ExecutionException e) {
+            result.setException(e.getCause());
+            return getStringListenableFuture(result);
+        } catch (Exception e) {
+            result.setException(e);
+            return getStringListenableFuture(result);
         }
+
+        if (StringUtils.isBlank(existingPatient.getHealthId())) {
+            patient.setHealthId(uid.getId());
+        }else{
+            result.setException(new PatientAlreadyExistException(existingPatient.getHealthId()));
+            return getStringListenableFuture(result);
+        }
+
         final String healthId = patient.getHealthId();
         Address address = patient.getAddress();
         Address permanentAddress = patient.getPermanentAddress();
@@ -61,7 +84,6 @@ public class PatientRepository {
         if(patient.getLastName() != null){
             fullName = fullName + " " +patient.getLastName();
         }
-
 
         String cql = String.format(getCreateQuery(),
                 healthId,
@@ -135,8 +157,6 @@ public class PatientRepository {
 
         logger.debug("Save patient CQL: [" + cql + "]");
 
-        final SettableFuture<String> result = SettableFuture.create();
-
         cqlOperations.executeAsynchronously(cql, new AsynchronousQueryListener() {
             @Override
             public void onQueryComplete(ResultSetFuture rsf) {
@@ -150,12 +170,56 @@ public class PatientRepository {
             }
         });
 
+        return getStringListenableFuture(result);
+    }
+
+    private ListenableFuture<String> getStringListenableFuture(final SettableFuture<String> result) {
         return new SimpleListenableFuture<String, String>(result) {
             @Override
             protected String adapt(String adapteeResult) throws ExecutionException {
                 return adapteeResult;
             }
         };
+    }
+
+    private Patient getExistingPatient(Patient patient) throws InterruptedException, ExecutionException {
+
+        if (!StringUtils.isBlank(patient.getHealthId())) {
+            try {
+                return findByHealthId(patient.getHealthId()).get();
+            } catch (Exception e) {
+                DirectFieldBindingResult bindingResult = new DirectFieldBindingResult(patient, "patient");
+                bindingResult.addError(new FieldError("patient", "hid", "404"));
+                throw new ValidationException(bindingResult);
+            }
+        }
+
+        if(!StringUtils.isBlank(patient.getNationalId())) {
+            try {
+                return findByNationalId(patient.getNationalId()).get();
+            } catch (Exception e) {
+                //Nothing to do, just ignore
+            }
+        }
+
+        if(!StringUtils.isBlank(patient.getBirthRegistrationNumber())) {
+
+            try {
+                return findByBirthRegistrationNumber(patient.getBirthRegistrationNumber()).get();
+            } catch (Exception e) {
+                //Nothing to do, just ignore
+            }
+        }
+
+        if(!StringUtils.isBlank(patient.getUid())) {
+            try {
+                return findByUid(patient.getUid()).get();
+            } catch (Exception e) {
+                //Nothing to do, just ignore
+            }
+        }
+
+        return patient;
     }
 
     public ListenableFuture<Patient> findByHealthId(final String healthId) {

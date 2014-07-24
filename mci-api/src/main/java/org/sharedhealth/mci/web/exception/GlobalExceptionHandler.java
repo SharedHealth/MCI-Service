@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
@@ -36,8 +37,10 @@ public class GlobalExceptionHandler {
         logger.error("Handling ValidationException. ", e);
         ErrorInfo errorInfo = new ErrorInfo(BAD_REQUEST.value(), "invalid.request");
 
-        for (ObjectError error: e.getBindingResult().getAllErrors()){
-            errorInfo.addError(getValidationErrorInfo(error));
+        if (e.getBindingResult() != null) {
+            for (ObjectError error : e.getBindingResult().getAllErrors()) {
+                errorInfo.addError(getValidationErrorInfo(error));
+            }
         }
 
         return errorInfo;
@@ -70,6 +73,14 @@ public class GlobalExceptionHandler {
     public ErrorInfo handlePatientNotFoundException(PatientNotFoundException e) {
         logger.error("Handling PatientNotFoundException. ", e);
         return new ErrorInfo(NOT_FOUND.value(), "patient.not.found");
+    }
+
+    @ResponseStatus(value = CONFLICT)
+    @ExceptionHandler(PatientAlreadyExistException.class)
+    @ResponseBody
+    public ErrorInfo handlePatientAlreadyExistException(PatientAlreadyExistException e) {
+        logger.error("Handling PatientAlreadyExistException. ", e);
+        return new ErrorInfo(CONFLICT.value(), "Patient already exist with health id: " + e.getMessage());
     }
 
     @ResponseStatus(value = INTERNAL_SERVER_ERROR)
