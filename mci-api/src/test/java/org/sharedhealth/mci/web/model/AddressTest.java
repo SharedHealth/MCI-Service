@@ -153,8 +153,69 @@ public class AddressTest {
     }
 
     @Test
+    public void shouldFailIfStreetIsMoreThan_50_Characters() {
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "street", "janagiralamkabirkhanjirkhanjirkhanjirkhanjirkhanjirkhanjahanaliahmadpuri");
+        assertEquals("2008", constraintViolations.iterator().next().getMessage());
+    }
+
+    @Test
+    public void shouldPassIfStreetIsValid() {
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "street", "DH1234567");
+        assertEquals(0, constraintViolations.size());
+    }
+
+    @Test
+    public void shouldFailIfAreaMouzaIsMoreThan_25_Characters() {
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "areaMouja", "jaanjirkhanjahanaliahmadpuri");
+        assertEquals("2009", constraintViolations.iterator().next().getMessage());
+    }
+
+    @Test
+    public void shouldPassIfAreaMouzaIsValid() {
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "areaMouja", "Dhaka");
+        assertEquals(0, constraintViolations.size());
+    }
+
+    @Test
+    public void shouldFailIfPostOfficeIsMoreThan_50_Characters() {
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "postOffice", "jaanjirkh999999999999999999yghgh khkj jkhkjh kjh kk kjhkjh khjkhkj kj kj");
+        assertEquals("2011", constraintViolations.iterator().next().getMessage());
+    }
+
+    @Test
+    public void shouldPassIfPostOfficeIsValid() {
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "postOffice", "Dhaka");
+        assertEquals(0, constraintViolations.size());
+    }
+
+    @Test
+    public void shouldFailIfPostCodeIsMoreThan_10_Characters() {
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "postCode", "jaanjirkh999999999999999999yghgh khkj jkhkjh kjh kk kjhkjh khjkhkj kj kj");
+        assertEquals("2012", constraintViolations.iterator().next().getMessage());
+    }
+
+    @Test
+    public void shouldPassIfPostCodeIsValid() {
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "postCode", "1362");
+        assertEquals(0, constraintViolations.size());
+    }
+
+    @Test
     public void shouldHaveVillageConstrainAnnotation() {
         assertAddressIdConstraint("village", new AddressIdConstraint("VILLAGE"));
+    }
+
+    @Test
+    public void shouldPassIfVillageIdIsValid() {
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "village", "1234");
+        assertEquals(0, constraintViolations.size());
+    }
+
+    @Test
+    public void shouldFailIfVillageIdIsInvalid() {
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "village", "abc");
+        assertEquals(1, constraintViolations.size());
+        assertEquals("2010", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
@@ -163,8 +224,51 @@ public class AddressTest {
     }
 
     @Test
+    public void shouldPassIfWardIdIsValid() {
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "ward", "1234");
+        assertEquals(0, constraintViolations.size());
+    }
+
+    @Test
+    public void shouldFailIfWardIdIsInvalid() {
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "ward", "abc");
+        assertEquals(1, constraintViolations.size());
+        assertEquals("2013", constraintViolations.iterator().next().getMessage());
+    }
+
+    @Test
     public void shouldHaveCountryConstrainAnnotation() {
         assertAddressIdConstraint("country", new AddressIdConstraint("COUNTRY"));
     }
 
+    @Test
+    public void shouldPassIfCountryIdIsValid() {
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "country", "1234");
+        assertEquals(0, constraintViolations.size());
+    }
+
+    @Test
+    public void shouldFailIfCountryIdIsInvalid() {
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "country", "abc");
+        assertEquals(1, constraintViolations.size());
+        assertEquals("2016", constraintViolations.iterator().next().getMessage());
+    }
+
+    @Test
+    public void shouldHaveCityCorporationConstrainAnnotation() {
+        assertAddressIdConstraint("cityCorporation", new AddressIdConstraint("CITYCORPORATION"));
+    }
+
+    @Test
+    public void shouldPassIfCityCorporationIsValid() {
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "cityCorporation", "1234");
+        assertEquals(0, constraintViolations.size());
+    }
+
+    @Test
+    public void shouldFailIfCityCorporationIdIsInvalid() {
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "cityCorporation", "abc");
+        assertEquals(1, constraintViolations.size());
+        assertEquals("2015", constraintViolations.iterator().next().getMessage());
+    }
 }

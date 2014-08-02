@@ -12,6 +12,7 @@ import static org.sharedhealth.mci.validation.AddressType.UPAZILLA;
 import static org.sharedhealth.mci.validation.AddressType.VILLAGE;
 import static org.sharedhealth.mci.validation.AddressType.WARD;
 import static org.sharedhealth.mci.validation.AddressType.COUNTRY;
+import static org.sharedhealth.mci.validation.AddressType.CITYCORPORATION;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 public class Address {
@@ -83,14 +84,13 @@ public class Address {
 
     @JsonProperty("city_corporation")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[0-9]{2}", message = "2015")
+    @AddressId(value = CITYCORPORATION, message = "2015")
     private String cityCorporation;
 
     @JsonProperty("country")
     @JsonInclude(NON_EMPTY)
     @AddressId(value=COUNTRY, message = "2016")
     private String country;
-
 
     @Override
     public boolean equals(Object o) {
