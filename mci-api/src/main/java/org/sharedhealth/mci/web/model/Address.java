@@ -1,15 +1,22 @@
 package org.sharedhealth.mci.web.model;
-
 import javax.validation.constraints.Size;
 import javax.validation.constraints.Pattern;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.validator.constraints.NotBlank;
 import org.sharedhealth.mci.validation.constraints.AddressId;
-
+import static org.sharedhealth.mci.validation.AddressType.DISTRICT;
+import static org.sharedhealth.mci.validation.AddressType.DIVISION;
+import static org.sharedhealth.mci.validation.AddressType.UNION;
+import static org.sharedhealth.mci.validation.AddressType.UPAZILLA;
+import static org.sharedhealth.mci.validation.AddressType.VILLAGE;
+import static org.sharedhealth.mci.validation.AddressType.WARD;
+import static org.sharedhealth.mci.validation.AddressType.COUNTRY;
+import static org.sharedhealth.mci.validation.AddressType.CITYCORPORATION;
+import static org.sharedhealth.mci.validation.AddressType.AREAMOUJA;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static org.sharedhealth.mci.validation.AddressType.*;
 
@@ -42,17 +49,17 @@ public class Address {
 
     @JsonProperty("holding_number")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[a-zA-Z0-9\\-_]{0,50}$", message = "2007")
+    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "2007")
     private String holdingNumber;
 
     @JsonProperty("street")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[a-zA-Z0-9\\-_]{0,50}$", message = "2008")
+    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "2008")
     private String street;
 
     @JsonProperty("area_mouja")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[a-zA-Z0-9\\-_]{0,25}$", message = "2009")
+    @AddressId(value = AREAMOUJA, message = "2009")
     private String areaMouja;
 
     @JsonProperty("village")

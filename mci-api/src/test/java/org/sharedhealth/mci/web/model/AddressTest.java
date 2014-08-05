@@ -59,7 +59,7 @@ public class AddressTest {
 
     @Test
     public void shouldPassIfDivisionIdIsValid() {
-        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "divisionId", "12345");
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "divisionId", "15");
         assertEquals(0, constraintViolations.size());
     }
 
@@ -77,7 +77,7 @@ public class AddressTest {
 
     @Test
     public void shouldPassIfDistrictIdIsValid() {
-        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "districtId", "12345");
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "districtId", "15");
         assertEquals(0, constraintViolations.size());
     }
 
@@ -95,7 +95,7 @@ public class AddressTest {
 
     @Test
     public void shouldPassIfUpazillaIsValid() {
-        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "upazillaId", "12345");
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "upazillaId", "15");
         assertEquals(0, constraintViolations.size());
     }
 
@@ -113,7 +113,7 @@ public class AddressTest {
 
     @Test
     public void shouldPassIfUnionIdIsValid() {
-        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "unionId", "12345");
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "unionId", "15");
         assertEquals(0, constraintViolations.size());
     }
 
@@ -165,14 +165,14 @@ public class AddressTest {
     }
 
     @Test
-    public void shouldFailIfAreaMouzaIsMoreThan_25_Characters() {
+    public void shouldFailIfAreaMouzaIsMoreThan_3_Characters() {
         Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "areaMouja", "jaanjirkhanjahanaliahmadpuri");
         assertEquals("2009", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
     public void shouldPassIfAreaMouzaIsValid() {
-        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "areaMouja", "Dhaka");
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "areaMouja", "134");
         assertEquals(0, constraintViolations.size());
     }
 
@@ -207,7 +207,7 @@ public class AddressTest {
 
     @Test
     public void shouldPassIfVillageIdIsValid() {
-        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "village", "1234");
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "village", "12");
         assertEquals(0, constraintViolations.size());
     }
 
@@ -225,7 +225,7 @@ public class AddressTest {
 
     @Test
     public void shouldPassIfWardIdIsValid() {
-        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "ward", "1234");
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "ward", "13");
         assertEquals(0, constraintViolations.size());
     }
 
@@ -243,7 +243,7 @@ public class AddressTest {
 
     @Test
     public void shouldPassIfCountryIdIsValid() {
-        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "country", "1234");
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "country", "124");
         assertEquals(0, constraintViolations.size());
     }
 
@@ -261,7 +261,7 @@ public class AddressTest {
 
     @Test
     public void shouldPassIfCityCorporationIsValid() {
-        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "cityCorporation", "1234");
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "cityCorporation", "12");
         assertEquals(0, constraintViolations.size());
     }
 
