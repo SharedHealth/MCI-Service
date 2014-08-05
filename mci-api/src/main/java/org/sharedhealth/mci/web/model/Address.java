@@ -13,6 +13,7 @@ import static org.sharedhealth.mci.validation.AddressType.VILLAGE;
 import static org.sharedhealth.mci.validation.AddressType.WARD;
 import static org.sharedhealth.mci.validation.AddressType.COUNTRY;
 import static org.sharedhealth.mci.validation.AddressType.CITYCORPORATION;
+import static org.sharedhealth.mci.validation.AddressType.AREAMOUJA;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 public class Address {
@@ -44,17 +45,17 @@ public class Address {
 
     @JsonProperty("holding_number")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[a-zA-Z0-9\\-_]{0,50}$", message = "2007")
+    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "2007")
     private String holdingNumber;
 
     @JsonProperty("street")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[a-zA-Z0-9\\-_]{0,50}$", message = "2008")
+    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "2008")
     private String street;
 
     @JsonProperty("area_mouja")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[a-zA-Z0-9\\-_]{0,25}$", message = "2009")
+    @AddressId(value = AREAMOUJA, message = "2009")
     private String areaMouja;
 
     @JsonProperty("village")

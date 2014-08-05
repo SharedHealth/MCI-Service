@@ -51,12 +51,13 @@ public class PatientControllerTest {
         Address address = new Address();
         address.setAddressLine("house-10");
         address.setDivisionId("10");
-        address.setDistrictId("1020");
-        address.setUpazillaId("102030");
-        address.setUnionId("10203040");
+        address.setDistrictId("20");
+        address.setUpazillaId("10");
+        address.setUnionId("10");
         address.setVillage("10");
-        address.setWard("10");
+        address.setWard("12");
         address.setCountry("103");
+
         patient.setAddress(address);
     }
 
