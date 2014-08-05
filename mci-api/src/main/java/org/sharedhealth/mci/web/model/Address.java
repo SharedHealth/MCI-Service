@@ -1,8 +1,10 @@
 package org.sharedhealth.mci.web.model;
-
 import javax.validation.constraints.Size;
 import javax.validation.constraints.Pattern;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.validator.constraints.NotBlank;
 import org.sharedhealth.mci.validation.constraints.AddressId;
 import static org.sharedhealth.mci.validation.AddressType.DISTRICT;
@@ -16,6 +18,8 @@ import static org.sharedhealth.mci.validation.AddressType.CITYCORPORATION;
 import static org.sharedhealth.mci.validation.AddressType.AREAMOUJA;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
+import static org.sharedhealth.mci.validation.AddressType.*;
+
 public class Address {
 
     @JsonProperty("address_line")
@@ -94,20 +98,13 @@ public class Address {
     private String country;
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+    public boolean equals(Object rhs) {
+        return EqualsBuilder.reflectionEquals(this, rhs);
+    }
 
-        Address address = (Address) o;
-
-        if (addressLine != null ? !addressLine.equals(address.addressLine) : address.addressLine != null) return false;
-        if (districtId != null ? !districtId.equals(address.districtId) : address.districtId != null) return false;
-        if (divisionId != null ? !divisionId.equals(address.divisionId) : address.divisionId != null) return false;
-        if (unionId != null ? !unionId.equals(address.unionId) : address.unionId != null) return false;
-        if (upazillaId != null ? !upazillaId.equals(address.upazillaId) : address.upazillaId != null) return false;
-        if (village != null ? !village.equals(address.village) : address.village != null) return false;
-
-        return true;
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override

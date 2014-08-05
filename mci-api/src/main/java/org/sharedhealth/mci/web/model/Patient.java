@@ -6,6 +6,8 @@ import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.validator.constraints.NotBlank;
 import org.sharedhealth.mci.validation.constraints.Date;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
@@ -208,26 +210,13 @@ public class Patient {
     private String fullName;
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Patient)) return false;
+    public boolean equals(Object rhs) {
+        return EqualsBuilder.reflectionEquals(this, rhs);
+    }
 
-        Patient patient = (Patient) o;
-
-        if (address != null ? !address.equals(patient.address) : patient.address != null) return false;
-        if (birthRegistrationNumber != null ? !birthRegistrationNumber.equals(patient.birthRegistrationNumber) : patient.birthRegistrationNumber != null) return false;
-        if (dateOfBirth != null ? !dateOfBirth.equals(patient.dateOfBirth) : patient.dateOfBirth != null) return false;
-        if (educationLevel != null ? !educationLevel.equals(patient.educationLevel) : patient.educationLevel != null)
-            return false;
-        if (firstName != null ? !firstName.equals(patient.firstName) : patient.firstName != null) return false;
-        if (gender != null ? !gender.equals(patient.gender) : patient.gender != null) return false;
-        if (healthId != null ? !healthId.equals(patient.healthId) : patient.healthId != null) return false;
-        if (lastName != null ? !lastName.equals(patient.lastName) : patient.lastName != null) return false;
-        if (middleName != null ? !middleName.equals(patient.middleName) : patient.middleName != null) return false;
-        if (nationalId != null ? !nationalId.equals(patient.nationalId) : patient.nationalId != null) return false;
-        if (occupation != null ? !occupation.equals(patient.occupation) : patient.occupation != null) return false;
-
-        return true;
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     public String getNationalId() {
