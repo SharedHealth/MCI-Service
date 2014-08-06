@@ -4,8 +4,12 @@ import javax.validation.Valid;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import com.datastax.driver.core.exceptions.InvalidQueryException;
+import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.web.exception.ValidationException;
+import org.sharedhealth.mci.web.model.Address;
 import org.sharedhealth.mci.web.model.Patient;
+import org.sharedhealth.mci.web.service.LocationService;
 import org.sharedhealth.mci.web.service.PatientService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
@@ -27,10 +32,12 @@ public class PatientController {
     private static final Logger logger = LoggerFactory.getLogger(PatientController.class);
 
     private PatientService patientService;
+    private LocationService locationService;
 
     @Autowired
-    public PatientController(PatientService patientService) {
+    public PatientController(PatientService patientService, LocationService locationService) {
         this.patientService = patientService;
+        this.locationService = locationService;
     }
 
     @RequestMapping(method = RequestMethod.POST, consumes = {APPLICATION_JSON_VALUE})
@@ -38,6 +45,10 @@ public class PatientController {
             throws ExecutionException, InterruptedException {
         logger.debug("Trying to create patient. [" + patient + "]");
         final DeferredResult<ResponseEntity<String>> deferredResult = new DeferredResult<>();
+
+        this.validateAddress(patient.getAddress(), bindingResult, "address");
+        this.validateAddress(patient.getPermanentAddress(), bindingResult, "permanentAddress");
+
 
         if (bindingResult.hasErrors()) {
             throw new ValidationException(bindingResult);
@@ -56,6 +67,34 @@ public class PatientController {
             }
         });
         return deferredResult;
+    }
+
+    private void validateAddress(Address address, BindingResult bindingResult, String field) {
+
+        if(address == null) {
+            return;
+        }
+
+        try {
+            org.sharedhealth.mci.web.model.Location location = locationService.findByGeoCode(getGeoCode(address)).get();
+
+            if(!StringUtils.isBlank(location.getGeoCode())) {
+                return;
+            }
+
+        } catch (Exception e) {
+            if(extractAppException(e.getCause()).getClass() == InvalidQueryException.class){
+                //Ignoring validation if failed to communicate with Location Registry
+                return;
+            }
+            e.printStackTrace();
+        }
+
+        bindingResult.addError(new FieldError("patient", field, getGeoCode(address)));
+    }
+
+    private String getGeoCode(Address a) {
+        return a.getDivisionId() + a.getDistrictId() + a.getUpazillaId() + a.getCityCorporation() + a.getWard();
     }
 
     @RequestMapping(value = "/{healthId}", method = RequestMethod.GET)

@@ -373,7 +373,7 @@ public class PatientRepository {
     }
 
     private Patient getPatientFromRow(Row r) {
-        PatientRow row = new PatientRow(r);
+        DatabaseRow row = new DatabaseRow(r);
         Patient patient = new Patient();
         patient.setHealthId(row.getString(HEALTH_ID));
         patient.setNationalId(row.getString(NATIONAL_ID));

@@ -3,11 +3,11 @@ package org.sharedhealth.mci.web.infrastructure.persistence;
 import com.datastax.driver.core.Row;
 import org.apache.commons.lang3.StringUtils;
 
-public class PatientRow {
+public class DatabaseRow {
 
     private final Row row;
 
-    public PatientRow(Row row) {
+    public DatabaseRow(Row row) {
         this.row = row;
     }
 

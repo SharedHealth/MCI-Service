@@ -56,11 +56,12 @@ public class PatientRestApiTest {
         Address address = new Address();
         address.setAddressLine("house-10");
         address.setDivisionId("10");
-        address.setDistrictId("20");
-        address.setUpazillaId("30");
-        address.setUnionId("40");
+        address.setDistrictId("04");
+        address.setUpazillaId("09");
+        address.setCityCorporation("20");
+        // address.setUnionId("10");
         address.setVillage("10");
-        address.setWard("40");
+        address.setWard("01");
         address.setCountry("103");
 
         patient.setAddress(address);

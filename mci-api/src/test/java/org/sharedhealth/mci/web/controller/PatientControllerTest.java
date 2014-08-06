@@ -6,7 +6,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.sharedhealth.mci.web.model.Address;
+import org.sharedhealth.mci.web.model.Location;
 import org.sharedhealth.mci.web.model.Patient;
+import org.sharedhealth.mci.web.service.LocationService;
 import org.sharedhealth.mci.web.service.PatientService;
 import org.sharedhealth.mci.web.utils.concurrent.PreResolvedListenableFuture;
 import org.springframework.http.ResponseEntity;
@@ -27,18 +29,24 @@ public class PatientControllerTest {
 
     @Mock
     private PatientService patientService;
+
+    @Mock
+    private LocationService locationService;
+
     private Patient patient;
+    private Location locaiton;
     private MockMvc mockMvc;
     private String nationalId = "1234567890123";
     private String birthRegistrationNumber = "12345678901234567";
     private String name = "Roni Kumar Saha";
     private String uid = "11111111111";
     public static final String API_END_POINT = "/api/v1/patients";
+    public static final String GEO_CODE = "1004092001";
 
     @Before
     public void setup() {
         initMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(new PatientController(patientService)).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(new PatientController(patientService, locationService)).build();
 
         patient = new Patient();
         patient.setNationalId(nationalId);
@@ -51,21 +59,33 @@ public class PatientControllerTest {
         Address address = new Address();
         address.setAddressLine("house-10");
         address.setDivisionId("10");
-        address.setDistrictId("20");
-        address.setUpazillaId("10");
-        address.setUnionId("10");
+        address.setDistrictId("04");
+        address.setUpazillaId("09");
+        address.setCityCorporation("20");
         address.setVillage("10");
-        address.setWard("12");
+        address.setWard("01");
         address.setCountry("103");
 
         patient.setAddress(address);
+
+        locaiton = new Location();
+
+        locaiton.setGeoCode(GEO_CODE);
+        locaiton.setDivisionId("10");
+        locaiton.setDistrictId("04");
+        locaiton.setUpazillaId("09");
+        locaiton.setPaurashavaId("20");
+        locaiton.setUnionId("01");
+
     }
 
     @Test
     public void shouldCreatePatientAndReturnHealthId() throws Exception {
         String json = new ObjectMapper().writeValueAsString(patient);
         String healthId = "healthId-100";
+        when(locationService.findByGeoCode(GEO_CODE)).thenReturn(new PreResolvedListenableFuture<>(locaiton));
         when(patientService.create(patient)).thenReturn(new PreResolvedListenableFuture<>(healthId));
+
         mockMvc.perform(post(API_END_POINT).content(json).contentType(APPLICATION_JSON))
                 .andExpect(request().asyncResult(new ResponseEntity<>(healthId, CREATED)));
         verify(patientService).create(patient);

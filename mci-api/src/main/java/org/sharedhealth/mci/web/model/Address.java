@@ -1,22 +1,14 @@
 package org.sharedhealth.mci.web.model;
-import javax.validation.constraints.Size;
 import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.validator.constraints.NotBlank;
 import org.sharedhealth.mci.validation.constraints.AddressId;
-import static org.sharedhealth.mci.validation.AddressType.DISTRICT;
-import static org.sharedhealth.mci.validation.AddressType.DIVISION;
-import static org.sharedhealth.mci.validation.AddressType.UNION;
-import static org.sharedhealth.mci.validation.AddressType.UPAZILLA;
-import static org.sharedhealth.mci.validation.AddressType.VILLAGE;
-import static org.sharedhealth.mci.validation.AddressType.WARD;
-import static org.sharedhealth.mci.validation.AddressType.COUNTRY;
-import static org.sharedhealth.mci.validation.AddressType.CITYCORPORATION;
-import static org.sharedhealth.mci.validation.AddressType.AREAMOUJA;
-import com.fasterxml.jackson.annotation.JsonInclude;
+
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static org.sharedhealth.mci.validation.AddressType.*;
 
