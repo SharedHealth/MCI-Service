@@ -186,7 +186,7 @@ public class Patient {
 
     @JsonProperty("nationality")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[a-zA-Z]{0,50}$", message = "1033")
+    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "1033")
     private String nationality;
 
     @JsonProperty("disability")

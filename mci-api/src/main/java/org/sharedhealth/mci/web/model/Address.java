@@ -64,7 +64,7 @@ public class Address {
 
     @JsonProperty("post_office")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[a-zA-Z0-9\\-_]{0,50}$", message = "2011")
+    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "2011")
     private String postOffice;
 
     @JsonProperty("post_code")
@@ -79,7 +79,7 @@ public class Address {
 
     @JsonProperty("thana")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[a-zA-Z0-9\\-_]{0,50}$", message = "2014")
+    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "2014")
     private String thana;
 
     @JsonProperty("city_corporation")

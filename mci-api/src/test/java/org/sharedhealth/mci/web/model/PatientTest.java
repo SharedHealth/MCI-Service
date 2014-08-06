@@ -5,11 +5,9 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import java.util.Set;
-
 import org.hibernate.validator.HibernateValidator;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
 
 public class PatientTest {
@@ -563,14 +561,8 @@ public class PatientTest {
     }
 
     @Test
-    public void shouldFailIfNationalityIsContainSpecialCharacter() {
-        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "nationality", ";,*@");
-        assertEquals("1033", constraintViolations.iterator().next().getMessage());
-    }
-
-    @Test
     public void shouldFailIfNationalityIsMoreThan_50_Characters() {
-        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "nationality", "bangladeshi bangladeshi");
+        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "nationality", "bangladeshi bangladeshi bangladeshi bangladeshi bangladeshi bangladeshi ");
         assertEquals("1033", constraintViolations.iterator().next().getMessage());
     }
 
