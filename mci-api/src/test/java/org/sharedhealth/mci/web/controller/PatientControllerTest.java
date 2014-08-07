@@ -4,7 +4,9 @@ package org.sharedhealth.mci.web.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.sharedhealth.mci.web.model.Address;
 import org.sharedhealth.mci.web.model.Location;
 import org.sharedhealth.mci.web.model.Patient;
@@ -14,6 +16,7 @@ import org.sharedhealth.mci.web.utils.concurrent.PreResolvedListenableFuture;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -25,6 +28,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 
+@RunWith(MockitoJUnitRunner.class)
 public class PatientControllerTest {
 
     @Mock
@@ -32,6 +36,9 @@ public class PatientControllerTest {
 
     @Mock
     private LocationService locationService;
+
+    @Mock
+    private LocalValidatorFactoryBean localValidatorFactoryBean;
 
     private Patient patient;
     private Location locaiton;
@@ -46,7 +53,10 @@ public class PatientControllerTest {
     @Before
     public void setup() {
         initMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(new PatientController(patientService, locationService)).build();
+        mockMvc = MockMvcBuilders
+                .standaloneSetup(new PatientController(patientService))
+                .setValidator(validator())
+                .build();
 
         patient = new Patient();
         patient.setNationalId(nationalId);
@@ -130,6 +140,10 @@ public class PatientControllerTest {
         mockMvc.perform(get(API_END_POINT + "?name=" + name))
                 .andExpect(request().asyncResult(new ResponseEntity<>(patient, OK)));
         verify(patientService).findByName(name.toLowerCase());
+    }
+
+    private LocalValidatorFactoryBean validator() {
+        return localValidatorFactoryBean;
     }
 }
 

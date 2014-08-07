@@ -1,7 +1,9 @@
 package org.sharedhealth.mci.web.model;
+
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -12,6 +14,7 @@ import org.sharedhealth.mci.validation.constraints.AddressId;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static org.sharedhealth.mci.validation.AddressType.*;
 
+@JsonIgnoreProperties({ "geoCode" })
 public class Address {
 
     @JsonProperty("address_line")
@@ -239,5 +242,9 @@ public class Address {
 
     public void setPostCode(String postCode) {
         this.postCode = postCode;
+    }
+
+    public String getGeoCode() {
+        return this.getDivisionId() + this.getDistrictId() + this.getUpazillaId() + this.getCityCorporation() + this.getWard();
     }
 }

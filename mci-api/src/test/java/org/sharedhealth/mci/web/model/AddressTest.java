@@ -11,12 +11,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.hibernate.validator.HibernateValidator;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.sharedhealth.mci.validation.constraints.AddressId;
-import org.sharedhealth.mci.web.model.Address;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class AddressTest {
 
@@ -36,14 +36,14 @@ public class AddressTest {
     public void shouldFailIfAddressLineIsBlank() {
         Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "addressLine", null);
         assertEquals(1, constraintViolations.size());
-        assertEquals("2001", constraintViolations.iterator().next().getMessage());
+        printViolations(constraintViolations);
     }
 
     @Test
     public void shouldFailIfAddressLineSizeLessThan3() {
         Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "addressLine", "ab");
         assertEquals(1, constraintViolations.size());
-        assertEquals("2002", constraintViolations.iterator().next().getMessage());
+        printViolations(constraintViolations);
     }
 
     @Test
@@ -67,7 +67,7 @@ public class AddressTest {
     public void shouldFailIfDivisionIdIsInvalid() {
         Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "divisionId", "abcd");
         assertEquals(1, constraintViolations.size());
-        assertEquals("2003", constraintViolations.iterator().next().getMessage());
+        printViolations(constraintViolations);
     }
 
     @Test
@@ -85,7 +85,7 @@ public class AddressTest {
     public void shouldFailIfDistrictIdIsInvalid() {
         Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "districtId", "abcd");
         assertEquals(1, constraintViolations.size());
-        assertEquals("2004", constraintViolations.iterator().next().getMessage());
+        printViolations(constraintViolations);
     }
 
     @Test
@@ -103,7 +103,7 @@ public class AddressTest {
     public void shouldFailIfUpazillaIdIsInvalid() {
         Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "upazillaId", "abcd");
         assertEquals(1, constraintViolations.size());
-        assertEquals("2005", constraintViolations.iterator().next().getMessage());
+        printViolations(constraintViolations);
     }
 
     @Test
@@ -121,7 +121,7 @@ public class AddressTest {
     public void shouldFailIfUnionIdIsInvalid() {
         Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "unionId", "abc");
         assertEquals(1, constraintViolations.size());
-        assertEquals("2006", constraintViolations.iterator().next().getMessage());
+        printViolations(constraintViolations);
     }
 
     private void assertAddressIdConstraint(String propertyName, AddressIdConstraint constraint) {
@@ -129,33 +129,10 @@ public class AddressTest {
         assertTrue(constraint.matchesAny(descriptors));
     }
 
-    private static class AddressIdConstraint {
-
-        private final Class type;
-        private final String value;
-
-        public AddressIdConstraint(String value) {
-            this.type = AddressId.class;
-            this.value = value;
-        }
-
-        public boolean matchesAny(Set<ConstraintDescriptor<?>> descriptors) {
-            for (ConstraintDescriptor descriptor : descriptors) {
-                Class<? extends Annotation> aClass = descriptor.getAnnotation().annotationType();
-                Map<String, Object> attributes = descriptor.getAttributes();
-                String val = attributes.get("value").toString();
-                if (this.type.equals(aClass) && this.value.equals(val)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-    }
-
     @Test
     public void shouldFailIfStreetIsMoreThan_50_Characters() {
         Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "street", "janagiralamkabirkhanjirkhanjirkhanjirkhanjirkhanjirkhanjahanaliahmadpuri");
-        assertEquals("2008", constraintViolations.iterator().next().getMessage());
+        printViolations(constraintViolations);
     }
 
     @Test
@@ -167,7 +144,7 @@ public class AddressTest {
     @Test
     public void shouldFailIfAreaMouzaIsMoreThan_3_Characters() {
         Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "areaMouja", "jaanjirkhanjahanaliahmadpuri");
-        assertEquals("2009", constraintViolations.iterator().next().getMessage());
+        printViolations(constraintViolations);
     }
 
     @Test
@@ -179,7 +156,7 @@ public class AddressTest {
     @Test
     public void shouldFailIfPostOfficeIsMoreThan_50_Characters() {
         Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "postOffice", "jaanjirkh999999999999999999yghgh khkj jkhkjh kjh kk kjhkjh khjkhkj kj kj");
-        assertEquals("2011", constraintViolations.iterator().next().getMessage());
+        printViolations(constraintViolations);
     }
 
     @Test
@@ -191,7 +168,7 @@ public class AddressTest {
     @Test
     public void shouldFailIfPostCodeIsMoreThan_10_Characters() {
         Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "postCode", "jaanjirkh999999999999999999yghgh khkj jkhkjh kjh kk kjhkjh khjkhkj kj kj");
-        assertEquals("2012", constraintViolations.iterator().next().getMessage());
+        printViolations(constraintViolations);
     }
 
     @Test
@@ -215,7 +192,7 @@ public class AddressTest {
     public void shouldFailIfVillageIdIsInvalid() {
         Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "village", "abc");
         assertEquals(1, constraintViolations.size());
-        assertEquals("2010", constraintViolations.iterator().next().getMessage());
+        printViolations(constraintViolations);
     }
 
     @Test
@@ -233,7 +210,7 @@ public class AddressTest {
     public void shouldFailIfWardIdIsInvalid() {
         Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "ward", "abc");
         assertEquals(1, constraintViolations.size());
-        assertEquals("2013", constraintViolations.iterator().next().getMessage());
+        printViolations(constraintViolations);
     }
 
     @Test
@@ -251,7 +228,7 @@ public class AddressTest {
     public void shouldFailIfCountryIdIsInvalid() {
         Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "country", "abc");
         assertEquals(1, constraintViolations.size());
-        assertEquals("2016", constraintViolations.iterator().next().getMessage());
+        printViolations(constraintViolations);
     }
 
     @Test
@@ -269,6 +246,40 @@ public class AddressTest {
     public void shouldFailIfCityCorporationIdIsInvalid() {
         Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "cityCorporation", "abc");
         assertEquals(1, constraintViolations.size());
-        assertEquals("2015", constraintViolations.iterator().next().getMessage());
+        printViolations(constraintViolations);
+    }
+
+    private void printViolations(Set<ConstraintViolation<Address>> constraintViolations) {
+
+        for (ConstraintViolation<Address> violation : constraintViolations) {
+
+            String invalidValue = (String) violation.getInvalidValue();
+            String message = violation.getMessage();
+            System.out.println("Found constraint violation. Value: " + invalidValue
+                    + " Message: " + message);
+        }
+    }
+
+    private static class AddressIdConstraint {
+
+        private final Class type;
+        private final String value;
+
+        public AddressIdConstraint(String value) {
+            this.type = AddressId.class;
+            this.value = value;
+        }
+
+        public boolean matchesAny(Set<ConstraintDescriptor<?>> descriptors) {
+            for (ConstraintDescriptor descriptor : descriptors) {
+                Class<? extends Annotation> aClass = descriptor.getAnnotation().annotationType();
+                Map<String, Object> attributes = descriptor.getAttributes();
+                String val = attributes.get("value").toString();
+                if (this.type.equals(aClass) && this.value.equals(val)) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }

@@ -9,7 +9,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.validator.constraints.NotBlank;
-import org.sharedhealth.mci.validation.constraints.Date;
+import org.sharedhealth.mci.validation.constraints.*;
+import org.sharedhealth.mci.validation.constraints.Location;
+
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
 public class Patient {
@@ -199,10 +201,12 @@ public class Patient {
 
     @JsonProperty("present_address")
     @Valid
+    @Location(message = "1036")
     private Address address;
 
     @JsonProperty("permanent_address")
     @JsonInclude(NON_EMPTY)
+    @Location(message = "1037")
     private Address permanentAddress;
 
     @JsonProperty("full_name")
