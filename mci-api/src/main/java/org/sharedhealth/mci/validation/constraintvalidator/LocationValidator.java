@@ -51,7 +51,7 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
 
         } catch (Exception e) {
             Throwable exception = e instanceof ExecutionException && e.getCause() != null ? e.getCause() : e;
-            if(exception.getClass() == InvalidQueryException.class){
+            if(exception.getCause().getClass() == InvalidQueryException.class){
                 //Ignoring validation if failed to communicate with Location Registry
                 return true;
             }
