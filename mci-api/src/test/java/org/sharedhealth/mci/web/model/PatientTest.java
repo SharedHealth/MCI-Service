@@ -566,4 +566,19 @@ public class PatientTest {
         assertEquals("1033", constraintViolations.iterator().next().getMessage());
     }
 
+    @Test
+    public void shouldPassIfAliveIsValid() {
+        for(int i = 1; i<3; i++) {
+            Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "isAlive", Integer.toString(i));
+            assertEquals(0, constraintViolations.size());
+        }
+    }
+
+    @Test
+    public void shouldFailIfAliveIsInvalid() {
+        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "isAlive", "3");
+        assertEquals(1, constraintViolations.size());
+        assertEquals("1041", constraintViolations.iterator().next().getMessage());
+    }
+
 }

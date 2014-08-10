@@ -213,6 +213,11 @@ public class Patient {
     @JsonInclude(NON_EMPTY)
     private String fullName;
 
+    @JsonProperty("is_alive")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "[1-2]{1}", message = "1041")
+    private String isAlive;
+
     @Override
     public boolean equals(Object rhs) {
         return EqualsBuilder.reflectionEquals(this, rhs);
@@ -518,6 +523,7 @@ public class Patient {
     public void setEthnicity(String ethnicity) {
         this.ethnicity = ethnicity;
     }
+
     public String getFathersFirstName() {
         return fathersFirstName;
     }
@@ -540,5 +546,13 @@ public class Patient {
 
     public void setPermanentAddress(Address permanentAddress) {
         this.permanentAddress = permanentAddress;
+    }
+
+    public String getIsAlive() {
+        return isAlive;
+    }
+
+    public void setIsAlive(String isAlive) {
+        this.isAlive = isAlive;
     }
 }

@@ -123,6 +123,7 @@ public class PatientRepository {
                 patient.getNationality(),
                 patient.getDisability(),
                 patient.getEthnicity(),
+                patient.getIsAlive(),
                 address.getAddressLine(),
                 address.getDivisionId(),
                 address.getDistrictId(),
@@ -412,6 +413,7 @@ public class PatientRepository {
         patient.setNationality(row.getString(NATIONALITY));
         patient.setDisability(row.getString(DISABILITY));
         patient.setEthnicity(row.getString(ETHNICITY));
+        patient.setIsAlive(row.getString(IS_ALIVE));
 
 
         Address address = new Address();
