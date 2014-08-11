@@ -52,7 +52,6 @@ alter table patient add permanent_thana varchar;
 alter table patient add permanent_city_corporation varchar;
 alter table patient add permanent_country varchar;
 alter table patient add full_name varchar;
-alter table patient add is_alive varchar;
 
 CREATE INDEX uid_key ON patient (uid);
 CREATE INDEX bin_brn_key ON patient (bin_brn);
