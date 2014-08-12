@@ -452,4 +452,29 @@ public class PatientRepository {
             }
         };
     }
+
+    public ListenableFuture<String> update(Patient patient, final String hid){
+        final SettableFuture<String> result = SettableFuture.create();
+        String cql = String.format(getUpdateQuery(),
+                patient.getFirstName(),
+                hid
+            );
+
+        logger.debug("Update patient CQL: [" + cql + "]");
+
+        cqlOperations.executeAsynchronously(cql, new AsynchronousQueryListener() {
+            @Override
+            public void onQueryComplete(ResultSetFuture rsf) {
+                try {
+                    rsf.get(TIMEOUT_IN_MILLIS, TimeUnit.MILLISECONDS);
+                    result.set(hid);
+                } catch (Exception e) {
+                    logger.error("Error while creating patient.", e);
+                    result.setException(e);
+                }
+            }
+        });
+
+        return getStringListenableFuture(result);
+    }
 }

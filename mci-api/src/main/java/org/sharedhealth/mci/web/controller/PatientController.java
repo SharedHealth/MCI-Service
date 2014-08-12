@@ -211,15 +211,15 @@ public class PatientController {
     @RequestMapping(method = RequestMethod.PUT, value = "/{healthId}", consumes = {APPLICATION_JSON_VALUE})
     public DeferredResult<ResponseEntity<String>> update(@RequestBody @Valid Patient patient, @PathVariable String healthId, BindingResult bindingResult)
             throws ExecutionException, InterruptedException {
-        logger.debug("Trying to create patient. [" + patient + "]");
-        logger.debug("Trying to find patient by health id [" + healthId + "]");
+        logger.debug("Trying to update patient. [" + patient.getDateOfBirth() + "]");
+        logger.debug(" Health id [" + healthId + "]");
         final DeferredResult<ResponseEntity<String>> deferredResult = new DeferredResult<>();
 
         if (bindingResult.hasErrors()) {
             throw new ValidationException(bindingResult);
         }
 
-       /* patientService.update(patient).addCallback(new ListenableFutureCallback<String>() {
+        patientService.update(patient,healthId).addCallback(new ListenableFutureCallback<String>() {
             @Override
             public void onSuccess(String healthId) {
                 deferredResult.setResult(new ResponseEntity<>(healthId, CREATED));
@@ -229,7 +229,8 @@ public class PatientController {
             public void onFailure(Throwable e) {
                 deferredResult.setErrorResult(extractAppException(e));
             }
-        });*/
+        });
+
         return deferredResult;
     }
 

@@ -72,7 +72,6 @@ public class PatientQueryBuilder {
     public static final String FULL_NAME = "full_name";
     public static final String IS_ALIVE = "is_alive";
 
-
     public static String getCreateQuery() {
         return String.format("INSERT INTO patient ( %s, %s, %s, %s, %s, %s,%s, %s, %s, %s, %s,%s,%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) values " +
                 "('%%s','%%s','%%s','%%s', '%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s' );",
@@ -148,6 +147,11 @@ public class PatientQueryBuilder {
                 );
     }
 
+    public static String getUpdateQuery() {
+         return String.format("UPDATE patient SET  %s = '%%s' WHERE %s = '%%s'", FIRST_NAME, HEALTH_ID );
+
+    }
+
     public static String getFindByHealthIdQuery() {
         return String.format("SELECT * FROM patient WHERE %s = '%%s'", HEALTH_ID);
     }
@@ -159,9 +163,11 @@ public class PatientQueryBuilder {
     public static String getFindByBirthRegistrationNumberQuery() {
         return String.format("SELECT * FROM patient WHERE %s = '%%s'", BIN_BRN);
     }
+
     public static String getFindByNameQuery() {
         return String.format("SELECT * FROM patient WHERE %s = '%%s'", FULL_NAME);
     }
+
     public static String getFindByUidQuery() {
         return String.format("SELECT * FROM patient WHERE %s = '%%s'", UID);
     }

@@ -25,6 +25,9 @@ public class PatientService {
     public ListenableFuture<String> create(Patient patient) {
         return patientRepository.create(patient);
     }
+    public ListenableFuture<String> update(Patient patient,String healthId) {
+        return patientRepository.update(patient,healthId);
+    }
 
     public ListenableFuture<Patient> findByHealthId(String healthId) {
         return patientRepository.findByHealthId(healthId);
