@@ -208,8 +208,8 @@ public class PatientController {
         return deferredResult;
     }
 
-    @RequestMapping(method = RequestMethod.PUT, value = "/{healthId}", consumes = {APPLICATION_JSON_VALUE})
-    public DeferredResult<ResponseEntity<String>> update(@RequestBody @Valid Patient patient, @PathVariable String healthId, BindingResult bindingResult)
+    @RequestMapping(method = RequestMethod.POST, value = "/{healthId}", consumes = {APPLICATION_JSON_VALUE})
+    public DeferredResult<ResponseEntity<String>> update(@PathVariable String healthId, @RequestBody @Valid Patient patient, BindingResult bindingResult)
             throws ExecutionException, InterruptedException {
         logger.debug("Trying to update patient. [" + patient.getDateOfBirth() + "]");
         logger.debug(" Health id [" + healthId + "]");
