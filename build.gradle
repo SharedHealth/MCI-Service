@@ -1,6 +1,13 @@
+apply plugin: 'idea'
+
 subprojects {
 
     apply plugin: 'java'
+    compileJava {
+        sourceCompatibility = 1.7
+        targetCompatibility = 1.7
+        options.encoding = 'UTF-8'
+    }
 
     def localEnv = new Properties();
     localEnv.load(new FileInputStream(file("${projectDir}/../env/local.properties")))
@@ -41,4 +48,3 @@ ext.testLibraries = [
         http_client: "org.apache.httpcomponents:httpclient:4.3.3",
         spring_test: "org.springframework:spring-test:4.0.3.RELEASE"
 ]
-
