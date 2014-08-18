@@ -455,8 +455,91 @@ public class PatientRepository {
 
     public ListenableFuture<String> update(Patient patient, final String hid){
         final SettableFuture<String> result = SettableFuture.create();
+        Address address = patient.getAddress();
+        Address permanentAddress = patient.getPermanentAddress();
+        if (permanentAddress == null ){
+            permanentAddress = new Address();
+        }
+        String fullName = "";
+        if(patient.getFirstName() != null){
+            fullName = patient.getFirstName();
+        }
+        if(patient.getMiddleName() != null){
+            fullName = fullName + " " + patient.getMiddleName();
+        }
+        if(patient.getLastName() != null){
+            fullName = fullName + " " +patient.getLastName();
+        }
+
         String cql = String.format(getUpdateQuery(),
+                patient.getNationalId(),
+                patient.getBirthRegistrationNumber(),
+                patient.getFullNameBangla(),
                 patient.getFirstName(),
+                patient.getMiddleName(),
+                patient.getLastName(),
+                patient.getDateOfBirth(),
+                patient.getGender(),
+                patient.getOccupation(),
+                patient.getEducationLevel(),
+                patient.getFathersNameBangla(),
+                patient.getFathersFirstName(),
+                patient.getFathersMiddleName(),
+                patient.getFathersLastName(),
+                patient.getFathersBrn(),
+                patient.getFathersNid(),
+                patient.getFathersUid(),
+                patient.getMothersNameBangla(),
+                patient.getMothersFirstName(),
+                patient.getMothersMiddleName(),
+                patient.getMothersLastName(),
+                patient.getMothersBrn(),
+                patient.getMothersNid(),
+                patient.getMothersUid(),
+                patient.getUid(),
+                patient.getPlaceOfBirth(),
+                patient.getMaritalStatus(),
+                patient.getMarriageId(),
+                patient.getSpouseName(),
+                patient.getSpouseNameBangla(),
+                patient.getSpouseUidNid(),
+                patient.getReligion(),
+                patient.getBloodGroup(),
+                patient.getNationality(),
+                patient.getDisability(),
+                patient.getEthnicity(),
+                patient.getIsAlive(),
+                address.getAddressLine(),
+                address.getDivisionId(),
+                address.getDistrictId(),
+                address.getUpazillaId(),
+                address.getUnionId(),
+                address.getHoldingNumber(),
+                address.getStreet(),
+                address.getAreaMouja(),
+                address.getVillage(),
+                address.getPostOffice(),
+                address.getPostCode(),
+                address.getWard(),
+                address.getThana(),
+                address.getCityCorporation(),
+                address.getCountry(),
+                permanentAddress.getAddressLine(),
+                permanentAddress.getDivisionId(),
+                permanentAddress.getDistrictId(),
+                permanentAddress.getUpazillaId(),
+                permanentAddress.getUnionId(),
+                permanentAddress.getHoldingNumber(),
+                permanentAddress.getStreet(),
+                permanentAddress.getAreaMouja(),
+                permanentAddress.getVillage(),
+                permanentAddress.getPostOffice(),
+                permanentAddress.getPostCode(),
+                permanentAddress.getWard(),
+                permanentAddress.getThana(),
+                permanentAddress.getCityCorporation(),
+                permanentAddress.getCountry(),
+                fullName.toLowerCase(),
                 hid
             );
 
