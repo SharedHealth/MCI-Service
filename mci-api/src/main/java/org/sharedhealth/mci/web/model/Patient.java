@@ -11,6 +11,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.validator.constraints.NotBlank;
 import org.sharedhealth.mci.validation.constraints.*;
 import org.sharedhealth.mci.validation.constraints.Location;
+import org.sharedhealth.mci.validation.constraints.Length;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
@@ -31,22 +32,22 @@ public class Patient {
 
     @JsonProperty("full_name_bangla")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[\\s\\S]{0,120}$", message = "1003")
+    @Length(lengthSize= 120, message = "1003")
     private String fullNameBangla;
 
     @JsonProperty("first_name")
     @NotBlank(message = "1004")
-    @Pattern(regexp = "^[\\s\\S]{0,25}$", message = "1036")
+    @Length(lengthSize= 25, message = "1036")
     private String firstName;
 
     @JsonProperty("middle_name")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[\\s\\S]{0,25}$", message = "1005")
+    @Length(lengthSize= 25, message = "1005")
     private String middleName;
 
     @JsonProperty("last_name")
     @NotBlank(message = "1006")
-    @Pattern(regexp = "^[\\s\\S]{0,25}$", message = "1037")
+    @Length(lengthSize= 25, message = "1037")
     private String lastName;
 
     @JsonProperty("date_of_birth")
@@ -71,22 +72,22 @@ public class Patient {
 
     @JsonProperty("fathers_name_bangla")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[\\s\\S]{0,120}$", message = "1013")
+    @Length(lengthSize= 120, message = "1013")
     private String fathersNameBangla;
 
     @JsonProperty("fathers_first_name")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[\\s\\S]{0,25}$", message = "1014")
+    @Length(lengthSize= 25, message = "1014")
     private String fathersFirstName;
 
     @JsonProperty("fathers_middle_name")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[\\s\\S]{0,25}$", message = "1015")
+    @Length(lengthSize= 25, message = "1015")
     private String fathersMiddleName;
 
     @JsonProperty("fathers_last_name")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[\\s\\S]{0,25}$", message = "1016")
+    @Length(lengthSize= 25, message = "1016")
     private String fathersLastName;
 
     @JsonProperty("fathers_uid")
@@ -106,22 +107,22 @@ public class Patient {
 
     @JsonProperty("mothers_name_bangla")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[\\s\\S]{0,120}$", message = "1020")
+    @Length(lengthSize= 120, message = "1020")
     private String mothersNameBangla;
 
     @JsonProperty("mothers_first_name")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[\\s\\S]{0,25}$", message = "1021")
+    @Length(lengthSize= 25, message = "1021")
     private String mothersFirstName;
 
     @JsonProperty("mothers_middle_name")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[\\s\\S]{0,25}$", message = "1022")
+    @Length(lengthSize= 25, message = "1022")
     private String mothersMiddleName;
 
     @JsonProperty("mothers_last_name")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[\\s\\S]{0,25}$", message = "1023")
+    @Length(lengthSize= 25, message = "1023")
     private String mothersLastName;
 
     @JsonProperty("mothers_uid")
@@ -161,12 +162,12 @@ public class Patient {
 
     @JsonProperty("spouse_name")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[\\s\\S]{0,100}$", message = "1030")
+    @Length(lengthSize= 100, message = "1030")
     private String spouseName;
 
     @JsonProperty("spouse_name_bangla")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[\\s\\S]{0,120}$", message = "1039")
+    @Length(lengthSize= 120, message = "1039")
     private String spouseNameBangla;
 
     @JsonProperty("spouse_uid_nid")
@@ -186,7 +187,7 @@ public class Patient {
 
     @JsonProperty("nationality")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "1033")
+    @Length(lengthSize= 50, message = "1033")
     private String nationality;
 
     @JsonProperty("disability")

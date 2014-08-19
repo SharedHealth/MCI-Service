@@ -24,15 +24,16 @@ public class LengthValidator implements ConstraintValidator<Length, String> {
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
 
+     if(value != null) {
         logger.debug(" Name  [" + value + "]");
         logger.debug(" length [" + length.lengthSize() + "]");
         String trimvalue = value.trim();
         logger.debug(" trim value [" + trimvalue + "]");
         logger.debug(" trim lenght [" + trimvalue.length() + "]");
-        if(trimvalue.length() >  (int) length.lengthSize()){
+        if (trimvalue.length() > (int) length.lengthSize()) {
             return false;
         }
-
+    }
         return true;
 
     }
