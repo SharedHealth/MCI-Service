@@ -5,17 +5,22 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
 import org.sharedhealth.mci.web.config.WebMvcConfig;
 import org.sharedhealth.mci.web.exception.GlobalExceptionHandler.ErrorInfo;
 import org.sharedhealth.mci.web.model.Address;
 import org.sharedhealth.mci.web.model.Patient;
+import org.sharedhealth.mci.web.service.LocationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cassandra.core.CqlOperations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -33,11 +38,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
 public class PatientRestApiTest {
 
+    private static final String LOCATION_INSERT_QUERY = "INSERT INTO locations (geo_code, division_id, district_id, upazilla_id, pourashava_id, union_id)" +
+            " values ('%s', '%s', '%s', '%s', '%s', '%s')";
     @Autowired
     protected WebApplicationContext webApplicationContext;
+
+    @Mock
+    private LocationService locationService;
+
+    @Autowired
+    @Qualifier("MCICassandraTemplate")
+    private CqlOperations cqlTemplate;
+
     private MockMvc mockMvc;
     private Patient patient;
     public static final String API_END_POINT = "/api/v1/patients";
+    public static final String GEO_CODE = "1004092001";
 
     @Before
     public void setup() {
@@ -59,12 +75,13 @@ public class PatientRestApiTest {
         address.setDistrictId("04");
         address.setUpazillaId("09");
         address.setCityCorporation("20");
-        // address.setUnionId("10");
         address.setVillage("10");
         address.setWard("01");
         address.setCountry("103");
 
         patient.setAddress(address);
+
+        createLocation();
     }
 
     @Test
@@ -125,6 +142,17 @@ public class PatientRestApiTest {
                 .andExpect(status().isBadRequest())
                 .andReturn();
         Assert.assertEquals("{\"code\":126,\"message\":\"Unrecognized field: \\\"invalid_property\\\"\"}", result.getResponse().getContentAsString());
+    }
+
+    @After
+    public void teardown() {
+        cqlTemplate.execute("truncate locations");
+        cqlTemplate.execute("truncate patient");
+    }
+
+    public void createLocation()
+    {
+        cqlTemplate.execute(String.format(LOCATION_INSERT_QUERY, GEO_CODE, "10", "04", "09", "20", "01"));
     }
 
     private class InvalidPatient {

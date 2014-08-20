@@ -41,7 +41,7 @@ public class PatientControllerTest {
     private LocalValidatorFactoryBean localValidatorFactoryBean;
 
     private Patient patient;
-    private Location locaiton;
+    private Location location;
     private MockMvc mockMvc;
     private String nationalId = "1234567890123";
     private String birthRegistrationNumber = "12345678901234567";
@@ -78,14 +78,14 @@ public class PatientControllerTest {
 
         patient.setAddress(address);
 
-        locaiton = new Location();
+        location = new Location();
 
-        locaiton.setGeoCode(GEO_CODE);
-        locaiton.setDivisionId("10");
-        locaiton.setDistrictId("04");
-        locaiton.setUpazillaId("09");
-        locaiton.setPaurashavaId("20");
-        locaiton.setUnionId("01");
+        location.setGeoCode(GEO_CODE);
+        location.setDivisionId("10");
+        location.setDistrictId("04");
+        location.setUpazillaId("09");
+        location.setPaurashavaId("20");
+        location.setUnionId("01");
 
     }
 
@@ -93,7 +93,7 @@ public class PatientControllerTest {
     public void shouldCreatePatientAndReturnHealthId() throws Exception {
         String json = new ObjectMapper().writeValueAsString(patient);
         String healthId = "healthId-100";
-        when(locationService.findByGeoCode(GEO_CODE)).thenReturn(new PreResolvedListenableFuture<>(locaiton));
+        when(locationService.findByGeoCode(GEO_CODE)).thenReturn(new PreResolvedListenableFuture<>(location));
         when(patientService.create(patient)).thenReturn(new PreResolvedListenableFuture<>(healthId));
 
         mockMvc.perform(post(API_END_POINT).content(json).contentType(APPLICATION_JSON))

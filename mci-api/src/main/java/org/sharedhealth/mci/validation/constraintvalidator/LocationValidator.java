@@ -2,10 +2,8 @@ package org.sharedhealth.mci.validation.constraintvalidator;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
-import com.datastax.driver.core.exceptions.InvalidQueryException;
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.validation.constraints.Location;
 import org.sharedhealth.mci.web.model.Address;
@@ -40,7 +38,15 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
 
         logger.debug("Validation testing for code : [" + geoCode + "]");
 
+        if(!(Pattern.compile("[\\d]{2}").matcher(value.getUpazilaOrThana()).matches())) return false;
+
+        String unionOrWard = value.getUnionOrWard();
+        if(unionOrWard == "") {
+            return true;
+        }
+
         if(!(Pattern.compile("[\\d]{2,10}").matcher(geoCode).matches())) return false;
+        if(!(Pattern.compile("[\\d]{2}").matcher(unionOrWard).matches())) return false;
 
         try {
             org.sharedhealth.mci.web.model.Location location = locationService.findByGeoCode(geoCode).get();
@@ -50,11 +56,7 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
             }
 
         } catch (Exception e) {
-            Throwable exception = e instanceof ExecutionException && e.getCause() != null ? e.getCause() : e;
-            if(exception.getCause()!= null && exception.getCause().getClass() == InvalidQueryException.class){
-                //Ignoring validation if failed to communicate with Location Registry
-                return true;
-            }
+            //Nothing to do validation should be failed
         }
 
         return false;

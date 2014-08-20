@@ -32,6 +32,7 @@ dependencies {
 }
 
 test.doFirst {
+    project(":mci-api").tasks.dropSchema.execute()
     project(":mci-api").tasks.migrateDatabase.execute()
 }
 

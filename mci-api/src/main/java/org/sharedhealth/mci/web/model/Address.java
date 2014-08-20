@@ -14,7 +14,7 @@ import org.sharedhealth.mci.validation.constraints.AddressId;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static org.sharedhealth.mci.validation.AddressType.*;
 
-@JsonIgnoreProperties({ "geoCode" })
+@JsonIgnoreProperties({ "geoCode", "upazilaOrThana", "unionOrWard" })
 public class Address {
 
     @JsonProperty("address_line")
@@ -244,7 +244,44 @@ public class Address {
         this.postCode = postCode;
     }
 
+    public  String getUpazilaOrThana() {
+        String ut = "";
+
+        if(this.getUpazillaId() != null) {
+            ut = this.getUpazillaId();
+        }
+
+        if(this.getThana() != null) {
+            ut = ut + this.getThana();
+        }
+
+        return ut;
+    }
+
+    public String getUnionOrWard() {
+        String uw = "";
+
+        if(this.getUnionId() != null) {
+            uw = this.getUnionId();
+        }
+
+        if(this.getWard() != null) {
+            uw = uw + this.getWard();
+        }
+
+        return uw;
+    }
+
     public String getGeoCode() {
-        return this.getDivisionId() + this.getDistrictId() + this.getUpazillaId() + this.getCityCorporation() + this.getWard();
+
+        final StringBuilder sb = new StringBuilder("");
+
+        sb.append(this.getDivisionId());
+        sb.append(this.getDistrictId());
+        sb.append(this.getUpazilaOrThana());
+        sb.append(this.getCityCorporation());
+        sb.append(this.getUnionOrWard());
+
+        return sb.toString();
     }
 }
