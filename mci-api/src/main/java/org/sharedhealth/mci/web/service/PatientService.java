@@ -48,8 +48,8 @@ public class PatientService {
         return patientRepository.findByUid(uid);
     }
 
-    public ListenableFuture<List<Patient>> findAll(MultiValueMap parameters) {
-        return new ListenableFutureAdapter<List<Patient>, List<Patient>>(patientRepository.findAll(parameters)) {
+    public ListenableFuture<List<Patient>> findAllByQuery(MultiValueMap parameters) {
+        return new ListenableFutureAdapter<List<Patient>, List<Patient>>(patientRepository.findAllByQuery(parameters)) {
             @Override
             protected List<Patient> adapt(List<Patient> patients) throws ExecutionException {
                 return patients;

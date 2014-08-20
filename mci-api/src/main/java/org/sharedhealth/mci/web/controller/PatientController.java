@@ -189,11 +189,11 @@ public class PatientController {
     }
 
     @RequestMapping(value = "/search", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
-    public DeferredResult<List<Patient>> findAll(@RequestParam MultiValueMap parameters) {
+    public DeferredResult<List<Patient>> findAll(@RequestParam MultiValueMap<String, String> parameters) {
         logger.debug("Find all patients  by search query ");
         final DeferredResult<List<Patient>> deferredResult = new DeferredResult<>();
 
-        patientService.findAll(parameters).addCallback(new ListenableFutureCallback<List<Patient>>() {
+        patientService.findAllByQuery(parameters).addCallback(new ListenableFutureCallback<List<Patient>>() {
             @Override
             public void onSuccess(List<Patient> result) {
                 deferredResult.setResult(result);

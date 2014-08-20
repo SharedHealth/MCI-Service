@@ -8,6 +8,8 @@ import java.util.concurrent.TimeUnit;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Row;
+import com.datastax.driver.core.querybuilder.QueryBuilder;
+import com.datastax.driver.core.querybuilder.Select;
 import com.google.common.util.concurrent.SettableFuture;
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.utils.UidGenerator;
@@ -23,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cassandra.core.AsynchronousQueryListener;
 import org.springframework.cassandra.core.CqlOperations;
+import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFuture;
@@ -38,10 +41,12 @@ public class PatientRepository {
 
     private static final UidGenerator uid = new UidGenerator();
     private CqlOperations cqlOperations;
+    private CassandraOperations cassandraOperations;
 
     @Autowired
-    public PatientRepository(@Qualifier("MCICassandraTemplate") CqlOperations cqlOperations) {
+    public PatientRepository(@Qualifier("MCICassandraTemplate") CqlOperations cqlOperations, @Qualifier("MCICassandraDataTemplate") CassandraOperations cassandraOperations) {
         this.cqlOperations = cqlOperations;
+        this.cassandraOperations = cassandraOperations;
     }
 
     public ListenableFuture<String> create(Patient patient) {
@@ -436,13 +441,19 @@ public class PatientRepository {
         return patient;
     }
 
-    public ListenableFuture<List<Patient>> findAll(MultiValueMap parameters) {
+    public ListenableFuture<List<Patient>> findAllByQuery(MultiValueMap<String, String> parameters) {
+
+        Select select = QueryBuilder.select().from("patient");
+
+        if(!parameters.get("full_name").isEmpty()){
+            select.where(QueryBuilder.eq("full_name", parameters.get("full_name").get(0)));
+        }
 
         return new SimpleListenableFuture<List<Patient>, ResultSet>(
-                cqlOperations.queryAsynchronously(getFindAllQuery())) {
+                cassandraOperations.queryAsynchronously(select)) {
             @Override
             protected List<Patient> adapt(ResultSet resultSet) throws ExecutionException {
-                List<Patient> patients = new ArrayList<Patient>();
+                List<Patient> patients = new ArrayList<>();
                 for (Row result : resultSet.all()) {
                     Patient patient = getPatientFromRow(result);
                     patients.add(patient);
