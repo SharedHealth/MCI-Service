@@ -445,7 +445,7 @@ public class PatientRepository {
 
         Select select = QueryBuilder.select().from("patient");
 
-        if(!parameters.get("full_name").isEmpty()){
+        if(parameters.get("full_name") != null) {
             select.where(QueryBuilder.eq("full_name", parameters.get("full_name").get(0)));
         }
 
