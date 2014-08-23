@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cassandra.core.AsynchronousQueryListener;
-import org.springframework.cassandra.core.CqlOperations;
 import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
@@ -40,12 +39,10 @@ public class PatientRepository {
     private static long TIMEOUT_IN_MILLIS = 10;
 
     private static final UidGenerator uid = new UidGenerator();
-    private CqlOperations cqlOperations;
     private CassandraOperations cassandraOperations;
 
     @Autowired
-    public PatientRepository(@Qualifier("MCICassandraTemplate") CqlOperations cqlOperations, @Qualifier("MCICassandraDataTemplate") CassandraOperations cassandraOperations) {
-        this.cqlOperations = cqlOperations;
+    public PatientRepository(@Qualifier("MCICassandraTemplate") CassandraOperations cassandraOperations) {
         this.cassandraOperations = cassandraOperations;
     }
 
@@ -163,7 +160,7 @@ public class PatientRepository {
 
         logger.debug("Save patient CQL: [" + cql + "]");
 
-        cqlOperations.executeAsynchronously(cql, new AsynchronousQueryListener() {
+        cassandraOperations.executeAsynchronously(cql, new AsynchronousQueryListener() {
             @Override
             public void onQueryComplete(ResultSetFuture rsf) {
                 try {
@@ -233,7 +230,7 @@ public class PatientRepository {
         logger.debug("Find patient by health id CQL: [" + cql + "]");
         final SettableFuture<Patient> result = SettableFuture.create();
 
-        cqlOperations.queryAsynchronously(cql, new AsynchronousQueryListener() {
+        cassandraOperations.queryAsynchronously(cql, new AsynchronousQueryListener() {
             @Override
             public void onQueryComplete(ResultSetFuture rsf) {
                 try {
@@ -262,7 +259,7 @@ public class PatientRepository {
         logger.debug("Find patient by national id CQL: [" + cql + "]");
         final SettableFuture<Patient> result = SettableFuture.create();
 
-        cqlOperations.queryAsynchronously(cql, new AsynchronousQueryListener() {
+        cassandraOperations.queryAsynchronously(cql, new AsynchronousQueryListener() {
             @Override
             public void onQueryComplete(ResultSetFuture rsf) {
                 try {
@@ -291,7 +288,7 @@ public class PatientRepository {
         logger.debug("Find patient by birth registration number CQL: [" + cql + "]");
         final SettableFuture<Patient> result = SettableFuture.create();
 
-        cqlOperations.queryAsynchronously(cql, new AsynchronousQueryListener() {
+        cassandraOperations.queryAsynchronously(cql, new AsynchronousQueryListener() {
             @Override
             public void onQueryComplete(ResultSetFuture rsf) {
                 try {
@@ -320,7 +317,7 @@ public class PatientRepository {
         logger.debug("Find patient by name  CQL: [" + cql + "]");
         final SettableFuture<Patient> result = SettableFuture.create();
 
-        cqlOperations.queryAsynchronously(cql, new AsynchronousQueryListener() {
+        cassandraOperations.queryAsynchronously(cql, new AsynchronousQueryListener() {
             @Override
             public void onQueryComplete(ResultSetFuture rsf) {
                 try {
@@ -349,7 +346,7 @@ public class PatientRepository {
         logger.debug("Find patient by name  CQL: [" + cql + "]");
         final SettableFuture<Patient> result = SettableFuture.create();
 
-        cqlOperations.queryAsynchronously(cql, new AsynchronousQueryListener() {
+        cassandraOperations.queryAsynchronously(cql, new AsynchronousQueryListener() {
             @Override
             public void onQueryComplete(ResultSetFuture rsf) {
                 try {
@@ -556,7 +553,7 @@ public class PatientRepository {
 
         logger.debug("Update patient CQL: [" + cql + "]");
 
-        cqlOperations.executeAsynchronously(cql, new AsynchronousQueryListener() {
+        cassandraOperations.executeAsynchronously(cql, new AsynchronousQueryListener() {
             @Override
             public void onQueryComplete(ResultSetFuture rsf) {
                 try {

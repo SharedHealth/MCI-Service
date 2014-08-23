@@ -2,7 +2,6 @@ package org.sharedhealth.mci.web.config;
 
 import com.datastax.driver.core.SocketOptions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cassandra.core.CqlOperations;
 import org.springframework.cassandra.core.CqlTemplate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,12 +41,7 @@ public class MCICassandraConfig extends AbstractCassandraConfiguration {
     }
 
     @Bean(name = "MCICassandraTemplate")
-    public CqlOperations CassandraTemplate() throws Exception {
-        return new CqlTemplate(session().getObject());
-    }
-
-    @Bean(name = "MCICassandraDataTemplate")
-    public CassandraOperations CassandraDataTemplate() throws Exception {
+    public CassandraOperations CassandraTemplate() throws Exception {
         return new CassandraTemplate(session().getObject());
     }
 

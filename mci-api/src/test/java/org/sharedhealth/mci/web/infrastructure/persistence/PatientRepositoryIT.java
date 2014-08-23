@@ -10,10 +10,10 @@ import org.sharedhealth.mci.web.model.Address;
 import org.sharedhealth.mci.web.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cassandra.core.CqlOperations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.data.cassandra.core.CassandraOperations;
 
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -27,7 +27,7 @@ import static org.junit.Assert.assertNotNull;
 public class PatientRepositoryIT {
     @Autowired
     @Qualifier("MCICassandraTemplate")
-    private CqlOperations cqlTemplate;
+    private CassandraOperations cqlTemplate;
 
     @Autowired
     private PatientRepository patientRepository;

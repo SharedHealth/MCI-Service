@@ -13,9 +13,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cassandra.core.AsynchronousQueryListener;
-import org.springframework.cassandra.core.CqlOperations;
 import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.data.cassandra.core.CassandraOperations;
 
 @Component
 public class LocationRepository {
@@ -24,11 +24,11 @@ public class LocationRepository {
 
     private static long TIMEOUT_IN_MILLIS = 10;
 
-    private CqlOperations cqlOperations;
+    private CassandraOperations cassandraOperations;
 
     @Autowired
-    public LocationRepository(@Qualifier("MCICassandraTemplate") CqlOperations cqlOperations) {
-        this.cqlOperations = cqlOperations;
+    public LocationRepository(@Qualifier("MCICassandraTemplate") CassandraOperations cassandraOperations) {
+        this.cassandraOperations = cassandraOperations;
     }
 
     public ListenableFuture<Location> findByGeoCode(final String geoCode) {
@@ -36,7 +36,7 @@ public class LocationRepository {
         logger.debug("Find location by geo_code CQL: [" + cql + "]");
         final SettableFuture<Location> result = SettableFuture.create();
 
-        cqlOperations.queryAsynchronously(cql, new AsynchronousQueryListener() {
+        cassandraOperations.queryAsynchronously(cql, new AsynchronousQueryListener() {
             @Override
             public void onQueryComplete(ResultSetFuture rsf) {
                 try {
