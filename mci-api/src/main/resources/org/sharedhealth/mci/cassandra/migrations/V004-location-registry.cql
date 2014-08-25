@@ -1,4 +1,4 @@
-CREATE TABLE locations (
+CREATE TABLE IF NOT EXISTS locations (
   geo_code text  PRIMARY KEY,
   district_id text,
   district_name text,
