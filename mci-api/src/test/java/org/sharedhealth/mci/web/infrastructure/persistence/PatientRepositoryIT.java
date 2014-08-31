@@ -37,6 +37,7 @@ public class PatientRepositoryIT {
     private String birthRegistrationNumber = "12345678901234567";
     private String uid = "12345678901";
 
+
     @Before
     public void setup() throws ExecutionException, InterruptedException {
         patient = new Patient();
@@ -50,6 +51,7 @@ public class PatientRepositoryIT {
         patient.setOccupation("salaried");
         patient.setEducationLevel("BA");
 
+
         Address address = new Address();
         address.setAddressLine("house-10");
         address.setDivisionId("10");
@@ -57,6 +59,9 @@ public class PatientRepositoryIT {
         address.setUpazillaId("102030");
         address.setUnionId("10203040");
         patient.setAddress(address);
+
+
+
     }
 
     @Test

@@ -33,11 +33,14 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 @ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
 public class PatientRestApiTest {
-
+    private static final Logger logger = LoggerFactory.getLogger(Patient.class);
     private static final String LOCATION_INSERT_QUERY = "INSERT INTO locations (geo_code, division_id, district_id, upazilla_id, pourashava_id, union_id)" +
             " values ('%s', '%s', '%s', '%s', '%s', '%s')";
     @Autowired
@@ -67,7 +70,7 @@ public class PatientRestApiTest {
         patient.setDateOfBirth("2014-12-01");
         patient.setEducationLevel("01");
         patient.setOccupation("02");
-        patient.setFathersFirstName("Bob");
+
 
         Address address = new Address();
         address.setAddressLine("house-10");
@@ -97,7 +100,6 @@ public class PatientRestApiTest {
     public void shouldReturnBadRequestForInvalidRequestData() throws Exception {
         patient.getAddress().setAddressLine("h");
         String json = new ObjectMapper().writeValueAsString(patient);
-
         MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();

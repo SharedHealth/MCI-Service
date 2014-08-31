@@ -1,9 +1,9 @@
 package org.sharedhealth.mci.web.model;
 
-
+import java.util.List;
+import java.util.ArrayList;
 import javax.validation.Valid;
 import javax.validation.constraints.Pattern;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -12,11 +12,15 @@ import org.hibernate.validator.constraints.NotBlank;
 import org.sharedhealth.mci.validation.constraints.*;
 import org.sharedhealth.mci.validation.constraints.Location;
 import org.sharedhealth.mci.validation.constraints.Length;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
 public class Patient {
 
+    private static final Logger logger = LoggerFactory.getLogger(Patient.class);
     @JsonProperty("hid")
     private String healthId;
 
@@ -70,75 +74,9 @@ public class Patient {
     @Pattern(regexp = "[0-1]{1}[0-9]{1}", message = "1012")
     private String educationLevel;
 
-    @JsonProperty("fathers_name_bangla")
+    @JsonProperty("relations")
     @JsonInclude(NON_EMPTY)
-    @Length(lengthSize= 120, message = "1013")
-    private String fathersNameBangla;
-
-    @JsonProperty("fathers_first_name")
-    @JsonInclude(NON_EMPTY)
-    @Length(lengthSize= 25, message = "1014")
-    private String fathersFirstName;
-
-    @JsonProperty("fathers_middle_name")
-    @JsonInclude(NON_EMPTY)
-    @Length(lengthSize= 25, message = "1015")
-    private String fathersMiddleName;
-
-    @JsonProperty("fathers_last_name")
-    @JsonInclude(NON_EMPTY)
-    @Length(lengthSize= 25, message = "1016")
-    private String fathersLastName;
-
-    @JsonProperty("fathers_uid")
-    @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[a-zA-Z0-9]{11}", message = "1017")
-    private String fathersUid;
-
-    @JsonProperty("fathers_nid")
-    @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[\\d]{13}|[\\d]{17}", message = "1018")
-    private String fathersNid;
-
-    @JsonProperty("fathers_brn")
-    @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[\\d]{17}", message = "1019")
-    private String fathersBrn;
-
-    @JsonProperty("mothers_name_bangla")
-    @JsonInclude(NON_EMPTY)
-    @Length(lengthSize= 120, message = "1020")
-    private String mothersNameBangla;
-
-    @JsonProperty("mothers_first_name")
-    @JsonInclude(NON_EMPTY)
-    @Length(lengthSize= 25, message = "1021")
-    private String mothersFirstName;
-
-    @JsonProperty("mothers_middle_name")
-    @JsonInclude(NON_EMPTY)
-    @Length(lengthSize= 25, message = "1022")
-    private String mothersMiddleName;
-
-    @JsonProperty("mothers_last_name")
-    @JsonInclude(NON_EMPTY)
-    @Length(lengthSize= 25, message = "1023")
-    private String mothersLastName;
-
-    @JsonProperty("mothers_uid")
-    @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[a-zA-Z0-9]{11}", message = "1024")
-    private String mothersUid;
-
-    @JsonProperty("mothers_nid")
-    @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[\\d]{13}|[\\d]{17}", message = "1025")
-    private String mothersNid;
-
-    @JsonProperty("mothers_brn")
-    @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[\\d]{17}", message = "1026")
-    private String mothersBrn;
+    private List<Relation> relations;
 
     @JsonProperty("uid")
     @JsonInclude(NON_EMPTY)
@@ -149,31 +87,6 @@ public class Patient {
     @JsonProperty("place_of_birth")
     @Pattern(regexp = "^[a-zA-Z]{0,7}$", message = "1038")
     private String placeOfBirth;
-
-    @JsonProperty("marital_status")
-    @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[1-5]{1}", message = "1028")
-    private String maritalStatus;
-
-    @JsonProperty("marriage_id")
-    @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[a-zA-Z0-9]{8}", message = "1029")
-    private String marriageId;
-
-    @JsonProperty("spouse_name")
-    @JsonInclude(NON_EMPTY)
-    @Length(lengthSize= 100, message = "1030")
-    private String spouseName;
-
-    @JsonProperty("spouse_name_bangla")
-    @JsonInclude(NON_EMPTY)
-    @Length(lengthSize= 120, message = "1039")
-    private String spouseNameBangla;
-
-    @JsonProperty("spouse_uid_nid")
-    @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[\\d]{10}|[\\d]{17}", message = "1040")
-    private String spouseUidNid;
 
     @JsonProperty("religion")
     @JsonInclude(NON_EMPTY)
@@ -204,6 +117,7 @@ public class Patient {
     @Valid
     @Location(message = "1036")
     private Address address;
+
 
     @JsonProperty("permanent_address")
     @JsonInclude(NON_EMPTY)
@@ -333,110 +247,6 @@ public class Patient {
         this.uid = uid;
     }
 
-    public String getFathersNameBangla() {
-        return fathersNameBangla;
-    }
-
-    public void setFathersNameBangla(String fathersNameBangla) {
-        this.fathersNameBangla = fathersNameBangla;
-    }
-
-    public String getFathersMiddleName() {
-        return fathersMiddleName;
-    }
-
-    public void setFathersMiddleName(String fathersMiddleName) {
-        this.fathersMiddleName = fathersMiddleName;
-    }
-
-    public String getFathersLastName() {
-        return fathersLastName;
-    }
-
-    public void setFathersLastName(String fathersLastName) {
-        this.fathersLastName = fathersLastName;
-    }
-
-    public String getFathersUid() {
-        return fathersUid;
-    }
-
-    public void setFathersUid(String fathersUid) {
-        this.fathersUid = fathersUid;
-    }
-
-    public String getFathersNid() {
-        return fathersNid;
-    }
-
-    public void setFathersNid(String fathersNid) {
-        this.fathersNid = fathersNid;
-    }
-
-    public String getFathersBrn() {
-        return fathersBrn;
-    }
-
-    public void setFathersBrn(String fathersBrn) {
-        this.fathersBrn = fathersBrn;
-    }
-
-    public String getMothersNameBangla() {
-        return mothersNameBangla;
-    }
-
-    public void setMothersNameBangla(String mothersNameBangla) {
-        this.mothersNameBangla = mothersNameBangla;
-    }
-
-    public String getMothersFirstName() {
-        return mothersFirstName;
-    }
-
-    public void setMothersFirstName(String mothersFirstName) {
-        this.mothersFirstName = mothersFirstName;
-    }
-
-    public String getMothersMiddleName() {
-        return mothersMiddleName;
-    }
-
-    public void setMothersMiddleName(String mothersMiddleName) {
-        this.mothersMiddleName = mothersMiddleName;
-    }
-
-    public String getMothersLastName() {
-        return mothersLastName;
-    }
-
-    public void setMothersLastName(String mothersLastName) {
-        this.mothersLastName = mothersLastName;
-    }
-
-    public String getMothersUid() {
-        return mothersUid;
-    }
-
-    public void setMothersUid(String mothersUid) {
-        this.mothersUid = mothersUid;
-    }
-
-    public String getMothersNid() {
-        return mothersNid;
-    }
-
-    public void setMothersNid(String mothersNid) {
-        this.mothersNid = mothersNid;
-    }
-
-    public String getMothersBrn() {
-        return mothersBrn;
-    }
-
-    public void setMothersBrn(String mothersBrn) {
-        this.mothersBrn = mothersBrn;
-    }
-
     public String getPlaceOfBirth() {
         return placeOfBirth;
     }
@@ -445,46 +255,7 @@ public class Patient {
         this.placeOfBirth = placeOfBirth;
     }
 
-    public String getMaritalStatus() {
-        return maritalStatus;
-    }
-
-    public void setMaritalStatus(String maritalStatus) {
-        this.maritalStatus = maritalStatus;
-    }
-
-    public String getMarriageId() {
-        return marriageId;
-    }
-
-    public void setMarriageId(String marriageId) {
-        this.marriageId = marriageId;
-    }
-
-    public String getSpouseNameBangla() {
-        return spouseNameBangla;
-    }
-
-    public void setSpouseNameBangla(String spouseNameBangla) {
-        this.spouseNameBangla = spouseNameBangla;
-    }
-
-    public String getSpouseName() {
-        return spouseName;
-    }
-
-    public void setSpouseName(String spouseName) {
-        this.spouseName = spouseName;
-    }
-
-    public String getSpouseUidNid() {
-        return spouseUidNid;
-    }
-
-    public void setSpouseUidNid(String spouseUidNid) {
-        this.spouseUidNid = spouseUidNid;
-    }
-
+    
     public String getReligion() {
         return religion;
     }
@@ -525,14 +296,6 @@ public class Patient {
         this.ethnicity = ethnicity;
     }
 
-    public String getFathersFirstName() {
-        return fathersFirstName;
-    }
-
-    public void setFathersFirstName(String fathersFirstName) {
-        this.fathersFirstName = fathersFirstName;
-    }
-
     public Address getPermanentAddress() {
         return permanentAddress;
     }
@@ -555,5 +318,25 @@ public class Patient {
 
     public void setIsAlive(String isAlive) {
         this.isAlive = isAlive;
+    }
+
+    public List<Relation> getRelations() {
+        return relations;
+    }
+
+    public Relation getRelation(String relationType){
+
+            for (Relation relation : this.relations) {
+
+                if (relation.getType() != null && relation.getType().equals(relationType)) {
+                    return relation;
+                }
+            }
+
+        return null;
+    }
+
+    public void setRelations(List<Relation> relations) {
+        this.relations = relations;
     }
 }

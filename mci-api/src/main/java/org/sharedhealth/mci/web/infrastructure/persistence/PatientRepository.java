@@ -10,14 +10,17 @@ import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.SettableFuture;
 import org.apache.commons.lang3.StringUtils;
+import org.codehaus.jettison.json.JSONArray;
 import org.sharedhealth.mci.utils.UidGenerator;
 import org.sharedhealth.mci.web.exception.PatientAlreadyExistException;
 import org.sharedhealth.mci.web.exception.PatientNotFoundException;
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.model.Address;
 import org.sharedhealth.mci.web.model.Patient;
+import org.sharedhealth.mci.web.model.Relation;
 import org.sharedhealth.mci.web.utils.concurrent.SimpleListenableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +33,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.FieldError;
+
+
 
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
 
@@ -72,10 +77,28 @@ public class PatientRepository {
         final String healthId = patient.getHealthId();
         Address address = patient.getAddress();
         Address permanentAddress = patient.getPermanentAddress();
+        Relation father = new Relation();
+        Relation mother = new Relation();
+
+        String relationsJson = "";
+        ObjectMapper mapper = new ObjectMapper();
+
+        try {
+             List<Relation> relations = patient.getRelations();
+             relationsJson =  mapper.writeValueAsString(relations);
+             father = patient.getRelation("father");
+             mother = patient.getRelation("mother");
+
+        }catch(Exception e){
+            logger.debug(" Relations: [" +e.getMessage() + "]");
+        }
+        logger.debug(" Relations: [" + patient.getRelations() + "]");
 
         if (permanentAddress == null ){
             permanentAddress = new Address();
         }
+
+
         String fullName = "";
         if(patient.getFirstName() != null){
              fullName = patient.getFirstName();
@@ -99,27 +122,22 @@ public class PatientRepository {
                 patient.getGender(),
                 patient.getOccupation(),
                 patient.getEducationLevel(),
-                patient.getFathersNameBangla(),
-                patient.getFathersFirstName(),
-                patient.getFathersMiddleName(),
-                patient.getFathersLastName(),
-                patient.getFathersBrn(),
-                patient.getFathersNid(),
-                patient.getFathersUid(),
-                patient.getMothersNameBangla(),
-                patient.getMothersFirstName(),
-                patient.getMothersMiddleName(),
-                patient.getMothersLastName(),
-                patient.getMothersBrn(),
-                patient.getMothersNid(),
-                patient.getMothersUid(),
+                father.getNameBangla(),
+                father.getFirstName(),
+                father.getMiddleName(),
+                father.getLastName(),
+                father.getBrn(),
+                father.getNid(),
+                father.getUid(),
+                mother.getNameBangla(),
+                mother.getFirstName(),
+                mother.getMiddleName(),
+                mother.getLastName(),
+                mother.getBrn(),
+                mother.getNid(),
+                mother.getUid(),
                 patient.getUid(),
                 patient.getPlaceOfBirth(),
-                patient.getMaritalStatus(),
-                patient.getMarriageId(),
-                patient.getSpouseName(),
-                patient.getSpouseNameBangla(),
-                patient.getSpouseUidNid(),
                 patient.getReligion(),
                 patient.getBloodGroup(),
                 patient.getNationality(),
@@ -156,7 +174,11 @@ public class PatientRepository {
                 permanentAddress.getThana(),
                 permanentAddress.getCityCorporation(),
                 permanentAddress.getCountry(),
-                fullName.toLowerCase());
+                fullName.toLowerCase(),
+                father.getType(),
+                mother.getType(),
+                relationsJson
+          );
 
         logger.debug("Save patient CQL: [" + cql + "]");
 
@@ -378,29 +400,19 @@ public class PatientRepository {
     private Patient getPatientFromRow(Row r) {
         DatabaseRow row = new DatabaseRow(r);
         Patient patient = new Patient();
+        ObjectMapper mapper = new ObjectMapper();
+
+        try {
+            patient.setRelations(mapper.readValue(row.getString(RELATIONS),  List.class ));
+        }catch(Exception e){
+            logger.debug(" Relations: [" +e.getMessage() + "]");
+        }
+
         patient.setHealthId(row.getString(HEALTH_ID));
         patient.setNationalId(row.getString(NATIONAL_ID));
         patient.setUid(row.getString(UID));
-        patient.setFathersNameBangla(row.getString(FATHERS_NAME_BANGLA));
-        patient.setFathersFirstName(row.getString(FATHERS_FIRST_NAME));
-        patient.setFathersMiddleName(row.getString(FATHERS_MIDDLE_NAME));
-        patient.setFathersLastName(row.getString(FATHERS_LAST_NAME));
-        patient.setFathersUid(row.getString(FATHERS_UID));
-        patient.setFathersNid(row.getString(FATHERS_NID));
-        patient.setFathersBrn(row.getString(FATHERS_BRN));
-        patient.setMothersNameBangla(row.getString(MOTHERS_NAME_BANGLA));
-        patient.setMothersFirstName(row.getString(MOTHERS_FIRST_NAME));
-        patient.setMothersMiddleName(row.getString(MOTHERS_MIDDLE_NAME));
-        patient.setMothersLastName(row.getString(MOTHERS_LAST_NAME));
-        patient.setMothersUid(row.getString(MOTHERS_UID));
-        patient.setMothersNid(row.getString(MOTHERS_NID));
-        patient.setMothersBrn(row.getString(MOTHERS_BRN));
         patient.setPlaceOfBirth(row.getString(PLACE_OF_BIRTH));
-        patient.setMaritalStatus(row.getString(MARITAL_STATUS));
-        patient.setMarriageId(row.getString(MARRIAGE_ID));
-        patient.setSpouseNameBangla(row.getString(SPOUSE_NAME_BANGLA));
-        patient.setSpouseName(row.getString(SPOUSE_NAME));
-        patient.setSpouseUidNid(row.getString(SPOUSE_UID_NID));
+
         patient.setReligion(row.getString(RELIGION));
         patient.setBloodGroup(row.getString(BLOOD_GROUP));
         patient.setFullNameBangla(row.getString(FULL_NAME_BANGLA));
@@ -416,7 +428,6 @@ public class PatientRepository {
         patient.setDisability(row.getString(DISABILITY));
         patient.setEthnicity(row.getString(ETHNICITY));
         patient.setIsAlive(row.getString(IS_ALIVE));
-
 
         Address address = new Address();
         address.setAddressLine(row.getString(ADDRESS_LINE));
@@ -435,6 +446,24 @@ public class PatientRepository {
         address.setCityCorporation(row.getString(CITY_CORPORATION));
         address.setCountry(row.getString(COUNTRY));
         patient.setAddress(address);
+
+       /* Address permanetaddress = new Address();
+        permanetaddress.setAddressLine(row.getString(PERMANENT_ADDRESS_LINE));
+        permanetaddress.setDivisionId(row.getString(PERMANENT_DIVISION_ID));
+        permanetaddress.setDistrictId(row.getString(PERMANENT_DISTRICT_ID));
+        permanetaddress.setUpazillaId(row.getString(PERMANENT_UPAZILLA_ID));
+        permanetaddress.setUnionId(row.getString(PERMANENT_UNION_ID));
+        permanetaddress.setHoldingNumber(row.getString(PERMANENT_HOLDING_NUMBER));
+        permanetaddress.setStreet(row.getString(PERMANENT_STREET));
+        permanetaddress.setAreaMouja(row.getString(PERMANENT_AREA_MOUJA));
+        permanetaddress.setVillage(row.getString(PERMANENT_VILLAGE));
+        permanetaddress.setPostOffice(row.getString(PERMANENT_POST_OFFICE));
+        permanetaddress.setPostCode(row.getString(PERMANENT_POST_CODE));
+        permanetaddress.setWard(row.getString(PERMANENT_WARD));
+        permanetaddress.setThana(row.getString(PERMANENT_THANA));
+        permanetaddress.setCityCorporation(row.getString(PERMANENT_CITY_CORPORATION));
+        permanetaddress.setCountry(row.getString(PERMANENT_COUNTRY));
+        patient.setPermanentAddress(permanetaddress);*/
         return patient;
     }
 
@@ -465,6 +494,11 @@ public class PatientRepository {
         final SettableFuture<String> result = SettableFuture.create();
         Address address = patient.getAddress();
         Address permanentAddress = patient.getPermanentAddress();
+
+        Relation father = patient.getRelation("father");
+        Relation mother = patient.getRelation("mother");
+
+
         if (permanentAddress == null ){
             permanentAddress = new Address();
         }
@@ -490,27 +524,22 @@ public class PatientRepository {
                 patient.getGender(),
                 patient.getOccupation(),
                 patient.getEducationLevel(),
-                patient.getFathersNameBangla(),
-                patient.getFathersFirstName(),
-                patient.getFathersMiddleName(),
-                patient.getFathersLastName(),
-                patient.getFathersBrn(),
-                patient.getFathersNid(),
-                patient.getFathersUid(),
-                patient.getMothersNameBangla(),
-                patient.getMothersFirstName(),
-                patient.getMothersMiddleName(),
-                patient.getMothersLastName(),
-                patient.getMothersBrn(),
-                patient.getMothersNid(),
-                patient.getMothersUid(),
+                father.getNameBangla(),
+                father.getFirstName(),
+                father.getMiddleName(),
+                father.getLastName(),
+                father.getBrn(),
+                father.getNid(),
+                father.getUid(),
+                mother.getNameBangla(),
+                mother.getFirstName(),
+                mother.getMiddleName(),
+                mother.getLastName(),
+                mother.getBrn(),
+                mother.getNid(),
+                mother.getUid(),
                 patient.getUid(),
                 patient.getPlaceOfBirth(),
-                patient.getMaritalStatus(),
-                patient.getMarriageId(),
-                patient.getSpouseName(),
-                patient.getSpouseNameBangla(),
-                patient.getSpouseUidNid(),
                 patient.getReligion(),
                 patient.getBloodGroup(),
                 patient.getNationality(),

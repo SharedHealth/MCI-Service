@@ -179,7 +179,8 @@ buildscript {
         classpath(
                 'org.springframework.boot:spring-boot-gradle-plugin:1.0.2.BUILD-SNAPSHOT',
                 'com.netflix.nebula:gradle-ospackage-plugin:1.9.1+',
-                'com.netflix.astyanax:astyanax:1.56.48'
+                'com.netflix.astyanax:astyanax:1.56.48',
+                'com.google.code.gson:gson:2.3'
         )
     }
 }
