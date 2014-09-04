@@ -77,7 +77,7 @@ public class PatientRestApiTest {
         address.setDistrictId("04");
         address.setUpazillaId("09");
         address.setCityCorporationId("20");
-        address.setVillageId("10");
+        address.setVillage("10");
         address.setWardId("01");
         address.setCountryCode("103");
 
@@ -102,7 +102,7 @@ public class PatientRestApiTest {
         MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
-        Assert.assertEquals("{\"code\":400,\"message\":\"invalid.request\",\"errors\":[{\"code\":1004,\"message\":\"Invalid address.addressLine\"}]}", result.getResponse().getContentAsString());
+        Assert.assertEquals("{\"code\":400,\"message\":\"invalid.request\",\"errors\":[{\"code\":1002,\"message\":\"Invalid address.addressLine\"}]}", result.getResponse().getContentAsString());
     }
 
     @Test
@@ -121,7 +121,7 @@ public class PatientRestApiTest {
         Collections.sort(errorInfoErrors);
 
         Assert.assertEquals(2, errorInfoErrors.size());
-        Assert.assertEquals(1004, errorInfoErrors.get(0).getCode());
+        Assert.assertEquals(1002, errorInfoErrors.get(0).getCode());
         Assert.assertEquals(1004, errorInfoErrors.get(1).getCode());
     }
 

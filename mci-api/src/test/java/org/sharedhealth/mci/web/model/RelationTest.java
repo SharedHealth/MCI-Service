@@ -28,14 +28,14 @@ public class RelationTest {
     public void shouldFailIf_Marriage_Id_LengthIsNotEqual_8() {
         Set<ConstraintViolation<Relation>> constraintViolations = validator.validateValue(Relation.class, "marriageId", "1");
         assertEquals(1, constraintViolations.size());
-        assertEquals("1004", constraintViolations.iterator().next().getMessage());
+        assertEquals("1002", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
     public void shouldFailIf_Marriage_Id_ContainSpecialCharacter() {
         Set<ConstraintViolation<Relation>> constraintViolations = validator.validateValue(Relation.class, "marriageId", "123456*8901");
         assertEquals(1, constraintViolations.size());
-        assertEquals("1004", constraintViolations.iterator().next().getMessage());
+        assertEquals("1002", constraintViolations.iterator().next().getMessage());
     }
 
     @Test

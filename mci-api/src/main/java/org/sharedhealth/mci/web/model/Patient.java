@@ -25,32 +25,32 @@ public class Patient {
 
     @JsonProperty("nid")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[\\d]{13}|[\\d]{17}", message = "1004")
+    @Pattern(regexp = "[\\d]{13}|[\\d]{17}", message = "1002")
     private String nationalId;
 
     @JsonProperty("bin_brn")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[\\d]{17}", message = "1004")
+    @Pattern(regexp = "[\\d]{17}", message = "1002")
     private String birthRegistrationNumber;
 
     @JsonProperty("name_bangla")
     @JsonInclude(NON_EMPTY)
-    @Length(lengthSize= 120, message = "1004")
+    @Length(lengthSize= 120, message = "1002")
     private String nameBangla;
 
     @JsonProperty("given_name")
     @NotBlank(message = "1001")
-    @Length(lengthSize= 100, message = "1004")
+    @Length(lengthSize= 100, message = "1002")
     private String givenName;
 
     @JsonProperty("sur_name")
     @NotBlank(message = "1001")
-    @Pattern(regexp = "^[a-zA-Z0-9]{0,25}$",message = "1004")
+    @Pattern(regexp = "^[a-zA-Z0-9]{0,25}$",message = "1002")
     private String surName;
 
     @JsonProperty("date_of_birth")
     @NotBlank(message = "1001")
-    @Date(format = "yyyy-MM-dd", message = "1004")
+    @Date(format = "yyyy-MM-dd", message = "1002")
     private String dateOfBirth;
 
     @JsonProperty("gender")
@@ -75,12 +75,12 @@ public class Patient {
 
     @JsonProperty("uid")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[a-zA-Z0-9]{11}", message = "1004")
+    @Pattern(regexp = "[a-zA-Z0-9]{11}", message = "1002")
     private String uid;
 
     @JsonInclude(NON_EMPTY)
     @JsonProperty("place_of_birth")
-    @Pattern(regexp = "^[a-zA-Z0-9]{0,20}$", message = "1004")
+    @Pattern(regexp = "^[a-zA-Z0-9]{0,20}$", message = "1002")
     private String placeOfBirth;
 
     @JsonProperty("religion")
@@ -95,7 +95,7 @@ public class Patient {
 
     @JsonProperty("nationality")
     @JsonInclude(NON_EMPTY)
-    @Length(lengthSize= 50, message = "1004")
+    @Length(lengthSize= 50, message = "1002")
     private String nationality;
 
     @JsonProperty("disability")
@@ -110,22 +110,22 @@ public class Patient {
 
     @JsonProperty("present_address")
     @Valid
-    @Location(message = "1004")
+    @Location(message = "1002")
     private Address address;
 
     @JsonProperty("primary_contact")
     @JsonInclude(NON_EMPTY)
-    @Length(lengthSize= 100, message = "1004")
+    @Length(lengthSize= 100, message = "1002")
     private String primaryContact;
 
     @JsonProperty("cell_no")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[)(-+0-9]*$", message = "1004")
+    @Pattern(regexp = "^[)(-+0-9]*$", message = "1002")
     private String cellNo;
 
     @JsonProperty("primary_cell_no")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[)(-+0-9]*$", message = "1004")
+    @Pattern(regexp = "^[)(-+0-9]*$", message = "1002")
     private String primaryCellNo;
 
     @JsonProperty("permanent_address")

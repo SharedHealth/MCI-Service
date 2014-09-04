@@ -18,7 +18,7 @@ public class Address {
 
     @JsonProperty("address_line")
     @NotBlank(message = "1001")
-    @Size(min = 3, max = 20, message = "1004")
+    @Size(min = 3, max = 20, message = "1002")
     private String addressLine;
 
     @JsonProperty("division_id")
@@ -43,27 +43,27 @@ public class Address {
 
     @JsonProperty("holding_number")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "1004")
+    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "1002")
     private String holdingNumber;
 
     @JsonProperty("street")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "1004")
+    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "1002")
     private String street;
 
     @JsonProperty("area_mouja")
     @JsonInclude(NON_EMPTY)
-    @AddressId(value = AREAMOUJA, message = "1004")
+    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "1002")
     private String areaMouja;
 
-    @JsonProperty("village_id")
+    @JsonProperty("village")
     @JsonInclude(NON_EMPTY)
-    @AddressId(value = VILLAGE, message = "1004")
-    private String villageId;
+    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "1002")
+    private String village;
 
     @JsonProperty("post_office")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "1004")
+    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "1002")
     private String postOffice;
 
     @JsonProperty("post_code")
@@ -112,7 +112,7 @@ public class Address {
         sb.append(", holdingNumber='").append(holdingNumber).append('\'');
         sb.append(", street='").append(street).append('\'');
         sb.append(", areaMouja='").append(areaMouja).append('\'');
-        sb.append(", villageId='").append(villageId).append('\'');
+        sb.append(", village='").append(village).append('\'');
         sb.append(", postOffice='").append(postOffice).append('\'');
         sb.append(", postCode='").append(postCode).append('\'');
         sb.append(", wardId='").append(wardId).append('\'');
@@ -187,12 +187,12 @@ public class Address {
         this.areaMouja = areaMouja;
     }
 
-    public String getVillageId() {
-        return villageId;
+    public String getVillage() {
+        return village;
     }
 
-    public void setVillageId(String villageId) {
-        this.villageId = villageId;
+    public void setVillage(String village) {
+        this.village = village;
     }
 
     public String getPostOffice() {

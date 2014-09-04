@@ -24,37 +24,37 @@ public class Relation {
 
     @JsonProperty("name_bangla")
     @JsonInclude(NON_EMPTY)
-    @Length(lengthSize= 120, message = "1004")
+    @Length(lengthSize= 120, message = "1002")
     private String nameBangla;
 
     @JsonProperty("given_name")
     @JsonInclude(NON_EMPTY)
-    @Length(lengthSize= 100, message = "1014")
+    @Length(lengthSize= 100, message = "1002")
     private String givenName;
 
     @JsonProperty("sur_name")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[a-zA-Z0-9]{0,25}$",message = "1004")
+    @Pattern(regexp = "^[a-zA-Z0-9]{0,25}$",message = "1002")
     private String surName;
 
     @JsonProperty("uid")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[a-zA-Z0-9]{11}", message = "1004")
+    @Pattern(regexp = "[a-zA-Z0-9]{11}", message = "1002")
     private String uid;
 
     @JsonProperty("nid")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[\\d]{13}|[\\d]{17}", message = "1004")
+    @Pattern(regexp = "[\\d]{13}|[\\d]{17}", message = "1002")
     private String nid;
 
     @JsonProperty("bin_brn")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[\\d]{17}", message = "1004")
+    @Pattern(regexp = "[\\d]{17}", message = "1002")
     private String binBrn;
 
     @JsonProperty("marriage_id")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[a-zA-Z0-9]{8}", message = "1004")
+    @Pattern(regexp = "[a-zA-Z0-9]{8}", message = "1002")
     private String marriageId;
 
     @JsonProperty("relational_status")

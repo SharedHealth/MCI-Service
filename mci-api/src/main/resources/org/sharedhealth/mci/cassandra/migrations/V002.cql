@@ -29,7 +29,7 @@ alter table patient add ethnicity varchar;
 alter table patient add holding_number varchar;
 alter table patient add street varchar;
 alter table patient add area_mouja varchar;
-alter table patient add village_id varchar;
+alter table patient add village varchar;
 alter table patient add post_office varchar;
 alter table patient add post_code varchar;
 alter table patient add ward_id varchar;

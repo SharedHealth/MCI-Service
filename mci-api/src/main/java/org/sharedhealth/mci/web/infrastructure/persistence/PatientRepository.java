@@ -140,7 +140,7 @@ public class PatientRepository {
                 address.getHoldingNumber(),
                 address.getStreet(),
                 address.getAreaMouja(),
-                address.getVillageId(),
+                address.getVillage(),
                 address.getPostOffice(),
                 address.getPostCode(),
                 address.getWardId(),
@@ -155,7 +155,7 @@ public class PatientRepository {
                 permanentAddress.getHoldingNumber(),
                 permanentAddress.getStreet(),
                 permanentAddress.getAreaMouja(),
-                permanentAddress.getVillageId(),
+                permanentAddress.getVillage(),
                 permanentAddress.getPostOffice(),
                 permanentAddress.getPostCode(),
                 permanentAddress.getWardId(),
@@ -430,7 +430,7 @@ public class PatientRepository {
         address.setHoldingNumber(row.getString(HOLDING_NUMBER));
         address.setStreet(row.getString(STREET));
         address.setAreaMouja(row.getString(AREA_MOUJA));
-        address.setVillageId(row.getString(VILLAGE));
+        address.setVillage(row.getString(VILLAGE));
         address.setPostOffice(row.getString(POST_OFFICE));
         address.setPostCode(row.getString(POST_CODE));
         address.setWardId(row.getString(WARD));
@@ -448,7 +448,7 @@ public class PatientRepository {
         permanetaddress.setHoldingNumber(row.getString(PERMANENT_HOLDING_NUMBER));
         permanetaddress.setStreet(row.getString(PERMANENT_STREET));
         permanetaddress.setAreaMouja(row.getString(PERMANENT_AREA_MOUJA));
-        permanetaddress.setVillageId(row.getString(PERMANENT_VILLAGE));
+        permanetaddress.setVillage(row.getString(PERMANENT_VILLAGE));
         permanetaddress.setPostOffice(row.getString(PERMANENT_POST_OFFICE));
         permanetaddress.setPostCode(row.getString(PERMANENT_POST_CODE));
         permanetaddress.setWardId(row.getString(PERMANENT_WARD));
@@ -553,7 +553,7 @@ public class PatientRepository {
                 address.getHoldingNumber(),
                 address.getStreet(),
                 address.getAreaMouja(),
-                address.getVillageId(),
+                address.getVillage(),
                 address.getPostOffice(),
                 address.getPostCode(),
                 address.getWardId(),
@@ -568,7 +568,7 @@ public class PatientRepository {
                 permanentAddress.getHoldingNumber(),
                 permanentAddress.getStreet(),
                 permanentAddress.getAreaMouja(),
-                permanentAddress.getVillageId(),
+                permanentAddress.getVillage(),
                 permanentAddress.getPostOffice(),
                 permanentAddress.getPostCode(),
                 permanentAddress.getWardId(),

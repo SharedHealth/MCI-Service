@@ -72,7 +72,7 @@ public class PatientControllerTest {
         address.setDistrictId("04");
         address.setUpazillaId("09");
         address.setCityCorporationId("20");
-        address.setVillageId("10");
+        address.setVillage("10");
         address.setWardId("01");
         address.setCountryCode("103");
 

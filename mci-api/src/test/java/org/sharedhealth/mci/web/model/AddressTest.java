@@ -142,18 +142,6 @@ public class AddressTest {
     }
 
     @Test
-    public void shouldFailIfAreaMouzaIsMoreThan_3_Characters() {
-        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "areaMouja", "jaanjirkhanjahanaliahmadpuri");
-        printViolations(constraintViolations);
-    }
-
-    @Test
-    public void shouldPassIfAreaMouzaIsValid() {
-        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "areaMouja", "134");
-        assertEquals(0, constraintViolations.size());
-    }
-
-    @Test
     public void shouldFailIfPostOfficeIsMoreThan_50_Characters() {
         Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "postOffice", "jaanjirkh999999999999999999yghgh khkj jkhkjh kjh kk kjhkjh khjkhkj kj kj");
         printViolations(constraintViolations);
@@ -178,21 +166,27 @@ public class AddressTest {
     }
 
     @Test
-    public void shouldHaveVillageConstrainAnnotation() {
-        assertAddressIdConstraint("villageId", new AddressIdConstraint("VILLAGE"));
+    public void shouldFailIfVillageIsMoreThan_50_Characters() {
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "village", "jaanjirkh999999999999999999yghgh khkj jkhkjh kjh kk kjhkjh khjkhkj kj kj");
+        printViolations(constraintViolations);
     }
 
     @Test
-    public void shouldPassIfVillageIdIsValid() {
-        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "villageId", "12");
+    public void shouldPassIfVillageIsValid() {
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "village", "Dhaka");
         assertEquals(0, constraintViolations.size());
     }
 
     @Test
-    public void shouldFailIfVillageIdIsInvalid() {
-        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "villageId", "abc");
-        assertEquals(1, constraintViolations.size());
+    public void shouldFailIfAreaMoujaIsMoreThan_50_Characters() {
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "areaMouja", "jaanjirkh999999999999999999yghgh khkj jkhkjh kjh kk kjhkjh khjkhkj kj kj");
         printViolations(constraintViolations);
+    }
+
+    @Test
+    public void shouldPassIfAreaMoujaIsValid() {
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "areaMouja", "Dhaka");
+        assertEquals(0, constraintViolations.size());
     }
 
     @Test

@@ -44,7 +44,7 @@ public class PatientQueryBuilder {
     public static final String HOLDING_NUMBER = "holding_number";
     public static final String STREET = "street";
     public static final String AREA_MOUJA = "area_mouja";
-    public static final String VILLAGE = "village_id";
+    public static final String VILLAGE = "village";
     public static final String POST_OFFICE = "post_office";
     public static final String POST_CODE = "post_code";
     public static final String WARD = "ward_id";
