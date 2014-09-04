@@ -13,6 +13,6 @@ public class DatabaseRow {
 
     public String getString(String name) {
         final String value = row.getString(name);
-        return (StringUtils.isBlank(value) || "null".equals(value)) ? null : value;
+        return StringUtils.isBlank(value) || "null".equals(value) ? null : value;
     }
 }

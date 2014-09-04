@@ -3,6 +3,9 @@ apply plugin: 'idea'
 subprojects {
 
     apply plugin: 'java'
+    apply plugin: 'checkstyle'
+    apply plugin: 'pmd'
+
     compileJava {
         sourceCompatibility = 1.7
         targetCompatibility = 1.7
@@ -19,15 +22,18 @@ subprojects {
         maven { url "http://repo.spring.io/milestone" }
     }
 
-    task checkStyle(type: Checkstyle) {
+    checkstyle {
         configFile file("${project.projectDir}/../config/checkstyle/checkstyle.xml")
+    }
+
+    pmd {
+        toolVersion = '5.0.5'
+        ruleSetFiles = files("${project.projectDir}/../config/pmd/rulesets.xml")
     }
 
     test {
         environment localEnv
     }
-
-    jar.dependsOn 'checkStyle'
 }
 
 task wrapper(type: Wrapper) {

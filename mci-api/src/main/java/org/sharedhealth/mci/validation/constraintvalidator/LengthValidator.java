@@ -1,14 +1,11 @@
 package org.sharedhealth.mci.validation.constraintvalidator;
 
-import org.sharedhealth.mci.validation.constraints.Date;
-import java.lang.annotation.Annotation;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+
+import org.sharedhealth.mci.validation.constraints.Length;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sharedhealth.mci.validation.constraints.Length;
 
 
 public class LengthValidator implements ConstraintValidator<Length, String> {

@@ -1,5 +1,8 @@
 package org.sharedhealth.mci.web.launch.migration;
 
+import java.io.IOException;
+import java.util.HashMap;
+
 import com.netflix.astyanax.AstyanaxContext;
 import com.netflix.astyanax.Keyspace;
 import com.netflix.astyanax.connectionpool.exceptions.BadRequestException;
@@ -11,9 +14,6 @@ import com.netflix.astyanax.thrift.ThriftFamilyFactory;
 import com.toddfast.mutagen.Plan;
 import com.toddfast.mutagen.cassandra.CassandraMutagen;
 import com.toddfast.mutagen.cassandra.impl.CassandraMutagenImpl;
-
-import java.io.IOException;
-import java.util.HashMap;
 
 import static java.lang.Integer.valueOf;
 import static java.lang.System.getenv;

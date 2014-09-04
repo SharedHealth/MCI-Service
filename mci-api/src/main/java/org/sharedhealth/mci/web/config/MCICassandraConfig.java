@@ -2,7 +2,6 @@ package org.sharedhealth.mci.web.config;
 
 import com.datastax.driver.core.SocketOptions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cassandra.core.CqlTemplate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.cassandra.config.java.AbstractCassandraConfiguration;

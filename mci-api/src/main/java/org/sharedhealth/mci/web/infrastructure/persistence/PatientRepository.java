@@ -13,7 +13,6 @@ import com.datastax.driver.core.querybuilder.Select;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.SettableFuture;
 import org.apache.commons.lang3.StringUtils;
-import org.codehaus.jettison.json.JSONArray;
 import org.sharedhealth.mci.utils.UidGenerator;
 import org.sharedhealth.mci.web.exception.PatientAlreadyExistException;
 import org.sharedhealth.mci.web.exception.PatientNotFoundException;
@@ -33,8 +32,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.FieldError;
-
-
 
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
 
@@ -223,7 +220,7 @@ public class PatientRepository {
             try {
                 return findByNationalId(patient.getNationalId()).get();
             } catch (Exception e) {
-                //Nothing to do, just ignore
+                logger.debug("Can not find patient by [National Id");
             }
         }
 
@@ -232,7 +229,7 @@ public class PatientRepository {
             try {
                 return findByBirthRegistrationNumber(patient.getBirthRegistrationNumber()).get();
             } catch (Exception e) {
-                //Nothing to do, just ignore
+                logger.debug("Can not find patient by [Birth Registration Number]");
             }
         }
 
@@ -240,7 +237,7 @@ public class PatientRepository {
             try {
                 return findByUid(patient.getUid()).get();
             } catch (Exception e) {
-                //Nothing to do, just ignore
+                logger.debug("Can not find patient by [UID]");
             }
         }
 

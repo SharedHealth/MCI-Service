@@ -56,7 +56,7 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
             }
 
         } catch (Exception e) {
-            //Nothing to do validation should be failed
+            logger.debug("Validation error for : [" + geoCode + "]");
         }
 
         return false;

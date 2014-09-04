@@ -154,7 +154,7 @@ public class GlobalExceptionHandler {
 
         @Override
         public int compareTo(ErrorInfo e) {
-            return this.code > e.getCode() ? 1 : (this.code < e.getCode() ? -1 : 0);
+            return this.code > e.getCode() ? 1 : this.code < e.getCode() ? -1 : 0;
         }
     }
 }

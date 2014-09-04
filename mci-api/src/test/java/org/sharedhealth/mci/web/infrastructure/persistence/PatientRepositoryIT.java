@@ -1,5 +1,8 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,13 +13,10 @@ import org.sharedhealth.mci.web.model.Address;
 import org.sharedhealth.mci.web.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.data.cassandra.core.CassandraOperations;
-
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

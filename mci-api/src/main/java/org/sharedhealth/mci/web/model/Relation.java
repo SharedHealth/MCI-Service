@@ -1,15 +1,9 @@
 package org.sharedhealth.mci.web.model;
 
-import javax.validation.Valid;
 import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.validator.constraints.NotBlank;
-import org.sharedhealth.mci.validation.constraints.*;
-import org.sharedhealth.mci.validation.constraints.Location;
 import org.sharedhealth.mci.validation.constraints.Length;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;

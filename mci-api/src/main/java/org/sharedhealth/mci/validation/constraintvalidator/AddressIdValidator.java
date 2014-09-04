@@ -3,8 +3,9 @@ package org.sharedhealth.mci.validation.constraintvalidator;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.util.regex.Pattern;
-import org.sharedhealth.mci.validation.constraints.AddressId;
+
 import org.sharedhealth.mci.validation.AddressType;
+import org.sharedhealth.mci.validation.constraints.AddressId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

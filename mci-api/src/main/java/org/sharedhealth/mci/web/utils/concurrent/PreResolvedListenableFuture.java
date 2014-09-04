@@ -1,8 +1,8 @@
 package org.sharedhealth.mci.web.utils.concurrent;
 
-import org.springframework.util.concurrent.ListenableFutureTask;
-
 import java.util.concurrent.Callable;
+
+import org.springframework.util.concurrent.ListenableFutureTask;
 
 /**
  * Helps create methods which return a ListenableFuture in one case and a resolved value in another
