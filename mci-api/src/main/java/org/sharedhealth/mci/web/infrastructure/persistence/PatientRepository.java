@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Row;
@@ -80,57 +79,49 @@ public class PatientRepository {
         String relationsJson = "";
         ObjectMapper mapper = new ObjectMapper();
 
-        try {
+       try {
              List<Relation> relations = patient.getRelations();
              relationsJson =  mapper.writeValueAsString(relations);
-             father = patient.getRelation("father");
+            father = patient.getRelation("father");
              mother = patient.getRelation("mother");
 
         }catch(Exception e){
             logger.debug(" Relations: [" +e.getMessage() + "]");
         }
-        logger.debug(" Relations: [" + patient.getRelations() + "]");
 
         if (permanentAddress == null ){
             permanentAddress = new Address();
         }
 
-
         String fullName = "";
-        if(patient.getFirstName() != null){
-             fullName = patient.getFirstName();
+        if(patient.getGivenName() != null){
+             fullName = patient.getGivenName();
         }
-        if(patient.getMiddleName() != null){
-            fullName = fullName + " " + patient.getMiddleName();
-        }
-        if(patient.getLastName() != null){
-            fullName = fullName + " " +patient.getLastName();
+        if(patient.getSurName() != null){
+            fullName = fullName + " " +patient.getSurName();
         }
 
         String cql = String.format(getCreateQuery(),
                 healthId,
                 patient.getNationalId(),
                 patient.getBirthRegistrationNumber(),
-                patient.getFullNameBangla(),
-                patient.getFirstName(),
-                patient.getMiddleName(),
-                patient.getLastName(),
+                patient.getNameBangla(),
+                patient.getGivenName(),
+                patient.getSurName(),
                 patient.getDateOfBirth(),
                 patient.getGender(),
                 patient.getOccupation(),
                 patient.getEducationLevel(),
                 father.getNameBangla(),
-                father.getFirstName(),
-                father.getMiddleName(),
-                father.getLastName(),
-                father.getBrn(),
+                father.getGivenName(),
+                father.getSurName(),
+                father.getBinBrn(),
                 father.getNid(),
                 father.getUid(),
                 mother.getNameBangla(),
-                mother.getFirstName(),
-                mother.getMiddleName(),
-                mother.getLastName(),
-                mother.getBrn(),
+                mother.getGivenName(),
+                mother.getSurName(),
+                mother.getBinBrn(),
                 mother.getNid(),
                 mother.getUid(),
                 patient.getUid(),
@@ -149,13 +140,13 @@ public class PatientRepository {
                 address.getHoldingNumber(),
                 address.getStreet(),
                 address.getAreaMouja(),
-                address.getVillage(),
+                address.getVillageId(),
                 address.getPostOffice(),
                 address.getPostCode(),
-                address.getWard(),
-                address.getThana(),
-                address.getCityCorporation(),
-                address.getCountry(),
+                address.getWardId(),
+                address.getThanaId(),
+                address.getCityCorporationId(),
+                address.getCountryCode(),
                 permanentAddress.getAddressLine(),
                 permanentAddress.getDivisionId(),
                 permanentAddress.getDistrictId(),
@@ -164,17 +155,19 @@ public class PatientRepository {
                 permanentAddress.getHoldingNumber(),
                 permanentAddress.getStreet(),
                 permanentAddress.getAreaMouja(),
-                permanentAddress.getVillage(),
+                permanentAddress.getVillageId(),
                 permanentAddress.getPostOffice(),
                 permanentAddress.getPostCode(),
-                permanentAddress.getWard(),
-                permanentAddress.getThana(),
-                permanentAddress.getCityCorporation(),
-                permanentAddress.getCountry(),
+                permanentAddress.getWardId(),
+                permanentAddress.getThanaId(),
+                permanentAddress.getCityCorporationId(),
+                permanentAddress.getCountryCode(),
                 fullName.toLowerCase(),
-                father.getType(),
-                mother.getType(),
-                relationsJson
+                relationsJson,
+                patient.getPrimaryContact(),
+                patient.getCellNo(),
+                patient.getPrimaryCellNo()
+
           );
 
         logger.debug("Save patient CQL: [" + cql + "]");
@@ -412,11 +405,10 @@ public class PatientRepository {
 
         patient.setReligion(row.getString(RELIGION));
         patient.setBloodGroup(row.getString(BLOOD_GROUP));
-        patient.setFullNameBangla(row.getString(FULL_NAME_BANGLA));
+        patient.setNameBangla(row.getString(FULL_NAME_BANGLA));
         patient.setBirthRegistrationNumber(row.getString(BIN_BRN));
-        patient.setFirstName(row.getString(FIRST_NAME));
-        patient.setMiddleName(row.getString(MIDDLE_NAME));
-        patient.setLastName(row.getString(LAST_NAME));
+        patient.setGivenName(row.getString(GIVEN_NAME));
+        patient.setSurName(row.getString(SUR_NAME));
         patient.setDateOfBirth(row.getString(DATE_OF_BIRTH));
         patient.setGender(row.getString(GENDER));
         patient.setOccupation(row.getString(OCCUPATION));
@@ -425,6 +417,9 @@ public class PatientRepository {
         patient.setDisability(row.getString(DISABILITY));
         patient.setEthnicity(row.getString(ETHNICITY));
         patient.setIsAlive(row.getString(IS_ALIVE));
+        patient.setCellNo(row.getString(CELL_NO));
+        patient.setPrimaryContact(row.getString(PRIMARY_CONTACT));
+        patient.setPrimaryCellNo(row.getString(PRIMARY_CELL_NO));
 
         Address address = new Address();
         address.setAddressLine(row.getString(ADDRESS_LINE));
@@ -435,13 +430,13 @@ public class PatientRepository {
         address.setHoldingNumber(row.getString(HOLDING_NUMBER));
         address.setStreet(row.getString(STREET));
         address.setAreaMouja(row.getString(AREA_MOUJA));
-        address.setVillage(row.getString(VILLAGE));
+        address.setVillageId(row.getString(VILLAGE));
         address.setPostOffice(row.getString(POST_OFFICE));
         address.setPostCode(row.getString(POST_CODE));
-        address.setWard(row.getString(WARD));
-        address.setThana(row.getString(THANA));
-        address.setCityCorporation(row.getString(CITY_CORPORATION));
-        address.setCountry(row.getString(COUNTRY));
+        address.setWardId(row.getString(WARD));
+        address.setThanaId(row.getString(THANA));
+        address.setCityCorporationId(row.getString(CITY_CORPORATION));
+        address.setCountryCode(row.getString(COUNTRY));
         patient.setAddress(address);
 
        /* Address permanetaddress = new Address();
@@ -453,14 +448,15 @@ public class PatientRepository {
         permanetaddress.setHoldingNumber(row.getString(PERMANENT_HOLDING_NUMBER));
         permanetaddress.setStreet(row.getString(PERMANENT_STREET));
         permanetaddress.setAreaMouja(row.getString(PERMANENT_AREA_MOUJA));
-        permanetaddress.setVillage(row.getString(PERMANENT_VILLAGE));
+        permanetaddress.setVillageId(row.getString(PERMANENT_VILLAGE));
         permanetaddress.setPostOffice(row.getString(PERMANENT_POST_OFFICE));
         permanetaddress.setPostCode(row.getString(PERMANENT_POST_CODE));
-        permanetaddress.setWard(row.getString(PERMANENT_WARD));
-        permanetaddress.setThana(row.getString(PERMANENT_THANA));
+        permanetaddress.setWardId(row.getString(PERMANENT_WARD));
+        permanetaddress.setThanaId(row.getString(PERMANENT_THANA));
         permanetaddress.setCityCorporation(row.getString(PERMANENT_CITY_CORPORATION));
-        permanetaddress.setCountry(row.getString(PERMANENT_COUNTRY));
+        permanetaddress.setCountryCode(row.getString(PERMANENT_COUNTRY));
         patient.setPermanentAddress(permanetaddress);*/
+
         return patient;
     }
 
@@ -495,44 +491,50 @@ public class PatientRepository {
         Relation father = patient.getRelation("father");
         Relation mother = patient.getRelation("mother");
 
+        String relationsJson = "";
+        ObjectMapper mapper = new ObjectMapper();
+
+        try {
+            List<Relation> relations = patient.getRelations();
+            relationsJson =  mapper.writeValueAsString(relations);
+            father = patient.getRelation("father");
+            mother = patient.getRelation("mother");
+
+        }catch(Exception e){
+            logger.debug(" Relations: [" +e.getMessage() + "]");
+        }
 
         if (permanentAddress == null ){
             permanentAddress = new Address();
         }
         String fullName = "";
-        if(patient.getFirstName() != null){
-            fullName = patient.getFirstName();
+        if(patient.getGivenName() != null){
+            fullName = patient.getGivenName();
         }
-        if(patient.getMiddleName() != null){
-            fullName = fullName + " " + patient.getMiddleName();
-        }
-        if(patient.getLastName() != null){
-            fullName = fullName + " " +patient.getLastName();
+        if(patient.getSurName() != null){
+            fullName = fullName + " " +patient.getSurName();
         }
 
         String cql = String.format(getUpdateQuery(),
                 patient.getNationalId(),
                 patient.getBirthRegistrationNumber(),
-                patient.getFullNameBangla(),
-                patient.getFirstName(),
-                patient.getMiddleName(),
-                patient.getLastName(),
+                patient.getNameBangla(),
+                patient.getGivenName(),
+                patient.getSurName(),
                 patient.getDateOfBirth(),
                 patient.getGender(),
                 patient.getOccupation(),
                 patient.getEducationLevel(),
                 father.getNameBangla(),
-                father.getFirstName(),
-                father.getMiddleName(),
-                father.getLastName(),
-                father.getBrn(),
+                father.getGivenName(),
+                father.getSurName(),
+                father.getBinBrn(),
                 father.getNid(),
                 father.getUid(),
                 mother.getNameBangla(),
-                mother.getFirstName(),
-                mother.getMiddleName(),
-                mother.getLastName(),
-                mother.getBrn(),
+                mother.getGivenName(),
+                mother.getSurName(),
+                mother.getBinBrn(),
                 mother.getNid(),
                 mother.getUid(),
                 patient.getUid(),
@@ -551,13 +553,13 @@ public class PatientRepository {
                 address.getHoldingNumber(),
                 address.getStreet(),
                 address.getAreaMouja(),
-                address.getVillage(),
+                address.getVillageId(),
                 address.getPostOffice(),
                 address.getPostCode(),
-                address.getWard(),
-                address.getThana(),
-                address.getCityCorporation(),
-                address.getCountry(),
+                address.getWardId(),
+                address.getThanaId(),
+                address.getCityCorporationId(),
+                address.getCountryCode(),
                 permanentAddress.getAddressLine(),
                 permanentAddress.getDivisionId(),
                 permanentAddress.getDistrictId(),
@@ -566,14 +568,18 @@ public class PatientRepository {
                 permanentAddress.getHoldingNumber(),
                 permanentAddress.getStreet(),
                 permanentAddress.getAreaMouja(),
-                permanentAddress.getVillage(),
+                permanentAddress.getVillageId(),
                 permanentAddress.getPostOffice(),
                 permanentAddress.getPostCode(),
-                permanentAddress.getWard(),
-                permanentAddress.getThana(),
-                permanentAddress.getCityCorporation(),
-                permanentAddress.getCountry(),
+                permanentAddress.getWardId(),
+                permanentAddress.getThanaId(),
+                permanentAddress.getCityCorporationId(),
+                permanentAddress.getCountryCode(),
                 fullName.toLowerCase(),
+                relationsJson,
+                patient.getPrimaryContact(),
+                patient.getCellNo(),
+                patient.getPrimaryCellNo(),
                 hid
             );
 

@@ -13,6 +13,7 @@ create table patient (
     division_id varchar,
     district_id varchar,
     upazilla_id varchar,
-    union_id varchar);
+    union_id varchar
+    );
 
 CREATE INDEX national_id_key ON patient (national_id);

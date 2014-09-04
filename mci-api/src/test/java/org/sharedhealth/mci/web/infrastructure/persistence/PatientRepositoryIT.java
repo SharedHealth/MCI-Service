@@ -44,13 +44,12 @@ public class PatientRepositoryIT {
         patient.setNationalId(nationalId);
         patient.setBirthRegistrationNumber(birthRegistrationNumber);
         patient.setUid(uid);
-        patient.setFirstName("Scott");
-        patient.setLastName("Tiger");
+        patient.setGivenName("Scott");
+        patient.setSurName("Tiger");
         patient.setDateOfBirth("2014-12-01");
-        patient.setGender("1");
+        patient.setGender("M");
         patient.setOccupation("salaried");
         patient.setEducationLevel("BA");
-
 
         Address address = new Address();
         address.setAddressLine("house-10");
@@ -59,8 +58,6 @@ public class PatientRepositoryIT {
         address.setUpazillaId("102030");
         address.setUnionId("10203040");
         patient.setAddress(address);
-
-
 
     }
 

@@ -61,9 +61,9 @@ public class PatientControllerTest {
         patient = new Patient();
         patient.setNationalId(nationalId);
         patient.setBirthRegistrationNumber(birthRegistrationNumber);
-        patient.setFirstName("Scott");
-        patient.setLastName("Tiger");
-        patient.setGender("1");
+        patient.setGivenName("Scott");
+        patient.setSurName("Tiger");
+        patient.setGender("M");
         patient.setDateOfBirth("2014-12-01");
 
         Address address = new Address();
@@ -71,10 +71,10 @@ public class PatientControllerTest {
         address.setDivisionId("10");
         address.setDistrictId("04");
         address.setUpazillaId("09");
-        address.setCityCorporation("20");
-        address.setVillage("10");
-        address.setWard("01");
-        address.setCountry("103");
+        address.setCityCorporationId("20");
+        address.setVillageId("10");
+        address.setWardId("01");
+        address.setCountryCode("103");
 
         patient.setAddress(address);
 

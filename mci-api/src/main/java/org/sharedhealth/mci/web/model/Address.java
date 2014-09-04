@@ -2,7 +2,6 @@ package org.sharedhealth.mci.web.model;
 
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -18,79 +17,79 @@ import static org.sharedhealth.mci.validation.AddressType.*;
 public class Address {
 
     @JsonProperty("address_line")
-    @NotBlank(message = "2001")
-    @Size(min = 3, max = 20, message = "2002")
+    @NotBlank(message = "1001")
+    @Size(min = 3, max = 20, message = "1004")
     private String addressLine;
 
     @JsonProperty("division_id")
     @JsonInclude(NON_EMPTY)
-    @AddressId(value = DIVISION, message = "2003")
+    @AddressId(value = DIVISION, message = "1004")
     private String divisionId;
 
     @JsonProperty("district_id")
     @JsonInclude(NON_EMPTY)
-    @AddressId(value = DISTRICT, message = "2004")
+    @AddressId(value = DISTRICT, message = "1004")
     private String districtId;
 
     @JsonProperty("upazilla_id")
     @JsonInclude(NON_EMPTY)
-    @AddressId(value = UPAZILLA, message = "2005")
+    @AddressId(value = UPAZILLA, message = "1004")
     private String upazillaId;
 
     @JsonProperty("union_id")
     @JsonInclude(NON_EMPTY)
-    @AddressId(value = UNION, message = "2006")
+    @AddressId(value = UNION, message = "1004")
     private String unionId;
 
     @JsonProperty("holding_number")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "2007")
+    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "1004")
     private String holdingNumber;
 
     @JsonProperty("street")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "2008")
+    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "1004")
     private String street;
 
     @JsonProperty("area_mouja")
     @JsonInclude(NON_EMPTY)
-    @AddressId(value = AREAMOUJA, message = "2009")
+    @AddressId(value = AREAMOUJA, message = "1004")
     private String areaMouja;
 
-    @JsonProperty("village")
+    @JsonProperty("village_id")
     @JsonInclude(NON_EMPTY)
-    @AddressId(value = VILLAGE, message = "2010")
-    private String village;
+    @AddressId(value = VILLAGE, message = "1004")
+    private String villageId;
 
     @JsonProperty("post_office")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "2011")
+    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "1004")
     private String postOffice;
 
     @JsonProperty("post_code")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[a-zA-Z0-9\\-_]{0,10}$", message = "2012")
+    @Pattern(regexp = "[0-9]{4}$", message = "1004")
     private String postCode;
 
-    @JsonProperty("ward")
+    @JsonProperty("ward_id")
     @JsonInclude(NON_EMPTY)
-    @AddressId(value = WARD, message = "2013")
-    private String ward;
+    @AddressId(value = WARD, message = "1004")
+    private String wardId;
 
-    @JsonProperty("thana")
+    @JsonProperty("thana_id")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "2014")
-    private String thana;
+    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "1004")
+    private String thanaId;
 
-    @JsonProperty("city_corporation")
+    @JsonProperty("city_corporation_id")
     @JsonInclude(NON_EMPTY)
-    @AddressId(value = CITYCORPORATION, message = "2015")
-    private String cityCorporation;
+    @AddressId(value = CITYCORPORATION, message = "1004")
+    private String cityCorporationId;
 
-    @JsonProperty("country")
+    @JsonProperty("country_code")
     @JsonInclude(NON_EMPTY)
-    @AddressId(value=COUNTRY, message = "2016")
-    private String country;
+    @AddressId(value=COUNTRY, message = "1004")
+    private String countryCode;
 
     @Override
     public boolean equals(Object rhs) {
@@ -113,13 +112,13 @@ public class Address {
         sb.append(", holdingNumber='").append(holdingNumber).append('\'');
         sb.append(", street='").append(street).append('\'');
         sb.append(", areaMouja='").append(areaMouja).append('\'');
-        sb.append(", village='").append(village).append('\'');
+        sb.append(", villageId='").append(villageId).append('\'');
         sb.append(", postOffice='").append(postOffice).append('\'');
         sb.append(", postCode='").append(postCode).append('\'');
-        sb.append(", ward='").append(ward).append('\'');
-        sb.append(", thana='").append(thana).append('\'');
-        sb.append(", cityCorporation='").append(cityCorporation).append('\'');
-        sb.append(", country='").append(country).append('\'');
+        sb.append(", wardId='").append(wardId).append('\'');
+        sb.append(", thanaId='").append(thanaId).append('\'');
+        sb.append(", cityCorporationId='").append(cityCorporationId).append('\'');
+        sb.append(", countryCode='").append(countryCode).append('\'');
         sb.append('}');
         return sb.toString();
     }
@@ -188,12 +187,12 @@ public class Address {
         this.areaMouja = areaMouja;
     }
 
-    public String getVillage() {
-        return village;
+    public String getVillageId() {
+        return villageId;
     }
 
-    public void setVillage(String village) {
-        this.village = village;
+    public void setVillageId(String villageId) {
+        this.villageId = villageId;
     }
 
     public String getPostOffice() {
@@ -204,36 +203,36 @@ public class Address {
         this.postOffice = postOffice;
     }
 
-    public String getCountry() {
-        return country;
+    public String getCountryCode() {
+        return countryCode;
     }
 
-    public void setCountry(String country) {
-        this.country = country;
+    public void setCountryCode(String countryCode) {
+        this.countryCode = countryCode;
     }
 
-    public String getCityCorporation() {
-        return cityCorporation;
+    public String getCityCorporationId() {
+        return cityCorporationId;
     }
 
-    public void setCityCorporation(String cityCorporation) {
-        this.cityCorporation = cityCorporation;
+    public void setCityCorporationId(String cityCorporationId) {
+        this.cityCorporationId = cityCorporationId;
     }
 
-    public String getThana() {
-        return thana;
+    public String getThanaId() {
+        return thanaId;
     }
 
-    public void setThana(String thana) {
-        this.thana = thana;
+    public void setThanaId(String thanaId) {
+        this.thanaId = thanaId;
     }
 
-    public String getWard() {
-        return ward;
+    public String getWardId() {
+        return wardId;
     }
 
-    public void setWard(String ward) {
-        this.ward = ward;
+    public void setWardId(String wardId) {
+        this.wardId = wardId;
     }
 
     public String getPostCode() {
@@ -251,8 +250,8 @@ public class Address {
             ut = this.getUpazillaId();
         }
 
-        if(this.getThana() != null) {
-            ut = ut + this.getThana();
+        if(this.getThanaId() != null) {
+            ut = ut + this.getThanaId();
         }
 
         return ut;
@@ -265,8 +264,8 @@ public class Address {
             uw = this.getUnionId();
         }
 
-        if(this.getWard() != null) {
-            uw = uw + this.getWard();
+        if(this.getWardId() != null) {
+            uw = uw + this.getWardId();
         }
 
         return uw;
@@ -279,7 +278,7 @@ public class Address {
         sb.append(this.getDivisionId());
         sb.append(this.getDistrictId());
         sb.append(this.getUpazilaOrThana());
-        sb.append(this.getCityCorporation());
+        sb.append(this.getCityCorporationId());
         sb.append(this.getUnionOrWard());
 
         return sb.toString();

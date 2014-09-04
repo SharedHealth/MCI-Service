@@ -28,14 +28,14 @@ public class RelationTest {
     public void shouldFailIf_Marriage_Id_LengthIsNotEqual_8() {
         Set<ConstraintViolation<Relation>> constraintViolations = validator.validateValue(Relation.class, "marriageId", "1");
         assertEquals(1, constraintViolations.size());
-        assertEquals("1029", constraintViolations.iterator().next().getMessage());
+        assertEquals("1004", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
     public void shouldFailIf_Marriage_Id_ContainSpecialCharacter() {
         Set<ConstraintViolation<Relation>> constraintViolations = validator.validateValue(Relation.class, "marriageId", "123456*8901");
         assertEquals(1, constraintViolations.size());
-        assertEquals("1029", constraintViolations.iterator().next().getMessage());
+        assertEquals("1004", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
@@ -44,18 +44,4 @@ public class RelationTest {
         assertEquals(0, constraintViolations.size());
     }
 
-    @Test
-    public void shouldPassIfMaritalStatusIsValid() {
-        for(int i = 1; i<6; i++) {
-            Set<ConstraintViolation<Relation>> constraintViolations = validator.validateValue(Relation.class, "maritalStatus", Integer.toString(i));
-            assertEquals(0, constraintViolations.size());
-        }
-    }
-
-    @Test
-    public void shouldFailIfMaritalStatusIsInvalid() {
-        Set<ConstraintViolation<Relation>> constraintViolations = validator.validateValue(Relation.class, "maritalStatus", "8");
-        assertEquals(1, constraintViolations.size());
-        assertEquals("1028", constraintViolations.iterator().next().getMessage());
-    }
 }

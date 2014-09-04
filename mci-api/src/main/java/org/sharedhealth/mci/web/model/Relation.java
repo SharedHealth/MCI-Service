@@ -5,10 +5,18 @@ import javax.validation.constraints.Pattern;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.sharedhealth.mci.validation.constraints.Length;
-
+import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
 public class Relation {
+    private static final Logger logger = LoggerFactory.getLogger(Relation.class);
+
+    public Relation() {
+        UUID idOne = UUID.randomUUID();
+        this.Id = idOne.toString();
+    }
 
     @JsonProperty("type")
     @JsonInclude(NON_EMPTY)
@@ -16,48 +24,46 @@ public class Relation {
 
     @JsonProperty("name_bangla")
     @JsonInclude(NON_EMPTY)
-    @Length(lengthSize= 120, message = "1013")
+    @Length(lengthSize= 120, message = "1004")
     private String nameBangla;
 
-    @JsonProperty("first_name")
+    @JsonProperty("given_name")
     @JsonInclude(NON_EMPTY)
-    @Length(lengthSize= 25, message = "1014")
-    private String firstName;
+    @Length(lengthSize= 100, message = "1014")
+    private String givenName;
 
-    @JsonProperty("middle_name")
+    @JsonProperty("sur_name")
     @JsonInclude(NON_EMPTY)
-    @Length(lengthSize= 25, message = "1015")
-    private String middleName;
-
-    @JsonProperty("last_name")
-    @JsonInclude(NON_EMPTY)
-    @Length(lengthSize= 25, message = "1016")
-    private String lastName;
+    @Pattern(regexp = "^[a-zA-Z0-9]{0,25}$",message = "1004")
+    private String surName;
 
     @JsonProperty("uid")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[a-zA-Z0-9]{11}", message = "1017")
+    @Pattern(regexp = "[a-zA-Z0-9]{11}", message = "1004")
     private String uid;
 
     @JsonProperty("nid")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[\\d]{13}|[\\d]{17}", message = "1018")
+    @Pattern(regexp = "[\\d]{13}|[\\d]{17}", message = "1004")
     private String nid;
 
-    @JsonProperty("brn")
+    @JsonProperty("bin_brn")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[\\d]{17}", message = "1019")
-    private String brn;
-
-    @JsonProperty("marital_status")
-    @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[1-5]{1}", message = "1028")
-    private String maritalStatus;
+    @Pattern(regexp = "[\\d]{17}", message = "1004")
+    private String binBrn;
 
     @JsonProperty("marriage_id")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[a-zA-Z0-9]{8}", message = "1029")
+    @Pattern(regexp = "[a-zA-Z0-9]{8}", message = "1004")
     private String marriageId;
+
+    @JsonProperty("relational_status")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "[3|4|5]", message = "1004")
+    private String relationalStatus;
+
+    @JsonProperty("id")
+    private String Id;
 
     public String getNameBangla() {
         return nameBangla;
@@ -67,28 +73,20 @@ public class Relation {
         this.nameBangla = nameBangla;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public String getGivenName() {
+        return givenName;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+    public void setGivenName(String givenName) {
+        this.givenName = givenName;
     }
 
-    public String getMiddleName() {
-        return middleName;
+    public String getSurName() {
+        return surName;
     }
 
-    public void setMiddleName(String middleName) {
-        this.middleName = middleName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setSurName(String surName) {
+        this.surName = surName;
     }
 
     public String getUid() {
@@ -107,12 +105,12 @@ public class Relation {
         this.nid = nid;
     }
 
-    public String getBrn() {
-        return brn;
+    public String getBinBrn() {
+        return binBrn;
     }
 
-    public void setBrn(String brn) {
-        this.brn = brn;
+    public void setBinBrn(String binBrn) {
+        this.binBrn = binBrn;
     }
 
     public String getType() {
@@ -123,19 +121,27 @@ public class Relation {
         this.type = type;
     }
 
-    public String getMaritalStatus() {
-        return maritalStatus;
-    }
-
-    public void setMaritalStatus(String maritalStatus) {
-        this.maritalStatus = maritalStatus;
-    }
-
     public String getMarriageId() {
         return marriageId;
     }
 
     public void setMarriageId(String marriageId) {
         this.marriageId = marriageId;
+    }
+
+    public String getId() {
+        return Id;
+    }
+
+    public void setId(String id) {
+        this.Id = id;
+    }
+
+    public String getRelationalStatus() {
+        return relationalStatus;
+    }
+
+    public void setRelationalStatus(String relationalStatus) {
+        this.relationalStatus = relationalStatus;
     }
 }

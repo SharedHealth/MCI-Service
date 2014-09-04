@@ -25,31 +25,31 @@ public class PatientTest {
     }
 
     @Test
-    public void shouldFailIfFirstNameIsBlank() {
-        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "firstName", "");
+    public void shouldFailIfGivenNameIsBlank() {
+        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "givenName", "");
         assertEquals(1, constraintViolations.size());
-        assertEquals("1004", constraintViolations.iterator().next().getMessage());
+        assertEquals("1001", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
-    public void shouldFailIfLastNameIsBlank() {
-        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "lastName", "");
+    public void shouldFailIfSurNameIsBlank() {
+        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "surName", "");
         assertEquals(1, constraintViolations.size());
-        assertEquals("1006", constraintViolations.iterator().next().getMessage());
+        assertEquals("1001", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
     public void shouldFailIfDateOfBirthIsBlank() {
         Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "dateOfBirth", "   ");
         assertEquals(1, constraintViolations.size());
-        assertEquals("1007", constraintViolations.iterator().next().getMessage());
+        assertEquals("1001", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
     public void shouldFailIfDateOfBirthIsInvalidDate() {
         Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "dateOfBirth", "1999-02-30");
         assertEquals(1, constraintViolations.size());
-        assertEquals("1008", constraintViolations.iterator().next().getMessage());
+        assertEquals("1004", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
@@ -60,31 +60,29 @@ public class PatientTest {
 
     @Test
     public void shouldPassIfGenderValid() {
-        for (int i = 1; i < 4; i++) {
-            Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "gender", Integer.toString(i));
+            Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "gender", "M");
             assertEquals(0, constraintViolations.size());
-        }
     }
 
     @Test
     public void shouldFailIfGenderIsBlank() {
         Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "gender", null);
         assertEquals(1, constraintViolations.size());
-        assertEquals("1009", constraintViolations.iterator().next().getMessage());
+        assertEquals("1001", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
     public void shouldFailIfGenderIsInvalid() {
         Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "gender", "5");
         assertEquals(1, constraintViolations.size());
-        assertEquals("1010", constraintViolations.iterator().next().getMessage());
+        assertEquals("1004", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
     public void shouldFailIfNationalIdIsInvalid() {
         Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "nationalId", "1");
         assertEquals(1, constraintViolations.size());
-        assertEquals("1001", constraintViolations.iterator().next().getMessage());
+        assertEquals("1004", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
@@ -103,14 +101,14 @@ public class PatientTest {
     public void shouldFailIf_UID_LengthIsNotEqual_11() {
         Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "uid", "1");
         assertEquals(1, constraintViolations.size());
-        assertEquals("1027", constraintViolations.iterator().next().getMessage());
+        assertEquals("1004", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
     public void shouldFailIf_UUID_ContainSpecialCharacter() {
         Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "uid", "123456*8901");
         assertEquals(1, constraintViolations.size());
-        assertEquals("1027", constraintViolations.iterator().next().getMessage());
+        assertEquals("1004", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
@@ -123,14 +121,14 @@ public class PatientTest {
     public void shouldFailIfOccupationCodeIsLessThenOne() {
         Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "occupation", "00");
         assertEquals(1, constraintViolations.size());
-        assertEquals("1011", constraintViolations.iterator().next().getMessage());
+        assertEquals("1004", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
     public void shouldFailIfOccupationCodeIsGreaterThen92() {
         Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "occupation", "93");
         assertEquals(1, constraintViolations.size());
-        assertEquals("1011", constraintViolations.iterator().next().getMessage());
+        assertEquals("1004", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
@@ -153,7 +151,7 @@ public class PatientTest {
     public void shouldFailIfReligionIsInvalid() {
         Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "religion", "9");
         assertEquals(1, constraintViolations.size());
-        assertEquals("1031", constraintViolations.iterator().next().getMessage());
+        assertEquals("1004", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
@@ -165,81 +163,69 @@ public class PatientTest {
     @Test
     public void shouldFailIfBirthRegistrationNumberIsLessThan17() {
         Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "birthRegistrationNumber", "1234567489123456");
-        assertEquals("1002", constraintViolations.iterator().next().getMessage());
+        assertEquals("1004", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
     public void shouldFailIfBirthRegistrationNumberIsMoreThan17() {
         Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "birthRegistrationNumber", "123456748912345644");
-        assertEquals("1002", constraintViolations.iterator().next().getMessage());
+        assertEquals("1004", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
     public void shouldFailIfContainSpecialCharacter() {
         Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "birthRegistrationNumber", "123456748*12345644");
-        assertEquals("1002", constraintViolations.iterator().next().getMessage());
+        assertEquals("1004", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
     public void shouldPassIfFullNameBanglaIsValid() {
-        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "fullNameBangla", "এ বি এম আখতার হোসেন মন্ডল");
+        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "nameBangla", "এ বি এম আখতার হোসেন মন্ডল");
         assertEquals(0, constraintViolations.size());
     }
 
     @Test
     public void shouldFailIfFullNameBanglaIsMoreThan_120_Characters() {
-        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "fullNameBangla", "এ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডল");
-        assertEquals("1003", constraintViolations.iterator().next().getMessage());
+        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "nameBangla", "এ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডল");
+        assertEquals("1004", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
-    public void shouldFailIfFirstNameIsMoreThan_25_Characters() {
-        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "firstName", "janagiralamkabirkhanjahanaliahmadpuri");
-        assertEquals("1036", constraintViolations.iterator().next().getMessage());
+    public void shouldFailIfGivenNameIsMoreThan_100_Characters() {
+        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "givenName", "janagiralamkabirkhanjahanaliahmadpuri janagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpuri");
+        assertEquals("1004", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
-    public void shouldPassIfFirstNameIsValid() {
-        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "firstName", "imran");
+    public void shouldPassIfGivenNameIsValid() {
+        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "givenName", "imran");
         assertEquals(0, constraintViolations.size());
     }
 
     @Test
-    public void shouldPassIfLastNameIsValid() {
-        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "lastName", "imran");
+    public void shouldPassIfSurNameIsValid() {
+        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "surName", "imran");
         assertEquals(0, constraintViolations.size());
     }
 
     @Test
-    public void shouldFailIfLastNameIsMoreThan_25_Characters() {
-        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "lastName", "janagiralamkabirkhanjahanaliahmadpuri");
-        assertEquals("1037", constraintViolations.iterator().next().getMessage());
-    }
-
-    @Test
-    public void shouldPassIfMiddleNameIsValid() {
-        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "middleName", "imran");
-        assertEquals(0, constraintViolations.size());
-    }
-
-    @Test
-    public void shouldFailIfMiddleNameIsMoreThan_25_Characters() {
-        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "middleName", "janagiralamkabirkhanjahanaliahmadpuri");
-        assertEquals("1005", constraintViolations.iterator().next().getMessage());
+    public void shouldFailIfSurNameIsMoreThan_25_Characters() {
+        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "surName", "janagiralamkabirkhanjahanaliahmadpuri");
+        assertEquals("1004", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
     public void shouldFailIfEducationLevelIsGreaterThen20() {
         Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "educationLevel", "20");
         assertEquals(1, constraintViolations.size());
-        assertEquals("1012", constraintViolations.iterator().next().getMessage());
+        assertEquals("1004", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
     public void shouldFailIfEducationLevelIsNotTwoDigitFormat() {
         Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "educationLevel", "1");
         assertEquals(1, constraintViolations.size());
-        assertEquals("1012", constraintViolations.iterator().next().getMessage());
+        assertEquals("1004", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
@@ -251,15 +237,15 @@ public class PatientTest {
     }
 
     @Test
-    public void shouldFailIfPlaceOfBirthIsMoreThan_7_AlphabeticCharacters() {
-        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "placeOfBirth", "DhanmondiDhanmondi");
-        assertEquals("1038", constraintViolations.iterator().next().getMessage());
+    public void shouldFailIfPlaceOfBirthIsMoreThan_20_AlphabeticCharacters() {
+        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "placeOfBirth", "DhanmondiDmondiDmondiDmondiDmondiDmondiDhanmondi");
+        assertEquals("1004", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
     public void shouldFailIfPlaceOfBirthIsContainSpecialCharacterAndNumericCharacter() {
-        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "placeOfBirth", "9;");
-        assertEquals("1038", constraintViolations.iterator().next().getMessage());
+        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "placeOfBirth", "rr;");
+        assertEquals("1004", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
@@ -277,7 +263,7 @@ public class PatientTest {
     @Test
     public void shouldFailIfNationalityIsMoreThan_50_Characters() {
         Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "nationality", "bangladeshi bangladeshi bangladeshi bangladeshi bangladeshi bangladeshi ");
-        assertEquals("1033", constraintViolations.iterator().next().getMessage());
+        assertEquals("1004", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
@@ -292,6 +278,21 @@ public class PatientTest {
     public void shouldFailIfAliveIsInvalid() {
         Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "isAlive", "3");
         assertEquals(1, constraintViolations.size());
-        assertEquals("1041", constraintViolations.iterator().next().getMessage());
+        assertEquals("1004", constraintViolations.iterator().next().getMessage());
+    }
+
+    @Test
+    public void shouldPassIfMaritalStatusIsValid() {
+        for(int i = 1; i<6; i++) {
+            Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "maritalStatus", Integer.toString(i));
+            assertEquals(0, constraintViolations.size());
+        }
+    }
+
+    @Test
+    public void shouldFailIfMaritalStatusIsInvalid() {
+        Set<ConstraintViolation<Patient>> constraintViolations = validator.validateValue(Patient.class, "maritalStatus", "8");
+        assertEquals(1, constraintViolations.size());
+        assertEquals("1004", constraintViolations.iterator().next().getMessage());
     }
 }

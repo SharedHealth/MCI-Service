@@ -5,9 +5,8 @@ public class PatientQueryBuilder {
     public static final String HEALTH_ID = "health_id";
     public static final String NATIONAL_ID = "national_id";
     public static final String FULL_NAME_BANGLA = "full_name_bangla";
-    public static final String FIRST_NAME = "first_name";
-    public static final String MIDDLE_NAME = "middle_name";
-    public static final String LAST_NAME = "last_name";
+    public static final String GIVEN_NAME = "given_name";
+    public static final String SUR_NAME = "sur_name";
     public static final String DATE_OF_BIRTH = "date_of_birth";
     public static final String GENDER = "gender";
     public static final String OCCUPATION = "occupation";
@@ -20,16 +19,14 @@ public class PatientQueryBuilder {
     public static final String BIN_BRN = "bin_brn";
     public static final String UID ="uid";
     public static final String FATHERS_NAME_BANGLA ="fathers_name_bangla";
-    public static final String FATHERS_FIRST_NAME ="fathers_first_name";
-    public static final String FATHERS_MIDDLE_NAME ="fathers_middle_name";
-    public static final String FATHERS_LAST_NAME ="fathers_last_name";
+    public static final String FATHERS_GIVEN_NAME ="fathers_given_name";
+    public static final String FATHERS_SUR_NAME ="fathers_sur_name";
     public static final String FATHERS_UID ="fathers_uid";
     public static final String FATHERS_NID = "fathers_nid";
     public static final String FATHERS_BRN = "fathers_brn";
     public static final String MOTHERS_NAME_BANGLA = "mothers_name_bangla";
-    public static final String MOTHERS_FIRST_NAME = "mothers_first_name";
-    public static final String MOTHERS_MIDDLE_NAME = "mothers_middle_name";
-    public static final String MOTHERS_LAST_NAME = "mothers_last_name";
+    public static final String MOTHERS_GIVEN_NAME = "mothers_given_name";
+    public static final String MOTHERS_SUR_NAME = "mothers_sur_name";
     public static final String MOTHERS_UID = "mothers_uid";
     public static final String MOTHERS_NID = "mothers_nid";
     public static final String MOTHERS_BRN = "mothers_brn";
@@ -47,13 +44,13 @@ public class PatientQueryBuilder {
     public static final String HOLDING_NUMBER = "holding_number";
     public static final String STREET = "street";
     public static final String AREA_MOUJA = "area_mouja";
-    public static final String VILLAGE = "village";
+    public static final String VILLAGE = "village_id";
     public static final String POST_OFFICE = "post_office";
     public static final String POST_CODE = "post_code";
-    public static final String WARD = "ward";
-    public static final String THANA = "thana";
-    public static final String CITY_CORPORATION = "city_corporation";
-    public static final String COUNTRY = "country";
+    public static final String WARD = "ward_id";
+    public static final String THANA = "thana_id";
+    public static final String CITY_CORPORATION = "city_corporation_id";
+    public static final String COUNTRY = "country_code";
     public static final String PERMANENT_ADDRESS_LINE = "permanent_address_line";
     public static final String PERMANENT_DIVISION_ID = "permanent_division_id";
     public static final String PERMANENT_DISTRICT_ID = "permanent_district_id";
@@ -71,35 +68,33 @@ public class PatientQueryBuilder {
     public static final String PERMANENT_COUNTRY = "permanent_country";
     public static final String FULL_NAME = "full_name";
     public static final String IS_ALIVE = "is_alive";
-    public static final String TYPE_FATHER = "type_father";
-    public static final String TYPE_MOTHER = "type_mother";
     public static final String RELATIONS = "relations";
+    public static final String PRIMARY_CONTACT = "primary_contact";
+    public static final String CELL_NO = "cell_no";
+    public static final String PRIMARY_CELL_NO = "primary_cell_no";
 
     public static String getCreateQuery() {
-        return String.format("INSERT INTO patient ( %s,%s,%s,%s, %s, %s, %s, %s,%s,%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s) values " +
-                        "('%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s' );",
+        return String.format("INSERT INTO patient ( %s,%s,%s,%s,%s,%s,%s,%s,%s,%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s) values " +
+                        "('%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s' );",
                 HEALTH_ID,
                 NATIONAL_ID,
                 BIN_BRN,
                 FULL_NAME_BANGLA,
-                FIRST_NAME,
-                MIDDLE_NAME,
-                LAST_NAME,
+                GIVEN_NAME,
+                SUR_NAME,
                 DATE_OF_BIRTH,
                 GENDER,
                 OCCUPATION,
                 EDU_LEVEL,
                 FATHERS_NAME_BANGLA,
-                FATHERS_FIRST_NAME,
-                FATHERS_MIDDLE_NAME,
-                FATHERS_LAST_NAME,
+                FATHERS_GIVEN_NAME,
+                FATHERS_SUR_NAME,
                 FATHERS_BRN,
                 FATHERS_NID,
                 FATHERS_UID,
                 MOTHERS_NAME_BANGLA,
-                MOTHERS_FIRST_NAME,
-                MOTHERS_MIDDLE_NAME,
-                MOTHERS_LAST_NAME,
+                MOTHERS_GIVEN_NAME,
+                MOTHERS_SUR_NAME,
                 MOTHERS_BRN,
                 MOTHERS_NID,
                 MOTHERS_UID,
@@ -142,46 +137,39 @@ public class PatientQueryBuilder {
                 PERMANENT_CITY_CORPORATION,
                 PERMANENT_COUNTRY,
                 FULL_NAME,
-                TYPE_FATHER,
-                TYPE_MOTHER,
-                RELATIONS
+                RELATIONS,
+                PRIMARY_CONTACT,
+                CELL_NO,
+                PRIMARY_CELL_NO
 
         );
     }
 
     public static String getUpdateQuery() {
-        return String.format("UPDATE patient SET %s ='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s',%s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s',%s='%%s',%s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s' WHERE %s = '%%s'",
+        return String.format("UPDATE patient SET  %s='%%s',%s='%%s',%s='%%s',%s='%%s',%s='%%s',%s='%%s',%s='%%s',%s='%%s',%s='%%s',%s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s' WHERE %s ='%%s'",
                 NATIONAL_ID,
                 BIN_BRN,
                 FULL_NAME_BANGLA,
-                FIRST_NAME,
-                MIDDLE_NAME,
-                LAST_NAME,
+                GIVEN_NAME,
+                SUR_NAME,
                 DATE_OF_BIRTH,
                 GENDER,
                 OCCUPATION,
                 EDU_LEVEL,
                 FATHERS_NAME_BANGLA,
-                FATHERS_FIRST_NAME,
-                FATHERS_MIDDLE_NAME,
-                FATHERS_LAST_NAME,
+                FATHERS_GIVEN_NAME,
+                FATHERS_SUR_NAME,
                 FATHERS_BRN,
                 FATHERS_NID,
                 FATHERS_UID,
                 MOTHERS_NAME_BANGLA,
-                MOTHERS_FIRST_NAME,
-                MOTHERS_MIDDLE_NAME,
-                MOTHERS_LAST_NAME,
+                MOTHERS_GIVEN_NAME,
+                MOTHERS_SUR_NAME,
                 MOTHERS_BRN,
                 MOTHERS_NID,
                 MOTHERS_UID,
                 UID,
                 PLACE_OF_BIRTH,
-                MARITAL_STATUS,
-                MARRIAGE_ID,
-                SPOUSE_NAME,
-                SPOUSE_NAME_BANGLA,
-                SPOUSE_UID_NID,
                 RELIGION,
                 BLOOD_GROUP,
                 NATIONALITY,
@@ -219,7 +207,12 @@ public class PatientQueryBuilder {
                 PERMANENT_CITY_CORPORATION,
                 PERMANENT_COUNTRY,
                 FULL_NAME,
-                HEALTH_ID );
+                RELATIONS,
+                PRIMARY_CONTACT,
+                CELL_NO,
+                PRIMARY_CELL_NO,
+                HEALTH_ID
+        );
 
     }
 

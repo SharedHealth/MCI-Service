@@ -25,103 +25,118 @@ public class Patient {
 
     @JsonProperty("nid")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[\\d]{13}|[\\d]{17}", message = "1001")
+    @Pattern(regexp = "[\\d]{13}|[\\d]{17}", message = "1004")
     private String nationalId;
 
     @JsonProperty("bin_brn")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[\\d]{17}", message = "1002")
+    @Pattern(regexp = "[\\d]{17}", message = "1004")
     private String birthRegistrationNumber;
 
-    @JsonProperty("full_name_bangla")
+    @JsonProperty("name_bangla")
     @JsonInclude(NON_EMPTY)
-    @Length(lengthSize= 120, message = "1003")
-    private String fullNameBangla;
+    @Length(lengthSize= 120, message = "1004")
+    private String nameBangla;
 
-    @JsonProperty("first_name")
-    @NotBlank(message = "1004")
-    @Length(lengthSize= 25, message = "1036")
-    private String firstName;
+    @JsonProperty("given_name")
+    @NotBlank(message = "1001")
+    @Length(lengthSize= 100, message = "1004")
+    private String givenName;
 
-    @JsonProperty("middle_name")
-    @JsonInclude(NON_EMPTY)
-    @Length(lengthSize= 25, message = "1005")
-    private String middleName;
-
-    @JsonProperty("last_name")
-    @NotBlank(message = "1006")
-    @Length(lengthSize= 25, message = "1037")
-    private String lastName;
+    @JsonProperty("sur_name")
+    @NotBlank(message = "1001")
+    @Pattern(regexp = "^[a-zA-Z0-9]{0,25}$",message = "1004")
+    private String surName;
 
     @JsonProperty("date_of_birth")
-    @NotBlank(message = "1007")
-    @Date(format = "yyyy-MM-dd", message = "1008")
+    @NotBlank(message = "1001")
+    @Date(format = "yyyy-MM-dd", message = "1004")
     private String dateOfBirth;
 
     @JsonProperty("gender")
-    @NotBlank(message = "1009")
-    @Pattern(regexp = "[1-3]{1}", message = "1010")
+    @NotBlank(message = "1001")
+    @Pattern(regexp = "[M|F|O]{1}", message = "1004")
     private String gender;
 
     @JsonProperty("occupation")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[1-8]{1}[\\d]{1}|0[1-9]{1}|9[0-2]{1}", message = "1011")
+    @Pattern(regexp = "[1-8]{1}[\\d]{1}|0[1-9]{1}|9[0-2]{1}", message = "1004")
     private String occupation;
 
     @JsonProperty("edu_level")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[0-1]{1}[0-9]{1}", message = "1012")
+    @Pattern(regexp = "[0-1]{1}[0-9]{1}", message = "1004")
     private String educationLevel;
 
     @JsonProperty("relations")
     @JsonInclude(NON_EMPTY)
+    @Valid
     private List<Relation> relations;
 
     @JsonProperty("uid")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[a-zA-Z0-9]{11}", message = "1027")
+    @Pattern(regexp = "[a-zA-Z0-9]{11}", message = "1004")
     private String uid;
 
     @JsonInclude(NON_EMPTY)
     @JsonProperty("place_of_birth")
-    @Pattern(regexp = "^[a-zA-Z]{0,7}$", message = "1038")
+    @Pattern(regexp = "^[a-zA-Z0-9]{0,20}$", message = "1004")
     private String placeOfBirth;
 
     @JsonProperty("religion")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[1-7]{1}", message = "1031")
+    @Pattern(regexp = "[1-7]{1}", message = "1004")
     private String religion;
 
     @JsonProperty("blood_group")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[1-8]{1}", message = "1032")
+    @Pattern(regexp = "[1-8]{1}", message = "1004")
     private String bloodGroup;
 
     @JsonProperty("nationality")
     @JsonInclude(NON_EMPTY)
-    @Length(lengthSize= 50, message = "1033")
+    @Length(lengthSize= 50, message = "1004")
     private String nationality;
 
     @JsonProperty("disability")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[0-5]{1}", message = "1034")
+    @Pattern(regexp = "[0-5]{1}", message = "1004")
     private String disability;
 
     @JsonProperty("ethnicity")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[0-9]{2}", message = "1035")
+    @Pattern(regexp = "[0-9]{2}", message = "1004")
     private String ethnicity;
 
     @JsonProperty("present_address")
     @Valid
-    @Location(message = "1036")
+    @Location(message = "1004")
     private Address address;
 
+    @JsonProperty("primary_contact")
+    @JsonInclude(NON_EMPTY)
+    @Length(lengthSize= 100, message = "1004")
+    private String primaryContact;
+
+    @JsonProperty("cell_no")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "^[)(-+0-9]*$", message = "1004")
+    private String cellNo;
+
+    @JsonProperty("primary_cell_no")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "^[)(-+0-9]*$", message = "1004")
+    private String primaryCellNo;
 
     @JsonProperty("permanent_address")
     @JsonInclude(NON_EMPTY)
-    @Location(message = "1037")
+    @Location(message = "1004")
     private Address permanentAddress;
+
+    @JsonProperty("marital_status")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "[1-5]{1}", message = "1004")
+    private String maritalStatus;
 
     @JsonProperty("full_name")
     @JsonInclude(NON_EMPTY)
@@ -129,7 +144,7 @@ public class Patient {
 
     @JsonProperty("is_alive")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[1-2]{1}", message = "1041")
+    @Pattern(regexp = "[1-2]{1}", message = "1004")
     private String isAlive;
 
     @Override
@@ -158,28 +173,19 @@ public class Patient {
         this.healthId = healthId;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public String getGivenName() {
+        return givenName;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+    public void setGivenName(String givenName) {
+        this.givenName = givenName;
+    }
+    public String getSurName() {
+        return surName;
     }
 
-    public String getMiddleName() {
-        return middleName;
-    }
-
-    public void setMiddleName(String middleName) {
-        this.middleName = middleName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setSurName(String surName) {
+        this.surName = surName;
     }
 
     public String getDateOfBirth() {
@@ -230,12 +236,12 @@ public class Patient {
         this.birthRegistrationNumber = birthRegistrationNumber;
     }
 
-    public String getFullNameBangla() {
-        return fullNameBangla;
+    public String getNameBangla() {
+        return nameBangla;
     }
 
-    public void setFullNameBangla(String fullNameBangla) {
-        this.fullNameBangla = fullNameBangla;
+    public void setNameBangla(String nameBangla) {
+        this.nameBangla = nameBangla;
     }
 
     public String getUid() {
@@ -254,7 +260,7 @@ public class Patient {
         this.placeOfBirth = placeOfBirth;
     }
 
-    
+
     public String getReligion() {
         return religion;
     }
@@ -337,5 +343,37 @@ public class Patient {
 
     public void setRelations(List<Relation> relations) {
         this.relations = relations;
+    }
+
+    public String getPrimaryContact() {
+        return primaryContact;
+    }
+
+    public void setPrimaryContact(String primaryContact) {
+        this.primaryContact = primaryContact;
+    }
+
+    public String getCellNo() {
+        return cellNo;
+    }
+
+    public void setCellNo(String cellNo) {
+        this.cellNo = cellNo;
+    }
+
+    public String getPrimaryCellNo() {
+        return primaryCellNo;
+    }
+
+    public void setPrimaryCellNo(String primaryCellNo) {
+        this.primaryCellNo = primaryCellNo;
+    }
+
+    public String getMaritalStatus() {
+        return maritalStatus;
+    }
+
+    public void setMaritalStatus(String maritalStatus) {
+        this.maritalStatus = maritalStatus;
     }
 }

@@ -63,9 +63,9 @@ public class PatientRestApiTest {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
         patient = new Patient();
-        patient.setFirstName("Scott");
-        patient.setLastName("Tiger");
-        patient.setGender("1");
+        patient.setGivenName("Scott");
+        patient.setSurName("Tiger");
+        patient.setGender("M");
         patient.setDateOfBirth("2014-12-01");
         patient.setEducationLevel("01");
         patient.setOccupation("02");
@@ -76,10 +76,10 @@ public class PatientRestApiTest {
         address.setDivisionId("10");
         address.setDistrictId("04");
         address.setUpazillaId("09");
-        address.setCityCorporation("20");
-        address.setVillage("10");
-        address.setWard("01");
-        address.setCountry("103");
+        address.setCityCorporationId("20");
+        address.setVillageId("10");
+        address.setWardId("01");
+        address.setCountryCode("103");
 
         patient.setAddress(address);
 
@@ -102,7 +102,7 @@ public class PatientRestApiTest {
         MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
-        Assert.assertEquals("{\"code\":400,\"message\":\"invalid.request\",\"errors\":[{\"code\":2002,\"message\":\"Invalid address.addressLine\"}]}", result.getResponse().getContentAsString());
+        Assert.assertEquals("{\"code\":400,\"message\":\"invalid.request\",\"errors\":[{\"code\":1004,\"message\":\"Invalid address.addressLine\"}]}", result.getResponse().getContentAsString());
     }
 
     @Test
@@ -121,8 +121,8 @@ public class PatientRestApiTest {
         Collections.sort(errorInfoErrors);
 
         Assert.assertEquals(2, errorInfoErrors.size());
-        Assert.assertEquals(1010, errorInfoErrors.get(0).getCode());
-        Assert.assertEquals(2002, errorInfoErrors.get(1).getCode());
+        Assert.assertEquals(1004, errorInfoErrors.get(0).getCode());
+        Assert.assertEquals(1004, errorInfoErrors.get(1).getCode());
     }
 
     @Test

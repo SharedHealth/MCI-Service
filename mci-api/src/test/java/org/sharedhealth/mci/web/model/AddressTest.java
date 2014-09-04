@@ -166,7 +166,7 @@ public class AddressTest {
     }
 
     @Test
-    public void shouldFailIfPostCodeIsMoreThan_10_Characters() {
+    public void shouldFailIfPostCodeIsMoreThan_4_Characters() {
         Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "postCode", "jaanjirkh999999999999999999yghgh khkj jkhkjh kjh kk kjhkjh khjkhkj kj kj");
         printViolations(constraintViolations);
     }
@@ -179,72 +179,72 @@ public class AddressTest {
 
     @Test
     public void shouldHaveVillageConstrainAnnotation() {
-        assertAddressIdConstraint("village", new AddressIdConstraint("VILLAGE"));
+        assertAddressIdConstraint("villageId", new AddressIdConstraint("VILLAGE"));
     }
 
     @Test
     public void shouldPassIfVillageIdIsValid() {
-        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "village", "12");
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "villageId", "12");
         assertEquals(0, constraintViolations.size());
     }
 
     @Test
     public void shouldFailIfVillageIdIsInvalid() {
-        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "village", "abc");
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "villageId", "abc");
         assertEquals(1, constraintViolations.size());
         printViolations(constraintViolations);
     }
 
     @Test
     public void shouldHaveWardConstrainAnnotation() {
-        assertAddressIdConstraint("ward", new AddressIdConstraint("WARD"));
+        assertAddressIdConstraint("wardId", new AddressIdConstraint("WARD"));
     }
 
     @Test
     public void shouldPassIfWardIdIsValid() {
-        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "ward", "13");
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "wardId", "13");
         assertEquals(0, constraintViolations.size());
     }
 
     @Test
     public void shouldFailIfWardIdIsInvalid() {
-        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "ward", "abc");
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "wardId", "abc");
         assertEquals(1, constraintViolations.size());
         printViolations(constraintViolations);
     }
 
     @Test
     public void shouldHaveCountryConstrainAnnotation() {
-        assertAddressIdConstraint("country", new AddressIdConstraint("COUNTRY"));
+        assertAddressIdConstraint("countryCode", new AddressIdConstraint("COUNTRY"));
     }
 
     @Test
     public void shouldPassIfCountryIdIsValid() {
-        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "country", "124");
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "countryCode", "124");
         assertEquals(0, constraintViolations.size());
     }
 
     @Test
     public void shouldFailIfCountryIdIsInvalid() {
-        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "country", "abc");
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "countryCode", "abc");
         assertEquals(1, constraintViolations.size());
         printViolations(constraintViolations);
     }
 
     @Test
     public void shouldHaveCityCorporationConstrainAnnotation() {
-        assertAddressIdConstraint("cityCorporation", new AddressIdConstraint("CITYCORPORATION"));
+        assertAddressIdConstraint("cityCorporationId", new AddressIdConstraint("CITYCORPORATION"));
     }
 
     @Test
     public void shouldPassIfCityCorporationIsValid() {
-        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "cityCorporation", "12");
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "cityCorporationId", "12");
         assertEquals(0, constraintViolations.size());
     }
 
     @Test
     public void shouldFailIfCityCorporationIdIsInvalid() {
-        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "cityCorporation", "abc");
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "cityCorporationId", "abc");
         assertEquals(1, constraintViolations.size());
         printViolations(constraintViolations);
     }
