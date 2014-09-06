@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.validation.constraints.Location;
-import org.sharedhealth.mci.web.model.Address;
+import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.service.LocationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +49,7 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
         if(!(Pattern.compile("[\\d]{2}").matcher(unionOrWard).matches())) return false;
 
         try {
-            org.sharedhealth.mci.web.model.Location location = locationService.findByGeoCode(geoCode).get();
+            org.sharedhealth.mci.web.mapper.Location location = locationService.findByGeoCode(geoCode).get();
 
             if(!StringUtils.isBlank(location.getGeoCode())) {
                 return true;

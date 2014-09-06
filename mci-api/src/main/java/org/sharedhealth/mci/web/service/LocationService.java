@@ -2,7 +2,7 @@ package org.sharedhealth.mci.web.service;
 
 
 import org.sharedhealth.mci.web.infrastructure.persistence.LocationRepository;
-import org.sharedhealth.mci.web.model.Location;
+import org.sharedhealth.mci.web.mapper.Location;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFuture;

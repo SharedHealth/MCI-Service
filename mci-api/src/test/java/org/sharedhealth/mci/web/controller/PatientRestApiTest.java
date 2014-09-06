@@ -15,8 +15,8 @@ import org.mockito.MockitoAnnotations;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
 import org.sharedhealth.mci.web.config.WebMvcConfig;
 import org.sharedhealth.mci.web.exception.GlobalExceptionHandler.ErrorInfo;
-import org.sharedhealth.mci.web.model.Address;
-import org.sharedhealth.mci.web.model.Patient;
+import org.sharedhealth.mci.web.mapper.Address;
+import org.sharedhealth.mci.web.mapper.PatientMapper;
 import org.sharedhealth.mci.web.service.LocationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebAppConfiguration
 @ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
 public class PatientRestApiTest {
-    private static final Logger logger = LoggerFactory.getLogger(Patient.class);
+    private static final Logger logger = LoggerFactory.getLogger(PatientMapper.class);
     private static final String LOCATION_INSERT_QUERY = "INSERT INTO locations (geo_code, division_id, district_id, upazilla_id, pourashava_id, union_id)" +
             " values ('%s', '%s', '%s', '%s', '%s', '%s')";
     @Autowired
@@ -53,7 +53,7 @@ public class PatientRestApiTest {
     private CassandraOperations cqlTemplate;
 
     private MockMvc mockMvc;
-    private Patient patient;
+    private PatientMapper patientMapper;
     public static final String API_END_POINT = "/api/v1/patients";
     public static final String GEO_CODE = "1004092001";
 
@@ -62,13 +62,13 @@ public class PatientRestApiTest {
         MockitoAnnotations.initMocks(this);
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
-        patient = new Patient();
-        patient.setGivenName("Scott");
-        patient.setSurName("Tiger");
-        patient.setGender("M");
-        patient.setDateOfBirth("2014-12-01");
-        patient.setEducationLevel("01");
-        patient.setOccupation("02");
+        patientMapper = new PatientMapper();
+        patientMapper.setGivenName("Scott");
+        patientMapper.setSurName("Tiger");
+        patientMapper.setGender("M");
+        patientMapper.setDateOfBirth("2014-12-01");
+        patientMapper.setEducationLevel("01");
+        patientMapper.setOccupation("02");
 
 
         Address address = new Address();
@@ -81,14 +81,14 @@ public class PatientRestApiTest {
         address.setWardId("01");
         address.setCountryCode("103");
 
-        patient.setAddress(address);
+        patientMapper.setAddress(address);
 
         createLocation();
     }
 
     @Test
     public void shouldCreatePatient() throws Exception {
-        String json = new ObjectMapper().writeValueAsString(patient);
+        String json = new ObjectMapper().writeValueAsString(patientMapper);
 
         MvcResult result = mockMvc.perform(post(API_END_POINT).content(json).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -97,8 +97,8 @@ public class PatientRestApiTest {
 
     @Test
     public void shouldReturnBadRequestForInvalidRequestData() throws Exception {
-        patient.getAddress().setAddressLine("h");
-        String json = new ObjectMapper().writeValueAsString(patient);
+        patientMapper.getAddress().setAddressLine("h");
+        String json = new ObjectMapper().writeValueAsString(patientMapper);
         MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
@@ -107,9 +107,9 @@ public class PatientRestApiTest {
 
     @Test
     public void shouldReturnBadRequestWithErrorDetailsForMultipleInvalidRequestData() throws Exception {
-        patient.getAddress().setAddressLine("h");
-        patient.setGender("0");
-        String json = new ObjectMapper().writeValueAsString(patient);
+        patientMapper.getAddress().setAddressLine("h");
+        patientMapper.setGender("0");
+        String json = new ObjectMapper().writeValueAsString(patientMapper);
 
         MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
@@ -127,7 +127,7 @@ public class PatientRestApiTest {
 
     @Test
     public void shouldReturnBadRequestForInvalidJson() throws Exception {
-        String json = new ObjectMapper().writeValueAsString(patient);
+        String json = new ObjectMapper().writeValueAsString(patientMapper);
 
         MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content("invalidate" + json).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
-import org.sharedhealth.mci.web.model.Patient;
+import org.sharedhealth.mci.web.mapper.PatientMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
@@ -22,37 +22,37 @@ public class PatientService {
         this.patientRepository = patientRepository;
     }
 
-    public ListenableFuture<String> create(Patient patient) {
-        return patientRepository.create(patient);
+    public ListenableFuture<String> create(PatientMapper patientMapper) {
+        return patientRepository.create(patientMapper);
     }
-    public ListenableFuture<String> update(Patient patient,String healthId) {
-        return patientRepository.update(patient,healthId);
+    public ListenableFuture<String> update(PatientMapper patientMapper,String healthId) {
+        return patientRepository.update(patientMapper,healthId);
     }
 
-    public ListenableFuture<Patient> findByHealthId(String healthId) {
+    public ListenableFuture<PatientMapper> findByHealthId(String healthId) {
         return patientRepository.findByHealthId(healthId);
     }
 
-    public ListenableFuture<Patient> findByNationalId(String nationalId) {
+    public ListenableFuture<PatientMapper> findByNationalId(String nationalId) {
         return patientRepository.findByNationalId(nationalId);
     }
 
-    public ListenableFuture<Patient> findByBirthRegistrationNumber(String birthRegistrationNumber) {
+    public ListenableFuture<PatientMapper> findByBirthRegistrationNumber(String birthRegistrationNumber) {
         return patientRepository.findByBirthRegistrationNumber(birthRegistrationNumber);
     }
 
-    public ListenableFuture<Patient> findByName(String name) {
+    public ListenableFuture<PatientMapper> findByName(String name) {
         return patientRepository.findByName(name);
     }
-    public ListenableFuture<Patient> findByUid(String uid) {
+    public ListenableFuture<PatientMapper> findByUid(String uid) {
         return patientRepository.findByUid(uid);
     }
 
-    public ListenableFuture<List<Patient>> findAllByQuery(MultiValueMap parameters) {
-        return new ListenableFutureAdapter<List<Patient>, List<Patient>>(patientRepository.findAllByQuery(parameters)) {
+    public ListenableFuture<List<PatientMapper>> findAllByQuery(MultiValueMap parameters) {
+        return new ListenableFutureAdapter<List<PatientMapper>, List<PatientMapper>>(patientRepository.findAllByQuery(parameters)) {
             @Override
-            protected List<Patient> adapt(List<Patient> patients) throws ExecutionException {
-                return patients;
+            protected List<PatientMapper> adapt(List<PatientMapper> patientMappers) throws ExecutionException {
+                return patientMappers;
             }
         };
     }

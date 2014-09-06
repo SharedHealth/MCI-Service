@@ -7,9 +7,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.sharedhealth.mci.web.model.Address;
-import org.sharedhealth.mci.web.model.Location;
-import org.sharedhealth.mci.web.model.Patient;
+import org.sharedhealth.mci.web.mapper.Address;
+import org.sharedhealth.mci.web.mapper.Location;
+import org.sharedhealth.mci.web.mapper.PatientMapper;
 import org.sharedhealth.mci.web.service.LocationService;
 import org.sharedhealth.mci.web.service.PatientService;
 import org.sharedhealth.mci.web.utils.concurrent.PreResolvedListenableFuture;
@@ -40,7 +40,7 @@ public class PatientControllerTest {
     @Mock
     private LocalValidatorFactoryBean localValidatorFactoryBean;
 
-    private Patient patient;
+    private PatientMapper patientMapper;
     private Location location;
     private MockMvc mockMvc;
     private String nationalId = "1234567890123";
@@ -58,13 +58,13 @@ public class PatientControllerTest {
                 .setValidator(validator())
                 .build();
 
-        patient = new Patient();
-        patient.setNationalId(nationalId);
-        patient.setBirthRegistrationNumber(birthRegistrationNumber);
-        patient.setGivenName("Scott");
-        patient.setSurName("Tiger");
-        patient.setGender("M");
-        patient.setDateOfBirth("2014-12-01");
+        patientMapper = new PatientMapper();
+        patientMapper.setNationalId(nationalId);
+        patientMapper.setBirthRegistrationNumber(birthRegistrationNumber);
+        patientMapper.setGivenName("Scott");
+        patientMapper.setSurName("Tiger");
+        patientMapper.setGender("M");
+        patientMapper.setDateOfBirth("2014-12-01");
 
         Address address = new Address();
         address.setAddressLine("house-10");
@@ -76,7 +76,7 @@ public class PatientControllerTest {
         address.setWardId("01");
         address.setCountryCode("103");
 
-        patient.setAddress(address);
+        patientMapper.setAddress(address);
 
         location = new Location();
 
@@ -91,54 +91,54 @@ public class PatientControllerTest {
 
     @Test
     public void shouldCreatePatientAndReturnHealthId() throws Exception {
-        String json = new ObjectMapper().writeValueAsString(patient);
+        String json = new ObjectMapper().writeValueAsString(patientMapper);
         String healthId = "healthId-100";
         when(locationService.findByGeoCode(GEO_CODE)).thenReturn(new PreResolvedListenableFuture<>(location));
-        when(patientService.create(patient)).thenReturn(new PreResolvedListenableFuture<>(healthId));
+        when(patientService.create(patientMapper)).thenReturn(new PreResolvedListenableFuture<>(healthId));
 
         mockMvc.perform(post(API_END_POINT).content(json).contentType(APPLICATION_JSON))
                 .andExpect(request().asyncResult(new ResponseEntity<>(healthId, CREATED)));
-        verify(patientService).create(patient);
+        verify(patientService).create(patientMapper);
     }
 
     @Test
     public void shouldFindPatientByHealthId() throws Exception {
         String healthId = "healthId-100";
-        when(patientService.findByHealthId(healthId)).thenReturn(new PreResolvedListenableFuture<>(patient));
+        when(patientService.findByHealthId(healthId)).thenReturn(new PreResolvedListenableFuture<>(patientMapper));
         mockMvc.perform(get(API_END_POINT + "/" + healthId))
-                .andExpect(request().asyncResult(new ResponseEntity<>(patient, OK)));
+                .andExpect(request().asyncResult(new ResponseEntity<>(patientMapper, OK)));
         verify(patientService).findByHealthId(healthId);
     }
 
     @Test
     public void shouldFindPatientByNationalId() throws Exception {
-        when(patientService.findByNationalId(nationalId)).thenReturn(new PreResolvedListenableFuture<>(patient));
+        when(patientService.findByNationalId(nationalId)).thenReturn(new PreResolvedListenableFuture<>(patientMapper));
         mockMvc.perform(get(API_END_POINT + "?nid=" + nationalId))
-                .andExpect(request().asyncResult(new ResponseEntity<>(patient, OK)));
+                .andExpect(request().asyncResult(new ResponseEntity<>(patientMapper, OK)));
         verify(patientService).findByNationalId(nationalId);
     }
 
     @Test
     public void shouldFindPatientByBirthRegistrationNumber() throws Exception {
-        when(patientService.findByBirthRegistrationNumber(birthRegistrationNumber)).thenReturn(new PreResolvedListenableFuture<>(patient));
+        when(patientService.findByBirthRegistrationNumber(birthRegistrationNumber)).thenReturn(new PreResolvedListenableFuture<>(patientMapper));
         mockMvc.perform(get(API_END_POINT + "?bin_brn=" + birthRegistrationNumber))
-                .andExpect(request().asyncResult(new ResponseEntity<>(patient, OK)));
+                .andExpect(request().asyncResult(new ResponseEntity<>(patientMapper, OK)));
         verify(patientService).findByBirthRegistrationNumber(birthRegistrationNumber);
     }
 
     @Test
     public void shouldFindPatientByUid() throws Exception {
-        when(patientService.findByUid(uid)).thenReturn(new PreResolvedListenableFuture<>(patient));
+        when(patientService.findByUid(uid)).thenReturn(new PreResolvedListenableFuture<>(patientMapper));
         mockMvc.perform(get(API_END_POINT + "?uid=" + uid))
-                .andExpect(request().asyncResult(new ResponseEntity<>(patient, OK)));
+                .andExpect(request().asyncResult(new ResponseEntity<>(patientMapper, OK)));
         verify(patientService).findByUid(uid);
     }
 
     @Test
     public void shouldFindPatientByName() throws Exception {
-        when(patientService.findByName(name.toLowerCase())).thenReturn(new PreResolvedListenableFuture<>(patient));
+        when(patientService.findByName(name.toLowerCase())).thenReturn(new PreResolvedListenableFuture<>(patientMapper));
         mockMvc.perform(get(API_END_POINT + "?name=" + name))
-                .andExpect(request().asyncResult(new ResponseEntity<>(patient, OK)));
+                .andExpect(request().asyncResult(new ResponseEntity<>(patientMapper, OK)));
         verify(patientService).findByName(name.toLowerCase());
     }
 

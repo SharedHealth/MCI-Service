@@ -1,4 +1,4 @@
-package org.sharedhealth.mci.web.model;
+package org.sharedhealth.mci.web.mapper;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;

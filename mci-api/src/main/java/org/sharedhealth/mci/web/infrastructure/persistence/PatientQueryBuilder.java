@@ -73,78 +73,6 @@ public class PatientQueryBuilder {
     public static final String CELL_NO = "cell_no";
     public static final String PRIMARY_CELL_NO = "primary_cell_no";
 
-    public static String getCreateQuery() {
-        return String.format("INSERT INTO patient ( %s,%s,%s,%s,%s,%s,%s,%s,%s,%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s) values " +
-                        "('%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s','%%s' );",
-                HEALTH_ID,
-                NATIONAL_ID,
-                BIN_BRN,
-                FULL_NAME_BANGLA,
-                GIVEN_NAME,
-                SUR_NAME,
-                DATE_OF_BIRTH,
-                GENDER,
-                OCCUPATION,
-                EDU_LEVEL,
-                FATHERS_NAME_BANGLA,
-                FATHERS_GIVEN_NAME,
-                FATHERS_SUR_NAME,
-                FATHERS_BRN,
-                FATHERS_NID,
-                FATHERS_UID,
-                MOTHERS_NAME_BANGLA,
-                MOTHERS_GIVEN_NAME,
-                MOTHERS_SUR_NAME,
-                MOTHERS_BRN,
-                MOTHERS_NID,
-                MOTHERS_UID,
-                UID,
-                PLACE_OF_BIRTH,
-                RELIGION,
-                BLOOD_GROUP,
-                NATIONALITY,
-                DISABILITY,
-                ETHNICITY,
-                IS_ALIVE,
-                ADDRESS_LINE,
-                DIVISION_ID,
-                DISTRICT_ID,
-                UPAZILLA_ID,
-                UNION_ID,
-                HOLDING_NUMBER,
-                STREET,
-                AREA_MOUJA,
-                VILLAGE,
-                POST_OFFICE,
-                POST_CODE,
-                WARD,
-                THANA,
-                CITY_CORPORATION,
-                COUNTRY,
-                PERMANENT_ADDRESS_LINE,
-                PERMANENT_DIVISION_ID,
-                PERMANENT_DISTRICT_ID,
-                PERMANENT_UPAZILLA_ID,
-                PERMANENT_UNION_ID,
-                PERMANENT_HOLDING_NUMBER,
-                PERMANENT_STREET,
-                PERMANENT_AREA_MOUJA,
-                PERMANENT_VILLAGE,
-                PERMANENT_POST_OFFICE,
-                PERMANENT_POST_CODE,
-                PERMANENT_WARD,
-                PERMANENT_THANA,
-                PERMANENT_CITY_CORPORATION,
-                PERMANENT_COUNTRY,
-                FULL_NAME,
-                RELATIONS,
-                PRIMARY_CONTACT,
-                CELL_NO,
-                PRIMARY_CELL_NO
-
-        );
-    }
-
     public static String getUpdateQuery() {
         return String.format("UPDATE patient SET  %s='%%s',%s='%%s',%s='%%s',%s='%%s',%s='%%s',%s='%%s',%s='%%s',%s='%%s',%s='%%s',%s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s', %s='%%s' WHERE %s ='%%s'",
                 NATIONAL_ID,
@@ -234,9 +162,5 @@ public class PatientQueryBuilder {
 
     public static String getFindByUidQuery() {
         return String.format("SELECT * FROM patient WHERE %s = '%%s'", UID);
-    }
-
-    public static String getFindAllQuery() {
-        return String.format("SELECT * FROM patient");
     }
 }

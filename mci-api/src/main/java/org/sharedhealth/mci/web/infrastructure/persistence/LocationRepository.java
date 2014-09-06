@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Row;
 import com.google.common.util.concurrent.SettableFuture;
-import org.sharedhealth.mci.web.model.Location;
+import org.sharedhealth.mci.web.mapper.Location;
 import org.sharedhealth.mci.web.utils.concurrent.SimpleListenableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

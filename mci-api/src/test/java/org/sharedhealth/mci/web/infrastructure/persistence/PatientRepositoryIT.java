@@ -9,8 +9,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
 import org.sharedhealth.mci.web.config.WebMvcConfig;
-import org.sharedhealth.mci.web.model.Address;
-import org.sharedhealth.mci.web.model.Patient;
+import org.sharedhealth.mci.web.mapper.Address;
+import org.sharedhealth.mci.web.mapper.PatientMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.cassandra.core.CassandraOperations;
@@ -32,7 +32,7 @@ public class PatientRepositoryIT {
     @Autowired
     private PatientRepository patientRepository;
 
-    private Patient patient;
+    private PatientMapper patientMapper;
     private String nationalId = "1234567890123";
     private String birthRegistrationNumber = "12345678901234567";
     private String uid = "12345678901";
@@ -40,16 +40,16 @@ public class PatientRepositoryIT {
 
     @Before
     public void setup() throws ExecutionException, InterruptedException {
-        patient = new Patient();
-        patient.setNationalId(nationalId);
-        patient.setBirthRegistrationNumber(birthRegistrationNumber);
-        patient.setUid(uid);
-        patient.setGivenName("Scott");
-        patient.setSurName("Tiger");
-        patient.setDateOfBirth("2014-12-01");
-        patient.setGender("M");
-        patient.setOccupation("salaried");
-        patient.setEducationLevel("BA");
+        patientMapper = new PatientMapper();
+        patientMapper.setNationalId(nationalId);
+        patientMapper.setBirthRegistrationNumber(birthRegistrationNumber);
+        patientMapper.setUid(uid);
+        patientMapper.setGivenName("Scott");
+        patientMapper.setSurName("Tiger");
+        patientMapper.setDateOfBirth("2014-12-01");
+        patientMapper.setGender("M");
+        patientMapper.setOccupation("salaried");
+        patientMapper.setEducationLevel("BA");
 
         Address address = new Address();
         address.setAddressLine("house-10");
@@ -57,17 +57,17 @@ public class PatientRepositoryIT {
         address.setDistrictId("1020");
         address.setUpazillaId("102030");
         address.setUnionId("10203040");
-        patient.setAddress(address);
+        patientMapper.setAddress(address);
 
     }
 
     @Test
     public void shouldFindPatientWithMatchingGeneratedHealthId() throws ExecutionException, InterruptedException {
-        String healthId = patientRepository.create(patient).get();
-        Patient p = patientRepository.findByHealthId(healthId).get();
+        String healthId = patientRepository.create(patientMapper).get();
+        PatientMapper p = patientRepository.findByHealthId(healthId).get();
         assertNotNull(p);
-        patient.setHealthId(healthId);
-        assertEquals(patient, p);
+        patientMapper.setHealthId(healthId);
+        assertEquals(patientMapper, p);
     }
 
     @Test(expected = ExecutionException.class)
@@ -77,25 +77,25 @@ public class PatientRepositoryIT {
 
     @Test(expected = ExecutionException.class)
     public void shouldThrowException_IfInvalidHealthIdProvidedForCreate() throws ExecutionException, InterruptedException {
-        patient.setHealthId("12");
-        patientRepository.create(patient).get();
+        patientMapper.setHealthId("12");
+        patientRepository.create(patientMapper).get();
     }
 
     @Test(expected = ExecutionException.class)
     public void shouldThrowException_IfPatientExistWithProvidedHealthIdOnCreate() throws ExecutionException, InterruptedException {
-        patientRepository.create(patient).get();
-        patient.setUid("12345678123");
-        patient.setBirthRegistrationNumber("12345678901234568");
-        patientRepository.create(patient).get();
+        patientRepository.create(patientMapper).get();
+        patientMapper.setUid("12345678123");
+        patientMapper.setBirthRegistrationNumber("12345678901234568");
+        patientRepository.create(patientMapper).get();
     }
 
     @Test
     public void shouldFindPatientWithMatchingNationalId() throws ExecutionException, InterruptedException {
-        String hid = patientRepository.create(patient).get();
-        final Patient p = patientRepository.findByNationalId(nationalId).get();
+        String hid = patientRepository.create(patientMapper).get();
+        final PatientMapper p = patientRepository.findByNationalId(nationalId).get();
         assertNotNull(p);
-        patient.setHealthId(hid);
-        assertEquals(patient, p);
+        patientMapper.setHealthId(hid);
+        assertEquals(patientMapper, p);
     }
 
     @Test(expected = ExecutionException.class)
@@ -105,11 +105,11 @@ public class PatientRepositoryIT {
 
     @Test
     public void shouldFindPatientWithMatchingBirthRegistrationNumber() throws ExecutionException, InterruptedException {
-        String hid = patientRepository.create(patient).get();
-        final Patient p = patientRepository.findByBirthRegistrationNumber(birthRegistrationNumber).get();
+        String hid = patientRepository.create(patientMapper).get();
+        final PatientMapper p = patientRepository.findByBirthRegistrationNumber(birthRegistrationNumber).get();
         assertNotNull(p);
-        patient.setHealthId(hid);
-        assertEquals(patient, p);
+        patientMapper.setHealthId(hid);
+        assertEquals(patientMapper, p);
     }
 
     @Test(expected = ExecutionException.class)
@@ -119,12 +119,12 @@ public class PatientRepositoryIT {
 
     @Test
     public void shouldFindPatientWithMatchingUid() throws ExecutionException, InterruptedException {
-        String hid = patientRepository.create(patient).get();
+        String hid = patientRepository.create(patientMapper).get();
 
-        final Patient p = patientRepository.findByUid(uid).get();
+        final PatientMapper p = patientRepository.findByUid(uid).get();
         assertNotNull(p);
-        patient.setHealthId(hid);
-        assertEquals(patient, p);
+        patientMapper.setHealthId(hid);
+        assertEquals(patientMapper, p);
     }
 
     @Test(expected = ExecutionException.class)

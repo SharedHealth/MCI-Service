@@ -1,4 +1,4 @@
-package org.sharedhealth.mci.web.model;
+package org.sharedhealth.mci.web.mapper;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;

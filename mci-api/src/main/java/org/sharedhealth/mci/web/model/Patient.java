@@ -1,151 +1,240 @@
 package org.sharedhealth.mci.web.model;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Pattern;
-import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Date;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.validator.constraints.NotBlank;
-import org.sharedhealth.mci.validation.constraints.Date;
-import org.sharedhealth.mci.validation.constraints.Length;
-import org.sharedhealth.mci.validation.constraints.Location;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.data.cassandra.mapping.Column;
+import org.springframework.data.cassandra.mapping.PrimaryKey;
+import org.springframework.data.cassandra.mapping.Table;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
+import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
 
+@Table(value = "patient")
 public class Patient {
 
-    private static final Logger logger = LoggerFactory.getLogger(Patient.class);
-    @JsonProperty("hid")
+    @PrimaryKey(HEALTH_ID)
     private String healthId;
 
-    @JsonProperty("nid")
-    @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[\\d]{13}|[\\d]{17}", message = "1002")
+    @Column(NATIONAL_ID)
     private String nationalId;
 
-    @JsonProperty("bin_brn")
-    @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[\\d]{17}", message = "1002")
+    @Column(BIN_BRN)
     private String birthRegistrationNumber;
 
-    @JsonProperty("name_bangla")
-    @JsonInclude(NON_EMPTY)
-    @Length(lengthSize= 120, message = "1002")
-    private String nameBangla;
+    @Column(FULL_NAME_BANGLA)
+    private String fullNameBangla;
 
-    @JsonProperty("given_name")
-    @NotBlank(message = "1001")
-    @Length(lengthSize= 100, message = "1002")
+    @Column(GIVEN_NAME)
     private String givenName;
 
-    @JsonProperty("sur_name")
-    @NotBlank(message = "1001")
-    @Pattern(regexp = "^[a-zA-Z0-9]{0,25}$",message = "1002")
+    @Column(SUR_NAME)
     private String surName;
 
-    @JsonProperty("date_of_birth")
-    @NotBlank(message = "1001")
-    @Date(format = "yyyy-MM-dd", message = "1002")
+    @Column(DATE_OF_BIRTH)
     private String dateOfBirth;
 
-    @JsonProperty("gender")
-    @NotBlank(message = "1001")
-    @Pattern(regexp = "[M|F|O]{1}", message = "1004")
+    @Column(GENDER)
     private String gender;
 
-    @JsonProperty("occupation")
-    @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[1-8]{1}[\\d]{1}|0[1-9]{1}|9[0-2]{1}", message = "1004")
+    @Column(OCCUPATION)
     private String occupation;
 
-    @JsonProperty("edu_level")
-    @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[0-1]{1}[0-9]{1}", message = "1004")
+    @Column(EDU_LEVEL)
     private String educationLevel;
 
-    @JsonProperty("relations")
-    @JsonInclude(NON_EMPTY)
-    @Valid
-    private List<Relation> relations;
+    @Column(FATHERS_NAME_BANGLA)
+    private String fathersNameBangla;
 
-    @JsonProperty("uid")
-    @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[a-zA-Z0-9]{11}", message = "1002")
+    @Column(FATHERS_GIVEN_NAME)
+    private String fathersGivenName;
+
+    @Column(FATHERS_SUR_NAME)
+    private String fathersSurName;
+
+    @Column(FATHERS_UID)
+    private String fathersUid;
+
+    @Column(FATHERS_NID)
+    private String fathersNid;
+
+    @Column(FATHERS_BRN)
+    private String fathersBrn;
+
+    @Column(MOTHERS_NAME_BANGLA)
+    private String mothersNameBangla;
+
+    @Column(MOTHERS_GIVEN_NAME)
+    private String mothersGivenName;
+
+    @Column(MOTHERS_SUR_NAME)
+    private String mothersSurName;
+
+    @Column(MOTHERS_UID)
+    private String mothersUid;
+
+    @Column(MOTHERS_NID)
+    private String mothersNid;
+
+    @Column(MOTHERS_BRN)
+    private String mothersBrn;
+
+    @Column(UID)
     private String uid;
 
-    @JsonInclude(NON_EMPTY)
-    @JsonProperty("place_of_birth")
-    @Pattern(regexp = "^[a-zA-Z0-9]{0,20}$", message = "1002")
+    @Column(PLACE_OF_BIRTH)
     private String placeOfBirth;
 
-    @JsonProperty("religion")
-    @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[1-7]{1}", message = "1004")
-    private String religion;
-
-    @JsonProperty("blood_group")
-    @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[1-8]{1}", message = "1004")
-    private String bloodGroup;
-
-    @JsonProperty("nationality")
-    @JsonInclude(NON_EMPTY)
-    @Length(lengthSize= 50, message = "1002")
-    private String nationality;
-
-    @JsonProperty("disability")
-    @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[0-5]{1}", message = "1004")
-    private String disability;
-
-    @JsonProperty("ethnicity")
-    @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[0-9]{2}", message = "1004")
-    private String ethnicity;
-
-    @JsonProperty("present_address")
-    @Valid
-    @Location(message = "1002")
-    private Address address;
-
-    @JsonProperty("primary_contact")
-    @JsonInclude(NON_EMPTY)
-    @Length(lengthSize= 100, message = "1002")
-    private String primaryContact;
-
-    @JsonProperty("cell_no")
-    @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[)(-+0-9]*$", message = "1002")
-    private String cellNo;
-
-    @JsonProperty("primary_cell_no")
-    @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[)(-+0-9]*$", message = "1002")
-    private String primaryCellNo;
-
-    @JsonProperty("permanent_address")
-    @JsonInclude(NON_EMPTY)
-    @Location(message = "1004")
-    private Address permanentAddress;
-
-    @JsonProperty("marital_status")
-    @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[1-5]{1}", message = "1004")
+    @Column(MARITAL_STATUS)
     private String maritalStatus;
 
-    @JsonProperty("full_name")
-    @JsonInclude(NON_EMPTY)
+    @Column(RELIGION)
+    private String religion;
+
+    @Column(BLOOD_GROUP)
+    private String bloodGroup;
+
+    @Column(NATIONALITY)
+    private String nationality;
+
+    @Column(DISABILITY)
+    private String disability;
+
+    @Column(ETHNICITY)
+    private String ethnicity;
+
+    @Column(ADDRESS_LINE)
+    private String addressLine;
+
+    @Column(DIVISION_ID)
+    private String divisionId;
+
+    @Column(DISTRICT_ID)
+    private String districtId;
+
+    @Column(UPAZILLA_ID)
+    private String upazillaId;
+
+    @Column(UNION_ID)
+    private String unionId;
+
+    @Column(HOLDING_NUMBER)
+    private String holdingNumber;
+
+    @Column(STREET)
+    private String street;
+
+    @Column(AREA_MOUJA)
+    private String areaMouja;
+
+    @Column(VILLAGE)
+    private String village;
+
+    @Column(POST_OFFICE)
+    private String postOffice;
+
+    @Column(POST_CODE)
+    private String postCode;
+
+    @Column(WARD)
+    private String wardId;
+
+    @Column(THANA)
+    private String thanaId;
+
+    @Column(CITY_CORPORATION)
+    private String cityCorporationId;
+
+    @Column(COUNTRY)
+    private String countryCode;
+
+    @Column("location_level1")
+    private String locationLevel1;
+
+    @Column("location_level2")
+    private String locationLevel2;
+
+    @Column("location_level3")
+    private String locationLevel3;
+
+    @Column("location_level4")
+    private String locationLevel4;
+
+    @Column("location_level5")
+    private String locationLevel5;
+
+    @Column(PERMANENT_ADDRESS_LINE)
+    private String permanentAddressLine;
+
+    @Column(PERMANENT_DIVISION_ID)
+    private String permanentDivisionId;
+
+    @Column(PERMANENT_DISTRICT_ID)
+    private String permanentDistrictId;
+
+    @Column(PERMANENT_UPAZILLA_ID)
+    private String permanentUpazillaId;
+
+    @Column(PERMANENT_UNION_ID)
+    private String permanentUnionId;
+
+    @Column(PERMANENT_HOLDING_NUMBER)
+    private String permanentHoldingNumber;
+
+    @Column(PERMANENT_STREET)
+    private String permanentStreet;
+
+    @Column(PERMANENT_AREA_MOUJA)
+    private String permanentAreaMouja;
+
+    @Column(PERMANENT_VILLAGE)
+    private String permanentVillage;
+
+    @Column(PERMANENT_POST_OFFICE)
+    private String permanentPostOffice;
+
+    @Column(PERMANENT_POST_CODE)
+    private String permanentPostCode;
+
+    @Column(PERMANENT_WARD)
+    private String permanentWardId;
+
+    @Column(PERMANENT_THANA)
+    private String permanentThanaId;
+
+    @Column(PERMANENT_CITY_CORPORATION)
+    private String permanentCityCorporationId;
+
+    @Column(PERMANENT_COUNTRY)
+    private String permanentCountryCode;
+
+    @Column(FULL_NAME)
     private String fullName;
 
-    @JsonProperty("is_alive")
-    @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[1-2]{1}", message = "1004")
+    @Column(IS_ALIVE)
     private String isAlive;
+
+    @Column(PRIMARY_CONTACT)
+    private String primaryContact;
+
+    @Column(PRIMARY_CELL_NO)
+    private String primaryCellNo;
+
+    @Column(CELL_NO)
+    private String cellNo;
+
+    @Column("created_at")
+    private Date createdAt;
+
+    @Column("updated_at")
+    private Date updatedAt;
+
+    @Column("time_uid")
+    private String timeUid;
+
+    @Column(RELATIONS)
+    private String relations;
 
     @Override
     public boolean equals(Object rhs) {
@@ -180,6 +269,7 @@ public class Patient {
     public void setGivenName(String givenName) {
         this.givenName = givenName;
     }
+
     public String getSurName() {
         return surName;
     }
@@ -194,14 +284,6 @@ public class Patient {
 
     public void setDateOfBirth(String dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
-    }
-
-    public Address getAddress() {
-        return address;
-    }
-
-    public void setAddress(Address address) {
-        this.address = address;
     }
 
     public String getGender() {
@@ -236,12 +318,12 @@ public class Patient {
         this.birthRegistrationNumber = birthRegistrationNumber;
     }
 
-    public String getNameBangla() {
-        return nameBangla;
+    public String getFullNameBangla() {
+        return fullNameBangla;
     }
 
-    public void setNameBangla(String nameBangla) {
-        this.nameBangla = nameBangla;
+    public void setFullNameBangla(String fullNameBangla) {
+        this.fullNameBangla = fullNameBangla;
     }
 
     public String getUid() {
@@ -252,6 +334,95 @@ public class Patient {
         this.uid = uid;
     }
 
+    public String getFathersNameBangla() {
+        return fathersNameBangla;
+    }
+
+    public void setFathersNameBangla(String fathersNameBangla) {
+        this.fathersNameBangla = fathersNameBangla;
+    }
+
+    public String getFathersSurName() {
+        return fathersSurName;
+    }
+
+    public void setFathersSurName(String fathersSurName) {
+        this.fathersSurName = fathersSurName;
+    }
+
+    public String getFathersUid() {
+        return fathersUid;
+    }
+
+    public void setFathersUid(String fathersUid) {
+        this.fathersUid = fathersUid;
+    }
+
+    public String getFathersNid() {
+        return fathersNid;
+    }
+
+    public void setFathersNid(String fathersNid) {
+        this.fathersNid = fathersNid;
+    }
+
+    public String getFathersBrn() {
+        return fathersBrn;
+    }
+
+    public void setFathersBrn(String fathersBrn) {
+        this.fathersBrn = fathersBrn;
+    }
+
+    public String getMothersNameBangla() {
+        return mothersNameBangla;
+    }
+
+    public void setMothersNameBangla(String mothersNameBangla) {
+        this.mothersNameBangla = mothersNameBangla;
+    }
+
+    public String getmothersGivenName() {
+        return mothersGivenName;
+    }
+
+    public void setMothersGivenName(String mothersGivenName) {
+        this.mothersGivenName = mothersGivenName;
+    }
+
+    public String getMothersSurName() {
+        return mothersSurName;
+    }
+
+    public void setMothersSurName(String mothersSurName) {
+        this.mothersSurName = mothersSurName;
+    }
+
+
+    public String getMothersUid() {
+        return mothersUid;
+    }
+
+    public void setMothersUid(String mothersUid) {
+        this.mothersUid = mothersUid;
+    }
+
+    public String getMothersNid() {
+        return mothersNid;
+    }
+
+    public void setMothersNid(String mothersNid) {
+        this.mothersNid = mothersNid;
+    }
+
+    public String getMothersBrn() {
+        return mothersBrn;
+    }
+
+    public void setMothersBrn(String mothersBrn) {
+        this.mothersBrn = mothersBrn;
+    }
+
     public String getPlaceOfBirth() {
         return placeOfBirth;
     }
@@ -260,6 +431,13 @@ public class Patient {
         this.placeOfBirth = placeOfBirth;
     }
 
+    public String getMaritalStatus() {
+        return maritalStatus;
+    }
+
+    public void setMaritalStatus(String maritalStatus) {
+        this.maritalStatus = maritalStatus;
+    }
 
     public String getReligion() {
         return religion;
@@ -301,8 +479,12 @@ public class Patient {
         this.ethnicity = ethnicity;
     }
 
-    public Address getPermanentAddress() {
-        return permanentAddress;
+    public String getFathersGivenName() {
+        return fathersGivenName;
+    }
+
+    public void setFathersGivenName(String fathersGivenName) {
+        this.fathersGivenName = fathersGivenName;
     }
 
     public String getFullName() {
@@ -313,10 +495,6 @@ public class Patient {
         this.fullName = fullName;
     }
 
-    public void setPermanentAddress(Address permanentAddress) {
-        this.permanentAddress = permanentAddress;
-    }
-
     public String getIsAlive() {
         return isAlive;
     }
@@ -325,23 +503,267 @@ public class Patient {
         this.isAlive = isAlive;
     }
 
-    public List<Relation> getRelations() {
+    public String getAddressLine() {
+        return addressLine;
+    }
+
+    public void setAddressLine(String addressLine) {
+        this.addressLine = addressLine;
+    }
+
+    public String getDivisionId() {
+        return divisionId;
+    }
+
+    public void setDivisionId(String divisionId) {
+        this.divisionId = divisionId;
+    }
+
+    public String getDistrictId() {
+        return districtId;
+    }
+
+    public void setDistrictId(String districtId) {
+        this.districtId = districtId;
+    }
+
+    public String getUpazillaId() {
+        return upazillaId;
+    }
+
+    public void setUpazillaId(String upazillaId) {
+        this.upazillaId = upazillaId;
+    }
+
+    public String getUnionId() {
+        return unionId;
+    }
+
+    public void setUnionId(String unionId) {
+        this.unionId = unionId;
+    }
+
+    public String getHoldingNumber() {
+        return holdingNumber;
+    }
+
+    public void setHoldingNumber(String holdingNumber) {
+        this.holdingNumber = holdingNumber;
+    }
+
+    public String getStreet() {
+        return street;
+    }
+
+    public void setStreet(String street) {
+        this.street = street;
+    }
+
+    public String getAreaMouja() {
+        return areaMouja;
+    }
+
+    public void setAreaMouja(String areaMouja) {
+        this.areaMouja = areaMouja;
+    }
+
+    public String getVillage() {
+        return village;
+    }
+
+    public void setVillage(String village) {
+        this.village = village;
+    }
+
+    public String getPostOffice() {
+        return postOffice;
+    }
+
+    public void setPostOffice(String postOffice) {
+        this.postOffice = postOffice;
+    }
+
+    public String getPostCode() {
+        return postCode;
+    }
+
+    public void setPostCode(String postCode) {
+        this.postCode = postCode;
+    }
+
+    public String getWardId() {
+        return wardId;
+    }
+
+    public void setWardId(String wardId) {
+        this.wardId = wardId;
+    }
+
+    public String getThanaId() {
+        return thanaId;
+    }
+
+    public void setThanaId(String thanaId) {
+        this.thanaId = thanaId;
+    }
+
+    public String getCityCorporationId() {
+        return cityCorporationId;
+    }
+
+    public void setCityCorporationId(String cityCorporationId) {
+        this.cityCorporationId = cityCorporationId;
+    }
+
+    public String getCountryCode() {
+        return countryCode;
+    }
+
+    public void setCountryCode(String countryCode) {
+        this.countryCode = countryCode;
+    }
+
+    public String getPermanentAddressLine() {
+        return permanentAddressLine;
+    }
+
+    public void setPermanentAddressLine(String permanentAddressLine) {
+        this.permanentAddressLine = permanentAddressLine;
+    }
+
+    public String getPermanentDivisionId() {
+        return permanentDivisionId;
+    }
+
+    public void setPermanentDivisionId(String permanentDivisionId) {
+        this.permanentDivisionId = permanentDivisionId;
+    }
+
+    public String getPermanentDistrictId() {
+        return permanentDistrictId;
+    }
+
+    public void setPermanentDistrictId(String permanentDistrictId) {
+        this.permanentDistrictId = permanentDistrictId;
+    }
+
+    public String getPermanentUpazillaId() {
+        return permanentUpazillaId;
+    }
+
+    public void setPermanentUpazillaId(String permanentUpazillaId) {
+        this.permanentUpazillaId = permanentUpazillaId;
+    }
+
+    public String getPermanentUnionId() {
+        return permanentUnionId;
+    }
+
+    public void setPermanentUnionId(String permanentUnionId) {
+        this.permanentUnionId = permanentUnionId;
+    }
+
+    public String getPermanentHoldingNumber() {
+        return permanentHoldingNumber;
+    }
+
+    public void setPermanentHoldingNumber(String permanentHoldingNumber) {
+        this.permanentHoldingNumber = permanentHoldingNumber;
+    }
+
+    public String getPermanentStreet() {
+        return permanentStreet;
+    }
+
+    public void setPermanentStreet(String permanentStreet) {
+        this.permanentStreet = permanentStreet;
+    }
+
+    public String getPermanentAreaMouja() {
+        return permanentAreaMouja;
+    }
+
+    public void setPermanentAreaMouja(String permanentAreaMouja) {
+        this.permanentAreaMouja = permanentAreaMouja;
+    }
+
+    public String getPermanentVillage() {
+        return permanentVillage;
+    }
+
+    public void setPermanentVillage(String permanentVillage) {
+        this.permanentVillage = permanentVillage;
+    }
+
+    public String getPermanentPostOffice() {
+        return permanentPostOffice;
+    }
+
+    public void setPermanentPostOffice(String permanentPostOffice) {
+        this.permanentPostOffice = permanentPostOffice;
+    }
+
+    public String getPermanentPostCode() {
+        return permanentPostCode;
+    }
+
+    public void setPermanentPostCode(String permanentPostCode) {
+        this.permanentPostCode = permanentPostCode;
+    }
+
+    public String getPermanentWardId() {
+        return permanentWardId;
+    }
+
+    public void setPermanentWardId(String permanentWardId) {
+        this.permanentWardId = permanentWardId;
+    }
+
+    public String getPermanentThanaId() {
+        return permanentThanaId;
+    }
+
+    public void setPermanentThanaId(String permanentThanaId) {
+        this.permanentThanaId = permanentThanaId;
+    }
+
+    public String getPermanentCityCorporationId() {
+        return permanentCityCorporationId;
+    }
+
+    public void setPermanentCityCorporationId(String permanentCityCorporationId) {
+        this.permanentCityCorporationId = permanentCityCorporationId;
+    }
+
+    public String getPermanentCountryCode() {
+        return permanentCountryCode;
+    }
+
+    public void setPermanentCountryCode(String permanentCountryCode) {
+        this.permanentCountryCode = permanentCountryCode;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public String getRelations() {
         return relations;
     }
 
-    public Relation getRelation(String relationType){
-
-            for (Relation relation : this.relations) {
-
-                if (relation.getType() != null && relation.getType().equals(relationType)) {
-                    return relation;
-                }
-            }
-
-        return null;
-    }
-
-    public void setRelations(List<Relation> relations) {
+    public void setRelations(String relations) {
         this.relations = relations;
     }
 
@@ -369,11 +791,11 @@ public class Patient {
         this.primaryCellNo = primaryCellNo;
     }
 
-    public String getMaritalStatus() {
-        return maritalStatus;
+    public String getTimeUid() {
+        return timeUid;
     }
 
-    public void setMaritalStatus(String maritalStatus) {
-        this.maritalStatus = maritalStatus;
+    public void setTimeUid(String timeUid) {
+        this.timeUid = timeUid;
     }
 }
