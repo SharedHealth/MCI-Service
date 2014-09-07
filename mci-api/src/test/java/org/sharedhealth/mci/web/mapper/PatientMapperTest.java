@@ -131,25 +131,28 @@ public class PatientMapperTest {
         assertEquals("1004", constraintViolations.iterator().next().getMessage());
     }
 
-    @Test
+   @Test
     public void shouldPassIfOccupationCodeIsValid() {
-        for (int i = 1; i <93; i++) {
-            Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "occupation", String.format("%02d", i));
+        String[] occupationNumbers = {"01","02","03","04","05","06","07","08","09","10","12","13","14","15","16","17","18","19","20","21","30","31","32","33","34","35","36","37","38","39","40","42","43","44","45","46","50","51","52","53","54","55","56","58","59","60","61","63","64","70","71","72","74","75","76","77","78","79","80","81","82","83","84","85","86","87","88","89","90","91","92"};
+        for(String occupationNumber : occupationNumbers){
+            Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "occupation", occupationNumber);
             assertEquals(0, constraintViolations.size());
         }
     }
 
     @Test
     public void shouldPassIfReligionIsValid() {
-        for(int i = 1; i<8; i++) {
-            Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "religion", Integer.toString(i));
-            assertEquals(0, constraintViolations.size());
+           int[] religionNumbers = {0,1,2,3,4,8,9};
+
+            for(int religionNumber : religionNumbers) {
+                Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "religion", Integer.toString(religionNumber));
+                assertEquals(0, constraintViolations.size());
+            }
         }
-    }
 
     @Test
     public void shouldFailIfReligionIsInvalid() {
-        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "religion", "9");
+        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "religion", "22");
         assertEquals(1, constraintViolations.size());
         assertEquals("1004", constraintViolations.iterator().next().getMessage());
     }
@@ -268,7 +271,7 @@ public class PatientMapperTest {
 
     @Test
     public void shouldPassIfAliveIsValid() {
-        for(int i = 1; i<3; i++) {
+        for(int i =0; i<2;i++) {
             Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "isAlive", Integer.toString(i));
             assertEquals(0, constraintViolations.size());
         }
@@ -283,7 +286,7 @@ public class PatientMapperTest {
 
     @Test
     public void shouldPassIfMaritalStatusIsValid() {
-        for(int i = 1; i<6; i++) {
+        for(int i = 1; i<3; i++) {
             Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "maritalStatus", Integer.toString(i));
             assertEquals(0, constraintViolations.size());
         }

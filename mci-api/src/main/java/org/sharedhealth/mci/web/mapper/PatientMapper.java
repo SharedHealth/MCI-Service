@@ -12,6 +12,7 @@ import org.hibernate.validator.constraints.NotBlank;
 import org.sharedhealth.mci.validation.constraints.Date;
 import org.sharedhealth.mci.validation.constraints.Length;
 import org.sharedhealth.mci.validation.constraints.Location;
+import org.sharedhealth.mci.validation.constraints.Occupation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +61,7 @@ public class PatientMapper {
 
     @JsonProperty("occupation")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[1-8]{1}[\\d]{1}|0[1-9]{1}|9[0-2]{1}", message = "1004")
+    @Occupation(message = "1004")
     private String occupation;
 
     @JsonProperty("edu_level")
@@ -85,7 +86,7 @@ public class PatientMapper {
 
     @JsonProperty("religion")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[1-7]{1}", message = "1004")
+    @Pattern(regexp = "[1|2|3|4|8|9|0]{1}", message = "1004")
     private String religion;
 
     @JsonProperty("blood_group")
@@ -120,12 +121,14 @@ public class PatientMapper {
 
     @JsonProperty("cell_no")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[)(-+0-9]*$", message = "1002")
+    @Length(lengthSize= 20, message = "1002")
+    @Pattern(regexp = "^[-)(+0-9 ]*$", message = "1002")
     private String cellNo;
 
     @JsonProperty("primary_cell_no")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[)(-+0-9]*$", message = "1002")
+    @Length(lengthSize= 20, message = "1002")
+    @Pattern(regexp = "^[-)(+0-9 ]*$", message = "1002")
     private String primaryCellNo;
 
     @JsonProperty("permanent_address")
@@ -135,7 +138,7 @@ public class PatientMapper {
 
     @JsonProperty("marital_status")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[1-5]{1}", message = "1004")
+    @Pattern(regexp = "[1|2]{1}", message = "1004")
     private String maritalStatus;
 
     @JsonProperty("full_name")
@@ -144,7 +147,7 @@ public class PatientMapper {
 
     @JsonProperty("is_alive")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[1-2]{1}", message = "1004")
+    @Pattern(regexp = "[0|1]{1}", message = "1004")
     private String isAlive;
 
     @Override
