@@ -3,6 +3,7 @@ package org.sharedhealth.mci.web.model;
 
 import java.util.Date;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.data.cassandra.mapping.Column;
@@ -517,6 +518,7 @@ public class Patient {
 
     public void setDivisionId(String divisionId) {
         this.divisionId = divisionId;
+        this.updateLocationLevels();
     }
 
     public String getDistrictId() {
@@ -525,6 +527,7 @@ public class Patient {
 
     public void setDistrictId(String districtId) {
         this.districtId = districtId;
+        this.updateLocationLevels();
     }
 
     public String getUpazillaId() {
@@ -533,6 +536,7 @@ public class Patient {
 
     public void setUpazillaId(String upazillaId) {
         this.upazillaId = upazillaId;
+        this.updateLocationLevels();
     }
 
     public String getUnionId() {
@@ -541,6 +545,7 @@ public class Patient {
 
     public void setUnionId(String unionId) {
         this.unionId = unionId;
+        this.updateLocationLevels();
     }
 
     public String getHoldingNumber() {
@@ -597,6 +602,7 @@ public class Patient {
 
     public void setWardId(String wardId) {
         this.wardId = wardId;
+        this.updateLocationLevels();
     }
 
     public String getThanaId() {
@@ -605,6 +611,7 @@ public class Patient {
 
     public void setThanaId(String thanaId) {
         this.thanaId = thanaId;
+        this.updateLocationLevels();
     }
 
     public String getCityCorporationId() {
@@ -613,6 +620,7 @@ public class Patient {
 
     public void setCityCorporationId(String cityCorporationId) {
         this.cityCorporationId = cityCorporationId;
+        this.updateLocationLevels();
     }
 
     public String getCountryCode() {
@@ -797,5 +805,76 @@ public class Patient {
 
     public void setTimeUid(String timeUid) {
         this.timeUid = timeUid;
+    }
+
+
+    public void updateLocationLevels() {
+        this.locationLevel1 = this.getLocationLevel1();
+        this.locationLevel2 = this.getLocationLevel2();
+        this.locationLevel3 = this.getLocationLevel3();
+        this.locationLevel4 = this.getLocationLevel4();
+        this.locationLevel5 = this.getLocationLevel5();
+    }
+
+    public String getLocationLevel1() {
+
+        if (StringUtils.isBlank(this.getDivisionId())) {
+            return "";
+        }
+
+        return this.getDivisionId();
+    }
+
+    public String getLocationLevel2() {
+
+        if (StringUtils.isBlank(this.getDistrictId())) {
+            return "";
+        }
+
+        return this.getLocationLevel1() + this.getDistrictId();
+    }
+
+    public String getLocationLevel3() {
+        String ut = "";
+
+        if(this.getUpazillaId() != null) {
+            ut = this.getUpazillaId();
+        }
+
+        if(this.getThanaId() != null) {
+            ut = ut + this.getThanaId();
+        }
+
+        if (StringUtils.isBlank(ut)) {
+            return "";
+        }
+
+        return this.getLocationLevel2() + ut;
+    }
+
+    public String getLocationLevel4() {
+        if (StringUtils.isBlank(this.getCityCorporationId())) {
+            return "";
+        }
+
+        return this.getLocationLevel3() + this.getCityCorporationId();
+    }
+
+    public String getLocationLevel5() {
+        String uw = "";
+
+        if(this.getUnionId() != null) {
+            uw = this.getUnionId();
+        }
+
+        if(this.getWardId() != null) {
+            uw = uw + this.getWardId();
+        }
+
+        if (StringUtils.isBlank(uw)) {
+            return "";
+        }
+
+        return this.getLocationLevel4() + uw;
     }
 }
