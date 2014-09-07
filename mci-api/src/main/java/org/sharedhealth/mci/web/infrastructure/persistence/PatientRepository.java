@@ -349,7 +349,7 @@ public class PatientRepository {
         address.setCountryCode(row.getString(COUNTRY));
         patientMapper.setAddress(address);
 
-       /* Address permanetaddress = new Address();
+        Address permanetaddress = new Address();
         permanetaddress.setAddressLine(row.getString(PERMANENT_ADDRESS_LINE));
         permanetaddress.setDivisionId(row.getString(PERMANENT_DIVISION_ID));
         permanetaddress.setDistrictId(row.getString(PERMANENT_DISTRICT_ID));
@@ -365,7 +365,7 @@ public class PatientRepository {
         permanetaddress.setThanaId(row.getString(PERMANENT_THANA));
         permanetaddress.setCityCorporationId(row.getString(PERMANENT_CITY_CORPORATION));
         permanetaddress.setCountryCode(row.getString(PERMANENT_COUNTRY));
-        patient.setPermanentAddress(permanetaddress);*/
+        patientMapper.setPermanentAddress(permanetaddress);
 
         return patientMapper;
     }

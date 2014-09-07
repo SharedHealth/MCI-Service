@@ -57,7 +57,15 @@ public class PatientRepositoryIT {
         address.setDistrictId("1020");
         address.setUpazillaId("102030");
         address.setUnionId("10203040");
+
+        Address parmentaddress = new Address();
+        parmentaddress.setAddressLine("house-10");
+        parmentaddress.setDivisionId("10");
+        parmentaddress.setDistrictId("1020");
+        parmentaddress.setUpazillaId("102030");
+        parmentaddress.setUnionId("10203040");
         patientMapper.setAddress(address);
+        patientMapper.setPermanentAddress(parmentaddress);
 
     }
 
