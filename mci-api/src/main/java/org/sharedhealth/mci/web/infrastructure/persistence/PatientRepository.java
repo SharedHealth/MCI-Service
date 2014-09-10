@@ -13,9 +13,9 @@ import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Joiner;
 import com.google.common.util.concurrent.SettableFuture;
 import org.apache.commons.lang3.StringUtils;
-import org.sharedhealth.mci.utils.TimeUid;
 import org.sharedhealth.mci.utils.UidGenerator;
 import org.sharedhealth.mci.web.exception.PatientAlreadyExistException;
 import org.sharedhealth.mci.web.exception.PatientNotFoundException;
@@ -43,6 +43,7 @@ import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBu
 public class PatientRepository {
     private static final Logger logger = LoggerFactory.getLogger(PatientRepository.class);
     private static long TIMEOUT_IN_MILLIS = 10;
+    private static int PER_PAGE_LIMIT = 10;
 
     private static final UidGenerator uid = new UidGenerator();
     private CassandraOperations cassandraOperations;
@@ -76,17 +77,16 @@ public class PatientRepository {
         final String healthId = patientMapper.getHealthId();
 
         String fullName = "";
-        if(patientMapper.getGivenName() != null){
-             fullName = patientMapper.getGivenName();
+        if (patientMapper.getGivenName() != null) {
+            fullName = patientMapper.getGivenName();
         }
-        if(patientMapper.getSurName() != null){
+        if (patientMapper.getSurName() != null) {
             fullName = fullName + " " + patientMapper.getSurName();
         }
 
         Patient p = getEntityFromPatientMapper(patientMapper);
 
         p.setHealthId(uid.getId());
-        p.setTimeUid(TimeUid.getId());
         p.setFullName(fullName);
         p.setCreatedAt(new Date());
         p.setUpdatedAt(new Date());
@@ -119,7 +119,7 @@ public class PatientRepository {
             }
         }
 
-        if(!StringUtils.isBlank(patientMapper.getNationalId())) {
+        if (!StringUtils.isBlank(patientMapper.getNationalId())) {
             try {
                 return findByNationalId(patientMapper.getNationalId()).get();
             } catch (Exception e) {
@@ -127,7 +127,7 @@ public class PatientRepository {
             }
         }
 
-        if(!StringUtils.isBlank(patientMapper.getBirthRegistrationNumber())) {
+        if (!StringUtils.isBlank(patientMapper.getBirthRegistrationNumber())) {
 
             try {
                 return findByBirthRegistrationNumber(patientMapper.getBirthRegistrationNumber()).get();
@@ -136,7 +136,7 @@ public class PatientRepository {
             }
         }
 
-        if(!StringUtils.isBlank(patientMapper.getUid())) {
+        if (!StringUtils.isBlank(patientMapper.getUid())) {
             try {
                 return findByUid(patientMapper.getUid()).get();
             } catch (Exception e) {
@@ -303,9 +303,9 @@ public class PatientRepository {
         ObjectMapper mapper = new ObjectMapper();
 
         try {
-            patientMapper.setRelations(mapper.readValue(row.getString(RELATIONS),  List.class ));
-        }catch(Exception e){
-            logger.debug(" Relations: [" +e.getMessage() + "]");
+            patientMapper.setRelations(mapper.readValue(row.getString(RELATIONS), List.class));
+        } catch (Exception e) {
+            logger.debug(" Relations: [" + e.getMessage() + "]");
         }
 
         patientMapper.setHealthId(row.getString(HEALTH_ID));
@@ -366,6 +366,7 @@ public class PatientRepository {
         permanetaddress.setCityCorporationId(row.getString(PERMANENT_CITY_CORPORATION));
         permanetaddress.setCountryCode(row.getString(PERMANENT_COUNTRY));
         patientMapper.setPermanentAddress(permanetaddress);
+        patientMapper.setCreatedAt(row.getDate("created_at"));
 
         return patientMapper;
     }
@@ -374,7 +375,7 @@ public class PatientRepository {
 
         Select select = QueryBuilder.select().from("patient");
 
-        if(parameters.get("full_name") != null) {
+        if (parameters.get("full_name") != null) {
             select.where(QueryBuilder.eq("full_name", parameters.get("full_name").get(0)));
         }
 
@@ -393,7 +394,7 @@ public class PatientRepository {
         };
     }
 
-    public ListenableFuture<String> update(PatientMapper patientMapper, final String hid){
+    public ListenableFuture<String> update(PatientMapper patientMapper, final String hid) {
         final SettableFuture<String> result = SettableFuture.create();
         Address address = patientMapper.getAddress();
         Address permanentAddress = patientMapper.getPermanentAddress();
@@ -406,22 +407,22 @@ public class PatientRepository {
 
         try {
             List<Relation> relations = patientMapper.getRelations();
-            relationsJson =  mapper.writeValueAsString(relations);
+            relationsJson = mapper.writeValueAsString(relations);
             father = patientMapper.getRelation("father");
             mother = patientMapper.getRelation("mother");
 
-        }catch(Exception e){
-            logger.debug(" Relations: [" +e.getMessage() + "]");
+        } catch (Exception e) {
+            logger.debug(" Relations: [" + e.getMessage() + "]");
         }
 
-        if (permanentAddress == null ){
+        if (permanentAddress == null) {
             permanentAddress = new Address();
         }
         String fullName = "";
-        if(patientMapper.getGivenName() != null){
+        if (patientMapper.getGivenName() != null) {
             fullName = patientMapper.getGivenName();
         }
-        if(patientMapper.getSurName() != null){
+        if (patientMapper.getSurName() != null) {
             fullName = fullName + " " + patientMapper.getSurName();
         }
 
@@ -491,7 +492,7 @@ public class PatientRepository {
                 patientMapper.getCellNo(),
                 patientMapper.getPrimaryCellNo(),
                 hid
-            );
+        );
 
         logger.debug("Update patient CQL: [" + cql + "]");
 
@@ -511,8 +512,111 @@ public class PatientRepository {
         return getStringListenableFuture(result);
     }
 
-    public Patient getEntityFromPatientMapper(PatientMapper p)
-    {
+    public ListenableFuture<List<PatientMapper>> findAllByLocations(List<String> locations, String start) {
+
+        final SettableFuture<List<PatientMapper>> result = SettableFuture.create();
+        List<PatientMapper> patients = new ArrayList<>();
+
+        int limit = PER_PAGE_LIMIT;
+
+        if (locations.size() > 0) {
+            String locationPointer = getLocationPointer(locations, start, null);
+
+            for (String catchment : locations) {
+                if (patients.size() == 0 && !isLocationBelongsToCatchment(locationPointer, catchment)) {
+                    continue;
+                }
+
+                ListenableFuture<List<PatientMapper>> res = this.findAllByLocation(catchment, start, limit);
+                try {
+                    List<PatientMapper> temp = res.get();
+                    patients.addAll(temp);
+
+                    if (patients.size() < PER_PAGE_LIMIT) {
+                        start = null;
+                        limit = PER_PAGE_LIMIT - patients.size();
+                        locationPointer = null;
+                    } else {
+                        break;
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } else {
+            return this.findAllByLocation(null, start, limit);
+        }
+
+        result.set(patients);
+        return new SimpleListenableFuture<List<PatientMapper>, List<PatientMapper>>(result) {
+            @Override
+            protected List<PatientMapper> adapt(List<PatientMapper> p) throws ExecutionException {
+                return p;
+            }
+        };
+    }
+
+    private String getLocationPointer(List<String> locations, String start, String d) {
+        if (locations.size() > 1 && StringUtils.isNotBlank(start)) {
+            ListenableFuture<PatientMapper> p = findByHealthId(start);
+            try {
+                return p.get().getAddress().getGeoCode();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return d;
+    }
+
+    private boolean isLocationBelongsToCatchment(String location, String catchment) {
+
+        if (StringUtils.isBlank(location)) {
+            return true;
+        }
+
+        return location.startsWith(catchment);
+    }
+
+    public ListenableFuture<List<PatientMapper>> findAllByLocation(String location, String start, int limit) {
+
+        String cql = "SELECT * FROM patient %s LIMIT %s";
+        List<String> wheres = new ArrayList<>();
+
+        if (StringUtils.isNotBlank(location)) {
+            int i = location.length() / 2;
+            wheres.add("location_level" + i + "='" + location + "'");
+        }
+
+        if (StringUtils.isNotBlank(start)) {
+            wheres.add("token(health_id) > token('" + start + "')");
+        }
+
+        String where = Joiner.on(" AND ").join(wheres);
+
+        if (StringUtils.isNotBlank(where)) {
+            where = "WHERE " + where;
+        }
+
+        return new SimpleListenableFuture<List<PatientMapper>, ResultSet>(
+                cassandraOperations.queryAsynchronously(String.format(cql, where, limit))) {
+            @Override
+            protected List<PatientMapper> adapt(ResultSet resultSet) throws ExecutionException {
+                List<PatientMapper> patientMappers = new ArrayList<>();
+                for (Row result : resultSet.all()) {
+                    PatientMapper patientMapper = getPatientFromRow(result);
+                    patientMappers.add(patientMapper);
+                }
+
+                return patientMappers;
+            }
+        };
+    }
+
+    public Patient getEntityFromPatientMapper(PatientMapper p) {
         Patient patient = new Patient();
 
         String relationsJson = "";
@@ -522,7 +626,7 @@ public class PatientRepository {
         Relation mother = p.getRelation("mother");
 
         try {
-            relationsJson =  mapper.writeValueAsString(p.getRelations());
+            relationsJson = mapper.writeValueAsString(p.getRelations());
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
@@ -568,7 +672,7 @@ public class PatientRepository {
         patient.setEthnicity(p.getEthnicity());
         patient.setIsAlive(p.getIsAlive());
 
-        if(address != null) {
+        if (address != null) {
             patient.setAddressLine(address.getAddressLine());
             patient.setDivisionId(address.getDivisionId());
             patient.setDistrictId(address.getDistrictId());
@@ -586,7 +690,7 @@ public class PatientRepository {
             patient.setCountryCode(address.getCountryCode());
         }
 
-        if(permanentAddress != null) {
+        if (permanentAddress != null) {
             patient.setPermanentAddressLine(permanentAddress.getAddressLine());
             patient.setPermanentDivisionId(permanentAddress.getDivisionId());
             patient.setPermanentDistrictId(permanentAddress.getDistrictId());

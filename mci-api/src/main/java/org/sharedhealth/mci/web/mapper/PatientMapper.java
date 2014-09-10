@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.validator.constraints.NotBlank;
@@ -149,6 +150,10 @@ public class PatientMapper {
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "[0|1]{1}", message = "1004")
     private String isAlive;
+
+    @JsonProperty("created_at")
+    @JsonInclude(NON_EMPTY)
+    private java.util.Date createdAt;
 
     @Override
     public boolean equals(Object rhs) {
@@ -382,5 +387,13 @@ public class PatientMapper {
 
     public void setMaritalStatus(String maritalStatus) {
         this.maritalStatus = maritalStatus;
+    }
+
+    public String getCreatedAt() {
+        return DateFormatUtils.ISO_DATETIME_FORMAT.format(this.createdAt);
+    }
+
+    public void setCreatedAt(java.util.Date createdAt) {
+        this.createdAt = createdAt;
     }
 }

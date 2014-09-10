@@ -236,12 +236,16 @@ public class PatientController {
     @RequestMapping(value = "/facility/{facilityId}", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
     public DeferredResult<List<PatientMapper>> findAllPatientsInCatchment(
             @PathVariable String facilityId,
-            @RequestParam(value = "start", required = false) String start,
-            @RequestParam(value = "bin_brn", required = false) String birthRegistrationNumber) {
+            @RequestParam(value = "last", required = false) String last
+            ) {
+        return getPaginatePatientListInCatchment(facilityId, last);
+    }
+
+    private DeferredResult<List<PatientMapper>> getPaginatePatientListInCatchment(String facilityId, String last) {
         logger.debug("Find all patients  for catchment of facility [" + facilityId+ "]");
         final DeferredResult<List<PatientMapper>> deferredResult = new DeferredResult<>();
 
-        patientService.findAllByQuery(null).addCallback(new ListenableFutureCallback<List<PatientMapper>>() {
+        patientService.findAllByFacility(facilityId, last).addCallback(new ListenableFutureCallback<List<PatientMapper>>() {
             @Override
             public void onSuccess(List<PatientMapper> result) {
                 deferredResult.setResult(result);
@@ -255,5 +259,4 @@ public class PatientController {
 
         return deferredResult;
     }
-
 }
