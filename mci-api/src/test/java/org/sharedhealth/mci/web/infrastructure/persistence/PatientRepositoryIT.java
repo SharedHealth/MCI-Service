@@ -75,6 +75,7 @@ public class PatientRepositoryIT {
         PatientMapper p = patientRepository.findByHealthId(healthId).get();
         assertNotNull(p);
         patientMapper.setHealthId(healthId);
+        patientMapper.setCreatedAt(p.getCreatedAt());
         assertEquals(patientMapper, p);
     }
 
@@ -103,6 +104,7 @@ public class PatientRepositoryIT {
         final PatientMapper p = patientRepository.findByNationalId(nationalId).get();
         assertNotNull(p);
         patientMapper.setHealthId(hid);
+        patientMapper.setCreatedAt(p.getCreatedAt());
         assertEquals(patientMapper, p);
     }
 
@@ -117,6 +119,7 @@ public class PatientRepositoryIT {
         final PatientMapper p = patientRepository.findByBirthRegistrationNumber(birthRegistrationNumber).get();
         assertNotNull(p);
         patientMapper.setHealthId(hid);
+        patientMapper.setCreatedAt(p.getCreatedAt());
         assertEquals(patientMapper, p);
     }
 
@@ -132,6 +135,7 @@ public class PatientRepositoryIT {
         final PatientMapper p = patientRepository.findByUid(uid).get();
         assertNotNull(p);
         patientMapper.setHealthId(hid);
+        patientMapper.setCreatedAt(p.getCreatedAt());
         assertEquals(patientMapper, p);
     }
 

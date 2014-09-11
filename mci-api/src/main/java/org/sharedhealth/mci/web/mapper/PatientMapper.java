@@ -4,6 +4,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Pattern;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.time.DateFormatUtils;
@@ -19,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
+@JsonIgnoreProperties({ "createdAt" })
 public class PatientMapper {
 
     private static final Logger logger = LoggerFactory.getLogger(PatientMapper.class);
@@ -389,7 +391,15 @@ public class PatientMapper {
         this.maritalStatus = maritalStatus;
     }
 
-    public String getCreatedAt() {
+    public java.util.Date getCreatedAt() {
+        return this.createdAt;
+    }
+
+    @JsonInclude(NON_EMPTY)
+    public String getCreated() {
+        if(this.createdAt == null){
+            return null;
+        }
         return DateFormatUtils.ISO_DATETIME_FORMAT.format(this.createdAt);
     }
 

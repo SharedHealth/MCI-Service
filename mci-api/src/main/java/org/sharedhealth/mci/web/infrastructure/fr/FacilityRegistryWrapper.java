@@ -20,7 +20,7 @@ import org.springframework.web.client.AsyncRestTemplate;
 @Component
 public class FacilityRegistryWrapper {
 
-    private static final String API_BASE_URL = "http://dghs.gov.bd/hrm/api/v1/facilities";
+    private static final String API_BASE_URL = "http://pagani.websitewelcome.com/~stagedgh/dghshrml4/public/api/1.0/facilities";
 
     private AsyncRestTemplate mciRestTemplate;
     private MCIProperties mciProperties;
