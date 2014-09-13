@@ -13,6 +13,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureAdapter;
 
+import org.sharedhealth.mci.web.handler.MCIResponse;
+
 @Component
 public class PatientService {
 
@@ -25,10 +27,10 @@ public class PatientService {
         this.facilityRegistryWrapper = facilityRegistryWrapper;
     }
 
-    public ListenableFuture<String> create(PatientMapper patientMapper) {
+    public ListenableFuture<MCIResponse> create(PatientMapper patientMapper) {
         return patientRepository.create(patientMapper);
     }
-    public ListenableFuture<String> update(PatientMapper patientMapper,String healthId) {
+    public ListenableFuture<MCIResponse> update(PatientMapper patientMapper,String healthId) {
         return patientRepository.update(patientMapper,healthId);
     }
 

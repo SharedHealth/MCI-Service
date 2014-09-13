@@ -17,9 +17,10 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
-import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
+import org.sharedhealth.mci.web.handler.MCIResponse;
 
 @RestController
 @RequestMapping("/api/v1/patients")
@@ -34,20 +35,20 @@ public class PatientController {
     }
 
     @RequestMapping(method = RequestMethod.POST, consumes = {APPLICATION_JSON_VALUE})
-    public DeferredResult<ResponseEntity<String>> create(@RequestBody @Valid PatientMapper patientMapper, BindingResult bindingResult)
+    public DeferredResult<ResponseEntity<MCIResponse>> create(@RequestBody @Valid PatientMapper patientMapper, BindingResult bindingResult)
             throws ExecutionException, InterruptedException {
         logger.debug("Trying to create patient.");
-        final DeferredResult<ResponseEntity<String>> deferredResult = new DeferredResult<>();
+        final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
 
         if (bindingResult.hasErrors()) {
             throw new ValidationException(bindingResult);
         }
 
 
-        patientService.create(patientMapper).addCallback(new ListenableFutureCallback<String>() {
+        patientService.create(patientMapper).addCallback(new ListenableFutureCallback<MCIResponse>() {
             @Override
-            public void onSuccess(String healthId) {
-                deferredResult.setResult(new ResponseEntity<>(healthId, CREATED));
+            public void onSuccess(MCIResponse mciResponse) {
+                deferredResult.setResult(new ResponseEntity<MCIResponse>(mciResponse, mciResponse.httpStatusObject));
             }
 
             @Override
@@ -209,19 +210,19 @@ public class PatientController {
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/{healthId}", consumes = {APPLICATION_JSON_VALUE})
-    public DeferredResult<ResponseEntity<String>> update(@PathVariable String healthId, @RequestBody @Valid PatientMapper patientMapper, BindingResult bindingResult)
+    public DeferredResult<ResponseEntity<MCIResponse>> update(@PathVariable String healthId, @RequestBody @Valid PatientMapper patientMapper, BindingResult bindingResult)
             throws ExecutionException, InterruptedException {
            logger.debug(" Health id [" + healthId + "]");
-        final DeferredResult<ResponseEntity<String>> deferredResult = new DeferredResult<>();
+        final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
 
         if (bindingResult.hasErrors()) {
             throw new ValidationException(bindingResult);
         }
 
-        patientService.update(patientMapper,healthId).addCallback(new ListenableFutureCallback<String>() {
+        patientService.update(patientMapper,healthId).addCallback(new ListenableFutureCallback<MCIResponse>() {
             @Override
-            public void onSuccess(String healthId) {
-                deferredResult.setResult(new ResponseEntity<>(healthId, CREATED));
+            public void onSuccess(MCIResponse mciResponse) {
+                deferredResult.setResult(new ResponseEntity<>(mciResponse, mciResponse.httpStatusObject));
             }
 
             @Override

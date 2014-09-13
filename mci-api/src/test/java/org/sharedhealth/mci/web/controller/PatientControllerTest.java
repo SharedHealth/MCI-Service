@@ -28,6 +28,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 
+import org.sharedhealth.mci.web.handler.MCIResponse;
+
 @RunWith(MockitoJUnitRunner.class)
 public class PatientControllerTest {
 
@@ -93,11 +95,12 @@ public class PatientControllerTest {
     public void shouldCreatePatientAndReturnHealthId() throws Exception {
         String json = new ObjectMapper().writeValueAsString(patientMapper);
         String healthId = "healthId-100";
+        MCIResponse mciResponse = new MCIResponse(healthId,CREATED);
         when(locationService.findByGeoCode(GEO_CODE)).thenReturn(new PreResolvedListenableFuture<>(location));
-        when(patientService.create(patientMapper)).thenReturn(new PreResolvedListenableFuture<>(healthId));
+        when(patientService.create(patientMapper)).thenReturn(new PreResolvedListenableFuture<>(mciResponse));
 
         mockMvc.perform(post(API_END_POINT).content(json).contentType(APPLICATION_JSON))
-                .andExpect(request().asyncResult(new ResponseEntity<>(healthId, CREATED)));
+                .andExpect(request().asyncResult(new ResponseEntity<>(mciResponse, CREATED)));
         verify(patientService).create(patientMapper);
     }
 

@@ -18,6 +18,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
+import org.sharedhealth.mci.web.handler.MCIResponse;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -71,10 +73,10 @@ public class PatientRepositoryIT {
 
     @Test
     public void shouldFindPatientWithMatchingGeneratedHealthId() throws ExecutionException, InterruptedException {
-        String healthId = patientRepository.create(patientMapper).get();
-        PatientMapper p = patientRepository.findByHealthId(healthId).get();
+        MCIResponse mciResponse = patientRepository.create(patientMapper).get();
+        PatientMapper p = patientRepository.findByHealthId(mciResponse.id).get();
         assertNotNull(p);
-        patientMapper.setHealthId(healthId);
+        patientMapper.setHealthId(mciResponse.id);
         patientMapper.setCreatedAt(p.getCreatedAt());
         assertEquals(patientMapper, p);
     }
@@ -100,10 +102,10 @@ public class PatientRepositoryIT {
 
     @Test
     public void shouldFindPatientWithMatchingNationalId() throws ExecutionException, InterruptedException {
-        String hid = patientRepository.create(patientMapper).get();
+        MCIResponse mciResponse = patientRepository.create(patientMapper).get();
         final PatientMapper p = patientRepository.findByNationalId(nationalId).get();
         assertNotNull(p);
-        patientMapper.setHealthId(hid);
+        patientMapper.setHealthId(mciResponse.id);
         patientMapper.setCreatedAt(p.getCreatedAt());
         assertEquals(patientMapper, p);
     }
@@ -115,10 +117,10 @@ public class PatientRepositoryIT {
 
     @Test
     public void shouldFindPatientWithMatchingBirthRegistrationNumber() throws ExecutionException, InterruptedException {
-        String hid = patientRepository.create(patientMapper).get();
+        MCIResponse mciResponse = patientRepository.create(patientMapper).get();
         final PatientMapper p = patientRepository.findByBirthRegistrationNumber(birthRegistrationNumber).get();
         assertNotNull(p);
-        patientMapper.setHealthId(hid);
+        patientMapper.setHealthId(mciResponse.id);
         patientMapper.setCreatedAt(p.getCreatedAt());
         assertEquals(patientMapper, p);
     }
@@ -130,11 +132,11 @@ public class PatientRepositoryIT {
 
     @Test
     public void shouldFindPatientWithMatchingUid() throws ExecutionException, InterruptedException {
-        String hid = patientRepository.create(patientMapper).get();
+        MCIResponse mciResponse = patientRepository.create(patientMapper).get();
 
         final PatientMapper p = patientRepository.findByUid(uid).get();
         assertNotNull(p);
-        patientMapper.setHealthId(hid);
+        patientMapper.setHealthId(mciResponse.id);
         patientMapper.setCreatedAt(p.getCreatedAt());
         assertEquals(patientMapper, p);
     }

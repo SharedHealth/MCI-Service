@@ -14,7 +14,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
 import org.sharedhealth.mci.web.config.WebMvcConfig;
-import org.sharedhealth.mci.web.exception.GlobalExceptionHandler.ErrorInfo;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientMapper;
 import org.sharedhealth.mci.web.service.LocationService;
@@ -34,6 +33,9 @@ import org.springframework.web.context.WebApplicationContext;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import org.sharedhealth.mci.web.handler.ErrorHandler;
+import org.sharedhealth.mci.web.handler.MCIError;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -102,7 +104,7 @@ public class PatientRestApiTest {
         MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
-        Assert.assertEquals("{\"code\":400,\"message\":\"invalid.request\",\"errors\":[{\"code\":1002,\"message\":\"Invalid address.addressLine\"}]}", result.getResponse().getContentAsString());
+        Assert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1002,\"field\":\"address.addressLine\",\"message\":\"1002\"}]}", result.getResponse().getContentAsString());
     }
 
     @Test
@@ -115,9 +117,9 @@ public class PatientRestApiTest {
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        ErrorInfo errorInfo = new ObjectMapper().readValue(result.getResponse().getContentAsString(), ErrorInfo.class);
+        ErrorHandler errorHandler = new ObjectMapper().readValue(result.getResponse().getContentAsString(), ErrorHandler.class);
 
-        List<ErrorInfo> errorInfoErrors = errorInfo.getErrors();
+        List<MCIError> errorInfoErrors = errorHandler.getErrors();
         Collections.sort(errorInfoErrors);
 
         Assert.assertEquals(2, errorInfoErrors.size());
@@ -132,7 +134,7 @@ public class PatientRestApiTest {
         MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content("invalidate" + json).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
-        Assert.assertEquals("{\"code\":125,\"message\":\"invalid.json\"}", result.getResponse().getContentAsString());
+        Assert.assertEquals("{\"error_code\":2000,\"http_status\":400,\"message\":\"invalid.request\",\"errors\":[{\"code\":125,\"field\":\"\",\"message\":\"invalid.json\"}]}", result.getResponse().getContentAsString());
     }
 
     @Test
@@ -142,7 +144,7 @@ public class PatientRestApiTest {
         MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
-        Assert.assertEquals("{\"code\":126,\"message\":\"Unrecognized field: \\\"invalid_property\\\"\"}", result.getResponse().getContentAsString());
+        Assert.assertEquals("{\"error_code\":2000,\"http_status\":400,\"message\":\"invalid.request\",\"errors\":[{\"code\":126,\"field\":\"\",\"message\":\"Unrecognized field: \\\"invalid_property\\\"\"}]}", result.getResponse().getContentAsString());
     }
 
     @After

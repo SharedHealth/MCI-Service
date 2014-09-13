@@ -31,11 +31,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cassandra.core.AsynchronousQueryListener;
 import org.springframework.data.cassandra.core.CassandraOperations;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.FieldError;
+
+import org.sharedhealth.mci.web.handler.MCIResponse;
 
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
 
@@ -53,11 +56,11 @@ public class PatientRepository {
         this.cassandraOperations = cassandraOperations;
     }
 
-    public ListenableFuture<String> create(PatientMapper patientMapper) {
+    public ListenableFuture<MCIResponse> create(PatientMapper patientMapper) {
 
         PatientMapper existingPatientMapper;
 
-        final SettableFuture<String> result = SettableFuture.create();
+        final SettableFuture<MCIResponse> result = SettableFuture.create();
 
         try {
             existingPatientMapper = getExistingPatient(patientMapper);
@@ -93,15 +96,15 @@ public class PatientRepository {
 
         p = cassandraOperations.insert(p);
 
-        result.set(p.getHealthId());
+        result.set(new MCIResponse(p.getHealthId(), HttpStatus.CREATED));
 
         return getStringListenableFuture(result);
     }
 
-    private ListenableFuture<String> getStringListenableFuture(final SettableFuture<String> result) {
-        return new SimpleListenableFuture<String, String>(result) {
+    private ListenableFuture<MCIResponse> getStringListenableFuture(final SettableFuture<MCIResponse> result) {
+        return new SimpleListenableFuture<MCIResponse, MCIResponse>(result) {
             @Override
-            protected String adapt(String adapteeResult) throws ExecutionException {
+            protected MCIResponse adapt(MCIResponse adapteeResult) throws ExecutionException {
                 return adapteeResult;
             }
         };
@@ -394,8 +397,8 @@ public class PatientRepository {
         };
     }
 
-    public ListenableFuture<String> update(PatientMapper patientMapper, final String hid) {
-        final SettableFuture<String> result = SettableFuture.create();
+    public ListenableFuture<MCIResponse> update(PatientMapper patientMapper, final String hid) {
+        final SettableFuture<MCIResponse> result = SettableFuture.create();
         Address address = patientMapper.getAddress();
         Address permanentAddress = patientMapper.getPermanentAddress();
 
@@ -501,7 +504,7 @@ public class PatientRepository {
             public void onQueryComplete(ResultSetFuture rsf) {
                 try {
                     rsf.get(TIMEOUT_IN_MILLIS, TimeUnit.MILLISECONDS);
-                    result.set(hid);
+                    result.set(new MCIResponse(hid, HttpStatus.CREATED));
                 } catch (Exception e) {
                     logger.error("Error while creating patient.", e);
                     result.setException(e);

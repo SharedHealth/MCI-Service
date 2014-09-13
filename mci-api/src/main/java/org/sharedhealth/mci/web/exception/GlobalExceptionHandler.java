@@ -1,5 +1,6 @@
 package org.sharedhealth.mci.web.exception;
 
+import java.lang.String;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,8 +11,6 @@ import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.validation.FieldError;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -23,6 +22,8 @@ import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
+import org.sharedhealth.mci.web.handler.ErrorHandler;
+
 @ControllerAdvice
 public class GlobalExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
@@ -33,38 +34,38 @@ public class GlobalExceptionHandler {
     @ResponseStatus(value = BAD_REQUEST)
     @ExceptionHandler(ValidationException.class)
     @ResponseBody
-    public GlobalExceptionHandler.ErrorInfo handleValidationException(ValidationException e) {
+    public ErrorHandler handleValidationException(ValidationException e) {
+
         logger.error("Handling ValidationException. ", e);
-        ErrorInfo errorInfo = new ErrorInfo(BAD_REQUEST.value(), "invalid.request");
+        ErrorHandler errorHandler = new ErrorHandler(BAD_REQUEST.value(),
+                ErrorHandler.VALIDATION_ERROR_CODE, "validation error");
 
-        if (e.getBindingResult() != null) {
-            for (ObjectError error : e.getBindingResult().getAllErrors()) {
-                errorInfo.addError(getValidationErrorInfo(error));
-            }
-        }
-
-        return errorInfo;
+        return errorHandler.handleValidationError(errorHandler, e);
     }
 
     @ResponseStatus(value = BAD_REQUEST)
     @ExceptionHandler(HttpMessageNotReadableException.class)
     @ResponseBody
-    public ErrorInfo handleHttpMessageNotReadableExceptionException(HttpMessageNotReadableException e) {
+    public ErrorHandler handleHttpMessageNotReadableExceptionException(HttpMessageNotReadableException e) {
         logger.error("Handling HttpMessageNotReadableExceptionException. ", e);
 
         int code = BAD_REQUEST.value();
         String msg = "invalid.request";
         Throwable cause = e.getCause();
-
+        ErrorHandler errorHandler = null;
         if (cause != null && cause.getClass() == UnrecognizedPropertyException.class) {
+            errorHandler = new ErrorHandler(BAD_REQUEST.value(),
+                    ErrorHandler.INVALID_REQUEST_ERROR_CODE, "invalid.request");
             code = ERROR_CODE_UNRECOGNIZED_FIELD;
             msg = "Unrecognized field: \"" + ((UnrecognizedPropertyException) cause).getPropertyName() + "\"";
         } else if (cause != null) {
+            errorHandler = new ErrorHandler(BAD_REQUEST.value(),
+                    ErrorHandler.INVALID_REQUEST_ERROR_CODE, "invalid.request");
             code = ERROR_CODE_JSON_PARSE;
             msg = "invalid.json";
         }
 
-        return new ErrorInfo(code, msg);
+        return errorHandler.handleHttpMessageNotReadableError(errorHandler, code, msg);
     }
 
     @ResponseStatus(value = NOT_FOUND)
@@ -91,41 +92,23 @@ public class GlobalExceptionHandler {
         return new ErrorInfo(INTERNAL_SERVER_ERROR.value(), "internal.server.error");
     }
 
-    private ErrorInfo getValidationErrorInfo(ObjectError error) {
-        int code;
-        String msg;
-
-        if (error.getDefaultMessage().matches("\\d+")) {
-            code = Integer.parseInt(error.getDefaultMessage());
-        } else {
-            code = 0;
-        }
-
-        msg = getErrorMessage(error);
-
-        return new ErrorInfo(code, msg);
-    }
-
-    private static String getErrorMessage(ObjectError error) {
-        if(error.getClass() == FieldError.class) {
-            return "Invalid " + ((FieldError) error).getField();
-        }
-
-        return "Invalid " + error.getDefaultMessage();
-    }
-
     @JsonRootName(value = "error")
     public static class ErrorInfo implements Comparable<ErrorInfo> {
-        @JsonProperty
-        private int code;
+
+
         @JsonProperty
         private String message;
+
+        @JsonProperty
+        private int code;
+
 
         @JsonProperty
         @JsonInclude(NON_EMPTY)
         private List<ErrorInfo> errors;
 
-        public ErrorInfo() {}
+        public ErrorInfo() {
+        }
 
         public ErrorInfo(int code, String message) {
             this.code = code;
@@ -133,7 +116,7 @@ public class GlobalExceptionHandler {
         }
 
         public void addError(ErrorInfo errorInfo) {
-            if(this.errors == null) {
+            if (this.errors == null) {
                 this.errors = new ArrayList<>();
             }
 

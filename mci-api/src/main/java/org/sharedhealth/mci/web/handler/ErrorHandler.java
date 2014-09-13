@@ -1,0 +1,130 @@
+package org.sharedhealth.mci.web.handler;
+
+import java.lang.Integer;
+import java.lang.String;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonRootName;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
+
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
+
+import org.sharedhealth.mci.web.handler.MCIError;
+import org.sharedhealth.mci.web.exception.*;
+
+
+@JsonRootName(value = "error")
+public class ErrorHandler {
+
+    // MCI APPLICATION ERROR CODE
+    public static final int VALIDATION_ERROR_CODE = 1000;
+    public static final int INVALID_REQUEST_ERROR_CODE = 2000;
+    public static final int PERMISSION_ERROR_CODE = 3000;
+
+
+    @JsonProperty("error_code")
+    private int errorCode;
+
+    @JsonProperty("http_status")
+    private int httpStatus;
+
+    @JsonProperty
+    private String message;
+
+    @JsonProperty
+    @JsonInclude(NON_EMPTY)
+    private List<MCIError> errors;
+
+    public ErrorHandler() {
+    }
+
+    public ErrorHandler(int httpStatus, int errorCode, String message) {
+        this.httpStatus = httpStatus;
+        this.errorCode = errorCode;
+        this.message = message;
+    }
+
+    public int addError(MCIError error) {
+
+        if (this.errors == null) {
+            this.errors = new ArrayList<>();
+        }
+
+        for (int i = 0; i < this.errors.size(); i++) {
+            MCIError err = this.errors.get(i);
+            if (error.getCode() == err.getCode()) {
+                error.setField(err.getField() + ',' + error.getField());
+                this.errors.set(i, error);
+                return 1;
+            }
+        }
+
+        this.errors.add(error);
+        return 1;
+
+    }
+
+    public List<MCIError> getErrors() {
+        return this.errors;
+    }
+
+    public String getMessage() {
+        return this.message;
+    }
+
+
+    public Integer getHttpStatus() {
+        return this.httpStatus;
+    }
+
+    public Integer getErrorCode() {
+        return this.errorCode;
+    }
+
+    public ErrorHandler handleValidationError(ErrorHandler errorHandler, ValidationException e) {
+
+        if (e.getBindingResult() != null) {
+            for (ObjectError error : e.getBindingResult().getAllErrors()) {
+                errorHandler.addError(getValidationErrorInfo(error));
+            }
+        }
+
+        return errorHandler;
+    }
+
+    public ErrorHandler handleHttpMessageNotReadableError(ErrorHandler errorHandler, int code, String message) {
+        MCIError mciError = new MCIError(code, message, "");
+        errorHandler.addError(mciError);
+
+        return errorHandler;
+    }
+
+    private MCIError getValidationErrorInfo(ObjectError error) {
+        int code;
+        String message;
+        String field;
+
+        if (error.getDefaultMessage().matches("\\d+")) {
+            code = Integer.parseInt(error.getDefaultMessage());
+        } else {
+            code = 0;
+        }
+
+        message = error.getDefaultMessage();
+        field = getErrorField(error);
+
+        return new MCIError(code, message, field);
+    }
+
+
+    private static String getErrorField(ObjectError error) {
+        if (error.getClass() == FieldError.class) {
+            return ((FieldError) error).getField();
+        }
+        return "";
+    }
+}
