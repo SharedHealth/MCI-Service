@@ -41,7 +41,7 @@ public class PatientMapper {
 
     @JsonProperty("name_bangla")
     @JsonInclude(NON_EMPTY)
-    @Length(lengthSize= 120, message = "1002")
+    @Length(lengthSize= 125, message = "1002")
     private String nameBangla;
 
     @JsonProperty("given_name")
@@ -51,7 +51,7 @@ public class PatientMapper {
 
     @JsonProperty("sur_name")
     @NotBlank(message = "1001")
-    @Pattern(regexp = "^[a-zA-Z0-9]{0,25}$",message = "1002")
+    @Length(lengthSize= 25, message = "1002")
     private String surName;
 
     @JsonProperty("date_of_birth")

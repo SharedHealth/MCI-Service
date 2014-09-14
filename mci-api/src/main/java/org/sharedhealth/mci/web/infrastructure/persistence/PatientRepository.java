@@ -397,7 +397,6 @@ public class PatientRepository {
         permanentaddress.setThanaId(row.getString(PERMANENT_THANA));
         permanentaddress.setCityCorporationId(row.getString(PERMANENT_CITY_CORPORATION));
         permanentaddress.setCountryCode(row.getString(PERMANENT_COUNTRY));
-        patientMapper.setCreatedAt(row.getDate("created_at"));
 
         if (permanentaddress.getCountryCode() != null) {
             if (permanentaddress.getCountryCode() == "050" && permanentaddress.getDistrictId() != null) {
