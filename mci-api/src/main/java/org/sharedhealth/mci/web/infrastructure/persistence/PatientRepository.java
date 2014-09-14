@@ -46,7 +46,7 @@ import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBu
 public class PatientRepository {
     private static final Logger logger = LoggerFactory.getLogger(PatientRepository.class);
     private static long TIMEOUT_IN_MILLIS = 10;
-    private static int PER_PAGE_LIMIT = 10;
+    private static int PER_PAGE_LIMIT = 10000;
 
     private static final UidGenerator uid = new UidGenerator();
     private CassandraOperations cassandraOperations;
