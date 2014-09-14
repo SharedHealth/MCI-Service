@@ -78,7 +78,7 @@ public class PatientRepositoryIT {
         patientRepository.findByHealthId(UUID.randomUUID().toString()).get();
     }
 
-    @Test(expected = ExecutionException.class)
+    /*@Test(expected = ExecutionException.class)
     public void shouldThrowException_IfInvalidHealthIdProvidedForCreate() throws ExecutionException, InterruptedException {
         patientMapper.setHealthId("12");
         patientRepository.create(patientMapper).get();

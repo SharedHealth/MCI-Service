@@ -3,7 +3,6 @@ package org.sharedhealth.mci.web.mapper;
 import javax.validation.Valid;
 import javax.validation.constraints.Pattern;
 import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.time.DateFormatUtils;
