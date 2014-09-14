@@ -87,6 +87,7 @@ public class ErrorHandler {
     }
 
     public ErrorHandler handleHttpMessageNotReadableError(ErrorHandler errorHandler, int code, String message) {
+
         MCIError mciError = new MCIError(code, message, "");
         errorHandler.addError(mciError);
 
@@ -94,9 +95,9 @@ public class ErrorHandler {
     }
 
     private MCIError getValidationErrorInfo(ObjectError error) {
+
         int code;
-        String message;
-        String field;
+        String message,field;
 
         if (error.getDefaultMessage().matches("\\d+")) {
             code = Integer.parseInt(error.getDefaultMessage());
@@ -106,14 +107,17 @@ public class ErrorHandler {
 
         message = error.getDefaultMessage();
         field = getErrorField(error);
-        if(field != "") {
+
+        if (field != "") {
             message = "invalid " + field;
         }
+
         return new MCIError(code, message, field);
     }
 
 
     private static String getErrorField(ObjectError error) {
+
         if (error.getClass() == FieldError.class) {
             return ((FieldError) error).getField();
         }

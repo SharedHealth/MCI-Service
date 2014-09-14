@@ -1,6 +1,7 @@
 package org.sharedhealth.mci.web.controller;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -21,6 +22,7 @@ import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import org.sharedhealth.mci.web.handler.MCIResponse;
+import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 
 @RestController
 @RequestMapping("/api/v1/patients")
@@ -235,21 +237,23 @@ public class PatientController {
     }
 
     @RequestMapping(value = "/facility/{facilityId}", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
-    public DeferredResult<List<PatientMapper>> findAllPatientsInCatchment(
+    public DeferredResult<ResponseEntity<MCIMultiResponse>> findAllPatientsInCatchment(
             @PathVariable String facilityId,
             @RequestParam(value = "last", required = false) String last
             ) {
         return getPaginatePatientListInCatchment(facilityId, last);
     }
 
-    private DeferredResult<List<PatientMapper>> getPaginatePatientListInCatchment(String facilityId, String last) {
+    private DeferredResult<ResponseEntity<MCIMultiResponse>> getPaginatePatientListInCatchment(String facilityId, String last) {
         logger.debug("Find all patients  for catchment of facility [" + facilityId+ "]");
-        final DeferredResult<List<PatientMapper>> deferredResult = new DeferredResult<>();
+        final DeferredResult<ResponseEntity<MCIMultiResponse>> deferredResult = new DeferredResult<>();
 
         patientService.findAllByFacility(facilityId, last).addCallback(new ListenableFutureCallback<List<PatientMapper>>() {
             @Override
-            public void onSuccess(List<PatientMapper> result) {
-                deferredResult.setResult(result);
+            public void onSuccess(List<PatientMapper> results) {
+                List<ArrayList> additionalInfo = null;
+                MCIMultiResponse mciMultiResponse = new MCIMultiResponse(results,additionalInfo, OK);
+                deferredResult.setResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject));
             }
 
             @Override
