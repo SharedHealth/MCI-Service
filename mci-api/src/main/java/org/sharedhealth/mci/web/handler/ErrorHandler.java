@@ -48,23 +48,13 @@ public class ErrorHandler {
         this.message = message;
     }
 
-    public int addError(MCIError error) {
+    public void addError(MCIError error) {
 
         if (this.errors == null) {
             this.errors = new ArrayList<>();
         }
 
-        for (int i = 0; i < this.errors.size(); i++) {
-            MCIError err = this.errors.get(i);
-            if (error.getCode() == err.getCode()) {
-                error.setField(err.getField() + ',' + error.getField());
-                this.errors.set(i, error);
-                return 1;
-            }
-        }
-
         this.errors.add(error);
-        return 1;
 
     }
 
@@ -116,7 +106,9 @@ public class ErrorHandler {
 
         message = error.getDefaultMessage();
         field = getErrorField(error);
-
+        if(field != "") {
+            message = "invalid " + field;
+        }
         return new MCIError(code, message, field);
     }
 
