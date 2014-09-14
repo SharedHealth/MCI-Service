@@ -188,7 +188,7 @@ public class PatientMapperTest {
     }
 
     @Test
-    public void shouldFailIfFullNameBanglaIsMoreThan_120_Characters() {
+    public void shouldFailIfFullNameBanglaIsMoreThan_125_Characters() {
         Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "nameBangla", "এ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডল");
         assertEquals("1002", constraintViolations.iterator().next().getMessage());
     }
@@ -298,4 +298,27 @@ public class PatientMapperTest {
         assertEquals(1, constraintViolations.size());
         assertEquals("1004", constraintViolations.iterator().next().getMessage());
     }
+    @Test
+    public void shouldFailIfPrimaryContactIsMoreThan_100_Characters() {
+        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "primaryContact", "janagiralamkabirkhanjahanaliahmadpuri janagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpuri");
+        assertEquals("1002", constraintViolations.iterator().next().getMessage());
+    }
+
+    @Test
+    public void shouldPassIfPrimaryContactIsValid() {
+        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "primaryContact", "imran");
+        assertEquals(0, constraintViolations.size());
+    }
+    @Test
+    public void ShouldFailIFCellNoIsInvalid(){
+        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "cellNo", "adfdfdsdfdfdfdfdfdffdfdfdfdf");
+        assertEquals("1002", constraintViolations.iterator().next().getMessage());
+    }
+
+    @Test
+    public void ShouldPassIFCellNoIsInvalid(){
+        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "cellNo", "+(880)-1912109075");
+        assertEquals(0, constraintViolations.size());
+    }
+
 }

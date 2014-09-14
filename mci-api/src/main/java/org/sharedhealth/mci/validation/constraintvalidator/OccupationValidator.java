@@ -17,6 +17,9 @@ public class OccupationValidator implements ConstraintValidator<Occupation, Stri
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
+        if(value == null){
+            return true;
+        }
         List<String> list = Arrays.asList(occupationNumbers);
         boolean b = list.contains(value);
         if (b == false) {

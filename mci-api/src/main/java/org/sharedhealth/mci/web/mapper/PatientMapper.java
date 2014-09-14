@@ -4,7 +4,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.Pattern;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.time.DateFormatUtils;
@@ -15,12 +14,15 @@ import org.sharedhealth.mci.validation.constraints.Date;
 import org.sharedhealth.mci.validation.constraints.Length;
 import org.sharedhealth.mci.validation.constraints.Location;
 import org.sharedhealth.mci.validation.constraints.Occupation;
+import org.sharedhealth.mci.validation.constraints.MaritalRelation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
-@JsonIgnoreProperties({ "created_at" })
+@MaritalRelation.List({
+        @MaritalRelation(maritalStatus = "maritalStatus", relationalStatus = "relations", message = "2004")
+})
 public class PatientMapper {
 
     private static final Logger logger = LoggerFactory.getLogger(PatientMapper.class);
@@ -353,6 +355,24 @@ public class PatientMapper {
         }
 
         return null;
+    }
+
+    public boolean isSimilarTo(PatientMapper patientMapper) {
+        int matches = 0;
+
+        if(this.getNationalId() != null && this.getNationalId().equals(patientMapper.getNationalId())) {
+            matches++;
+        }
+
+        if(this.getBirthRegistrationNumber() != null && this.getBirthRegistrationNumber().equals(patientMapper.getBirthRegistrationNumber())) {
+            matches++;
+        }
+
+        if(this.getUid() != null && this.getUid().equals(patientMapper.getUid())) {
+            matches++;
+        }
+
+        return matches > 1;
     }
 
     public void setRelations(List<Relation> relations) {

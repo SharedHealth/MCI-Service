@@ -80,7 +80,7 @@ public class PatientRestApiTest {
         address.setCityCorporationId("20");
         address.setVillage("10");
         address.setWardId("01");
-        address.setCountryCode("103");
+        address.setCountryCode("050");
 
         patientMapper.setAddress(address);
     }

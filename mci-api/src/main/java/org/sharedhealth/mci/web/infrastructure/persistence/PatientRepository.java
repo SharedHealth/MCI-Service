@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Joiner;
 import com.google.common.util.concurrent.SettableFuture;
 import org.apache.commons.lang3.StringUtils;
+import org.sharedhealth.mci.utils.TimeUid;
 import org.sharedhealth.mci.utils.UidGenerator;
 import org.sharedhealth.mci.web.exception.PatientAlreadyExistException;
 import org.sharedhealth.mci.web.exception.PatientNotFoundException;
@@ -45,10 +46,11 @@ import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBu
 @Component
 public class PatientRepository {
     private static final Logger logger = LoggerFactory.getLogger(PatientRepository.class);
+    private static final UidGenerator uid = new UidGenerator();
     private static long TIMEOUT_IN_MILLIS = 10;
     private static int PER_PAGE_LIMIT = 10000;
 
-    private static final UidGenerator uid = new UidGenerator();
+
     private CassandraOperations cassandraOperations;
 
     @Autowired
@@ -58,12 +60,12 @@ public class PatientRepository {
 
     public ListenableFuture<MCIResponse> create(PatientMapper patientMapper) {
 
-        PatientMapper existingPatientMapper;
+        PatientMapper existingPatient;
 
         final SettableFuture<MCIResponse> result = SettableFuture.create();
 
         try {
-            existingPatientMapper = getExistingPatient(patientMapper);
+            existingPatient = getExistingPatient(patientMapper);
         } catch (ExecutionException e) {
             result.setException(e.getCause());
             return getStringListenableFuture(result);
@@ -72,8 +74,20 @@ public class PatientRepository {
             return getStringListenableFuture(result);
         }
 
-        if (!StringUtils.isBlank(existingPatientMapper.getHealthId())) {
-            result.setException(new PatientAlreadyExistException(existingPatientMapper.getHealthId()));
+        if (!StringUtils.isBlank(patientMapper.getHealthId())) {
+            DirectFieldBindingResult bindingResult = new DirectFieldBindingResult(patientMapper, "patient");
+            bindingResult.addError(new FieldError("patient", "hid", "2000"));
+            throw new ValidationException(bindingResult);
+        }
+
+
+        if (existingPatient == null) {
+            patientMapper.setHealthId(uid.getId());
+        } else if (StringUtils.isBlank(patientMapper.getHealthId())) {
+            logger.debug("Update flow");
+            update(patientMapper, existingPatient.getHealthId());
+        } else {
+            result.setException(new PatientAlreadyExistException(existingPatient.getHealthId()));
             return getStringListenableFuture(result);
         }
 
@@ -90,6 +104,7 @@ public class PatientRepository {
         Patient p = getEntityFromPatientMapper(patientMapper);
 
         p.setHealthId(uid.getId());
+        p.setTimeUid(TimeUid.getId());
         p.setFullName(fullName);
         p.setCreatedAt(new Date());
         p.setUpdatedAt(new Date());
@@ -112,6 +127,8 @@ public class PatientRepository {
 
     private PatientMapper getExistingPatient(PatientMapper patientMapper) throws InterruptedException, ExecutionException {
 
+        PatientMapper existingPatient;
+
         if (!StringUtils.isBlank(patientMapper.getHealthId())) {
             try {
                 return findByHealthId(patientMapper.getHealthId()).get();
@@ -122,32 +139,44 @@ public class PatientRepository {
             }
         }
 
-        if (!StringUtils.isBlank(patientMapper.getNationalId())) {
+        if(!StringUtils.isBlank(patientMapper.getNationalId())) {
             try {
-                return findByNationalId(patientMapper.getNationalId()).get();
+                existingPatient = findByNationalId(patientMapper.getNationalId()).get();
+
+                if(existingPatient.isSimilarTo(patientMapper)) {
+                    return existingPatient;
+                }
             } catch (Exception e) {
-                logger.debug("Can not find patient by [National Id");
+                logger.debug("something happens finding NationalId");
             }
         }
 
-        if (!StringUtils.isBlank(patientMapper.getBirthRegistrationNumber())) {
+        if(!StringUtils.isBlank(patientMapper.getBirthRegistrationNumber())) {
 
             try {
-                return findByBirthRegistrationNumber(patientMapper.getBirthRegistrationNumber()).get();
+                existingPatient = findByBirthRegistrationNumber(patientMapper.getBirthRegistrationNumber()).get();
+
+                if(existingPatient.isSimilarTo(patientMapper)) {
+                    return existingPatient;
+                }
             } catch (Exception e) {
-                logger.debug("Can not find patient by [Birth Registration Number]");
+                logger.debug("something happens finding BirthRegistration");
             }
         }
 
-        if (!StringUtils.isBlank(patientMapper.getUid())) {
+        if(!StringUtils.isBlank(patientMapper.getUid())) {
             try {
-                return findByUid(patientMapper.getUid()).get();
+                existingPatient = findByUid(patientMapper.getUid()).get();
+
+                if(existingPatient.isSimilarTo(patientMapper)) {
+                    return existingPatient;
+                }
             } catch (Exception e) {
-                logger.debug("Can not find patient by [UID]");
+                logger.debug("something happens finding Uid");
             }
         }
 
-        return patientMapper;
+        return null;
     }
 
     public ListenableFuture<PatientMapper> findByHealthId(final String healthId) {
@@ -352,25 +381,33 @@ public class PatientRepository {
         address.setCountryCode(row.getString(COUNTRY));
         patientMapper.setAddress(address);
 
-        Address permanetaddress = new Address();
-        permanetaddress.setAddressLine(row.getString(PERMANENT_ADDRESS_LINE));
-        permanetaddress.setDivisionId(row.getString(PERMANENT_DIVISION_ID));
-        permanetaddress.setDistrictId(row.getString(PERMANENT_DISTRICT_ID));
-        permanetaddress.setUpazillaId(row.getString(PERMANENT_UPAZILLA_ID));
-        permanetaddress.setUnionId(row.getString(PERMANENT_UNION_ID));
-        permanetaddress.setHoldingNumber(row.getString(PERMANENT_HOLDING_NUMBER));
-        permanetaddress.setStreet(row.getString(PERMANENT_STREET));
-        permanetaddress.setAreaMouja(row.getString(PERMANENT_AREA_MOUJA));
-        permanetaddress.setVillage(row.getString(PERMANENT_VILLAGE));
-        permanetaddress.setPostOffice(row.getString(PERMANENT_POST_OFFICE));
-        permanetaddress.setPostCode(row.getString(PERMANENT_POST_CODE));
-        permanetaddress.setWardId(row.getString(PERMANENT_WARD));
-        permanetaddress.setThanaId(row.getString(PERMANENT_THANA));
-        permanetaddress.setCityCorporationId(row.getString(PERMANENT_CITY_CORPORATION));
-        permanetaddress.setCountryCode(row.getString(PERMANENT_COUNTRY));
-        patientMapper.setPermanentAddress(permanetaddress);
+        Address permanentaddress = new Address();
+        permanentaddress.setAddressLine(row.getString(PERMANENT_ADDRESS_LINE));
+        permanentaddress.setDivisionId(row.getString(PERMANENT_DIVISION_ID));
+        permanentaddress.setDistrictId(row.getString(PERMANENT_DISTRICT_ID));
+        permanentaddress.setUpazillaId(row.getString(PERMANENT_UPAZILLA_ID));
+        permanentaddress.setUnionId(row.getString(PERMANENT_UNION_ID));
+        permanentaddress.setHoldingNumber(row.getString(PERMANENT_HOLDING_NUMBER));
+        permanentaddress.setStreet(row.getString(PERMANENT_STREET));
+        permanentaddress.setAreaMouja(row.getString(PERMANENT_AREA_MOUJA));
+        permanentaddress.setVillage(row.getString(PERMANENT_VILLAGE));
+        permanentaddress.setPostOffice(row.getString(PERMANENT_POST_OFFICE));
+        permanentaddress.setPostCode(row.getString(PERMANENT_POST_CODE));
+        permanentaddress.setWardId(row.getString(PERMANENT_WARD));
+        permanentaddress.setThanaId(row.getString(PERMANENT_THANA));
+        permanentaddress.setCityCorporationId(row.getString(PERMANENT_CITY_CORPORATION));
+        permanentaddress.setCountryCode(row.getString(PERMANENT_COUNTRY));
         patientMapper.setCreatedAt(row.getDate("created_at"));
 
+        if (permanentaddress.getCountryCode() != null) {
+            if (permanentaddress.getCountryCode() == "050" && permanentaddress.getDistrictId() != null) {
+                patientMapper.setPermanentAddress(permanentaddress);
+            }
+
+            if (permanentaddress.getCountryCode() != "050") {
+                patientMapper.setPermanentAddress(permanentaddress);
+            }
+        }
         return patientMapper;
     }
 
@@ -442,14 +479,14 @@ public class PatientRepository {
                 father.getNameBangla(),
                 father.getGivenName(),
                 father.getSurName(),
-                father.getBinBrn(),
-                father.getNid(),
+                father.getBirthRegistrationNumber(),
+                father.getNationalId(),
                 father.getUid(),
                 mother.getNameBangla(),
                 mother.getGivenName(),
                 mother.getSurName(),
-                mother.getBinBrn(),
-                mother.getNid(),
+                mother.getBirthRegistrationNumber(),
+                mother.getNationalId(),
                 mother.getUid(),
                 patientMapper.getUid(),
                 patientMapper.getPlaceOfBirth(),
@@ -652,8 +689,8 @@ public class PatientRepository {
             patient.setFathersNameBangla(father.getNameBangla());
             patient.setFathersGivenName(father.getGivenName());
             patient.setFathersSurName(father.getSurName());
-            patient.setFathersBrn(father.getBinBrn());
-            patient.setFathersNid(father.getNid());
+            patient.setFathersBrn(father.getBirthRegistrationNumber());
+            patient.setFathersNid(father.getNationalId());
             patient.setFathersUid(father.getUid());
         }
 
@@ -661,8 +698,8 @@ public class PatientRepository {
             patient.setMothersNameBangla(mother.getNameBangla());
             patient.setMothersGivenName(mother.getGivenName());
             patient.setMothersSurName(mother.getSurName());
-            patient.setMothersBrn(mother.getBinBrn());
-            patient.setMothersNid(mother.getNid());
+            patient.setMothersBrn(mother.getBirthRegistrationNumber());
+            patient.setMothersNid(mother.getNationalId());
             patient.setMothersUid(mother.getUid());
         }
 

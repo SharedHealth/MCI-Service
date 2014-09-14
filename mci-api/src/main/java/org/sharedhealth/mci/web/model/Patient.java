@@ -231,6 +231,9 @@ public class Patient {
     @Column("updated_at")
     private Date updatedAt;
 
+    @Column("time_uid")
+    private String timeUid;
+
     @Column(RELATIONS)
     private String relations;
 
@@ -795,6 +798,15 @@ public class Patient {
     public void setPrimaryCellNo(String primaryCellNo) {
         this.primaryCellNo = primaryCellNo;
     }
+
+    public String getTimeUid() {
+        return timeUid;
+    }
+
+    public void setTimeUid(String timeUid) {
+        this.timeUid = timeUid;
+    }
+
 
     public void updateLocationLevels() {
         this.locationLevel1 = this.getLocationLevel1();

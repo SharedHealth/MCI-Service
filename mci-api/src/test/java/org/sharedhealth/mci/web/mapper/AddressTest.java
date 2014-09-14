@@ -208,13 +208,8 @@ public class AddressTest {
     }
 
     @Test
-    public void shouldHaveCountryConstrainAnnotation() {
-        assertAddressIdConstraint("countryCode", new AddressIdConstraint("COUNTRY"));
-    }
-
-    @Test
     public void shouldPassIfCountryIdIsValid() {
-        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "countryCode", "124");
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "countryCode", "050");
         assertEquals(0, constraintViolations.size());
     }
 

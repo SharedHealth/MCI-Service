@@ -33,6 +33,9 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
     @Override
     public boolean isValid(Address value, ConstraintValidatorContext context) {
         if(value == null) return true;
+        if(value.getCountryCode() != null && value.getCountryCode() != "050" ){
+            return true;
+        }
 
         String geoCode = value.getGeoCode();
 

@@ -89,7 +89,7 @@ public class Address {
     @JsonProperty("country_code")
     @JsonInclude(NON_EMPTY)
     @AddressId(value=COUNTRY, message = "1004")
-    private String countryCode;
+    private String countryCode = "050";
 
     @Override
     public boolean equals(Object rhs) {

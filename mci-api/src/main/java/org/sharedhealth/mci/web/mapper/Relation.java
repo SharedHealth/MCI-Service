@@ -24,7 +24,7 @@ public class Relation {
 
     @JsonProperty("name_bangla")
     @JsonInclude(NON_EMPTY)
-    @Length(lengthSize= 120, message = "1002")
+    @Length(lengthSize= 125, message = "1002")
     private String nameBangla;
 
     @JsonProperty("given_name")
@@ -34,7 +34,7 @@ public class Relation {
 
     @JsonProperty("sur_name")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[a-zA-Z0-9]{0,25}$",message = "1002")
+    @Length(lengthSize= 25, message = "1002")
     private String surName;
 
     @JsonProperty("uid")
@@ -45,12 +45,12 @@ public class Relation {
     @JsonProperty("nid")
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "[\\d]{13}|[\\d]{17}", message = "1002")
-    private String nid;
+    private String nationalId;
 
     @JsonProperty("bin_brn")
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "[\\d]{17}", message = "1002")
-    private String binBrn;
+    private String birthRegistrationNumber;
 
     @JsonProperty("marriage_id")
     @JsonInclude(NON_EMPTY)
@@ -97,20 +97,20 @@ public class Relation {
         this.uid = uid;
     }
 
-    public String getNid() {
-        return nid;
+    public String getNationalId() {
+        return nationalId;
     }
 
-    public void setNid(String nid) {
-        this.nid = nid;
+    public void setNationalId(String nationalId) {
+        this.nationalId = nationalId;
     }
 
-    public String getBinBrn() {
-        return binBrn;
+    public String getBirthRegistrationNumber() {
+        return birthRegistrationNumber;
     }
 
-    public void setBinBrn(String binBrn) {
-        this.binBrn = binBrn;
+    public void setBirthRegistrationNumber(String birthRegistrationNumber) {
+        this.birthRegistrationNumber = birthRegistrationNumber;
     }
 
     public String getType() {

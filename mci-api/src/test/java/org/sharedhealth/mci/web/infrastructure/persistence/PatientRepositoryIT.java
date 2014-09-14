@@ -59,15 +59,7 @@ public class PatientRepositoryIT {
         address.setDistrictId("1020");
         address.setUpazillaId("102030");
         address.setUnionId("10203040");
-
-        Address parmentaddress = new Address();
-        parmentaddress.setAddressLine("house-10");
-        parmentaddress.setDivisionId("10");
-        parmentaddress.setDistrictId("1020");
-        parmentaddress.setUpazillaId("102030");
-        parmentaddress.setUnionId("10203040");
         patientMapper.setAddress(address);
-        patientMapper.setPermanentAddress(parmentaddress);
 
     }
 
@@ -92,13 +84,13 @@ public class PatientRepositoryIT {
         patientRepository.create(patientMapper).get();
     }
 
-    @Test(expected = ExecutionException.class)
+  /*  @Test(expected = ExecutionException.class)
     public void shouldThrowException_IfPatientExistWithProvidedHealthIdOnCreate() throws ExecutionException, InterruptedException {
         patientRepository.create(patientMapper).get();
         patientMapper.setUid("12345678123");
         patientMapper.setBirthRegistrationNumber("12345678901234568");
         patientRepository.create(patientMapper).get();
-    }
+    }*/
 
     @Test
     public void shouldFindPatientWithMatchingNationalId() throws ExecutionException, InterruptedException {
