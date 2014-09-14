@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
-@JsonIgnoreProperties({ "createdAt" })
+@JsonIgnoreProperties({ "created_at" })
 public class PatientMapper {
 
     private static final Logger logger = LoggerFactory.getLogger(PatientMapper.class);

@@ -42,8 +42,7 @@ import org.sharedhealth.mci.web.handler.MCIError;
 @ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
 public class PatientRestApiTest {
     private static final Logger logger = LoggerFactory.getLogger(PatientMapper.class);
-    private static final String LOCATION_INSERT_QUERY = "INSERT INTO locations (geo_code, division_id, district_id, upazilla_id, pourashava_id, union_id)" +
-            " values ('%s', '%s', '%s', '%s', '%s', '%s')";
+
     @Autowired
     protected WebApplicationContext webApplicationContext;
 
@@ -84,8 +83,6 @@ public class PatientRestApiTest {
         address.setCountryCode("103");
 
         patientMapper.setAddress(address);
-
-        createLocation();
     }
 
     @Test
@@ -149,13 +146,7 @@ public class PatientRestApiTest {
 
     @After
     public void teardown() {
-        cqlTemplate.execute("truncate locations");
         cqlTemplate.execute("truncate patient");
-    }
-
-    public void createLocation()
-    {
-        cqlTemplate.execute(String.format(LOCATION_INSERT_QUERY, GEO_CODE, "10", "04", "09", "20", "01"));
     }
 
     private class InvalidPatient {
