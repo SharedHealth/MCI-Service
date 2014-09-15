@@ -22,9 +22,6 @@ public @interface MaritalRelation {
 
     Class<? extends Payload>[] payload() default {};
 
-    String maritalStatus();
-    String relationalStatus();
-
     @Target({TYPE, ANNOTATION_TYPE})
     @Retention(RUNTIME)
     @Documented

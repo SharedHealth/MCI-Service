@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
 @MaritalRelation.List({
-        @MaritalRelation(maritalStatus = "maritalStatus", relationalStatus = "relations", message = "2004")
+        @MaritalRelation(message = "Invalid Spouse")
 })
 @JsonIgnoreProperties({ "createdAt" })
 public class PatientMapper {

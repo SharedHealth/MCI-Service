@@ -9,24 +9,23 @@ import org.slf4j.LoggerFactory;
 public class MaritalRelationValidator implements ConstraintValidator<MaritalRelation, PatientMapper> {
 
     private static final Logger logger = LoggerFactory.getLogger(MaritalRelationValidator.class);
-    private String maritalStatus;
-    private String relationalStatus;
 
     @Override
     public void initialize(MaritalRelation constraintAnnotation) {
-        maritalStatus = constraintAnnotation.maritalStatus();
-        relationalStatus = constraintAnnotation.relationalStatus();
+
     }
 
     @Override
     public boolean isValid(final PatientMapper value, final ConstraintValidatorContext context) {
           if(value != null) {
               try {
-                  if(value.getMaritalStatus().equals(1)){
-                     /* if(value.getRelation("spouse") != null){
+
+                  if(value.getMaritalStatus().equals("1")){
+                      logger.debug("check spouse["+value.getRelation("spouse")+"]");
+                     if(value.getRelation("spouse") != null){
                           return false;
-                      }*/
-                      return false;
+                      }
+                      return true;
                   }
 
               } catch (final Exception ignore) {

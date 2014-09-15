@@ -84,7 +84,7 @@ public class PatientRepository {
             patientMapper.setHealthId(uid.getId());
         } else if (StringUtils.isBlank(patientMapper.getHealthId())) {
             logger.debug("Update flow");
-            update(patientMapper, existingPatient.getHealthId());
+            return update(patientMapper, existingPatient.getHealthId());
         } else {
             result.setException(new PatientAlreadyExistException(existingPatient.getHealthId()));
             return getStringListenableFuture(result);
@@ -545,7 +545,7 @@ public class PatientRepository {
                 }
             }
         });
-
+        result.set(new MCIResponse(hid, HttpStatus.OK));
         return getStringListenableFuture(result);
     }
 
