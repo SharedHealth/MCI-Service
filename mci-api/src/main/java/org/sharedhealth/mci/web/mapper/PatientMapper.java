@@ -1,5 +1,5 @@
 package org.sharedhealth.mci.web.mapper;
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import javax.validation.Valid;
 import javax.validation.constraints.Pattern;
 import java.util.List;
@@ -22,6 +22,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 @MaritalRelation.List({
         @MaritalRelation(maritalStatus = "maritalStatus", relationalStatus = "relations", message = "2004")
 })
+@JsonIgnoreProperties({ "createdAt" })
 public class PatientMapper {
 
     private static final Logger logger = LoggerFactory.getLogger(PatientMapper.class);

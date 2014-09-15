@@ -16,7 +16,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Joiner;
 import com.google.common.util.concurrent.SettableFuture;
 import org.apache.commons.lang3.StringUtils;
-import org.sharedhealth.mci.utils.TimeUid;
 import org.sharedhealth.mci.utils.UidGenerator;
 import org.sharedhealth.mci.web.exception.PatientAlreadyExistException;
 import org.sharedhealth.mci.web.exception.PatientNotFoundException;
@@ -104,7 +103,6 @@ public class PatientRepository {
         Patient p = getEntityFromPatientMapper(patientMapper);
 
         p.setHealthId(uid.getId());
-        p.setTimeUid(TimeUid.getId());
         p.setFullName(fullName);
         p.setCreatedAt(new Date());
         p.setUpdatedAt(new Date());
