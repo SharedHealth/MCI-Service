@@ -1,11 +1,11 @@
 package org.sharedhealth.mci.validation.constraintvalidator;
 
-import org.sharedhealth.mci.validation.constraints.CountryCode;
-
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.util.Arrays;
 import java.util.List;
+
+import org.sharedhealth.mci.validation.constraints.CountryCode;
 
 public class CountryCodeValidator implements ConstraintValidator<CountryCode, String> {
 
@@ -21,11 +21,9 @@ public class CountryCodeValidator implements ConstraintValidator<CountryCode, St
         if(value == null){
             return true;
         }
+
         List<String> list = Arrays.asList(countryCodes);
-        boolean b = list.contains(value);
-        if (b == false) {
-            return false;
-        }
-        return true;
+
+        return list.contains(value);
     }
 }

@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 public class LocationValidator implements ConstraintValidator<Location, Address> {
 
     private static final Logger logger = LoggerFactory.getLogger(LocationValidator.class);
+    private static final String BD_COUNTRY_CODE = "050";
 
     private LocationService locationService;
 
@@ -32,8 +33,10 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
 
     @Override
     public boolean isValid(Address value, ConstraintValidatorContext context) {
+
         if(value == null) return true;
-        if(value.getCountryCode() != null && value.getCountryCode() != "050" ){
+
+        if(value.getCountryCode() != null && !value.getCountryCode().equals(BD_COUNTRY_CODE)){
             return true;
         }
 
@@ -48,13 +51,15 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
             return true;
         }
 
-        if(!(Pattern.compile("[\\d]{2,10}").matcher(geoCode).matches())) return false;
+        if(geoCode.length() < 6) return false;
+
         if(!(Pattern.compile("[\\d]{2}").matcher(unionOrWard).matches())) return false;
 
         try {
             org.sharedhealth.mci.web.mapper.Location location = locationService.findByGeoCode(geoCode).get();
 
             if(!StringUtils.isBlank(location.getGeoCode())) {
+
                 return true;
             }
 
