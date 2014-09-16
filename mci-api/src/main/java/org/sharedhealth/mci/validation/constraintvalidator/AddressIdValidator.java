@@ -32,16 +32,12 @@ public class AddressIdValidator implements ConstraintValidator<AddressId, String
                 return Pattern.compile("[\\d]{2}").matcher(value).matches();
             case UNION:
                 return Pattern.compile("[\\d]{2}").matcher(value).matches();
-            case VILLAGE:
-                return Pattern.compile("[\\d]{2}").matcher(value).matches();
             case WARD:
                 return Pattern.compile("[\\d]{2}").matcher(value).matches();
             case COUNTRY:
                 return Pattern.compile("[\\d]{3}").matcher(value).matches();
             case CITYCORPORATION:
                 return Pattern.compile("[\\d]{2}").matcher(value).matches();
-            case AREAMOUJA:
-                return Pattern.compile("[\\d]{3}").matcher(value).matches();
         }
 
         return false;

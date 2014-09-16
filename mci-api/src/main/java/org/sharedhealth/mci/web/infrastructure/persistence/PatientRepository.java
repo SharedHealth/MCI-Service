@@ -132,7 +132,7 @@ public class PatientRepository {
                 return findByHealthId(patientMapper.getHealthId()).get();
             } catch (Exception e) {
                 DirectFieldBindingResult bindingResult = new DirectFieldBindingResult(patientMapper, "patient");
-                bindingResult.addError(new FieldError("patient", "hid", "404"));
+                bindingResult.addError(new FieldError("patient", "hid", "2002"));
                 throw new ValidationException(bindingResult);
             }
         }
