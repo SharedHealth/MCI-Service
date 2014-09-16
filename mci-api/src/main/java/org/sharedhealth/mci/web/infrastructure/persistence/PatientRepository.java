@@ -436,8 +436,7 @@ public class PatientRepository {
         Address address = patientMapper.getAddress();
         Address permanentAddress = patientMapper.getPermanentAddress();
 
-        Relation father = patientMapper.getRelation("father");
-        Relation mother = patientMapper.getRelation("mother");
+        Relation father = null, mother = null;
 
         String relationsJson = "";
         ObjectMapper mapper = new ObjectMapper();
@@ -450,6 +449,14 @@ public class PatientRepository {
 
         } catch (Exception e) {
             logger.debug(" Relations: [" + e.getMessage() + "]");
+        }
+
+        if(father == null) {
+            father = new Relation();
+        }
+
+        if(mother == null) {
+            mother = new Relation();
         }
 
         if (permanentAddress == null) {
@@ -538,14 +545,14 @@ public class PatientRepository {
             public void onQueryComplete(ResultSetFuture rsf) {
                 try {
                     rsf.get(TIMEOUT_IN_MILLIS, TimeUnit.MILLISECONDS);
-                    result.set(new MCIResponse(hid, HttpStatus.CREATED));
+                    result.set(new MCIResponse(hid, HttpStatus.ACCEPTED));
                 } catch (Exception e) {
                     logger.error("Error while creating patient.", e);
                     result.setException(e);
                 }
             }
         });
-        result.set(new MCIResponse(hid, HttpStatus.OK));
+
         return getStringListenableFuture(result);
     }
 

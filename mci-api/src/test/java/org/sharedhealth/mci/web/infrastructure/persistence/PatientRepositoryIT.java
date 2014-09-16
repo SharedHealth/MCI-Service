@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
 import org.sharedhealth.mci.web.config.WebMvcConfig;
+import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,15 +19,15 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import org.sharedhealth.mci.web.handler.MCIResponse;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.springframework.http.HttpStatus.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 @ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
 public class PatientRepositoryIT {
+    @SuppressWarnings("SpringJavaAutowiringInspection")
     @Autowired
     @Qualifier("MCICassandraTemplate")
     private CassandraOperations cqlTemplate;
@@ -56,9 +57,10 @@ public class PatientRepositoryIT {
         Address address = new Address();
         address.setAddressLine("house-10");
         address.setDivisionId("10");
-        address.setDistrictId("1020");
-        address.setUpazillaId("102030");
-        address.setUnionId("10203040");
+        address.setDistrictId("04");
+        address.setUpazillaId("09");
+        address.setCityCorporationId("20");
+        address.setWardId("01");
         patientMapper.setAddress(address);
 
     }
@@ -78,19 +80,19 @@ public class PatientRepositoryIT {
         patientRepository.findByHealthId(UUID.randomUUID().toString()).get();
     }
 
-    /*@Test(expected = ExecutionException.class)
-    public void shouldThrowException_IfInvalidHealthIdProvidedForCreate() throws ExecutionException, InterruptedException {
+    @Test(expected = ExecutionException.class)
+    public void shouldThrowException_IfHealthIdProvidedForCreate() throws ExecutionException, InterruptedException {
         patientMapper.setHealthId("12");
         patientRepository.create(patientMapper).get();
     }
 
-  /*  @Test(expected = ExecutionException.class)
-    public void shouldThrowException_IfPatientExistWithProvidedHealthIdOnCreate() throws ExecutionException, InterruptedException {
-        patientRepository.create(patientMapper).get();
-        patientMapper.setUid("12345678123");
-        patientMapper.setBirthRegistrationNumber("12345678901234568");
-        patientRepository.create(patientMapper).get();
-    }*/
+   @Test
+    public void shouldReturnAccepted_IfPatientExistWithProvidedTwoIdFieldsOnCreate() throws ExecutionException, InterruptedException {
+       patientRepository.create(patientMapper).get();
+       patientMapper.setHealthId(null);
+       MCIResponse mciResponse = patientRepository.create(patientMapper).get();
+       assertEquals(mciResponse.getHttpStatus(), ACCEPTED.value());
+    }
 
     @Test
     public void shouldFindPatientWithMatchingNationalId() throws ExecutionException, InterruptedException {

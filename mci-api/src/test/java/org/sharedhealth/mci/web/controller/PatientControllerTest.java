@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.Location;
 import org.sharedhealth.mci.web.mapper.PatientMapper;
@@ -27,8 +28,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
-
-import org.sharedhealth.mci.web.handler.MCIResponse;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PatientControllerTest {
@@ -76,7 +75,7 @@ public class PatientControllerTest {
         address.setCityCorporationId("20");
         address.setVillage("10");
         address.setWardId("01");
-        address.setCountryCode("103");
+        address.setCountryCode("050");
 
         patientMapper.setAddress(address);
 
