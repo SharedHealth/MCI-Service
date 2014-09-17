@@ -50,7 +50,7 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
 
         if(geoCode.length() < 6) return false;
 
-        if(!StringUtils.isNotBlank(unionOrWard) && !(Pattern.compile("[\\d]{2}").matcher(unionOrWard).matches())) return false;
+        if(StringUtils.isNotBlank(unionOrWard) && !(Pattern.compile("[\\d]{2}").matcher(unionOrWard).matches())) return false;
 
         try {
             org.sharedhealth.mci.web.mapper.Location location = locationService.findByGeoCode(geoCode).get();

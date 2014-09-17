@@ -5,6 +5,7 @@ import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.validator.constraints.NotBlank;
@@ -273,15 +274,35 @@ public class Address {
     }
 
     public String getGeoCode() {
+        String gCode = this.getDivisionId();
 
-        final StringBuilder sb = new StringBuilder("");
+        if(gCode.equals("null")) {
+            return "";
+        }
 
-        sb.append(this.getDivisionId());
-        sb.append(this.getDistrictId());
-        sb.append(this.getUpazilaOrThana());
-        sb.append(this.getCityCorporationId());
-        sb.append(this.getUnionOrWard());
+        if(StringUtils.isBlank(this.getDistrictId())) {
+            return gCode;
+        }
 
-        return sb.toString();
+        gCode += this.getDistrictId();
+
+        if(StringUtils.isBlank(this.getUpazilaOrThana())) {
+            return gCode;
+        }
+
+        gCode += this.getUpazilaOrThana();
+
+        if(StringUtils.isBlank(this.getCityCorporationId())) {
+            return gCode;
+        }
+
+        gCode += this.getCityCorporationId();
+
+
+        if(StringUtils.isBlank(this.getUnionOrWard())) {
+            return gCode;
+        }
+
+        return  gCode + this.getUnionOrWard();
     }
 }

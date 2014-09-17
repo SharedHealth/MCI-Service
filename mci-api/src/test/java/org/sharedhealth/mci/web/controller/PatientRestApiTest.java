@@ -144,6 +144,20 @@ public class PatientRestApiTest {
         Assert.assertEquals("{\"error_code\":2000,\"http_status\":400,\"message\":\"invalid.request\",\"errors\":[{\"code\":126,\"field\":\"\",\"message\":\"Unrecognized field: \\\"invalid_property\\\"\"}]}", result.getResponse().getContentAsString());
     }
 
+    @Test
+    public void ShouldPassIFAddressIsValidTillUpazilaLevel() throws Exception {
+
+        patientMapper.getAddress().setWardId(null);
+        patientMapper.getAddress().setCityCorporationId(null);
+        patientMapper.getAddress().setUnionId(null);
+
+        String json = new ObjectMapper().writeValueAsString(patientMapper);
+
+        MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
     @After
     public void teardown() {
         cqlTemplate.execute("truncate patient");
