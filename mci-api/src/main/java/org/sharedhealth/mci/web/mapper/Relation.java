@@ -34,7 +34,7 @@ public class Relation {
 
     @JsonProperty("sur_name")
     @JsonInclude(NON_EMPTY)
-    @Length(lengthSize= 25, message = "1002")
+    @Pattern(regexp = "^(\\s*)([A-Za-z0-9]{0,25})(\\b\\s*$)",message = "1002")
     private String surName;
 
     @JsonProperty("uid")

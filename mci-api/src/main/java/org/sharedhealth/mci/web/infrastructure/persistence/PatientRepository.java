@@ -106,6 +106,7 @@ public class PatientRepository {
         p.setFullName(fullName);
         p.setCreatedAt(new Date());
         p.setUpdatedAt(new Date());
+        p.setSurName(patientMapper.getSurName().trim());
 
         p = cassandraOperations.insert(p);
 
@@ -681,37 +682,37 @@ public class PatientRepository {
         patient.setHealthId(p.getHealthId());
         patient.setNationalId(p.getNationalId());
         patient.setBirthRegistrationNumber(p.getBirthRegistrationNumber());
-        patient.setFullNameBangla(p.getNameBangla());
-        patient.setGivenName(p.getGivenName());
-        patient.setSurName(p.getSurName());
+        patient.setFullNameBangla(StringUtils.trim(p.getNameBangla()));
+        patient.setGivenName(StringUtils.trim(p.getGivenName()));
+        patient.setSurName(StringUtils.trim(p.getSurName()));
         patient.setDateOfBirth(p.getDateOfBirth());
         patient.setGender(p.getGender());
         patient.setOccupation(p.getOccupation());
         patient.setEducationLevel(p.getEducationLevel());
 
         if (father != null) {
-            patient.setFathersNameBangla(father.getNameBangla());
-            patient.setFathersGivenName(father.getGivenName());
-            patient.setFathersSurName(father.getSurName());
+            patient.setFathersNameBangla(StringUtils.trim(father.getNameBangla()));
+            patient.setFathersGivenName(StringUtils.trim(father.getGivenName()));
+            patient.setFathersSurName(StringUtils.trim(father.getSurName()));
             patient.setFathersBrn(father.getBirthRegistrationNumber());
             patient.setFathersNid(father.getNationalId());
             patient.setFathersUid(father.getUid());
         }
 
         if (mother != null) {
-            patient.setMothersNameBangla(mother.getNameBangla());
-            patient.setMothersGivenName(mother.getGivenName());
-            patient.setMothersSurName(mother.getSurName());
+            patient.setMothersNameBangla(StringUtils.trim(mother.getNameBangla()));
+            patient.setMothersGivenName(StringUtils.trim(mother.getGivenName()));
+            patient.setMothersSurName(StringUtils.trim(mother.getSurName()));
             patient.setMothersBrn(mother.getBirthRegistrationNumber());
             patient.setMothersNid(mother.getNationalId());
             patient.setMothersUid(mother.getUid());
         }
 
         patient.setUid(p.getUid());
-        patient.setPlaceOfBirth(p.getPlaceOfBirth());
+        patient.setPlaceOfBirth(StringUtils.trim(p.getPlaceOfBirth()));
         patient.setReligion(p.getReligion());
         patient.setBloodGroup(p.getBloodGroup());
-        patient.setNationality(p.getNationality());
+        patient.setNationality(StringUtils.trim(p.getNationality()));
         patient.setDisability(p.getDisability());
         patient.setEthnicity(p.getEthnicity());
         patient.setIsAlive(p.getIsAlive());
@@ -722,11 +723,11 @@ public class PatientRepository {
             patient.setDistrictId(address.getDistrictId());
             patient.setUpazillaId(address.getUpazillaId());
             patient.setUnionId(address.getUnionId());
-            patient.setHoldingNumber(address.getHoldingNumber());
-            patient.setStreet(address.getStreet());
-            patient.setAreaMouja(address.getAreaMouja());
-            patient.setVillage(address.getVillage());
-            patient.setPostOffice(address.getPostOffice());
+            patient.setHoldingNumber(StringUtils.trim(address.getHoldingNumber()));
+            patient.setStreet(StringUtils.trim(address.getStreet()));
+            patient.setAreaMouja(StringUtils.trim(address.getAreaMouja()));
+            patient.setVillage(StringUtils.trim(address.getVillage()));
+            patient.setPostOffice(StringUtils.trim(address.getPostOffice()));
             patient.setPostCode(address.getPostCode());
             patient.setWardId(address.getWardId());
             patient.setThanaId(address.getThanaId());
@@ -740,11 +741,11 @@ public class PatientRepository {
             patient.setPermanentDistrictId(permanentAddress.getDistrictId());
             patient.setPermanentUpazillaId(permanentAddress.getUpazillaId());
             patient.setPermanentUnionId(permanentAddress.getUnionId());
-            patient.setPermanentHoldingNumber(permanentAddress.getHoldingNumber());
-            patient.setPermanentStreet(permanentAddress.getStreet());
-            patient.setPermanentAreaMouja(permanentAddress.getAreaMouja());
-            patient.setPermanentVillage(permanentAddress.getVillage());
-            patient.setPermanentPostOffice(permanentAddress.getPostOffice());
+            patient.setPermanentHoldingNumber(StringUtils.trim(permanentAddress.getHoldingNumber()));
+            patient.setPermanentStreet(StringUtils.trim(permanentAddress.getStreet()));
+            patient.setPermanentAreaMouja(StringUtils.trim(permanentAddress.getAreaMouja()));
+            patient.setPermanentVillage(StringUtils.trim(permanentAddress.getVillage()));
+            patient.setPermanentPostOffice(StringUtils.trim(permanentAddress.getPostOffice()));
             patient.setPermanentPostCode(permanentAddress.getPostCode());
             patient.setPermanentWardId(permanentAddress.getWardId());
             patient.setPermanentThanaId(permanentAddress.getThanaId());
@@ -755,9 +756,8 @@ public class PatientRepository {
         patient.setRelations(relationsJson);
 
         patient.setCellNo(p.getCellNo());
-        patient.setPrimaryContact(p.getPrimaryContact());
+        patient.setPrimaryContact(StringUtils.trim(p.getPrimaryContact()));
         patient.setPrimaryCellNo(p.getPrimaryCellNo());
-
 
         return patient;
     }

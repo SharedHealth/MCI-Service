@@ -51,7 +51,7 @@ public class PatientMapper {
 
     @JsonProperty("sur_name")
     @NotBlank(message = "1001")
-    @Length(lengthSize= 25, message = "1002")
+    @Pattern(regexp = "^(\\s*)([A-Za-z0-9]{0,25})(\\b\\s*$)",message = "1002")
     private String surName;
 
     @JsonProperty("date_of_birth")
@@ -61,7 +61,7 @@ public class PatientMapper {
 
     @JsonProperty("gender")
     @NotBlank(message = "1001")
-    @Pattern(regexp = "[M|F|O]{1}", message = "1004")
+    @Pattern(regexp = "[M|F|O ]{1}", message = "1004")
     private String gender;
 
     @JsonProperty("occupation")
