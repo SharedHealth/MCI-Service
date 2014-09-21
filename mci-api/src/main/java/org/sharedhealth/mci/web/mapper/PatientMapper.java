@@ -116,7 +116,7 @@ public class PatientMapper {
 
     @JsonProperty("present_address")
     @Valid
-    @Location(message = "1002")
+    @Location(message = "1004")
     private Address address;
 
     @JsonProperty("primary_contact")

@@ -11,9 +11,13 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.validator.constraints.NotBlank;
 import org.sharedhealth.mci.validation.constraints.AddressId;
 import org.sharedhealth.mci.validation.constraints.CountryCode;
-
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static org.sharedhealth.mci.validation.AddressType.*;
+import org.sharedhealth.mci.validation.constraints.ConditionalAddessId;
+
+@ConditionalAddessId.List({
+        @ConditionalAddessId(message = "Conditioalal Address")
+})
 
 @JsonIgnoreProperties({ "geoCode", "upazilaOrThana", "unionOrWard" })
 public class Address {
@@ -25,22 +29,24 @@ public class Address {
 
     @JsonProperty("division_id")
     @JsonInclude(NON_EMPTY)
-    @AddressId(value = DIVISION, message = "1004")
+    @NotBlank(message = "1001")
+    @AddressId(value = DIVISION, message = "1002")
     private String divisionId;
 
     @JsonProperty("district_id")
     @JsonInclude(NON_EMPTY)
-    @AddressId(value = DISTRICT, message = "1004")
+    @NotBlank(message = "1001")
+    @AddressId(value = DISTRICT, message = "1002")
     private String districtId;
 
     @JsonProperty("upazilla_id")
     @JsonInclude(NON_EMPTY)
-    @AddressId(value = UPAZILLA, message = "1004")
+    @AddressId(value = UPAZILLA, message = "1002")
     private String upazillaId;
 
     @JsonProperty("union_id")
     @JsonInclude(NON_EMPTY)
-    @AddressId(value = UNION, message = "1004")
+    @AddressId(value = UNION, message = "1002")
     private String unionId;
 
     @JsonProperty("holding_number")
@@ -75,17 +81,17 @@ public class Address {
 
     @JsonProperty("ward_id")
     @JsonInclude(NON_EMPTY)
-    @AddressId(value = WARD, message = "1004")
+    @AddressId(value = WARD, message = "1002")
     private String wardId;
 
     @JsonProperty("thana_id")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "1004")
+    @AddressId(value = THANA, message = "1002")
     private String thanaId;
 
     @JsonProperty("city_corporation_id")
     @JsonInclude(NON_EMPTY)
-    @AddressId(value = CITYCORPORATION, message = "1004")
+    @AddressId(value = CITYCORPORATION, message = "1002")
     private String cityCorporationId;
 
     @JsonProperty("country_code")

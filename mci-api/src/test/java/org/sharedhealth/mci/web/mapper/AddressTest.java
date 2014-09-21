@@ -40,6 +40,20 @@ public class AddressTest {
     }
 
     @Test
+    public void shouldFailIfDistrictIsBlank() {
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "districtId", null);
+        assertEquals(1, constraintViolations.size());
+        printViolations(constraintViolations);
+    }
+
+    @Test
+    public void shouldFailIfDivisionIsBlank() {
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "divisionId", null);
+        assertEquals(1, constraintViolations.size());
+        printViolations(constraintViolations);
+    }
+
+    @Test
     public void shouldFailIfAddressLineSizeLessThan3() {
         Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "addressLine", "ab");
         assertEquals(1, constraintViolations.size());
@@ -105,6 +119,25 @@ public class AddressTest {
         assertEquals(1, constraintViolations.size());
         printViolations(constraintViolations);
     }
+
+    @Test
+    public void shouldHaveThanaConstrainAnnotation() {
+        assertAddressIdConstraint("thanaId", new AddressIdConstraint("THANA"));
+    }
+
+    @Test
+    public void shouldPassIfThanaIsValid() {
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "thanaId", "15");
+        assertEquals(0, constraintViolations.size());
+    }
+
+    @Test
+    public void shouldFailIfThanaIdIsInvalid() {
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "thanaId", "abcd");
+        assertEquals(1, constraintViolations.size());
+        printViolations(constraintViolations);
+    }
+
 
     @Test
     public void shouldHaveUnionConstrainAnnotation() {
@@ -263,8 +296,13 @@ public class AddressTest {
             for (ConstraintDescriptor descriptor : descriptors) {
                 Class<? extends Annotation> aClass = descriptor.getAnnotation().annotationType();
                 Map<String, Object> attributes = descriptor.getAttributes();
+
+                if (!this.type.equals(aClass)){
+                    continue;
+                }
+
                 String val = attributes.get("value").toString();
-                if (this.type.equals(aClass) && this.value.equals(val)) {
+                if (this.value.equals(val)) {
                     return true;
                 }
             }

@@ -29,6 +29,7 @@ public class AddressIdValidator implements ConstraintValidator<AddressId, String
             case DISTRICT:
                 return Pattern.compile("[\\d]{2}").matcher(value).matches();
             case UPAZILLA:
+            case THANA:
                 return Pattern.compile("[\\d]{2}").matcher(value).matches();
             case UNION:
                 return Pattern.compile("[\\d]{2}").matcher(value).matches();
