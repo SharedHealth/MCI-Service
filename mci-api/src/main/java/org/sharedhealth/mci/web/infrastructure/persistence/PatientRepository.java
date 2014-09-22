@@ -406,6 +406,9 @@ public class PatientRepository {
                 patientMapper.setPermanentAddress(permanentaddress);
             }
         }
+
+        patientMapper.setCreatedAt(row.getDate("created_at"));
+
         return patientMapper;
     }
 

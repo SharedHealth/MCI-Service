@@ -1,19 +1,17 @@
 package org.sharedhealth.mci.web.mapper;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import javax.validation.Valid;
 import javax.validation.constraints.Pattern;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.validator.constraints.NotBlank;
-import org.sharedhealth.mci.validation.constraints.Date;
-import org.sharedhealth.mci.validation.constraints.Length;
+import org.sharedhealth.mci.validation.constraints.*;
 import org.sharedhealth.mci.validation.constraints.Location;
-import org.sharedhealth.mci.validation.constraints.Occupation;
-import org.sharedhealth.mci.validation.constraints.MaritalRelation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +20,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 @MaritalRelation.List({
         @MaritalRelation(message = "Invalid Spouse")
 })
-@JsonIgnoreProperties({ "createdAt" })
+@JsonIgnoreProperties({ "created_at" })
 public class PatientMapper {
 
     private static final Logger logger = LoggerFactory.getLogger(PatientMapper.class);

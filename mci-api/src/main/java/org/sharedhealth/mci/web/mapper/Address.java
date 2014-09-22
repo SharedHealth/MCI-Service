@@ -2,6 +2,8 @@ package org.sharedhealth.mci.web.mapper;
 
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -9,44 +11,37 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.validator.constraints.NotBlank;
-import org.sharedhealth.mci.validation.constraints.AddressId;
 import org.sharedhealth.mci.validation.constraints.CountryCode;
+
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
-import static org.sharedhealth.mci.validation.AddressType.*;
-import org.sharedhealth.mci.validation.constraints.ConditionalAddessId;
 
-@ConditionalAddessId.List({
-        @ConditionalAddessId(message = "Conditioalal Address")
-})
 
-@JsonIgnoreProperties({ "geoCode", "upazilaOrThana", "unionOrWard" })
+@JsonIgnoreProperties({ "geoCode", "unionOrWard" })
 public class Address {
 
     @JsonProperty("address_line")
     @NotBlank(message = "1001")
-    @Size(min = 3, max = 20, message = "1002")
+    @Size(min = 3, max = 255, message = "1002")
     private String addressLine;
 
     @JsonProperty("division_id")
     @JsonInclude(NON_EMPTY)
-    @NotBlank(message = "1001")
-    @AddressId(value = DIVISION, message = "1002")
+    @Pattern(regexp = "[\\d]{2}", message = "1002")
     private String divisionId;
 
     @JsonProperty("district_id")
     @JsonInclude(NON_EMPTY)
-    @NotBlank(message = "1001")
-    @AddressId(value = DISTRICT, message = "1002")
+    @Pattern(regexp = "[\\d]{2}", message = "1002")
     private String districtId;
 
     @JsonProperty("upazilla_id")
     @JsonInclude(NON_EMPTY)
-    @AddressId(value = UPAZILLA, message = "1002")
+    @Pattern(regexp = "[\\d]{2}", message = "1002")
     private String upazillaId;
 
     @JsonProperty("union_id")
     @JsonInclude(NON_EMPTY)
-    @AddressId(value = UNION, message = "1002")
+    @Pattern(regexp = "[\\d]{2}", message = "1002")
     private String unionId;
 
     @JsonProperty("holding_number")
@@ -81,23 +76,35 @@ public class Address {
 
     @JsonProperty("ward_id")
     @JsonInclude(NON_EMPTY)
-    @AddressId(value = WARD, message = "1002")
+    @Pattern(regexp = "[\\d]{2}", message = "1002")
     private String wardId;
 
     @JsonProperty("thana_id")
     @JsonInclude(NON_EMPTY)
-    @AddressId(value = THANA, message = "1002")
+    @Pattern(regexp = "[\\d]{2}", message = "1002")
     private String thanaId;
 
     @JsonProperty("city_corporation_id")
     @JsonInclude(NON_EMPTY)
-    @AddressId(value = CITYCORPORATION, message = "1002")
+    @Pattern(regexp = "[\\d]{2}", message = "1002")
     private String cityCorporationId;
 
     @JsonProperty("country_code")
     @JsonInclude(NON_EMPTY)
     @CountryCode(message = "1004")
     private String countryCode = "050";
+
+    @JsonIgnore
+    @JsonProperty("(upazila_id/thana_id)")
+    private String upazilaOrThana;
+
+    @JsonIgnore
+    @JsonProperty("(upazila_id,thana_id)")
+    private String upazilaAndThana;
+
+    @JsonIgnore
+    @JsonProperty("(union_id,ward_id)")
+    private String unionAndWard;
 
     @Override
     public boolean equals(Object rhs) {
@@ -251,6 +258,7 @@ public class Address {
         this.postCode = postCode;
     }
 
+    @JsonIgnore
     public  String getUpazilaOrThana() {
         String ut = "";
 
@@ -280,35 +288,38 @@ public class Address {
     }
 
     public String getGeoCode() {
-        String gCode = this.getDivisionId();
+        String gCode = "";
 
-        if(gCode.equals("null")) {
-            return "";
+        if (StringUtils.isNotBlank(this.getDivisionId())) {
+            gCode += this.getDivisionId();
         }
 
-        if(StringUtils.isBlank(this.getDistrictId())) {
-            return gCode;
+        if (StringUtils.isNotBlank(this.getDistrictId())) {
+            gCode += this.getDistrictId();
         }
 
-        gCode += this.getDistrictId();
-
-        if(StringUtils.isBlank(this.getUpazilaOrThana())) {
-            return gCode;
+        if (StringUtils.isNotBlank(this.getUpazilaOrThana())) {
+            gCode += this.getUpazilaOrThana();
         }
 
-        gCode += this.getUpazilaOrThana();
-
-        if(StringUtils.isBlank(this.getCityCorporationId())) {
-            return gCode;
+        if (StringUtils.isNotBlank(this.getCityCorporationId())) {
+            gCode += this.getCityCorporationId();
         }
 
-        gCode += this.getCityCorporationId();
-
-
-        if(StringUtils.isBlank(this.getUnionOrWard())) {
-            return gCode;
+        if (StringUtils.isNotBlank(this.getUnionOrWard())) {
+            gCode += this.getUnionOrWard();
         }
 
-        return  gCode + this.getUnionOrWard();
+        return gCode;
+    }
+
+    @JsonIgnore
+    public String getUpazilaAndThana() {
+        return null;
+    }
+
+    @JsonIgnore
+    public String getUnionAndWard() {
+        return null;
     }
 }

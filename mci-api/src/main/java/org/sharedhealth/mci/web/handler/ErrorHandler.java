@@ -1,20 +1,18 @@
 package org.sharedhealth.mci.web.handler;
 
-import java.lang.Integer;
-import java.lang.String;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
+import org.sharedhealth.mci.utils.FieldPropertyNameReader;
+import org.sharedhealth.mci.web.exception.ValidationException;
+import org.sharedhealth.mci.web.mapper.PatientMapper;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
-
-import org.sharedhealth.mci.web.handler.MCIError;
-import org.sharedhealth.mci.web.exception.*;
 
 
 @JsonRootName(value = "error")
@@ -119,8 +117,12 @@ public class ErrorHandler {
     private static String getErrorField(ObjectError error) {
 
         if (error.getClass() == FieldError.class) {
-            return ((FieldError) error).getField();
+            FieldError fieldError = (FieldError) error;
+            String field = fieldError.getField();
+
+            return FieldPropertyNameReader.getFieldPropertyName(PatientMapper.class, field);
         }
+
         return "";
     }
 }

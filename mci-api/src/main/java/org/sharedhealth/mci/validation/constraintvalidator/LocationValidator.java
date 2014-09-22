@@ -2,7 +2,6 @@ package org.sharedhealth.mci.validation.constraintvalidator;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.validation.constraints.Location;
@@ -18,6 +17,8 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
 
     private static final Logger logger = LoggerFactory.getLogger(LocationValidator.class);
     private static final String BD_COUNTRY_CODE = "050";
+    private static final String ERROR_CODE_REQUIRED = "1001";
+    private static final String ERROR_CODE_DEPENDENT = "1005";
 
     private LocationService locationService;
 
@@ -34,36 +35,69 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
     @Override
     public boolean isValid(Address value, ConstraintValidatorContext context) {
 
-        if(value == null) return true;
-
-        if(value.getCountryCode() != null && !value.getCountryCode().equals(BD_COUNTRY_CODE)){
-            return true;
-        }
+        if (value == null) return true;
 
         String geoCode = value.getGeoCode();
 
+
+        if (value.getCountryCode() != null && !value.getCountryCode().equals(BD_COUNTRY_CODE)) {
+            return true;
+        }
+
+        boolean isValid = true;
+
+        context.disableDefaultConstraintViolation();
+
+        if (StringUtils.isBlank(value.getDivisionId())) {
+            isValid = false;
+            addConstraintViolation(context, ERROR_CODE_REQUIRED, "divisionId");
+        }
+
+        if (StringUtils.isBlank(value.getDistrictId())) {
+            isValid = false;
+            addConstraintViolation(context, ERROR_CODE_REQUIRED, "districtId");
+        }
+
+        if (StringUtils.isBlank(value.getUpazilaOrThana())) {
+            isValid = false;
+            addConstraintViolation(context, ERROR_CODE_REQUIRED, "upazilaOrThana");
+        } else if (StringUtils.isNotBlank(value.getUpazillaId()) && StringUtils.isNotBlank(value.getThanaId())) {
+            isValid = false;
+            addConstraintViolation(context, ERROR_CODE_DEPENDENT, "upazilaAndThana");
+        }
+
+        if (StringUtils.isNotBlank(value.getUnionId()) && StringUtils.isNotBlank(value.getWardId())) {
+            isValid = false;
+            addConstraintViolation(context, ERROR_CODE_DEPENDENT + "unionAndWard");
+        }
+
         logger.debug("Validation testing for code : [" + geoCode + "]");
 
-        if(!(Pattern.compile("[\\d]{2}").matcher(value.getUpazilaOrThana()).matches())) return false;
-
-        String unionOrWard = value.getUnionOrWard();
-
-        if(geoCode.length() < 6) return false;
-
-        if(StringUtils.isNotBlank(unionOrWard) && !(Pattern.compile("[\\d]{2}").matcher(unionOrWard).matches())) return false;
 
         try {
             org.sharedhealth.mci.web.mapper.Location location = locationService.findByGeoCode(geoCode).get();
 
-            if(!StringUtils.isBlank(location.getGeoCode())) {
-
-                return true;
+            if (StringUtils.isBlank(location.getGeoCode())) {
+                isValid = false;
             }
 
         } catch (Exception e) {
+            addConstraintViolation(context, context.getDefaultConstraintMessageTemplate());
             logger.debug("Validation error for : [" + geoCode + "]");
         }
 
-        return false;
+        return isValid;
+
+    }
+
+    private void addConstraintViolation(ConstraintValidatorContext context, String code, String field) {
+        context.buildConstraintViolationWithTemplate(code)
+                .addPropertyNode(field)
+                .addConstraintViolation();
+    }
+
+    private void addConstraintViolation(ConstraintValidatorContext context, String code) {
+        context.buildConstraintViolationWithTemplate(code)
+                .addConstraintViolation();
     }
 }
