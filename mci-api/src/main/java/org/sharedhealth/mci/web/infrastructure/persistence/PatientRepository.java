@@ -106,7 +106,7 @@ public class PatientRepository {
         p.setFullName(fullName);
         p.setCreatedAt(new Date());
         p.setUpdatedAt(new Date());
-        p.setSurName(patientMapper.getSurName().trim());
+        p.setSurName(patientMapper.getSurName());
 
         p = cassandraOperations.insert(p);
 
@@ -437,35 +437,7 @@ public class PatientRepository {
 
     public ListenableFuture<MCIResponse> update(PatientMapper patientMapper, final String hid) {
         final SettableFuture<MCIResponse> result = SettableFuture.create();
-        Address address = patientMapper.getAddress();
-        Address permanentAddress = patientMapper.getPermanentAddress();
 
-        Relation father = null, mother = null;
-
-        String relationsJson = "";
-        ObjectMapper mapper = new ObjectMapper();
-
-        try {
-            List<Relation> relations = patientMapper.getRelations();
-            relationsJson = mapper.writeValueAsString(relations);
-            father = patientMapper.getRelation("father");
-            mother = patientMapper.getRelation("mother");
-
-        } catch (Exception e) {
-            logger.debug(" Relations: [" + e.getMessage() + "]");
-        }
-
-        if(father == null) {
-            father = new Relation();
-        }
-
-        if(mother == null) {
-            mother = new Relation();
-        }
-
-        if (permanentAddress == null) {
-            permanentAddress = new Address();
-        }
         String fullName = "";
         if (patientMapper.getGivenName() != null) {
             fullName = patientMapper.getGivenName();
@@ -474,89 +446,12 @@ public class PatientRepository {
             fullName = fullName + " " + patientMapper.getSurName();
         }
 
-        String cql = String.format(getUpdateQuery(),
-                patientMapper.getNationalId(),
-                patientMapper.getBirthRegistrationNumber(),
-                patientMapper.getNameBangla(),
-                patientMapper.getGivenName(),
-                patientMapper.getSurName(),
-                patientMapper.getDateOfBirth(),
-                patientMapper.getGender(),
-                patientMapper.getOccupation(),
-                patientMapper.getEducationLevel(),
-                father.getNameBangla(),
-                father.getGivenName(),
-                father.getSurName(),
-                father.getBirthRegistrationNumber(),
-                father.getNationalId(),
-                father.getUid(),
-                mother.getNameBangla(),
-                mother.getGivenName(),
-                mother.getSurName(),
-                mother.getBirthRegistrationNumber(),
-                mother.getNationalId(),
-                mother.getUid(),
-                patientMapper.getUid(),
-                patientMapper.getPlaceOfBirth(),
-                patientMapper.getReligion(),
-                patientMapper.getBloodGroup(),
-                patientMapper.getNationality(),
-                patientMapper.getDisability(),
-                patientMapper.getEthnicity(),
-                patientMapper.getIsAlive(),
-                address.getAddressLine(),
-                address.getDivisionId(),
-                address.getDistrictId(),
-                address.getUpazillaId(),
-                address.getUnionId(),
-                address.getHoldingNumber(),
-                address.getStreet(),
-                address.getAreaMouja(),
-                address.getVillage(),
-                address.getPostOffice(),
-                address.getPostCode(),
-                address.getWardId(),
-                address.getThanaId(),
-                address.getCityCorporationId(),
-                address.getCountryCode(),
-                permanentAddress.getAddressLine(),
-                permanentAddress.getDivisionId(),
-                permanentAddress.getDistrictId(),
-                permanentAddress.getUpazillaId(),
-                permanentAddress.getUnionId(),
-                permanentAddress.getHoldingNumber(),
-                permanentAddress.getStreet(),
-                permanentAddress.getAreaMouja(),
-                permanentAddress.getVillage(),
-                permanentAddress.getPostOffice(),
-                permanentAddress.getPostCode(),
-                permanentAddress.getWardId(),
-                permanentAddress.getThanaId(),
-                permanentAddress.getCityCorporationId(),
-                permanentAddress.getCountryCode(),
-                fullName.toLowerCase(),
-                relationsJson,
-                patientMapper.getPrimaryContact(),
-                patientMapper.getCellNo(),
-                patientMapper.getPrimaryCellNo(),
-                hid
-        );
-
-        logger.debug("Update patient CQL: [" + cql + "]");
-
-        cassandraOperations.executeAsynchronously(cql, new AsynchronousQueryListener() {
-            @Override
-            public void onQueryComplete(ResultSetFuture rsf) {
-                try {
-                    rsf.get(TIMEOUT_IN_MILLIS, TimeUnit.MILLISECONDS);
-                    result.set(new MCIResponse(hid, HttpStatus.ACCEPTED));
-                } catch (Exception e) {
-                    logger.error("Error while creating patient.", e);
-                    result.setException(e);
-                }
-            }
-        });
-
+        Patient p = getEntityFromPatientMapper(patientMapper);
+        p.setHealthId(hid);
+        p.setFullName(fullName);
+        p.setUpdatedAt(new Date());
+        p = cassandraOperations.update(p);
+        result.set(new MCIResponse(p.getHealthId(), HttpStatus.ACCEPTED));
         return getStringListenableFuture(result);
     }
 
