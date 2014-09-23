@@ -68,7 +68,7 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
 
         if (StringUtils.isNotBlank(value.getUnionId()) && StringUtils.isNotBlank(value.getWardId())) {
             isValid = false;
-            addConstraintViolation(context, ERROR_CODE_DEPENDENT + "unionAndWard");
+            addConstraintViolation(context, ERROR_CODE_DEPENDENT, "unionAndWard");
         }
 
         isValid = isValid && isExistInLocationRegistry(geoCode);
