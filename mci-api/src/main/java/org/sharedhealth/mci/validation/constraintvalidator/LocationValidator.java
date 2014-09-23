@@ -71,23 +71,30 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
             addConstraintViolation(context, ERROR_CODE_DEPENDENT + "unionAndWard");
         }
 
-        logger.debug("Validation testing for code : [" + geoCode + "]");
+        isValid = isValid && isExistInLocationRegistry(geoCode);
 
-
-        try {
-            org.sharedhealth.mci.web.mapper.Location location = locationService.findByGeoCode(geoCode).get();
-
-            if (StringUtils.isBlank(location.getGeoCode())) {
-                isValid = false;
-            }
-
-        } catch (Exception e) {
+        if(!isValid) {
             addConstraintViolation(context, context.getDefaultConstraintMessageTemplate());
-            logger.debug("Validation error for : [" + geoCode + "]");
         }
 
         return isValid;
 
+    }
+
+    private boolean isExistInLocationRegistry(String geoCode) {
+        logger.debug("Validation testing for code : [" + geoCode + "]");
+        try {
+            org.sharedhealth.mci.web.mapper.Location location = locationService.findByGeoCode(geoCode).get();
+
+            if (!StringUtils.isBlank(location.getGeoCode())) {
+                return true;
+            }
+
+        } catch (Exception e) {
+            logger.debug("Validation error for : [" + geoCode + "]");
+        }
+
+        return false;
     }
 
     private void addConstraintViolation(ConstraintValidatorContext context, String code, String field) {
