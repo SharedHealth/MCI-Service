@@ -207,7 +207,7 @@ public class AddressTest {
         assertEquals(1, constraintViolations.size());
         printViolations(constraintViolations);
 
-        constraintViolations = validator.validateValue(Address.class, field, "125");
+        constraintViolations = validator.validateValue(Address.class, field, "2001");
         assertEquals(1, constraintViolations.size());
         printViolations(constraintViolations);
 

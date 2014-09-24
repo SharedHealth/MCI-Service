@@ -28,8 +28,8 @@ import org.sharedhealth.mci.web.handler.ErrorHandler;
 public class GlobalExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    public static final int ERROR_CODE_JSON_PARSE = 125;
-    public static final int ERROR_CODE_UNRECOGNIZED_FIELD = 126;
+    public static final int ERROR_CODE_JSON_PARSE = 2001;
+    public static final int ERROR_CODE_UNRECOGNIZED_FIELD = 2002;
 
     @ResponseStatus(value = BAD_REQUEST)
     @ExceptionHandler(ValidationException.class)

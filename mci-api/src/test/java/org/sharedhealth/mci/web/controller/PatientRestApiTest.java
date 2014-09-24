@@ -131,7 +131,7 @@ public class PatientRestApiTest {
         MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content("invalidate" + json).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
-        Assert.assertEquals("{\"error_code\":2000,\"http_status\":400,\"message\":\"invalid.request\",\"errors\":[{\"code\":125,\"field\":\"\",\"message\":\"invalid.json\"}]}", result.getResponse().getContentAsString());
+        Assert.assertEquals("{\"error_code\":2000,\"http_status\":400,\"message\":\"invalid.request\",\"errors\":[{\"code\":2001,\"field\":\"\",\"message\":\"invalid.json\"}]}", result.getResponse().getContentAsString());
     }
 
     @Test
@@ -141,7 +141,7 @@ public class PatientRestApiTest {
         MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
-        Assert.assertEquals("{\"error_code\":2000,\"http_status\":400,\"message\":\"invalid.request\",\"errors\":[{\"code\":126,\"field\":\"\",\"message\":\"Unrecognized field: \\\"invalid_property\\\"\"}]}", result.getResponse().getContentAsString());
+        Assert.assertEquals("{\"error_code\":2000,\"http_status\":400,\"message\":\"invalid.request\",\"errors\":[{\"code\":2002,\"field\":\"\",\"message\":\"Unrecognized field: \\\"invalid_property\\\"\"}]}", result.getResponse().getContentAsString());
     }
 
     @Test
