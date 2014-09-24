@@ -225,6 +225,24 @@ public class Patient {
     @Column(CELL_NO)
     private String cellNo;
 
+    @Column(PHONE_NUMBER_COUNTRY_CODE)
+    private String phoneNumberCountryCode;
+
+    @Column(PHONE_NUMBER_AREA_CODE)
+    private String phoneNumberAreaCode;
+
+    @Column(PHONE_NUMBER_EXTENSION)
+    private String phoneNumberExtension;
+
+    @Column(PRIMARY_CONTACT_NUMBER_COUNTRY_CODE)
+    private String primaryContactNumberCountryCode;
+
+    @Column(PRIMARY_CONTACT_NUMBER_AREA_CODE)
+    private String primaryContactNumberAreaCode;
+
+    @Column(PRIMARY_CONTACT_NUMBER_EXTENSION)
+    private String primaryContactNumberExtension;
+
     @Column("created_at")
     private Date createdAt;
 
@@ -794,6 +812,54 @@ public class Patient {
 
     public void setPrimaryCellNo(String primaryCellNo) {
         this.primaryCellNo = primaryCellNo;
+    }
+
+    public String getPhoneNumberCountryCode() {
+        return phoneNumberCountryCode;
+    }
+
+    public void setPhoneNumberCountryCode(String phoneNumberCountryCode) {
+        this.phoneNumberCountryCode = phoneNumberCountryCode;
+    }
+
+    public String getPhoneNumberAreaCode() {
+        return phoneNumberAreaCode;
+    }
+
+    public void setPhoneNumberAreaCode(String phoneNumberAreaCode) {
+        this.phoneNumberAreaCode = phoneNumberAreaCode;
+    }
+
+    public String getPhoneNumberExtension() {
+        return phoneNumberExtension;
+    }
+
+    public void setPhoneNumberExtension(String phoneNumberExtension) {
+        this.phoneNumberExtension = phoneNumberExtension;
+    }
+
+    public String getPrimaryContactNumberCountryCode() {
+        return primaryContactNumberCountryCode;
+    }
+
+    public void setPrimaryContactNumberCountryCode(String primaryContactNumberCountryCode) {
+        this.primaryContactNumberCountryCode = primaryContactNumberCountryCode;
+    }
+
+    public String getPrimaryContactNumberAreaCode() {
+        return primaryContactNumberAreaCode;
+    }
+
+    public void setPrimaryContactNumberAreaCode(String primaryContactNumberAreaCode) {
+        this.primaryContactNumberAreaCode = primaryContactNumberAreaCode;
+    }
+
+    public String getPrimaryContactNumberExtension() {
+        return primaryContactNumberExtension;
+    }
+
+    public void setPrimaryContactNumberExtension(String primaryContactNumberExtension) {
+        this.primaryContactNumberExtension = primaryContactNumberExtension;
     }
 
     public void updateLocationLevels() {

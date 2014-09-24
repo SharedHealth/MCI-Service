@@ -22,6 +22,25 @@ public class Relation {
     @JsonInclude(NON_EMPTY)
     private String type;
 
+    @JsonProperty("hid")
+    @JsonInclude(NON_EMPTY)
+    private String healthId;
+
+    @JsonProperty("nid")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "[\\d]{13}|[\\d]{17}", message = "1002")
+    private String nationalId;
+
+    @JsonProperty("uid")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "[a-zA-Z0-9]{11}", message = "1002")
+    private String uid;
+
+    @JsonProperty("bin_brn")
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "[\\d]{17}", message = "1002")
+    private String birthRegistrationNumber;
+
     @JsonProperty("name_bangla")
     @JsonInclude(NON_EMPTY)
     @Length(lengthSize= 125, message = "1002")
@@ -36,21 +55,6 @@ public class Relation {
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "^(\\s*)([A-Za-z0-9]{0,25})(\\b\\s*$)",message = "1002")
     private String surName;
-
-    @JsonProperty("uid")
-    @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[a-zA-Z0-9]{11}", message = "1002")
-    private String uid;
-
-    @JsonProperty("nid")
-    @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[\\d]{13}|[\\d]{17}", message = "1002")
-    private String nationalId;
-
-    @JsonProperty("bin_brn")
-    @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[\\d]{17}", message = "1002")
-    private String birthRegistrationNumber;
 
     @JsonProperty("marriage_id")
     @JsonInclude(NON_EMPTY)
@@ -143,5 +147,13 @@ public class Relation {
 
     public void setRelationalStatus(String relationalStatus) {
         this.relationalStatus = relationalStatus;
+    }
+
+    public String getHealthId() {
+        return healthId;
+    }
+
+    public void setHealthId(String healthId) {
+        this.healthId = healthId;
     }
 }

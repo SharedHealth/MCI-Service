@@ -22,6 +22,7 @@ import org.sharedhealth.mci.web.exception.PatientNotFoundException;
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientMapper;
+import org.sharedhealth.mci.web.mapper.PhoneNumber;
 import org.sharedhealth.mci.web.mapper.Relation;
 import org.sharedhealth.mci.web.model.Patient;
 import org.sharedhealth.mci.web.utils.concurrent.SimpleListenableFuture;
@@ -358,9 +359,9 @@ public class PatientRepository {
         patientMapper.setDisability(row.getString(DISABILITY));
         patientMapper.setEthnicity(row.getString(ETHNICITY));
         patientMapper.setIsAlive(row.getString(IS_ALIVE));
-        patientMapper.setCellNo(row.getString(CELL_NO));
+
         patientMapper.setPrimaryContact(row.getString(PRIMARY_CONTACT));
-        patientMapper.setPrimaryCellNo(row.getString(PRIMARY_CELL_NO));
+
 
         Address address = new Address();
         address.setAddressLine(row.getString(ADDRESS_LINE));
@@ -396,6 +397,27 @@ public class PatientRepository {
         permanentaddress.setThanaId(row.getString(PERMANENT_THANA));
         permanentaddress.setCityCorporationId(row.getString(PERMANENT_CITY_CORPORATION));
         permanentaddress.setCountryCode(row.getString(PERMANENT_COUNTRY));
+
+        PhoneNumber phoneNumber = new PhoneNumber();
+        PhoneNumber primaryContactNumber = new PhoneNumber();
+
+        phoneNumber.setNumber(row.getString(CELL_NO));
+        phoneNumber.setAreaCode(row.getString(PHONE_NUMBER_AREA_CODE));
+        phoneNumber.setCountryCode(row.getString(PHONE_NUMBER_COUNTRY_CODE));
+        phoneNumber.setExtension(row.getString(PHONE_NUMBER_EXTENSION));
+
+        primaryContactNumber.setNumber(row.getString(PRIMARY_CELL_NO));
+        primaryContactNumber.setAreaCode(row.getString(PRIMARY_CONTACT_NUMBER_AREA_CODE));
+        primaryContactNumber.setCountryCode(row.getString(PRIMARY_CONTACT_NUMBER_COUNTRY_CODE));
+        primaryContactNumber.setExtension(row.getString(PRIMARY_CONTACT_NUMBER_EXTENSION));
+
+        if(primaryContactNumber.getNumber() != null) {
+            patientMapper.setPhoneNumber(phoneNumber);
+        }
+
+        if(phoneNumber.getNumber() != null){
+            patientMapper.setPrimaryContactNumber(primaryContactNumber);
+        }
 
         if (permanentaddress.getCountryCode() != null) {
             if (permanentaddress.getCountryCode() == "050" && permanentaddress.getDistrictId() != null) {
@@ -577,6 +599,9 @@ public class PatientRepository {
         Address address = p.getAddress();
         Address permanentAddress = p.getPermanentAddress();
 
+        PhoneNumber phoneNumber = p.getPhoneNumber();
+        PhoneNumber primaryContactNumber = p.getPrimaryContactNumber();
+
         patient.setHealthId(p.getHealthId());
         patient.setNationalId(p.getNationalId());
         patient.setBirthRegistrationNumber(p.getBirthRegistrationNumber());
@@ -653,9 +678,22 @@ public class PatientRepository {
 
         patient.setRelations(relationsJson);
 
-        patient.setCellNo(p.getCellNo());
-        patient.setPrimaryContact(StringUtils.trim(p.getPrimaryContact()));
-        patient.setPrimaryCellNo(p.getPrimaryCellNo());
+        if(phoneNumber != null){
+            patient.setCellNo(phoneNumber.getNumber());
+            patient.setPhoneNumberAreaCode(phoneNumber.getAreaCode());
+            patient.setPhoneNumberCountryCode(phoneNumber.getCountryCode());
+            patient.setPhoneNumberExtension(phoneNumber.getExtension());
+        }
+
+        if(primaryContactNumber != null){
+            patient.setPrimaryCellNo(primaryContactNumber.getNumber());
+            patient.setPrimaryContactNumberAreaCode(primaryContactNumber.getAreaCode());
+            patient.setPrimaryContactNumberCountryCode(primaryContactNumber.getCountryCode());
+            patient.setPrimaryContactNumberExtension(primaryContactNumber.getExtension());
+        }
+
+         patient.setPrimaryContact(StringUtils.trim(p.getPrimaryContact()));
+
 
         return patient;
     }

@@ -286,7 +286,7 @@ public class PatientMapperTest {
 
     @Test
     public void shouldPassIfMaritalStatusIsValid() {
-        for(int i = 1; i<3; i++) {
+        for(int i = 1; i<6; i++) {
             Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "maritalStatus", Integer.toString(i));
             assertEquals(0, constraintViolations.size());
         }
@@ -307,17 +307,6 @@ public class PatientMapperTest {
     @Test
     public void shouldPassIfPrimaryContactIsValid() {
         Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "primaryContact", "imran");
-        assertEquals(0, constraintViolations.size());
-    }
-    @Test
-    public void ShouldFailIFCellNoIsInvalid(){
-        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "cellNo", "adfdfdsdfdfdfdfdfdffdfdfdfdf");
-        assertEquals("1002", constraintViolations.iterator().next().getMessage());
-    }
-
-    @Test
-    public void ShouldPassIFCellNoIsInvalid(){
-        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "cellNo", "+(880)-1912109075");
         assertEquals(0, constraintViolations.size());
     }
 

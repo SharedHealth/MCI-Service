@@ -120,17 +120,15 @@ public class PatientMapper {
     @Length(lengthSize= 100, message = "1002")
     private String primaryContact;
 
-    @JsonProperty("cell_no")
+    @JsonProperty("phone_number")
+    @Valid
     @JsonInclude(NON_EMPTY)
-    @Length(lengthSize= 20, message = "1002")
-    @Pattern(regexp = "^[-)(+0-9 ]*$", message = "1002")
-    private String cellNo;
+    private  PhoneNumber phoneNumber;
 
-    @JsonProperty("primary_cell_no")
+    @JsonProperty("primary_contact_number")
+    @Valid
     @JsonInclude(NON_EMPTY)
-    @Length(lengthSize= 20, message = "1002")
-    @Pattern(regexp = "^[-)(+0-9 ]*$", message = "1002")
-    private String primaryCellNo;
+    private PhoneNumber primaryContactNumber;
 
     @JsonProperty("permanent_address")
     @JsonInclude(NON_EMPTY)
@@ -139,7 +137,7 @@ public class PatientMapper {
 
     @JsonProperty("marital_status")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[1|2]{1}", message = "1004")
+    @Pattern(regexp = "[1-5]{1}", message = "1004")
     private String maritalStatus;
 
     @JsonProperty("full_name")
@@ -383,22 +381,6 @@ public class PatientMapper {
         this.primaryContact = primaryContact;
     }
 
-    public String getCellNo() {
-        return cellNo;
-    }
-
-    public void setCellNo(String cellNo) {
-        this.cellNo = cellNo;
-    }
-
-    public String getPrimaryCellNo() {
-        return primaryCellNo;
-    }
-
-    public void setPrimaryCellNo(String primaryCellNo) {
-        this.primaryCellNo = primaryCellNo;
-    }
-
     public String getMaritalStatus() {
         return maritalStatus;
     }
@@ -421,5 +403,21 @@ public class PatientMapper {
 
     public void setCreatedAt(java.util.Date createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public PhoneNumber getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(PhoneNumber phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public PhoneNumber getPrimaryContactNumber() {
+        return primaryContactNumber;
+    }
+
+    public void setPrimaryContactNumber(PhoneNumber primaryContactNumber) {
+        this.primaryContactNumber = primaryContactNumber;
     }
 }
