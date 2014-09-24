@@ -249,6 +249,12 @@ public class Patient {
     @Column("updated_at")
     private Date updatedAt;
 
+    @Column("created_by")
+    private String createdBy;
+
+    @Column("updated_by")
+    private String updatedBy;
+
     @Column(RELATIONS)
     private String relations;
 
@@ -860,6 +866,22 @@ public class Patient {
 
     public void setPrimaryContactNumberExtension(String primaryContactNumberExtension) {
         this.primaryContactNumberExtension = primaryContactNumberExtension;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public String getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public void setUpdatedBy(String updatedBy) {
+        this.updatedBy = updatedBy;
     }
 
     public void updateLocationLevels() {

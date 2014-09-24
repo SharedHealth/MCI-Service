@@ -131,6 +131,7 @@ public class PatientMapper {
     private PhoneNumber primaryContactNumber;
 
     @JsonProperty("permanent_address")
+    @Valid
     @JsonInclude(NON_EMPTY)
     @Location(message = "1004")
     private Address permanentAddress;
