@@ -68,7 +68,7 @@ public class PhoneNumberTest {
 
     @Test
     public void ShouldFailIFPhoneNoIsInvalid(){
-        Set<ConstraintViolation<PhoneNumber>> constraintViolations = validator.validateValue(PhoneNumber.class, "number", "adfdfdsdfdfdfdfdfdffdfdfdfdf");
+        Set<ConstraintViolation<PhoneNumber>> constraintViolations = validator.validateValue(PhoneNumber.class, "number", "aaa");
         assertEquals("1002", constraintViolations.iterator().next().getMessage());
     }
 

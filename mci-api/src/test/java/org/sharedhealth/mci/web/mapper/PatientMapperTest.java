@@ -6,6 +6,7 @@ import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.HibernateValidator;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -171,8 +172,7 @@ public class PatientMapperTest {
 
     @Test
     public void shouldFailIfBirthRegistrationNumberIsMoreThan17() {
-        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "birthRegistrationNumber", "123456748912345644");
-        assertEquals("1002", constraintViolations.iterator().next().getMessage());
+        assertLengthViolation("birthRegistrationNumber", 17);
     }
 
     @Test
@@ -189,14 +189,12 @@ public class PatientMapperTest {
 
     @Test
     public void shouldFailIfFullNameBanglaIsMoreThan_125_Characters() {
-        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "nameBangla", "এ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডলএ বি এম আখতার হোসেন মন্ডল");
-        assertEquals("1002", constraintViolations.iterator().next().getMessage());
+        assertLengthViolation("nameBangla", 125);
     }
 
     @Test
     public void shouldFailIfGivenNameIsMoreThan_100_Characters() {
-        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "givenName", "janagiralamkabirkhanjahanaliahmadpuri janagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpuri");
-        assertEquals("1002", constraintViolations.iterator().next().getMessage());
+        assertLengthViolation("givenName", 100);
     }
 
     @Test
@@ -213,8 +211,7 @@ public class PatientMapperTest {
 
     @Test
     public void shouldFailIfSurNameIsMoreThan_25_Characters() {
-        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "surName", "janagiralamkabirkhanjahanaliahmadpuri");
-        assertEquals("1002", constraintViolations.iterator().next().getMessage());
+        assertLengthViolation("surName", 25);
     }
 
     @Test
@@ -241,8 +238,7 @@ public class PatientMapperTest {
 
     @Test
     public void shouldFailIfPlaceOfBirthIsMoreThan_20_AlphabeticCharacters() {
-        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "placeOfBirth", "DhanmondiDmondiDmondiDmondiDmondiDmondiDhanmondi");
-        assertEquals("1002", constraintViolations.iterator().next().getMessage());
+        assertLengthViolation("placeOfBirth", 20);
     }
 
     @Test
@@ -265,8 +261,7 @@ public class PatientMapperTest {
 
     @Test
     public void shouldFailIfNationalityIsMoreThan_50_Characters() {
-        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "nationality", "bangladeshi bangladeshi bangladeshi bangladeshi bangladeshi bangladeshi ");
-        assertEquals("1002", constraintViolations.iterator().next().getMessage());
+        assertLengthViolation("nationality", 50);
     }
 
     @Test
@@ -300,14 +295,17 @@ public class PatientMapperTest {
     }
     @Test
     public void shouldFailIfPrimaryContactIsMoreThan_100_Characters() {
-        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "primaryContact", "janagiralamkabirkhanjahanaliahmadpuri janagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpurijanagiralamkabirkhanjahanaliahmadpuri");
-        assertEquals("1002", constraintViolations.iterator().next().getMessage());
+        assertLengthViolation("primaryContact", 100);
     }
 
     @Test
     public void shouldPassIfPrimaryContactIsValid() {
         Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "primaryContact", "imran");
         assertEquals(0, constraintViolations.size());
+    }
+    private void assertLengthViolation(String field, int length) {
+        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, field, StringUtils.repeat("a", length + 1));
+        assertEquals("1002", constraintViolations.iterator().next().getMessage());
     }
 
 }
