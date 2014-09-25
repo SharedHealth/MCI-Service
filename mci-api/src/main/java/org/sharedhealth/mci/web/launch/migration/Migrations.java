@@ -2,6 +2,7 @@ package org.sharedhealth.mci.web.launch.migration;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 
 import com.netflix.astyanax.AstyanaxContext;
 import com.netflix.astyanax.Keyspace;
@@ -21,10 +22,19 @@ import static java.lang.System.getenv;
 public class Migrations {
 
     private static final String MUTAGEN_CONNECTION_POOL_NAME = "mciMigrationConnectionPool";
+    private final Map<String, String> env;
+
+    public Migrations() {
+        this(getenv());
+    }
+
+    public Migrations(Map<String, String> env) {
+        this.env = env;
+    }
 
     public void migrate() throws IOException, ConnectionException {
         CassandraMutagen mutagen = new CassandraMutagenImpl();
-        mutagen.initialize(getenv("CASSANDRA_MIGRATIONS_PATH"));
+        mutagen.initialize(env.get("CASSANDRA_MIGRATIONS_PATH"));
         Keyspace keyspace = getKeySpace();
         Plan.Result<Integer> result = mutagen.mutate(keyspace);
         if (result.getException() != null) {
@@ -42,15 +52,15 @@ public class Migrations {
 
     private AstyanaxContext<Keyspace> buildContext() {
         return new AstyanaxContext.Builder()
-                .forKeyspace(getenv("CASSANDRA_KEYSPACE"))
+                .forKeyspace(env.get("CASSANDRA_KEYSPACE"))
                 .withAstyanaxConfiguration(new AstyanaxConfigurationImpl()
-                                .setCqlVersion(getenv("CQL_VERSION"))
-                                .setTargetCassandraVersion(getenv("CASSANDRA_VERSION"))
+                                .setCqlVersion(env.get("CQL_VERSION"))
+                                .setTargetCassandraVersion(env.get("CASSANDRA_VERSION"))
                 )
                 .withConnectionPoolConfiguration(new ConnectionPoolConfigurationImpl(MUTAGEN_CONNECTION_POOL_NAME)
-                                .setPort(valueOf(getenv("MUTAGEN_CONNECTION_POOL_PORT")))
+                                .setPort(valueOf(env.get("MUTAGEN_CONNECTION_POOL_PORT")))
                                 .setMaxConnsPerHost(1)
-                                .setSeeds(getenv("MUTAGEN_SEEDS"))
+                                .setSeeds(env.get("MUTAGEN_SEEDS"))
                 )
                 .withConnectionPoolMonitor(new CountingConnectionPoolMonitor())
                 .buildKeyspace(ThriftFamilyFactory.getInstance());

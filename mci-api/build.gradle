@@ -28,11 +28,10 @@ dependencies {
     compile('com.toddfast.mutagen:mutagen-cassandra:0.4.0') {
         exclude group: 'org.slf4j', module: 'slf4j-log4j12'
     }
-    testCompile testLibraries.mockito, testLibraries.junit, testLibraries.spring_test, testLibraries.http_client
+    testCompile testLibraries.mockito, testLibraries.junit, testLibraries.spring_test, testLibraries.http_client, testLibraries.cassandra_unit, testLibraries.wiremock
 }
 
 test.doFirst {
-    project(":mci-api").tasks.dropSchema.execute()
     project(":mci-api").tasks.migrateDatabase.execute()
 }
 
@@ -112,33 +111,6 @@ task dist(dependsOn: 'exportProperties', type: Rpm) {
 
 }
 
-task dropSchema << {
-    try {
-        List<com.netflix.astyanax.connectionpool.Host> hosts = new ArrayList<>();
-        hosts.add(new Host("localhost:9160", 9160));
-        new AstyanaxContext.Builder()
-                .forKeyspace('mci')
-                .withAstyanaxConfiguration(new AstyanaxConfigurationImpl()
-                .setCqlVersion("3.0.0")
-                .setTargetCassandraVersion("1.2")
-                .setDiscoveryType(NodeDiscoveryType.NONE)
-                .setConnectionPoolType(ConnectionPoolType.BAG)
-        )
-                .withHostSupplier(new ConstantSupplier<List<Host>>(hosts))
-                .withConnectionPoolConfiguration(new ConnectionPoolConfigurationImpl('mciMigrationConnectionPool')
-                .setPort(9160)
-                .setMaxConnsPerHost(1)
-                .setSeeds('localhost:9160')
-        )
-                .withConnectionPoolMonitor(new CountingConnectionPoolMonitor())
-                .buildKeyspace(ThriftFamilyFactory.getInstance()).getClient().truncateColumnFamily("patient");
-    }catch (Exception e) {
-        System.out.println("Keyspace not found ");
-    } finally {
-        // Do Nothing
-    }
-}
-
 task migrateDatabase << {
     tasks.compileJava.execute()
     tasks.processResources.execute()
@@ -159,13 +131,10 @@ war {
     }
 }
 
-Properties variables = new Properties();
-variables.load(new FileInputStream(file('../env/local.properties')))
-
 task runMCI(type: JavaExec) {
     main "org.sharedhealth.mci.web.launch.Main"
     classpath sourceSets.main.runtimeClasspath
-    environment variables
+    environment(loadConfig())
 }
 
 buildscript {

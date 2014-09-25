@@ -14,3 +14,6 @@
 build/
 out/
 classes
+
+#Test Directory
+mci-api/target/
