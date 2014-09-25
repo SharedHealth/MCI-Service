@@ -27,10 +27,12 @@ import org.sharedhealth.mci.web.handler.ErrorHandler;
 @ControllerAdvice
 public class GlobalExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
-
+    
     public static final int ERROR_CODE_JSON_PARSE = 2001;
     public static final int ERROR_CODE_UNRECOGNIZED_FIELD = 2002;
-
+    
+    
+    
     @ResponseStatus(value = BAD_REQUEST)
     @ExceptionHandler(ValidationException.class)
     @ResponseBody
@@ -51,13 +53,15 @@ public class GlobalExceptionHandler {
 
         int code = BAD_REQUEST.value();
         String msg = "invalid.request";
+        String field = null;
         Throwable cause = e.getCause();
         ErrorHandler errorHandler = null;
         if (cause != null && cause.getClass() == UnrecognizedPropertyException.class) {
             errorHandler = new ErrorHandler(BAD_REQUEST.value(),
                     ErrorHandler.INVALID_REQUEST_ERROR_CODE, "invalid.request");
             code = ERROR_CODE_UNRECOGNIZED_FIELD;
-            msg = "Unrecognized field: \"" + ((UnrecognizedPropertyException) cause).getPropertyName() + "\"";
+            field = ((UnrecognizedPropertyException) cause).getPropertyName();
+            msg = "Unrecognized field: '" + field + "'";
         } else if (cause != null) {
             errorHandler = new ErrorHandler(BAD_REQUEST.value(),
                     ErrorHandler.INVALID_REQUEST_ERROR_CODE, "invalid.request");
@@ -65,7 +69,7 @@ public class GlobalExceptionHandler {
             msg = "invalid.json";
         }
 
-        return errorHandler.handleHttpMessageNotReadableError(errorHandler, code, msg);
+        return errorHandler != null ? errorHandler.handleHttpMessageNotReadableError(errorHandler, code, msg, field) : null;
     }
 
     @ResponseStatus(value = NOT_FOUND)
@@ -74,6 +78,15 @@ public class GlobalExceptionHandler {
     public ErrorInfo handlePatientNotFoundException(PatientNotFoundException e) {
         logger.error("Handling PatientNotFoundException. ", e);
         return new ErrorInfo(NOT_FOUND.value(), "patient.not.found");
+    }
+
+    @ResponseStatus(value = NOT_FOUND)
+    @ExceptionHandler(FacilityNotFoundException.class)
+    @ResponseBody
+    public ErrorHandler handleFacilityNotFoundException(FacilityNotFoundException e) {
+        logger.error("Handling FacilityNotFoundException. ", e);
+
+        return new ErrorHandler(NOT_FOUND.value(), "facility.not.found");
     }
 
     @ResponseStatus(value = CONFLICT)

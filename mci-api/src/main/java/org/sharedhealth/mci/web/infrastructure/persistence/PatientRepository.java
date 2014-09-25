@@ -484,7 +484,7 @@ public class PatientRepository {
 
         int limit = PER_PAGE_LIMIT;
 
-        if (locations.size() > 0) {
+        if (locations != null && locations.size() > 0) {
             String locationPointer = getLocationPointer(locations, start, null);
 
             for (String catchment : locations) {
@@ -520,6 +520,11 @@ public class PatientRepository {
                 return p;
             }
         };
+    }
+
+    public ListenableFuture<List<PatientMapper>> raisException(Exception e) {
+
+        throw new ValidationException("x");
     }
 
     private String getLocationPointer(List<String> locations, String start, String d) {

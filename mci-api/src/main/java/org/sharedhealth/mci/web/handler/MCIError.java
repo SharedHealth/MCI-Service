@@ -4,10 +4,15 @@ package org.sharedhealth.mci.web.handler;
 import java.lang.Comparable;
 import java.lang.String;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
+
 public class MCIError implements Comparable<MCIError>{
 
     private int code;
 
+    @JsonInclude(NON_EMPTY)
     private String field;
 
     private String message;
@@ -20,6 +25,11 @@ public class MCIError implements Comparable<MCIError>{
         this.code = code;
         this.message = message;
         this.field = field;
+    }
+
+    public MCIError(int code, String message) {
+        this.code = code;
+        this.message = message;
     }
 
     public int getCode() {

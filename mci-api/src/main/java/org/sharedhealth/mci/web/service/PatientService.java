@@ -4,6 +4,7 @@ package org.sharedhealth.mci.web.service;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.infrastructure.fr.FacilityRegistryWrapper;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
 import org.sharedhealth.mci.web.mapper.PatientMapper;
@@ -12,8 +13,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureAdapter;
-
-import org.sharedhealth.mci.web.handler.MCIResponse;
 
 @Component
 public class PatientService {
@@ -63,19 +62,15 @@ public class PatientService {
         };
     }
 
-    public ListenableFuture<List<PatientMapper>> findAllByLocation(List<String> locations, String last) {
-        return new ListenableFutureAdapter<List<PatientMapper>, List<PatientMapper>>(patientRepository.findAllByLocations(locations, last)) {
-            @Override
-            protected List<PatientMapper> adapt(List<PatientMapper> patientMappers) throws ExecutionException {
-                return patientMappers;
-            }
-        };
+    public ListenableFuture<List<PatientMapper>> findAllByLocations(List<String> locations, String last) {
+        return patientRepository.findAllByLocations(locations, last);
     }
 
     public ListenableFuture<List<PatientMapper>> findAllByFacility(String facilityId,String last) {
+
         List<String> locations = facilityRegistryWrapper.getCatchmentAreasByFacility(facilityId);
 
-        return findAllByLocation(locations, last);
+        return findAllByLocations(locations, last);
     }
 
 }

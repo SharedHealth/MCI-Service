@@ -25,7 +25,8 @@ public class ErrorHandler {
 
 
     @JsonProperty("error_code")
-    private int errorCode;
+    @JsonInclude(NON_EMPTY)
+    private Integer errorCode;
 
     @JsonProperty("http_status")
     private int httpStatus;
@@ -38,6 +39,11 @@ public class ErrorHandler {
     private List<MCIError> errors;
 
     public ErrorHandler() {
+    }
+
+    public ErrorHandler(int httpStatus, String message) {
+        this.httpStatus = httpStatus;
+        this.message = message;
     }
 
     public ErrorHandler(int httpStatus, int errorCode, String message) {
@@ -84,9 +90,9 @@ public class ErrorHandler {
         return errorHandler;
     }
 
-    public ErrorHandler handleHttpMessageNotReadableError(ErrorHandler errorHandler, int code, String message) {
+    public ErrorHandler handleHttpMessageNotReadableError(ErrorHandler errorHandler, int code, String message, String field) {
 
-        MCIError mciError = new MCIError(code, message, "");
+        MCIError mciError = new MCIError(code, message, field);
         errorHandler.addError(mciError);
 
         return errorHandler;

@@ -1,17 +1,22 @@
 package org.sharedhealth.mci.web.infrastructure.fr;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import org.sharedhealth.mci.web.config.MCIProperties;
+import org.sharedhealth.mci.web.exception.FacilityNotFoundException;
 import org.sharedhealth.mci.web.mapper.Facility;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureAdapter;
 import org.springframework.web.client.AsyncRestTemplate;
@@ -20,8 +25,7 @@ import org.springframework.web.client.AsyncRestTemplate;
 @Component
 public class FacilityRegistryWrapper {
 
-    private static final String API_BASE_URL = "http://pagani.websitewelcome.com/~stagedgh/dghshrml4/public/api/1.0/facilities";
-
+    private static final Logger logger = LoggerFactory.getLogger(FacilityRegistryWrapper.class);
     private AsyncRestTemplate mciRestTemplate;
     private MCIProperties mciProperties;
 
@@ -32,11 +36,18 @@ public class FacilityRegistryWrapper {
         this.mciProperties = mciProperties;
     }
 
+    private HttpEntity getHttpEntityWithAuthenticationHeader() {
+        MultiValueMap<String, String> header = new LinkedMultiValueMap<>();
+        header.add("X-Auth-Token", mciProperties.getFacilityRegistryToken());
+        return new HttpEntity(header);
+    }
+
     public ListenableFuture<Facility> getFacility(String facilityId) {
+
         return new ListenableFutureAdapter<Facility, ResponseEntity<Facility>>(mciRestTemplate.exchange(
-                API_BASE_URL + "/" + facilityId,
+                mciProperties.getFacilityRegistryUrl() + "/" + facilityId + ".json",
                 HttpMethod.GET,
-                new HttpEntity(null),
+                getHttpEntityWithAuthenticationHeader(),
                 Facility.class)) {
             @Override
             protected Facility adapt(ResponseEntity<Facility> result) throws ExecutionException {
@@ -49,16 +60,17 @@ public class FacilityRegistryWrapper {
         };
     }
 
-    public List<String> getCatchmentAreasByFacility(String facilityId) {
-        ArrayList<String> areas = new ArrayList<>();
+    @Cacheable({"facility"})
+    public List<String> getCatchmentAreasByFacility(String facilityId) throws FacilityNotFoundException {
+        Facility facility;
+        ListenableFuture<Facility> facilityResponse = getFacility(facilityId);
 
-        if(facilityId.equals("1")){
-            areas.add("1004092004");
-            areas.add("1004092005");
-            areas.add("1004092006");
-            areas.add("1004092007");
+        try {
+            facility = facilityResponse.get();
+        } catch (Exception e) {
+           throw new FacilityNotFoundException();
         }
 
-        return areas;
+        return facility.getCatchments();
     }
 }

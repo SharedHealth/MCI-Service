@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import org.sharedhealth.mci.web.exception.ValidationException;
+import org.sharedhealth.mci.web.handler.MCIMultiResponse;
+import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.mapper.PatientMapper;
 import org.sharedhealth.mci.web.service.PatientService;
 import org.slf4j.Logger;
@@ -20,9 +22,6 @@ import org.springframework.web.context.request.async.DeferredResult;
 
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-
-import org.sharedhealth.mci.web.handler.MCIResponse;
-import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 
 @RestController
 @RequestMapping("/api/v1/patients")
@@ -240,11 +239,7 @@ public class PatientController {
     public DeferredResult<ResponseEntity<MCIMultiResponse>> findAllPatientsInCatchment(
             @PathVariable String facilityId,
             @RequestParam(value = "last", required = false) String last
-            ) {
-        return getPaginatePatientListInCatchment(facilityId, last);
-    }
-
-    private DeferredResult<ResponseEntity<MCIMultiResponse>> getPaginatePatientListInCatchment(String facilityId, String last) {
+            )throws ExecutionException, InterruptedException  {
         logger.debug("Find all patients  for catchment of facility [" + facilityId+ "]");
         final DeferredResult<ResponseEntity<MCIMultiResponse>> deferredResult = new DeferredResult<>();
 
@@ -252,13 +247,13 @@ public class PatientController {
             @Override
             public void onSuccess(List<PatientMapper> results) {
                 List<ArrayList> additionalInfo = null;
-                MCIMultiResponse mciMultiResponse = new MCIMultiResponse(results,additionalInfo, OK);
+                MCIMultiResponse mciMultiResponse = new MCIMultiResponse(results, additionalInfo, OK);
                 deferredResult.setResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject));
             }
 
             @Override
             public void onFailure(Throwable error) {
-                deferredResult.setErrorResult(error);
+                deferredResult.setErrorResult(extractAppException(error));
             }
         });
 

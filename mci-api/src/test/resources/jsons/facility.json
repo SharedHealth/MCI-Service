@@ -1,0 +1,29 @@
+{"name": "", "url": "", "id": "10010408", "active": "1", "createdAt": "", "updatedAt": "2014-06-03 18:45:27", "coordinates": ["N\/A", "N\/A"], "identifiers": {
+    "agency": "Directly under MOHFW",
+    "context": "HRM",
+    "id": "10262"
+}, "properties": {
+    "ownership": "Fully Government-owned",
+    "org_type": "Community Clinic",
+    "org_level": "Ward",
+    "care_level": "",
+    "services": [],
+    "locations": {
+        "division_code": "55",
+        "district_code": "49",
+        "upazila_code": "6",
+        "paurasava_code": "",
+        "union_code": "",
+        "ward_code": ""
+    },
+    "contacts": {
+        "name": "",
+        "email": "cc10010408@cc.dghs.gov.bd",
+        "phone": "",
+        "mobile": "+8800",
+        "fax": "N\/A\r"
+    },
+    "catchment": [1004092005]
+}}
+
+

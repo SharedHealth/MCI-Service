@@ -16,6 +16,14 @@ public class MCIProperties {
     private int cassandraTimeout;
     @Value("${REST_POOL_SIZE}")
     private int restPoolSize;
+    @Value("${FR_TOKEN}")
+    private String frToken;
+    @Value("${FR_URL}")
+    private String frUrl;
+    @Value("${LR_TOKEN}")
+    private String LrToken;
+    @Value("${LR_URL}")
+    private String LrUrl;
 
     public String getCassandraKeySpace() {
         return cassandraKeySpace;
@@ -36,4 +44,21 @@ public class MCIProperties {
     public int getRestPoolSize() {
         return restPoolSize;
     }
+
+    public String getFacilityRegistryToken() {
+        return frToken;
+    }
+
+    public String getFacilityRegistryUrl() {
+        return frUrl;
+    }
+
+    public String getLocaitonRegistryToken() {
+        return LrToken;
+    }
+
+    public String getLocaitonRegistryUrl() {
+        return LrUrl;
+    }
+
 }
