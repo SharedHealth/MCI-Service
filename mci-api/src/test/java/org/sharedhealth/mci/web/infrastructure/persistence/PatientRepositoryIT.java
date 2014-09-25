@@ -23,6 +23,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.springframework.http.HttpStatus.*;
 
+import org.sharedhealth.mci.web.exception.HealthIDExistException;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 @ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
@@ -80,7 +82,7 @@ public class PatientRepositoryIT {
         patientRepository.findByHealthId(UUID.randomUUID().toString()).get();
     }
 
-    @Test(expected = ExecutionException.class)
+    @Test(expected = HealthIDExistException.class)
     public void shouldThrowException_IfHealthIdProvidedForCreate() throws ExecutionException, InterruptedException {
         patientMapper.setHealthId("12");
         patientRepository.create(patientMapper).get();
