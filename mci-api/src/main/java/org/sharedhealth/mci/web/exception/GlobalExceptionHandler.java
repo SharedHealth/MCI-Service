@@ -109,7 +109,7 @@ public class GlobalExceptionHandler {
         ErrorHandler errorHandler = null;
 
         errorHandler = new ErrorHandler(BAD_REQUEST.value(),
-                ErrorHandler.PERMISSION_ERROR_CODE, "invalid.request");
+                ErrorHandler.PERMISSION_ERROR_CODE, "permission.error");
         code = ERROR_CODE_FIELD_NOT_PERMITTED;
         msg = "hid field is not permitted";
         field = "hid";
