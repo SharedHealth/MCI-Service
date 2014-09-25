@@ -30,7 +30,8 @@ public class GlobalExceptionHandler {
     
     public static final int ERROR_CODE_JSON_PARSE = 2001;
     public static final int ERROR_CODE_UNRECOGNIZED_FIELD = 2002;
-    
+    public static final int ERROR_CODE_FIELD_NOT_PERMITTED = 3001;
+
     
     
     @ResponseStatus(value = BAD_REQUEST)
@@ -95,6 +96,25 @@ public class GlobalExceptionHandler {
     public ErrorInfo handlePatientAlreadyExistException(PatientAlreadyExistException e) {
         logger.error("Handling PatientAlreadyExistException. ", e);
         return new ErrorInfo(CONFLICT.value(), "Patient already exist with health id: " + e.getMessage());
+    }
+
+    @ResponseStatus(value = BAD_REQUEST)
+    @ExceptionHandler(HealthIDExistException.class)
+    @ResponseBody
+    public ErrorHandler healthIDExistException(HealthIDExistException e) {
+        logger.error("Handling Health ID exist exception. ", e);
+        int code = BAD_REQUEST.value();
+        String msg = "invalid.request";
+        String field;
+        ErrorHandler errorHandler = null;
+
+        errorHandler = new ErrorHandler(BAD_REQUEST.value(),
+                ErrorHandler.PERMISSION_ERROR_CODE, "invalid.request");
+        code = ERROR_CODE_FIELD_NOT_PERMITTED;
+        msg = "hid field is not permitted";
+        field = "hid";
+
+        return errorHandler.handleHealthIDExistError(errorHandler, code, msg,field);
     }
 
     @ResponseStatus(value = INTERNAL_SERVER_ERROR)

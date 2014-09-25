@@ -20,6 +20,7 @@ import org.sharedhealth.mci.utils.UidGenerator;
 import org.sharedhealth.mci.web.exception.PatientAlreadyExistException;
 import org.sharedhealth.mci.web.exception.PatientNotFoundException;
 import org.sharedhealth.mci.web.exception.ValidationException;
+import org.sharedhealth.mci.web.exception.HealthIDExistException;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientMapper;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
@@ -76,10 +77,9 @@ public class PatientRepository {
 
         if (!StringUtils.isBlank(patientMapper.getHealthId())) {
             DirectFieldBindingResult bindingResult = new DirectFieldBindingResult(patientMapper, "patient");
-            bindingResult.addError(new FieldError("patient", "hid", "2000"));
-            throw new ValidationException(bindingResult);
+            bindingResult.addError(new FieldError("patient", "hid", "3001"));
+            throw new HealthIDExistException(bindingResult);
         }
-
 
         if (existingPatient == null) {
             patientMapper.setHealthId(uid.getId());

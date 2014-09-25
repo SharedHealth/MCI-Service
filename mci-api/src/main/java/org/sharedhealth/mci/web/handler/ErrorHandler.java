@@ -98,6 +98,15 @@ public class ErrorHandler {
         return errorHandler;
     }
 
+    public ErrorHandler handleHealthIDExistError(ErrorHandler errorHandler, int code, String message, String field) {
+
+        MCIError mciError = new MCIError(code, message, field);
+        errorHandler.addError(mciError);
+
+        return errorHandler;
+    }
+
+
     private MCIError getValidationErrorInfo(ObjectError error) {
 
         int code;
