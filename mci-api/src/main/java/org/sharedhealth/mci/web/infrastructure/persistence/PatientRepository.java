@@ -65,6 +65,12 @@ public class PatientRepository {
 
         final SettableFuture<MCIResponse> result = SettableFuture.create();
 
+        if (!StringUtils.isBlank(patientMapper.getHealthId())) {
+            DirectFieldBindingResult bindingResult = new DirectFieldBindingResult(patientMapper, "patient");
+            bindingResult.addError(new FieldError("patient", "hid", "3001"));
+            throw new HealthIDExistException(bindingResult);
+        }
+
         try {
             existingPatient = getExistingPatient(patientMapper);
         } catch (ExecutionException e) {
@@ -73,12 +79,6 @@ public class PatientRepository {
         } catch (Exception e) {
             result.setException(e);
             return getStringListenableFuture(result);
-        }
-
-        if (!StringUtils.isBlank(patientMapper.getHealthId())) {
-            DirectFieldBindingResult bindingResult = new DirectFieldBindingResult(patientMapper, "patient");
-            bindingResult.addError(new FieldError("patient", "hid", "3001"));
-            throw new HealthIDExistException(bindingResult);
         }
 
         if (existingPatient == null) {
@@ -520,11 +520,6 @@ public class PatientRepository {
                 return p;
             }
         };
-    }
-
-    public ListenableFuture<List<PatientMapper>> raisException(Exception e) {
-
-        throw new ValidationException("x");
     }
 
     private String getLocationPointer(List<String> locations, String start, String d) {
