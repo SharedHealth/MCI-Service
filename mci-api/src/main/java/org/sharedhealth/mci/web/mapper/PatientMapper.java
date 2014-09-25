@@ -1,5 +1,6 @@
 package org.sharedhealth.mci.web.mapper;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.util.List;
 
@@ -111,6 +112,7 @@ public class PatientMapper {
     private String ethnicity;
 
     @JsonProperty("present_address")
+    @NotNull(message = "1001")
     @Valid
     @Location(message = "1004")
     private Address address;

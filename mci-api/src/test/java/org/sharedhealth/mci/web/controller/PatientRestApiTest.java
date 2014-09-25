@@ -132,6 +132,17 @@ public class PatientRestApiTest {
     }
 
     @Test
+    public void shouldReturnBadRequestIfPresentAddressIsNull() throws Exception {
+        patientMapper.setAddress(null);
+        String json = new ObjectMapper().writeValueAsString(patientMapper);
+
+        MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+        Assert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1001,\"field\":\"present_address\",\"message\":\"invalid present_address\"}]}", result.getResponse().getContentAsString());
+    }
+
+    @Test
     public void shouldReturnBadRequestForInvalidDataProperty() throws Exception {
         String json = new ObjectMapper().writeValueAsString(new InvalidPatient());
 
