@@ -430,6 +430,7 @@ public class PatientRepository {
         }
 
         patientMapper.setCreatedAt(row.getDate("created_at"));
+        patientMapper.setUpdatedAt(row.getDate("updated_at"));
 
         return patientMapper;
     }

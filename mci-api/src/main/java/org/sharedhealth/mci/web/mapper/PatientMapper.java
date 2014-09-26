@@ -1,9 +1,11 @@
 package org.sharedhealth.mci.web.mapper;
+
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -152,9 +154,13 @@ public class PatientMapper {
     @Pattern(regexp = "[0|1]{1}", message = "1004")
     private String isAlive;
 
-    @JsonProperty("created_at")
+    @JsonProperty("created")
     @JsonInclude(NON_EMPTY)
-    private java.util.Date createdAt;
+    private String createdAt;
+
+    @JsonProperty("modified")
+    @JsonInclude(NON_EMPTY)
+    private String updatedAt;
 
     @Override
     public boolean equals(Object rhs) {
@@ -392,20 +398,30 @@ public class PatientMapper {
         this.maritalStatus = maritalStatus;
     }
 
-    public java.util.Date getCreatedAt() {
+    public String getCreatedAt() {
         return this.createdAt;
     }
 
-    @JsonInclude(NON_EMPTY)
-    public String getCreated() {
-        if(this.createdAt == null){
-            return null;
-        }
-        return DateFormatUtils.ISO_DATETIME_FORMAT.format(this.createdAt);
+    @JsonIgnore
+    public void setCreatedAt(java.util.Date createdAt) {
+        this.createdAt = (createdAt == null) ? null : DateFormatUtils.ISO_DATETIME_FORMAT.format(createdAt);
     }
 
-    public void setCreatedAt(java.util.Date createdAt) {
+    public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getUpdatedAt() {
+        return this.updatedAt;
+    }
+
+    @JsonIgnore
+    public void setUpdatedAt(java.util.Date updatedAt) {
+        this.updatedAt = (updatedAt == null) ? null : DateFormatUtils.ISO_DATETIME_FORMAT.format(updatedAt);
+    }
+
+    public void setUpdatedAt(String updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public PhoneNumber getPhoneNumber() {

@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
 import org.sharedhealth.mci.web.config.WebMvcConfig;
+import org.sharedhealth.mci.web.exception.HealthIDExistException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientMapper;
@@ -21,9 +22,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.springframework.http.HttpStatus.*;
-
-import org.sharedhealth.mci.web.exception.HealthIDExistException;
+import static org.springframework.http.HttpStatus.ACCEPTED;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -74,6 +73,7 @@ public class PatientRepositoryIT {
         assertNotNull(p);
         patientMapper.setHealthId(mciResponse.id);
         patientMapper.setCreatedAt(p.getCreatedAt());
+        patientMapper.setUpdatedAt(p.getUpdatedAt());
         assertEquals(patientMapper, p);
     }
 
@@ -103,6 +103,7 @@ public class PatientRepositoryIT {
         assertNotNull(p);
         patientMapper.setHealthId(mciResponse.id);
         patientMapper.setCreatedAt(p.getCreatedAt());
+        patientMapper.setUpdatedAt(p.getUpdatedAt());
         assertEquals(patientMapper, p);
     }
 
@@ -118,6 +119,7 @@ public class PatientRepositoryIT {
         assertNotNull(p);
         patientMapper.setHealthId(mciResponse.id);
         patientMapper.setCreatedAt(p.getCreatedAt());
+       patientMapper.setUpdatedAt(p.getUpdatedAt());
         assertEquals(patientMapper, p);
     }
 
@@ -134,6 +136,7 @@ public class PatientRepositoryIT {
         assertNotNull(p);
         patientMapper.setHealthId(mciResponse.id);
         patientMapper.setCreatedAt(p.getCreatedAt());
+        patientMapper.setUpdatedAt(p.getUpdatedAt());
         assertEquals(patientMapper, p);
     }
 
