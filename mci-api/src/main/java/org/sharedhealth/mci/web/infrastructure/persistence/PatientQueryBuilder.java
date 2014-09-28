@@ -62,10 +62,10 @@ public class PatientQueryBuilder {
     public static final String PERMANENT_VILLAGE = "permanent_village";
     public static final String PERMANENT_POST_OFFICE = "permanent_post_office";
     public static final String PERMANENT_POST_CODE = "permanent_post_code";
-    public static final String PERMANENT_WARD = "permanent_ward";
-    public static final String PERMANENT_THANA = "permanent_thana";
-    public static final String PERMANENT_CITY_CORPORATION = "permanent_city_corporation";
-    public static final String PERMANENT_COUNTRY = "permanent_country";
+    public static final String PERMANENT_WARD = "permanent_ward_id";
+    public static final String PERMANENT_THANA = "permanent_thana_id";
+    public static final String PERMANENT_CITY_CORPORATION = "permanent_city_corporation_id";
+    public static final String PERMANENT_COUNTRY = "permanent_country_code";
     public static final String FULL_NAME = "full_name";
     public static final String IS_ALIVE = "is_alive";
     public static final String RELATIONS = "relations";

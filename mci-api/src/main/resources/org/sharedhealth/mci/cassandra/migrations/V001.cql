@@ -1,19 +1,117 @@
-create table patient (
-    health_id varchar PRIMARY KEY,
-    national_id varchar,
-    first_name varchar,
-    middle_name varchar,
-    last_name varchar,
-    date_of_birth varchar,
-    gender varchar,
-    occupation varchar,
-    edu_level varchar,
-    primary_contact varchar,
-    address_line varchar,
-    division_id varchar,
-    district_id varchar,
-    upazilla_id varchar,
-    union_id varchar
-    );
+CREATE TABLE IF NOT EXISTS patient (
+  health_id varchar,
+  national_id varchar,
+  uid varchar,
+  bin_brn varchar,
+
+  given_name varchar,
+  sur_name varchar,
+  full_name_bangla varchar,
+
+  address_line varchar,
+  division_id varchar,
+  district_id varchar,
+  thana_id varchar,
+  union_id varchar,
+  area_mouja varchar,
+  upazilla_id varchar,
+  ward_id varchar,
+  city_corporation_id varchar,
+  street varchar,
+  village varchar,
+  post_code varchar,
+  post_office varchar,
+  holding_number varchar,
+  country_code varchar,
+
+  permanent_address_line varchar,
+  permanent_division_id varchar,
+  permanent_district_id varchar,
+  permanent_thana_id varchar,
+  permanent_union_id varchar,
+  permanent_ward_id  varchar,
+  permanent_upazilla_id varchar,
+  permanent_city_corporation_id varchar,
+  permanent_area_mouja varchar,
+  permanent_country_code varchar,
+  permanent_holding_number varchar,
+  permanent_post_code varchar,
+  permanent_post_office varchar,
+  permanent_street varchar,
+  permanent_village varchar,
+
+  fathers_nid varchar,
+  fathers_uid varchar,
+  fathers_brn varchar,
+  fathers_given_name varchar,
+  fathers_sur_name varchar,
+  fathers_name_bangla varchar,
+  mothers_nid varchar,
+  mothers_uid varchar,
+  mothers_brn varchar,
+  mothers_given_name varchar,
+  mothers_sur_name varchar,
+  mothers_name_bangla varchar,
+
+  marriage_id varchar,
+  marital_relations varchar,
+  marital_status varchar,
+
+  blood_group varchar,
+  date_of_birth varchar,
+  disability varchar,
+  ethnicity varchar,
+  edu_level varchar,
+  gender varchar,
+  nationality varchar,
+  occupation varchar,
+  place_of_birth varchar,
+  relations varchar,
+  religion varchar,
+  is_alive varchar,
+  primary_contact varchar,
+
+  cell_no varchar,
+  phone_number_area_code varchar,
+  phone_number_country_code varchar,
+  phone_number_extension varchar,
+
+  primary_cell_no varchar,
+  primary_contact_number_area_code varchar,
+  primary_contact_number_country_code varchar,
+  primary_contact_number_extension varchar,
+
+  location_level1 varchar,
+  location_level2 varchar,
+  location_level3 varchar,
+  location_level4 varchar,
+  location_level5 varchar,
+  created_at timestamp,
+  created_by varchar,
+  updated_at timestamp,
+  updated_by varchar,
+  full_name varchar,
+  PRIMARY KEY (health_id)
+);
+
+CREATE INDEX created_at_key ON patient (created_at);
+CREATE INDEX updated_at_key ON patient (updated_at);
+CREATE INDEX created_by_key ON patient (created_by);
+CREATE INDEX updated_by_key ON patient (updated_by);
+CREATE INDEX bin_brn_key ON patient (bin_brn);
+
+CREATE INDEX full_name_key ON patient (full_name);
+
+CREATE INDEX location_level1_key ON patient (location_level1);
+
+CREATE INDEX location_level2_key ON patient (location_level2);
+
+CREATE INDEX location_level3_key ON patient (location_level3);
+
+CREATE INDEX location_level4_key ON patient (location_level4);
+
+CREATE INDEX location_level5_key ON patient (location_level5);
 
 CREATE INDEX national_id_key ON patient (national_id);
+
+CREATE INDEX uid_key ON patient (uid);

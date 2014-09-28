@@ -1,1 +1,0 @@
-alter table patient add is_alive varchar;
