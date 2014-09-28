@@ -25,6 +25,32 @@ public class RelationTest {
     }
 
     @Test
+    public void shouldFailIfTypeIsNull() {
+        Set<ConstraintViolation<Relation>> constraintViolations = validator.validateValue(Relation.class, "type", null);
+        assertEquals(1, constraintViolations.size());
+        assertEquals("1001", constraintViolations.iterator().next().getMessage());
+    }
+
+    @Test
+    public void shouldFailIfTypeIsInvalid() {
+        String[] inValidRelations = {"", "somevalue", "fathera", "afather", "mothera", "spousea", "amother", "aspouse"};
+        for (String relation : inValidRelations) {
+            Set<ConstraintViolation<Relation>> constraintViolations = validator.validateValue(Relation.class, "type", relation);
+            assertEquals(1, constraintViolations.size());
+            assertEquals("1004", constraintViolations.iterator().next().getMessage());
+        }
+    }
+
+    @Test
+    public void shouldPassIfTypeIsValid() {
+        String[] validRelations = {"father", "mother", "spouse"};
+        for (String relation : validRelations) {
+            Set<ConstraintViolation<Relation>> constraintViolations = validator.validateValue(Relation.class, "type", relation);
+            assertEquals(0, constraintViolations.size());
+        }
+    }
+
+    @Test
     public void shouldFailIf_Marriage_Id_LengthIsNotEqual_8() {
         Set<ConstraintViolation<Relation>> constraintViolations = validator.validateValue(Relation.class, "marriageId", "1");
         assertEquals(1, constraintViolations.size());

@@ -1,17 +1,16 @@
 package org.sharedhealth.mci.web.mapper;
 
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
+import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.sharedhealth.mci.validation.constraints.Length;
-import java.util.UUID;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
 public class Relation {
-    private static final Logger logger = LoggerFactory.getLogger(Relation.class);
 
     public Relation() {
         UUID idOne = UUID.randomUUID();
@@ -20,6 +19,8 @@ public class Relation {
 
     @JsonProperty("type")
     @JsonInclude(NON_EMPTY)
+    @NotNull(message = "1001")
+    @Pattern(regexp = "^(father|mother|spouse)$", message = "1004")
     private String type;
 
     @JsonProperty("hid")
