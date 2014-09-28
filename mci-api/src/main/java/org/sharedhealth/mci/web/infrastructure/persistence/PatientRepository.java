@@ -351,7 +351,7 @@ public class PatientRepository {
         patientMapper.setBirthRegistrationNumber(row.getString(BIN_BRN));
         patientMapper.setGivenName(row.getString(GIVEN_NAME));
         patientMapper.setSurName(row.getString(SUR_NAME));
-        patientMapper.setDateOfBirth(row.getString(DATE_OF_BIRTH));
+        patientMapper.setDateOfBirth(row.getDateAsString(DATE_OF_BIRTH));
         patientMapper.setGender(row.getString(GENDER));
         patientMapper.setOccupation(row.getString(OCCUPATION));
         patientMapper.setEducationLevel(row.getString(EDU_LEVEL));
@@ -401,12 +401,12 @@ public class PatientRepository {
         PhoneNumber phoneNumber = new PhoneNumber();
         PhoneNumber primaryContactNumber = new PhoneNumber();
 
-        phoneNumber.setNumber(row.getString(CELL_NO));
+        phoneNumber.setNumber(row.getString(PHONE_NO));
         phoneNumber.setAreaCode(row.getString(PHONE_NUMBER_AREA_CODE));
         phoneNumber.setCountryCode(row.getString(PHONE_NUMBER_COUNTRY_CODE));
         phoneNumber.setExtension(row.getString(PHONE_NUMBER_EXTENSION));
 
-        primaryContactNumber.setNumber(row.getString(PRIMARY_CELL_NO));
+        primaryContactNumber.setNumber(row.getString(PRIMARY_CONTACT_NO));
         primaryContactNumber.setAreaCode(row.getString(PRIMARY_CONTACT_NUMBER_AREA_CODE));
         primaryContactNumber.setCountryCode(row.getString(PRIMARY_CONTACT_NUMBER_COUNTRY_CODE));
         primaryContactNumber.setExtension(row.getString(PRIMARY_CONTACT_NUMBER_EXTENSION));

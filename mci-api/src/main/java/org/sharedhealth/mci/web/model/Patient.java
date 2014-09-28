@@ -1,6 +1,7 @@
 package org.sharedhealth.mci.web.model;
 
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
@@ -34,7 +35,7 @@ public class Patient {
     private String surName;
 
     @Column(DATE_OF_BIRTH)
-    private String dateOfBirth;
+    private Date dateOfBirth;
 
     @Column(GENDER)
     private String gender;
@@ -219,10 +220,10 @@ public class Patient {
     @Column(PRIMARY_CONTACT)
     private String primaryContact;
 
-    @Column(PRIMARY_CELL_NO)
+    @Column(PRIMARY_CONTACT_NO)
     private String primaryCellNo;
 
-    @Column(CELL_NO)
+    @Column(PHONE_NO)
     private String cellNo;
 
     @Column(PHONE_NUMBER_COUNTRY_CODE)
@@ -300,12 +301,31 @@ public class Patient {
         this.surName = surName;
     }
 
-    public String getDateOfBirth() {
+    public Date getDateOfBirth() {
         return dateOfBirth;
     }
 
-    public void setDateOfBirth(String dateOfBirth) {
+    public void setDateOfBirth(Date dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
+    }
+
+    public void setDateOfBirth(String dateOfBirth) {
+        this.dateOfBirth = getDateObject(dateOfBirth, "yyyy-MM-dd");
+    }
+
+    private Date getDateObject(String value, String format) {
+
+        if (value == null || value.trim().equals("")) {
+            return null;
+        }
+
+        SimpleDateFormat sdf = new SimpleDateFormat(format);
+
+        try {
+            return new java.util.Date(sdf.parse(value).getTime());
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public String getGender() {

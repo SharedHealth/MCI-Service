@@ -70,8 +70,8 @@ public class PatientQueryBuilder {
     public static final String IS_ALIVE = "is_alive";
     public static final String RELATIONS = "relations";
     public static final String PRIMARY_CONTACT = "primary_contact";
-    public static final String CELL_NO = "cell_no";
-    public static final String PRIMARY_CELL_NO = "primary_cell_no";
+    public static final String PHONE_NO = "phone_no";
+    public static final String PRIMARY_CONTACT_NO = "primary_contact_no";
 
     public static final String PHONE_NUMBER_COUNTRY_CODE = "phone_number_country_code";
     public static final String PHONE_NUMBER_AREA_CODE = "phone_number_area_code";

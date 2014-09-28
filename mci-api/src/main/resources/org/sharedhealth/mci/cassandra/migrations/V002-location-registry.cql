@@ -12,8 +12,8 @@ CREATE TABLE IF NOT EXISTS locations (
   upazilla_name text
 );
 
-CREATE INDEX district_id_key ON locations (district_id);
-CREATE INDEX division_id_key ON locations (division_id);
-CREATE INDEX pourashava_id_key ON locations (pourashava_id);
-CREATE INDEX union_id_key ON locations (union_id);
-CREATE INDEX upazilla_id_key ON locations (upazilla_id);
+CREATE INDEX location_district_id_key ON locations (district_id);
+CREATE INDEX location_division_id_key ON locations (division_id);
+CREATE INDEX location_pourashava_id_key ON locations (pourashava_id);
+CREATE INDEX location_union_id_key ON locations (union_id);
+CREATE INDEX location_upazilla_id_key ON locations (upazilla_id);
