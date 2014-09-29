@@ -1,12 +1,16 @@
 package org.sharedhealth.mci.web.controller;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.Location;
@@ -17,6 +21,8 @@ import org.sharedhealth.mci.web.utils.concurrent.PreResolvedListenableFuture;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import static org.mockito.Mockito.verify;
@@ -46,7 +52,7 @@ public class PatientControllerTest {
     private MockMvc mockMvc;
     private String nationalId = "1234567890123";
     private String birthRegistrationNumber = "12345678901234567";
-    private String name = "Roni Kumar Saha";
+    private String fullname = "Scott Tiger";
     private String uid = "11111111111";
     public static final String API_END_POINT = "/api/v1/patients";
     public static final String GEO_CODE = "1004092001";
@@ -113,35 +119,41 @@ public class PatientControllerTest {
     }
 
     @Test
-    public void shouldFindPatientByNationalId() throws Exception {
-        when(patientService.findByNationalId(nationalId)).thenReturn(new PreResolvedListenableFuture<>(patientMapper));
-        mockMvc.perform(get(API_END_POINT + "?nid=" + nationalId))
-                .andExpect(request().asyncResult(new ResponseEntity<>(patientMapper, OK)));
-        verify(patientService).findByNationalId(nationalId);
+    public void shouldFindPatientsByNationalId() throws Exception {
+        assertFindAllBy("nid", nationalId);
     }
 
     @Test
-    public void shouldFindPatientByBirthRegistrationNumber() throws Exception {
-        when(patientService.findByBirthRegistrationNumber(birthRegistrationNumber)).thenReturn(new PreResolvedListenableFuture<>(patientMapper));
-        mockMvc.perform(get(API_END_POINT + "?bin_brn=" + birthRegistrationNumber))
-                .andExpect(request().asyncResult(new ResponseEntity<>(patientMapper, OK)));
-        verify(patientService).findByBirthRegistrationNumber(birthRegistrationNumber);
+    public void shouldFindPatientsByBirthRegistrationNumber() throws Exception {
+        assertFindAllBy("bin_brn", birthRegistrationNumber);
     }
 
     @Test
-    public void shouldFindPatientByUid() throws Exception {
-        when(patientService.findByUid(uid)).thenReturn(new PreResolvedListenableFuture<>(patientMapper));
-        mockMvc.perform(get(API_END_POINT + "?uid=" + uid))
-                .andExpect(request().asyncResult(new ResponseEntity<>(patientMapper, OK)));
-        verify(patientService).findByUid(uid);
+    public void shouldFindPatientsByUid() throws Exception {
+        assertFindAllBy("uid", uid);
     }
 
     @Test
-    public void shouldFindPatientByName() throws Exception {
-        when(patientService.findByName(name.toLowerCase())).thenReturn(new PreResolvedListenableFuture<>(patientMapper));
-        mockMvc.perform(get(API_END_POINT + "?name=" + name))
-                .andExpect(request().asyncResult(new ResponseEntity<>(patientMapper, OK)));
-        verify(patientService).findByName(name.toLowerCase());
+    public void shouldFindPatientsByName() throws Exception {
+        assertFindAllBy("full_name", fullname);
+    }
+
+    private void assertFindAllBy(String key, String value) throws Exception {
+        MultiValueMap<String, String> parameter = new LinkedMultiValueMap<>();
+        parameter.add(key, value);
+
+        List<PatientMapper> patientMappers = new ArrayList<>();
+        patientMappers.add(patientMapper);
+
+        when(patientService.findAllByQuery(parameter)).thenReturn(new PreResolvedListenableFuture<>(patientMappers));
+
+        List<ArrayList> additionalInfo = null;
+        MCIMultiResponse mciMultiResponse = new MCIMultiResponse<>(patientMappers, additionalInfo, OK);
+
+        mockMvc.perform(get(API_END_POINT + "?"+ key + "=" + value))
+                .andExpect(request().asyncResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject)));
+
+        verify(patientService).findAllByQuery(parameter);
     }
 
     private LocalValidatorFactoryBean validator() {

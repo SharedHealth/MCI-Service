@@ -1,11 +1,16 @@
 package org.sharedhealth.mci.web.handler;
 
-import org.springframework.http.HttpStatus;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.springframework.http.HttpStatus;
 
-import java.util.List;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
 @JsonIgnoreProperties(value = { "httpStatusObject" })
 @JsonPropertyOrder({"http_status","results","additional_info"})
@@ -17,6 +22,7 @@ public class MCIMultiResponse <T, A>{
     public List<T> results;
 
     @JsonProperty("additional_info")
+    @JsonInclude(NON_EMPTY)
     public List<A> additionalInfo;
 
     public HttpStatus httpStatusObject;
@@ -26,6 +32,11 @@ public class MCIMultiResponse <T, A>{
         this.httpStatus = httpStatusObject.value();
         this.results = results;
         this.additionalInfo = additionalInfo;
+    }
+
+    public MCIMultiResponse(HttpStatus httpStatusObject) {
+        this.httpStatusObject = httpStatusObject;
+        this.httpStatus = httpStatusObject.value();
     }
 
     public int getHttpStatus() {
@@ -58,5 +69,15 @@ public class MCIMultiResponse <T, A>{
 
     public void setHttpStatusObject(HttpStatus httpStatusObject) {
         this.httpStatusObject = httpStatusObject;
+    }
+
+    @Override
+    public boolean equals(Object rhs) {
+        return EqualsBuilder.reflectionEquals(this, rhs);
+    }
+
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 }

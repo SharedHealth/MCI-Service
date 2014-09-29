@@ -443,6 +443,18 @@ public class PatientRepository {
             select.where(QueryBuilder.eq("full_name", parameters.get("full_name").get(0)));
         }
 
+        if (parameters.get("nid") != null) {
+            select.where(QueryBuilder.eq(PatientQueryBuilder.NATIONAL_ID, parameters.get("nid").get(0)));
+        }
+
+        if (parameters.get("bin_brn") != null) {
+            select.where(QueryBuilder.eq(PatientQueryBuilder.BIN_BRN, parameters.get("bin_brn").get(0)));
+        }
+
+        if (parameters.get("uid") != null) {
+            select.where(QueryBuilder.eq(PatientQueryBuilder.UID, parameters.get("uid").get(0)));
+        }
+
         return new SimpleListenableFuture<List<PatientMapper>, ResultSet>(
                 cassandraOperations.queryAsynchronously(select)) {
             @Override

@@ -80,71 +80,6 @@ public class PatientController {
         return deferredResult;
     }
 
-    private DeferredResult<ResponseEntity<PatientMapper>> findByNationalId(String nationalId)
-            throws ExecutionException, InterruptedException {
-        logger.debug("Trying to find patient by national id [" + nationalId + "]");
-        final DeferredResult<ResponseEntity<PatientMapper>> deferredResult = new DeferredResult<>();
-
-        patientService.findByNationalId(nationalId).addCallback(new ListenableFutureCallback<PatientMapper>() {
-            @Override
-            public void onSuccess(PatientMapper result) {
-                deferredResult.setResult(new ResponseEntity<>(result, OK));
-            }
-
-            @Override
-            public void onFailure(Throwable e) {
-                deferredResult.setErrorResult(extractAppException(e));
-            }
-        });
-        return deferredResult;
-    }
-
-    private DeferredResult<ResponseEntity<PatientMapper>> findByBirthRegistrationNumber(String birthRegistrationNumber)
-            throws ExecutionException, InterruptedException {
-        logger.debug("Trying to find patient by birth registration number [" + birthRegistrationNumber + "]");
-        final DeferredResult<ResponseEntity<PatientMapper>> deferredResult = new DeferredResult<>();
-
-        patientService.findByBirthRegistrationNumber(birthRegistrationNumber).addCallback(new ListenableFutureCallback<PatientMapper>() {
-            @Override
-            public void onSuccess(PatientMapper result) {
-                deferredResult.setResult(new ResponseEntity<>(result, OK));
-            }
-
-            @Override
-            public void onFailure(Throwable e) {
-                deferredResult.setErrorResult(extractAppException(e));
-            }
-        });
-
-        return deferredResult;
-    }
-
-    @RequestMapping(method = RequestMethod.GET)
-    public DeferredResult<ResponseEntity<PatientMapper>> findPatient(
-            @RequestParam(value = "nid", required = false) String nationalId,
-            @RequestParam(value = "bin_brn", required = false) String birthRegistrationNumber,
-            @RequestParam(value = "uid", required = false) String uid,
-            @RequestParam(value = "name", required = false) String name
-    )
-            throws ExecutionException, InterruptedException {
-
-        if(nationalId != null) {
-            return findByNationalId(nationalId);
-        }
-
-        if(birthRegistrationNumber != null) {
-            return findByBirthRegistrationNumber(birthRegistrationNumber);
-        }
-        if(name != null) {
-            return findByName(name);
-        }
-        if(uid != null) {
-            return findByUid(uid);
-        }
-
-        throw new ValidationException("Invalid request");
-    }
-
     private Throwable extractAppException(Throwable e) {
         if (e instanceof ExecutionException && e.getCause() != null) {
             return e.getCause();
@@ -152,58 +87,22 @@ public class PatientController {
         return e;
     }
 
-    public DeferredResult<ResponseEntity<PatientMapper>> findByName(String name)
-            throws ExecutionException, InterruptedException {
-        logger.debug("Trying to find patient by name [" + name + "]");
-        final DeferredResult<ResponseEntity<PatientMapper>> deferredResult = new DeferredResult<>();
-
-        patientService.findByName(name.toLowerCase()).addCallback(new ListenableFutureCallback<PatientMapper>() {
-            @Override
-            public void onSuccess(PatientMapper result) {
-                deferredResult.setResult(new ResponseEntity<>(result, OK));
-            }
-
-            @Override
-            public void onFailure(Throwable e) {
-                deferredResult.setErrorResult(extractAppException(e));
-            }
-        });
-        return deferredResult;
-    }
-
-    public DeferredResult<ResponseEntity<PatientMapper>> findByUid(String uid)
-            throws ExecutionException, InterruptedException {
-        logger.debug("Trying to find patient by name [" + uid + "]");
-        final DeferredResult<ResponseEntity<PatientMapper>> deferredResult = new DeferredResult<>();
-
-        patientService.findByUid(uid).addCallback(new ListenableFutureCallback<PatientMapper>() {
-            @Override
-            public void onSuccess(PatientMapper result) {
-                deferredResult.setResult(new ResponseEntity<>(result, OK));
-            }
-
-            @Override
-            public void onFailure(Throwable e) {
-                deferredResult.setErrorResult(extractAppException(e));
-            }
-        });
-        return deferredResult;
-    }
-
-    @RequestMapping(value = "/search", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
-    public DeferredResult<List<PatientMapper>> findAll(@RequestParam MultiValueMap<String, String> parameters) {
+    @RequestMapping(method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
+    public DeferredResult<ResponseEntity<MCIMultiResponse>> findPatients(@RequestParam MultiValueMap<String, String> parameters) {
         logger.debug("Find all patients  by search query ");
-        final DeferredResult<List<PatientMapper>> deferredResult = new DeferredResult<>();
+        final DeferredResult<ResponseEntity<MCIMultiResponse>> deferredResult = new DeferredResult<>();
 
         patientService.findAllByQuery(parameters).addCallback(new ListenableFutureCallback<List<PatientMapper>>() {
             @Override
-            public void onSuccess(List<PatientMapper> result) {
-                deferredResult.setResult(result);
+            public void onSuccess(List<PatientMapper> results) {
+                List<ArrayList> additionalInfo = null;
+                MCIMultiResponse mciMultiResponse = new MCIMultiResponse<>(results, additionalInfo, OK);
+                deferredResult.setResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject));
             }
 
             @Override
             public void onFailure(Throwable error) {
-                deferredResult.setErrorResult(error);
+                deferredResult.setErrorResult(extractAppException(error));
             }
         });
 
@@ -247,7 +146,7 @@ public class PatientController {
             @Override
             public void onSuccess(List<PatientMapper> results) {
                 List<ArrayList> additionalInfo = null;
-                MCIMultiResponse mciMultiResponse = new MCIMultiResponse(results, additionalInfo, OK);
+                MCIMultiResponse mciMultiResponse = new MCIMultiResponse<>(results, additionalInfo, OK);
                 deferredResult.setResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject));
             }
 
