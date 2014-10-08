@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutionException;
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.handler.MCIResponse;
+import org.sharedhealth.mci.web.mapper.PaginationQuery;
 import org.sharedhealth.mci.web.mapper.PatientMapper;
 import org.sharedhealth.mci.web.service.PatientService;
 import org.slf4j.Logger;
@@ -137,12 +138,17 @@ public class PatientController {
     @RequestMapping(value = "/facility/{facilityId}", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
     public DeferredResult<ResponseEntity<MCIMultiResponse>> findAllPatientsInCatchment(
             @PathVariable String facilityId,
-            @RequestParam(value = "last", required = false) String last
+            @Valid PaginationQuery paginationQuery, BindingResult bindingResult
             )throws ExecutionException, InterruptedException  {
+
+        if (bindingResult.hasErrors()) {
+            throw new ValidationException(bindingResult);
+        }
+
         logger.debug("Find all patients  for catchment of facility [" + facilityId+ "]");
         final DeferredResult<ResponseEntity<MCIMultiResponse>> deferredResult = new DeferredResult<>();
 
-        patientService.findAllByFacility(facilityId, last).addCallback(new ListenableFutureCallback<List<PatientMapper>>() {
+        patientService.findAllByFacility(facilityId, paginationQuery.getLast(), paginationQuery.getDateSince()).addCallback(new ListenableFutureCallback<List<PatientMapper>>() {
             @Override
             public void onSuccess(List<PatientMapper> results) {
                 List<ArrayList> additionalInfo = null;

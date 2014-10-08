@@ -1,7 +1,6 @@
 package org.sharedhealth.mci.web.model;
 
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
@@ -11,6 +10,7 @@ import org.springframework.data.cassandra.mapping.Column;
 import org.springframework.data.cassandra.mapping.PrimaryKey;
 import org.springframework.data.cassandra.mapping.Table;
 
+import static org.sharedhealth.mci.utils.DateUtil.string2Date;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
 
 @Table(value = "patient")
@@ -310,22 +310,7 @@ public class Patient {
     }
 
     public void setDateOfBirth(String dateOfBirth) {
-        this.dateOfBirth = getDateObject(dateOfBirth, "yyyy-MM-dd");
-    }
-
-    private Date getDateObject(String value, String format) {
-
-        if (value == null || value.trim().equals("")) {
-            return null;
-        }
-
-        SimpleDateFormat sdf = new SimpleDateFormat(format);
-
-        try {
-            return new java.util.Date(sdf.parse(value).getTime());
-        } catch (Exception e) {
-            return null;
-        }
+        this.dateOfBirth = string2Date(dateOfBirth, "yyyy-MM-dd");
     }
 
     public String getGender() {

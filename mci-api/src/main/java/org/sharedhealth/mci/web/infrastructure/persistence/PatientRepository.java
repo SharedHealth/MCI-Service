@@ -1,8 +1,6 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -13,14 +11,14 @@ import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Joiner;
 import com.google.common.util.concurrent.SettableFuture;
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.utils.UidGenerator;
+import org.sharedhealth.mci.web.exception.HealthIDExistException;
 import org.sharedhealth.mci.web.exception.PatientAlreadyExistException;
 import org.sharedhealth.mci.web.exception.PatientNotFoundException;
 import org.sharedhealth.mci.web.exception.ValidationException;
-import org.sharedhealth.mci.web.exception.HealthIDExistException;
+import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientMapper;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
@@ -39,8 +37,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.FieldError;
-
-import org.sharedhealth.mci.web.handler.MCIResponse;
 
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
 
@@ -139,11 +135,11 @@ public class PatientRepository {
             }
         }
 
-        if(!StringUtils.isBlank(patientMapper.getNationalId())) {
+        if (!StringUtils.isBlank(patientMapper.getNationalId())) {
             try {
                 existingPatient = findByNationalId(patientMapper.getNationalId()).get();
 
-                if(existingPatient.isSimilarTo(patientMapper)) {
+                if (existingPatient.isSimilarTo(patientMapper)) {
                     return existingPatient;
                 }
             } catch (Exception e) {
@@ -151,12 +147,12 @@ public class PatientRepository {
             }
         }
 
-        if(!StringUtils.isBlank(patientMapper.getBirthRegistrationNumber())) {
+        if (!StringUtils.isBlank(patientMapper.getBirthRegistrationNumber())) {
 
             try {
                 existingPatient = findByBirthRegistrationNumber(patientMapper.getBirthRegistrationNumber()).get();
 
-                if(existingPatient.isSimilarTo(patientMapper)) {
+                if (existingPatient.isSimilarTo(patientMapper)) {
                     return existingPatient;
                 }
             } catch (Exception e) {
@@ -164,11 +160,11 @@ public class PatientRepository {
             }
         }
 
-        if(!StringUtils.isBlank(patientMapper.getUid())) {
+        if (!StringUtils.isBlank(patientMapper.getUid())) {
             try {
                 existingPatient = findByUid(patientMapper.getUid()).get();
 
-                if(existingPatient.isSimilarTo(patientMapper)) {
+                if (existingPatient.isSimilarTo(patientMapper)) {
                     return existingPatient;
                 }
             } catch (Exception e) {
@@ -411,11 +407,11 @@ public class PatientRepository {
         primaryContactNumber.setCountryCode(row.getString(PRIMARY_CONTACT_NUMBER_COUNTRY_CODE));
         primaryContactNumber.setExtension(row.getString(PRIMARY_CONTACT_NUMBER_EXTENSION));
 
-        if(primaryContactNumber.getNumber() != null) {
+        if (primaryContactNumber.getNumber() != null) {
             patientMapper.setPhoneNumber(phoneNumber);
         }
 
-        if(phoneNumber.getNumber() != null){
+        if (phoneNumber.getNumber() != null) {
             patientMapper.setPrimaryContactNumber(primaryContactNumber);
         }
 
@@ -455,19 +451,7 @@ public class PatientRepository {
             select.where(QueryBuilder.eq(PatientQueryBuilder.UID, parameters.get("uid").get(0)));
         }
 
-        return new SimpleListenableFuture<List<PatientMapper>, ResultSet>(
-                cassandraOperations.queryAsynchronously(select)) {
-            @Override
-            protected List<PatientMapper> adapt(ResultSet resultSet) throws ExecutionException {
-                List<PatientMapper> patientMappers = new ArrayList<>();
-                for (Row result : resultSet.all()) {
-                    PatientMapper patientMapper = getPatientFromRow(result);
-                    patientMappers.add(patientMapper);
-                }
-
-                return patientMappers;
-            }
-        };
+        return getPatientListListenableFuture(select);
     }
 
     public ListenableFuture<MCIResponse> update(PatientMapper patientMapper, final String hid) {
@@ -490,7 +474,7 @@ public class PatientRepository {
         return getStringListenableFuture(result);
     }
 
-    public ListenableFuture<List<PatientMapper>> findAllByLocations(List<String> locations, String start) {
+    public ListenableFuture<List<PatientMapper>> findAllByLocations(List<String> locations, String start, Date since) {
 
         final SettableFuture<List<PatientMapper>> result = SettableFuture.create();
         List<PatientMapper> patients = new ArrayList<>();
@@ -505,7 +489,7 @@ public class PatientRepository {
                     continue;
                 }
 
-                ListenableFuture<List<PatientMapper>> res = this.findAllByLocation(catchment, start, limit);
+                ListenableFuture<List<PatientMapper>> res = this.findAllByLocation(catchment, start, limit, since);
                 try {
                     List<PatientMapper> temp = res.get();
                     patients.addAll(temp);
@@ -523,10 +507,57 @@ public class PatientRepository {
                 }
             }
         } else {
-            return this.findAllByLocation(null, start, limit);
+            return this.findAllByLocation(null, start, limit, since);
         }
 
         result.set(patients);
+        return getPatientListListenableFuture(result);
+    }
+
+    public ListenableFuture<List<PatientMapper>> findAllByLocation(String location, String start, int limit, Date since) {
+
+        Select select = QueryBuilder.select().from("patient");
+
+        if (StringUtils.isBlank(location)) {
+            final SettableFuture<List<PatientMapper>> result = SettableFuture.create();
+            return getPatientListListenableFuture(result);
+        }
+
+        select.where(QueryBuilder.eq(getAddressHierarchyField(location.length()), location));
+
+        if (StringUtils.isNotBlank(start)) {
+            select.where(QueryBuilder.gt(QueryBuilder.token("health_id"), QueryBuilder.raw("token('" + start + "')")));
+        }
+
+        if (since != null) {
+            select.where(QueryBuilder.gt("updated_at", since));
+            select.allowFiltering();
+        }
+
+        if (limit > 0) {
+            select.limit(limit);
+        }
+
+        return getPatientListListenableFuture(select);
+    }
+
+    private ListenableFuture<List<PatientMapper>> getPatientListListenableFuture(final Select select) {
+        return new SimpleListenableFuture<List<PatientMapper>, ResultSet>(
+                cassandraOperations.queryAsynchronously(select)) {
+            @Override
+            protected List<PatientMapper> adapt(ResultSet resultSet) throws ExecutionException {
+                List<PatientMapper> patientMappers = new ArrayList<>();
+                for (Row result : resultSet.all()) {
+                    PatientMapper patientMapper = getPatientFromRow(result);
+                    patientMappers.add(patientMapper);
+                }
+
+                return patientMappers;
+            }
+        };
+    }
+
+    private ListenableFuture<List<PatientMapper>> getPatientListListenableFuture(final SettableFuture<List<PatientMapper>> result) {
         return new SimpleListenableFuture<List<PatientMapper>, List<PatientMapper>>(result) {
             @Override
             protected List<PatientMapper> adapt(List<PatientMapper> p) throws ExecutionException {
@@ -540,10 +571,8 @@ public class PatientRepository {
             ListenableFuture<PatientMapper> p = findByHealthId(start);
             try {
                 return p.get().getAddress().getGeoCode();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
+            } catch (InterruptedException | ExecutionException e) {
+                logger.debug("Invalid start parameter");
             }
         }
 
@@ -559,39 +588,8 @@ public class PatientRepository {
         return location.startsWith(catchment);
     }
 
-    public ListenableFuture<List<PatientMapper>> findAllByLocation(String location, String start, int limit) {
-
-        String cql = "SELECT * FROM patient %s LIMIT %s";
-        List<String> wheres = new ArrayList<>();
-
-        if (StringUtils.isNotBlank(location)) {
-            int i = location.length() / 2;
-            wheres.add("location_level" + i + "='" + location + "'");
-        }
-
-        if (StringUtils.isNotBlank(start)) {
-            wheres.add("token(health_id) > token('" + start + "')");
-        }
-
-        String where = Joiner.on(" AND ").join(wheres);
-
-        if (StringUtils.isNotBlank(where)) {
-            where = "WHERE " + where;
-        }
-
-        return new SimpleListenableFuture<List<PatientMapper>, ResultSet>(
-                cassandraOperations.queryAsynchronously(String.format(cql, where, limit))) {
-            @Override
-            protected List<PatientMapper> adapt(ResultSet resultSet) throws ExecutionException {
-                List<PatientMapper> patientMappers = new ArrayList<>();
-                for (Row result : resultSet.all()) {
-                    PatientMapper patientMapper = getPatientFromRow(result);
-                    patientMappers.add(patientMapper);
-                }
-
-                return patientMappers;
-            }
-        };
+    private String getAddressHierarchyField(int length) {
+        return "location_level" + (length / 2);
     }
 
     public Patient getEntityFromPatientMapper(PatientMapper p) {
@@ -691,21 +689,21 @@ public class PatientRepository {
 
         patient.setRelations(relationsJson);
 
-        if(phoneNumber != null){
+        if (phoneNumber != null) {
             patient.setCellNo(phoneNumber.getNumber());
             patient.setPhoneNumberAreaCode(phoneNumber.getAreaCode());
             patient.setPhoneNumberCountryCode(phoneNumber.getCountryCode());
             patient.setPhoneNumberExtension(phoneNumber.getExtension());
         }
 
-        if(primaryContactNumber != null){
+        if (primaryContactNumber != null) {
             patient.setPrimaryCellNo(primaryContactNumber.getNumber());
             patient.setPrimaryContactNumberAreaCode(primaryContactNumber.getAreaCode());
             patient.setPrimaryContactNumberCountryCode(primaryContactNumber.getCountryCode());
             patient.setPrimaryContactNumberExtension(primaryContactNumber.getExtension());
         }
 
-         patient.setPrimaryContact(StringUtils.trim(p.getPrimaryContact()));
+        patient.setPrimaryContact(StringUtils.trim(p.getPrimaryContact()));
 
 
         return patient;

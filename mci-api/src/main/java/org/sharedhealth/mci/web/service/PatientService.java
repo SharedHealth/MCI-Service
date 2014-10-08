@@ -1,6 +1,7 @@
 package org.sharedhealth.mci.web.service;
 
 
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -62,15 +63,15 @@ public class PatientService {
         };
     }
 
-    public ListenableFuture<List<PatientMapper>> findAllByLocations(List<String> locations, String last) {
-        return patientRepository.findAllByLocations(locations, last);
+    public ListenableFuture<List<PatientMapper>> findAllByLocations(List<String> locations, String last, Date since) {
+        return patientRepository.findAllByLocations(locations, last, since);
     }
 
-    public ListenableFuture<List<PatientMapper>> findAllByFacility(String facilityId,String last) {
+    public ListenableFuture<List<PatientMapper>> findAllByFacility(String facilityId, String last, Date since) {
 
         List<String> locations = facilityRegistryWrapper.getCatchmentAreasByFacility(facilityId);
 
-        return findAllByLocations(locations, last);
+        return findAllByLocations(locations, last, since);
     }
 
 }
