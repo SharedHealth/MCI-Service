@@ -22,7 +22,7 @@ public class PhoneNumber {
 
     @JsonProperty("number")
     @JsonInclude(NON_EMPTY)
-    @NotBlank(message = "1001")
+    @NotBlank(message = "1001", groups = CreateGroup.class)
     @Pattern(regexp = "[0-9]{1,12}$", message = "1002")
     private String number;
 

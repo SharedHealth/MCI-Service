@@ -20,8 +20,8 @@ import org.slf4j.LoggerFactory;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
-@MaritalRelation(message = "1005", field="maritalStatus")
-@JsonIgnoreProperties({ "created_at" })
+@MaritalRelation(message = "1005", field = "maritalStatus")
+@JsonIgnoreProperties({"created_at"})
 public class PatientMapper {
 
     private static final Logger logger = LoggerFactory.getLogger(PatientMapper.class);
@@ -40,26 +40,26 @@ public class PatientMapper {
 
     @JsonProperty("name_bangla")
     @JsonInclude(NON_EMPTY)
-    @Length(lengthSize= 125, message = "1002")
+    @Length(lengthSize = 125, message = "1002")
     private String nameBangla;
 
     @JsonProperty("given_name")
-    @NotBlank(message = "1001")
-    @Length(lengthSize= 100, message = "1002")
+    @NotBlank(message = "1001", groups = CreateGroup.class)
+    @Length(lengthSize = 100, message = "1002")
     private String givenName;
 
     @JsonProperty("sur_name")
-    @NotBlank(message = "1001")
-    @Pattern(regexp = "^(\\s*)([A-Za-z0-9]{0,25})(\\b\\s*$)",message = "1002")
+    @NotBlank(message = "1001", groups = CreateGroup.class)
+    @Pattern(regexp = "^(\\s*)([A-Za-z0-9]{0,25})(\\b\\s*$)", message = "1002")
     private String surName;
 
     @JsonProperty("date_of_birth")
-    @NotBlank(message = "1001")
+    @NotBlank(message = "1001", groups = CreateGroup.class)
     @Date(format = "yyyy-MM-dd", message = "1002")
     private String dateOfBirth;
 
     @JsonProperty("gender")
-    @NotBlank(message = "1001")
+    @NotBlank(message = "1001", groups = CreateGroup.class)
     @Pattern(regexp = "[M|F|O ]{1}", message = "1004")
     private String gender;
 
@@ -100,7 +100,7 @@ public class PatientMapper {
 
     @JsonProperty("nationality")
     @JsonInclude(NON_EMPTY)
-    @Length(lengthSize= 50, message = "1002")
+    @Length(lengthSize = 50, message = "1002")
     private String nationality;
 
     @JsonProperty("disability")
@@ -114,20 +114,20 @@ public class PatientMapper {
     private String ethnicity;
 
     @JsonProperty("present_address")
-    @NotNull(message = "1001")
+    @NotNull(message = "1001", groups = CreateGroup.class)
     @Valid
     @Location(message = "1004")
     private Address address;
 
     @JsonProperty("primary_contact")
     @JsonInclude(NON_EMPTY)
-    @Length(lengthSize= 100, message = "1002")
+    @Length(lengthSize = 100, message = "1002")
     private String primaryContact;
 
     @JsonProperty("phone_number")
     @Valid
     @JsonInclude(NON_EMPTY)
-    private  PhoneNumber phoneNumber;
+    private PhoneNumber phoneNumber;
 
     @JsonProperty("primary_contact_number")
     @Valid
@@ -195,6 +195,7 @@ public class PatientMapper {
     public void setGivenName(String givenName) {
         this.givenName = givenName;
     }
+
     public String getSurName() {
         return surName;
     }
@@ -346,7 +347,7 @@ public class PatientMapper {
 
     public Relation getRelation(String relationType) {
 
-        if(this.relations == null) {
+        if (this.relations == null) {
             return null;
         }
 
@@ -363,15 +364,15 @@ public class PatientMapper {
     public boolean isSimilarTo(PatientMapper patientMapper) {
         int matches = 0;
 
-        if(this.getNationalId() != null && this.getNationalId().equals(patientMapper.getNationalId())) {
+        if (this.getNationalId() != null && this.getNationalId().equals(patientMapper.getNationalId())) {
             matches++;
         }
 
-        if(this.getBirthRegistrationNumber() != null && this.getBirthRegistrationNumber().equals(patientMapper.getBirthRegistrationNumber())) {
+        if (this.getBirthRegistrationNumber() != null && this.getBirthRegistrationNumber().equals(patientMapper.getBirthRegistrationNumber())) {
             matches++;
         }
 
-        if(this.getUid() != null && this.getUid().equals(patientMapper.getUid())) {
+        if (this.getUid() != null && this.getUid().equals(patientMapper.getUid())) {
             matches++;
         }
 

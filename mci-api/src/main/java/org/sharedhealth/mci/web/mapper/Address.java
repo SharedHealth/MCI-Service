@@ -16,11 +16,11 @@ import org.sharedhealth.mci.validation.constraints.CountryCode;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
 
-@JsonIgnoreProperties({ "geoCode", "unionOrWard" })
+@JsonIgnoreProperties({"geoCode", "unionOrWard"})
 public class Address {
 
     @JsonProperty("address_line")
-    @NotBlank(message = "1001")
+    @NotBlank(message = "1001", groups = CreateGroup.class)
     @Size(min = 3, max = 255, message = "1002")
     private String addressLine;
 
@@ -259,14 +259,14 @@ public class Address {
     }
 
     @JsonIgnore
-    public  String getUpazilaOrThana() {
+    public String getUpazilaOrThana() {
         String ut = "";
 
-        if(this.getUpazillaId() != null) {
+        if (this.getUpazillaId() != null) {
             ut = this.getUpazillaId();
         }
 
-        if(this.getThanaId() != null) {
+        if (this.getThanaId() != null) {
             ut = ut + this.getThanaId();
         }
 
@@ -276,11 +276,11 @@ public class Address {
     public String getUnionOrWard() {
         String uw = "";
 
-        if(this.getUnionId() != null) {
+        if (this.getUnionId() != null) {
             uw = this.getUnionId();
         }
 
-        if(this.getWardId() != null) {
+        if (this.getWardId() != null) {
             uw = uw + this.getWardId();
         }
 

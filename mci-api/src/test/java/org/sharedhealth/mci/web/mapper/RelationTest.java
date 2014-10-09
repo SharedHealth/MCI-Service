@@ -26,7 +26,7 @@ public class RelationTest {
 
     @Test
     public void shouldFailIfTypeIsNull() {
-        Set<ConstraintViolation<Relation>> constraintViolations = validator.validateValue(Relation.class, "type", null);
+        Set<ConstraintViolation<Relation>> constraintViolations = validator.validateValue(Relation.class, "type", null, CreateGroup.class);
         assertEquals(1, constraintViolations.size());
         assertEquals("1001", constraintViolations.iterator().next().getMessage());
     }
@@ -144,6 +144,7 @@ public class RelationTest {
         Set<ConstraintViolation<Relation>> constraintViolations = validator.validateValue(Relation.class, "uid", "UID45678901");
         assertEquals(0, constraintViolations.size());
     }
+
     @Test
     public void shouldPassIfBirthRegistrationNumberIsValid() {
         Set<ConstraintViolation<Relation>> constraintViolations = validator.validateValue(Relation.class, "birthRegistrationNumber", "12345674891234567");
@@ -164,7 +165,7 @@ public class RelationTest {
 
     @Test
     public void shouldPassIfRelationalStatusIsValid() {
-        for(int i = 3; i<6; i++) {
+        for (int i = 3; i < 6; i++) {
             Set<ConstraintViolation<Relation>> constraintViolations = validator.validateValue(Relation.class, "relationalStatus", Integer.toString(i));
             assertEquals(0, constraintViolations.size());
         }

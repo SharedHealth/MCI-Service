@@ -30,8 +30,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 import org.sharedhealth.mci.web.handler.ErrorHandler;
 
@@ -53,7 +54,10 @@ public class PatientRestApiTest {
     private MockMvc mockMvc;
     private PatientMapper patientMapper;
     public static final String API_END_POINT = "/api/v1/patients";
+    public static final String PUT_API_END_POINT = "/api/v1/patients/healthId-100";
+    public static final String SEARCH_PATIENT_BY_NID = "/api/v1/patients/?nid=1234212191164";
     public static final String GEO_CODE = "1004092001";
+    public static final String APPLICATION_JSON_UTF8 = "application/json;charset=UTF-8";
 
     @Before
     public void setup() {
@@ -86,9 +90,13 @@ public class PatientRestApiTest {
     public void shouldCreatePatient() throws Exception {
         String json = new ObjectMapper().writeValueAsString(patientMapper);
 
-        MvcResult result = mockMvc.perform(post(API_END_POINT).content(json).contentType(APPLICATION_JSON))
+        MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
+
+        mockMvc.perform(asyncDispatch(result))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(APPLICATION_JSON_UTF8));
     }
 
     @Test
@@ -164,7 +172,9 @@ public class PatientRestApiTest {
         MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
+
     }
+
 
     @After
     public void teardown() {

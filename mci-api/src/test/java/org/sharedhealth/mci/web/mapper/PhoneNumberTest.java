@@ -80,7 +80,7 @@ public class PhoneNumberTest {
 
     @Test
     public void shouldFailIfPhoneNOIsBlank() {
-        Set<ConstraintViolation<PhoneNumber>> constraintViolations = validator.validateValue(PhoneNumber.class, "number", null);
+        Set<ConstraintViolation<PhoneNumber>> constraintViolations = validator.validateValue(PhoneNumber.class, "number", null, CreateGroup.class);
         assertEquals(1, constraintViolations.size());
         assertEquals("1001", constraintViolations.iterator().next().getMessage());
     }

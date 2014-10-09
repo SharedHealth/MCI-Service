@@ -28,11 +28,13 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.springframework.http.HttpStatus.ACCEPTED;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -55,6 +57,7 @@ public class PatientControllerTest {
     private String fullname = "Scott Tiger";
     private String uid = "11111111111";
     public static final String API_END_POINT = "/api/v1/patients";
+    public static final String PUT_API_END_POINT = "/api/v1/patients/{healthId}";
     public static final String GEO_CODE = "1004092001";
 
     @Before
@@ -100,7 +103,7 @@ public class PatientControllerTest {
     public void shouldCreatePatientAndReturnHealthId() throws Exception {
         String json = new ObjectMapper().writeValueAsString(patientMapper);
         String healthId = "healthId-100";
-        MCIResponse mciResponse = new MCIResponse(healthId,CREATED);
+        MCIResponse mciResponse = new MCIResponse(healthId, CREATED);
         when(locationService.findByGeoCode(GEO_CODE)).thenReturn(new PreResolvedListenableFuture<>(location));
         when(patientService.create(patientMapper)).thenReturn(new PreResolvedListenableFuture<>(mciResponse));
 
@@ -150,10 +153,24 @@ public class PatientControllerTest {
         List<ArrayList> additionalInfo = null;
         MCIMultiResponse mciMultiResponse = new MCIMultiResponse<>(patientMappers, additionalInfo, OK);
 
-        mockMvc.perform(get(API_END_POINT + "?"+ key + "=" + value))
+        mockMvc.perform(get(API_END_POINT + "?" + key + "=" + value))
                 .andExpect(request().asyncResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject)));
 
         verify(patientService).findAllByQuery(parameter);
+    }
+
+    @Test
+    public void shouldUpdatePatientAndReturnHealthId() throws Exception {
+        String json = new ObjectMapper().writeValueAsString(patientMapper);
+        String healthId = "healthId-100";
+        MCIResponse mciResponse = new MCIResponse(healthId, ACCEPTED);
+        when(locationService.findByGeoCode(GEO_CODE)).thenReturn(new PreResolvedListenableFuture<>(location));
+        when(patientService.update(patientMapper, healthId)).thenReturn(new PreResolvedListenableFuture<>(mciResponse));
+
+        mockMvc.perform(put(PUT_API_END_POINT, healthId).content(json).contentType(APPLICATION_JSON))
+                .andExpect(request().asyncResult(new ResponseEntity<>(mciResponse, ACCEPTED)));
+        verify(patientService).update(patientMapper, healthId);
+
     }
 
     private LocalValidatorFactoryBean validator() {

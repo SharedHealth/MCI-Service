@@ -19,7 +19,7 @@ public class Relation {
 
     @JsonProperty("type")
     @JsonInclude(NON_EMPTY)
-    @NotNull(message = "1001")
+    @NotNull(message = "1001", groups = CreateGroup.class)
     @Pattern(regexp = "^(father|mother|spouse)$", message = "1004")
     private String type;
 
@@ -44,17 +44,17 @@ public class Relation {
 
     @JsonProperty("name_bangla")
     @JsonInclude(NON_EMPTY)
-    @Length(lengthSize= 125, message = "1002")
+    @Length(lengthSize = 125, message = "1002")
     private String nameBangla;
 
     @JsonProperty("given_name")
     @JsonInclude(NON_EMPTY)
-    @Length(lengthSize= 100, message = "1002")
+    @Length(lengthSize = 100, message = "1002")
     private String givenName;
 
     @JsonProperty("sur_name")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^(\\s*)([A-Za-z0-9]{0,25})(\\b\\s*$)",message = "1002")
+    @Pattern(regexp = "^(\\s*)([A-Za-z0-9]{0,25})(\\b\\s*$)", message = "1002")
     private String surName;
 
     @JsonProperty("marriage_id")
