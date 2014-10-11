@@ -44,12 +44,12 @@ public class Relation {
 
     @JsonProperty("name_bangla")
     @JsonInclude(NON_EMPTY)
-    @Length(lengthSize = 125, message = "1002")
+    @Length(max = 125, message = "1002")
     private String nameBangla;
 
     @JsonProperty("given_name")
     @JsonInclude(NON_EMPTY)
-    @Length(lengthSize = 100, message = "1002")
+    @Length(max = 100, message = "1002")
     private String givenName;
 
     @JsonProperty("sur_name")

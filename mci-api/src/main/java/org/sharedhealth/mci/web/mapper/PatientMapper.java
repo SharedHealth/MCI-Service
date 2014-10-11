@@ -40,17 +40,17 @@ public class PatientMapper {
 
     @JsonProperty("name_bangla")
     @JsonInclude(NON_EMPTY)
-    @Length(lengthSize = 125, message = "1002")
+    @Length(max = 125, message = "1002")
     private String nameBangla;
 
     @JsonProperty("given_name")
-    @NotBlank(message = "1001", groups = CreateGroup.class)
-    @Length(lengthSize = 100, message = "1002")
+    @NotNull(message = "1001", groups = CreateGroup.class)
+    @Length(max = 100, min=1, message = "1002")
     private String givenName;
 
     @JsonProperty("sur_name")
-    @NotBlank(message = "1001", groups = CreateGroup.class)
-    @Pattern(regexp = "^(\\s*)([A-Za-z0-9]{0,25})(\\b\\s*$)", message = "1002")
+    @NotNull(message = "1001", groups = CreateGroup.class)
+    @Pattern(regexp = "^(\\s*)([A-Za-z0-9]{1,25})(\\b\\s*$)", message = "1002")
     private String surName;
 
     @JsonProperty("date_of_birth")
@@ -100,7 +100,7 @@ public class PatientMapper {
 
     @JsonProperty("nationality")
     @JsonInclude(NON_EMPTY)
-    @Length(lengthSize = 50, message = "1002")
+    @Length(max = 50, message = "1002")
     private String nationality;
 
     @JsonProperty("disability")
@@ -121,7 +121,7 @@ public class PatientMapper {
 
     @JsonProperty("primary_contact")
     @JsonInclude(NON_EMPTY)
-    @Length(lengthSize = 100, message = "1002")
+    @Length(max = 100, message = "1002")
     private String primaryContact;
 
     @JsonProperty("phone_number")

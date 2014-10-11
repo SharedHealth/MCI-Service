@@ -17,9 +17,11 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Documented
 public @interface Length {
     String message() default "invalid";
-    int lengthSize() default 0;
+    int max() default 0;
 
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};
+
+    int min() default 0;
 }

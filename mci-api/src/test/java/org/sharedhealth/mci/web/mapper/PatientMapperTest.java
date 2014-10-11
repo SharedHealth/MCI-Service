@@ -29,6 +29,13 @@ public class PatientMapperTest {
     public void shouldFailIfGivenNameIsBlank() {
         Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "givenName", "", CreateGroup.class);
         assertEquals(1, constraintViolations.size());
+        assertEquals("1002", constraintViolations.iterator().next().getMessage());
+    }
+
+    @Test
+    public void shouldFailIfGivenNameIsNull() {
+        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "givenName", null, CreateGroup.class);
+        assertEquals(1, constraintViolations.size());
         assertEquals("1001", constraintViolations.iterator().next().getMessage());
     }
 
