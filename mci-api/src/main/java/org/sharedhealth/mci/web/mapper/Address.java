@@ -12,6 +12,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.validator.constraints.NotBlank;
 import org.sharedhealth.mci.validation.constraints.CountryCode;
+import org.sharedhealth.mci.validation.group.RequiredGroup;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
@@ -20,7 +21,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 public class Address {
 
     @JsonProperty("address_line")
-    @NotBlank(message = "1001", groups = CreateGroup.class)
+    @NotBlank(message = "1001", groups = RequiredGroup.class)
     @Size(min = 3, max = 255, message = "1002")
     private String addressLine;
 

@@ -17,6 +17,7 @@ import org.sharedhealth.mci.web.mapper.Location;
 import org.sharedhealth.mci.web.mapper.PatientMapper;
 import org.sharedhealth.mci.web.service.LocationService;
 import org.sharedhealth.mci.web.service.PatientService;
+import org.sharedhealth.mci.web.service.SettingService;
 import org.sharedhealth.mci.web.utils.concurrent.PreResolvedListenableFuture;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
@@ -45,6 +46,9 @@ public class PatientControllerTest {
 
     @Mock
     private LocationService locationService;
+
+    @Mock
+    private SettingService settingService;
 
     @Mock
     private LocalValidatorFactoryBean localValidatorFactoryBean;

@@ -1,33 +1,19 @@
 package org.sharedhealth.mci.web.mapper;
 
 import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.validator.HibernateValidator;
-import org.junit.BeforeClass;
 import org.junit.Test;
+import org.sharedhealth.mci.validation.group.RequiredGroup;
 
 import static org.junit.Assert.assertEquals;
 
-public class AddressTest {
-
-    private static Validator validator;
-
-    @BeforeClass
-    public static void setUp() {
-        ValidatorFactory factory = Validation.byProvider(HibernateValidator.class)
-                .configure()
-                .buildValidatorFactory();
-        validator = factory.getValidator();
-    }
+public class AddressTest extends ValidationAwareMapper{
 
     @Test
     public void shouldFailIfAddressLineIsBlank() {
-        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "addressLine", null, CreateGroup.class);
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "addressLine", null, RequiredGroup.class);
         assertEquals(1, constraintViolations.size());
         printViolations(constraintViolations);
     }
@@ -191,17 +177,6 @@ public class AddressTest {
         printViolations(constraintViolations);
     }
 
-    private void printViolations(Set<ConstraintViolation<Address>> constraintViolations) {
-
-        for (ConstraintViolation<Address> violation : constraintViolations) {
-
-            String invalidValue = (String) violation.getInvalidValue();
-            String message = violation.getMessage();
-            System.out.println("Found constraint violation. Value: " + invalidValue
-                    + " Message: " + message);
-        }
-    }
-
     private void assertInvalidAddressId(String field) {
         Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, field, "abcd");
         assertEquals(1, constraintViolations.size());
@@ -216,9 +191,24 @@ public class AddressTest {
         printViolations(constraintViolations);
     }
 
-    private void assertLengthViolation(String field, int length) {
-        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, field, StringUtils.repeat("a", length + 1));
+    protected void assertLengthViolation(String field, int length) {
+        assertLengthViolation(field, length, "a");
+    }
+
+    protected void assertLengthViolation(String field, int length, String str) {
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, field, StringUtils.repeat(str, length + 1));
         assertEquals(1, constraintViolations.size());
         printViolations(constraintViolations);
+    }
+
+    protected void printViolations(Set<ConstraintViolation<Address>> constraintViolations) {
+
+        for (ConstraintViolation<Address> violation : constraintViolations) {
+
+            String invalidValue = (String) violation.getInvalidValue();
+            String message = violation.getMessage();
+            System.out.println("Found constraint violation. Value: " + invalidValue
+                    + " Message: " + message);
+        }
     }
 }

@@ -6,7 +6,9 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.sharedhealth.mci.validation.constraints.Code;
 import org.sharedhealth.mci.validation.constraints.Length;
+import org.sharedhealth.mci.validation.group.RequiredGroup;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
@@ -19,8 +21,8 @@ public class Relation {
 
     @JsonProperty("type")
     @JsonInclude(NON_EMPTY)
-    @NotNull(message = "1001", groups = CreateGroup.class)
-    @Pattern(regexp = "^(father|mother|spouse)$", message = "1004")
+    @NotNull(message = "1001", groups = RequiredGroup.class)
+    @Code(type = "relations", message = "1004")
     private String type;
 
     @JsonProperty("hid")

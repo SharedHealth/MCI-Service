@@ -18,17 +18,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFuture;
 
 @Component
-public class LocationRepository {
+public class LocationRepository extends BaseRepository {
+
     private static final Logger logger = LoggerFactory.getLogger(LocationRepository.class);
     public static final String LOCATION_FIND_BY_GEO_CODE_QUERY = "SELECT * FROM locations WHERE geo_code = '%s'";
 
-    private static long TIMEOUT_IN_MILLIS = 10;
-
-    private CassandraOperations cassandraOperations;
-
     @Autowired
     public LocationRepository(@Qualifier("MCICassandraTemplate") CassandraOperations cassandraOperations) {
-        this.cassandraOperations = cassandraOperations;
+        super(cassandraOperations);
     }
 
     public ListenableFuture<Location> findByGeoCode(final String geoCode) {

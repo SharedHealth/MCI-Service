@@ -41,18 +41,15 @@ import org.springframework.validation.FieldError;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
 
 @Component
-public class PatientRepository {
-    private static final Logger logger = LoggerFactory.getLogger(PatientRepository.class);
+public class PatientRepository extends BaseRepository {
+
+    protected static final Logger logger = LoggerFactory.getLogger(PatientRepository.class);
+
     private static final UidGenerator uid = new UidGenerator();
-    private static long TIMEOUT_IN_MILLIS = 10;
-    private static int PER_PAGE_LIMIT = 10000;
-
-
-    private CassandraOperations cassandraOperations;
 
     @Autowired
     public PatientRepository(@Qualifier("MCICassandraTemplate") CassandraOperations cassandraOperations) {
-        this.cassandraOperations = cassandraOperations;
+        super(cassandraOperations);
     }
 
     public ListenableFuture<MCIResponse> create(PatientMapper patientMapper) {
@@ -86,8 +83,6 @@ public class PatientRepository {
             result.setException(new PatientAlreadyExistException(existingPatient.getHealthId()));
             return getStringListenableFuture(result);
         }
-
-        final String healthId = patientMapper.getHealthId();
 
         String fullName = "";
         if (patientMapper.getGivenName() != null) {

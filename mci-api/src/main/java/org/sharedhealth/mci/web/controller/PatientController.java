@@ -1,14 +1,15 @@
 package org.sharedhealth.mci.web.controller;
 
 import javax.validation.*;
+import javax.validation.groups.Default;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import org.sharedhealth.mci.validation.group.RequiredGroup;
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.handler.MCIResponse;
-import org.sharedhealth.mci.web.mapper.CreateGroup;
 import org.sharedhealth.mci.web.mapper.PaginationQuery;
 import org.sharedhealth.mci.web.mapper.PatientMapper;
 import org.sharedhealth.mci.web.service.PatientService;
@@ -40,7 +41,7 @@ public class PatientController {
     }
 
     @RequestMapping(method = RequestMethod.POST, consumes = {APPLICATION_JSON_VALUE})
-    public DeferredResult<ResponseEntity<MCIResponse>> create(@RequestBody @Validated(CreateGroup.class) PatientMapper patientMapper, BindingResult bindingResult)
+    public DeferredResult<ResponseEntity<MCIResponse>> create(@RequestBody @Validated({RequiredGroup.class, Default.class}) PatientMapper patientMapper, BindingResult bindingResult)
             throws ExecutionException, InterruptedException {
         logger.debug("Trying to create patient.");
         final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();

@@ -15,6 +15,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.validator.constraints.NotBlank;
 import org.sharedhealth.mci.validation.constraints.*;
 import org.sharedhealth.mci.validation.constraints.Location;
+import org.sharedhealth.mci.validation.group.RequiredGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,22 +45,22 @@ public class PatientMapper {
     private String nameBangla;
 
     @JsonProperty("given_name")
-    @NotNull(message = "1001", groups = CreateGroup.class)
+    @NotNull(message = "1001", groups = RequiredGroup.class)
     @Length(max = 100, min=1, message = "1002")
     private String givenName;
 
     @JsonProperty("sur_name")
-    @NotNull(message = "1001", groups = CreateGroup.class)
+    @NotNull(message = "1001", groups = RequiredGroup.class)
     @Pattern(regexp = "^(\\s*)([A-Za-z0-9]{1,25})(\\b\\s*$)", message = "1002")
     private String surName;
 
     @JsonProperty("date_of_birth")
-    @NotBlank(message = "1001", groups = CreateGroup.class)
+    @NotBlank(message = "1001", groups = RequiredGroup.class)
     @Date(format = "yyyy-MM-dd", message = "1002")
     private String dateOfBirth;
 
     @JsonProperty("gender")
-    @NotBlank(message = "1001", groups = CreateGroup.class)
+    @NotBlank(message = "1001", groups = RequiredGroup.class)
     @Pattern(regexp = "[M|F|O ]{1}", message = "1004")
     private String gender;
 
@@ -114,7 +115,7 @@ public class PatientMapper {
     private String ethnicity;
 
     @JsonProperty("present_address")
-    @NotNull(message = "1001", groups = CreateGroup.class)
+    @NotNull(message = "1001", groups = RequiredGroup.class)
     @Valid
     @Location(message = "1004")
     private Address address;

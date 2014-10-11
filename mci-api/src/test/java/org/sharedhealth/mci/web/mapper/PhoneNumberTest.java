@@ -1,6 +1,7 @@
 package org.sharedhealth.mci.web.mapper;
 
-import org.sharedhealth.mci.web.mapper.PhoneNumber;
+import org.sharedhealth.mci.validation.group.RequiredGroup;
+
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -80,7 +81,7 @@ public class PhoneNumberTest {
 
     @Test
     public void shouldFailIfPhoneNOIsBlank() {
-        Set<ConstraintViolation<PhoneNumber>> constraintViolations = validator.validateValue(PhoneNumber.class, "number", null, CreateGroup.class);
+        Set<ConstraintViolation<PhoneNumber>> constraintViolations = validator.validateValue(PhoneNumber.class, "number", null, RequiredGroup.class);
         assertEquals(1, constraintViolations.size());
         assertEquals("1001", constraintViolations.iterator().next().getMessage());
     }

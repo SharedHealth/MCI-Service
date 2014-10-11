@@ -1,54 +1,40 @@
 package org.sharedhealth.mci.web.mapper;
 
 import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.validator.HibernateValidator;
-import org.junit.BeforeClass;
 import org.junit.Test;
+import org.sharedhealth.mci.validation.group.RequiredGroup;
 
 import static org.junit.Assert.assertEquals;
 
-public class PatientMapperTest {
-
-    private static Validator validator;
-
-    @BeforeClass
-    public static void setUp() {
-        ValidatorFactory factory = Validation.byProvider(HibernateValidator.class)
-                .configure()
-                .buildValidatorFactory();
-        validator = factory.getValidator();
-    }
+public class PatientMapperTest extends ValidationAwareMapper{
 
     @Test
     public void shouldFailIfGivenNameIsBlank() {
-        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "givenName", "", CreateGroup.class);
+        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "givenName", "");
         assertEquals(1, constraintViolations.size());
         assertEquals("1002", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
     public void shouldFailIfGivenNameIsNull() {
-        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "givenName", null, CreateGroup.class);
+        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "givenName", null, RequiredGroup.class);
         assertEquals(1, constraintViolations.size());
         assertEquals("1001", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
     public void shouldFailIfSurNameIsBlank() {
-        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "surName", null, CreateGroup.class);
+        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "surName", null, RequiredGroup.class);
         assertEquals(1, constraintViolations.size());
         assertEquals("1001", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
     public void shouldFailIfDateOfBirthIsBlank() {
-        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "dateOfBirth", "   ", CreateGroup.class);
+        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "dateOfBirth", "   ", RequiredGroup.class);
         assertEquals(1, constraintViolations.size());
         assertEquals("1001", constraintViolations.iterator().next().getMessage());
     }
@@ -74,7 +60,7 @@ public class PatientMapperTest {
 
     @Test
     public void shouldFailIfGenderIsBlank() {
-        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "gender", null, CreateGroup.class);
+        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "gender", null, RequiredGroup.class);
         assertEquals(1, constraintViolations.size());
         assertEquals("1001", constraintViolations.iterator().next().getMessage());
     }

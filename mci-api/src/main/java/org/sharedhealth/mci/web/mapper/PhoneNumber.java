@@ -3,6 +3,7 @@ package org.sharedhealth.mci.web.mapper;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.validator.constraints.NotBlank;
+import org.sharedhealth.mci.validation.group.RequiredGroup;
 
 import javax.validation.constraints.Pattern;
 
@@ -22,7 +23,7 @@ public class PhoneNumber {
 
     @JsonProperty("number")
     @JsonInclude(NON_EMPTY)
-    @NotBlank(message = "1001", groups = CreateGroup.class)
+    @NotBlank(message = "1001", groups = RequiredGroup.class)
     @Pattern(regexp = "[0-9]{1,12}$", message = "1002")
     private String number;
 
