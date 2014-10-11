@@ -9,6 +9,7 @@ import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.infrastructure.fr.FacilityRegistryWrapper;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
 import org.sharedhealth.mci.web.mapper.PatientMapper;
+import org.sharedhealth.mci.web.mapper.SearchQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
@@ -54,8 +55,8 @@ public class PatientService {
         return patientRepository.findByUid(uid);
     }
 
-    public ListenableFuture<List<PatientMapper>> findAllByQuery(MultiValueMap parameters) {
-        return new ListenableFutureAdapter<List<PatientMapper>, List<PatientMapper>>(patientRepository.findAllByQuery(parameters)) {
+    public ListenableFuture<List<PatientMapper>> findAllByQuery(SearchQuery searchQuery) {
+        return new ListenableFutureAdapter<List<PatientMapper>, List<PatientMapper>>(patientRepository.findAllByQuery(searchQuery)) {
             @Override
             protected List<PatientMapper> adapt(List<PatientMapper> patientMappers) throws ExecutionException {
                 return patientMappers;

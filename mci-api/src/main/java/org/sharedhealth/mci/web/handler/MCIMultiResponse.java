@@ -1,5 +1,6 @@
 package org.sharedhealth.mci.web.handler;
 
+import java.util.HashMap;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -23,11 +24,11 @@ public class MCIMultiResponse <T, A>{
 
     @JsonProperty("additional_info")
     @JsonInclude(NON_EMPTY)
-    public List<A> additionalInfo;
+    public HashMap<String, String> additionalInfo;
 
     public HttpStatus httpStatusObject;
 
-    public MCIMultiResponse(List<T> results, List<A> additionalInfo, HttpStatus httpStatusObject) {
+    public MCIMultiResponse(List<T> results, HashMap<String, String> additionalInfo, HttpStatus httpStatusObject) {
         this.httpStatusObject = httpStatusObject;
         this.httpStatus = httpStatusObject.value();
         this.results = results;
@@ -55,11 +56,11 @@ public class MCIMultiResponse <T, A>{
         this.results = results;
     }
 
-    public List<A> getAdditionalInfo() {
+    public HashMap<String, String> getAdditionalInfo() {
         return additionalInfo;
     }
 
-    public void setAdditionalInfo(List<A> additionalInfo) {
+    public void setAdditionalInfo(HashMap<String, String> additionalInfo) {
         this.additionalInfo = additionalInfo;
     }
 

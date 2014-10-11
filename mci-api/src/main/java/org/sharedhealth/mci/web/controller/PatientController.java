@@ -3,6 +3,7 @@ package org.sharedhealth.mci.web.controller;
 import javax.validation.*;
 import javax.validation.groups.Default;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -12,6 +13,7 @@ import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.mapper.PaginationQuery;
 import org.sharedhealth.mci.web.mapper.PatientMapper;
+import org.sharedhealth.mci.web.mapper.SearchQuery;
 import org.sharedhealth.mci.web.service.PatientService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,14 +95,21 @@ public class PatientController {
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
-    public DeferredResult<ResponseEntity<MCIMultiResponse>> findPatients(@RequestParam MultiValueMap<String, String> parameters) {
+    public DeferredResult<ResponseEntity<MCIMultiResponse>> findPatients( @Valid SearchQuery searchQuery, BindingResult bindingResult)
+            throws ExecutionException, InterruptedException
+    {
+        if (bindingResult.hasErrors()) {
+            throw new ValidationException(bindingResult);
+        }
         logger.debug("Find all patients  by search query ");
         final DeferredResult<ResponseEntity<MCIMultiResponse>> deferredResult = new DeferredResult<>();
 
-        patientService.findAllByQuery(parameters).addCallback(new ListenableFutureCallback<List<PatientMapper>>() {
+        patientService.findAllByQuery(searchQuery).addCallback(new ListenableFutureCallback<List<PatientMapper>>() {
             @Override
             public void onSuccess(List<PatientMapper> results) {
-                List<ArrayList> additionalInfo = null;
+                HashMap<String, String> additionalInfo = new HashMap<String, String>();
+                additionalInfo.put("note", "There are more patients for this query, please narrow down your search");
+
                 MCIMultiResponse mciMultiResponse = new MCIMultiResponse<>(results, additionalInfo, OK);
                 deferredResult.setResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject));
             }
@@ -155,7 +164,7 @@ public class PatientController {
         patientService.findAllByFacility(facilityId, paginationQuery.getLast(), paginationQuery.getDateSince()).addCallback(new ListenableFutureCallback<List<PatientMapper>>() {
             @Override
             public void onSuccess(List<PatientMapper> results) {
-                List<ArrayList> additionalInfo = null;
+                HashMap<String, String> additionalInfo = null;
                 MCIMultiResponse mciMultiResponse = new MCIMultiResponse<>(results, additionalInfo, OK);
                 deferredResult.setResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject));
             }

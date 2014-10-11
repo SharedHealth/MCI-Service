@@ -19,10 +19,7 @@ import org.sharedhealth.mci.web.exception.PatientAlreadyExistException;
 import org.sharedhealth.mci.web.exception.PatientNotFoundException;
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
-import org.sharedhealth.mci.web.mapper.Address;
-import org.sharedhealth.mci.web.mapper.PatientMapper;
-import org.sharedhealth.mci.web.mapper.PhoneNumber;
-import org.sharedhealth.mci.web.mapper.Relation;
+import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.model.Patient;
 import org.sharedhealth.mci.web.utils.concurrent.SimpleListenableFuture;
 import org.slf4j.Logger;
@@ -33,7 +30,6 @@ import org.springframework.cassandra.core.AsynchronousQueryListener;
 import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.FieldError;
@@ -42,6 +38,9 @@ import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBu
 
 @Component
 public class PatientRepository extends BaseRepository {
+   
+    
+    private static int MAXIMUM_RECORD = 25;
 
     protected static final Logger logger = LoggerFactory.getLogger(PatientRepository.class);
 
@@ -426,26 +425,9 @@ public class PatientRepository extends BaseRepository {
         return patientMapper;
     }
 
-    public ListenableFuture<List<PatientMapper>> findAllByQuery(MultiValueMap<String, String> parameters) {
+    public ListenableFuture<List<PatientMapper>> findAllByQuery(SearchQuery searchQuery) {
 
-        Select select = QueryBuilder.select().from("patient");
-
-        if (parameters.get("full_name") != null) {
-            select.where(QueryBuilder.eq("full_name", parameters.get("full_name").get(0)));
-        }
-
-        if (parameters.get("nid") != null) {
-            select.where(QueryBuilder.eq(PatientQueryBuilder.NATIONAL_ID, parameters.get("nid").get(0)));
-        }
-
-        if (parameters.get("bin_brn") != null) {
-            select.where(QueryBuilder.eq(PatientQueryBuilder.BIN_BRN, parameters.get("bin_brn").get(0)));
-        }
-
-        if (parameters.get("uid") != null) {
-            select.where(QueryBuilder.eq(PatientQueryBuilder.UID, parameters.get("uid").get(0)));
-        }
-
+        Select select = prepareSelectQueryForSearch(searchQuery);
         return getPatientListListenableFuture(select);
     }
 
@@ -702,5 +684,34 @@ public class PatientRepository extends BaseRepository {
 
 
         return patient;
+    }
+
+    private Select prepareSelectQueryForSearch(SearchQuery searchQuery)
+    {
+        Select select = QueryBuilder.select().from("patient");
+
+        if (StringUtils.isNotBlank(searchQuery.getFullName())) {
+            select.where(QueryBuilder.eq("full_name", searchQuery.getFullName()));
+        }
+
+        if (StringUtils.isNotBlank(searchQuery.getNid())) {
+            select.where(QueryBuilder.eq(PatientQueryBuilder.NATIONAL_ID, searchQuery.getNid()));
+        }
+
+        if (StringUtils.isNotBlank(searchQuery.getBin_brn())) {
+            select.where(QueryBuilder.eq(PatientQueryBuilder.BIN_BRN, searchQuery.getBin_brn()));
+        }
+
+        if (StringUtils.isNotBlank(searchQuery.getUid())) {
+            select.where(QueryBuilder.eq(PatientQueryBuilder.UID, searchQuery.getUid()));
+        }
+
+        if (StringUtils.isNotBlank(searchQuery.getPresent_address())) {
+            select.where(QueryBuilder.eq(getAddressHierarchyField(searchQuery.getPresent_address().length()), searchQuery.getPresent_address()));
+        }
+
+        select.limit(MAXIMUM_RECORD + 1);
+
+        return select;
     }
 }
