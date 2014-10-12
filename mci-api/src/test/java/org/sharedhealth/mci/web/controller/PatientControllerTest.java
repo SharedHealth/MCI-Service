@@ -64,6 +64,7 @@ public class PatientControllerTest {
     public static final String PUT_API_END_POINT = "/api/v1/patients/{healthId}";
     public static final String GEO_CODE = "1004092001";
     private SearchQuery searchQuery;
+    private StringBuilder stringBuilder;
 
     @Before
     public void setup() {
@@ -103,7 +104,7 @@ public class PatientControllerTest {
         location.setUnionId("01");
 
         searchQuery = new SearchQuery();
-
+        stringBuilder = new StringBuilder(200);
     }
 
     @Test
@@ -131,28 +132,52 @@ public class PatientControllerTest {
     @Test
     public void shouldFindPatientsByNationalId() throws Exception {
         searchQuery.setNid(nationalId);
-        assertFindAllBy(searchQuery, "nid", nationalId);
+        stringBuilder.append("nid=" + nationalId);
+        assertFindAllBy(searchQuery, stringBuilder.toString());
     }
 
     @Test
     public void shouldFindPatientsByBirthRegistrationNumber() throws Exception {
         searchQuery.setBin_brn(birthRegistrationNumber);
-        assertFindAllBy(searchQuery, "bin_brn", birthRegistrationNumber);
+        stringBuilder.append("bin_brn="+ birthRegistrationNumber);
+        assertFindAllBy(searchQuery, stringBuilder.toString());
     }
 
     @Test
     public void shouldFindPatientsByUid() throws Exception {
         searchQuery.setUid(uid);
-        assertFindAllBy(searchQuery, "uid", uid);
+        stringBuilder.append("uid="+uid);
+        assertFindAllBy(searchQuery, stringBuilder.toString());
     }
 
     @Test
     public void shouldFindPatientsByName() throws Exception {
         searchQuery.setFull_name(fullname);
-        assertFindAllBy(searchQuery, "full_name", fullname);
+        stringBuilder.append("full_name="+ fullname);
+        assertFindAllBy(searchQuery, stringBuilder.toString());
     }
 
-    private void assertFindAllBy(SearchQuery searchQuery, String key, String value) throws Exception {
+    @Test
+    public void shouldFindPatientsByAddress() throws Exception {
+        String address = location.getDivisionId() + location.getDistrictId() + location.getUpazillaId();
+        searchQuery.setPresent_address(address);
+        stringBuilder.append("present_address=" + address);
+        assertFindAllBy(searchQuery, stringBuilder.toString());
+    }
+
+    @Test
+    public void shouldFindPatientsByAddressAndUid() throws Exception {
+        StringBuilder stringBuilder = new StringBuilder(200);
+        String address = location.getDivisionId() + location.getDistrictId() + location.getUpazillaId();
+        searchQuery.setPresent_address(address);
+        searchQuery.setUid(uid);
+        stringBuilder.append("uid=" + uid);
+        stringBuilder.append("&present_address=" + address);
+
+        assertFindAllBy(searchQuery, stringBuilder.toString());
+    }
+
+    private void assertFindAllBy(SearchQuery searchQuery, String queryString) throws Exception {
         List<PatientMapper> patientMappers = new ArrayList<>();
         patientMappers.add(patientMapper);
 
@@ -170,7 +195,7 @@ public class PatientControllerTest {
         }
         MCIMultiResponse mciMultiResponse = new MCIMultiResponse<>(patientMappers, additionalInfo, OK);
 
-        mockMvc.perform(get(API_END_POINT + "?" + key + "=" + value))
+        mockMvc.perform(get(API_END_POINT + "?" + queryString))
                 .andExpect(request().asyncResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject)));
 
         verify(patientService).findAllByQuery(searchQuery);
