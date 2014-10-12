@@ -2,6 +2,7 @@ package org.sharedhealth.mci.web.controller;
 
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,6 +16,7 @@ import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.Location;
 import org.sharedhealth.mci.web.mapper.PatientMapper;
+import org.sharedhealth.mci.web.mapper.SearchQuery;
 import org.sharedhealth.mci.web.service.LocationService;
 import org.sharedhealth.mci.web.service.PatientService;
 import org.sharedhealth.mci.web.service.SettingService;
@@ -22,8 +24,6 @@ import org.sharedhealth.mci.web.utils.concurrent.PreResolvedListenableFuture;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import static org.mockito.Mockito.verify;
@@ -63,6 +63,7 @@ public class PatientControllerTest {
     public static final String API_END_POINT = "/api/v1/patients";
     public static final String PUT_API_END_POINT = "/api/v1/patients/{healthId}";
     public static final String GEO_CODE = "1004092001";
+    private SearchQuery searchQuery;
 
     @Before
     public void setup() {
@@ -101,6 +102,8 @@ public class PatientControllerTest {
         location.setPaurashavaId("20");
         location.setUnionId("01");
 
+        searchQuery = new SearchQuery();
+
     }
 
     @Test
@@ -127,40 +130,50 @@ public class PatientControllerTest {
 
     @Test
     public void shouldFindPatientsByNationalId() throws Exception {
-        assertFindAllBy("nid", nationalId);
+        searchQuery.setNid(nationalId);
+        assertFindAllBy(searchQuery, "nid", nationalId);
     }
 
     @Test
     public void shouldFindPatientsByBirthRegistrationNumber() throws Exception {
-        assertFindAllBy("bin_brn", birthRegistrationNumber);
+        searchQuery.setBin_brn(birthRegistrationNumber);
+        assertFindAllBy(searchQuery, "bin_brn", birthRegistrationNumber);
     }
 
     @Test
     public void shouldFindPatientsByUid() throws Exception {
-        assertFindAllBy("uid", uid);
+        searchQuery.setUid(uid);
+        assertFindAllBy(searchQuery, "uid", uid);
     }
 
     @Test
     public void shouldFindPatientsByName() throws Exception {
-        assertFindAllBy("full_name", fullname);
+        searchQuery.setFull_name(fullname);
+        assertFindAllBy(searchQuery, "full_name", fullname);
     }
 
-    private void assertFindAllBy(String key, String value) throws Exception {
-        MultiValueMap<String, String> parameter = new LinkedMultiValueMap<>();
-        parameter.add(key, value);
-
+    private void assertFindAllBy(SearchQuery searchQuery, String key, String value) throws Exception {
         List<PatientMapper> patientMappers = new ArrayList<>();
         patientMappers.add(patientMapper);
 
-        when(patientService.findAllByQuery(parameter)).thenReturn(new PreResolvedListenableFuture<>(patientMappers));
+        searchQuery.setMaximum_limit(25);
+        when(patientService.findAllByQuery(searchQuery)).thenReturn(new PreResolvedListenableFuture<>(patientMappers));
+        when(patientService.getPerPageMaximumLimit()).thenReturn(25);
+        when(patientService.getPerPageMaximumLimitNote()).thenReturn("There are more record for this search criteria. Please narrow down your search");
 
-        List<ArrayList> additionalInfo = null;
+        final int limit = patientService.getPerPageMaximumLimit();
+        final String note = patientService.getPerPageMaximumLimitNote();
+        HashMap<String, String> additionalInfo = new HashMap<>();
+        if (patientMappers.size() > limit) {
+            patientMappers.remove(limit);
+            additionalInfo.put("note", note);
+        }
         MCIMultiResponse mciMultiResponse = new MCIMultiResponse<>(patientMappers, additionalInfo, OK);
 
         mockMvc.perform(get(API_END_POINT + "?" + key + "=" + value))
                 .andExpect(request().asyncResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject)));
 
-        verify(patientService).findAllByQuery(parameter);
+        verify(patientService).findAllByQuery(searchQuery);
     }
 
     @Test

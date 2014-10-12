@@ -10,15 +10,21 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import static org.sharedhealth.mci.utils.DateUtil.string2Date;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PaginationQuery
-{
+public class PaginationQuery {
     @JsonProperty("last")
     private String last;
 
     @org.sharedhealth.mci.validation.constraints.Date(format = "yyyy-MM-dd", message = "1002")
     private String since;
 
-    public PaginationQuery() {}
+    @JsonProperty("limit")
+    private int limit;
+
+    @JsonProperty("maximum_limitt")
+    private int maximum_limit;
+
+    public PaginationQuery() {
+    }
 
     @Override
     public boolean equals(Object rhs) {
@@ -48,5 +54,21 @@ public class PaginationQuery
 
     public void setSince(String since) {
         this.since = since;
+    }
+
+    public int getLimit() {
+        return limit;
+    }
+
+    public void setLimit(int limit) {
+        this.limit = limit;
+    }
+
+    public int getMaximum_limit() {
+        return maximum_limit;
+    }
+
+    public void setMaximum_limit(int maximum_limit) {
+        this.maximum_limit = maximum_limit;
     }
 }

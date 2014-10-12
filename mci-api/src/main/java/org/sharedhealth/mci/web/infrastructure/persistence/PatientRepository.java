@@ -38,9 +38,6 @@ import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBu
 
 @Component
 public class PatientRepository extends BaseRepository {
-   
-    
-    private static int MAXIMUM_RECORD = 25;
 
     protected static final Logger logger = LoggerFactory.getLogger(PatientRepository.class);
 
@@ -686,12 +683,11 @@ public class PatientRepository extends BaseRepository {
         return patient;
     }
 
-    private Select prepareSelectQueryForSearch(SearchQuery searchQuery)
-    {
+    private Select prepareSelectQueryForSearch(SearchQuery searchQuery) {
         Select select = QueryBuilder.select().from("patient");
 
-        if (StringUtils.isNotBlank(searchQuery.getFullName())) {
-            select.where(QueryBuilder.eq("full_name", searchQuery.getFullName()));
+        if (StringUtils.isNotBlank(searchQuery.getFull_name())) {
+            select.where(QueryBuilder.eq("full_name", searchQuery.getFull_name()));
         }
 
         if (StringUtils.isNotBlank(searchQuery.getNid())) {
@@ -710,8 +706,8 @@ public class PatientRepository extends BaseRepository {
             select.where(QueryBuilder.eq(getAddressHierarchyField(searchQuery.getPresent_address().length()), searchQuery.getPresent_address()));
         }
 
-        select.limit(MAXIMUM_RECORD + 1);
-
+        select.limit(searchQuery.getMaximum_limit() + 1);
+        select.allowFiltering();
         return select;
     }
 }

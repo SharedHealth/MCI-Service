@@ -2,7 +2,6 @@ package org.sharedhealth.mci.web.controller;
 
 import javax.validation.*;
 import javax.validation.groups.Default;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -19,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -95,21 +93,25 @@ public class PatientController {
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
-    public DeferredResult<ResponseEntity<MCIMultiResponse>> findPatients( @Valid SearchQuery searchQuery, BindingResult bindingResult)
-            throws ExecutionException, InterruptedException
-    {
+    public DeferredResult<ResponseEntity<MCIMultiResponse>> findPatients(@Valid SearchQuery searchQuery, BindingResult bindingResult)
+            throws ExecutionException, InterruptedException {
         if (bindingResult.hasErrors()) {
             throw new ValidationException(bindingResult);
         }
         logger.debug("Find all patients  by search query ");
         final DeferredResult<ResponseEntity<MCIMultiResponse>> deferredResult = new DeferredResult<>();
+        final int limit = patientService.getPerPageMaximumLimit();
+        final String note = patientService.getPerPageMaximumLimitNote();
+        searchQuery.setMaximum_limit(limit);
 
         patientService.findAllByQuery(searchQuery).addCallback(new ListenableFutureCallback<List<PatientMapper>>() {
             @Override
             public void onSuccess(List<PatientMapper> results) {
-                HashMap<String, String> additionalInfo = new HashMap<String, String>();
-                additionalInfo.put("note", "There are more patients for this query, please narrow down your search");
-
+                HashMap<String, String> additionalInfo = new HashMap<>();
+                if (results.size() > limit) {
+                    results.remove(limit);
+                    additionalInfo.put("note", note);
+                }
                 MCIMultiResponse mciMultiResponse = new MCIMultiResponse<>(results, additionalInfo, OK);
                 deferredResult.setResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject));
             }
@@ -152,13 +154,13 @@ public class PatientController {
     public DeferredResult<ResponseEntity<MCIMultiResponse>> findAllPatientsInCatchment(
             @PathVariable String facilityId,
             @Valid PaginationQuery paginationQuery, BindingResult bindingResult
-            )throws ExecutionException, InterruptedException  {
+    ) throws ExecutionException, InterruptedException {
 
         if (bindingResult.hasErrors()) {
             throw new ValidationException(bindingResult);
         }
 
-        logger.debug("Find all patients  for catchment of facility [" + facilityId+ "]");
+        logger.debug("Find all patients  for catchment of facility [" + facilityId + "]");
         final DeferredResult<ResponseEntity<MCIMultiResponse>> deferredResult = new DeferredResult<>();
 
         patientService.findAllByFacility(facilityId, paginationQuery.getLast(), paginationQuery.getDateSince()).addCallback(new ListenableFutureCallback<List<PatientMapper>>() {

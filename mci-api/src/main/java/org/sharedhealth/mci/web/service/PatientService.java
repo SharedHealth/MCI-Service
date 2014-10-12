@@ -2,6 +2,7 @@ package org.sharedhealth.mci.web.service;
 
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -12,7 +13,6 @@ import org.sharedhealth.mci.web.mapper.PatientMapper;
 import org.sharedhealth.mci.web.mapper.SearchQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureAdapter;
 
@@ -21,18 +21,22 @@ public class PatientService {
 
     private PatientRepository patientRepository;
     private FacilityRegistryWrapper facilityRegistryWrapper;
+    private SettingService settingService;
+    public HashMap<String, String> systemSettings;
 
     @Autowired
-    public PatientService(PatientRepository patientRepository, FacilityRegistryWrapper facilityRegistryWrapper) {
+    public PatientService(PatientRepository patientRepository, FacilityRegistryWrapper facilityRegistryWrapper, SettingService settingService) {
         this.patientRepository = patientRepository;
         this.facilityRegistryWrapper = facilityRegistryWrapper;
+        this.settingService = settingService;
     }
 
     public ListenableFuture<MCIResponse> create(PatientMapper patientMapper) {
         return patientRepository.create(patientMapper);
     }
-    public ListenableFuture<MCIResponse> update(PatientMapper patientMapper,String healthId) {
-        return patientRepository.update(patientMapper,healthId);
+
+    public ListenableFuture<MCIResponse> update(PatientMapper patientMapper, String healthId) {
+        return patientRepository.update(patientMapper, healthId);
     }
 
     public ListenableFuture<PatientMapper> findByHealthId(String healthId) {
@@ -73,6 +77,31 @@ public class PatientService {
         List<String> locations = facilityRegistryWrapper.getCatchmentAreasByFacility(facilityId);
 
         return findAllByLocations(locations, last, since);
+    }
+
+    public int getPerPageMaximumLimit() {
+        int limit;
+
+        if (systemSettings == null) {
+            systemSettings = settingService.getSettingAsHashMapByKey("system");
+        }
+
+        limit = patientRepository.getPerPageMaximumLimit();
+
+        if (systemSettings.get("PER_PAGE_MAXIMUM_LIMIT") != null) {
+            limit = Integer.parseInt(systemSettings.get("PER_PAGE_MAXIMUM_LIMIT"));
+        }
+
+        return limit;
+
+    }
+
+    public String getPerPageMaximumLimitNote() {
+        if (systemSettings == null) {
+            systemSettings = settingService.getSettingAsHashMapByKey("system");
+        }
+        return systemSettings.get("PER_PAGE_MAXIMUM_LIMIT_NOTE");
+
     }
 
 }

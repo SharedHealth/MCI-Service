@@ -9,10 +9,9 @@ import javax.validation.constraints.Pattern;
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SearchQuery
-{
+public class SearchQuery extends PaginationQuery {
     @JsonProperty("full_name")
-    private String fullName;
+    private String full_name;
 
     @JsonProperty("nid")
     private String nid;
@@ -27,8 +26,9 @@ public class SearchQuery
     @Pattern(regexp = "[\\d]{6}", message = "1002")
     private String present_address;
 
-  
-    public SearchQuery() {}
+
+    public SearchQuery() {
+    }
 
     @Override
     public boolean equals(Object rhs) {
@@ -41,12 +41,12 @@ public class SearchQuery
     }
 
 
-    public String getFullName() {
-        return fullName;
+    public String getFull_name() {
+        return full_name;
     }
 
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
+    public void setFull_name(String full_name) {
+        this.full_name = full_name;
     }
 
     public String getNid() {
