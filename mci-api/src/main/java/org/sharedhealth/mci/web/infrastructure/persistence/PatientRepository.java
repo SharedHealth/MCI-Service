@@ -593,8 +593,8 @@ public class PatientRepository extends BaseRepository {
         String relationsJson = "";
         ObjectMapper mapper = new ObjectMapper();
 
-        Relation father = p.getRelation("father");
-        Relation mother = p.getRelation("mother");
+        Relation father = p.getRelation("FTH");
+        Relation mother = p.getRelation("MTH");
 
         try {
             relationsJson = mapper.writeValueAsString(p.getRelations());

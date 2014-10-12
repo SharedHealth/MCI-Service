@@ -4,7 +4,6 @@ import javax.validation.ConstraintViolation;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.sharedhealth.mci.validation.group.RequiredGroup;
 
@@ -17,27 +16,6 @@ public class RelationTest extends ValidationAwareMapper{
         Set<ConstraintViolation<Relation>> constraintViolations = validator.validateValue(Relation.class, "type", null, RequiredGroup.class);
         assertEquals(1, constraintViolations.size());
         assertEquals("1001", constraintViolations.iterator().next().getMessage());
-    }
-
-    @Test
-    @Ignore
-    public void shouldFailIfTypeIsInvalid() {
-        String[] inValidRelations = {"", "somevalue", "fathera", "afather", "mothera", "spousea", "amother", "aspouse"};
-        for (String relation : inValidRelations) {
-            Set<ConstraintViolation<Relation>> constraintViolations = validator.validateValue(Relation.class, "type", relation);
-            assertEquals(1, constraintViolations.size());
-            assertEquals("1004", constraintViolations.iterator().next().getMessage());
-        }
-    }
-
-    @Test
-    @Ignore
-    public void shouldPassIfTypeIsValid() {
-        String[] validRelations = {"father", "mother", "spouse"};
-        for (String relation : validRelations) {
-            Set<ConstraintViolation<Relation>> constraintViolations = validator.validateValue(Relation.class, "type", relation);
-            assertEquals(0, constraintViolations.size());
-        }
     }
 
     @Test

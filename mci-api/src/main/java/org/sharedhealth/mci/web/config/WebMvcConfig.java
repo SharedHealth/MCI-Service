@@ -46,7 +46,10 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
     @Bean
     public CacheManager cacheManager() {
         SimpleCacheManager cacheManager = new SimpleCacheManager();
-        cacheManager.setCaches(Arrays.asList(new ConcurrentMapCache("facility")));
+        cacheManager.setCaches(Arrays.asList(
+                new ConcurrentMapCache("facility"),
+                new ConcurrentMapCache("setting")
+        ));
         return cacheManager;
     }
 }

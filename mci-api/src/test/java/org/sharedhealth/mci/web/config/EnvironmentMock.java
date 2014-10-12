@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.cassandraunit.utils.EmbeddedCassandraServerHelper;
 import org.sharedhealth.mci.web.launch.migration.Migrations;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -12,7 +13,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.mock.env.MockPropertySource;
-import org.cassandraunit.utils.EmbeddedCassandraServerHelper;
 
 
 @Configuration
