@@ -14,6 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.cassandra.core.AsynchronousQueryListener;
 import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.stereotype.Component;
@@ -29,7 +32,7 @@ public class SettingRepository extends BaseRepository {
         super(cassandraOperations);
     }
 
-    public ListenableFuture<Setting> findByKey(final String key) {
+    public ListenableFuture<Setting> findSettingListenableFutureByKey(final String key) {
 
         final SettableFuture<Setting> result = SettableFuture.create();
 
@@ -42,7 +45,7 @@ public class SettingRepository extends BaseRepository {
             public void onQueryComplete(ResultSetFuture rsf) {
                 try {
                     Row row = rsf.get(TIMEOUT_IN_MILLIS, TimeUnit.MILLISECONDS).one();
-                    setLocationOnResult(row, result);
+                    setSettingOnResult(row, result);
                 } catch (Exception e) {
                     logger.error("Error while finding settings for key: " + key, e);
                     result.setException(e);
@@ -58,18 +61,35 @@ public class SettingRepository extends BaseRepository {
         };
     }
 
-    private void setLocationOnResult(Row r, SettableFuture<Setting> result) throws InterruptedException, ExecutionException {
-        Setting setting = getLocationFromRow(r);
+    private void setSettingOnResult(Row r, SettableFuture<Setting> result) throws InterruptedException, ExecutionException {
+        Setting setting = getSettingFromRow(r);
         result.set(setting);
     }
 
-    private Setting getLocationFromRow(Row r) {
+    private Setting getSettingFromRow(Row r) {
         DatabaseRow row = new DatabaseRow(r);
 
         Setting setting = new Setting();
 
         setting.setKey(row.getString("key"));
-        setting.setValue(row.getString("value"));
+        setting.setValue(row.getString("settings"));
+
+        return setting;
+    }
+
+    @Caching(evict = { @CacheEvict("mciSettings"), @CacheEvict(value = "mciSettingsHash") })
+    public void save(Setting setting) {
+        cassandraOperations.insert(setting);
+    }
+
+    @Cacheable({"mciSettings"})
+    public Setting findByKey(String key) {
+        Setting setting = null;
+        try {
+            setting = findSettingListenableFutureByKey(key).get();
+        } catch (Exception e) {
+            logger.debug("Could not find Setting for key : [" + key + "]");
+        }
 
         return setting;
     }

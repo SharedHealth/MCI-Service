@@ -60,7 +60,7 @@ public class FacilityRegistryWrapper {
         };
     }
 
-    @Cacheable({"facility"})
+    @Cacheable({"facilities"})
     public List<String> getCatchmentAreasByFacility(String facilityId) throws FacilityNotFoundException {
         Facility facility;
         ListenableFuture<Facility> facilityResponse = getFacility(facilityId);

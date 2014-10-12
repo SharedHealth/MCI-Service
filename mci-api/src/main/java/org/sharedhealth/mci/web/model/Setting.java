@@ -12,7 +12,7 @@ public class Setting {
     @PrimaryKey("key")
     private String key;
 
-    @Column("value")
+    @Column("settings")
     private String value;
 
     @Override
