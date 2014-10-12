@@ -4,11 +4,13 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 import java.util.Set;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
 import org.sharedhealth.mci.web.config.WebMvcConfigTest;
-import org.sharedhealth.mci.web.mapper.Relation;
+import org.sharedhealth.mci.web.mapper.Address;
+import org.sharedhealth.mci.web.mapper.PatientMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -24,22 +26,32 @@ public class LocationValidatorTest {
     @Autowired
     private Validator validator;
 
-    @Test
-    public void shouldPassForValidRelationType() throws Exception {
-        String[] validRelations = {"FTH", "MTH", "SPS", "CHILD"};
-        for (String relation : validRelations) {
-            Set<ConstraintViolation<Relation>> constraintViolations = validator.validateValue(Relation.class, "type", relation);
-            assertEquals(0, constraintViolations.size());
-        }
+    private Address address;
+
+    @Before
+    public void setup() {
+        address = new Address();
+        address.setAddressLine("house-10");
+        address.setDivisionId("10");
+        address.setDistrictId("04");
+        address.setUpazillaId("09");
+        address.setCityCorporationId("20");
+        address.setVillage("10");
+        address.setWardId("01");
+        address.setCountryCode("050");
     }
 
     @Test
-    public void shouldFailForInvalidRelationType() throws Exception {
-        String[] inValidRelations = {"", "somevalue", "fathera", "afather", "mothera", "spousea", "amother", "aspouse"};
-        for (String relation : inValidRelations) {
-            Set<ConstraintViolation<Relation>> constraintViolations = validator.validateValue(Relation.class, "type", relation);
-            assertEquals(1, constraintViolations.size());
-            assertEquals("1004", constraintViolations.iterator().next().getMessage());
-        }
+    public void shouldPassForValidAddress() throws Exception {
+        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "address", address);
+        assertEquals(0, constraintViolations.size());
+    }
+
+    @Test
+    public void shouldFailForInvalidAddress() throws Exception {
+        address.setDivisionId("00");
+        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "address", address);
+        assertEquals(1, constraintViolations.size());
+        assertEquals("1004", constraintViolations.iterator().next().getMessage());
     }
 }
