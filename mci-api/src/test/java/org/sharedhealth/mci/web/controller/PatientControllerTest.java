@@ -65,6 +65,8 @@ public class PatientControllerTest {
     public static final String GEO_CODE = "1004092001";
     private SearchQuery searchQuery;
     private StringBuilder stringBuilder;
+    private List<PatientMapper> patientMappers;
+    private int maxLimit;
 
     @Before
     public void setup() {
@@ -105,6 +107,8 @@ public class PatientControllerTest {
 
         searchQuery = new SearchQuery();
         stringBuilder = new StringBuilder(200);
+        patientMappers = new ArrayList<>();
+        maxLimit = 25;
     }
 
     @Test
@@ -139,21 +143,21 @@ public class PatientControllerTest {
     @Test
     public void shouldFindPatientsByBirthRegistrationNumber() throws Exception {
         searchQuery.setBin_brn(birthRegistrationNumber);
-        stringBuilder.append("bin_brn="+ birthRegistrationNumber);
+        stringBuilder.append("bin_brn=" + birthRegistrationNumber);
         assertFindAllBy(searchQuery, stringBuilder.toString());
     }
 
     @Test
     public void shouldFindPatientsByUid() throws Exception {
         searchQuery.setUid(uid);
-        stringBuilder.append("uid="+uid);
+        stringBuilder.append("uid=" + uid);
         assertFindAllBy(searchQuery, stringBuilder.toString());
     }
 
     @Test
     public void shouldFindPatientsByName() throws Exception {
         searchQuery.setFull_name(fullname);
-        stringBuilder.append("full_name="+ fullname);
+        stringBuilder.append("full_name=" + fullname);
         assertFindAllBy(searchQuery, stringBuilder.toString());
     }
 
@@ -177,13 +181,28 @@ public class PatientControllerTest {
         assertFindAllBy(searchQuery, stringBuilder.toString());
     }
 
+    @Test
+    public void shouldFindPatientsByAddressAndShowNoteForMoreRecord() throws Exception {
+
+        StringBuilder stringBuilder = new StringBuilder(200);
+        String address = location.getDivisionId() + location.getDistrictId() + location.getUpazillaId();
+        searchQuery.setPresent_address(address);
+        stringBuilder.append("present_address=" + address);
+
+        patientMappers.add(patientMapper);
+        patientMappers.add(patientMapper);
+        patientMappers.add(patientMapper);
+        maxLimit = 4;
+
+        assertFindAllBy(searchQuery, stringBuilder.toString());
+    }
+
     private void assertFindAllBy(SearchQuery searchQuery, String queryString) throws Exception {
-        List<PatientMapper> patientMappers = new ArrayList<>();
         patientMappers.add(patientMapper);
 
-        searchQuery.setMaximum_limit(25);
-        when(patientService.findAllByQuery(searchQuery)).thenReturn(new PreResolvedListenableFuture<>(patientMappers));
-        when(patientService.getPerPageMaximumLimit()).thenReturn(25);
+        searchQuery.setMaximum_limit(maxLimit);
+
+        when(patientService.getPerPageMaximumLimit()).thenReturn(maxLimit);
         when(patientService.getPerPageMaximumLimitNote()).thenReturn("There are more record for this search criteria. Please narrow down your search");
 
         final int limit = patientService.getPerPageMaximumLimit();
@@ -193,6 +212,8 @@ public class PatientControllerTest {
             patientMappers.remove(limit);
             additionalInfo.put("note", note);
         }
+
+        when(patientService.findAllByQuery(searchQuery)).thenReturn(new PreResolvedListenableFuture<>(patientMappers));
         MCIMultiResponse mciMultiResponse = new MCIMultiResponse<>(patientMappers, additionalInfo, OK);
 
         mockMvc.perform(get(API_END_POINT + "?" + queryString))
