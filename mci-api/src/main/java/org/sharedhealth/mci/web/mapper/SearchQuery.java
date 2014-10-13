@@ -4,8 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-
-import javax.validation.constraints.Pattern;
+import org.sharedhealth.mci.validation.constraints.Length;
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -23,7 +22,7 @@ public class SearchQuery extends PaginationQuery {
     private String uid;
 
     @JsonProperty("present_address")
-    @Pattern(regexp = "[\\d]{6}", message = "1002")
+    @Length(min = 6, max = 10, message = "1002")
     private String present_address;
 
 
