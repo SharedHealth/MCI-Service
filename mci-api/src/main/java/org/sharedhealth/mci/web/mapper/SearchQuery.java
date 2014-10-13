@@ -6,6 +6,8 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.sharedhealth.mci.validation.constraints.Length;
 
+import javax.validation.constraints.Pattern;
+
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SearchQuery extends PaginationQuery {
@@ -23,6 +25,7 @@ public class SearchQuery extends PaginationQuery {
 
     @JsonProperty("present_address")
     @Length(min = 6, max = 10, message = "1002")
+    @Pattern(regexp = "[\\d]{6}|[\\d]{8}|[\\d]{10}", message = "1002")
     private String present_address;
 
 
