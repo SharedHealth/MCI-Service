@@ -3,10 +3,9 @@ package org.sharedhealth.mci.validation.constraintvalidator;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import java.util.HashMap;
-
 import org.sharedhealth.mci.validation.constraints.Code;
-import org.sharedhealth.mci.web.service.SettingService;
+import org.sharedhealth.mci.web.model.MasterData;
+import org.sharedhealth.mci.web.service.MasterDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,11 +14,11 @@ public class CodeValidator implements ConstraintValidator<Code, String> {
 
     private Code code;
 
-    private SettingService settingService;
+    private MasterDataService masterDataService;
 
     @Autowired
-    public CodeValidator(SettingService settingService) {
-        this.settingService = settingService;
+    public CodeValidator(MasterDataService dataService) {
+        this.masterDataService = dataService;
     }
 
     @Override
@@ -30,8 +29,8 @@ public class CodeValidator implements ConstraintValidator<Code, String> {
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
 
-        HashMap<String, String> setting = settingService.getSettingAsHashMapByKey(code.type());
+        MasterData masterData = masterDataService.findByKey(code.type(), value);
 
-        return setting.get(value) != null;
+        return masterData != null;
     }
 }

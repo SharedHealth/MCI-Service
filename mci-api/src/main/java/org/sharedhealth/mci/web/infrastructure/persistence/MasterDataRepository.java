@@ -8,13 +8,12 @@ import com.datastax.driver.core.Row;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
 import com.google.common.util.concurrent.SettableFuture;
-import org.sharedhealth.mci.web.model.Setting;
+import org.sharedhealth.mci.web.model.MasterData;
 import org.sharedhealth.mci.web.utils.concurrent.SimpleListenableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cassandra.core.AsynchronousQueryListener;
 import org.springframework.data.cassandra.core.CassandraOperations;
@@ -22,21 +21,22 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFuture;
 
 @Component
-public class SettingRepository extends BaseRepository {
+public class MasterDataRepository extends BaseRepository {
 
     private static final Logger logger = LoggerFactory.getLogger(LocationRepository.class);
 
     @Autowired
-    public SettingRepository(@Qualifier("MCICassandraTemplate") CassandraOperations cassandraOperations) {
+    public MasterDataRepository(@Qualifier("MCICassandraTemplate") CassandraOperations cassandraOperations) {
         super(cassandraOperations);
     }
 
-    public ListenableFuture<Setting> findSettingListenableFutureByKey(final String key) {
+    public ListenableFuture<MasterData> findDataListenableFutureByKey(final String type, final String key) {
 
-        final SettableFuture<Setting> result = SettableFuture.create();
+        final SettableFuture<MasterData> result = SettableFuture.create();
 
-        Select select = QueryBuilder.select().from("settings");
+        Select select = QueryBuilder.select().from("master_data");
 
+        select.where(QueryBuilder.eq("type", type));
         select.where(QueryBuilder.eq("key", key));
 
         cassandraOperations.queryAsynchronously(select, new AsynchronousQueryListener() {
@@ -44,52 +44,43 @@ public class SettingRepository extends BaseRepository {
             public void onQueryComplete(ResultSetFuture rsf) {
                 try {
                     Row row = rsf.get(TIMEOUT_IN_MILLIS, TimeUnit.MILLISECONDS).one();
-                    setSettingOnResult(row, result);
+                    setMasterDataOnResult(row, result);
                 } catch (Exception e) {
-                    logger.error("Error while finding settings for key: " + key, e);
+                    logger.error("Error while finding data for key: " + key + " of type: " + type, e);
                     result.setException(e);
                 }
             }
         });
 
-        return new SimpleListenableFuture<Setting, Setting>(result) {
+        return new SimpleListenableFuture<MasterData, MasterData>(result) {
             @Override
-            protected Setting adapt(Setting adapteeResult) throws ExecutionException {
+            protected MasterData adapt(MasterData adapteeResult) throws ExecutionException {
                 return adapteeResult;
             }
         };
     }
 
-    private void setSettingOnResult(Row r, SettableFuture<Setting> result) throws InterruptedException, ExecutionException {
-        Setting setting = getSettingFromRow(r);
-        result.set(setting);
+    private void setMasterDataOnResult(Row r, SettableFuture<MasterData> result) throws InterruptedException, ExecutionException {
+        MasterData masterData = getMasterDataFromRow(r);
+        result.set(masterData);
     }
 
-    private Setting getSettingFromRow(Row r) {
+    private MasterData getMasterDataFromRow(Row r) {
         DatabaseRow row = new DatabaseRow(r);
 
-        Setting setting = new Setting();
-
-        setting.setKey(row.getString("key"));
-        setting.setValue(row.getString("settings"));
-
-        return setting;
+        return new MasterData(row.getString("type"), row.getString("key"), row.getString("value"));
     }
 
-    @CacheEvict("mciSettings")
-    public void save(Setting setting) {
-        cassandraOperations.insert(setting);
-    }
+    @Cacheable({"masterData"})
+    public MasterData findByKey(String type, String key) {
+        MasterData masterData = null;
 
-    @Cacheable({"mciSettings"})
-    public Setting findByKey(String key) {
-        Setting setting = null;
         try {
-            setting = findSettingListenableFutureByKey(key).get();
+            masterData = findDataListenableFutureByKey(type, key).get();
         } catch (Exception e) {
-            logger.debug("Could not find Setting for key : [" + key + "]");
+            logger.debug("Could not find Setting for key : [" + key + "] of type [" + type + "]" );
         }
 
-        return setting;
+        return masterData;
     }
 }

@@ -2,7 +2,6 @@ package org.sharedhealth.mci.web.service;
 
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -19,10 +18,13 @@ import org.springframework.util.concurrent.ListenableFutureAdapter;
 @Component
 public class PatientService {
 
+    private static final String PER_PAGE_MAXIMUM_LIMIT_NOTE = "There are more record for this search criteria. Please narrow down your search";
+    private static final int PER_PAGE_MAXIMUM_LIMIT = 25;
     private PatientRepository patientRepository;
     private FacilityRegistryWrapper facilityRegistryWrapper;
     private SettingService settingService;
-    public HashMap<String, String> systemSettings;
+    private static Integer perpageMaximimLimit = 25;
+    private static String perPageMaximimLimitNote = "There are more record for this search criteria. Please narrow down your search";
 
     @Autowired
     public PatientService(PatientRepository patientRepository, FacilityRegistryWrapper facilityRegistryWrapper, SettingService settingService) {
@@ -80,28 +82,22 @@ public class PatientService {
     }
 
     public int getPerPageMaximumLimit() {
-        int limit;
+        Integer limit = settingService.getSettingAsIntegerByKey("PER_PAGE_MAXIMUM_LIMIT");
 
-        if (systemSettings == null) {
-            systemSettings = settingService.getSettingAsHashMapByKey("system");
-        }
-
-        limit = patientRepository.getPerPageMaximumLimit();
-
-        if (systemSettings.get("PER_PAGE_MAXIMUM_LIMIT") != null) {
-            limit = Integer.parseInt(systemSettings.get("PER_PAGE_MAXIMUM_LIMIT"));
+        if (limit == null) {
+            return PER_PAGE_MAXIMUM_LIMIT;
         }
 
         return limit;
-
     }
 
     public String getPerPageMaximumLimitNote() {
-        if (systemSettings == null) {
-            systemSettings = settingService.getSettingAsHashMapByKey("system");
+       String note = settingService.getSettingAsStringByKey("PER_PAGE_MAXIMUM_LIMIT_NOTE");
+
+        if (note == null) {
+            return PER_PAGE_MAXIMUM_LIMIT_NOTE;
         }
-        return systemSettings.get("PER_PAGE_MAXIMUM_LIMIT_NOTE");
 
+        return note;
     }
-
 }

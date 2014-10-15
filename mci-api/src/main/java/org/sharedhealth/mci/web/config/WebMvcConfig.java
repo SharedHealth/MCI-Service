@@ -49,6 +49,7 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
         cacheManager.setCaches(Arrays.asList(
                 new ConcurrentMapCache("facilities"),
                 new ConcurrentMapCache("mciSettingsHash"),
+                new ConcurrentMapCache("masterData"),
                 new ConcurrentMapCache("mciSettings")
         ));
         return cacheManager;
