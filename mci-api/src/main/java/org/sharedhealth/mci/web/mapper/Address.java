@@ -11,7 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.validator.constraints.NotBlank;
-import org.sharedhealth.mci.validation.constraints.CountryCode;
+import org.sharedhealth.mci.validation.constraints.Code;
 import org.sharedhealth.mci.validation.group.RequiredGroup;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
@@ -92,7 +92,7 @@ public class Address {
 
     @JsonProperty("country_code")
     @JsonInclude(NON_EMPTY)
-    @CountryCode(message = "1004")
+    @Code(type = "country_code", message = "1004")
     private String countryCode = "050";
 
     @JsonIgnore

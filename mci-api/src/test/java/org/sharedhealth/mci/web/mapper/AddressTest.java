@@ -164,19 +164,6 @@ public class AddressTest extends ValidationAwareMapper{
         assertEquals(0, constraintViolations.size());
     }
 
-    @Test
-    public void shouldPassIfCountryIdIsValid() {
-        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "countryCode", "050");
-        assertEquals(0, constraintViolations.size());
-    }
-
-    @Test
-    public void shouldFailIfCountryIdIsInvalid() {
-        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "countryCode", "abc");
-        assertEquals(1, constraintViolations.size());
-        printViolations(constraintViolations);
-    }
-
     private void assertInvalidAddressId(String field) {
         Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, field, "abcd");
         assertEquals(1, constraintViolations.size());
