@@ -66,7 +66,7 @@ public class PatientMapper {
 
     @JsonProperty("occupation")
     @JsonInclude(NON_EMPTY)
-    @Occupation(message = "1004")
+    @Code(type = "occupation", regexp = "[\\d]{2}", message = "1004")
     private String occupation;
 
     @JsonProperty("edu_level")
