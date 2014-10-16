@@ -273,21 +273,6 @@ public class PatientMapperTest extends ValidationAwareMapper{
     }
 
     @Test
-    public void shouldPassIfMaritalStatusIsValid() {
-        for (int i = 1; i < 6; i++) {
-            Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "maritalStatus", Integer.toString(i));
-            assertEquals(0, constraintViolations.size());
-        }
-    }
-
-    @Test
-    public void shouldFailIfMaritalStatusIsInvalid() {
-        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "maritalStatus", "8");
-        assertEquals(1, constraintViolations.size());
-        assertEquals("1004", constraintViolations.iterator().next().getMessage());
-    }
-
-    @Test
     public void shouldFailIfPrimaryContactIsMoreThan_100_Characters() {
         assertLengthViolation("primaryContact", 100);
     }
