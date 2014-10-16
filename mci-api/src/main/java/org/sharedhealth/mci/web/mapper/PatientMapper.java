@@ -106,7 +106,7 @@ public class PatientMapper {
 
     @JsonProperty("disability")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[0-5]{1}", message = "1004")
+    @Code(type = "disability", regexp = "[\\d]{1}", message = "1004")
     private String disability;
 
     @JsonProperty("ethnicity")
@@ -143,7 +143,7 @@ public class PatientMapper {
 
     @JsonProperty("marital_status")
     @JsonInclude(NON_EMPTY)
-    @Code(type = "marital_status", regexp = "[1-5]{1}", message = "1004")
+    @Code(type = "marital_status", regexp = "[\\d]{1}", message = "1004")
     private String maritalStatus;
 
     @JsonProperty("full_name")
