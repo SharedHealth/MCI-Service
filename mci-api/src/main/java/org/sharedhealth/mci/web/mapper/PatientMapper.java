@@ -96,7 +96,7 @@ public class PatientMapper {
 
     @JsonProperty("blood_group")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[1-8]{1}", message = "1004")
+    @Code(type = "blood_group", regexp = "[\\d]{1}", message = "1004")
     private String bloodGroup;
 
     @JsonProperty("nationality")
