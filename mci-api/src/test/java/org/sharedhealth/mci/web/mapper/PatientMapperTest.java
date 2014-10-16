@@ -135,23 +135,6 @@ public class PatientMapperTest extends ValidationAwareMapper{
     }
 
     @Test
-    public void shouldPassIfReligionIsValid() {
-        int[] religionNumbers = {0, 1, 2, 3, 4, 8, 9};
-
-        for (int religionNumber : religionNumbers) {
-            Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "religion", Integer.toString(religionNumber));
-            assertEquals(0, constraintViolations.size());
-        }
-    }
-
-    @Test
-    public void shouldFailIfReligionIsInvalid() {
-        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "religion", "22");
-        assertEquals(1, constraintViolations.size());
-        assertEquals("1004", constraintViolations.iterator().next().getMessage());
-    }
-
-    @Test
     public void shouldPassIfBirthRegistrationNumberIsValid() {
         Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "birthRegistrationNumber", "12345674891234567");
         assertEquals(0, constraintViolations.size());
