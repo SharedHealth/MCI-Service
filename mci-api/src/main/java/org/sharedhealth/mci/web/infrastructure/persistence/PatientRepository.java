@@ -429,7 +429,20 @@ public class PatientRepository extends BaseRepository {
     }
 
     public ListenableFuture<MCIResponse> update(PatientMapper patientMapper, final String hid) {
+
         final SettableFuture<MCIResponse> result = SettableFuture.create();
+
+        if (patientMapper.getHealthId() != null && !StringUtils.equals(patientMapper.getHealthId(), hid)) {
+            DirectFieldBindingResult bindingResult = new DirectFieldBindingResult(patientMapper, "patient");
+            bindingResult.addError(new FieldError("patient", "hid", "1004"));
+            throw new ValidationException(bindingResult);
+        }
+
+        try {
+            findByHealthId(hid).get();
+        } catch (Exception e) {
+            throw new PatientNotFoundException("No patient found with health id: " + hid);
+        }
 
         String fullName = "";
         if (patientMapper.getGivenName() != null) {

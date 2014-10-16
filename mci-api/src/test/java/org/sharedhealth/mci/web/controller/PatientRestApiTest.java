@@ -54,9 +54,6 @@ public class PatientRestApiTest {
     private MockMvc mockMvc;
     private PatientMapper patientMapper;
     public static final String API_END_POINT = "/api/v1/patients";
-    public static final String PUT_API_END_POINT = "/api/v1/patients/healthId-100";
-    public static final String SEARCH_PATIENT_BY_NID = "/api/v1/patients/?nid=1234212191164";
-    public static final String GEO_CODE = "1004092001";
     public static final String APPLICATION_JSON_UTF8 = "application/json;charset=UTF-8";
 
     @Before
@@ -173,6 +170,27 @@ public class PatientRestApiTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
+    }
+
+    @Test
+    public void shouldReturnNotFoundResponseIfPatientNotExistForUpdate() throws Exception {
+        String json = new ObjectMapper().writeValueAsString(patientMapper);
+
+        MvcResult result = mockMvc.perform(put(API_END_POINT + "/health-1000").accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andReturn();
+        Assert.assertEquals("{\"http_status\":404,\"message\":\"patient.not.found\"}", result.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void shouldReturnNotFoundResponseIfHIDNotMatchWithUrlHid() throws Exception {
+        patientMapper.setHealthId("health-100");
+        String json = new ObjectMapper().writeValueAsString(patientMapper);
+
+        MvcResult result = mockMvc.perform(put(API_END_POINT + "/health-1000").accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+        Assert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1004,\"field\":\"hid\",\"message\":\"invalid hid\"}]}", result.getResponse().getContentAsString());
     }
 
 

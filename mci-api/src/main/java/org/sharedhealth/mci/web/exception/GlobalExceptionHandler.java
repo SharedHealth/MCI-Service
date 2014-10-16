@@ -76,9 +76,9 @@ public class GlobalExceptionHandler {
     @ResponseStatus(value = NOT_FOUND)
     @ExceptionHandler(PatientNotFoundException.class)
     @ResponseBody
-    public ErrorInfo handlePatientNotFoundException(PatientNotFoundException e) {
+    public ErrorHandler handlePatientNotFoundException(PatientNotFoundException e) {
         logger.error("Handling PatientNotFoundException. ", e);
-        return new ErrorInfo(NOT_FOUND.value(), "patient.not.found");
+        return new ErrorHandler(NOT_FOUND.value(), "patient.not.found");
     }
 
     @ResponseStatus(value = NOT_FOUND)
@@ -103,10 +103,9 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public ErrorHandler healthIDExistException(HealthIDExistException e) {
         logger.error("Handling Health ID exist exception. ", e);
-        int code = BAD_REQUEST.value();
-        String msg = "invalid.request";
-        String field;
-        ErrorHandler errorHandler = null;
+        int code;
+        String msg, field;
+        ErrorHandler errorHandler;
 
         errorHandler = new ErrorHandler(BAD_REQUEST.value(),
                 ErrorHandler.PERMISSION_ERROR_CODE, "permission.error");
