@@ -208,28 +208,6 @@ public class PatientMapperTest extends ValidationAwareMapper{
     }
 
     @Test
-    public void shouldFailIfEducationLevelIsGreaterThen20() {
-        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "educationLevel", "20");
-        assertEquals(1, constraintViolations.size());
-        assertEquals("1004", constraintViolations.iterator().next().getMessage());
-    }
-
-    @Test
-    public void shouldFailIfEducationLevelIsNotTwoDigitFormat() {
-        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "educationLevel", "1");
-        assertEquals(1, constraintViolations.size());
-        assertEquals("1004", constraintViolations.iterator().next().getMessage());
-    }
-
-    @Test
-    public void shouldPassIfEducationLevelIsValid() {
-        for (int i = 0; i < 20; i++) {
-            Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "educationLevel", String.format("%02d", i));
-            assertEquals(0, constraintViolations.size());
-        }
-    }
-
-    @Test
     public void shouldFailIfPlaceOfBirthIsMoreThan_20_AlphabeticCharacters() {
         assertLengthViolation("placeOfBirth", 20);
     }

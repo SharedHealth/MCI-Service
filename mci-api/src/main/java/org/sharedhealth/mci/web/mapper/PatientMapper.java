@@ -71,7 +71,7 @@ public class PatientMapper {
 
     @JsonProperty("edu_level")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[0-1]{1}[0-9]{1}", message = "1004")
+    @Code(type="education_level", regexp = "[\\d]{2}", message = "1004")
     private String educationLevel;
 
     @JsonProperty("relations")
