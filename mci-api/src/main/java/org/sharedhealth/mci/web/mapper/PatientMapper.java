@@ -61,7 +61,7 @@ public class PatientMapper {
 
     @JsonProperty("gender")
     @NotBlank(message = "1001", groups = RequiredGroup.class)
-    @Pattern(regexp = "[M|F|O ]{1}", message = "1004")
+    @Code(type = "gender", regexp = "[A-Z]{1}", message = "1004")
     private String gender;
 
     @JsonProperty("occupation")

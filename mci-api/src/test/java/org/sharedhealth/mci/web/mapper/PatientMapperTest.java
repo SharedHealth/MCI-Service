@@ -53,23 +53,10 @@ public class PatientMapperTest extends ValidationAwareMapper{
     }
 
     @Test
-    public void shouldPassIfGenderValid() {
-        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "gender", "M");
-        assertEquals(0, constraintViolations.size());
-    }
-
-    @Test
     public void shouldFailIfGenderIsBlank() {
         Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "gender", null, RequiredGroup.class);
         assertEquals(1, constraintViolations.size());
         assertEquals("1001", constraintViolations.iterator().next().getMessage());
-    }
-
-    @Test
-    public void shouldFailIfGenderIsInvalid() {
-        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "gender", "5");
-        assertEquals(1, constraintViolations.size());
-        assertEquals("1004", constraintViolations.iterator().next().getMessage());
     }
 
     @Test
