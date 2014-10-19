@@ -41,7 +41,7 @@ task wrapper(type: Wrapper) {
 }
 
 ext.libraries = [
-        spring_boot_logging  : "org.springframework.boot:spring-boot-starter-log4j:1.1.1.RELEASE",
+        spring_boot_logging  : "org.springframework.boot:spring-boot-starter-log4j:1.1.8.RELEASE",
         spring_data_cassandra: "org.springframework.data:spring-data-cassandra:1.0.4.RELEASE",
         mutagen_cassandra    : "com.toddfast.mutagen:mutagen-cassandra:0.4.0",
         hibernate_validator  : "org.hibernate:hibernate-validator:5.1.1.Final",

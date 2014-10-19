@@ -1,13 +1,3 @@
-import com.netflix.astyanax.AstyanaxContext
-import com.netflix.astyanax.connectionpool.Host
-import com.netflix.astyanax.connectionpool.NodeDiscoveryType
-import com.netflix.astyanax.connectionpool.impl.ConnectionPoolConfigurationImpl
-import com.netflix.astyanax.connectionpool.impl.ConnectionPoolType
-import com.netflix.astyanax.connectionpool.impl.CountingConnectionPoolMonitor
-import com.netflix.astyanax.impl.AstyanaxConfigurationImpl
-import com.netflix.astyanax.recipes.ConstantSupplier
-import com.netflix.astyanax.thrift.ThriftFamilyFactory
-
 apply plugin: 'java'
 apply plugin: 'spring-boot'
 apply plugin: 'war'
@@ -15,10 +5,10 @@ apply plugin: 'rpm'
 apply plugin: 'idea'
 
 dependencies {
-    compile('org.springframework.boot:spring-boot-starter-web:1.1.1.RELEASE') {
+    compile('org.springframework.boot:spring-boot-starter-web:1.1.8.RELEASE') {
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
     }
-    compile('org.springframework.boot:spring-boot-starter-security:1.1.1.RELEASE') {
+    compile('org.springframework.boot:spring-boot-starter-security:1.1.8.RELEASE') {
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
     }
     compile libraries.snappy, libraries.spring_boot_logging, libraries.spring_data_cassandra, libraries.hibernate_validator
@@ -146,7 +136,7 @@ buildscript {
     }
     dependencies {
         classpath(
-                'org.springframework.boot:spring-boot-gradle-plugin:1.0.2.BUILD-SNAPSHOT',
+                'org.springframework.boot:spring-boot-gradle-plugin:1.1.8.RELEASE',
                 'com.netflix.nebula:gradle-ospackage-plugin:1.9.1+',
                 'com.netflix.astyanax:astyanax:1.56.48'
         )
