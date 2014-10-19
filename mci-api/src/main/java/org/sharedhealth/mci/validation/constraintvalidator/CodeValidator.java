@@ -35,10 +35,8 @@ public class CodeValidator implements ConstraintValidator<Code, String> {
 
         if(StringUtils.isBlank(value)) return false;
 
-        if (StringUtils.isNotBlank(code.regexp())) {
-            if(!Pattern.compile(code.regexp()).matcher(value).matches()){
-                return false;
-            }
+        if (StringUtils.isNotBlank(code.regexp()) && !Pattern.compile(code.regexp()).matcher(value).matches()) {
+            return false;
         }
 
         MasterData masterData = masterDataService.findByKey(code.type(), value);
