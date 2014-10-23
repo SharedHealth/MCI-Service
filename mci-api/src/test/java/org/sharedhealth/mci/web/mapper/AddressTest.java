@@ -5,7 +5,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
-import org.sharedhealth.mci.validation.group.RequiredGroup;
+import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
 
 import static org.junit.Assert.assertEquals;
 
@@ -13,7 +13,7 @@ public class AddressTest extends ValidationAwareMapper{
 
     @Test
     public void shouldFailIfAddressLineIsBlank() {
-        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "addressLine", null, RequiredGroup.class);
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "addressLine", null, RequiredOnUpdateGroup.class);
         assertEquals(1, constraintViolations.size());
         printViolations(constraintViolations);
     }

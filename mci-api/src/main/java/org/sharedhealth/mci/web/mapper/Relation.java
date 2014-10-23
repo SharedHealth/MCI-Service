@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.sharedhealth.mci.validation.constraints.Code;
 import org.sharedhealth.mci.validation.constraints.Length;
-import org.sharedhealth.mci.validation.group.RequiredGroup;
+import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
@@ -21,7 +21,7 @@ public class Relation {
 
     @JsonProperty("type")
     @JsonInclude(NON_EMPTY)
-    @NotNull(message = "1001", groups = RequiredGroup.class)
+    @NotNull(message = "1001", groups = RequiredOnUpdateGroup.class)
     @Code(type = "relations", message = "1004")
     private String type;
 

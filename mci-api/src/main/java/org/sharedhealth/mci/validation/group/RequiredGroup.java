@@ -1,4 +1,4 @@
 package org.sharedhealth.mci.validation.group;
 
-public interface RequiredGroup {
+public interface RequiredGroup extends RequiredOnUpdateGroup {
 }

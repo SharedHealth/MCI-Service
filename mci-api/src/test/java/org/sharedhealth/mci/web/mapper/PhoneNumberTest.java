@@ -1,7 +1,5 @@
 package org.sharedhealth.mci.web.mapper;
 
-import org.sharedhealth.mci.validation.group.RequiredGroup;
-
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -11,6 +9,7 @@ import java.util.Set;
 import org.hibernate.validator.HibernateValidator;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
 
 import static org.junit.Assert.assertEquals;
 
@@ -81,13 +80,8 @@ public class PhoneNumberTest {
 
     @Test
     public void shouldFailIfPhoneNOIsBlank() {
-        Set<ConstraintViolation<PhoneNumber>> constraintViolations = validator.validateValue(PhoneNumber.class, "number", null, RequiredGroup.class);
+        Set<ConstraintViolation<PhoneNumber>> constraintViolations = validator.validateValue(PhoneNumber.class, "number", null, RequiredOnUpdateGroup.class);
         assertEquals(1, constraintViolations.size());
         assertEquals("1001", constraintViolations.iterator().next().getMessage());
     }
-
-
-
-
-
 }

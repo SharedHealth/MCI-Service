@@ -568,11 +568,8 @@ public class PatientRepository extends BaseRepository {
 
     private boolean isLocationBelongsToCatchment(String location, String catchment) {
 
-        if (StringUtils.isBlank(location)) {
-            return true;
-        }
+        return StringUtils.isBlank(location) || location.startsWith(catchment);
 
-        return location.startsWith(catchment);
     }
 
     private String getAddressHierarchyField(int length) {
@@ -580,7 +577,10 @@ public class PatientRepository extends BaseRepository {
     }
 
     public Patient getEntityFromPatientMapper(PatientMapper p) {
-        Patient patient = new Patient();
+        return getEntityFromPatientMapper(p, new Patient());
+    }
+
+    public Patient getEntityFromPatientMapper(PatientMapper p, Patient patient) {
 
         String relationsJson = "";
         ObjectMapper mapper = new ObjectMapper();

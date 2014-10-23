@@ -21,7 +21,7 @@ public class DisabilityCodeValidatorTest extends BaseCodeValidatorTest<PatientMa
 
     @Test
     public void shouldFailForInvalidValues() throws Exception {
-        String[] inValidRelations = {"", "some_invalid_code", "4", "01"};
+        String[] inValidRelations = {"", "some_invalid_code", "6", "01"};
         assertInvalidValues(inValidRelations, "disability", PatientMapper.class);
     }
 }

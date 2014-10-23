@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import org.sharedhealth.mci.validation.group.RequiredGroup;
+import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.handler.MCIResponse;
@@ -126,7 +127,7 @@ public class PatientController {
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/{healthId}", consumes = {APPLICATION_JSON_VALUE})
-    public DeferredResult<ResponseEntity<MCIResponse>> update(@PathVariable String healthId, @Valid @RequestBody PatientMapper patientMapper, BindingResult bindingResult)
+    public DeferredResult<ResponseEntity<MCIResponse>> update(@PathVariable String healthId, @Validated({RequiredOnUpdateGroup.class, Default.class}) @RequestBody PatientMapper patientMapper, BindingResult bindingResult)
             throws ExecutionException, InterruptedException {
         logger.debug(" Health id [" + healthId + "]");
         final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();

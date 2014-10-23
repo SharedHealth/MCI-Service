@@ -114,6 +114,8 @@ INSERT INTO master_data ("type", "key", "value") VALUES ('disability', '0', 'স
 INSERT INTO master_data ("type", "key", "value") VALUES ('disability', '1', 'বাক');
 INSERT INTO master_data ("type", "key", "value") VALUES ('disability', '2', 'দৃষ্টি');
 INSERT INTO master_data ("type", "key", "value") VALUES ('disability', '3', 'শ্রবন');
+INSERT INTO master_data ("type", "key", "value") VALUES ('disability', '4', 'physical');
+INSERT INTO master_data ("type", "key", "value") VALUES ('disability', '5', 'mental');
 
 INSERT INTO master_data ("type", "key", "value") VALUES ('education_level', '00', 'নার্সারি/কিন্ডার গার্ডেন');
 INSERT INTO master_data ("type", "key", "value") VALUES ('education_level', '01', '১ম শ্রেনী');

@@ -5,7 +5,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
-import org.sharedhealth.mci.validation.group.RequiredGroup;
+import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
 
 import static org.junit.Assert.assertEquals;
 
@@ -13,7 +13,7 @@ public class RelationTest extends ValidationAwareMapper{
 
     @Test
     public void shouldFailIfTypeIsNull() {
-        Set<ConstraintViolation<Relation>> constraintViolations = validator.validateValue(Relation.class, "type", null, RequiredGroup.class);
+        Set<ConstraintViolation<Relation>> constraintViolations = validator.validateValue(Relation.class, "type", null, RequiredOnUpdateGroup.class);
         assertEquals(1, constraintViolations.size());
         assertEquals("1001", constraintViolations.iterator().next().getMessage());
     }

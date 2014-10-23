@@ -16,8 +16,6 @@ import org.hibernate.validator.constraints.NotBlank;
 import org.sharedhealth.mci.validation.constraints.*;
 import org.sharedhealth.mci.validation.constraints.Location;
 import org.sharedhealth.mci.validation.group.RequiredGroup;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
@@ -25,7 +23,6 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 @JsonIgnoreProperties({"created_at"})
 public class PatientMapper {
 
-    private static final Logger logger = LoggerFactory.getLogger(PatientMapper.class);
     @JsonProperty("hid")
     private String healthId;
 

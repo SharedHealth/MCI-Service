@@ -1,5 +1,6 @@
 package org.sharedhealth.mci.web.mapper;
 
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
@@ -10,9 +11,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.validator.constraints.NotBlank;
 import org.sharedhealth.mci.validation.constraints.Code;
-import org.sharedhealth.mci.validation.group.RequiredGroup;
+import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
@@ -21,7 +21,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 public class Address {
 
     @JsonProperty("address_line")
-    @NotBlank(message = "1001", groups = RequiredGroup.class)
+    @NotNull(message = "1001", groups = RequiredOnUpdateGroup.class)
     @Size(min = 3, max = 255, message = "1002")
     private String addressLine;
 
@@ -92,7 +92,7 @@ public class Address {
 
     @JsonProperty("country_code")
     @JsonInclude(NON_EMPTY)
-    @Code(type = "country_code", message = "1004")
+    @Code(type = "country_code", regexp = "[\\d]{3}", message = "1004")
     private String countryCode = "050";
 
     @JsonIgnore
