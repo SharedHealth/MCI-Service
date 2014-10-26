@@ -236,6 +236,30 @@ public class PatientControllerTest {
 
     }
 
+    @Test
+    public void shouldFindPatientsByAddressAndSurName() throws Exception {
+        StringBuilder stringBuilder = new StringBuilder(200);
+        String address = location.getDivisionId() + location.getDistrictId() + location.getUpazillaId();
+        searchQuery.setPresent_address(address);
+        searchQuery.setSur_name(patientMapper.getSurName());
+        stringBuilder.append("sur_name=" + patientMapper.getSurName());
+        stringBuilder.append("&present_address=" + address);
+
+        assertFindAllBy(searchQuery, stringBuilder.toString());
+    }
+
+    @Test
+    public void shouldFindPatientsByAddressAndGivenName() throws Exception {
+        StringBuilder stringBuilder = new StringBuilder(200);
+        String address = location.getDivisionId() + location.getDistrictId() + location.getUpazillaId();
+        searchQuery.setPresent_address(address);
+        searchQuery.setGiven_name(patientMapper.getGivenName());
+        stringBuilder.append("given_name=" + patientMapper.getGivenName());
+        stringBuilder.append("&present_address=" + address);
+
+        assertFindAllBy(searchQuery, stringBuilder.toString());
+    }
+
     private LocalValidatorFactoryBean validator() {
         return localValidatorFactoryBean;
     }

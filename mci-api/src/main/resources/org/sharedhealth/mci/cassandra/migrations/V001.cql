@@ -104,8 +104,6 @@ CREATE INDEX created_by_key ON patient (created_by);
 CREATE INDEX updated_by_key ON patient (updated_by);
 
 CREATE INDEX full_name_key ON patient (full_name);
-CREATE INDEX given_name_key ON patient (given_name);
-CREATE INDEX sur_name_key ON patient (sur_name);
 
 CREATE INDEX division_id_key ON patient (division_id);
 CREATE INDEX district_id_key ON patient (district_id);

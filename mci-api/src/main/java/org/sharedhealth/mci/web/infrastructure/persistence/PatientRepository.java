@@ -605,7 +605,9 @@ public class PatientRepository extends BaseRepository {
         patient.setBirthRegistrationNumber(p.getBirthRegistrationNumber());
         patient.setFullNameBangla(StringUtils.trim(p.getNameBangla()));
         patient.setGivenName(StringUtils.trim(p.getGivenName()));
+        patient.setLowerGivenName(StringUtils.trim(p.getGivenName()).toLowerCase());
         patient.setSurName(StringUtils.trim(p.getSurName()));
+        patient.setLowerSurName(StringUtils.trim(p.getSurName()).toLowerCase());
         patient.setDateOfBirth(p.getDateOfBirth());
         patient.setGender(p.getGender());
         patient.setOccupation(p.getOccupation());
@@ -717,6 +719,14 @@ public class PatientRepository extends BaseRepository {
 
         if (StringUtils.isNotBlank(searchQuery.getPresent_address())) {
             select.where(QueryBuilder.eq(getAddressHierarchyField(searchQuery.getPresent_address().length()), searchQuery.getPresent_address()));
+        }
+
+        if (StringUtils.isNotBlank(searchQuery.getSur_name())) {
+            select.where(QueryBuilder.eq("lower_sur_name", StringUtils.trim(searchQuery.getSur_name()).toLowerCase()));
+        }
+
+        if (StringUtils.isNotBlank(searchQuery.getGiven_name())) {
+            select.where(QueryBuilder.eq("lower_given_name", StringUtils.trim(searchQuery.getGiven_name()).toLowerCase()));
         }
 
         select.limit(searchQuery.getMaximum_limit() + 1);

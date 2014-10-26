@@ -262,6 +262,12 @@ public class Patient {
     @Column(RELATIONS)
     private String relations;
 
+    @Column("lower_sur_name")
+    private String lowerSurName;
+
+    @Column("lower_given_name")
+    private String lowerGivenName;
+
     @Override
     public boolean equals(Object rhs) {
         return EqualsBuilder.reflectionEquals(this, rhs);
@@ -962,6 +968,19 @@ public class Patient {
         return this.getLocationLevel4() + uw;
     }
 
+    public String getLowerSurName() {
+        return lowerSurName;
+    }
 
+    public void setLowerSurName(String lowerSurName) {
+        this.lowerSurName = lowerSurName;
+    }
 
+    public String getLowerGivenName() {
+        return lowerGivenName;
+    }
+
+    public void setLowerGivenName(String lowerGivenName) {
+        this.lowerGivenName = lowerGivenName;
+    }
 }
