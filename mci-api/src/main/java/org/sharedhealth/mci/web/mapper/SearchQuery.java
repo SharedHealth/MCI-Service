@@ -11,7 +11,7 @@ import javax.validation.constraints.Pattern;
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@SearchQueryConstraint(message = "1001")
+@SearchQueryConstraint(message = "1006")
 public class SearchQuery extends PaginationQuery {
     @JsonProperty("full_name")
     private String full_name;

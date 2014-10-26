@@ -34,9 +34,9 @@ public class PatientMapperTest extends ValidationAwareMapper{
 
     @Test
     public void shouldFailIfDateOfBirthIsBlank() {
-        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "dateOfBirth", "   ", RequiredGroup.class);
+        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "dateOfBirth", "   ");
         assertEquals(1, constraintViolations.size());
-        assertEquals("1001", constraintViolations.iterator().next().getMessage());
+        assertEquals("1002", constraintViolations.iterator().next().getMessage());
     }
 
     @Test

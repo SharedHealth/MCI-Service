@@ -605,9 +605,13 @@ public class PatientRepository extends BaseRepository {
         patient.setBirthRegistrationNumber(p.getBirthRegistrationNumber());
         patient.setFullNameBangla(StringUtils.trim(p.getNameBangla()));
         patient.setGivenName(StringUtils.trim(p.getGivenName()));
-        patient.setLowerGivenName(StringUtils.trim(p.getGivenName()).toLowerCase());
+        if(p.getGivenName() != null) {
+            patient.setLowerGivenName(StringUtils.trim(p.getGivenName()).toLowerCase());
+        }
         patient.setSurName(StringUtils.trim(p.getSurName()));
-        patient.setLowerSurName(StringUtils.trim(p.getSurName()).toLowerCase());
+        if(p.getSurName() != null) {
+            patient.setLowerSurName(StringUtils.trim(p.getSurName()).toLowerCase());
+        }
         patient.setDateOfBirth(p.getDateOfBirth());
         patient.setGender(p.getGender());
         patient.setOccupation(p.getOccupation());

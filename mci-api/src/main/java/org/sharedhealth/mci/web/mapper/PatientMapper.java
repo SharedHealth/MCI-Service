@@ -52,8 +52,9 @@ public class PatientMapper {
     private String surName;
 
     @JsonProperty("date_of_birth")
-    @NotBlank(message = "1001", groups = RequiredGroup.class)
+    @NotNull(message = "1001", groups = RequiredGroup.class)
     @Date(format = "yyyy-MM-dd", message = "1002")
+    @Length(min=1,max = 10,message = "1002")
     private String dateOfBirth;
 
     @JsonProperty("gender")

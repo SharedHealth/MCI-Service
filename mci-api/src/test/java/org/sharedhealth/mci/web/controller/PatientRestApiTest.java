@@ -15,12 +15,14 @@ import org.mockito.MockitoAnnotations;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
 import org.sharedhealth.mci.web.config.WebMvcConfig;
 import org.sharedhealth.mci.web.handler.MCIError;
+import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientMapper;
 import org.sharedhealth.mci.web.service.LocationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.cassandra.core.CassandraOperations;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -193,11 +195,69 @@ public class PatientRestApiTest {
         Assert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1004,\"field\":\"hid\",\"message\":\"invalid hid\"}]}", result.getResponse().getContentAsString());
     }
 
+    @Test
+    public void shouldReturnBadRequestIfOnlySurNameGiven() throws Exception {
+        String json = new ObjectMapper().writeValueAsString(patientMapper);
+
+        MvcResult result = mockMvc.perform(get(API_END_POINT + "?sur_name=Tiger").accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+        Assert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1006,\"message\":\"1006\"}]}", result.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void shouldReturnBadRequestIfOnlyGivenNameGiven() throws Exception {
+        String json = new ObjectMapper().writeValueAsString(patientMapper);
+
+        MvcResult result = mockMvc.perform(get(API_END_POINT + "?given_name=Tiger").accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+        Assert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1006,\"message\":\"1006\"}]}", result.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void shouldReturnOkResponseIfPatientNotExistWithSurNameAndAddress() throws Exception {
+        patientMapper.setHealthId("health-100");
+        String json = new ObjectMapper().writeValueAsString(patientMapper);
+        String present_address = patientMapper.getAddress().getDivisionId() +
+                patientMapper.getAddress().getDistrictId() + patientMapper.getAddress().getUpazillaId();
+        String surName = "Mazumder";
+        MvcResult result = mockMvc.perform(get(API_END_POINT + "?sur_name="+surName + "&present_address=" + present_address).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+        final MCIMultiResponse body = getMciMultiResponse(result);
+        Assert.assertEquals("[]", body.getResults().toString());
+        Assert.assertEquals(200, body.getHttpStatus());
+    }
+
+    @Test
+    public void shouldReturnOkResponseIfPatientNotExistWithGivenNameAndAddress() throws Exception {
+        patientMapper.setHealthId("health-100");
+        String json = new ObjectMapper().writeValueAsString(patientMapper);
+        String present_address = patientMapper.getAddress().getDivisionId() +
+                patientMapper.getAddress().getDistrictId() + patientMapper.getAddress().getUpazillaId();
+        String surName = "Raju";
+        MvcResult result = mockMvc.perform(get(API_END_POINT + "?given_name="+surName + "&present_address=" + present_address).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+        final MCIMultiResponse body = getMciMultiResponse(result);
+        Assert.assertEquals("[]", body.getResults().toString());
+        Assert.assertEquals(200, body.getHttpStatus());
+    }
+
+    private MCIMultiResponse getMciMultiResponse(MvcResult result) {
+        final ResponseEntity asyncResult = (ResponseEntity< MCIMultiResponse>) result.getAsyncResult();
+
+        return (MCIMultiResponse)asyncResult.getBody();
+    }
+
 
     @After
     public void teardown() {
         cqlTemplate.execute("truncate patient");
     }
+
+
 
     private class InvalidPatient {
 

@@ -260,6 +260,24 @@ public class PatientControllerTest {
         assertFindAllBy(searchQuery, stringBuilder.toString());
     }
 
+    @Test
+    public void shouldFindPatientsByAddressAndSurNameAndShowNoteForMoreRecord() throws Exception {
+
+        StringBuilder stringBuilder = new StringBuilder(200);
+        String address = location.getDivisionId() + location.getDistrictId() + location.getUpazillaId();
+        searchQuery.setPresent_address(address);
+        stringBuilder.append("present_address=" + address);
+        stringBuilder.append("&sur_name=" + patientMapper.getSurName());
+        searchQuery.setSur_name(patientMapper.getSurName());
+
+        patientMappers.add(patientMapper);
+        patientMappers.add(patientMapper);
+        patientMappers.add(patientMapper);
+        maxLimit = 4;
+
+        assertFindAllBy(searchQuery, stringBuilder.toString());
+    }
+
     private LocalValidatorFactoryBean validator() {
         return localValidatorFactoryBean;
     }
