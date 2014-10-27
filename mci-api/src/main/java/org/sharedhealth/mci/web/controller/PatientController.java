@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.sharedhealth.mci.validation.group.RequiredGroup;
 import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
+import org.sharedhealth.mci.web.exception.SearchQueryParameterException;
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.handler.MCIResponse;
@@ -97,7 +98,7 @@ public class PatientController {
     public DeferredResult<ResponseEntity<MCIMultiResponse>> findPatients(@Valid SearchQuery searchQuery, BindingResult bindingResult)
             throws ExecutionException, InterruptedException {
         if (bindingResult.hasErrors()) {
-            throw new ValidationException(bindingResult);
+            throw new SearchQueryParameterException(bindingResult);
         }
         logger.debug("Find all patients  by search query ");
         final DeferredResult<ResponseEntity<MCIMultiResponse>> deferredResult = new DeferredResult<>();

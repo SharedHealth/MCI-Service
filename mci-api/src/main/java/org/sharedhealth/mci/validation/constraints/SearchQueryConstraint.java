@@ -17,7 +17,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Constraint(validatedBy = SearchQueryValidator.class)
 @Documented
 public @interface SearchQueryConstraint {
-    String message() default "invalid search query";
+    String message() default "1006";
 
     Class<?>[] groups() default {};
 

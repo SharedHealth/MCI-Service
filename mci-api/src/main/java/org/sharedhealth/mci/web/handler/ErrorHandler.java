@@ -106,6 +106,14 @@ public class ErrorHandler {
         return errorHandler;
     }
 
+    public ErrorHandler handleSearchQueryParameterError(ErrorHandler errorHandler, int code, String message) {
+
+        MCIError mciError = new MCIError(code, message);
+        errorHandler.addError(mciError);
+
+        return errorHandler;
+    }
+
 
     private MCIError getValidationErrorInfo(ObjectError error) {
 

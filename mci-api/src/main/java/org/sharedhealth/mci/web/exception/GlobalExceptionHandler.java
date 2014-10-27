@@ -31,6 +31,7 @@ public class GlobalExceptionHandler {
     public static final int ERROR_CODE_JSON_PARSE = 2001;
     public static final int ERROR_CODE_UNRECOGNIZED_FIELD = 2002;
     public static final int ERROR_CODE_FIELD_NOT_PERMITTED = 3001;
+    public static final int ERROR_SEARCH_PARAMETER = 1006;
 
     
     
@@ -114,6 +115,23 @@ public class GlobalExceptionHandler {
         field = "hid";
 
         return errorHandler.handleHealthIDExistError(errorHandler, code, msg,field);
+    }
+
+    @ResponseStatus(value = BAD_REQUEST)
+    @ExceptionHandler(SearchQueryParameterException.class)
+    @ResponseBody
+    public ErrorHandler searchQueryParameterException(SearchQueryParameterException e) {
+        logger.error("Handling Search Query parameter exception. ", e);
+        int code;
+        String msg;
+        ErrorHandler errorHandler;
+
+        errorHandler = new ErrorHandler(BAD_REQUEST.value(),
+                ErrorHandler.VALIDATION_ERROR_CODE, "validation error");
+        code = ERROR_SEARCH_PARAMETER;
+        msg = "Invalid search parameter";
+
+        return errorHandler.handleSearchQueryParameterError(errorHandler, code, msg);
     }
 
     @ResponseStatus(value = INTERNAL_SERVER_ERROR)
