@@ -16,6 +16,7 @@ import org.sharedhealth.mci.web.config.EnvironmentMock;
 import org.sharedhealth.mci.web.config.WebMvcConfig;
 import org.sharedhealth.mci.web.handler.MCIError;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
+import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientMapper;
 import org.sharedhealth.mci.web.service.LocationService;
@@ -70,7 +71,7 @@ public class PatientRestApiTest {
         patientMapper.setDateOfBirth("2014-12-01");
         patientMapper.setEducationLevel("01");
         patientMapper.setOccupation("02");
-
+        patientMapper.setMaritalStatus("1");
 
         Address address = new Address();
         address.setAddressLine("house-10");
@@ -245,12 +246,41 @@ public class PatientRestApiTest {
         Assert.assertEquals(200, body.getHttpStatus());
     }
 
+    @Test
+    public void shouldReturnAllTheCreatedPatientFieldAfterGetAPICall() throws Exception {
+        String json = new ObjectMapper().writeValueAsString(patientMapper);
+
+        MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        final MCIResponse body = getMciResponse(result);
+        String healthId = body.getId();
+
+        MvcResult getResult = mockMvc.perform(get(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        final ResponseEntity asyncResult = (ResponseEntity<PatientMapper>) getResult.getAsyncResult();
+        final PatientMapper getBody = (PatientMapper)asyncResult.getBody();
+
+        Assert.assertEquals("1", getBody.getMaritalStatus());
+        Assert.assertEquals("M", getBody.getGender());
+
+
+    }
+
     private MCIMultiResponse getMciMultiResponse(MvcResult result) {
         final ResponseEntity asyncResult = (ResponseEntity< MCIMultiResponse>) result.getAsyncResult();
 
         return (MCIMultiResponse)asyncResult.getBody();
     }
 
+    private MCIResponse getMciResponse(MvcResult result) {
+        final ResponseEntity asyncResult = (ResponseEntity< MCIResponse>) result.getAsyncResult();
+
+        return (MCIResponse)asyncResult.getBody();
+    }
 
     @After
     public void teardown() {

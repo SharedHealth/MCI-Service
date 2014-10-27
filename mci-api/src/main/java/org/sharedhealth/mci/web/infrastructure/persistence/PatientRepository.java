@@ -346,6 +346,7 @@ public class PatientRepository extends BaseRepository {
         patientMapper.setDisability(row.getString(DISABILITY));
         patientMapper.setEthnicity(row.getString(ETHNICITY));
         patientMapper.setIsAlive(row.getString(IS_ALIVE));
+        patientMapper.setMaritalStatus(row.getString(MARITAL_STATUS));
 
         patientMapper.setPrimaryContact(row.getString(PRIMARY_CONTACT));
 
@@ -643,6 +644,7 @@ public class PatientRepository extends BaseRepository {
         patient.setDisability(p.getDisability());
         patient.setEthnicity(p.getEthnicity());
         patient.setIsAlive(p.getIsAlive());
+        patient.setMaritalStatus(p.getMaritalStatus());
 
         if (address != null) {
             patient.setAddressLine(address.getAddressLine());
