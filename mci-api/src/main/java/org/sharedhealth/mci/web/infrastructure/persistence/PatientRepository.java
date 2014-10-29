@@ -735,6 +735,22 @@ public class PatientRepository extends BaseRepository {
             select.where(QueryBuilder.eq("lower_given_name", StringUtils.trim(searchQuery.getGiven_name()).toLowerCase()));
         }
 
+        if (StringUtils.isNotBlank(searchQuery.getPhone_no())) {
+            select.where(QueryBuilder.eq(PatientQueryBuilder.PHONE_NO, StringUtils.trim(searchQuery.getPhone_no())));
+        }
+
+        if (StringUtils.isNotBlank(searchQuery.getCountry_code())) {
+            select.where(QueryBuilder.eq(PatientQueryBuilder.PHONE_NUMBER_COUNTRY_CODE, StringUtils.trim(searchQuery.getCountry_code())));
+        }
+
+        if (StringUtils.isNotBlank(searchQuery.getArea_code())) {
+            select.where(QueryBuilder.eq(PatientQueryBuilder.PHONE_NUMBER_AREA_CODE, StringUtils.trim(searchQuery.getArea_code())));
+        }
+
+        if (StringUtils.isNotBlank(searchQuery.getExtension())) {
+            select.where(QueryBuilder.eq(PatientQueryBuilder.PHONE_NUMBER_EXTENSION, StringUtils.trim(searchQuery.getExtension())));
+        }
+
         select.limit(searchQuery.getMaximum_limit() + 1);
         select.allowFiltering();
         return select;

@@ -40,6 +40,22 @@ public class SearchQuery extends PaginationQuery {
     @Length(max = 100, min=1, message = "1002")
     private String given_name;
 
+    @JsonProperty("phone_no")
+    @Pattern(regexp = "[0-9]{1,12}$", message = "1002")
+    private String phone_no;
+
+    @JsonProperty("country_code")
+    @Pattern(regexp = "[0-9]*$", message = "1002")
+    private String country_code;
+
+    @JsonProperty("area_code")
+    @Pattern(regexp = "[0-9]*$", message = "1002")
+    private String area_code;
+
+    @JsonProperty("extension")
+    @Pattern(regexp = "[0-9]*$", message = "1002")
+    private String extension;
+
 
     public SearchQuery() {
     }
@@ -109,5 +125,37 @@ public class SearchQuery extends PaginationQuery {
 
     public void setGiven_name(String given_name) {
         this.given_name = given_name;
+    }
+
+    public String getPhone_no() {
+        return phone_no;
+    }
+
+    public void setPhone_no(String phone_no) {
+        this.phone_no = phone_no;
+    }
+
+    public String getCountry_code() {
+        return country_code;
+    }
+
+    public void setCountry_code(String country_code) {
+        this.country_code = country_code;
+    }
+
+    public String getArea_code() {
+        return area_code;
+    }
+
+    public void setArea_code(String area_code) {
+        this.area_code = area_code;
+    }
+
+    public String getExtension() {
+        return extension;
+    }
+
+    public void setExtension(String extension) {
+        this.extension = extension;
     }
 }
