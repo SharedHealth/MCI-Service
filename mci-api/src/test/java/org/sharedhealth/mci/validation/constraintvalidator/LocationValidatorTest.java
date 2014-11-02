@@ -54,4 +54,12 @@ public class LocationValidatorTest {
         assertEquals(1, constraintViolations.size());
         assertEquals("1004", constraintViolations.iterator().next().getMessage());
     }
+
+    @Test
+    public void shouldFailForInvalidCountryForPresentAddress() throws Exception {
+        address.setCountryCode("051");
+        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "address", address);
+        assertEquals(1, constraintViolations.size());
+        assertEquals("1004", constraintViolations.iterator().next().getMessage());
+    }
 }

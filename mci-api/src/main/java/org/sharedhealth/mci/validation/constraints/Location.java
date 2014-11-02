@@ -22,4 +22,6 @@ public @interface Location {
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};
+
+    String country_code() default "";
 }

@@ -18,9 +18,11 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
     private static final Logger logger = LoggerFactory.getLogger(LocationValidator.class);
     private static final String BD_COUNTRY_CODE = "050";
     private static final String ERROR_CODE_REQUIRED = "1001";
+    private static final String ERROR_CODE_PATTERN = "1004";
     private static final String ERROR_CODE_DEPENDENT = "1005";
 
     private LocationService locationService;
+    private String countryCode;
 
     @Autowired
     public LocationValidator(LocationService locationService) {
@@ -29,24 +31,28 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
 
     @Override
     public void initialize(Location constraintAnnotation) {
-
+            this.countryCode = constraintAnnotation.country_code();
     }
 
     @Override
     public boolean isValid(Address value, ConstraintValidatorContext context) {
 
+        boolean isValid = true;
+
         if (value == null) return true;
 
         String geoCode = value.getGeoCode();
 
+        context.disableDefaultConstraintViolation();
 
-        if (value.getCountryCode() != null && !value.getCountryCode().equals(BD_COUNTRY_CODE)) {
+        if (StringUtils.isEmpty(this.countryCode) && value.getCountryCode() != null && !value.getCountryCode().equals(BD_COUNTRY_CODE)) {
             return true;
         }
 
-        boolean isValid = true;
-
-        context.disableDefaultConstraintViolation();
+        if(StringUtils.isNotEmpty(this.countryCode) && value.getCountryCode() != null && !value.getCountryCode().equals(this.countryCode)) {
+            isValid = false;
+            //addConstraintViolation(context, ERROR_CODE_PATTERN, "countryCode");
+        }
 
         if (StringUtils.isBlank(value.getDivisionId())) {
             isValid = false;
