@@ -400,11 +400,11 @@ public class PatientRepository extends BaseRepository {
         primaryContactNumber.setExtension(row.getString(PRIMARY_CONTACT_NUMBER_EXTENSION));
 
         if (primaryContactNumber.getNumber() != null) {
-            patientMapper.setPhoneNumber(phoneNumber);
+            patientMapper.setPrimaryContactNumber(primaryContactNumber);
         }
 
         if (phoneNumber.getNumber() != null) {
-            patientMapper.setPrimaryContactNumber(primaryContactNumber);
+            patientMapper.setPhoneNumber(phoneNumber);
         }
 
         if (permanentaddress.getCountryCode() != null) {
