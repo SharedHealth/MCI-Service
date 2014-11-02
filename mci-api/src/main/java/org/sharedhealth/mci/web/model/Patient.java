@@ -839,7 +839,7 @@ public class Patient {
     }
 
     public void setPhoneNumberCountryCode(String phoneNumberCountryCode) {
-        this.phoneNumberCountryCode = phoneNumberCountryCode;
+        this.phoneNumberCountryCode = defaultString(phoneNumberCountryCode);
     }
 
     public String getPhoneNumberAreaCode() {
@@ -847,7 +847,7 @@ public class Patient {
     }
 
     public void setPhoneNumberAreaCode(String phoneNumberAreaCode) {
-        this.phoneNumberAreaCode = phoneNumberAreaCode;
+        this.phoneNumberAreaCode = defaultString(phoneNumberAreaCode);
     }
 
     public String getPhoneNumberExtension() {
@@ -855,7 +855,7 @@ public class Patient {
     }
 
     public void setPhoneNumberExtension(String phoneNumberExtension) {
-        this.phoneNumberExtension = phoneNumberExtension;
+        this.phoneNumberExtension = defaultString(phoneNumberExtension);
     }
 
     public String getPrimaryContactNumberCountryCode() {
@@ -863,7 +863,7 @@ public class Patient {
     }
 
     public void setPrimaryContactNumberCountryCode(String primaryContactNumberCountryCode) {
-        this.primaryContactNumberCountryCode = primaryContactNumberCountryCode;
+        this.primaryContactNumberCountryCode = defaultString(primaryContactNumberCountryCode);
     }
 
     public String getPrimaryContactNumberAreaCode() {
@@ -871,7 +871,7 @@ public class Patient {
     }
 
     public void setPrimaryContactNumberAreaCode(String primaryContactNumberAreaCode) {
-        this.primaryContactNumberAreaCode = primaryContactNumberAreaCode;
+        this.primaryContactNumberAreaCode = defaultString(primaryContactNumberAreaCode);
     }
 
     public String getPrimaryContactNumberExtension() {
@@ -879,7 +879,7 @@ public class Patient {
     }
 
     public void setPrimaryContactNumberExtension(String primaryContactNumberExtension) {
-        this.primaryContactNumberExtension = primaryContactNumberExtension;
+        this.primaryContactNumberExtension = defaultString(primaryContactNumberExtension);
     }
 
     public String getCreatedBy() {
