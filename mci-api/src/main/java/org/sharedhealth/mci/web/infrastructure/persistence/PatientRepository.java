@@ -682,7 +682,9 @@ public class PatientRepository extends BaseRepository {
             patient.setPermanentCountryCode(permanentAddress.getCountryCode());
         }
 
-        patient.setRelations(relationsJson);
+        if(p.getRelations() != null) {
+            patient.setRelations(relationsJson);
+        }
 
         if (phoneNumber != null) {
             patient.setCellNo(phoneNumber.getNumber());
