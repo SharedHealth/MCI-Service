@@ -28,6 +28,10 @@ CUR_USER=`/usr/bin/whoami`
 # Read configuration variable file if it is present
 [ -r /etc/default/$NAME ] && . /etc/default/$NAME
 
+if [ ! -e "/var/run/$NAME" ]; then
+    mkdir "/var/run/$NAME"
+fi
+
 show_message() {
     echo $1
 }
