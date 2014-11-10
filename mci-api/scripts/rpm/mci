@@ -50,7 +50,7 @@ case "$1" in
         check_proc
         if [ $? -eq 0 ]; then
             echo "$?"
-            log_success_msg "MCI Server already running on port $MCI_PORT"
+            show_message "MCI Server already running on port $MCI_PORT"
             exit 0
         fi
 
