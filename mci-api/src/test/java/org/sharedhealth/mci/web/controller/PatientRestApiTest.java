@@ -182,6 +182,19 @@ public class PatientRestApiTest {
     }
 
     @Test
+    public void shouldReturnNotFoundResponseWhenSearchBy_ID_IfPatientNotExist() throws Exception {
+
+        MvcResult result = mockMvc.perform(get(API_END_POINT + "/random-1000"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(result))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(APPLICATION_JSON_UTF8))
+                .andExpect(content().string("{\"http_status\":404,\"message\":\"patient.not.found\"}"));
+    }
+
+    @Test
     public void shouldReturnNotFoundResponseIfPatientNotExistForUpdate() throws Exception {
         String json = new ObjectMapper().writeValueAsString(patientMapper);
 
