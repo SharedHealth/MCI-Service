@@ -18,7 +18,7 @@ public class MaritalRelationValidator implements ConstraintValidator<MaritalRela
 
         if (value == null) return true;
 
-        if (value.getRelation("SPS") == null) return true;
+        if (value.getRelationOfType("SPS") == null) return true;
 
         if (isNotNullOrNotUnmarried(value.getMaritalStatus())) {
             return true;

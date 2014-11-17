@@ -344,7 +344,7 @@ public class PatientMapper {
         return relations;
     }
 
-    public Relation getRelation(String relationType) {
+    public Relation getRelationOfType(String relationType) {
 
         if (this.relations == null) {
             return null;
@@ -353,6 +353,22 @@ public class PatientMapper {
         for (Relation relation : this.relations) {
 
             if (relation.getType() != null && relation.getType().equals(relationType)) {
+                return relation;
+            }
+        }
+
+        return null;
+    }
+
+    public Relation getRelationById(String id) {
+
+        if (this.relations == null) {
+            return null;
+        }
+
+        for (Relation relation : this.relations) {
+
+            if (relation.getId() != null && relation.getId().equals(id)) {
                 return relation;
             }
         }

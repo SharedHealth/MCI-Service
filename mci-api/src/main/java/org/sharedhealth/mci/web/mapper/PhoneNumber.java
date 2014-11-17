@@ -5,6 +5,8 @@ import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
@@ -62,5 +64,15 @@ public class PhoneNumber {
 
     public void setExtension(String extension) {
         this.extension = extension;
+    }
+
+    @Override
+    public boolean equals(Object rhs) {
+        return EqualsBuilder.reflectionEquals(this, rhs);
+    }
+
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 }

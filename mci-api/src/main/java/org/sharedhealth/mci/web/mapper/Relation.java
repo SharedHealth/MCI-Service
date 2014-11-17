@@ -6,6 +6,8 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.sharedhealth.mci.validation.constraints.Code;
 import org.sharedhealth.mci.validation.constraints.Length;
 import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
@@ -16,7 +18,7 @@ public class Relation {
 
     public Relation() {
         UUID idOne = UUID.randomUUID();
-        this.Id = idOne.toString();
+        this.id = idOne.toString();
     }
 
     @JsonProperty("type")
@@ -70,7 +72,7 @@ public class Relation {
     private String relationalStatus;
 
     @JsonProperty("id")
-    private String Id;
+    private String id;
 
     public String getNameBangla() {
         return nameBangla;
@@ -137,11 +139,11 @@ public class Relation {
     }
 
     public String getId() {
-        return Id;
+        return id;
     }
 
     public void setId(String id) {
-        this.Id = id;
+        this.id = id;
     }
 
     public String getRelationalStatus() {
@@ -158,5 +160,15 @@ public class Relation {
 
     public void setHealthId(String healthId) {
         this.healthId = healthId;
+    }
+
+    @Override
+    public boolean equals(Object rhs) {
+        return EqualsBuilder.reflectionEquals(this, rhs);
+    }
+
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 }

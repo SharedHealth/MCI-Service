@@ -1,0 +1,48 @@
+{
+  "given_name":"Rafan Zaman",
+  "sur_name":"Aymaan",
+  "date_of_birth":"1990-02-28",
+  "gender":"M",
+  "marital_status":"2",
+  "relations":[
+    {
+      "type":"FTH",
+      "name_bangla":"মোঃ সাকিব আলী খান",
+      "given_name":"Md. Sakib Ali",
+      "sur_name":"Khan",
+      "nid":"1951557890163",
+      "uid":"09811217611",
+      "bin_brn":"76545678901633456",
+      "hid":"5911276753547952129"
+    },
+    {
+      "type":"SPS",
+      "name_bangla":"মেহজাবীন খান",
+      "given_name":"Mehzabin",
+      "sur_name":"Khan",
+      "nid":"1990567890163",
+      "uid":"38761111111",
+      "bin_brn":"52345678901633456",
+      "hid":"5911276753547952129",
+      "marriage_id":"12345678",
+      "relational_status":"3"
+    }
+  ],
+  "present_address":{
+    "address_line":"xyz",
+    "division_id":"10",
+    "district_id":"04",
+    "upazilla_id":"09",
+    "thana_id":null,
+    "city_corporation_id":"20",
+    "union_id":"06",
+    "ward_id":null,
+    "area_mouja":"Dhanmondi",
+    "village":"Lalmatia",
+    "holding_number":"Level 2,Taj Garden,House no.4/k",
+    "street":"Plot 51,Satmasjid Road",
+    "post_office":"Mohammadpur",
+    "post_code":"1207",
+    "country_code":"050"
+  }
+}

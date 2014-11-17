@@ -80,18 +80,9 @@ public class PatientRepository extends BaseRepository {
             return getStringListenableFuture(result);
         }
 
-        String fullName = "";
-        if (patientMapper.getGivenName() != null) {
-            fullName = patientMapper.getGivenName();
-        }
-        if (patientMapper.getSurName() != null) {
-            fullName = fullName + " " + patientMapper.getSurName();
-        }
-
         Patient p = getEntityFromPatientMapper(patientMapper);
 
         p.setHealthId(uid.getId());
-        p.setFullName(fullName);
         p.setCreatedAt(new Date());
         p.setUpdatedAt(new Date());
         p.setSurName(patientMapper.getSurName());
@@ -586,8 +577,8 @@ public class PatientRepository extends BaseRepository {
         String relationsJson = "";
         ObjectMapper mapper = new ObjectMapper();
 
-        Relation father = p.getRelation("FTH");
-        Relation mother = p.getRelation("MTH");
+        Relation father = p.getRelationOfType("FTH");
+        Relation mother = p.getRelationOfType("MTH");
 
         try {
             relationsJson = mapper.writeValueAsString(p.getRelations());
