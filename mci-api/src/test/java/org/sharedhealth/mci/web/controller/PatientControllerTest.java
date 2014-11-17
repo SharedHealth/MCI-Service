@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.handler.MCIResponse;
+import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.Location;
 import org.sharedhealth.mci.web.mapper.PatientMapper;
@@ -26,6 +27,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
+
+import java.text.ParseException;
+
+import static java.lang.String.format;
+import static org.hamcrest.Matchers.is;
+
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -36,7 +43,9 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PatientControllerTest {
@@ -51,9 +60,15 @@ public class PatientControllerTest {
     private SettingService settingService;
 
     @Mock
+    private PatientRepository patientRepository;
+
+    @Mock
     private LocalValidatorFactoryBean localValidatorFactoryBean;
 
     private PatientMapper patientMapper;
+
+    private PatientController controller;
+    private PatientMapper patientDto;
     private Location location;
     private MockMvc mockMvc;
     private String nationalId = "1234567890123";
@@ -65,11 +80,11 @@ public class PatientControllerTest {
     public static final String GEO_CODE = "1004092001";
     private SearchQuery searchQuery;
     private StringBuilder stringBuilder;
-    private List<PatientMapper> patientMappers;
+    private List<PatientMapper> patientDtos;
     private int maxLimit;
 
     @Before
-    public void setup() {
+    public void setup() throws ParseException {
         initMocks(this);
         mockMvc = MockMvcBuilders
                 .standaloneSetup(new PatientController(patientService))
@@ -107,29 +122,30 @@ public class PatientControllerTest {
 
         searchQuery = new SearchQuery();
         stringBuilder = new StringBuilder(200);
-        patientMappers = new ArrayList<>();
+        patientDtos = new ArrayList<>();
         maxLimit = 25;
     }
 
+
     @Test
     public void shouldCreatePatientAndReturnHealthId() throws Exception {
-        String json = new ObjectMapper().writeValueAsString(patientMapper);
+        String json = new ObjectMapper().writeValueAsString(patientDto);
         String healthId = "healthId-100";
         MCIResponse mciResponse = new MCIResponse(healthId, CREATED);
         when(locationService.findByGeoCode(GEO_CODE)).thenReturn(new PreResolvedListenableFuture<>(location));
-        when(patientService.create(patientMapper)).thenReturn(new PreResolvedListenableFuture<>(mciResponse));
+        when(patientService.create(patientDto)).thenReturn(new PreResolvedListenableFuture<>(mciResponse));
 
         mockMvc.perform(post(API_END_POINT).content(json).contentType(APPLICATION_JSON))
                 .andExpect(request().asyncResult(new ResponseEntity<>(mciResponse, CREATED)));
-        verify(patientService).create(patientMapper);
+        verify(patientService).create(patientDto);
     }
 
     @Test
     public void shouldFindPatientByHealthId() throws Exception {
         String healthId = "healthId-100";
-        when(patientService.findByHealthId(healthId)).thenReturn(new PreResolvedListenableFuture<>(patientMapper));
+        when(patientService.findByHealthId(healthId)).thenReturn(new PreResolvedListenableFuture<>(patientDto));
         mockMvc.perform(get(API_END_POINT + "/" + healthId))
-                .andExpect(request().asyncResult(new ResponseEntity<>(patientMapper, OK)));
+                .andExpect(request().asyncResult(new ResponseEntity<>(patientDto, OK)));
         verify(patientService).findByHealthId(healthId);
     }
 
@@ -189,16 +205,16 @@ public class PatientControllerTest {
         searchQuery.setPresent_address(address);
         stringBuilder.append("present_address=" + address);
 
-        patientMappers.add(patientMapper);
-        patientMappers.add(patientMapper);
-        patientMappers.add(patientMapper);
+        patientDtos.add(patientDto);
+        patientDtos.add(patientDto);
+        patientDtos.add(patientDto);
         maxLimit = 4;
 
         assertFindAllBy(searchQuery, stringBuilder.toString());
     }
 
     private void assertFindAllBy(SearchQuery searchQuery, String queryString) throws Exception {
-        patientMappers.add(patientMapper);
+        patientDtos.add(patientDto);
 
         searchQuery.setMaximum_limit(maxLimit);
 
@@ -208,13 +224,13 @@ public class PatientControllerTest {
         final int limit = patientService.getPerPageMaximumLimit();
         final String note = patientService.getPerPageMaximumLimitNote();
         HashMap<String, String> additionalInfo = new HashMap<>();
-        if (patientMappers.size() > limit) {
-            patientMappers.remove(limit);
+        if (patientDtos.size() > limit) {
+            patientDtos.remove(limit);
             additionalInfo.put("note", note);
         }
 
-        when(patientService.findAllByQuery(searchQuery)).thenReturn(new PreResolvedListenableFuture<>(patientMappers));
-        MCIMultiResponse mciMultiResponse = new MCIMultiResponse<>(patientMappers, additionalInfo, OK);
+        when(patientService.findAllByQuery(searchQuery)).thenReturn(new PreResolvedListenableFuture<>(patientDtos));
+        MCIMultiResponse mciMultiResponse = new MCIMultiResponse<>(patientDtos, additionalInfo, OK);
 
         mockMvc.perform(get(API_END_POINT + "?" + queryString))
                 .andExpect(request().asyncResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject)));
@@ -224,15 +240,15 @@ public class PatientControllerTest {
 
     @Test
     public void shouldUpdatePatientAndReturnHealthId() throws Exception {
-        String json = new ObjectMapper().writeValueAsString(patientMapper);
+        String json = new ObjectMapper().writeValueAsString(patientDto);
         String healthId = "healthId-100";
         MCIResponse mciResponse = new MCIResponse(healthId, ACCEPTED);
         when(locationService.findByGeoCode(GEO_CODE)).thenReturn(new PreResolvedListenableFuture<>(location));
-        when(patientService.update(patientMapper, healthId)).thenReturn(new PreResolvedListenableFuture<>(mciResponse));
+        when(patientService.update(patientDto, healthId)).thenReturn(new PreResolvedListenableFuture<>(mciResponse));
 
         mockMvc.perform(put(PUT_API_END_POINT, healthId).content(json).contentType(APPLICATION_JSON))
                 .andExpect(request().asyncResult(new ResponseEntity<>(mciResponse, ACCEPTED)));
-        verify(patientService).update(patientMapper, healthId);
+        verify(patientService).update(patientDto, healthId);
 
     }
 
@@ -270,9 +286,9 @@ public class PatientControllerTest {
         stringBuilder.append("&sur_name=" + patientMapper.getSurName());
         searchQuery.setSur_name(patientMapper.getSurName());
 
-        patientMappers.add(patientMapper);
-        patientMappers.add(patientMapper);
-        patientMappers.add(patientMapper);
+        patientDtos.add(patientDto);
+        patientDtos.add(patientDto);
+        patientDtos.add(patientDto);
         maxLimit = 4;
 
         assertFindAllBy(searchQuery, stringBuilder.toString());
@@ -280,6 +296,70 @@ public class PatientControllerTest {
 
     private LocalValidatorFactoryBean validator() {
         return localValidatorFactoryBean;
+    }
+    public void shouldNotUpdatePatient_FieldsMarkedForApproval() throws Exception {
+
+        String healthId = "healthId-100";
+        patientDto.setHealthId(healthId);
+
+        PatientMapper patientDtoUpdated = createPatientDto();
+        patientDtoUpdated.setGivenName("Bulla");
+        patientDtoUpdated.setGender("F");
+        patientDtoUpdated.setDateOfBirth("2000-02-10");
+        patientDtoUpdated.setHealthId(healthId);
+        String json = new ObjectMapper().writeValueAsString(patientDtoUpdated);
+        PatientMapper patientDtoModified = createPatientDto();
+        patientDtoModified.setGivenName("Bulla");
+
+        when(patientService.findByHealthId(healthId).get()).thenReturn(patientDtoModified);
+        when(patientRepository.findByHealthId(healthId).get()).thenReturn(patientDto);
+        when(patientService.update(patientDtoUpdated,healthId).get()).thenReturn(new MCIResponse(healthId, ACCEPTED));
+
+        mockMvc.perform(put(PUT_API_END_POINT, healthId).content(json).contentType(APPLICATION_JSON))
+                .andExpect(status().isAccepted());
+        mockMvc.perform(get(API_END_POINT + "/" + healthId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nid", is(nationalId)))
+                .andExpect(jsonPath("$.bin_brn", is(birthRegistrationNumber)))
+                .andExpect(jsonPath("$.given_name", is("Bulla")))
+                .andExpect(jsonPath("$.sur_name", is("Tiger")))
+                .andExpect(jsonPath("$.date_of_birth", is("2014-12-01")))
+                .andExpect(jsonPath("$.present_address.address_line", is("house-10")));
+        verify(patientService).update(patientDtoUpdated,healthId);
+        verify(patientService).findByHealthId(healthId);
+
+    }
+
+    private PatientMapper createPatientDto() throws ParseException {
+        patientDto = new PatientMapper();
+        patientDto.setNationalId(nationalId);
+        patientDto.setBirthRegistrationNumber(birthRegistrationNumber);
+        patientDto.setGivenName("Scott");
+        patientDto.setSurName("Tiger");
+        patientDto.setGender("M");
+        patientDto.setDateOfBirth("2014-12-01");
+
+        Address address = new Address();
+        address.setAddressLine("house-10");
+        address.setDivisionId("10");
+        address.setDistrictId("04");
+        address.setUpazillaId("09");
+        address.setCityCorporationId("20");
+        address.setVillage("10");
+        address.setWardId("01");
+        address.setCountryCode("050");
+
+        patientDto.setAddress(address);
+
+        location = new Location();
+
+        location.setGeoCode(GEO_CODE);
+        location.setDivisionId("10");
+        location.setDistrictId("04");
+        location.setUpazillaId("09");
+        location.setPaurashavaId("20");
+        location.setUnionId("01");
+        return patientDto;
     }
 }
 

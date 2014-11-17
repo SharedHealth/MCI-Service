@@ -1,0 +1,51 @@
+package org.sharedhealth.mci.web.utils;
+
+public class PatientFieldProperties {
+    public static final String HID = "hid";
+    public static final String NID = "nid";
+    public static final String NAME_BANGLA = "name_bangla";
+    public static final String BIN_BRN = "bin_brn";
+    public static final String GIVEN_NAME = "given_name";
+    public static final String SUR_NAME = "sur_name";
+    public static final String DATE_OF_BIRTH = "date_of_birth";
+    public static final String GENDER = "gender";
+    public static final String OCCUPATION = "occupation";
+    public static final String EDU_LEVEL = "edu_level";
+    public static final String RELATIONS = "relations";
+    public static final String UID = "uid";
+    public static final String PLACE_OF_BIRTH = "place_of_birth";
+    public static final String RELIGION = "religion";
+    public static final String BLOOD_GROUP = "blood_group";
+    public static final String NATIONALITY = "nationality";
+    public static final String DISABILITY = "disability";
+    public static final String ETHNICITY = "ethnicity";
+    public static final String PRESENT_ADDRESS = "present_address";
+    public static final String PRIMARY_CONTACT = "primary_contact";
+    public static final String PHONE_NUMBER = "phone_number";
+    public static final String PRIMARY_CONTACT_NUMBER = "primary_contact_number";
+    public static final String PERMANENT_ADDRESS = "permanent_address";
+    public static final String MARITAL_STATUS = "marital_status";
+    public static final String FULL_NAME = "full_name";
+    public static final String IS_ALIVE = "is_alive";
+    public static final String CREATED = "created";
+    public static final String MODIFIED = "modified";
+
+    public static final String ADDRESS_LINE = "address_line";
+    public static final String DIVISION_ID = "division_id";
+    public static final String DISTRICT_ID = "district_id";
+    public static final String UPAZILLA_ID = "upazilla_id";
+    public static final String UNION_ID = "union_id";
+    public static final String HOLDING_NUMBER = "holding_number";
+    public static final String STREET = "street";
+    public static final String AREA_MOUJA = "area_mouja";
+    public static final String VILLAGE = "village";
+    public static final String POST_OFFICE = "post_office";
+    public static final String POST_CODE = "post_code";
+    public static final String WARD_ID = "ward_id";
+    public static final String THANA_ID = "thana_id";
+    public static final String CITY_CORPORATION_ID = "city_corporation_id";
+    public static final String COUNTRY_CODE = "country_code";
+    public static final String UPAZILA_ID_OR_THANA_ID = "(upazila_id/thana_id)";
+    public static final String UPAZILLA_ID_AND_THANA_ID = "(upazila_id,thana_id)";
+    public static final String UNION_ID_AND_WARD_ID = "(union_id,ward_id)";
+}

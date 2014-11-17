@@ -1,10 +1,5 @@
 package org.sharedhealth.mci.web.mapper;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -17,147 +12,152 @@ import org.sharedhealth.mci.validation.constraints.*;
 import org.sharedhealth.mci.validation.constraints.Location;
 import org.sharedhealth.mci.validation.group.RequiredGroup;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import java.util.List;
+
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
+import static org.sharedhealth.mci.web.utils.PatientFieldProperties.*;
 
 @MaritalRelation(message = "1005", field = "maritalStatus")
 @JsonIgnoreProperties({"created_at"})
 public class PatientMapper {
 
-    @JsonProperty("hid")
+    @JsonProperty(HID)
     private String healthId;
 
-    @JsonProperty("nid")
+    @JsonProperty(NID)
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "[\\d]{13}|[\\d]{17}", message = "1002")
     private String nationalId;
-
-    @JsonProperty("bin_brn")
+    @JsonProperty(BIN_BRN)
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "[\\d]{17}", message = "1002")
     private String birthRegistrationNumber;
 
-    @JsonProperty("name_bangla")
+    @JsonProperty(NAME_BANGLA)
     @JsonInclude(NON_EMPTY)
     @Length(max = 125, message = "1002")
     private String nameBangla;
 
-    @JsonProperty("given_name")
+    @JsonProperty(GIVEN_NAME)
     @NotNull(message = "1001", groups = RequiredGroup.class)
     @Length(max = 100, min=1, message = "1002")
     private String givenName;
 
-    @JsonProperty("sur_name")
+    @JsonProperty(SUR_NAME)
     @NotNull(message = "1001", groups = RequiredGroup.class)
     @Pattern(regexp = "^(\\s*)([A-Za-z0-9]{1,25})(\\b\\s*$)", message = "1002")
     private String surName;
 
-    @JsonProperty("date_of_birth")
+    @JsonProperty(DATE_OF_BIRTH)
     @NotNull(message = "1001", groups = RequiredGroup.class)
     @Date(format = "yyyy-MM-dd", message = "1002")
     @Length(min=1,max = 10,message = "1002")
     private String dateOfBirth;
 
-    @JsonProperty("gender")
+    @JsonProperty(GENDER)
     @NotBlank(message = "1001", groups = RequiredGroup.class)
-    @Code(type = "gender", regexp = "[A-Z]{1}", message = "1004")
+    @Code(type = GENDER, regexp = "[A-Z]{1}", message = "1004")
     private String gender;
 
-    @JsonProperty("occupation")
+    @JsonProperty(OCCUPATION)
     @JsonInclude(NON_EMPTY)
-    @Code(type = "occupation", regexp = "[\\d]{2}", message = "1004")
+    @Code(type = OCCUPATION, regexp = "[\\d]{2}", message = "1004")
     private String occupation;
 
-    @JsonProperty("edu_level")
+    @JsonProperty(EDU_LEVEL)
     @JsonInclude(NON_EMPTY)
     @Code(type="education_level", regexp = "[\\d]{2}", message = "1004")
     private String educationLevel;
 
-    @JsonProperty("relations")
+    @JsonProperty(RELATIONS)
     @JsonInclude(NON_EMPTY)
     @Valid
     private List<Relation> relations;
 
-    @JsonProperty("uid")
+    @JsonProperty(UID)
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "[a-zA-Z0-9]{11}", message = "1002")
     private String uid;
 
     @JsonInclude(NON_EMPTY)
-    @JsonProperty("place_of_birth")
+    @JsonProperty(PLACE_OF_BIRTH)
     @Pattern(regexp = "^[a-zA-Z0-9]{0,20}$", message = "1002")
     private String placeOfBirth;
 
-    @JsonProperty("religion")
+    @JsonProperty(RELIGION)
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "[1|2|3|4|8|9|0]{1}", message = "1004")
     private String religion;
 
-    @JsonProperty("blood_group")
+    @JsonProperty(BLOOD_GROUP)
     @JsonInclude(NON_EMPTY)
     @Code(type = "blood_group", regexp = "[\\d]{1}", message = "1004")
     private String bloodGroup;
 
-    @JsonProperty("nationality")
+    @JsonProperty(NATIONALITY)
     @JsonInclude(NON_EMPTY)
     @Length(max = 50, message = "1002")
     private String nationality;
 
-    @JsonProperty("disability")
+    @JsonProperty(DISABILITY)
     @JsonInclude(NON_EMPTY)
-    @Code(type = "disability", regexp = "[\\d]{1}", message = "1004")
+    @Code(type = DISABILITY, regexp = "[\\d]{1}", message = "1004")
     private String disability;
 
-    @JsonProperty("ethnicity")
+    @JsonProperty(ETHNICITY)
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "[0-9]{2}", message = "1004")
     private String ethnicity;
 
-    @JsonProperty("present_address")
+    @JsonProperty(PRESENT_ADDRESS)
     @NotNull(message = "1001", groups = RequiredGroup.class)
     @Valid
     @Location(message = "1004",country_code = "050")
     private Address address;
 
-    @JsonProperty("primary_contact")
+    @JsonProperty(PRIMARY_CONTACT)
     @JsonInclude(NON_EMPTY)
     @Length(max = 100, message = "1002")
     private String primaryContact;
 
-    @JsonProperty("phone_number")
+    @JsonProperty(PHONE_NUMBER)
     @Valid
     @JsonInclude(NON_EMPTY)
     private PhoneNumber phoneNumber;
 
-    @JsonProperty("primary_contact_number")
+    @JsonProperty(PRIMARY_CONTACT_NUMBER)
     @Valid
     @JsonInclude(NON_EMPTY)
     private PhoneNumber primaryContactNumber;
 
-    @JsonProperty("permanent_address")
+    @JsonProperty(PERMANENT_ADDRESS)
     @Valid
     @JsonInclude(NON_EMPTY)
     @Location(message = "1004")
     private Address permanentAddress;
 
-    @JsonProperty("marital_status")
+    @JsonProperty(MARITAL_STATUS)
     @JsonInclude(NON_EMPTY)
-    @Code(type = "marital_status", regexp = "[\\d]{1}", message = "1004")
+    @Code(type = MARITAL_STATUS, regexp = "[\\d]{1}", message = "1004")
     private String maritalStatus;
 
-    @JsonProperty("full_name")
+    @JsonProperty(FULL_NAME)
     @JsonInclude(NON_EMPTY)
     private String fullName;
 
-    @JsonProperty("is_alive")
+    @JsonProperty(IS_ALIVE)
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "[0|1]{1}", message = "1004")
     private String isAlive;
 
-    @JsonProperty("created")
+    @JsonProperty(CREATED)
     @JsonInclude(NON_EMPTY)
     private String createdAt;
 
-    @JsonProperty("modified")
+    @JsonProperty(MODIFIED)
     @JsonInclude(NON_EMPTY)
     private String updatedAt;
 
@@ -376,18 +376,18 @@ public class PatientMapper {
         return null;
     }
 
-    public boolean isSimilarTo(PatientMapper patientMapper) {
+    public boolean isSimilarTo(PatientMapper patientDto) {
         int matches = 0;
 
-        if (this.getNationalId() != null && this.getNationalId().equals(patientMapper.getNationalId())) {
+        if (this.getNationalId() != null && this.getNationalId().equals(patientDto.getNationalId())) {
             matches++;
         }
 
-        if (this.getBirthRegistrationNumber() != null && this.getBirthRegistrationNumber().equals(patientMapper.getBirthRegistrationNumber())) {
+        if (this.getBirthRegistrationNumber() != null && this.getBirthRegistrationNumber().equals(patientDto.getBirthRegistrationNumber())) {
             matches++;
         }
 
-        if (this.getUid() != null && this.getUid().equals(patientMapper.getUid())) {
+        if (this.getUid() != null && this.getUid().equals(patientDto.getUid())) {
             matches++;
         }
 

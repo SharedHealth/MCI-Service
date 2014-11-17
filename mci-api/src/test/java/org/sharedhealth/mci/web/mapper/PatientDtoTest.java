@@ -1,15 +1,15 @@
 package org.sharedhealth.mci.web.mapper;
 
-import javax.validation.ConstraintViolation;
-import java.util.Set;
-
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.sharedhealth.mci.validation.group.RequiredGroup;
 
+import javax.validation.ConstraintViolation;
+import java.util.Set;
+
 import static org.junit.Assert.assertEquals;
 
-public class PatientMapperTest extends ValidationAwareMapper{
+public class PatientDtoTest extends ValidationAwareMapper{
 
     @Test
     public void shouldFailIfGivenNameIsBlank() {

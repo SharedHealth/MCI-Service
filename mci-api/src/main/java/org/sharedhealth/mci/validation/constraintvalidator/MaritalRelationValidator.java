@@ -1,9 +1,10 @@
 package org.sharedhealth.mci.validation.constraintvalidator;
+import org.sharedhealth.mci.validation.constraints.MaritalRelation;
+import org.sharedhealth.mci.web.mapper.PatientMapper;
+
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import org.sharedhealth.mci.validation.constraints.MaritalRelation;
-import org.sharedhealth.mci.web.mapper.PatientMapper;
 public class MaritalRelationValidator implements ConstraintValidator<MaritalRelation, PatientMapper> {
 
     private String field;

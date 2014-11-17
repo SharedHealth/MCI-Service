@@ -15,96 +15,96 @@ import org.sharedhealth.mci.validation.constraints.Code;
 import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
-
+import static org.sharedhealth.mci.web.utils.PatientFieldProperties.*;
 
 @JsonIgnoreProperties({"geoCode", "unionOrWard"})
 public class Address {
 
-    @JsonProperty("address_line")
+    @JsonProperty(ADDRESS_LINE)
     @NotNull(message = "1001", groups = RequiredOnUpdateGroup.class)
     @Size(min = 3, max = 255, message = "1002")
     private String addressLine;
 
-    @JsonProperty("division_id")
+    @JsonProperty(DIVISION_ID)
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "[\\d]{2}", message = "1002")
     private String divisionId;
 
-    @JsonProperty("district_id")
+    @JsonProperty(DISTRICT_ID)
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "[\\d]{2}", message = "1002")
     private String districtId;
 
-    @JsonProperty("upazilla_id")
+    @JsonProperty(UPAZILLA_ID)
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "[\\d]{2}", message = "1002")
     private String upazillaId;
 
-    @JsonProperty("union_id")
+    @JsonProperty(UNION_ID)
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "[\\d]{2}", message = "1002")
     private String unionId;
 
-    @JsonProperty("holding_number")
+    @JsonProperty(HOLDING_NUMBER)
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "1002")
     private String holdingNumber;
 
-    @JsonProperty("street")
+    @JsonProperty(STREET)
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "1002")
     private String street;
 
-    @JsonProperty("area_mouja")
+    @JsonProperty(AREA_MOUJA)
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "1002")
     private String areaMouja;
 
-    @JsonProperty("village")
+    @JsonProperty(VILLAGE)
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "1002")
     private String village;
 
-    @JsonProperty("post_office")
+    @JsonProperty(POST_OFFICE)
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "1002")
     private String postOffice;
 
-    @JsonProperty("post_code")
+    @JsonProperty(POST_CODE)
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "[0-9]{4}$", message = "1004")
     private String postCode;
 
-    @JsonProperty("ward_id")
+    @JsonProperty(WARD_ID)
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "[\\d]{2}", message = "1002")
     private String wardId;
 
-    @JsonProperty("thana_id")
+    @JsonProperty(THANA_ID)
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "[\\d]{2}", message = "1002")
     private String thanaId;
 
-    @JsonProperty("city_corporation_id")
+    @JsonProperty(CITY_CORPORATION_ID)
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "[\\d]{2}", message = "1002")
     private String cityCorporationId;
 
-    @JsonProperty("country_code")
+    @JsonProperty(COUNTRY_CODE)
     @JsonInclude(NON_EMPTY)
     @Code(type = "country_code", regexp = "[\\d]{3}", message = "1004")
     private String countryCode = "050";
 
     @JsonIgnore
-    @JsonProperty("(upazila_id/thana_id)")
+    @JsonProperty(UPAZILA_ID_OR_THANA_ID)
     private String upazilaOrThana;
 
     @JsonIgnore
-    @JsonProperty("(upazila_id,thana_id)")
+    @JsonProperty(UPAZILLA_ID_AND_THANA_ID)
     private String upazilaAndThana;
 
     @JsonIgnore
-    @JsonProperty("(union_id,ward_id)")
+    @JsonProperty(UNION_ID_AND_WARD_ID)
     private String unionAndWard;
 
     @Override
@@ -119,25 +119,65 @@ public class Address {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("Address{");
-        sb.append("addressLine='").append(addressLine).append('\'');
+        final StringBuilder sb = new StringBuilder("{");
+        if(addressLine!=null) {
+            sb.append("addressLine='").append(addressLine).append('\'');
+        }
+        if (divisionId!=null){
         sb.append(", divisionId='").append(divisionId).append('\'');
-        sb.append(", districtId='").append(districtId).append('\'');
-        sb.append(", upazillaId='").append(upazillaId).append('\'');
-        sb.append(", unionId='").append(unionId).append('\'');
-        sb.append(", holdingNumber='").append(holdingNumber).append('\'');
-        sb.append(", street='").append(street).append('\'');
-        sb.append(", areaMouja='").append(areaMouja).append('\'');
-        sb.append(", village='").append(village).append('\'');
-        sb.append(", postOffice='").append(postOffice).append('\'');
-        sb.append(", postCode='").append(postCode).append('\'');
-        sb.append(", wardId='").append(wardId).append('\'');
-        sb.append(", thanaId='").append(thanaId).append('\'');
-        sb.append(", cityCorporationId='").append(cityCorporationId).append('\'');
-        sb.append(", countryCode='").append(countryCode).append('\'');
+        }
+        if(districtId!=null) {
+            sb.append(", districtId='").append(districtId).append('\'');
+        }
+        if (upazillaId!=null){
+            sb.append(", upazillaId='").append(upazillaId).append('\'');
+
+        }
+        if (unionId!=null){
+            sb.append(", unionId='").append(unionId).append('\'');
+
+        }
+        if (holdingNumber!=null){
+            sb.append(", holdingNumber='").append(holdingNumber).append('\'');
+
+        }
+        if (street!=null){
+            sb.append(", street='").append(street).append('\'');
+
+        }
+        if (areaMouja!=null){
+            sb.append(", areaMouja='").append(areaMouja).append('\'');
+
+        }
+        if (village!=null){
+            sb.append(", village='").append(village).append('\'');
+
+        }
+        if (postOffice!=null){
+            sb.append(", postOffice='").append(postOffice).append('\'');
+
+        }
+        if (postCode!=null){
+            sb.append(", postCode='").append(postCode).append('\'');
+
+        }
+        if (wardId!=null){
+            sb.append(", wardId='").append(wardId).append('\'');
+
+        }
+        if (thanaId!=null){
+            sb.append(", thanaId='").append(thanaId).append('\'');
+        }
+        if (cityCorporationId!=null){
+            sb.append(", cityCorporationId='").append(cityCorporationId).append('\'');
+        }
+        if (countryCode!=null){
+            sb.append(", countryCode='").append(countryCode).append('\'');
+        }
         sb.append('}');
         return sb.toString();
     }
+
 
     public String getAddressLine() {
         return addressLine;

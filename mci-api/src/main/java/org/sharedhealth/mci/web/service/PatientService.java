@@ -1,10 +1,6 @@
 package org.sharedhealth.mci.web.service;
 
 
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.infrastructure.fr.FacilityRegistryWrapper;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
@@ -14,6 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureAdapter;
+
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 @Component
 public class PatientService {
@@ -33,12 +33,12 @@ public class PatientService {
         this.settingService = settingService;
     }
 
-    public ListenableFuture<MCIResponse> create(PatientMapper patientMapper) {
-        return patientRepository.create(patientMapper);
+    public ListenableFuture<MCIResponse> create(PatientMapper patientDto) {
+        return patientRepository.create(patientDto);
     }
 
-    public ListenableFuture<MCIResponse> update(PatientMapper patientMapper, String healthId) {
-        return patientRepository.update(patientMapper, healthId);
+    public ListenableFuture<MCIResponse> update(PatientMapper patientDto, String healthId) {
+        return patientRepository.update(patientDto, healthId);
     }
 
     public ListenableFuture<PatientMapper> findByHealthId(String healthId) {
@@ -64,8 +64,8 @@ public class PatientService {
     public ListenableFuture<List<PatientMapper>> findAllByQuery(SearchQuery searchQuery) {
         return new ListenableFutureAdapter<List<PatientMapper>, List<PatientMapper>>(patientRepository.findAllByQuery(searchQuery)) {
             @Override
-            protected List<PatientMapper> adapt(List<PatientMapper> patientMappers) throws ExecutionException {
-                return patientMappers;
+            protected List<PatientMapper> adapt(List<PatientMapper> patientDtos) throws ExecutionException {
+                return patientDtos;
             }
         };
     }

@@ -1,13 +1,13 @@
 package org.sharedhealth.mci.web.mapper;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
+
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
@@ -67,12 +67,30 @@ public class PhoneNumber {
     }
 
     @Override
-    public boolean equals(Object rhs) {
-        return EqualsBuilder.reflectionEquals(this, rhs);
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override
-    public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("{");
+        if(countryCode!=null) {
+            sb.append("countryCode='").append(countryCode).append('\'');
+        }
+        if(areaCode!=null) {
+            sb.append("areaCode='").append(areaCode).append('\'');
+        }
+        if(number!=null) {
+            sb.append("number='").append(number).append('\'');
+        }
+        if(extension!=null) {
+            sb.append("extension='").append(extension).append('\'');
+        }
+        sb.append('}');
+        return sb.toString();
+    }
+    @Override
+    public boolean equals(Object rhs) {
+        return EqualsBuilder.reflectionEquals(this, rhs);
     }
 }

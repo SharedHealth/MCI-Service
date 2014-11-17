@@ -13,6 +13,7 @@ import org.sharedhealth.mci.validation.constraints.Length;
 import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
+import static org.sharedhealth.mci.web.utils.PatientFieldProperties.*;
 
 public class Relation {
 
@@ -21,13 +22,15 @@ public class Relation {
         this.id = idOne.toString();
     }
 
-    @JsonProperty("type")
+    private final String RELATION_TYPE = "type";
+    private final String RELATIONS_CODE_TYPE = "relations";
+    @JsonProperty(RELATION_TYPE)
     @JsonInclude(NON_EMPTY)
     @NotNull(message = "1001", groups = RequiredOnUpdateGroup.class)
-    @Code(type = "relations", message = "1004")
+    @Code(type = RELATIONS_CODE_TYPE, message = "1004")
     private String type;
 
-    @JsonProperty("hid")
+    @JsonProperty(HID)
     @JsonInclude(NON_EMPTY)
     private String healthId;
 
@@ -36,27 +39,27 @@ public class Relation {
     @Pattern(regexp = "[\\d]{13}|[\\d]{17}", message = "1002")
     private String nationalId;
 
-    @JsonProperty("uid")
+    @JsonProperty(UID)
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "[a-zA-Z0-9]{11}", message = "1002")
     private String uid;
 
-    @JsonProperty("bin_brn")
+    @JsonProperty(BIN_BRN)
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "[\\d]{17}", message = "1002")
     private String birthRegistrationNumber;
 
-    @JsonProperty("name_bangla")
+    @JsonProperty(NAME_BANGLA)
     @JsonInclude(NON_EMPTY)
     @Length(max = 125, message = "1002")
     private String nameBangla;
 
-    @JsonProperty("given_name")
+    @JsonProperty(GIVEN_NAME)
     @JsonInclude(NON_EMPTY)
     @Length(max = 100, message = "1002")
     private String givenName;
 
-    @JsonProperty("sur_name")
+    @JsonProperty(SUR_NAME)
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "^(\\s*)([A-Za-z0-9]{0,25})(\\b\\s*$)", message = "1002")
     private String surName;

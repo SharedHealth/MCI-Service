@@ -11,7 +11,8 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-security:1.1.8.RELEASE') {
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
     }
-    compile libraries.snappy, libraries.spring_boot_logging, libraries.spring_data_cassandra, libraries.hibernate_validator
+    compile libraries.snappy, libraries.spring_boot_logging, libraries.spring_data_cassandra, libraries.hibernate_validator, libraries.apache_collections, libraries.apache_lang, libraries.apache_bean_utils
+
     compile('io.netty:netty:3.9.0.Final') {
         force = 'true'
     }

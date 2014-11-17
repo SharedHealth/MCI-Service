@@ -45,7 +45,10 @@ ext.libraries = [
         spring_data_cassandra: "org.springframework.data:spring-data-cassandra:1.0.4.RELEASE",
         mutagen_cassandra    : "com.toddfast.mutagen:mutagen-cassandra:0.4.0",
         hibernate_validator  : "org.hibernate:hibernate-validator:5.1.1.Final",
-        snappy               : 'org.xerial.snappy:snappy-java:1.1.1-M1'
+        snappy               : 'org.xerial.snappy:snappy-java:1.1.1-M1',
+        apache_collections: "org.apache.commons:commons-collections4:4.0",
+        apache_bean_utils   : "commons-beanutils:commons-beanutils:1.9.2",
+        apache_lang: "org.apache.commons:commons-lang3:3.3.2"
 ]
 
 ext.testLibraries = [
