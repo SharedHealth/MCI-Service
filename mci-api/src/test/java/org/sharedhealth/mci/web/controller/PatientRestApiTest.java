@@ -300,6 +300,36 @@ public class PatientRestApiTest {
         assertPatientEquals(original, patient);
     }
 
+    @Test
+    public void shouldGoToUpdateFlowIfCreatePatientRequestWithSimilarPatientData() throws Exception {
+        String json = asString("jsons/patient/full_payload.json");
+
+        PatientMapper original = getPatientObjectFromString(json);
+
+        MvcResult firstTimeResponse = createPatient(json);
+
+        final MCIResponse body1 = getMciResponse(firstTimeResponse);
+        String healthId = body1.getId();
+
+        original.setGivenName("Updated Full Name");
+
+        MvcResult result = createPatient(mapper.writeValueAsString(original));
+
+        final MCIResponse body = getMciResponse(result);
+
+        Assert.assertEquals(202, body.getHttpStatus());
+
+        MvcResult getResult = mockMvc.perform(get(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        final ResponseEntity asyncResult = (ResponseEntity<PatientMapper>) getResult.getAsyncResult();
+
+        PatientMapper patient = getPatientObjectFromResponse(asyncResult);
+
+        Assert.assertEquals("Updated Full Name", patient.getGivenName());
+    }
+
     private PatientMapper getPatientObjectFromResponse(ResponseEntity asyncResult) throws Exception {
         return getPatientObjectFromString(mapper.writeValueAsString((PatientMapper) asyncResult.getBody()));
     }
