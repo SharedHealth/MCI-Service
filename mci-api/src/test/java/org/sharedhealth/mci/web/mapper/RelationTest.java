@@ -1,11 +1,11 @@
 package org.sharedhealth.mci.web.mapper;
 
-import javax.validation.ConstraintViolation;
-import java.util.Set;
-
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
+
+import javax.validation.ConstraintViolation;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 
@@ -18,6 +18,7 @@ public class RelationTest extends ValidationAwareMapper{
         assertEquals("1001", constraintViolations.iterator().next().getMessage());
     }
 
+    
     @Test
     public void shouldFailIf_Marriage_Id_LengthIsNotEqual_8() {
         Set<ConstraintViolation<Relation>> constraintViolations = validator.validateValue(Relation.class, "marriageId", "1");
