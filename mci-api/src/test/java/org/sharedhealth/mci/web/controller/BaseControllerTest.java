@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.handler.MCIResponse;
+import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientMapper;
 import org.sharedhealth.mci.web.mapper.Relation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +57,10 @@ public class BaseControllerTest {
 
     protected PatientMapper getPatientObjectFromString(String json) throws Exception  {
         return mapper.readValue(json, PatientMapper.class);
+    }
+
+    protected Address getAddressObjectFromString(String json) throws Exception  {
+        return mapper.readValue(json, Address.class);
     }
 
     protected boolean isRelationsEqual(List<Relation> original, List<Relation> patient) {

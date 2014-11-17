@@ -544,7 +544,7 @@ public class Patient {
     }
 
     public void setAddressLine(String addressLine) {
-        this.addressLine = addressLine;
+        this.addressLine = defaultString(addressLine);
     }
 
     public String getDivisionId() {
@@ -552,7 +552,7 @@ public class Patient {
     }
 
     public void setDivisionId(String divisionId) {
-        this.divisionId = divisionId;
+        this.divisionId = defaultString(divisionId);
         this.updateLocationLevels();
     }
 
@@ -561,7 +561,7 @@ public class Patient {
     }
 
     public void setDistrictId(String districtId) {
-        this.districtId = districtId;
+        this.districtId = defaultString(districtId);
         this.updateLocationLevels();
     }
 
@@ -570,7 +570,7 @@ public class Patient {
     }
 
     public void setUpazillaId(String upazillaId) {
-        this.upazillaId = upazillaId;
+        this.upazillaId = defaultString(upazillaId);
         this.updateLocationLevels();
     }
 
@@ -579,7 +579,7 @@ public class Patient {
     }
 
     public void setUnionId(String unionId) {
-        this.unionId = unionId;
+        this.unionId = defaultString(unionId);
         this.updateLocationLevels();
     }
 
@@ -588,7 +588,7 @@ public class Patient {
     }
 
     public void setHoldingNumber(String holdingNumber) {
-        this.holdingNumber = holdingNumber;
+        this.holdingNumber = defaultString(holdingNumber);
     }
 
     public String getStreet() {
@@ -596,7 +596,7 @@ public class Patient {
     }
 
     public void setStreet(String street) {
-        this.street = street;
+        this.street = defaultString(street);
     }
 
     public String getAreaMouja() {
@@ -604,7 +604,7 @@ public class Patient {
     }
 
     public void setAreaMouja(String areaMouja) {
-        this.areaMouja = areaMouja;
+        this.areaMouja = defaultString(areaMouja);
     }
 
     public String getVillage() {
@@ -612,7 +612,7 @@ public class Patient {
     }
 
     public void setVillage(String village) {
-        this.village = village;
+        this.village = defaultString(village);
     }
 
     public String getPostOffice() {
@@ -620,7 +620,7 @@ public class Patient {
     }
 
     public void setPostOffice(String postOffice) {
-        this.postOffice = postOffice;
+        this.postOffice = defaultString(postOffice);
     }
 
     public String getPostCode() {
@@ -628,7 +628,7 @@ public class Patient {
     }
 
     public void setPostCode(String postCode) {
-        this.postCode = postCode;
+        this.postCode = defaultString(postCode);
     }
 
     public String getWardId() {
@@ -636,7 +636,7 @@ public class Patient {
     }
 
     public void setWardId(String wardId) {
-        this.wardId = wardId;
+        this.wardId = defaultString(wardId);
         this.updateLocationLevels();
     }
 
@@ -645,7 +645,7 @@ public class Patient {
     }
 
     public void setThanaId(String thanaId) {
-        this.thanaId = thanaId;
+        this.thanaId = defaultString(thanaId);
         this.updateLocationLevels();
     }
 
@@ -654,7 +654,7 @@ public class Patient {
     }
 
     public void setCityCorporationId(String cityCorporationId) {
-        this.cityCorporationId = cityCorporationId;
+        this.cityCorporationId = defaultString(cityCorporationId);
         this.updateLocationLevels();
     }
 
@@ -663,7 +663,7 @@ public class Patient {
     }
 
     public void setCountryCode(String countryCode) {
-        this.countryCode = countryCode;
+        this.countryCode = defaultString(countryCode);
     }
 
     public String getPermanentAddressLine() {
@@ -671,7 +671,7 @@ public class Patient {
     }
 
     public void setPermanentAddressLine(String permanentAddressLine) {
-        this.permanentAddressLine = permanentAddressLine;
+        this.permanentAddressLine = defaultString(permanentAddressLine);
     }
 
     public String getPermanentDivisionId() {
@@ -679,7 +679,7 @@ public class Patient {
     }
 
     public void setPermanentDivisionId(String permanentDivisionId) {
-        this.permanentDivisionId = permanentDivisionId;
+        this.permanentDivisionId = defaultString(permanentDivisionId);
     }
 
     public String getPermanentDistrictId() {
@@ -687,7 +687,7 @@ public class Patient {
     }
 
     public void setPermanentDistrictId(String permanentDistrictId) {
-        this.permanentDistrictId = permanentDistrictId;
+        this.permanentDistrictId = defaultString(permanentDistrictId);
     }
 
     public String getPermanentUpazillaId() {
@@ -695,7 +695,7 @@ public class Patient {
     }
 
     public void setPermanentUpazillaId(String permanentUpazillaId) {
-        this.permanentUpazillaId = permanentUpazillaId;
+        this.permanentUpazillaId = defaultString(permanentUpazillaId);
     }
 
     public String getPermanentUnionId() {
@@ -703,7 +703,7 @@ public class Patient {
     }
 
     public void setPermanentUnionId(String permanentUnionId) {
-        this.permanentUnionId = permanentUnionId;
+        this.permanentUnionId = defaultString(permanentUnionId);
     }
 
     public String getPermanentHoldingNumber() {
@@ -711,7 +711,7 @@ public class Patient {
     }
 
     public void setPermanentHoldingNumber(String permanentHoldingNumber) {
-        this.permanentHoldingNumber = permanentHoldingNumber;
+        this.permanentHoldingNumber = defaultString(permanentHoldingNumber);
     }
 
     public String getPermanentStreet() {
@@ -719,7 +719,7 @@ public class Patient {
     }
 
     public void setPermanentStreet(String permanentStreet) {
-        this.permanentStreet = permanentStreet;
+        this.permanentStreet = defaultString(permanentStreet);
     }
 
     public String getPermanentAreaMouja() {
@@ -727,7 +727,7 @@ public class Patient {
     }
 
     public void setPermanentAreaMouja(String permanentAreaMouja) {
-        this.permanentAreaMouja = permanentAreaMouja;
+        this.permanentAreaMouja = defaultString(permanentAreaMouja);
     }
 
     public String getPermanentVillage() {
@@ -735,7 +735,7 @@ public class Patient {
     }
 
     public void setPermanentVillage(String permanentVillage) {
-        this.permanentVillage = permanentVillage;
+        this.permanentVillage = defaultString(permanentVillage);
     }
 
     public String getPermanentPostOffice() {
@@ -743,7 +743,7 @@ public class Patient {
     }
 
     public void setPermanentPostOffice(String permanentPostOffice) {
-        this.permanentPostOffice = permanentPostOffice;
+        this.permanentPostOffice = defaultString(permanentPostOffice);
     }
 
     public String getPermanentPostCode() {
@@ -751,7 +751,7 @@ public class Patient {
     }
 
     public void setPermanentPostCode(String permanentPostCode) {
-        this.permanentPostCode = permanentPostCode;
+        this.permanentPostCode = defaultString(permanentPostCode);
     }
 
     public String getPermanentWardId() {
@@ -759,7 +759,7 @@ public class Patient {
     }
 
     public void setPermanentWardId(String permanentWardId) {
-        this.permanentWardId = permanentWardId;
+        this.permanentWardId = defaultString(permanentWardId);
     }
 
     public String getPermanentThanaId() {
@@ -767,7 +767,7 @@ public class Patient {
     }
 
     public void setPermanentThanaId(String permanentThanaId) {
-        this.permanentThanaId = permanentThanaId;
+        this.permanentThanaId = defaultString(permanentThanaId);
     }
 
     public String getPermanentCityCorporationId() {
@@ -775,7 +775,7 @@ public class Patient {
     }
 
     public void setPermanentCityCorporationId(String permanentCityCorporationId) {
-        this.permanentCityCorporationId = permanentCityCorporationId;
+        this.permanentCityCorporationId = defaultString(permanentCityCorporationId);
     }
 
     public String getPermanentCountryCode() {
@@ -839,7 +839,7 @@ public class Patient {
     }
 
     public void setPhoneNumberCountryCode(String phoneNumberCountryCode) {
-        this.phoneNumberCountryCode = phoneNumberCountryCode;
+        this.phoneNumberCountryCode = defaultString(phoneNumberCountryCode);
     }
 
     public String getPhoneNumberAreaCode() {
@@ -847,7 +847,7 @@ public class Patient {
     }
 
     public void setPhoneNumberAreaCode(String phoneNumberAreaCode) {
-        this.phoneNumberAreaCode = phoneNumberAreaCode;
+        this.phoneNumberAreaCode = defaultString(phoneNumberAreaCode);
     }
 
     public String getPhoneNumberExtension() {
@@ -855,7 +855,7 @@ public class Patient {
     }
 
     public void setPhoneNumberExtension(String phoneNumberExtension) {
-        this.phoneNumberExtension = phoneNumberExtension;
+        this.phoneNumberExtension = defaultString(phoneNumberExtension);
     }
 
     public String getPrimaryContactNumberCountryCode() {
@@ -863,7 +863,7 @@ public class Patient {
     }
 
     public void setPrimaryContactNumberCountryCode(String primaryContactNumberCountryCode) {
-        this.primaryContactNumberCountryCode = primaryContactNumberCountryCode;
+        this.primaryContactNumberCountryCode = defaultString(primaryContactNumberCountryCode);
     }
 
     public String getPrimaryContactNumberAreaCode() {
@@ -871,7 +871,7 @@ public class Patient {
     }
 
     public void setPrimaryContactNumberAreaCode(String primaryContactNumberAreaCode) {
-        this.primaryContactNumberAreaCode = primaryContactNumberAreaCode;
+        this.primaryContactNumberAreaCode = defaultString(primaryContactNumberAreaCode);
     }
 
     public String getPrimaryContactNumberExtension() {
@@ -879,7 +879,7 @@ public class Patient {
     }
 
     public void setPrimaryContactNumberExtension(String primaryContactNumberExtension) {
-        this.primaryContactNumberExtension = primaryContactNumberExtension;
+        this.primaryContactNumberExtension = defaultString(primaryContactNumberExtension);
     }
 
     public String getCreatedBy() {

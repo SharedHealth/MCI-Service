@@ -83,7 +83,7 @@ public class SearchRestApiTest extends BaseControllerTest {
     public void shouldReturnBadRequestIfOnlySurNameGiven() throws Exception {
         String json = new ObjectMapper().writeValueAsString(patientMapper);
 
-        MvcResult result = mockMvc.perform(get(API_END_POINT + "?sur_name=Mazumder").accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+        MvcResult result = mockMvc.perform(get(API_END_POINT + "?sur_name=Mazumder").accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         Assert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1006,\"message\":\"Invalid search parameter\"}]}", result.getResponse().getContentAsString());
@@ -93,7 +93,7 @@ public class SearchRestApiTest extends BaseControllerTest {
     public void shouldReturnBadRequestIfOnlyGivenNameGiven() throws Exception {
         String json = new ObjectMapper().writeValueAsString(patientMapper);
 
-        MvcResult result = mockMvc.perform(get(API_END_POINT + "?given_name=Mazumder").accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+        MvcResult result = mockMvc.perform(get(API_END_POINT + "?given_name=Mazumder").accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         Assert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1006,\"message\":\"Invalid search parameter\"}]}", result.getResponse().getContentAsString());
@@ -106,7 +106,7 @@ public class SearchRestApiTest extends BaseControllerTest {
         String present_address = patientMapper.getAddress().getDivisionId() +
                 patientMapper.getAddress().getDistrictId() + patientMapper.getAddress().getUpazillaId();
         String surName = "Raju";
-        MvcResult result = mockMvc.perform(get(API_END_POINT + "?sur_name=" + surName + "&present_address=" + present_address).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+        MvcResult result = mockMvc.perform(get(API_END_POINT + "?sur_name=" + surName + "&present_address=" + present_address).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
         final MCIMultiResponse body = getMciMultiResponse(result);
@@ -125,7 +125,7 @@ public class SearchRestApiTest extends BaseControllerTest {
                 original.getAddress().getDistrictId() + original.getAddress().getUpazillaId();
         String surName = "Aymaan";
 
-        MvcResult searchResult = mockMvc.perform(get(API_END_POINT + "?sur_name=" + surName + "&present_address=" + present_address).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+        MvcResult searchResult = mockMvc.perform(get(API_END_POINT + "?sur_name=" + surName + "&present_address=" + present_address).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
         final MCIMultiResponse body = getMciMultiResponse(searchResult);
@@ -140,7 +140,7 @@ public class SearchRestApiTest extends BaseControllerTest {
         String present_address = patientMapper.getAddress().getDivisionId() +
                 patientMapper.getAddress().getDistrictId() + patientMapper.getAddress().getUpazillaId();
         String givenName = "Rajus";
-        MvcResult result = mockMvc.perform(get(API_END_POINT + "?given_name=" + givenName + "&present_address=" + present_address).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+        MvcResult result = mockMvc.perform(get(API_END_POINT + "?given_name=" + givenName + "&present_address=" + present_address).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
         final MCIMultiResponse body = getMciMultiResponse(result);
@@ -159,7 +159,7 @@ public class SearchRestApiTest extends BaseControllerTest {
                 original.getAddress().getDistrictId() + original.getAddress().getUpazillaId();
         String givenName = "Zaman";
 
-        MvcResult searchResult = mockMvc.perform(get(API_END_POINT + "?given_name=" + givenName + "&present_address=" + present_address).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+        MvcResult searchResult = mockMvc.perform(get(API_END_POINT + "?given_name=" + givenName + "&present_address=" + present_address).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
         final MCIMultiResponse body = getMciMultiResponse(searchResult);
@@ -181,7 +181,7 @@ public class SearchRestApiTest extends BaseControllerTest {
         String givenName = "Zaman";
         String surName = "Aymaan";
         MvcResult searchResult = mockMvc.perform(get(API_END_POINT + "?given_name=" + givenName +
-                "&sur_name=" + surName + "&present_address=" + present_address).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+                "&sur_name=" + surName + "&present_address=" + present_address).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
         final MCIMultiResponse body = getMciMultiResponse(searchResult);
@@ -202,7 +202,7 @@ public class SearchRestApiTest extends BaseControllerTest {
         String givenName = "raju";
         String surName = "mazumder";
         MvcResult result = mockMvc.perform(get(API_END_POINT + "?given_name=" + givenName +
-                "&sur_name=" + surName + "&present_address=" + present_address).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+                "&sur_name=" + surName + "&present_address=" + present_address).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
         final MCIMultiResponse body = getMciMultiResponse(result);
@@ -216,7 +216,7 @@ public class SearchRestApiTest extends BaseControllerTest {
         String json = new ObjectMapper().writeValueAsString(patientMapper);
 
         MvcResult result = mockMvc.perform(get(API_END_POINT +
-                "?country_code=880&area_code=02&extension=122").accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+                "?country_code=880&area_code=02&extension=122").accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         Assert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1006,\"message\":\"Invalid search parameter\"}]}", result.getResponse().getContentAsString());
@@ -227,7 +227,7 @@ public class SearchRestApiTest extends BaseControllerTest {
         String json = new ObjectMapper().writeValueAsString(patientMapper);
 
         MvcResult result = mockMvc.perform(get(API_END_POINT +
-                "?phone_number=1716528608").accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+                "?phone_number=1716528608").accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         Assert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1006,\"message\":\"Invalid search parameter\"}]}", result.getResponse().getContentAsString());
@@ -238,7 +238,7 @@ public class SearchRestApiTest extends BaseControllerTest {
         String json = new ObjectMapper().writeValueAsString(patientMapper);
 
         MvcResult result = mockMvc.perform(get(API_END_POINT +
-                "?country_code=880").accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+                "?country_code=880").accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         Assert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1006,\"message\":\"Invalid search parameter\"}]}", result.getResponse().getContentAsString());
@@ -251,7 +251,7 @@ public class SearchRestApiTest extends BaseControllerTest {
         String present_address = patientMapper.getAddress().getDivisionId() +
                 patientMapper.getAddress().getDistrictId() + patientMapper.getAddress().getUpazillaId();
         MvcResult result = mockMvc.perform(get(API_END_POINT +
-                "?phone_no=123456&country_code=880&present_address=" + present_address).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+                "?phone_no=123456&country_code=880&present_address=" + present_address).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
         final MCIMultiResponse body = getMciMultiResponse(result);
@@ -269,7 +269,7 @@ public class SearchRestApiTest extends BaseControllerTest {
         createPatient(json);
 
         MvcResult result = mockMvc.perform(get(API_END_POINT +
-                "?phone_no=1716528608&country_code=880&present_address=" + present_address).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+                "?phone_no=1716528608&country_code=880&present_address=" + present_address).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 

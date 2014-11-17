@@ -219,7 +219,7 @@ public class PatientControllerIT extends BaseControllerTest{
         final MCIResponse body = getMciResponse(result);
         String healthId = body.getId();
 
-        MvcResult getResult = mockMvc.perform(get(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+        MvcResult getResult = mockMvc.perform(get(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -249,7 +249,7 @@ public class PatientControllerIT extends BaseControllerTest{
 
         Assert.assertEquals(202, body.getHttpStatus());
 
-        MvcResult getResult = mockMvc.perform(get(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+        MvcResult getResult = mockMvc.perform(get(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -271,7 +271,7 @@ public class PatientControllerIT extends BaseControllerTest{
         final MCIResponse body = getMciResponse(result);
         String healthId = body.getId();
 
-        MvcResult getResult = mockMvc.perform(get(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+        MvcResult getResult = mockMvc.perform(get(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(request().asyncStarted())
                 .andReturn();
@@ -282,6 +282,98 @@ public class PatientControllerIT extends BaseControllerTest{
         synchronizeRelationsId(original, patient);
         Assert.assertTrue(isRelationsEqual(original.getRelations(), patient.getRelations()));
     }
+
+    @Test
+    public void shouldUpdatePatientSuccessfullyForValidData() throws Exception {
+        String json = asString("jsons/patient/full_payload.json");
+
+        PatientMapper original = getPatientObjectFromString(json);
+
+        MvcResult createdResult = createPatient(json);
+
+        final MCIResponse createdResponse = getMciResponse(createdResult);
+        String healthId = createdResponse.getId();
+
+        MvcResult updatedResult = mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        MvcResult getResult = mockMvc.perform(get(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        final ResponseEntity asyncResult = (ResponseEntity<PatientMapper>) getResult.getAsyncResult();
+
+
+        PatientMapper patient = getPatientObjectFromResponse(asyncResult);
+
+        assertPatientEquals(original, patient);
+
+    }
+
+    @Test
+    public void shouldPatientUpdatePartiallyForValidPartialData() throws Exception {
+
+        String fullPayloadJson = asString("jsons/patient/full_payload.json");
+        String nid = "9934677890120";
+
+        PatientMapper original = getPatientObjectFromString(fullPayloadJson);
+
+        MvcResult createdResult = createPatient(fullPayloadJson);
+
+        final MCIResponse createdResponse = getMciResponse(createdResult);
+        String healthId = createdResponse.getId();
+        String nidJson = "{\"nid\": \"" + nid + "\"}";
+
+        MvcResult updatedResult = mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(nidJson).contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        MvcResult getResult = mockMvc.perform(get(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        final ResponseEntity asyncResult = (ResponseEntity<PatientMapper>) getResult.getAsyncResult();
+
+
+        PatientMapper patient = getPatientObjectFromResponse(asyncResult);
+        original.setNationalId(nid);
+        assertPatientEquals(original, patient);
+
+    }
+
+    @Test
+    public void shouldRemoveAddressBlockOptionalFieldsIfNotGiven() throws Exception {
+
+        String fullPayloadJson = asString("jsons/patient/full_payload.json");
+
+        MvcResult createdResult = createPatient(fullPayloadJson);
+
+        final MCIResponse createdResponse = getMciResponse(createdResult);
+        String healthId = createdResponse.getId();
+        String addressJson = asString("jsons/patient/payload_with_address.json");
+        PatientMapper patientMapper1 = getPatientObjectFromString(addressJson);
+
+        MvcResult updatedResult = mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(addressJson).contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        MvcResult getResult = mockMvc.perform(get(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        final ResponseEntity asyncResult = (ResponseEntity<PatientMapper>) getResult.getAsyncResult();
+
+
+        PatientMapper patient = getPatientObjectFromResponse(asyncResult);
+
+        assertEquals(patientMapper1.getAddress(), patient.getAddress());
+
+    }
+
 
     @After
     public void teardown() {
