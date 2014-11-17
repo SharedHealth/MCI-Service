@@ -18,13 +18,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import javax.ws.rs.HEAD;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.*;
-import static org.springframework.http.HttpStatus.ACCEPTED;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration

@@ -30,7 +30,6 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.text.ParseException;
 
-import static java.lang.String.format;
 import static org.hamcrest.Matchers.is;
 
 import static org.mockito.Mockito.verify;

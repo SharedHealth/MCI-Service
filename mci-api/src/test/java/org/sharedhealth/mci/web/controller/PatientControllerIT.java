@@ -15,23 +15,16 @@ import org.sharedhealth.mci.web.config.WebMvcConfig;
 import org.sharedhealth.mci.web.exception.PatientNotFoundException;
 import org.sharedhealth.mci.web.handler.ErrorHandler;
 import org.sharedhealth.mci.web.handler.MCIError;
-import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientMapper;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
-import org.sharedhealth.mci.web.mapper.Relation;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.text.ParseException;
 import java.util.Collections;
@@ -47,21 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 @ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
-public class PatientControllerIT {
-
-    @Autowired
-    protected WebApplicationContext webApplicationContext;
-
-    @Autowired
-    @Qualifier("MCICassandraTemplate")
-    private CassandraOperations cqlTemplate;
-
-    private MockMvc mockMvc;
-    private PatientMapper patientMapper;
-    private ObjectMapper mapper = new ObjectMapper();
-    public static final String API_END_POINT = "/api/v1/patients";
-    public static final String APPLICATION_JSON_UTF8 = "application/json;charset=UTF-8";
-
+public class PatientControllerIT extends BaseControllerTest{
     @Before
     public void setup() throws ParseException {
         MockitoAnnotations.initMocks(this);
@@ -230,56 +209,6 @@ public class PatientControllerIT {
     }
 
     @Test
-    public void shouldReturnBadRequestIfOnlySurNameGiven() throws Exception {
-        String json = mapper.writeValueAsString(patientMapper);
-
-        MvcResult result = mockMvc.perform(get(API_END_POINT + "?sur_name=Tiger").accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andReturn();
-        assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1006,\"message\":\"Invalid search parameter\"}]}", result.getResponse().getContentAsString());
-    }
-
-    @Test
-    public void shouldReturnBadRequestIfOnlyGivenNameGiven() throws Exception {
-        String json = mapper.writeValueAsString(patientMapper);
-
-        MvcResult result = mockMvc.perform(get(API_END_POINT + "?given_name=Tiger").accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andReturn();
-        assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1006,\"message\":\"Invalid search parameter\"}]}", result.getResponse().getContentAsString());
-    }
-
-    @Test
-    public void shouldReturnOkResponseIfPatientNotExistWithSurNameAndAddress() throws Exception {
-        patientMapper.setHealthId("health-100");
-        String json = mapper.writeValueAsString(patientMapper);
-        String present_address = patientMapper.getAddress().getDivisionId() +
-                patientMapper.getAddress().getDistrictId() + patientMapper.getAddress().getUpazillaId();
-        String surName = "Mazumder";
-        MvcResult result = mockMvc.perform(get(API_END_POINT + "?sur_name="+surName + "&present_address=" + present_address).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn();
-        final MCIMultiResponse body = getMciMultiResponse(result);
-        Assert.assertEquals("[]", body.getResults().toString());
-        Assert.assertEquals(200, body.getHttpStatus());
-    }
-
-    @Test
-    public void shouldReturnOkResponseIfPatientNotExistWithGivenNameAndAddress() throws Exception {
-        patientMapper.setHealthId("health-100");
-        String json = mapper.writeValueAsString(patientMapper);
-        String present_address = patientMapper.getAddress().getDivisionId() +
-                patientMapper.getAddress().getDistrictId() + patientMapper.getAddress().getUpazillaId();
-        String surName = "Raju";
-        MvcResult result = mockMvc.perform(get(API_END_POINT + "?given_name="+surName + "&present_address=" + present_address).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn();
-        final MCIMultiResponse body = getMciMultiResponse(result);
-        Assert.assertEquals("[]", body.getResults().toString());
-        Assert.assertEquals(200, body.getHttpStatus());
-    }
-
-    @Test
     public void shouldReturnAllTheCreatedPatientFieldAfterGetAPICall() throws Exception {
         String json = asString("jsons/patient/full_payload.json");
 
@@ -331,10 +260,6 @@ public class PatientControllerIT {
         Assert.assertEquals("Updated Full Name", patient.getGivenName());
     }
 
-    private PatientMapper getPatientObjectFromResponse(ResponseEntity asyncResult) throws Exception {
-        return getPatientObjectFromString(mapper.writeValueAsString((PatientMapper) asyncResult.getBody()));
-    }
-
     @Test
     public void shouldCreateRelationsData() throws Exception {
         String json = asString("jsons/patient/payload_with_multiple_relations.json");
@@ -356,120 +281,6 @@ public class PatientControllerIT {
         PatientMapper patient = getPatientObjectFromResponse(asyncResult);
         synchronizeRelationsId(original, patient);
         Assert.assertTrue(isRelationsEqual(original.getRelations(), patient.getRelations()));
-    }
-
-    @Test
-    public void shouldReturnBadRequestIfOnlyExtensionOrCountryCodeOrAreaCodeGiven() throws Exception {
-        String json = mapper.writeValueAsString(patientMapper);
-
-        MvcResult result = mockMvc.perform(get(API_END_POINT +
-                "?country_code=880&area_code=02&extension=122").accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andReturn();
-        assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1006,\"message\":\"Invalid search parameter\"}]}", result.getResponse().getContentAsString());
-    }
-
-    @Test
-    public void shouldReturnBadRequestIfPresentAddressNotGivenWithPhoneNumber() throws Exception {
-        String json = mapper.writeValueAsString(patientMapper);
-
-        MvcResult result = mockMvc.perform(get(API_END_POINT +
-                "?phone_number=1716528608").accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andReturn();
-        assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1006,\"message\":\"Invalid search parameter\"}]}", result.getResponse().getContentAsString());
-    }
-
-    @Test
-    public void shouldReturnBadRequestIfOnlyCountryCodeGiven() throws Exception {
-        String json = mapper.writeValueAsString(patientMapper);
-
-        MvcResult result = mockMvc.perform(get(API_END_POINT +
-                "?country_code=880").accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andReturn();
-        assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1006,\"message\":\"Invalid search parameter\"}]}", result.getResponse().getContentAsString());
-    }
-
-    @Test
-    public void shouldReturnOkResponseIfPatientNotExistWithPhoneNumber() throws Exception {
-        patientMapper.setHealthId("health-100");
-        String json = mapper.writeValueAsString(patientMapper);
-        String present_address = patientMapper.getAddress().getDivisionId() +
-                patientMapper.getAddress().getDistrictId() + patientMapper.getAddress().getUpazillaId();
-        MvcResult result = mockMvc.perform(get(API_END_POINT +
-                "?phone_no=123456&country_code=880&present_address="+present_address).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn();
-        final MCIMultiResponse body = getMciMultiResponse(result);
-        Assert.assertEquals("[]", body.getResults().toString());
-        Assert.assertEquals(200, body.getHttpStatus());
-    }
-
-    @Test
-    public void shouldReturnAllTheCreatedPatientIfPhoneNumberMatchBySearch() throws Exception {
-        String json = mapper.writeValueAsString(patientMapper);
-        String present_address = patientMapper.getAddress().getDivisionId() +
-                patientMapper.getAddress().getDistrictId() + patientMapper.getAddress().getUpazillaId();
-        createPatient(json);
-        createPatient(json);
-        createPatient(json);
-
-        MvcResult result = mockMvc.perform(get(API_END_POINT +
-                "?phone_no=1716528608&country_code=880&present_address="+present_address).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        final MCIMultiResponse body = getMciMultiResponse(result);
-        PatientMapper patientMapper1 = (PatientMapper)body.getResults().get(0);
-        Assert.assertEquals("1716528608", patientMapper1.getPhoneNumber().getNumber());
-        Assert.assertEquals(200, body.getHttpStatus());
-    }
-
-    private MvcResult createPatient(String json) throws Exception {
-        return mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn();
-    }
-
-    private MCIMultiResponse getMciMultiResponse(MvcResult result) {
-        final ResponseEntity asyncResult = (ResponseEntity< MCIMultiResponse>) result.getAsyncResult();
-
-        return (MCIMultiResponse)asyncResult.getBody();
-    }
-
-    private MCIResponse getMciResponse(MvcResult result) {
-        final ResponseEntity asyncResult = (ResponseEntity< MCIResponse>) result.getAsyncResult();
-
-        return (MCIResponse)asyncResult.getBody();
-    }
-
-    private  PatientMapper getPatientObjectFromString(String json) throws Exception  {
-        return mapper.readValue(json, PatientMapper.class);
-    }
-
-    private boolean isRelationsEqual(List<Relation> original, List<Relation> patient) {
-        return original.containsAll(patient) && patient.containsAll(original);
-    }
-
-    private void assertPatientEquals(PatientMapper original, PatientMapper patient) {
-        synchronizeAutoGeneratedFields(original, patient);
-        Assert.assertEquals(original, patient);
-    }
-
-    private void synchronizeAutoGeneratedFields(PatientMapper original, PatientMapper patient) {
-        original.setHealthId(patient.getHealthId());
-        original.setCreatedAt(patient.getCreatedAt());
-        original.setUpdatedAt(patient.getUpdatedAt());
-        synchronizeRelationsId(original, patient);
-    }
-
-    private void synchronizeRelationsId(PatientMapper original, PatientMapper patient) {
-        int y = original.getRelations().size();
-
-        for(int x = 0; x < y; x = x+1) {
-            original.getRelations().get(x).setId(patient.getRelationOfType(original.getRelations().get(x).getType()).getId());
-        }
     }
 
     @After
