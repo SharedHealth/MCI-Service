@@ -1,0 +1,24 @@
+{
+  "hid":"1234567890",
+  "given_name":"Rafan Zaman",
+  "sur_name":"Aymaan",
+  "date_of_birth":"1990-02-28",
+  "gender":"M",
+  "present_address":{
+    "address_line":"xyz",
+    "division_id":"10",
+    "district_id":"04",
+    "upazilla_id":"09",
+    "thana_id":null,
+    "city_corporation_id":"20",
+    "union_id":"06",
+    "ward_id":null,
+    "area_mouja":"Dhanmondi",
+    "village":"Lalmatia",
+    "holding_number":"Level 2,Taj Garden,House no.4/k",
+    "street":"Plot 51,Satmasjid Road",
+    "post_office":"Mohammadpur",
+    "post_code":"1207",
+    "country_code":"050"
+  }
+}

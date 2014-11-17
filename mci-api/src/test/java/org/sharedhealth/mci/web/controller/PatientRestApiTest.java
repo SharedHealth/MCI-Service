@@ -194,17 +194,27 @@ public class PatientRestApiTest {
 
         mockMvc.perform(asyncDispatch(result))
                 .andExpect(content().contentType(APPLICATION_JSON_UTF8))
-                .andExpect(content().string("{\"http_status\":404,\"message\":\"patient.not.found\"}"));
+                .andExpect(content().string(asString("jsons/response/error_404.json")));
     }
 
     @Test
     public void shouldReturnNotFoundResponseIfPatientNotExistForUpdate() throws Exception {
         String json = mapper.writeValueAsString(patientMapper);
 
-        MvcResult result = mockMvc.perform(put(API_END_POINT + "/health-1000").accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+        mockMvc.perform(put(API_END_POINT + "/health-1000").accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
                 .andExpect(status().isNotFound())
+                .andExpect(content().string(asString("jsons/response/error_404.json")))
                 .andReturn();
-        Assert.assertEquals("{\"http_status\":404,\"message\":\"patient.not.found\"}", result.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void shouldReturnErrorResponseIfHealthIdGivenWhileCreateApiCall() throws Exception {
+        String json = asString("jsons/patient/payload_with_hid.json");
+
+        mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(asString("jsons/response/error_hid.json")))
+                .andReturn();
     }
 
     @Test
