@@ -176,8 +176,8 @@ public class SearchRestApiTest extends BaseControllerTest {
         MvcResult result = createPatient(json);
         String present_address = original.getAddress().getDivisionId() +
                 original.getAddress().getDistrictId() + original.getAddress().getUpazillaId();
-        String givenName = "Zaman";
-        String surName = "Aymaan";
+        String givenName = "zaman";
+        String surName = "aymaan";
         MvcResult searchResult = mockMvc.perform(get(API_END_POINT + "?given_name=" + givenName +
                 "&sur_name=" + surName + "&present_address=" + present_address).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
