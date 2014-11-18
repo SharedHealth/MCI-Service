@@ -1,5 +1,10 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,10 +23,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.sharedhealth.mci.utils.FileUtil.asString;
+import static org.springframework.http.HttpStatus.ACCEPTED;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -75,17 +81,13 @@ public class PatientRepositoryIT {
         patientRepository.create(patientDto).get();
     }
 
-//   @Test
-//    public void shouldReturnAccepted_IfPatientExistWithProvidedTwoIdFieldsOnCreate() throws ExecutionException, InterruptedException {
-//       patientRepository.create(patientDto).get();
-//       patientDto.setHealthId("");
-//       MCIResponse mciResponse = patientRepository.create(patientDto).get();
-//       assertEquals(mciResponse.getHttpStatus(), ACCEPTED.value());
-//
-//        PatientMapper patientDto = createPatient();
-//        patientDto.setHealthId("12");
-//        patientRepository.create(patientDto);
-//    }
+   @Test
+    public void shouldReturnAccepted_IfPatientExistWithProvidedTwoIdFieldsOnCreate() throws ExecutionException, InterruptedException {
+       patientRepository.create(patientDto).get();
+       patientDto.setHealthId(null);
+       MCIResponse mciResponse = patientRepository.create(patientDto).get();
+       assertEquals(mciResponse.getHttpStatus(), ACCEPTED.value());
+    }
 
     @Test
     public void shouldFindPatientWithMatchingNationalId() throws ExecutionException, InterruptedException {
@@ -158,6 +160,31 @@ public class PatientRepositoryIT {
         assertEquals("M",savedPatient.getGender());
     }
 
+    @Test
+    public void shouldReturnAllPatientsBelongsToSpecificLocation() throws Exception {
+        generatePatientSet();
+        List<PatientMapper> patients = patientRepository.findAllByLocation("1004092006", null, 0, null).get();
+        assertEquals(10, patients.size());
+        patients = patientRepository.findAllByLocation("1004092001", null, 0, null).get();
+        assertEquals(5, patients.size());
+        patients = patientRepository.findAllByLocation("10040920", null, 0, null).get();
+        assertEquals(15, patients.size());
+    }
+
+    private void generatePatientSet() throws Exception {
+        String json = asString("jsons/patient/required_only_payload.json");
+        PatientMapper patientMapper = new ObjectMapper().readValue(json, PatientMapper.class);
+        createMultiplePatients(patientMapper, 10);
+        patientMapper.setAddress(createAddress("10", "04", "09", "20", "01"));
+        createMultiplePatients(patientMapper, 5);
+    }
+
+    private void createMultiplePatients(PatientMapper patientDto, int n) throws Exception {
+        for (int x = 0; x < n; x++) {
+            patientRepository.create(patientDto).get();
+            patientDto.setHealthId(null);
+        }
+    }
 
     private void assertPatient(PatientMapper savedPatient,PatientMapper patientDto) {
         assertEquals(patientDto.getHealthId(), savedPatient.getHealthId());
@@ -187,15 +214,22 @@ public class PatientRepositoryIT {
         patientDto1.setOccupation("salaried");
         patientDto1.setEducationLevel("BA");
 
+        Address address = createAddress("10", "04", "09", "20", "01");
+        patientDto1.setAddress(address);
+
+        return patientDto1;
+    }
+
+    private Address createAddress(String division, String district, String upazilla, String cityCorp, String ward) {
         Address address = new Address();
         address.setAddressLine("house-10");
-        address.setDivisionId("10");
-        address.setDistrictId("04");
-        address.setUpazillaId("09");
-        address.setCityCorporationId("20");
-        address.setWardId("01");
-        patientDto1.setAddress(address);
-        return patientDto1;
+        address.setDivisionId(division);
+        address.setDistrictId(district);
+        address.setUpazillaId(upazilla);
+        address.setCityCorporationId(cityCorp);
+        address.setWardId(ward);
+
+        return address;
     }
 
     @After
