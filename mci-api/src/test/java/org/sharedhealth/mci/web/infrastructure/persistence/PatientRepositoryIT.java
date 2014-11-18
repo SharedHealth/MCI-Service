@@ -128,7 +128,7 @@ public class PatientRepositoryIT {
 
     @Test(expected = PatientNotFoundException.class)
     public void shouldThrowErrorIfPatientNotFound() throws Exception {
-        patientRepository.update(new PatientMapper(),"1");
+        patientRepository.update(new PatientMapper(), "1");
     }
 
     @Test
@@ -142,7 +142,7 @@ public class PatientRepositoryIT {
         MCIResponse mciResponseForUpdate = patientRepository.update( patientDto,patientDto.getHealthId()).get();
         assertEquals(202, mciResponseForUpdate.getHttpStatus());
         PatientMapper savedPatient = patientRepository.findByHealthId(healthId).get();
-        assertPatient(savedPatient,patientDto);
+        assertPatient(savedPatient, patientDto);
     }
 
     @Test
@@ -163,12 +163,17 @@ public class PatientRepositoryIT {
     @Test
     public void shouldReturnAllPatientsBelongsToSpecificLocation() throws Exception {
         generatePatientSet();
-        List<PatientMapper> patients = patientRepository.findAllByLocation("1004092005", null, 0, null).get();
-        assertEquals(10, patients.size());
-        patients = patientRepository.findAllByLocation("1004092001", null, 0, null).get();
-        assertEquals(5, patients.size());
-        patients = patientRepository.findAllByLocation("10040920", null, 0, null).get();
-        assertEquals(15, patients.size());
+
+        assertPatientsFoundByCatchment("1004092005", 10);
+        assertPatientsFoundByCatchment("1004092001", 5);
+        assertPatientsFoundByCatchment("10040920", 15);
+        assertPatientsFoundByCatchment("1004092006", 0);
+    }
+
+    private void assertPatientsFoundByCatchment(String location, int expectedRecordCount) throws InterruptedException, ExecutionException {
+        List<PatientMapper> patients;
+        patients = patientRepository.findAllByLocation(location, null, 0, null).get();
+        assertEquals(expectedRecordCount, patients.size());
     }
 
     private void generatePatientSet() throws Exception {
