@@ -72,7 +72,6 @@ public class Address {
 
     @JsonProperty(POST_CODE)
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[0-9]{4}$", message = "1004")
     private String postCode;
 
     @JsonProperty(WARD_ID)

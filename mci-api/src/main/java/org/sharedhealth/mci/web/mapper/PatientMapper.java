@@ -116,6 +116,7 @@ public class PatientMapper {
     @NotNull(message = "1001", groups = RequiredGroup.class)
     @Valid
     @Location(message = "1004",country_code = "050")
+    @PostCode(message = "1004", country_code = "050")
     private Address address;
 
     @JsonProperty(PRIMARY_CONTACT)
@@ -137,6 +138,7 @@ public class PatientMapper {
     @Valid
     @JsonInclude(NON_EMPTY)
     @Location(message = "1004")
+    @PostCode(message = "1004", country_code = "050")
     private Address permanentAddress;
 
     @JsonProperty(MARITAL_STATUS)

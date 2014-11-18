@@ -22,6 +22,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.text.ParseException;
@@ -62,17 +63,29 @@ public class PatientControllerIT extends BaseControllerTest {
         patientMapper.setPhoneNumber(phoneNumber);
         patientMapper.setPrimaryContactNumber(phoneNumber);
 
-        Address address = new Address();
-        address.setAddressLine("house-12");
-        address.setDivisionId("10");
-        address.setDistrictId("04");
-        address.setUpazillaId("09");
-        address.setCityCorporationId("20");
-        address.setVillage("10");
-        address.setWardId("01");
-        address.setCountryCode("050");
+        Address presentAddress = new Address();
+        presentAddress.setAddressLine("house-12");
+        presentAddress.setDivisionId("10");
+        presentAddress.setDistrictId("04");
+        presentAddress.setUpazillaId("09");
+        presentAddress.setCityCorporationId("20");
+        presentAddress.setVillage("10");
+        presentAddress.setWardId("01");
+        presentAddress.setCountryCode("050");
 
-        patientMapper.setAddress(address);
+        patientMapper.setAddress(presentAddress);
+
+        Address permanentAddress = new Address();
+        permanentAddress.setAddressLine("house-12");
+        permanentAddress.setDivisionId("10");
+        permanentAddress.setDistrictId("04");
+        permanentAddress.setUpazillaId("09");
+        permanentAddress.setCityCorporationId("20");
+        permanentAddress.setVillage("10");
+        permanentAddress.setWardId("01");
+        permanentAddress.setCountryCode("050");
+
+        patientMapper.setPermanentAddress(permanentAddress);
     }
 
     @Test
@@ -86,6 +99,33 @@ public class PatientControllerIT extends BaseControllerTest {
         mockMvc.perform(asyncDispatch(result))
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(APPLICATION_JSON_UTF8));
+    }
+
+    @Test
+    public void shouldCreatePatientForAnyPostCodeWithPermanentAddressWhenCountryCodeIsNotBangladesh() throws Exception {
+        patientMapper.getPermanentAddress().setCountryCode("051");
+        patientMapper.getPermanentAddress().setPostCode("12345");
+        String json = mapper.writeValueAsString(patientMapper);
+
+        MvcResult result = createPatient(json);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        mockMvc.perform(asyncDispatch(result))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(APPLICATION_JSON_UTF8));
+    }
+
+    @Test
+    public void shouldReturnBadRequestForInvalidPostCodeWithPermanentAddressWhenCountryCodeIsBangladesh() throws Exception {
+        patientMapper.getPermanentAddress().setCountryCode("050");
+        patientMapper.getPermanentAddress().setPostCode("12345");
+        String json = mapper.writeValueAsString(patientMapper);
+
+        mockMvc.perform(MockMvcRequestBuilders.post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
     }
 
     @Test

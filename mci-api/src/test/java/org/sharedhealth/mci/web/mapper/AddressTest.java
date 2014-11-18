@@ -132,11 +132,6 @@ public class AddressTest extends ValidationAwareMapper{
     }
 
     @Test
-    public void shouldFailIfPostCodeIsMoreThan_4_Characters() {
-        assertLengthViolation("postCode", 4);
-    }
-
-    @Test
     public void shouldPassIfPostCodeIsValid() {
         Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "postCode", "1362");
         assertEquals(0, constraintViolations.size());
