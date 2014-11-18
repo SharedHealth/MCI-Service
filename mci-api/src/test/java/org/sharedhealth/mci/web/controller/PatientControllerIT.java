@@ -1,9 +1,7 @@
 package org.sharedhealth.mci.web.controller;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,7 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 @ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
-public class PatientControllerIT extends BaseControllerTest{
+public class PatientControllerIT extends BaseControllerTest {
     @Before
     public void setup() throws ParseException {
         MockitoAnnotations.initMocks(this);
@@ -374,18 +372,4 @@ public class PatientControllerIT extends BaseControllerTest{
 
     }
 
-
-    @After
-    public void teardown() {
-        cqlTemplate.execute("truncate patient");
-    }
-
-    private class InvalidPatient {
-
-        @JsonProperty("nid")
-        public String nationalId = "1234567890123";
-
-        @JsonProperty("invalid_property")
-        public String birthRegistrationNumber = "some thing";
-    }
 }

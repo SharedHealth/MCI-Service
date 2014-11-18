@@ -1,6 +1,8 @@
 package org.sharedhealth.mci.web.controller;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.After;
 import org.junit.Assert;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.handler.MCIResponse;
@@ -44,22 +46,22 @@ public class BaseControllerTest {
     }
 
     protected MCIMultiResponse getMciMultiResponse(MvcResult result) {
-        final ResponseEntity asyncResult = (ResponseEntity< MCIMultiResponse>) result.getAsyncResult();
+        final ResponseEntity asyncResult = (ResponseEntity<MCIMultiResponse>) result.getAsyncResult();
 
-        return (MCIMultiResponse)asyncResult.getBody();
+        return (MCIMultiResponse) asyncResult.getBody();
     }
 
     protected MCIResponse getMciResponse(MvcResult result) {
-        final ResponseEntity asyncResult = (ResponseEntity< MCIResponse>) result.getAsyncResult();
+        final ResponseEntity asyncResult = (ResponseEntity<MCIResponse>) result.getAsyncResult();
 
-        return (MCIResponse)asyncResult.getBody();
+        return (MCIResponse) asyncResult.getBody();
     }
 
-    protected PatientMapper getPatientObjectFromString(String json) throws Exception  {
+    protected PatientMapper getPatientObjectFromString(String json) throws Exception {
         return mapper.readValue(json, PatientMapper.class);
     }
 
-    protected Address getAddressObjectFromString(String json) throws Exception  {
+    protected Address getAddressObjectFromString(String json) throws Exception {
         return mapper.readValue(json, Address.class);
     }
 
@@ -82,13 +84,27 @@ public class BaseControllerTest {
     protected void synchronizeRelationsId(PatientMapper original, PatientMapper patient) {
         int y = original.getRelations().size();
 
-        for(int x = 0; x < y; x = x+1) {
+        for (int x = 0; x < y; x = x + 1) {
             original.getRelations().get(x).setId(patient.getRelationOfType(original.getRelations().get(x).getType()).getId());
         }
     }
 
     protected PatientMapper getPatientObjectFromResponse(ResponseEntity asyncResult) throws Exception {
         return getPatientObjectFromString(mapper.writeValueAsString((PatientMapper) asyncResult.getBody()));
+    }
+
+    @After
+    public void teardown() {
+        cqlTemplate.execute("truncate patient");
+    }
+
+    protected class InvalidPatient {
+
+        @JsonProperty("nid")
+        public String nationalId = "1234567890123";
+
+        @JsonProperty("invalid_property")
+        public String birthRegistrationNumber = "some thing";
     }
 
 }

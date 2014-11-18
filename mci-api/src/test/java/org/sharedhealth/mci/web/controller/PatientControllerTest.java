@@ -288,6 +288,7 @@ public class PatientControllerTest {
     private LocalValidatorFactoryBean validator() {
         return localValidatorFactoryBean;
     }
+
     public void shouldNotUpdatePatient_FieldsMarkedForApproval() throws Exception {
 
         String healthId = "healthId-100";
@@ -304,7 +305,7 @@ public class PatientControllerTest {
 
         when(patientService.findByHealthId(healthId).get()).thenReturn(patientDtoModified);
         when(patientRepository.findByHealthId(healthId).get()).thenReturn(patientDto);
-        when(patientService.update(patientDtoUpdated,healthId).get()).thenReturn(new MCIResponse(healthId, ACCEPTED));
+        when(patientService.update(patientDtoUpdated, healthId).get()).thenReturn(new MCIResponse(healthId, ACCEPTED));
 
         mockMvc.perform(put(PUT_API_END_POINT, healthId).content(json).contentType(APPLICATION_JSON))
                 .andExpect(status().isAccepted());
@@ -316,7 +317,7 @@ public class PatientControllerTest {
                 .andExpect(jsonPath("$.sur_name", is("Tiger")))
                 .andExpect(jsonPath("$.date_of_birth", is("2014-12-01")))
                 .andExpect(jsonPath("$.present_address.address_line", is("house-10")));
-        verify(patientService).update(patientDtoUpdated,healthId);
+        verify(patientService).update(patientDtoUpdated, healthId);
         verify(patientService).findByHealthId(healthId);
 
     }

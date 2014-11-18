@@ -1,8 +1,6 @@
 package org.sharedhealth.mci.web.controller;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -194,7 +192,7 @@ public class SearchRestApiTest extends BaseControllerTest {
     public void shouldReturnPatientWithAdditionalNoteWhenSearchFindMorePatient() throws Exception {
         String json = new ObjectMapper().writeValueAsString(patientMapper);
 
-        for(int x = 0; x <= PER_PAGE_MAXIMUM_LIMIT; x++) {
+        for (int x = 0; x <= PER_PAGE_MAXIMUM_LIMIT; x++) {
             createPatient(json);
         }
         String present_address = patientMapper.getAddress().getDivisionId() +
@@ -277,19 +275,5 @@ public class SearchRestApiTest extends BaseControllerTest {
         PatientMapper patientMapper1 = (PatientMapper) body.getResults().get(0);
         Assert.assertEquals("1716528608", patientMapper1.getPhoneNumber().getNumber());
         Assert.assertEquals(200, body.getHttpStatus());
-    }
-
-    @After
-    public void teardown() {
-        cqlTemplate.execute("truncate patient");
-    }
-
-    private class InvalidPatient {
-
-        @JsonProperty("nid")
-        public String nationalId = "1234567890123";
-
-        @JsonProperty("invalid_property")
-        public String birthRegistrationNumber = "some thing";
     }
 }
