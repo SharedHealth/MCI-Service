@@ -163,7 +163,7 @@ public class PatientRepositoryIT {
     @Test
     public void shouldReturnAllPatientsBelongsToSpecificLocation() throws Exception {
         generatePatientSet();
-        List<PatientMapper> patients = patientRepository.findAllByLocation("1004092006", null, 0, null).get();
+        List<PatientMapper> patients = patientRepository.findAllByLocation("1004092005", null, 0, null).get();
         assertEquals(10, patients.size());
         patients = patientRepository.findAllByLocation("1004092001", null, 0, null).get();
         assertEquals(5, patients.size());
