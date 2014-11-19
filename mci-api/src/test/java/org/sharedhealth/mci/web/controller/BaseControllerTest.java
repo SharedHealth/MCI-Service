@@ -1,5 +1,7 @@
 package org.sharedhealth.mci.web.controller;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.After;
@@ -17,8 +19,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
-import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -78,15 +78,6 @@ public class BaseControllerTest {
         original.setHealthId(patient.getHealthId());
         original.setCreatedAt(patient.getCreatedAt());
         original.setUpdatedAt(patient.getUpdatedAt());
-        synchronizeRelationsId(original, patient);
-    }
-
-    protected void synchronizeRelationsId(PatientMapper original, PatientMapper patient) {
-        int y = original.getRelations().size();
-
-        for (int x = 0; x < y; x = x + 1) {
-            original.getRelations().get(x).setId(patient.getRelationOfType(original.getRelations().get(x).getType()).getId());
-        }
     }
 
     protected PatientMapper getPatientObjectFromResponse(ResponseEntity asyncResult) throws Exception {

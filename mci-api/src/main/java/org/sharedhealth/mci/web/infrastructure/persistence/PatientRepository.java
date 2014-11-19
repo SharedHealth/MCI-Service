@@ -1,5 +1,11 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Row;
@@ -33,15 +39,6 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.FieldError;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
 import static org.springframework.data.cassandra.core.CassandraTemplate.toUpdateQuery;
 
@@ -51,6 +48,7 @@ public class PatientRepository extends BaseRepository {
     protected static final Logger logger = LoggerFactory.getLogger(PatientRepository.class);
 
     private static final UidGenerator uid = new UidGenerator();
+    private final ObjectMapper mapper = new ObjectMapper();
 
     @Autowired
     public PatientRepository(@Qualifier("MCICassandraTemplate") CassandraOperations cassandraOperations) {
@@ -326,10 +324,10 @@ public class PatientRepository extends BaseRepository {
     private PatientMapper getPatientFromRow(Row r) {
         DatabaseRow row = new DatabaseRow(r);
         PatientMapper patientMapper = new PatientMapper();
-        ObjectMapper mapper = new ObjectMapper();
 
         try {
-            patientMapper.setRelations(mapper.readValue(row.getString(RELATIONS), List.class));
+            final String string = row.getString(RELATIONS);
+            patientMapper.setRelations(getRelationsList(string));
         } catch (Exception e) {
             logger.debug(" Relations: [" + e.getMessage() + "]");
         }
@@ -428,6 +426,10 @@ public class PatientRepository extends BaseRepository {
         return patientMapper;
     }
 
+    private List<Relation> getRelationsList(String string) throws IOException {
+        return mapper.readValue(string, mapper.getTypeFactory().constructCollectionType(List.class, Relation.class));
+    }
+
     public ListenableFuture<List<PatientMapper>> findAllByQuery(SearchQuery searchQuery) {
 
         Select select = prepareSelectQueryForSearch(searchQuery);
@@ -466,13 +468,16 @@ public class PatientRepository extends BaseRepository {
         Approval approval = patientFilter.filter();
 
         String fullName = "";
+
         if (patientMapper.getGivenName() != null) {
             fullName = patientMapper.getGivenName();
         }
+
         if (patientMapper.getSurName() != null) {
             fullName = fullName + " " + patientMapper.getSurName();
         }
-        Patient patient = getEntityFromPatientMapper(patientToSave);
+
+        Patient patient = getEntityFromPatientMapper(patientToSave, existingPatient);
         patient.setHealthId(hid);
         patient.setFullName(fullName);
         patient.setUpdatedAt(new Date());
@@ -604,73 +609,47 @@ public class PatientRepository extends BaseRepository {
     }
 
     public Patient getEntityFromPatientMapper(PatientMapper p) {
-        return getEntityFromPatientMapper(p, new Patient());
+        return getEntityFromPatientMapper(p, new PatientMapper());
     }
 
-    public Patient getEntityFromPatientMapper(PatientMapper p, Patient patient) {
+    public Patient getEntityFromPatientMapper(PatientMapper patientDto, PatientMapper existing) {
 
-        String relationsJson = "";
-        ObjectMapper mapper = new ObjectMapper();
+        Patient patient= new Patient();
 
-        Relation father = p.getRelationOfType("FTH");
-        Relation mother = p.getRelationOfType("MTH");
+        prepareRelationBlock(patientDto, existing, patient);
 
-        try {
-            relationsJson = mapper.writeValueAsString(p.getRelations());
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
+        Address address = patientDto.getAddress();
+        Address permanentAddress = patientDto.getPermanentAddress();
+
+        PhoneNumber phoneNumber = patientDto.getPhoneNumber();
+        PhoneNumber primaryContactNumber = patientDto.getPrimaryContactNumber();
+
+        patient.setHealthId(patientDto.getHealthId());
+        patient.setNationalId(patientDto.getNationalId());
+        patient.setBirthRegistrationNumber(patientDto.getBirthRegistrationNumber());
+        patient.setFullNameBangla(StringUtils.trim(patientDto.getNameBangla()));
+        patient.setGivenName(StringUtils.trim(patientDto.getGivenName()));
+        if (patientDto.getGivenName() != null) {
+            patient.setLowerGivenName(StringUtils.trim(patientDto.getGivenName()).toLowerCase());
         }
-
-        Address address = p.getAddress();
-        Address permanentAddress = p.getPermanentAddress();
-
-        PhoneNumber phoneNumber = p.getPhoneNumber();
-        PhoneNumber primaryContactNumber = p.getPrimaryContactNumber();
-
-        patient.setHealthId(p.getHealthId());
-        patient.setNationalId(p.getNationalId());
-        patient.setBirthRegistrationNumber(p.getBirthRegistrationNumber());
-        patient.setFullNameBangla(StringUtils.trim(p.getNameBangla()));
-        patient.setGivenName(StringUtils.trim(p.getGivenName()));
-        if (p.getGivenName() != null) {
-            patient.setLowerGivenName(StringUtils.trim(p.getGivenName()).toLowerCase());
+        patient.setSurName(StringUtils.trim(patientDto.getSurName()));
+        if (patientDto.getSurName() != null) {
+            patient.setLowerSurName(StringUtils.trim(patientDto.getSurName()).toLowerCase());
         }
-        patient.setSurName(StringUtils.trim(p.getSurName()));
-        if (p.getSurName() != null) {
-            patient.setLowerSurName(StringUtils.trim(p.getSurName()).toLowerCase());
-        }
-        patient.setDateOfBirth(p.getDateOfBirth());
-        patient.setGender(p.getGender());
-        patient.setOccupation(p.getOccupation());
-        patient.setEducationLevel(p.getEducationLevel());
+        patient.setDateOfBirth(patientDto.getDateOfBirth());
+        patient.setGender(patientDto.getGender());
+        patient.setOccupation(patientDto.getOccupation());
+        patient.setEducationLevel(patientDto.getEducationLevel());
 
-        if (father != null) {
-            patient.setFathersNameBangla(StringUtils.trim(father.getNameBangla()));
-            patient.setFathersGivenName(StringUtils.trim(father.getGivenName()));
-            patient.setFathersSurName(StringUtils.trim(father.getSurName()));
-            patient.setFathersBrn(father.getBirthRegistrationNumber());
-            patient.setFathersNid(father.getNationalId());
-            patient.setFathersUid(father.getUid());
-        }
-
-        if (mother != null) {
-            patient.setMothersNameBangla(StringUtils.trim(mother.getNameBangla()));
-            patient.setMothersGivenName(StringUtils.trim(mother.getGivenName()));
-            patient.setMothersSurName(StringUtils.trim(mother.getSurName()));
-            patient.setMothersBrn(mother.getBirthRegistrationNumber());
-            patient.setMothersNid(mother.getNationalId());
-            patient.setMothersUid(mother.getUid());
-        }
-
-        patient.setUid(p.getUid());
-        patient.setPlaceOfBirth(StringUtils.trim(p.getPlaceOfBirth()));
-        patient.setReligion(p.getReligion());
-        patient.setBloodGroup(p.getBloodGroup());
-        patient.setNationality(StringUtils.trim(p.getNationality()));
-        patient.setDisability(p.getDisability());
-        patient.setEthnicity(p.getEthnicity());
-        patient.setIsAlive(p.getIsAlive());
-        patient.setMaritalStatus(p.getMaritalStatus());
+        patient.setUid(patientDto.getUid());
+        patient.setPlaceOfBirth(StringUtils.trim(patientDto.getPlaceOfBirth()));
+        patient.setReligion(patientDto.getReligion());
+        patient.setBloodGroup(patientDto.getBloodGroup());
+        patient.setNationality(StringUtils.trim(patientDto.getNationality()));
+        patient.setDisability(patientDto.getDisability());
+        patient.setEthnicity(patientDto.getEthnicity());
+        patient.setIsAlive(patientDto.getIsAlive());
+        patient.setMaritalStatus(patientDto.getMaritalStatus());
 
         if (address != null) {
             patient.setAddressLine(address.getAddressLine());
@@ -708,10 +687,6 @@ public class PatientRepository extends BaseRepository {
             patient.setPermanentCountryCode(permanentAddress.getCountryCode());
         }
 
-        if (p.getRelations() != null) {
-            patient.setRelations(relationsJson);
-        }
-
         if (phoneNumber != null) {
             patient.setCellNo(phoneNumber.getNumber());
             patient.setPhoneNumberAreaCode(phoneNumber.getAreaCode());
@@ -726,10 +701,160 @@ public class PatientRepository extends BaseRepository {
             patient.setPrimaryContactNumberExtension(primaryContactNumber.getExtension());
         }
 
-        patient.setPrimaryContact(StringUtils.trim(p.getPrimaryContact()));
-
+        patient.setPrimaryContact(StringUtils.trim(patientDto.getPrimaryContact()));
 
         return patient;
+    }
+
+    private void prepareRelationBlock(PatientMapper patientDto, PatientMapper existingDto, Patient patient) {
+
+        List<Relation> relations = patientDto.getRelations();
+
+        if (relations == null) {
+            return;
+        }
+
+        removeDuplicateRelationBlock(relations);
+        appendExistingRelationBlock(patientDto, existingDto);
+        handleRelationRemovalRequest(relations);
+        populateRelationId(relations);
+
+        prepareFathersInfo(patientDto, patient);
+        prepareMothersInfo(patientDto, patient);
+
+        try {
+            patient.setRelations(mapper.writeValueAsString(patientDto.getRelations()));
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void removeDuplicateRelationBlock(List<Relation> r) {
+        Set<Relation> uniqueRelations = new LinkedHashSet<>(r);
+        r.clear();
+        r.addAll(uniqueRelations);
+    }
+
+    private void handleRelationRemovalRequest(List<Relation> relations) {
+        if (relations == null) {
+            return;
+        }
+
+        List<Relation> relationsToRemoved = new ArrayList<>();
+
+        for (Relation relation : relations) {
+            if (relation.isEmpty()) {
+                relationsToRemoved.add(relation);
+            }
+        }
+
+        for (Relation relation : relationsToRemoved) {
+            relations.remove(relation);
+        }
+    }
+
+    private void prepareMothersInfo(PatientMapper patientDto, Patient patient) {
+        Relation mother = patientDto.getRelationOfType("MTH");
+
+        if (mother != null) {
+            patient.setMothersNameBangla(StringUtils.trim(mother.getNameBangla()));
+            patient.setMothersGivenName(StringUtils.trim(mother.getGivenName()));
+            patient.setMothersSurName(StringUtils.trim(mother.getSurName()));
+            patient.setMothersBrn(mother.getBirthRegistrationNumber());
+            patient.setMothersNid(mother.getNationalId());
+            patient.setMothersUid(mother.getUid());
+        } else {
+            patient.setMothersNameBangla("");
+            patient.setMothersGivenName("");
+            patient.setMothersSurName("");
+            patient.setMothersBrn("");
+            patient.setMothersNid("");
+            patient.setMothersUid("");
+        }
+    }
+
+    private void prepareFathersInfo(PatientMapper patientDto, Patient patient) {
+        Relation father = patientDto.getRelationOfType("FTH");
+        if (father != null) {
+            patient.setFathersNameBangla(StringUtils.trim(father.getNameBangla()));
+            patient.setFathersGivenName(StringUtils.trim(father.getGivenName()));
+            patient.setFathersSurName(StringUtils.trim(father.getSurName()));
+            patient.setFathersBrn(father.getBirthRegistrationNumber());
+            patient.setFathersNid(father.getNationalId());
+            patient.setFathersUid(father.getUid());
+        } else {
+            patient.setFathersNameBangla("");
+            patient.setFathersGivenName("");
+            patient.setFathersSurName("");
+            patient.setFathersBrn("");
+            patient.setFathersNid("");
+            patient.setFathersUid("");
+        }
+    }
+
+    private Boolean isValidRelationBlock(List<Relation> relations, List<Relation> existing) {
+
+        for (Relation relation : relations) {
+            if (StringUtils.isNotBlank(relation.getId()) && !relationExistWithId(existing, relation.getId())) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private void appendExistingRelationBlock(PatientMapper patientDto, PatientMapper existingPatient) {
+
+        List<Relation> r = patientDto.getRelations();
+
+        if (r == null) {
+            r = new ArrayList<>();
+        }
+
+        List<Relation> relations = existingPatient.getRelations();
+
+        if (!isValidRelationBlock(r, relations)) {
+            DirectFieldBindingResult bindingResult = new DirectFieldBindingResult(patientDto, "patient");
+            bindingResult.addError(new FieldError("patient", "relations", "1004"));
+            throw new ValidationException(bindingResult);
+        }
+
+        if(relations == null) {
+            return;
+        }
+
+        for (Relation relation : relations) {
+            if (r.contains(relation)) {
+                r.get(r.indexOf(relation)).setId(relation.getId());
+            } else if (patientDto.getRelationById(relation.getId()) == null) {
+                r.add(relation);
+            }
+        }
+    }
+
+    private void populateRelationId(List<Relation> r) {
+        int y = r.size();
+        for (int x = 0; x < y; x = x + 1) {
+            if (StringUtils.isBlank(r.get(x).getId())) {
+                r.get(x).setId(UUID.randomUUID().toString());
+            }
+        }
+    }
+
+    public Boolean relationExistWithId(List<Relation> relations, String id) {
+
+        if (relations == null) {
+            return false;
+        }
+
+        for (Relation relation : relations) {
+
+            if (relation.getId() != null && relation.getId().equals(id)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private Select prepareSelectQueryForSearch(SearchQuery searchQuery) {

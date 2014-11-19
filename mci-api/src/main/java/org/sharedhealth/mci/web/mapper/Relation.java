@@ -2,12 +2,11 @@ package org.sharedhealth.mci.web.mapper;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
-import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.validation.constraints.Code;
 import org.sharedhealth.mci.validation.constraints.Length;
 import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
@@ -16,11 +15,6 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static org.sharedhealth.mci.web.utils.PatientFieldProperties.*;
 
 public class Relation {
-
-    public Relation() {
-        UUID idOne = UUID.randomUUID();
-        this.id = idOne.toString();
-    }
 
     private final String RELATION_TYPE = "type";
     private final String RELATIONS_CODE_TYPE = "relations";
@@ -166,12 +160,81 @@ public class Relation {
     }
 
     @Override
-    public boolean equals(Object rhs) {
-        return EqualsBuilder.reflectionEquals(this, rhs);
+    public String toString() {
+
+        final StringBuilder sb = new StringBuilder("{");
+        appendKeyValue(sb, "type", type);
+        appendKeyValue(sb, "healthId", healthId);
+        appendKeyValue(sb, "nationalId", nationalId);
+        appendKeyValue(sb, "uid", uid);
+        appendKeyValue(sb, "birthRegistrationNumber", birthRegistrationNumber);
+        appendKeyValue(sb, "nameBangla", nameBangla);
+        appendKeyValue(sb, "givenName", givenName);
+        appendKeyValue(sb, "surName", surName);
+        appendKeyValue(sb, "marriageId", marriageId);
+        appendKeyValue(sb, "relationalStatus", relationalStatus);
+        appendKeyValue(sb, "id", id);
+        sb.append('}');
+        return sb.toString();
+    }
+
+    private void appendKeyValue(StringBuilder sb, String key, String property) {
+        if (property != null) {
+            sb.append(key + ":'").append(property).append("'");
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Relation)) return false;
+
+        Relation relation = (Relation) o;
+
+        if (birthRegistrationNumber != null ? !birthRegistrationNumber.equals(relation.birthRegistrationNumber) : relation.birthRegistrationNumber != null)
+            return false;
+        if (givenName != null ? !givenName.equals(relation.givenName) : relation.givenName != null) return false;
+        if (healthId != null ? !healthId.equals(relation.healthId) : relation.healthId != null) return false;
+        if (marriageId != null ? !marriageId.equals(relation.marriageId) : relation.marriageId != null) return false;
+        if (nameBangla != null ? !nameBangla.equals(relation.nameBangla) : relation.nameBangla != null) return false;
+        if (nationalId != null ? !nationalId.equals(relation.nationalId) : relation.nationalId != null) return false;
+        if (relationalStatus != null ? !relationalStatus.equals(relation.relationalStatus) : relation.relationalStatus != null)
+            return false;
+        if (surName != null ? !surName.equals(relation.surName) : relation.surName != null) return false;
+        if (!type.equals(relation.type)) return false;
+        if (uid != null ? !uid.equals(relation.uid) : relation.uid != null) return false;
+
+        return true;
+    }
+
+    @JsonIgnore
+    public boolean isEmpty() {
+
+        if (StringUtils.isNotBlank(birthRegistrationNumber)) return false;
+        if (StringUtils.isNotBlank(givenName)) return false;
+        if (StringUtils.isNotBlank(healthId)) return false;
+        if (StringUtils.isNotBlank(marriageId)) return false;
+        if (StringUtils.isNotBlank(nameBangla)) return false;
+        if (StringUtils.isNotBlank(nationalId)) return false;
+        if (StringUtils.isNotBlank(relationalStatus)) return false;
+        if (StringUtils.isNotBlank(surName)) return false;
+        if (StringUtils.isNotBlank(uid)) return false;
+
+        return true;
     }
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        int result = type.hashCode();
+        result = 31 * result + (healthId != null ? healthId.hashCode() : 0);
+        result = 31 * result + (nationalId != null ? nationalId.hashCode() : 0);
+        result = 31 * result + (uid != null ? uid.hashCode() : 0);
+        result = 31 * result + (birthRegistrationNumber != null ? birthRegistrationNumber.hashCode() : 0);
+        result = 31 * result + (nameBangla != null ? nameBangla.hashCode() : 0);
+        result = 31 * result + (givenName != null ? givenName.hashCode() : 0);
+        result = 31 * result + (surName != null ? surName.hashCode() : 0);
+        result = 31 * result + (marriageId != null ? marriageId.hashCode() : 0);
+        result = 31 * result + (relationalStatus != null ? relationalStatus.hashCode() : 0);
+        return result;
     }
 }

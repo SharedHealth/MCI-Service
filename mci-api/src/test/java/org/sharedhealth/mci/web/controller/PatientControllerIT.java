@@ -1,5 +1,9 @@
 package org.sharedhealth.mci.web.controller;
 
+import java.text.ParseException;
+import java.util.Collections;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
@@ -25,16 +29,16 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.text.ParseException;
-import java.util.Collections;
-import java.util.List;
-
 import static org.junit.Assert.assertEquals;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -317,7 +321,6 @@ public class PatientControllerIT extends BaseControllerTest {
         final ResponseEntity asyncResult = (ResponseEntity<PatientMapper>) getResult.getAsyncResult();
 
         PatientMapper patient = getPatientObjectFromResponse(asyncResult);
-        synchronizeRelationsId(original, patient);
         Assert.assertTrue(isRelationsEqual(original.getRelations(), patient.getRelations()));
     }
 
@@ -332,7 +335,7 @@ public class PatientControllerIT extends BaseControllerTest {
         final MCIResponse createdResponse = getMciResponse(createdResult);
         String healthId = createdResponse.getId();
 
-        MvcResult updatedResult = mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+        mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 
