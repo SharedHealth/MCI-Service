@@ -1,0 +1,10 @@
+{
+  "relations":[
+    {
+      "id":"__RELATION_ID__",
+      "type":"FTH",
+      "given_name":"Swapan",
+      "sur_name":"Saha"
+    }
+  ]
+}

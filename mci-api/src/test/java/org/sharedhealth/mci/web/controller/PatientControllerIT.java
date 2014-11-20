@@ -21,6 +21,7 @@ import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientMapper;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
+import org.sharedhealth.mci.web.mapper.Relation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -30,6 +31,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
@@ -313,14 +315,7 @@ public class PatientControllerIT extends BaseControllerTest {
         final MCIResponse body = getMciResponse(result);
         String healthId = body.getId();
 
-        MvcResult getResult = mockMvc.perform(get(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(request().asyncStarted())
-                .andReturn();
-
-        final ResponseEntity asyncResult = (ResponseEntity<PatientMapper>) getResult.getAsyncResult();
-
-        PatientMapper patient = getPatientObjectFromResponse(asyncResult);
+        PatientMapper patient = getPatientMapperObjectByHealthId(healthId);
         Assert.assertTrue(isRelationsEqual(original.getRelations(), patient.getRelations()));
     }
 
@@ -339,15 +334,7 @@ public class PatientControllerIT extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        MvcResult getResult = mockMvc.perform(get(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(request().asyncStarted())
-                .andReturn();
-
-        final ResponseEntity asyncResult = (ResponseEntity<PatientMapper>) getResult.getAsyncResult();
-
-
-        PatientMapper patient = getPatientObjectFromResponse(asyncResult);
+        PatientMapper patient = getPatientMapperObjectByHealthId(healthId);
 
         assertPatientEquals(original, patient);
 
@@ -371,15 +358,7 @@ public class PatientControllerIT extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        MvcResult getResult = mockMvc.perform(get(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(request().asyncStarted())
-                .andReturn();
-
-        final ResponseEntity asyncResult = (ResponseEntity<PatientMapper>) getResult.getAsyncResult();
-
-
-        PatientMapper patient = getPatientObjectFromResponse(asyncResult);
+        PatientMapper patient = getPatientMapperObjectByHealthId(healthId);
         original.setNationalId(nid);
         assertPatientEquals(original, patient);
 
@@ -401,18 +380,105 @@ public class PatientControllerIT extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        MvcResult getResult = mockMvc.perform(get(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(request().asyncStarted())
-                .andReturn();
-
-        final ResponseEntity asyncResult = (ResponseEntity<PatientMapper>) getResult.getAsyncResult();
-
-
-        PatientMapper patient = getPatientObjectFromResponse(asyncResult);
+        PatientMapper patient = getPatientMapperObjectByHealthId(healthId);
 
         assertEquals(patientMapper1.getAddress(), patient.getAddress());
 
     }
 
+    @Test
+    public void shouldUpdateSingleRelationBlock() throws Exception {
+
+        String json = asString("jsons/patient/payload_with_multiple_relations.json");
+
+        MvcResult createdResult = createPatient(json);
+
+        final MCIResponse createdResponse = getMciResponse(createdResult);
+        String healthId = createdResponse.getId();
+        PatientMapper original = getPatientMapperObjectByHealthId(healthId);
+
+        String relationJson = asString("jsons/patient/payload_relation_with_id.json");
+
+        Relation fth = original.getRelationOfType("FTH");
+        relationJson = relationJson.replace("__RELATION_ID__", fth.getId());
+
+        PatientMapper updateRequestPatientMapper = getPatientObjectFromString(relationJson);
+        original.getRelations().set(original.getRelations().indexOf(fth), updateRequestPatientMapper.getRelations().get(0));
+
+        mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(relationJson).contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        PatientMapper updatedPatient = getPatientMapperObjectByHealthId(healthId);
+
+        assertTrue(isRelationsEqual(original.getRelations(), updatedPatient.getRelations()));
+    }
+
+    @Test
+    public void shouldRemoveRelationBlockWithEmptyData() throws Exception {
+
+        String json = asString("jsons/patient/payload_with_multiple_relations.json");
+
+        MvcResult createdResult = createPatient(json);
+
+        final MCIResponse createdResponse = getMciResponse(createdResult);
+        String healthId = createdResponse.getId();
+        PatientMapper original = getPatientMapperObjectByHealthId(healthId);
+
+        String relationJson = asString("jsons/patient/payload_with_empty_relation.json");
+
+        Relation fth = original.getRelationOfType("FTH");
+        relationJson = relationJson.replace("__RELATION_ID__", fth.getId());
+
+        original.getRelations().remove(fth);
+
+        mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(relationJson).contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        PatientMapper updatedPatient = getPatientMapperObjectByHealthId(healthId);
+
+        assertTrue(isRelationsEqual(original.getRelations(), updatedPatient.getRelations()));
+    }
+
+    @Test
+    public void shouldAddNewRelationBlockOnUpdate() throws Exception {
+
+        String json = asString("jsons/patient/payload_with_multiple_relations.json");
+
+        MvcResult createdResult = createPatient(json);
+
+        final MCIResponse createdResponse = getMciResponse(createdResult);
+        String healthId = createdResponse.getId();
+        PatientMapper original = getPatientMapperObjectByHealthId(healthId);
+
+        String relationJson = asString("jsons/patient/payload_with_new_relation.json");
+
+        PatientMapper newPatientMapper = getPatientObjectFromString(relationJson);
+
+        original.getRelations().add(newPatientMapper.getRelations().get(0));
+
+        mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(relationJson).contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        PatientMapper updatedPatient = getPatientMapperObjectByHealthId(healthId);
+
+        assertTrue(isRelationsEqual(original.getRelations(), updatedPatient.getRelations()));
+    }
+
+    @Test
+    public void shouldNotSaveDuplicateRelationBlock() throws Exception {
+
+        String json = asString("jsons/patient/payload_with_duplicate_relations.json");
+
+        MvcResult createdResult = createPatient(json);
+
+        final MCIResponse createdResponse = getMciResponse(createdResult);
+        String healthId = createdResponse.getId();
+        PatientMapper original = getPatientMapperObjectByHealthId(healthId);
+
+        assertEquals(1, original.getRelations().size());
+
+    }
 }

@@ -225,7 +225,8 @@ public class Relation {
 
     @Override
     public int hashCode() {
-        int result = type.hashCode();
+        int result = 0;
+        result = 31 * result + (type != null ? type.hashCode() : 0);
         result = 31 * result + (healthId != null ? healthId.hashCode() : 0);
         result = 31 * result + (nationalId != null ? nationalId.hashCode() : 0);
         result = 31 * result + (uid != null ? uid.hashCode() : 0);

@@ -1,0 +1,8 @@
+{
+  "relations":[
+    {
+      "id":"__RELATION_ID__",
+      "type":"FTH"
+    }
+  ]
+}
