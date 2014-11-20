@@ -13,7 +13,8 @@
 #Build dirs
 build/
 out/
-classes
+classes/
+target/
 
 #Test Directory
 mci-api/target/

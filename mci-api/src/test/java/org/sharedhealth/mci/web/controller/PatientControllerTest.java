@@ -124,7 +124,7 @@ public class PatientControllerTest {
         String healthId = "healthId-100";
         MCIResponse mciResponse = new MCIResponse(healthId, CREATED);
         when(locationService.findByGeoCode(GEO_CODE)).thenReturn(new PreResolvedListenableFuture<>(location));
-        when(patientService.create(patientDto)).thenReturn(new PreResolvedListenableFuture<>(mciResponse));
+        when(patientService.create(patientDto)).thenReturn(mciResponse);
 
         mockMvc.perform(post(API_END_POINT).content(json).contentType(APPLICATION_JSON))
                 .andExpect(request().asyncResult(new ResponseEntity<>(mciResponse, CREATED)));
@@ -134,7 +134,7 @@ public class PatientControllerTest {
     @Test
     public void shouldFindPatientByHealthId() throws Exception {
         String healthId = "healthId-100";
-        when(patientService.findByHealthId(healthId)).thenReturn(new PreResolvedListenableFuture<>(patientDto));
+        when(patientService.findByHealthId(healthId)).thenReturn(patientDto);
         mockMvc.perform(get(API_END_POINT + "/" + healthId))
                 .andExpect(request().asyncResult(new ResponseEntity<>(patientDto, OK)));
         verify(patientService).findByHealthId(healthId);
@@ -235,7 +235,7 @@ public class PatientControllerTest {
         String healthId = "healthId-100";
         MCIResponse mciResponse = new MCIResponse(healthId, ACCEPTED);
         when(locationService.findByGeoCode(GEO_CODE)).thenReturn(new PreResolvedListenableFuture<>(location));
-        when(patientService.update(patientDto, healthId)).thenReturn(new PreResolvedListenableFuture<>(mciResponse));
+        when(patientService.update(patientDto, healthId)).thenReturn(mciResponse);
 
         mockMvc.perform(put(PUT_API_END_POINT, healthId).content(json).contentType(APPLICATION_JSON))
                 .andExpect(request().asyncResult(new ResponseEntity<>(mciResponse, ACCEPTED)));
@@ -303,9 +303,9 @@ public class PatientControllerTest {
         PatientMapper patientDtoModified = createPatientDto();
         patientDtoModified.setGivenName("Bulla");
 
-        when(patientService.findByHealthId(healthId).get()).thenReturn(patientDtoModified);
-        when(patientRepository.findByHealthId(healthId).get()).thenReturn(patientDto);
-        when(patientService.update(patientDtoUpdated, healthId).get()).thenReturn(new MCIResponse(healthId, ACCEPTED));
+        when(patientService.findByHealthId(healthId)).thenReturn(patientDtoModified);
+        when(patientRepository.findByHealthId(healthId)).thenReturn(patientDto);
+        when(patientService.update(patientDtoUpdated, healthId)).thenReturn(new MCIResponse(healthId, ACCEPTED));
 
         mockMvc.perform(put(PUT_API_END_POINT, healthId).content(json).contentType(APPLICATION_JSON))
                 .andExpect(status().isAccepted());

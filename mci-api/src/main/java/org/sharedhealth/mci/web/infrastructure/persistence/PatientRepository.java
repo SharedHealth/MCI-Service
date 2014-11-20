@@ -1,11 +1,5 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Row;
@@ -39,6 +33,12 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.FieldError;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
 import static org.springframework.data.cassandra.core.CassandraTemplate.toUpdateQuery;
 
@@ -55,27 +55,14 @@ public class PatientRepository extends BaseRepository {
         super(cassandraOperations);
     }
 
-    public ListenableFuture<MCIResponse> create(PatientMapper patientDto) {
-
-        PatientMapper existingPatient;
-
-        final SettableFuture<MCIResponse> result = SettableFuture.create();
-
+    public MCIResponse create(PatientMapper patientDto) {
         if (!StringUtils.isBlank(patientDto.getHealthId())) {
             DirectFieldBindingResult bindingResult = new DirectFieldBindingResult(patientDto, "patient");
             bindingResult.addError(new FieldError("patient", "hid", "3001"));
             throw new HealthIDExistException(bindingResult);
         }
 
-        try {
-            existingPatient = getExistingPatient(patientDto);
-        } catch (ExecutionException e) {
-            result.setException(e.getCause());
-            return getStringListenableFuture(result);
-        } catch (Exception e) {
-            result.setException(e);
-            return getStringListenableFuture(result);
-        }
+        PatientMapper existingPatient = getExistingPatient(patientDto);
 
         if (existingPatient == null) {
             patientDto.setHealthId(uid.getId());
@@ -83,8 +70,7 @@ public class PatientRepository extends BaseRepository {
             logger.debug("Update flow");
             return update(patientDto, existingPatient.getHealthId());
         } else {
-            result.setException(new PatientAlreadyExistException(existingPatient.getHealthId()));
-            return getStringListenableFuture(result);
+            throw new PatientAlreadyExistException(existingPatient.getHealthId());
         }
 
         String fullName = "";
@@ -103,28 +89,16 @@ public class PatientRepository extends BaseRepository {
         p.setSurName(patientDto.getSurName());
 
         p = cassandraOperations.insert(p);
-
-        result.set(new MCIResponse(p.getHealthId(), HttpStatus.CREATED));
-
-        return getStringListenableFuture(result);
+        return new MCIResponse(p.getHealthId(), HttpStatus.CREATED);
     }
 
-    private ListenableFuture<MCIResponse> getStringListenableFuture(final SettableFuture<MCIResponse> result) {
-        return new SimpleListenableFuture<MCIResponse, MCIResponse>(result) {
-            @Override
-            protected MCIResponse adapt(MCIResponse adapteeResult) throws ExecutionException {
-                return adapteeResult;
-            }
-        };
-    }
-
-    private PatientMapper getExistingPatient(PatientMapper patientDto) throws InterruptedException, ExecutionException {
+    private PatientMapper getExistingPatient(PatientMapper patientDto) {
 
         PatientMapper existingPatient;
 
         if (!StringUtils.isBlank(patientDto.getHealthId())) {
             try {
-                return findByHealthId(patientDto.getHealthId()).get();
+                return findByHealthId(patientDto.getHealthId());
             } catch (Exception e) {
                 DirectFieldBindingResult bindingResult = new DirectFieldBindingResult(patientDto, "patient");
                 bindingResult.addError(new FieldError("patient", "hid", "2002"));
@@ -172,33 +146,18 @@ public class PatientRepository extends BaseRepository {
         return null;
     }
 
-    public ListenableFuture<PatientMapper> findByHealthId(final String healthId) {
+    public PatientMapper findByHealthId(final String healthId) {
         String cql = String.format(getFindByHealthIdQuery(), healthId);
         logger.debug("Find patient by health id CQL: [" + cql + "]");
-        final SettableFuture<PatientMapper> result = SettableFuture.create();
+        ResultSet resultSet = cassandraOperations.query(cql);
 
-        cassandraOperations.queryAsynchronously(cql, new AsynchronousQueryListener() {
-            @Override
-            public void onQueryComplete(ResultSetFuture rsf) {
-                try {
-                    Row row = rsf.get(TIMEOUT_IN_MILLIS, TimeUnit.MILLISECONDS).one();
-                    if (row == null) {
-                        throw new PatientNotFoundException("No patient found with health id: " + healthId);
-                    }
-                    setPatientOnResult(row, result);
-                } catch (Exception e) {
-                    logger.error("Error while finding patient by healthId: " + healthId, e);
-                    result.setException(e);
-                }
+        if (resultSet != null) {
+            Row row = resultSet.one();
+            if (row != null) {
+                return getPatientFromRow(row);
             }
-        });
-
-        return new SimpleListenableFuture<PatientMapper, PatientMapper>(result) {
-            @Override
-            protected PatientMapper adapt(PatientMapper adapteeResult) throws ExecutionException {
-                return adapteeResult;
-            }
-        };
+        }
+        throw new PatientNotFoundException("No patient found with health id: " + healthId);
     }
 
     public ListenableFuture<PatientMapper> findByNationalId(final String nationalId) {
@@ -316,7 +275,7 @@ public class PatientRepository extends BaseRepository {
         };
     }
 
-    private void setPatientOnResult(Row r, SettableFuture<PatientMapper> result) throws InterruptedException, ExecutionException {
+    private void setPatientOnResult(Row r, SettableFuture<PatientMapper> result) {
         PatientMapper patientDto = getPatientFromRow(r);
         result.set(patientDto);
     }
@@ -436,11 +395,7 @@ public class PatientRepository extends BaseRepository {
         return getPatientListListenableFuture(select);
     }
 
-    public ListenableFuture<MCIResponse> update(PatientMapper patientMapper, final String hid) {
-
-        final SettableFuture<MCIResponse> result = SettableFuture.create();
-
-
+    public MCIResponse update(PatientMapper patientMapper, final String hid) {
         if (patientMapper.getHealthId() != null && !StringUtils.equals(patientMapper.getHealthId(), hid)) {
             DirectFieldBindingResult bindingResult = new DirectFieldBindingResult(patientMapper, "patient");
             bindingResult.addError(new FieldError("patient", "hid", "1004"));
@@ -448,7 +403,7 @@ public class PatientRepository extends BaseRepository {
         }
         PatientMapper existingPatient;
         try {
-            existingPatient = findByHealthId(hid).get();
+            existingPatient = findByHealthId(hid);
         } catch (Exception e) {
             throw new PatientNotFoundException("No patient found with health id: " + hid);
         }
@@ -489,8 +444,7 @@ public class PatientRepository extends BaseRepository {
             batch.add(toUpdateQuery("approval", approval, null, converter));
         }
         cassandraOperations.execute(batch);
-        result.set(new MCIResponse(patient.getHealthId(), HttpStatus.ACCEPTED));
-        return getStringListenableFuture(result);
+        return new MCIResponse(patient.getHealthId(), HttpStatus.ACCEPTED);
     }
 
     public ListenableFuture<List<PatientMapper>> findAllByLocations(List<String> locations, String start, Date since) {
@@ -587,14 +541,9 @@ public class PatientRepository extends BaseRepository {
 
     private String getLocationPointer(List<String> locations, String start, String d) {
         if (locations.size() > 1 && StringUtils.isNotBlank(start)) {
-            ListenableFuture<PatientMapper> p = findByHealthId(start);
-            try {
-                return p.get().getAddress().getGeoCode();
-            } catch (InterruptedException | ExecutionException e) {
-                logger.debug("Invalid start parameter");
-            }
+            PatientMapper p = findByHealthId(start);
+            return p.getAddress().getGeoCode();
         }
-
         return d;
     }
 
@@ -614,7 +563,7 @@ public class PatientRepository extends BaseRepository {
 
     public Patient getEntityFromPatientMapper(PatientMapper patientDto, PatientMapper existing) {
 
-        Patient patient= new Patient();
+        Patient patient = new Patient();
 
         prepareRelationBlock(patientDto, existing, patient);
 
@@ -819,7 +768,7 @@ public class PatientRepository extends BaseRepository {
             throw new ValidationException(bindingResult);
         }
 
-        if(relations == null) {
+        if (relations == null) {
             return;
         }
 

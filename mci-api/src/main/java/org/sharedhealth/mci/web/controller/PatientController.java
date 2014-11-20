@@ -43,8 +43,11 @@ public class PatientController {
     }
 
     @RequestMapping(method = RequestMethod.POST, consumes = {APPLICATION_JSON_VALUE})
-    public DeferredResult<ResponseEntity<MCIResponse>> create(@RequestBody @Validated({RequiredGroup.class, Default.class}) PatientMapper patientDto, BindingResult bindingResult)
-            throws ExecutionException, InterruptedException {
+    public DeferredResult<ResponseEntity<MCIResponse>> create(
+            @RequestBody @Validated({RequiredGroup.class, Default.class})
+            PatientMapper patientDto,
+            BindingResult bindingResult) {
+
         logger.debug("Trying to create patient.");
         final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
 
@@ -52,38 +55,18 @@ public class PatientController {
             throw new ValidationException(bindingResult);
         }
 
-
-        patientService.create(patientDto).addCallback(new ListenableFutureCallback<MCIResponse>() {
-            @Override
-            public void onSuccess(MCIResponse mciResponse) {
-                deferredResult.setResult(new ResponseEntity<MCIResponse>(mciResponse, mciResponse.httpStatusObject));
-            }
-
-            @Override
-            public void onFailure(Throwable e) {
-                deferredResult.setErrorResult(extractAppException(e));
-            }
-        });
+        MCIResponse mciResponse = patientService.create(patientDto);
+        deferredResult.setResult(new ResponseEntity<>(mciResponse, mciResponse.httpStatusObject));
         return deferredResult;
     }
 
     @RequestMapping(value = "/{healthId}", method = RequestMethod.GET)
-    public DeferredResult<ResponseEntity<PatientMapper>> findByHealthId(@PathVariable String healthId)
-            throws ExecutionException, InterruptedException {
+    public DeferredResult<ResponseEntity<PatientMapper>> findByHealthId(@PathVariable String healthId) {
         logger.debug("Trying to find patient by health id [" + healthId + "]");
         final DeferredResult<ResponseEntity<PatientMapper>> deferredResult = new DeferredResult<>();
 
-        patientService.findByHealthId(healthId).addCallback(new ListenableFutureCallback<PatientMapper>() {
-            @Override
-            public void onSuccess(PatientMapper result) {
-                deferredResult.setResult(new ResponseEntity<>(result, OK));
-            }
-
-            @Override
-            public void onFailure(Throwable e) {
-                deferredResult.setErrorResult(extractAppException(e));
-            }
-        });
+        PatientMapper result = patientService.findByHealthId(healthId);
+        deferredResult.setResult(new ResponseEntity<>(result, OK));
         return deferredResult;
     }
 
@@ -95,8 +78,10 @@ public class PatientController {
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
-    public DeferredResult<ResponseEntity<MCIMultiResponse>> findPatients(@Valid SearchQuery searchQuery, BindingResult bindingResult)
-            throws ExecutionException, InterruptedException {
+    public DeferredResult<ResponseEntity<MCIMultiResponse>> findPatients(
+            @Valid SearchQuery searchQuery,
+            BindingResult bindingResult) {
+
         if (bindingResult.hasErrors()) {
             throw new SearchQueryParameterException(bindingResult);
         }
@@ -128,8 +113,11 @@ public class PatientController {
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/{healthId}", consumes = {APPLICATION_JSON_VALUE})
-    public DeferredResult<ResponseEntity<MCIResponse>> update(@PathVariable String healthId, @Validated({RequiredOnUpdateGroup.class, Default.class}) @RequestBody PatientMapper patientDto, BindingResult bindingResult)
-            throws ExecutionException, InterruptedException {
+    public DeferredResult<ResponseEntity<MCIResponse>> update(
+            @PathVariable String healthId,
+            @Validated({RequiredOnUpdateGroup.class, Default.class}) @RequestBody PatientMapper patientDto,
+            BindingResult bindingResult) {
+
         logger.debug(" Health id [" + healthId + "]");
         final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
 
@@ -137,26 +125,16 @@ public class PatientController {
             throw new ValidationException(bindingResult);
         }
 
-        patientService.update(patientDto, healthId).addCallback(new ListenableFutureCallback<MCIResponse>() {
-            @Override
-            public void onSuccess(MCIResponse mciResponse) {
-                deferredResult.setResult(new ResponseEntity<>(mciResponse, mciResponse.httpStatusObject));
-            }
-
-            @Override
-            public void onFailure(Throwable e) {
-                deferredResult.setErrorResult(extractAppException(e));
-            }
-        });
-
+        MCIResponse mciResponse = patientService.update(patientDto, healthId);
+        deferredResult.setResult(new ResponseEntity<>(mciResponse, mciResponse.httpStatusObject));
         return deferredResult;
     }
 
     @RequestMapping(value = "/facility/{facilityId}", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
     public DeferredResult<ResponseEntity<MCIMultiResponse>> findAllPatientsInCatchment(
             @PathVariable String facilityId,
-            @Valid PaginationQuery paginationQuery, BindingResult bindingResult
-    ) throws ExecutionException, InterruptedException {
+            @Valid PaginationQuery paginationQuery,
+            BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
             throw new ValidationException(bindingResult);

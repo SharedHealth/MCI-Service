@@ -33,15 +33,15 @@ public class PatientService {
         this.settingService = settingService;
     }
 
-    public ListenableFuture<MCIResponse> create(PatientMapper patientDto) {
+    public MCIResponse create(PatientMapper patientDto) {
         return patientRepository.create(patientDto);
     }
 
-    public ListenableFuture<MCIResponse> update(PatientMapper patientDto, String healthId) {
+    public MCIResponse update(PatientMapper patientDto, String healthId) {
         return patientRepository.update(patientDto, healthId);
     }
 
-    public ListenableFuture<PatientMapper> findByHealthId(String healthId) {
+    public PatientMapper findByHealthId(String healthId) {
         return patientRepository.findByHealthId(healthId);
     }
 
@@ -92,7 +92,7 @@ public class PatientService {
     }
 
     public String getPerPageMaximumLimitNote() {
-       String note = settingService.getSettingAsStringByKey("PER_PAGE_MAXIMUM_LIMIT_NOTE");
+        String note = settingService.getSettingAsStringByKey("PER_PAGE_MAXIMUM_LIMIT_NOTE");
 
         if (note == null) {
             return PER_PAGE_MAXIMUM_LIMIT_NOTE;

@@ -55,8 +55,8 @@ public class PatientRepositoryIT {
     @Test
     public void shouldFindPatientWithMatchingGeneratedHealthId() throws ExecutionException, InterruptedException {
 
-        MCIResponse mciResponse = patientRepository.create(patientDto).get();
-        PatientMapper p = patientRepository.findByHealthId(mciResponse.id).get();
+        MCIResponse mciResponse = patientRepository.create(patientDto);
+        PatientMapper p = patientRepository.findByHealthId(mciResponse.id);
         assertNotNull(p);
         patientDto.setHealthId(mciResponse.id);
         patientDto.setCreatedAt(p.getCreatedAt());
@@ -64,35 +64,29 @@ public class PatientRepositoryIT {
         assertEquals(patientDto, p);
     }
 
-    @Test(expected = ExecutionException.class)
-    public void shouldThrowException_IfPatientDoesNotExistForGivenHealthId() throws ExecutionException, InterruptedException {
-        patientRepository.findByHealthId(UUID.randomUUID().toString()).get();
-        PatientMapper patientDto = createPatient();
-        MCIResponse mciResponse = patientRepository.create(patientDto).get();
-        patientDto.setHealthId(mciResponse.id);
-        PatientMapper savedPatient = patientRepository.findByHealthId(mciResponse.id).get();
-        assertNotNull(savedPatient);
-        assertPatient(savedPatient,patientDto);
+    @Test(expected = PatientNotFoundException.class)
+    public void shouldThrowException_IfPatientDoesNotExistForGivenHealthId() {
+        patientRepository.findByHealthId(UUID.randomUUID().toString());
     }
 
     @Test(expected = HealthIDExistException.class)
     public void shouldThrowException_IfHealthIdProvidedForCreate() throws ExecutionException, InterruptedException {
         patientDto.setHealthId("12");
-        patientRepository.create(patientDto).get();
+        patientRepository.create(patientDto);
     }
 
    @Test
     public void shouldReturnAccepted_IfPatientExistWithProvidedTwoIdFieldsOnCreate() throws ExecutionException, InterruptedException {
-       patientRepository.create(patientDto).get();
+       patientRepository.create(patientDto);
        patientDto.setHealthId(null);
-       MCIResponse mciResponse = patientRepository.create(patientDto).get();
+       MCIResponse mciResponse = patientRepository.create(patientDto);
        assertEquals(mciResponse.getHttpStatus(), ACCEPTED.value());
     }
 
     @Test
     public void shouldFindPatientWithMatchingNationalId() throws ExecutionException, InterruptedException {
 
-        MCIResponse mciResponse = patientRepository.create(patientDto).get();
+        MCIResponse mciResponse = patientRepository.create(patientDto);
         final PatientMapper p = patientRepository.findByNationalId(nationalId).get();
         assertNotNull(p);
         patientDto.setHealthId(mciResponse.id);
@@ -105,7 +99,7 @@ public class PatientRepositoryIT {
     @Test
     public void shouldFindPatientWithMatchingBirthRegistrationNumber() throws ExecutionException, InterruptedException {
 
-        MCIResponse mciResponse = patientRepository.create(patientDto).get();
+        MCIResponse mciResponse = patientRepository.create(patientDto);
         final PatientMapper p = patientRepository.findByBirthRegistrationNumber(birthRegistrationNumber).get();
         assertNotNull(p);
         patientDto.setHealthId(mciResponse.id);
@@ -116,7 +110,7 @@ public class PatientRepositoryIT {
 
     @Test
     public void shouldFindPatientWithMatchingUid() throws ExecutionException, InterruptedException {
-        MCIResponse mciResponse = patientRepository.create(patientDto).get();
+        MCIResponse mciResponse = patientRepository.create(patientDto);
 
         final PatientMapper p = patientRepository.findByUid(uid).get();
         assertNotNull(p);
@@ -134,29 +128,29 @@ public class PatientRepositoryIT {
     @Test
     public void shouldUpdatePatient() throws Exception {
         PatientMapper patientDto = createPatient();
-        MCIResponse mciResponseForCreate = patientRepository.create(patientDto).get();
+        MCIResponse mciResponseForCreate = patientRepository.create(patientDto);
         assertEquals(201, mciResponseForCreate.getHttpStatus());
         String healthId = mciResponseForCreate.getId();
         patientDto.setHealthId(healthId);
         patientDto.setGivenName("Danny");
-        MCIResponse mciResponseForUpdate = patientRepository.update( patientDto,patientDto.getHealthId()).get();
+        MCIResponse mciResponseForUpdate = patientRepository.update( patientDto,patientDto.getHealthId());
         assertEquals(202, mciResponseForUpdate.getHttpStatus());
-        PatientMapper savedPatient = patientRepository.findByHealthId(healthId).get();
+        PatientMapper savedPatient = patientRepository.findByHealthId(healthId);
         assertPatient(savedPatient, patientDto);
     }
 
     @Test
     public void shouldNotUpdateFieldsThatNeedApprovalPatient() throws Exception {
         PatientMapper patientDto = createPatient();
-        MCIResponse mciResponseForCreate = patientRepository.create(patientDto).get();
+        MCIResponse mciResponseForCreate = patientRepository.create(patientDto);
         assertEquals(201, mciResponseForCreate.getHttpStatus());
         String healthId = mciResponseForCreate.getId();
         patientDto.setHealthId(healthId);
 
         patientDto.setGender("F");
-        MCIResponse mciResponseForUpdate = patientRepository.update( patientDto,patientDto.getHealthId()).get();
+        MCIResponse mciResponseForUpdate = patientRepository.update( patientDto,patientDto.getHealthId());
         assertEquals(202, mciResponseForUpdate.getHttpStatus());
-        PatientMapper savedPatient = patientRepository.findByHealthId(healthId).get();
+        PatientMapper savedPatient = patientRepository.findByHealthId(healthId);
         assertEquals("M",savedPatient.getGender());
     }
 
@@ -186,7 +180,7 @@ public class PatientRepositoryIT {
 
     private void createMultiplePatients(PatientMapper patientDto, int n) throws Exception {
         for (int x = 0; x < n; x++) {
-            patientRepository.create(patientDto).get();
+            patientRepository.create(patientDto);
             patientDto.setHealthId(null);
         }
     }

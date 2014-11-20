@@ -212,8 +212,7 @@ public class PatientControllerIT extends BaseControllerTest {
     public void shouldReturnNotFoundResponseWhenSearchBy_ID_IfPatientNotExist() throws Exception {
 
         MvcResult result = mockMvc.perform(get(API_END_POINT + "/random-1000"))
-                .andExpect(status().isOk())
-                .andExpect(request().asyncResult(new InstanceOf(PatientNotFoundException.class)))
+                .andExpect(status().isNotFound())
                 .andReturn();
 
         mockMvc.perform(asyncDispatch(result))
