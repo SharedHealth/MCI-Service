@@ -481,4 +481,30 @@ public class PatientControllerIT extends BaseControllerTest {
         assertEquals(1, original.getRelations().size());
 
     }
+
+    @Test
+    public void shouldReturnErrorResponseOnUpdateRequestWithWrongRelationId() throws Exception {
+
+        String json = asString("jsons/patient/payload_with_multiple_relations.json");
+
+        MvcResult createdResult = createPatient(json);
+
+        final MCIResponse createdResponse = getMciResponse(createdResult);
+        String healthId = createdResponse.getId();
+        PatientMapper original = getPatientMapperObjectByHealthId(healthId);
+
+        String relationJson = asString("jsons/patient/payload_with_empty_relation.json");
+
+        Relation fth = original.getRelationOfType("FTH");
+        relationJson = relationJson.replace("__RELATION_ID__", "random-id");
+
+        original.getRelations().remove(fth);
+
+        MvcResult result = mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(relationJson).contentType(APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1004,\"field\":\"relations\",\"message\":\"invalid relations\"}]}", result.getResponse().getContentAsString());
+
+    }
 }
