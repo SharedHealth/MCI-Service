@@ -19,7 +19,10 @@ dependencies {
     compile('com.toddfast.mutagen:mutagen-cassandra:0.4.0') {
         exclude group: 'org.slf4j', module: 'slf4j-log4j12'
     }
-    testCompile testLibraries.mockito, testLibraries.junit, testLibraries.spring_test, testLibraries.http_client, testLibraries.cassandra_unit_spring, testLibraries.wiremock
+    testCompile('org.cassandraunit:cassandra-unit-spring:2.0.2.2') {
+        exclude group: 'com.datastax.cassandra', module: 'cassandra-driver-core'
+    }
+    testCompile testLibraries.mockito, testLibraries.junit, testLibraries.spring_test, testLibraries.http_client, testLibraries.wiremock
 }
 
 test.doFirst {

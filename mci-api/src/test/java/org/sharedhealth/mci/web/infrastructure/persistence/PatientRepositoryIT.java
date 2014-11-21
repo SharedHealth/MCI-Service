@@ -1,9 +1,5 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.After;
 import org.junit.Before;
@@ -16,6 +12,7 @@ import org.sharedhealth.mci.web.exception.PatientNotFoundException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientMapper;
+import org.sharedhealth.mci.web.mapper.PhoneNumber;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.cassandra.core.CassandraOperations;
@@ -23,10 +20,13 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+
+import static org.junit.Assert.*;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
+import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
 import static org.springframework.http.HttpStatus.ACCEPTED;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -36,7 +36,7 @@ public class PatientRepositoryIT {
     @SuppressWarnings("SpringJavaAutowiringInspection")
     @Autowired
     @Qualifier("MCICassandraTemplate")
-    private CassandraOperations cqlTemplate;
+    private CassandraOperations cassandraOperations;
 
     @Autowired
     private PatientRepository patientRepository;
@@ -45,7 +45,12 @@ public class PatientRepositoryIT {
     private String nationalId = "1234567890123";
     private String birthRegistrationNumber = "12345678901234567";
     private String uid = "12345678901";
-
+    private String givenName = "Scott";
+    public String surname = "Tiger";
+    public String phoneNumber = "999900000";
+    public String divisionId = "10";
+    public String districtId = "04";
+    public String upazilaId = "09";
 
     @Before
     public void setup() throws ExecutionException, InterruptedException {
@@ -53,8 +58,28 @@ public class PatientRepositoryIT {
     }
 
     @Test
-    public void shouldFindPatientWithMatchingGeneratedHealthId() throws ExecutionException, InterruptedException {
+    public void shouldCreatePatientAndMappings() {
+        String id = patientRepository.create(patientDto).getId();
+        assertNotNull(id);
 
+        String healthId = cassandraOperations.queryForObject(buildFindByNidQuery(nationalId), String.class);
+        assertEquals(healthId, id);
+
+        healthId = cassandraOperations.queryForObject(buildFindByBrnQuery(birthRegistrationNumber), String.class);
+        assertEquals(healthId, id);
+
+        healthId = cassandraOperations.queryForObject(buildFindByUidQuery(uid), String.class);
+        assertEquals(healthId, id);
+
+        healthId = cassandraOperations.queryForObject(buildFindByPhoneNumberQuery(phoneNumber), String.class);
+        assertEquals(healthId, id);
+
+        healthId = cassandraOperations.queryForObject(buildFindByNameQuery(divisionId, districtId, upazilaId, givenName, surname), String.class);
+        assertEquals(healthId, id);
+    }
+
+    @Test
+    public void shouldFindPatientWithMatchingGeneratedHealthId() throws ExecutionException, InterruptedException {
         MCIResponse mciResponse = patientRepository.create(patientDto);
         PatientMapper p = patientRepository.findByHealthId(mciResponse.id);
         assertNotNull(p);
@@ -75,12 +100,12 @@ public class PatientRepositoryIT {
         patientRepository.create(patientDto);
     }
 
-   @Test
+    @Test
     public void shouldReturnAccepted_IfPatientExistWithProvidedTwoIdFieldsOnCreate() throws ExecutionException, InterruptedException {
-       patientRepository.create(patientDto);
-       patientDto.setHealthId(null);
-       MCIResponse mciResponse = patientRepository.create(patientDto);
-       assertEquals(mciResponse.getHttpStatus(), ACCEPTED.value());
+        patientRepository.create(patientDto);
+        patientDto.setHealthId(null);
+        MCIResponse mciResponse = patientRepository.create(patientDto);
+        assertEquals(mciResponse.getHttpStatus(), ACCEPTED.value());
     }
 
     @Test
@@ -104,7 +129,7 @@ public class PatientRepositoryIT {
         assertNotNull(p);
         patientDto.setHealthId(mciResponse.id);
         patientDto.setCreatedAt(p.getCreatedAt());
-       patientDto.setUpdatedAt(p.getUpdatedAt());
+        patientDto.setUpdatedAt(p.getUpdatedAt());
         assertEquals(patientDto, p);
     }
 
@@ -133,7 +158,7 @@ public class PatientRepositoryIT {
         String healthId = mciResponseForCreate.getId();
         patientDto.setHealthId(healthId);
         patientDto.setGivenName("Danny");
-        MCIResponse mciResponseForUpdate = patientRepository.update( patientDto,patientDto.getHealthId());
+        MCIResponse mciResponseForUpdate = patientRepository.update(patientDto, patientDto.getHealthId());
         assertEquals(202, mciResponseForUpdate.getHttpStatus());
         PatientMapper savedPatient = patientRepository.findByHealthId(healthId);
         assertPatient(savedPatient, patientDto);
@@ -148,10 +173,10 @@ public class PatientRepositoryIT {
         patientDto.setHealthId(healthId);
 
         patientDto.setGender("F");
-        MCIResponse mciResponseForUpdate = patientRepository.update( patientDto,patientDto.getHealthId());
+        MCIResponse mciResponseForUpdate = patientRepository.update(patientDto, patientDto.getHealthId());
         assertEquals(202, mciResponseForUpdate.getHttpStatus());
         PatientMapper savedPatient = patientRepository.findByHealthId(healthId);
-        assertEquals("M",savedPatient.getGender());
+        assertEquals("M", savedPatient.getGender());
     }
 
     @Test
@@ -185,7 +210,7 @@ public class PatientRepositoryIT {
         }
     }
 
-    private void assertPatient(PatientMapper savedPatient,PatientMapper patientDto) {
+    private void assertPatient(PatientMapper savedPatient, PatientMapper patientDto) {
         assertEquals(patientDto.getHealthId(), savedPatient.getHealthId());
         assertEquals(patientDto.getDateOfBirth(), savedPatient.getDateOfBirth());
         assertEquals(patientDto.getGender(), savedPatient.getGender());
@@ -201,19 +226,23 @@ public class PatientRepositoryIT {
         assertNotNull(savedPatient.getUpdatedAt());
         assertNotNull(savedPatient.getCreatedAt());
     }
+
     private PatientMapper createPatient() {
         PatientMapper patientDto1 = new PatientMapper();
-        patientDto1.setNationalId("1234567890123");
-        patientDto1.setBirthRegistrationNumber("12345678901234567");
-        patientDto1.setUid("12345678901");
-        patientDto1.setGivenName("Scott");
-        patientDto1.setSurName("Tiger");
+        patientDto1.setNationalId(nationalId);
+        patientDto1.setBirthRegistrationNumber(birthRegistrationNumber);
+        patientDto1.setUid(uid);
+        patientDto1.setGivenName(givenName);
+        patientDto1.setSurName(surname);
         patientDto1.setDateOfBirth("2014-12-01");
         patientDto1.setGender("M");
         patientDto1.setOccupation("salaried");
         patientDto1.setEducationLevel("BA");
+        PhoneNumber phone = new PhoneNumber();
+        phone.setNumber(phoneNumber);
+        patientDto1.setPhoneNumber(phone);
 
-        Address address = createAddress("10", "04", "09", "20", "01");
+        Address address = createAddress(divisionId, districtId, upazilaId, "20", "01");
         patientDto1.setAddress(address);
 
         return patientDto1;
@@ -233,7 +262,12 @@ public class PatientRepositoryIT {
 
     @After
     public void teardown() {
-        cqlTemplate.execute("truncate patient");
-        cqlTemplate.execute("truncate approval");
+        cassandraOperations.execute("truncate " + CF_PATIENT);
+        cassandraOperations.execute("truncate " + CF_NID_MAPPING);
+        cassandraOperations.execute("truncate " + CF_BRN_MAPPING);
+        cassandraOperations.execute("truncate " + CF_UID_MAPPING);
+        cassandraOperations.execute("truncate " + CF_PHONE_NUMBER_MAPPING);
+        cassandraOperations.execute("truncate " + CF_NAME_MAPPING);
+        cassandraOperations.execute("truncate approval");
     }
 }

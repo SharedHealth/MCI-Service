@@ -18,7 +18,7 @@ import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.handler.PatientFilter;
 import org.sharedhealth.mci.web.mapper.*;
-import org.sharedhealth.mci.web.model.Patient;
+import org.sharedhealth.mci.web.model.*;
 import org.sharedhealth.mci.web.utils.concurrent.SimpleListenableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +39,9 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
+import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
 import static org.springframework.data.cassandra.core.CassandraTemplate.toUpdateQuery;
 
 @Component
@@ -88,8 +90,48 @@ public class PatientRepository extends BaseRepository {
         p.setUpdatedAt(new Date());
         p.setSurName(patientDto.getSurName());
 
-        p = cassandraOperations.insert(p);
+        cassandraOperations.execute(buildSaveBatch(p));
         return new MCIResponse(p.getHealthId(), HttpStatus.CREATED);
+    }
+
+    private Batch buildSaveBatch(Patient patient) {
+        String healthId = patient.getHealthId();
+        Batch batch = QueryBuilder.batch();
+        CassandraConverter converter = cassandraOperations.getConverter();
+
+        batch.add(createInsertQuery(CF_PATIENT, patient, null, converter));
+
+        String nationalId = patient.getNationalId();
+        if (isNotBlank(nationalId)) {
+            batch.add(createInsertQuery(CF_NID_MAPPING, new NidMapping(nationalId, healthId), null, converter));
+        }
+
+        String brn = patient.getBirthRegistrationNumber();
+        if (isNotBlank(brn)) {
+            batch.add(createInsertQuery(CF_BRN_MAPPING, new BrnMapping(brn, healthId), null, converter));
+        }
+
+        String uid = patient.getUid();
+        if (isNotBlank(uid)) {
+            batch.add(createInsertQuery(CF_UID_MAPPING, new UidMapping(uid, healthId), null, converter));
+        }
+
+        String phoneNumber = patient.getCellNo();
+        if (isNotBlank(phoneNumber)) {
+            batch.add(createInsertQuery(CF_PHONE_NUMBER_MAPPING,
+                    new PhoneNumberMapping(phoneNumber, healthId), null, converter));
+        }
+
+        String divisionId = patient.getDivisionId();
+        String districtId = patient.getDistrictId();
+        String upazilaId = patient.getUpazillaId();
+        String givenName = patient.getGivenName();
+        String surname = patient.getSurName();
+        if (isNotBlank(divisionId) && isNotBlank(districtId) && isNotBlank(upazilaId) && isNotBlank(givenName) && isNotBlank(surname)) {
+            NameMapping mapping = new NameMapping(divisionId, districtId, upazilaId, givenName, surname, healthId);
+            batch.add(createInsertQuery(CF_NAME_MAPPING, mapping, null, converter));
+        }
+        return batch;
     }
 
     private PatientMapper getExistingPatient(PatientMapper patientDto) {
@@ -498,7 +540,7 @@ public class PatientRepository extends BaseRepository {
 
         select.where(QueryBuilder.eq(getAddressHierarchyField(location.length()), location));
 
-        if (StringUtils.isNotBlank(start)) {
+        if (isNotBlank(start)) {
             select.where(QueryBuilder.gt(QueryBuilder.token("health_id"), QueryBuilder.raw("token('" + start + "')")));
         }
 
@@ -540,7 +582,7 @@ public class PatientRepository extends BaseRepository {
     }
 
     private String getLocationPointer(List<String> locations, String start, String d) {
-        if (locations.size() > 1 && StringUtils.isNotBlank(start)) {
+        if (locations.size() > 1 && isNotBlank(start)) {
             PatientMapper p = findByHealthId(start);
             return p.getAddress().getGeoCode();
         }
@@ -744,7 +786,7 @@ public class PatientRepository extends BaseRepository {
     private Boolean isValidRelationBlock(List<Relation> relations, List<Relation> existing) {
 
         for (Relation relation : relations) {
-            if (StringUtils.isNotBlank(relation.getId()) && !relationExistWithId(existing, relation.getId())) {
+            if (isNotBlank(relation.getId()) && !relationExistWithId(existing, relation.getId())) {
                 return false;
             }
         }
@@ -809,47 +851,47 @@ public class PatientRepository extends BaseRepository {
     private Select prepareSelectQueryForSearch(SearchQuery searchQuery) {
         Select select = QueryBuilder.select().from("patient");
 
-        if (StringUtils.isNotBlank(searchQuery.getFull_name())) {
+        if (isNotBlank(searchQuery.getFull_name())) {
             select.where(QueryBuilder.eq("full_name", searchQuery.getFull_name()));
         }
 
-        if (StringUtils.isNotBlank(searchQuery.getNid())) {
+        if (isNotBlank(searchQuery.getNid())) {
             select.where(QueryBuilder.eq(PatientQueryBuilder.NATIONAL_ID, searchQuery.getNid()));
         }
 
-        if (StringUtils.isNotBlank(searchQuery.getBin_brn())) {
+        if (isNotBlank(searchQuery.getBin_brn())) {
             select.where(QueryBuilder.eq(PatientQueryBuilder.BIN_BRN, searchQuery.getBin_brn()));
         }
 
-        if (StringUtils.isNotBlank(searchQuery.getUid())) {
+        if (isNotBlank(searchQuery.getUid())) {
             select.where(QueryBuilder.eq(PatientQueryBuilder.UID, searchQuery.getUid()));
         }
 
-        if (StringUtils.isNotBlank(searchQuery.getPresent_address())) {
+        if (isNotBlank(searchQuery.getPresent_address())) {
             select.where(QueryBuilder.eq(getAddressHierarchyField(searchQuery.getPresent_address().length()), searchQuery.getPresent_address()));
         }
 
-        if (StringUtils.isNotBlank(searchQuery.getSur_name())) {
+        if (isNotBlank(searchQuery.getSur_name())) {
             select.where(QueryBuilder.eq("lower_sur_name", StringUtils.trim(searchQuery.getSur_name()).toLowerCase()));
         }
 
-        if (StringUtils.isNotBlank(searchQuery.getGiven_name())) {
+        if (isNotBlank(searchQuery.getGiven_name())) {
             select.where(QueryBuilder.eq("lower_given_name", StringUtils.trim(searchQuery.getGiven_name()).toLowerCase()));
         }
 
-        if (StringUtils.isNotBlank(searchQuery.getPhone_no())) {
+        if (isNotBlank(searchQuery.getPhone_no())) {
             select.where(QueryBuilder.eq(PatientQueryBuilder.PHONE_NO, StringUtils.trim(searchQuery.getPhone_no())));
         }
 
-        if (StringUtils.isNotBlank(searchQuery.getCountry_code())) {
+        if (isNotBlank(searchQuery.getCountry_code())) {
             select.where(QueryBuilder.eq(PatientQueryBuilder.PHONE_NUMBER_COUNTRY_CODE, StringUtils.trim(searchQuery.getCountry_code())));
         }
 
-        if (StringUtils.isNotBlank(searchQuery.getArea_code())) {
+        if (isNotBlank(searchQuery.getArea_code())) {
             select.where(QueryBuilder.eq(PatientQueryBuilder.PHONE_NUMBER_AREA_CODE, StringUtils.trim(searchQuery.getArea_code())));
         }
 
-        if (StringUtils.isNotBlank(searchQuery.getExtension())) {
+        if (isNotBlank(searchQuery.getExtension())) {
             select.where(QueryBuilder.eq(PatientQueryBuilder.PHONE_NUMBER_EXTENSION, StringUtils.trim(searchQuery.getExtension())));
         }
 

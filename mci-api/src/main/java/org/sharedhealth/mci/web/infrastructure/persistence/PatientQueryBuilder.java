@@ -1,6 +1,18 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
+import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
+import static com.datastax.driver.core.querybuilder.Select.Where;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
 public class PatientQueryBuilder {
+
+    public static final String CF_PATIENT = "patient";
+    public static final String CF_NID_MAPPING = "nid_mapping";
+    public static final String CF_BRN_MAPPING = "brn_mapping";
+    public static final String CF_UID_MAPPING = "uid_mapping";
+    public static final String CF_PHONE_NUMBER_MAPPING = "phone_number_mapping";
+    public static final String CF_NAME_MAPPING = "name_mapping";
 
     public static final String HEALTH_ID = "health_id";
     public static final String NATIONAL_ID = "national_id";
@@ -17,11 +29,11 @@ public class PatientQueryBuilder {
     public static final String UPAZILLA_ID = "upazilla_id";
     public static final String UNION_ID = "union_id";
     public static final String BIN_BRN = "bin_brn";
-    public static final String UID ="uid";
-    public static final String FATHERS_NAME_BANGLA ="fathers_name_bangla";
-    public static final String FATHERS_GIVEN_NAME ="fathers_given_name";
-    public static final String FATHERS_SUR_NAME ="fathers_sur_name";
-    public static final String FATHERS_UID ="fathers_uid";
+    public static final String UID = "uid";
+    public static final String FATHERS_NAME_BANGLA = "fathers_name_bangla";
+    public static final String FATHERS_GIVEN_NAME = "fathers_given_name";
+    public static final String FATHERS_SUR_NAME = "fathers_sur_name";
+    public static final String FATHERS_UID = "fathers_uid";
     public static final String FATHERS_NID = "fathers_nid";
     public static final String FATHERS_BRN = "fathers_brn";
     public static final String MOTHERS_NAME_BANGLA = "mothers_name_bangla";
@@ -82,7 +94,6 @@ public class PatientQueryBuilder {
     public static final String PRIMARY_CONTACT_NUMBER_EXTENSION = "primary_contact_number_extension";
 
 
-
     public static String getFindByHealthIdQuery() {
         return String.format("SELECT * FROM patient WHERE %s = '%%s'", HEALTH_ID);
     }
@@ -101,5 +112,38 @@ public class PatientQueryBuilder {
 
     public static String getFindByUidQuery() {
         return String.format("SELECT * FROM patient WHERE %s = '%%s'", UID);
+    }
+
+    public static String buildFindByHidQuery(String hid) {
+        return select().from(CF_PATIENT).where(eq(HEALTH_ID, hid)).toString();
+    }
+
+    public static String buildFindByNidQuery(String nid) {
+        return select(HEALTH_ID).from(CF_NID_MAPPING).where(eq(NATIONAL_ID, nid)).toString();
+    }
+
+    public static String buildFindByBrnQuery(String brn) {
+        return select(HEALTH_ID).from(CF_BRN_MAPPING).where(eq(BIN_BRN, brn)).toString();
+    }
+
+    public static String buildFindByUidQuery(String uid) {
+        return select(HEALTH_ID).from(CF_UID_MAPPING).where(eq(UID, uid)).toString();
+    }
+
+    public static String buildFindByPhoneNumberQuery(String phoneNumber) {
+        return select(HEALTH_ID).from(CF_PHONE_NUMBER_MAPPING).where(eq(PHONE_NO, phoneNumber)).toString();
+    }
+
+    public static String buildFindByNameQuery(String divisionId, String districtId, String upazilaId, String givenName, String surname) {
+        Where where = select(HEALTH_ID).from(CF_NAME_MAPPING)
+                .where(eq(DIVISION_ID, divisionId))
+                .and(eq(DISTRICT_ID, districtId))
+                .and(eq(UPAZILLA_ID, upazilaId))
+                .and(eq(GIVEN_NAME, givenName));
+
+        if (isNotEmpty(surname)) {
+            where = where.and(eq(SUR_NAME, surname));
+        }
+        return where.toString();
     }
 }
