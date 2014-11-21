@@ -9,11 +9,9 @@ import org.sharedhealth.mci.web.mapper.SearchQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureAdapter;
 
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 @Component
 public class PatientService {
@@ -45,29 +43,8 @@ public class PatientService {
         return patientRepository.findByHealthId(healthId);
     }
 
-    public ListenableFuture<PatientMapper> findByNationalId(String nationalId) {
-        return patientRepository.findByNationalId(nationalId);
-    }
-
-    public ListenableFuture<PatientMapper> findByBirthRegistrationNumber(String birthRegistrationNumber) {
-        return patientRepository.findByBirthRegistrationNumber(birthRegistrationNumber);
-    }
-
-    public ListenableFuture<PatientMapper> findByName(String name) {
-        return patientRepository.findByName(name);
-    }
-
-    public ListenableFuture<PatientMapper> findByUid(String uid) {
-        return patientRepository.findByUid(uid);
-    }
-
-    public ListenableFuture<List<PatientMapper>> findAllByQuery(SearchQuery searchQuery) {
-        return new ListenableFutureAdapter<List<PatientMapper>, List<PatientMapper>>(patientRepository.findAllByQuery(searchQuery)) {
-            @Override
-            protected List<PatientMapper> adapt(List<PatientMapper> patientDtos) throws ExecutionException {
-                return patientDtos;
-            }
-        };
+    public List<PatientMapper> findAllByQuery(SearchQuery searchQuery) {
+        return patientRepository.findAllByQuery(searchQuery);
     }
 
     public ListenableFuture<List<PatientMapper>> findAllByLocations(List<String> locations, String last, Date since) {

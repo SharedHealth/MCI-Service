@@ -431,10 +431,14 @@ public class PatientRepository extends BaseRepository {
         return mapper.readValue(string, mapper.getTypeFactory().constructCollectionType(List.class, Relation.class));
     }
 
-    public ListenableFuture<List<PatientMapper>> findAllByQuery(SearchQuery searchQuery) {
-
-        Select select = prepareSelectQueryForSearch(searchQuery);
-        return getPatientListListenableFuture(select);
+    public List<PatientMapper> findAllByQuery(SearchQuery searchQuery) {
+        List<PatientMapper> patientDtos = new ArrayList<>();
+        ResultSet resultSet = cassandraOperations.query(prepareSelectQueryForSearch(searchQuery));
+        for (Row result : resultSet.all()) {
+            PatientMapper patientDto = getPatientFromRow(result);
+            patientDtos.add(patientDto);
+        }
+        return patientDtos;
     }
 
     public MCIResponse update(PatientMapper patientMapper, final String hid) {

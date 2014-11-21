@@ -91,23 +91,14 @@ public class PatientController {
         final String note = patientService.getPerPageMaximumLimitNote();
         searchQuery.setMaximum_limit(limit);
 
-        patientService.findAllByQuery(searchQuery).addCallback(new ListenableFutureCallback<List<PatientMapper>>() {
-            @Override
-            public void onSuccess(List<PatientMapper> results) {
-                HashMap<String, String> additionalInfo = new HashMap<>();
-                if (results.size() > limit) {
-                    results.remove(limit);
-                    additionalInfo.put("note", note);
-                }
-                MCIMultiResponse mciMultiResponse = new MCIMultiResponse<>(results, additionalInfo, OK);
-                deferredResult.setResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject));
-            }
-
-            @Override
-            public void onFailure(Throwable error) {
-                deferredResult.setErrorResult(extractAppException(error));
-            }
-        });
+        List<PatientMapper> results = patientService.findAllByQuery(searchQuery);
+        HashMap<String, String> additionalInfo = new HashMap<>();
+        if (results.size() > limit) {
+            results.remove(limit);
+            additionalInfo.put("note", note);
+        }
+        MCIMultiResponse mciMultiResponse = new MCIMultiResponse<>(results, additionalInfo, OK);
+        deferredResult.setResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject));
 
         return deferredResult;
     }

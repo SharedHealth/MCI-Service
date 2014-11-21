@@ -220,7 +220,7 @@ public class PatientControllerTest {
             additionalInfo.put("note", note);
         }
 
-        when(patientService.findAllByQuery(searchQuery)).thenReturn(new PreResolvedListenableFuture<>(patientDtos));
+        when(patientService.findAllByQuery(searchQuery)).thenReturn(patientDtos);
         MCIMultiResponse mciMultiResponse = new MCIMultiResponse<>(patientDtos, additionalInfo, OK);
 
         mockMvc.perform(get(API_END_POINT + "?" + queryString))
