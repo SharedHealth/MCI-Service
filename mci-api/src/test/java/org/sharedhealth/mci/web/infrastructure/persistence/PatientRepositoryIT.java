@@ -74,7 +74,8 @@ public class PatientRepositoryIT {
         healthId = cassandraOperations.queryForObject(buildFindByPhoneNumberQuery(phoneNumber), String.class);
         assertEquals(healthId, id);
 
-        healthId = cassandraOperations.queryForObject(buildFindByNameQuery(divisionId, districtId, upazilaId, givenName, surname), String.class);
+        healthId = cassandraOperations.queryForObject(buildFindByNameQuery(divisionId, districtId, upazilaId,
+                givenName.toLowerCase(), surname.toLowerCase()), String.class);
         assertEquals(healthId, id);
     }
 

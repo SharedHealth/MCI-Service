@@ -98,41 +98,6 @@ public class SearchRestApiTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldReturnOkResponseIfSurNameAndAddressNotMatchWithAnyPatient() throws Exception {
-        String json = new ObjectMapper().writeValueAsString(patientMapper);
-        createPatient(json);
-        String present_address = patientMapper.getAddress().getDivisionId() +
-                patientMapper.getAddress().getDistrictId() + patientMapper.getAddress().getUpazillaId();
-        String surName = "Raju";
-        MvcResult result = mockMvc.perform(get(API_END_POINT + "?sur_name=" + surName + "&present_address=" + present_address).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn();
-        final MCIMultiResponse body = getMciMultiResponse(result);
-        Assert.assertEquals("[]", body.getResults().toString());
-        Assert.assertEquals(200, body.getHttpStatus());
-    }
-
-    @Test
-    public void shouldReturnPatientIfSurNameAndAddressMatchWithAnyPatient() throws Exception {
-        String json = asString("jsons/patient/full_payload.json");
-
-        PatientMapper original = getPatientObjectFromString(json);
-
-        MvcResult result = createPatient(json);
-        String present_address = original.getAddress().getDivisionId() +
-                original.getAddress().getDistrictId() + original.getAddress().getUpazillaId();
-        String surName = "Aymaan";
-
-        MvcResult searchResult = mockMvc.perform(get(API_END_POINT + "?sur_name=" + surName + "&present_address=" + present_address).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn();
-        final MCIMultiResponse body = getMciMultiResponse(searchResult);
-        PatientMapper patient = getPatientObjectFromString(mapper.writeValueAsString(body.getResults().get(0)));
-
-        assertPatientEquals(original, patient);
-    }
-
-    @Test
     public void shouldReturnOkResponseIfPatientNotExistWithGivenNameAndAddress() throws Exception {
         String json = new ObjectMapper().writeValueAsString(patientMapper);
         String present_address = patientMapper.getAddress().getDivisionId() +

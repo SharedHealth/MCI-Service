@@ -98,55 +98,10 @@ CREATE INDEX uid_key ON patient (uid);
 CREATE INDEX national_id_key ON patient (national_id);
 CREATE INDEX bin_brn_key ON patient (bin_brn);
 
-CREATE INDEX created_at_key ON patient (created_at);
-CREATE INDEX updated_at_key ON patient (updated_at);
-CREATE INDEX created_by_key ON patient (created_by);
-CREATE INDEX updated_by_key ON patient (updated_by);
-
-CREATE INDEX full_name_key ON patient (full_name);
-
-CREATE INDEX division_id_key ON patient (division_id);
-CREATE INDEX district_id_key ON patient (district_id);
-CREATE INDEX thana_id_key ON patient (thana_id);
-CREATE INDEX union_id_key ON patient (union_id);
-CREATE INDEX upazilla_id_key ON patient (upazilla_id);
-CREATE INDEX ward_id_key ON patient (ward_id);
-CREATE INDEX city_corporation_id_key ON patient (city_corporation_id);
-CREATE INDEX post_code_key ON patient (post_code);
-CREATE INDEX post_office_key ON patient (post_office);
-CREATE INDEX holding_number_key ON patient (holding_number);
-CREATE INDEX country_code_key ON patient (country_code);
-
-CREATE INDEX permanent_division_id_key ON patient (permanent_division_id);
-CREATE INDEX permanent_district_id_key ON patient (permanent_district_id);
-CREATE INDEX permanent_thana_id_key ON patient (permanent_thana_id);
-CREATE INDEX permanent_union_id_key ON patient (permanent_union_id);
-CREATE INDEX permanent_ward_id_key ON patient (permanent_ward_id);
-CREATE INDEX permanent_upazilla_id_key ON patient (permanent_upazilla_id);
-CREATE INDEX permanent_city_corporation_id_key ON patient (permanent_city_corporation_id);
-CREATE INDEX permanent_country_code_key ON patient (permanent_country_code);
-CREATE INDEX permanent_holding_number_key ON patient (permanent_holding_number);
-CREATE INDEX permanent_post_code_key ON patient (permanent_post_code);
-CREATE INDEX permanent_post_office_key ON patient (permanent_post_office);
-
-CREATE INDEX date_of_birth_key ON patient (date_of_birth);
-
-CREATE INDEX phone_no_key ON patient (phone_no);
-CREATE INDEX phone_number_area_code_key ON patient (phone_number_area_code);
-CREATE INDEX phone_number_country_code_key ON patient (phone_number_country_code);
-CREATE INDEX phone_number_extension_key ON patient (phone_number_extension);
-
-CREATE INDEX primary_contact_no_key ON patient (primary_contact_no);
-CREATE INDEX primary_contact_number_area_code_key ON patient (primary_contact_number_area_code);
-CREATE INDEX primary_contact_number_country_code_key ON patient (primary_contact_number_country_code);
-CREATE INDEX primary_contact_number_extension_key ON patient (primary_contact_number_extension);
-
 CREATE INDEX location_level1_key ON patient (location_level1);
 CREATE INDEX location_level2_key ON patient (location_level2);
 CREATE INDEX location_level3_key ON patient (location_level3);
 CREATE INDEX location_level4_key ON patient (location_level4);
 CREATE INDEX location_level5_key ON patient (location_level5);
-
-CREATE INDEX is_alive_key ON patient (is_alive);
 
 

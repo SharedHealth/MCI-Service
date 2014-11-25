@@ -1,7 +1,6 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
-import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
 import static com.datastax.driver.core.querybuilder.Select.Where;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
@@ -114,8 +113,8 @@ public class PatientQueryBuilder {
         return String.format("SELECT * FROM patient WHERE %s = '%%s'", UID);
     }
 
-    public static String buildFindByHidQuery(String hid) {
-        return select().from(CF_PATIENT).where(eq(HEALTH_ID, hid)).toString();
+    public static String buildFindByHidsQuery(String[] values) {
+        return select().from(CF_PATIENT).where(in(HEALTH_ID, values)).toString();
     }
 
     public static String buildFindByNidQuery(String nid) {
@@ -139,10 +138,10 @@ public class PatientQueryBuilder {
                 .where(eq(DIVISION_ID, divisionId))
                 .and(eq(DISTRICT_ID, districtId))
                 .and(eq(UPAZILLA_ID, upazilaId))
-                .and(eq(GIVEN_NAME, givenName));
+                .and(eq(GIVEN_NAME, givenName.toLowerCase()));
 
         if (isNotEmpty(surname)) {
-            where = where.and(eq(SUR_NAME, surname));
+            where = where.and(eq(SUR_NAME, surname.toLowerCase()));
         }
         return where.toString();
     }

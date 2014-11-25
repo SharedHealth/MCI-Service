@@ -32,12 +32,16 @@ public class SearchQuery extends PaginationQuery {
     @Pattern(regexp = "[\\d]{6}|[\\d]{8}|[\\d]{10}", message = "1002")
     private String present_address;
 
+    private String divisionId;
+    private String districtId;
+    private String upazilaId;
+
     @JsonProperty("sur_name")
     @Pattern(regexp = "^(\\s*)([A-Za-z0-9]{1,25})(\\b\\s*$)", message = "1002")
     private String sur_name;
 
     @JsonProperty("given_name")
-    @Length(max = 100, min=1, message = "1002")
+    @Length(max = 100, min = 1, message = "1002")
     private String given_name;
 
     @JsonProperty("phone_no")
@@ -109,6 +113,21 @@ public class SearchQuery extends PaginationQuery {
 
     public void setPresent_address(String present_address) {
         this.present_address = present_address;
+        this.divisionId = present_address.substring(0, 2);
+        this.districtId = present_address.substring(2, 4);
+        this.upazilaId = present_address.substring(4, 6);
+    }
+
+    public String getDivisionId() {
+        return divisionId;
+    }
+
+    public String getDistrictId() {
+        return districtId;
+    }
+
+    public String getUpazilaId() {
+        return upazilaId;
     }
 
     public String getSur_name() {

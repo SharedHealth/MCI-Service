@@ -39,6 +39,8 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
@@ -128,7 +130,7 @@ public class PatientRepository extends BaseRepository {
         String givenName = patient.getGivenName();
         String surname = patient.getSurName();
         if (isNotBlank(divisionId) && isNotBlank(districtId) && isNotBlank(upazilaId) && isNotBlank(givenName) && isNotBlank(surname)) {
-            NameMapping mapping = new NameMapping(divisionId, districtId, upazilaId, givenName, surname, healthId);
+            NameMapping mapping = new NameMapping(divisionId, districtId, upazilaId, givenName.toLowerCase(), surname.toLowerCase(), healthId);
             batch.add(createInsertQuery(CF_NAME_MAPPING, mapping, null, converter));
         }
         return batch;
@@ -246,35 +248,6 @@ public class PatientRepository extends BaseRepository {
                     setPatientOnResult(row, result);
                 } catch (Exception e) {
                     logger.error("Error while finding patient by birth registration number: " + birthRegistrationNumber, e);
-                    result.setException(e);
-                }
-            }
-        });
-
-        return new SimpleListenableFuture<PatientMapper, PatientMapper>(result) {
-            @Override
-            protected PatientMapper adapt(PatientMapper adapteeResult) throws ExecutionException {
-                return adapteeResult;
-            }
-        };
-    }
-
-    public ListenableFuture<PatientMapper> findByName(final String fullName) {
-        String cql = String.format(getFindByNameQuery(), fullName);
-        logger.debug("Find patient by name  CQL: [" + cql + "]");
-        final SettableFuture<PatientMapper> result = SettableFuture.create();
-
-        cassandraOperations.queryAsynchronously(cql, new AsynchronousQueryListener() {
-            @Override
-            public void onQueryComplete(ResultSetFuture rsf) {
-                try {
-                    Row row = rsf.get(TIMEOUT_IN_MILLIS, TimeUnit.MILLISECONDS).one();
-                    if (row == null) {
-                        throw new PatientNotFoundException("No patient found with name: " + fullName);
-                    }
-                    setPatientOnResult(row, result);
-                } catch (Exception e) {
-                    logger.error("Error while finding patient by name: " + fullName, e);
                     result.setException(e);
                 }
             }
@@ -432,13 +405,85 @@ public class PatientRepository extends BaseRepository {
     }
 
     public List<PatientMapper> findAllByQuery(SearchQuery searchQuery) {
-        List<PatientMapper> patientDtos = new ArrayList<>();
-        ResultSet resultSet = cassandraOperations.query(prepareSelectQueryForSearch(searchQuery));
-        for (Row result : resultSet.all()) {
-            PatientMapper patientDto = getPatientFromRow(result);
-            patientDtos.add(patientDto);
+        return filterPatients(findProbables(searchQuery), searchQuery);
+    }
+
+    private List<PatientMapper> findProbables(SearchQuery searchQuery) {
+        List<PatientMapper> patientMappers = new ArrayList<>();
+        String query = null;
+
+        if (isNotBlank(searchQuery.getNid())) {
+            query = buildFindByNidQuery(searchQuery.getNid());
+
+        } else if (isNotBlank(searchQuery.getBin_brn())) {
+            query = buildFindByBrnQuery(searchQuery.getBin_brn());
+
+        } else if (isNotBlank(searchQuery.getUid())) {
+            query = buildFindByUidQuery(searchQuery.getUid());
+
+        } else if (isNotBlank(searchQuery.getPhone_no())) {
+            query = buildFindByPhoneNumberQuery(searchQuery.getPhone_no());
+
+        } else if (isNotBlank(searchQuery.getPresent_address()) && isNotBlank(searchQuery.getGiven_name())) {
+            query = buildFindByNameQuery(searchQuery.getDivisionId(), searchQuery.getDistrictId(),
+                    searchQuery.getUpazilaId(), searchQuery.getGiven_name(), searchQuery.getSur_name());
         }
-        return patientDtos;
+
+        if (isNotBlank(query)) {
+            List<String> healthIds = cassandraOperations.queryForList(query, String.class);
+            if (isNotEmpty(healthIds)) {
+                ResultSet resultSet = cassandraOperations.query(buildFindByHidsQuery(healthIds.toArray(new String[healthIds.size()])));
+                for (Row row : resultSet) {
+                    patientMappers.add(getPatientFromRow(row));
+                }
+            }
+        }
+        return patientMappers;
+    }
+
+    private List<PatientMapper> filterPatients(List<PatientMapper> patients, SearchQuery searchQuery) {
+        List<PatientMapper> result = new ArrayList<>();
+        for (PatientMapper patient : patients) {
+            if (isMatchingPatient(patient, searchQuery)) {
+                result.add(patient);
+            }
+        }
+        return result;
+    }
+
+    private boolean isMatchingPatient(PatientMapper p, SearchQuery searchQuery) {
+        if (isNotBlank(searchQuery.getNid()) && !p.getNationalId().equals(searchQuery.getNid())) {
+            return false;
+        }
+        if (isNotBlank(searchQuery.getBin_brn()) && !searchQuery.getBin_brn().equals(p.getBirthRegistrationNumber())) {
+            return false;
+        }
+        if (isNotBlank(searchQuery.getUid()) && !searchQuery.getUid().equals(p.getUid())) {
+            return false;
+        }
+        if (isNotBlank(searchQuery.getArea_code()) && !searchQuery.getArea_code().equals(p.getPhoneNumber().getAreaCode())) {
+            return false;
+        }
+        if (isNotBlank(searchQuery.getPhone_no()) && !searchQuery.getPhone_no().equals(p.getPhoneNumber().getNumber())) {
+            return false;
+        }
+        Address address = p.getAddress();
+        if (isNotBlank(searchQuery.getDivisionId()) && !searchQuery.getDivisionId().equals(address.getDivisionId())) {
+            return false;
+        }
+        if (isNotBlank(searchQuery.getDistrictId()) && !searchQuery.getDistrictId().equals(address.getDistrictId())) {
+            return false;
+        }
+        if (isNotBlank(searchQuery.getUpazilaId()) && !searchQuery.getUpazilaId().equals(address.getUpazillaId())) {
+            return false;
+        }
+        if (isNotBlank(searchQuery.getGiven_name()) && !searchQuery.getGiven_name().equalsIgnoreCase(p.getGivenName())) {
+            return false;
+        }
+        if (isNotBlank(searchQuery.getSur_name()) && !searchQuery.getSur_name().equalsIgnoreCase(p.getSurName())) {
+            return false;
+        }
+        return true;
     }
 
     public MCIResponse update(PatientMapper patientMapper, final String hid) {
@@ -535,7 +580,7 @@ public class PatientRepository extends BaseRepository {
 
     public ListenableFuture<List<PatientMapper>> findAllByLocation(String location, String start, int limit, Date since) {
 
-        Select select = QueryBuilder.select().from("patient");
+        Select select = select().from("patient");
 
         if (StringUtils.isBlank(location)) {
             final SettableFuture<List<PatientMapper>> result = SettableFuture.create();
@@ -850,57 +895,5 @@ public class PatientRepository extends BaseRepository {
         }
 
         return false;
-    }
-
-    private Select prepareSelectQueryForSearch(SearchQuery searchQuery) {
-        Select select = QueryBuilder.select().from("patient");
-
-        if (isNotBlank(searchQuery.getFull_name())) {
-            select.where(QueryBuilder.eq("full_name", searchQuery.getFull_name()));
-        }
-
-        if (isNotBlank(searchQuery.getNid())) {
-            select.where(QueryBuilder.eq(PatientQueryBuilder.NATIONAL_ID, searchQuery.getNid()));
-        }
-
-        if (isNotBlank(searchQuery.getBin_brn())) {
-            select.where(QueryBuilder.eq(PatientQueryBuilder.BIN_BRN, searchQuery.getBin_brn()));
-        }
-
-        if (isNotBlank(searchQuery.getUid())) {
-            select.where(QueryBuilder.eq(PatientQueryBuilder.UID, searchQuery.getUid()));
-        }
-
-        if (isNotBlank(searchQuery.getPresent_address())) {
-            select.where(QueryBuilder.eq(getAddressHierarchyField(searchQuery.getPresent_address().length()), searchQuery.getPresent_address()));
-        }
-
-        if (isNotBlank(searchQuery.getSur_name())) {
-            select.where(QueryBuilder.eq("lower_sur_name", StringUtils.trim(searchQuery.getSur_name()).toLowerCase()));
-        }
-
-        if (isNotBlank(searchQuery.getGiven_name())) {
-            select.where(QueryBuilder.eq("lower_given_name", StringUtils.trim(searchQuery.getGiven_name()).toLowerCase()));
-        }
-
-        if (isNotBlank(searchQuery.getPhone_no())) {
-            select.where(QueryBuilder.eq(PatientQueryBuilder.PHONE_NO, StringUtils.trim(searchQuery.getPhone_no())));
-        }
-
-        if (isNotBlank(searchQuery.getCountry_code())) {
-            select.where(QueryBuilder.eq(PatientQueryBuilder.PHONE_NUMBER_COUNTRY_CODE, StringUtils.trim(searchQuery.getCountry_code())));
-        }
-
-        if (isNotBlank(searchQuery.getArea_code())) {
-            select.where(QueryBuilder.eq(PatientQueryBuilder.PHONE_NUMBER_AREA_CODE, StringUtils.trim(searchQuery.getArea_code())));
-        }
-
-        if (isNotBlank(searchQuery.getExtension())) {
-            select.where(QueryBuilder.eq(PatientQueryBuilder.PHONE_NUMBER_EXTENSION, StringUtils.trim(searchQuery.getExtension())));
-        }
-
-        select.limit(searchQuery.getMaximum_limit() + 1);
-        select.allowFiltering();
-        return select;
     }
 }

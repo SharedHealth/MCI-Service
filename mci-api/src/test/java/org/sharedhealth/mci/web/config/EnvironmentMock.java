@@ -38,10 +38,9 @@ public class EnvironmentMock implements ApplicationContextInitializer<Configurab
         }
 
         try {
-            //EmbeddedCassandraServerHelper.startEmbeddedCassandra();
             new Migrations(env).migrate();
         } catch (Exception e) {
-            throw new RuntimeException("Error starting embedded server..", e);
+            throw new RuntimeException("Error while running migrations.", e);
         }
 
     }
