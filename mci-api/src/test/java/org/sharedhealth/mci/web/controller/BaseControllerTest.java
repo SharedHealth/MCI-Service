@@ -19,6 +19,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.util.List;
 
+import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -88,7 +89,13 @@ public class BaseControllerTest {
 
     @After
     public void teardown() {
-        cqlTemplate.execute("truncate patient");
+        cqlTemplate.execute("truncate " + CF_PATIENT);
+        cqlTemplate.execute("truncate " + CF_NID_MAPPING);
+        cqlTemplate.execute("truncate " + CF_BRN_MAPPING);
+        cqlTemplate.execute("truncate " + CF_UID_MAPPING);
+        cqlTemplate.execute("truncate " + CF_PHONE_NUMBER_MAPPING);
+        cqlTemplate.execute("truncate " + CF_NAME_MAPPING);
+        cqlTemplate.execute("truncate approval");
     }
 
     protected PatientMapper getPatientMapperObjectByHealthId(String healthId) throws Exception {
