@@ -109,43 +109,6 @@ public class PatientRepositoryIT {
         assertEquals(mciResponse.getHttpStatus(), ACCEPTED.value());
     }
 
-    @Test
-    public void shouldFindPatientWithMatchingNationalId() throws ExecutionException, InterruptedException {
-
-        MCIResponse mciResponse = patientRepository.create(patientDto);
-        final PatientMapper p = patientRepository.findByNationalId(nationalId).get();
-        assertNotNull(p);
-        patientDto.setHealthId(mciResponse.id);
-        patientDto.setCreatedAt(p.getCreatedAt());
-        patientDto.setUpdatedAt(p.getUpdatedAt());
-        assertEquals(patientDto, p);
-    }
-
-
-    @Test
-    public void shouldFindPatientWithMatchingBirthRegistrationNumber() throws ExecutionException, InterruptedException {
-
-        MCIResponse mciResponse = patientRepository.create(patientDto);
-        final PatientMapper p = patientRepository.findByBirthRegistrationNumber(birthRegistrationNumber).get();
-        assertNotNull(p);
-        patientDto.setHealthId(mciResponse.id);
-        patientDto.setCreatedAt(p.getCreatedAt());
-        patientDto.setUpdatedAt(p.getUpdatedAt());
-        assertEquals(patientDto, p);
-    }
-
-    @Test
-    public void shouldFindPatientWithMatchingUid() throws ExecutionException, InterruptedException {
-        MCIResponse mciResponse = patientRepository.create(patientDto);
-
-        final PatientMapper p = patientRepository.findByUid(uid).get();
-        assertNotNull(p);
-        patientDto.setHealthId(mciResponse.id);
-        patientDto.setCreatedAt(p.getCreatedAt());
-        patientDto.setUpdatedAt(p.getUpdatedAt());
-        assertEquals(patientDto, p);
-    }
-
     @Test(expected = PatientNotFoundException.class)
     public void shouldThrowErrorIfPatientNotFound() throws Exception {
         patientRepository.update(new PatientMapper(), "1");

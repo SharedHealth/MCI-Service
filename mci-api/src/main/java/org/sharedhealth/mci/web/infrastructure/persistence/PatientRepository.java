@@ -1,7 +1,6 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
 import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
@@ -12,7 +11,6 @@ import com.google.common.util.concurrent.SettableFuture;
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.utils.UidGenerator;
 import org.sharedhealth.mci.web.exception.HealthIDExistException;
-import org.sharedhealth.mci.web.exception.PatientAlreadyExistException;
 import org.sharedhealth.mci.web.exception.PatientNotFoundException;
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
@@ -24,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cassandra.core.AsynchronousQueryListener;
 import org.springframework.data.cassandra.convert.CassandraConverter;
 import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.http.HttpStatus;
@@ -37,7 +34,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
@@ -59,41 +55,42 @@ public class PatientRepository extends BaseRepository {
         super(cassandraOperations);
     }
 
-    public MCIResponse create(PatientMapper patientDto) {
-        if (!StringUtils.isBlank(patientDto.getHealthId())) {
-            DirectFieldBindingResult bindingResult = new DirectFieldBindingResult(patientDto, "patient");
+    public MCIResponse create(PatientMapper patientMapper) {
+        if (!StringUtils.isBlank(patientMapper.getHealthId())) {
+            DirectFieldBindingResult bindingResult = new DirectFieldBindingResult(patientMapper, "patient");
             bindingResult.addError(new FieldError("patient", "hid", "3001"));
             throw new HealthIDExistException(bindingResult);
         }
 
-        PatientMapper existingPatient = getExistingPatient(patientDto);
-
-        if (existingPatient == null) {
-            patientDto.setHealthId(uid.getId());
-        } else if (StringUtils.isBlank(patientDto.getHealthId())) {
-            logger.debug("Update flow");
-            return update(patientDto, existingPatient.getHealthId());
-        } else {
-            throw new PatientAlreadyExistException(existingPatient.getHealthId());
+        PatientMapper existingPatient = getExistingPatient(patientMapper);
+        if (existingPatient != null) {
+            return update(patientMapper, existingPatient.getHealthId());
         }
 
-        String fullName = "";
-        if (patientDto.getGivenName() != null) {
-            fullName = patientDto.getGivenName();
-        }
-        if (patientDto.getSurName() != null) {
-            fullName = fullName + " " + patientDto.getSurName();
-        }
-
-        Patient p = getEntityFromPatientMapper(patientDto);
+        Patient p = getEntityFromPatientMapper(patientMapper);
 
         p.setHealthId(uid.getId());
         p.setCreatedAt(new Date());
         p.setUpdatedAt(new Date());
-        p.setSurName(patientDto.getSurName());
+        p.setSurName(patientMapper.getSurName());
 
         cassandraOperations.execute(buildSaveBatch(p));
         return new MCIResponse(p.getHealthId(), HttpStatus.CREATED);
+    }
+
+    private PatientMapper getExistingPatient(PatientMapper mapper) {
+        if (!mapper.containsMultipleIdentifier()) {
+            return null;
+        }
+        SearchQuery searchQuery = new SearchQuery();
+        searchQuery.setNid(mapper.getNationalId());
+        searchQuery.setBin_brn(mapper.getBirthRegistrationNumber());
+        searchQuery.setUid(mapper.getUid());
+        List<PatientMapper> mappers = findAllByQuery(searchQuery);
+        if (isNotEmpty(mappers)) {
+            return mappers.get(0);
+        }
+        return null;
     }
 
     private Batch buildSaveBatch(Patient patient) {
@@ -136,60 +133,6 @@ public class PatientRepository extends BaseRepository {
         return batch;
     }
 
-    private PatientMapper getExistingPatient(PatientMapper patientDto) {
-
-        PatientMapper existingPatient;
-
-        if (!StringUtils.isBlank(patientDto.getHealthId())) {
-            try {
-                return findByHealthId(patientDto.getHealthId());
-            } catch (Exception e) {
-                DirectFieldBindingResult bindingResult = new DirectFieldBindingResult(patientDto, "patient");
-                bindingResult.addError(new FieldError("patient", "hid", "2002"));
-                throw new ValidationException(bindingResult);
-            }
-        }
-
-        if (!StringUtils.isBlank(patientDto.getNationalId())) {
-            try {
-                existingPatient = findByNationalId(patientDto.getNationalId()).get();
-
-                if (existingPatient.isSimilarTo(patientDto)) {
-                    return existingPatient;
-                }
-            } catch (Exception e) {
-                logger.debug("something happens finding NationalId");
-            }
-        }
-
-        if (!StringUtils.isBlank(patientDto.getBirthRegistrationNumber())) {
-
-            try {
-                existingPatient = findByBirthRegistrationNumber(patientDto.getBirthRegistrationNumber()).get();
-
-                if (existingPatient.isSimilarTo(patientDto)) {
-                    return existingPatient;
-                }
-            } catch (Exception e) {
-                logger.debug("something happens finding BirthRegistration");
-            }
-        }
-
-        if (!StringUtils.isBlank(patientDto.getUid())) {
-            try {
-                existingPatient = findByUid(patientDto.getUid()).get();
-
-                if (existingPatient.isSimilarTo(patientDto)) {
-                    return existingPatient;
-                }
-            } catch (Exception e) {
-                logger.debug("something happens finding Uid");
-            }
-        }
-
-        return null;
-    }
-
     public PatientMapper findByHealthId(final String healthId) {
         String cql = String.format(getFindByHealthIdQuery(), healthId);
         logger.debug("Find patient by health id CQL: [" + cql + "]");
@@ -202,97 +145,6 @@ public class PatientRepository extends BaseRepository {
             }
         }
         throw new PatientNotFoundException("No patient found with health id: " + healthId);
-    }
-
-    public ListenableFuture<PatientMapper> findByNationalId(final String nationalId) {
-        String cql = String.format(getFindByNationalIdQuery(), nationalId);
-        logger.debug("Find patient by national id CQL: [" + cql + "]");
-        final SettableFuture<PatientMapper> result = SettableFuture.create();
-
-        cassandraOperations.queryAsynchronously(cql, new AsynchronousQueryListener() {
-            @Override
-            public void onQueryComplete(ResultSetFuture rsf) {
-                try {
-                    Row row = rsf.get(TIMEOUT_IN_MILLIS, TimeUnit.MILLISECONDS).one();
-                    if (row == null) {
-                        throw new PatientNotFoundException("No patient found with national id: " + nationalId);
-                    }
-                    setPatientOnResult(row, result);
-                } catch (Exception e) {
-                    logger.error("Error while finding patient by nationalId: " + nationalId, e);
-                    result.setException(e);
-                }
-            }
-        });
-
-        return new SimpleListenableFuture<PatientMapper, PatientMapper>(result) {
-            @Override
-            protected PatientMapper adapt(PatientMapper adapteeResult) throws ExecutionException {
-                return adapteeResult;
-            }
-        };
-    }
-
-    public ListenableFuture<PatientMapper> findByBirthRegistrationNumber(final String birthRegistrationNumber) {
-        String cql = String.format(getFindByBirthRegistrationNumberQuery(), birthRegistrationNumber);
-        logger.debug("Find patient by birth registration number CQL: [" + cql + "]");
-        final SettableFuture<PatientMapper> result = SettableFuture.create();
-        cassandraOperations.queryAsynchronously(cql, new AsynchronousQueryListener() {
-            @Override
-            public void onQueryComplete(ResultSetFuture rsf) {
-                try {
-                    Row row = rsf.get(TIMEOUT_IN_MILLIS, TimeUnit.MILLISECONDS).one();
-                    if (row == null) {
-                        throw new PatientNotFoundException("No patient found with birth registration number: " + birthRegistrationNumber);
-                    }
-                    setPatientOnResult(row, result);
-                } catch (Exception e) {
-                    logger.error("Error while finding patient by birth registration number: " + birthRegistrationNumber, e);
-                    result.setException(e);
-                }
-            }
-        });
-
-        return new SimpleListenableFuture<PatientMapper, PatientMapper>(result) {
-            @Override
-            protected PatientMapper adapt(PatientMapper adapteeResult) throws ExecutionException {
-                return adapteeResult;
-            }
-        };
-    }
-
-    public ListenableFuture<PatientMapper> findByUid(final String uid) {
-        String cql = String.format(getFindByUidQuery(), uid);
-        logger.debug("Find patient by name  CQL: [" + cql + "]");
-        final SettableFuture<PatientMapper> result = SettableFuture.create();
-
-        cassandraOperations.queryAsynchronously(cql, new AsynchronousQueryListener() {
-            @Override
-            public void onQueryComplete(ResultSetFuture rsf) {
-                try {
-                    Row row = rsf.get(TIMEOUT_IN_MILLIS, TimeUnit.MILLISECONDS).one();
-                    if (row == null) {
-                        throw new PatientNotFoundException("No patient found with name: " + uid);
-                    }
-                    setPatientOnResult(row, result);
-                } catch (Exception e) {
-                    logger.error("Error while finding patient by name: " + uid, e);
-                    result.setException(e);
-                }
-            }
-        });
-
-        return new SimpleListenableFuture<PatientMapper, PatientMapper>(result) {
-            @Override
-            protected PatientMapper adapt(PatientMapper adapteeResult) throws ExecutionException {
-                return adapteeResult;
-            }
-        };
-    }
-
-    private void setPatientOnResult(Row r, SettableFuture<PatientMapper> result) {
-        PatientMapper patientDto = getPatientFromRow(r);
-        result.set(patientDto);
     }
 
     private PatientMapper getPatientFromRow(Row r) {

@@ -18,6 +18,7 @@ import javax.validation.constraints.Pattern;
 import java.util.List;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.web.utils.PatientFieldProperties.*;
 
 @MaritalRelation(message = "1005", field = "maritalStatus")
@@ -456,5 +457,19 @@ public class PatientMapper {
 
     public void setPrimaryContactNumber(PhoneNumber primaryContactNumber) {
         this.primaryContactNumber = primaryContactNumber;
+    }
+
+    public boolean containsMultipleIdentifier() {
+        int count = 0;
+        if (isNotBlank(this.getNationalId())) {
+            count++;
+        }
+        if (isNotBlank(this.getBirthRegistrationNumber())) {
+            count++;
+        }
+        if (isNotBlank(this.getUid())) {
+            count++;
+        }
+        return count > 1;
     }
 }
