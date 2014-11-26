@@ -155,7 +155,7 @@ public class PatientRepositoryIT {
 
     private void assertPatientsFoundByCatchment(String location, int expectedRecordCount) throws InterruptedException, ExecutionException {
         List<PatientData> patients;
-        patients = patientRepository.findAllByLocation(location, null, 0, null).get();
+        patients = patientRepository.findAllByLocation(location, null, 0, null);
         assertEquals(expectedRecordCount, patients.size());
     }
 

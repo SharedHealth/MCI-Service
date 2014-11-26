@@ -1,13 +1,10 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
-import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.Row;
 import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.util.concurrent.SettableFuture;
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.utils.UidGenerator;
 import org.sharedhealth.mci.web.exception.HealthIDExistException;
@@ -17,7 +14,6 @@ import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.handler.PatientFilter;
 import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.model.*;
-import org.sharedhealth.mci.web.utils.concurrent.SimpleListenableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,14 +22,12 @@ import org.springframework.data.cassandra.convert.CassandraConverter;
 import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.FieldError;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
@@ -139,115 +133,6 @@ public class PatientRepository extends BaseRepository {
             return patient.convert();
         }
         throw new PatientNotFoundException("No patient found with health id: " + healthId);
-    }
-
-    private PatientData getPatientFromRow(Row r) {
-        DatabaseRow row = new DatabaseRow(r);
-        PatientData patientData = new PatientData();
-
-        try {
-            final String string = row.getString(RELATIONS);
-            patientData.setRelations(getRelationsList(string));
-        } catch (Exception e) {
-            logger.debug(" Relations: [" + e.getMessage() + "]");
-        }
-        patientData.setHealthId(row.getString(HEALTH_ID));
-        patientData.setNationalId(row.getString(NATIONAL_ID));
-        patientData.setUid(row.getString(UID));
-        patientData.setPlaceOfBirth(row.getString(PLACE_OF_BIRTH));
-
-        patientData.setReligion(row.getString(RELIGION));
-        patientData.setBloodGroup(row.getString(BLOOD_GROUP));
-        patientData.setNameBangla(row.getString(FULL_NAME_BANGLA));
-        patientData.setBirthRegistrationNumber(row.getString(BIN_BRN));
-        patientData.setGivenName(row.getString(GIVEN_NAME));
-        patientData.setSurName(row.getString(SUR_NAME));
-        patientData.setDateOfBirth(row.getDateAsString(DATE_OF_BIRTH));
-        patientData.setGender(row.getString(GENDER));
-        patientData.setOccupation(row.getString(OCCUPATION));
-        patientData.setEducationLevel(row.getString(EDU_LEVEL));
-        patientData.setNationality(row.getString(NATIONALITY));
-        patientData.setDisability(row.getString(DISABILITY));
-        patientData.setEthnicity(row.getString(ETHNICITY));
-        patientData.setIsAlive(row.getString(IS_ALIVE));
-        patientData.setMaritalStatus(row.getString(MARITAL_STATUS));
-
-        patientData.setPrimaryContact(row.getString(PRIMARY_CONTACT));
-
-        Address address = new Address();
-        address.setAddressLine(row.getString(ADDRESS_LINE));
-        address.setDivisionId(row.getString(DIVISION_ID));
-        address.setDistrictId(row.getString(DISTRICT_ID));
-        address.setUpazillaId(row.getString(UPAZILLA_ID));
-        address.setUnionId(row.getString(UNION_ID));
-        address.setHoldingNumber(row.getString(HOLDING_NUMBER));
-        address.setStreet(row.getString(STREET));
-        address.setAreaMouja(row.getString(AREA_MOUJA));
-        address.setVillage(row.getString(VILLAGE));
-        address.setPostOffice(row.getString(POST_OFFICE));
-        address.setPostCode(row.getString(POST_CODE));
-        address.setWardId(row.getString(WARD));
-        address.setThanaId(row.getString(THANA));
-        address.setCityCorporationId(row.getString(CITY_CORPORATION));
-        address.setCountryCode(row.getString(COUNTRY));
-        patientData.setAddress(address);
-
-        Address permanentaddress = new Address();
-        permanentaddress.setAddressLine(row.getString(PERMANENT_ADDRESS_LINE));
-        permanentaddress.setDivisionId(row.getString(PERMANENT_DIVISION_ID));
-        permanentaddress.setDistrictId(row.getString(PERMANENT_DISTRICT_ID));
-        permanentaddress.setUpazillaId(row.getString(PERMANENT_UPAZILLA_ID));
-        permanentaddress.setUnionId(row.getString(PERMANENT_UNION_ID));
-        permanentaddress.setHoldingNumber(row.getString(PERMANENT_HOLDING_NUMBER));
-        permanentaddress.setStreet(row.getString(PERMANENT_STREET));
-        permanentaddress.setAreaMouja(row.getString(PERMANENT_AREA_MOUJA));
-        permanentaddress.setVillage(row.getString(PERMANENT_VILLAGE));
-        permanentaddress.setPostOffice(row.getString(PERMANENT_POST_OFFICE));
-        permanentaddress.setPostCode(row.getString(PERMANENT_POST_CODE));
-        permanentaddress.setWardId(row.getString(PERMANENT_WARD));
-        permanentaddress.setThanaId(row.getString(PERMANENT_THANA));
-        permanentaddress.setCityCorporationId(row.getString(PERMANENT_CITY_CORPORATION));
-        permanentaddress.setCountryCode(row.getString(PERMANENT_COUNTRY));
-
-        PhoneNumber phoneNumber = new PhoneNumber();
-        PhoneNumber primaryContactNumber = new PhoneNumber();
-
-        phoneNumber.setNumber(row.getString(PHONE_NO));
-        phoneNumber.setAreaCode(row.getString(PHONE_NUMBER_AREA_CODE));
-        phoneNumber.setCountryCode(row.getString(PHONE_NUMBER_COUNTRY_CODE));
-        phoneNumber.setExtension(row.getString(PHONE_NUMBER_EXTENSION));
-
-        primaryContactNumber.setNumber(row.getString(PRIMARY_CONTACT_NO));
-        primaryContactNumber.setAreaCode(row.getString(PRIMARY_CONTACT_NUMBER_AREA_CODE));
-        primaryContactNumber.setCountryCode(row.getString(PRIMARY_CONTACT_NUMBER_COUNTRY_CODE));
-        primaryContactNumber.setExtension(row.getString(PRIMARY_CONTACT_NUMBER_EXTENSION));
-
-        if (primaryContactNumber.getNumber() != null) {
-            patientData.setPrimaryContactNumber(primaryContactNumber);
-        }
-
-        if (phoneNumber.getNumber() != null) {
-            patientData.setPhoneNumber(phoneNumber);
-        }
-
-        if (permanentaddress.getCountryCode() != null) {
-            if (permanentaddress.getCountryCode() == "050" && permanentaddress.getDistrictId() != null) {
-                patientData.setPermanentAddress(permanentaddress);
-            }
-
-            if (permanentaddress.getCountryCode() != "050") {
-                patientData.setPermanentAddress(permanentaddress);
-            }
-        }
-
-        patientData.setCreatedAt(row.getDate("created_at"));
-        patientData.setUpdatedAt(row.getDate("updated_at"));
-
-        return patientData;
-    }
-
-    private List<Relation> getRelationsList(String string) throws IOException {
-        return mapper.readValue(string, mapper.getTypeFactory().constructCollectionType(List.class, Relation.class));
     }
 
     public List<PatientData> findAllByQuery(SearchQuery searchQuery) {
@@ -385,29 +270,22 @@ public class PatientRepository extends BaseRepository {
         return new MCIResponse(patient.getHealthId(), HttpStatus.ACCEPTED);
     }
 
-    public ListenableFuture<List<PatientData>> findAllByLocations(List<String> locations, String start, Date since) {
-
-        final SettableFuture<List<PatientData>> result = SettableFuture.create();
-        List<PatientData> patients = new ArrayList<>();
-
+    public List<PatientData> findAllByLocations(List<String> locations, String start, Date since) {
+        List<PatientData> dataList = new ArrayList<>();
         int limit = PER_PAGE_LIMIT;
 
         if (locations != null && locations.size() > 0) {
             String locationPointer = getLocationPointer(locations, start, null);
 
             for (String catchment : locations) {
-                if (patients.size() == 0 && !isLocationBelongsToCatchment(locationPointer, catchment)) {
+                if (dataList.size() == 0 && !isLocationBelongsToCatchment(locationPointer, catchment)) {
                     continue;
                 }
-
-                ListenableFuture<List<PatientData>> res = this.findAllByLocation(catchment, start, limit, since);
                 try {
-                    List<PatientData> temp = res.get();
-                    patients.addAll(temp);
-
-                    if (patients.size() < PER_PAGE_LIMIT) {
+                    dataList.addAll(this.findAllByLocation(catchment, start, limit, since));
+                    if (dataList.size() < PER_PAGE_LIMIT) {
                         start = null;
-                        limit = PER_PAGE_LIMIT - patients.size();
+                        limit = PER_PAGE_LIMIT - dataList.size();
                         locationPointer = null;
                     } else {
                         break;
@@ -420,26 +298,16 @@ public class PatientRepository extends BaseRepository {
         } else {
             return this.findAllByLocation(null, start, limit, since);
         }
-
-        result.set(patients);
-        return getPatientListListenableFuture(result);
+        return dataList;
     }
 
-    public ListenableFuture<List<PatientData>> findAllByLocation(String location, String start, int limit, Date since) {
-
+    List<PatientData> findAllByLocation(String location, String start, int limit, Date since) {
         Select select = select().from("patient");
-
-        if (StringUtils.isBlank(location)) {
-            final SettableFuture<List<PatientData>> result = SettableFuture.create();
-            return getPatientListListenableFuture(result);
-        }
-
         select.where(QueryBuilder.eq(getAddressHierarchyField(location.length()), location));
 
         if (isNotBlank(start)) {
             select.where(QueryBuilder.gt(QueryBuilder.token("health_id"), QueryBuilder.raw("token('" + start + "')")));
         }
-
         if (since != null) {
             select.where(QueryBuilder.gt("updated_at", since));
             select.allowFiltering();
@@ -448,33 +316,18 @@ public class PatientRepository extends BaseRepository {
         if (limit > 0) {
             select.limit(limit);
         }
-
-        return getPatientListListenableFuture(select);
+        return convert(cassandraOperations.select(select, Patient.class));
     }
 
-    private ListenableFuture<List<PatientData>> getPatientListListenableFuture(final Select select) {
-        return new SimpleListenableFuture<List<PatientData>, ResultSet>(
-                cassandraOperations.queryAsynchronously(select)) {
-            @Override
-            protected List<PatientData> adapt(ResultSet resultSet) throws ExecutionException {
-                List<PatientData> dataList = new ArrayList<>();
-                for (Row result : resultSet.all()) {
-                    PatientData data = getPatientFromRow(result);
-                    dataList.add(data);
-                }
-
-                return dataList;
+    private List<PatientData> convert(List<Patient> patients) {
+        List<PatientData> dataList = new ArrayList<>();
+        if (isNotEmpty(patients)) {
+            for (Patient patient : patients) {
+                PatientData data = patient.convert();
+                dataList.add(data);
             }
-        };
-    }
-
-    private ListenableFuture<List<PatientData>> getPatientListListenableFuture(final SettableFuture<List<PatientData>> result) {
-        return new SimpleListenableFuture<List<PatientData>, List<PatientData>>(result) {
-            @Override
-            protected List<PatientData> adapt(List<PatientData> p) throws ExecutionException {
-                return p;
-            }
-        };
+        }
+        return dataList;
     }
 
     private String getLocationPointer(List<String> locations, String start, String d) {

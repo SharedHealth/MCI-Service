@@ -8,7 +8,6 @@ import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.SearchQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.concurrent.ListenableFuture;
 
 import java.util.Date;
 import java.util.List;
@@ -47,15 +46,9 @@ public class PatientService {
         return patientRepository.findAllByQuery(searchQuery);
     }
 
-    public ListenableFuture<List<PatientData>> findAllByLocations(List<String> locations, String last, Date since) {
-        return patientRepository.findAllByLocations(locations, last, since);
-    }
-
-    public ListenableFuture<List<PatientData>> findAllByFacility(String facilityId, String last, Date since) {
-
+    public List<PatientData> findAllByFacility(String facilityId, String last, Date since) {
         List<String> locations = facilityRegistryWrapper.getCatchmentAreasByFacility(facilityId);
-
-        return findAllByLocations(locations, last, since);
+        return patientRepository.findAllByLocations(locations, last, since);
     }
 
     public int getPerPageMaximumLimit() {
@@ -64,7 +57,6 @@ public class PatientService {
         if (limit == null) {
             return PER_PAGE_MAXIMUM_LIMIT;
         }
-
         return limit;
     }
 
@@ -74,7 +66,6 @@ public class PatientService {
         if (note == null) {
             return PER_PAGE_MAXIMUM_LIMIT_NOTE;
         }
-
         return note;
     }
 }

@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -130,24 +129,13 @@ public class PatientController {
         if (bindingResult.hasErrors()) {
             throw new ValidationException(bindingResult);
         }
-
         logger.debug("Find all patients  for catchment of facility [" + facilityId + "]");
         final DeferredResult<ResponseEntity<MCIMultiResponse>> deferredResult = new DeferredResult<>();
 
-        patientService.findAllByFacility(facilityId, paginationQuery.getLast(), paginationQuery.getDateSince()).addCallback(new ListenableFutureCallback<List<PatientData>>() {
-            @Override
-            public void onSuccess(List<PatientData> results) {
-                HashMap<String, String> additionalInfo = null;
-                MCIMultiResponse mciMultiResponse = new MCIMultiResponse<>(results, additionalInfo, OK);
-                deferredResult.setResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject));
-            }
-
-            @Override
-            public void onFailure(Throwable error) {
-                deferredResult.setErrorResult(extractAppException(error));
-            }
-        });
-
+        List<PatientData> dataList = patientService.findAllByFacility(facilityId, paginationQuery.getLast(), paginationQuery.getDateSince());
+        HashMap<String, String> additionalInfo = null;
+        MCIMultiResponse mciMultiResponse = new MCIMultiResponse<>(dataList, additionalInfo, OK);
+        deferredResult.setResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject));
         return deferredResult;
     }
 }
