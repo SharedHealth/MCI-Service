@@ -1,15 +1,22 @@
 package org.sharedhealth.mci.web.model;
 
 
-import java.util.Date;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.sharedhealth.mci.web.mapper.Address;
+import org.sharedhealth.mci.web.mapper.PatientData;
+import org.sharedhealth.mci.web.mapper.PhoneNumber;
+import org.sharedhealth.mci.web.mapper.Relation;
 import org.springframework.data.cassandra.mapping.Column;
 import org.springframework.data.cassandra.mapping.PrimaryKey;
 import org.springframework.data.cassandra.mapping.Table;
 
+import java.util.Date;
+import java.util.List;
+
+import static org.apache.commons.lang.time.DateFormatUtils.ISO_DATE_FORMAT;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.sharedhealth.mci.utils.DateUtil.string2Date;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
@@ -544,7 +551,7 @@ public class Patient {
     }
 
     public void setAddressLine(String addressLine) {
-        this.addressLine = defaultString(addressLine);
+        this.addressLine = addressLine;
     }
 
     public String getDivisionId() {
@@ -552,7 +559,7 @@ public class Patient {
     }
 
     public void setDivisionId(String divisionId) {
-        this.divisionId = defaultString(divisionId);
+        this.divisionId = divisionId;
         this.updateLocationLevels();
     }
 
@@ -561,7 +568,7 @@ public class Patient {
     }
 
     public void setDistrictId(String districtId) {
-        this.districtId = defaultString(districtId);
+        this.districtId = districtId;
         this.updateLocationLevels();
     }
 
@@ -570,7 +577,7 @@ public class Patient {
     }
 
     public void setUpazillaId(String upazillaId) {
-        this.upazillaId = defaultString(upazillaId);
+        this.upazillaId = upazillaId;
         this.updateLocationLevels();
     }
 
@@ -579,7 +586,7 @@ public class Patient {
     }
 
     public void setUnionId(String unionId) {
-        this.unionId = defaultString(unionId);
+        this.unionId = unionId;
         this.updateLocationLevels();
     }
 
@@ -588,7 +595,7 @@ public class Patient {
     }
 
     public void setHoldingNumber(String holdingNumber) {
-        this.holdingNumber = defaultString(holdingNumber);
+        this.holdingNumber = holdingNumber;
     }
 
     public String getStreet() {
@@ -596,7 +603,7 @@ public class Patient {
     }
 
     public void setStreet(String street) {
-        this.street = defaultString(street);
+        this.street = street;
     }
 
     public String getAreaMouja() {
@@ -604,7 +611,7 @@ public class Patient {
     }
 
     public void setAreaMouja(String areaMouja) {
-        this.areaMouja = defaultString(areaMouja);
+        this.areaMouja = areaMouja;
     }
 
     public String getVillage() {
@@ -612,7 +619,7 @@ public class Patient {
     }
 
     public void setVillage(String village) {
-        this.village = defaultString(village);
+        this.village = village;
     }
 
     public String getPostOffice() {
@@ -620,7 +627,7 @@ public class Patient {
     }
 
     public void setPostOffice(String postOffice) {
-        this.postOffice = defaultString(postOffice);
+        this.postOffice = postOffice;
     }
 
     public String getPostCode() {
@@ -628,7 +635,7 @@ public class Patient {
     }
 
     public void setPostCode(String postCode) {
-        this.postCode = defaultString(postCode);
+        this.postCode = postCode;
     }
 
     public String getWardId() {
@@ -636,7 +643,7 @@ public class Patient {
     }
 
     public void setWardId(String wardId) {
-        this.wardId = defaultString(wardId);
+        this.wardId = wardId;
         this.updateLocationLevels();
     }
 
@@ -645,7 +652,7 @@ public class Patient {
     }
 
     public void setThanaId(String thanaId) {
-        this.thanaId = defaultString(thanaId);
+        this.thanaId = thanaId;
         this.updateLocationLevels();
     }
 
@@ -654,7 +661,7 @@ public class Patient {
     }
 
     public void setCityCorporationId(String cityCorporationId) {
-        this.cityCorporationId = defaultString(cityCorporationId);
+        this.cityCorporationId = cityCorporationId;
         this.updateLocationLevels();
     }
 
@@ -663,7 +670,7 @@ public class Patient {
     }
 
     public void setCountryCode(String countryCode) {
-        this.countryCode = defaultString(countryCode);
+        this.countryCode = countryCode;
     }
 
     public String getPermanentAddressLine() {
@@ -671,7 +678,7 @@ public class Patient {
     }
 
     public void setPermanentAddressLine(String permanentAddressLine) {
-        this.permanentAddressLine = defaultString(permanentAddressLine);
+        this.permanentAddressLine = permanentAddressLine;
     }
 
     public String getPermanentDivisionId() {
@@ -679,7 +686,7 @@ public class Patient {
     }
 
     public void setPermanentDivisionId(String permanentDivisionId) {
-        this.permanentDivisionId = defaultString(permanentDivisionId);
+        this.permanentDivisionId = permanentDivisionId;
     }
 
     public String getPermanentDistrictId() {
@@ -687,7 +694,7 @@ public class Patient {
     }
 
     public void setPermanentDistrictId(String permanentDistrictId) {
-        this.permanentDistrictId = defaultString(permanentDistrictId);
+        this.permanentDistrictId = permanentDistrictId;
     }
 
     public String getPermanentUpazillaId() {
@@ -695,7 +702,7 @@ public class Patient {
     }
 
     public void setPermanentUpazillaId(String permanentUpazillaId) {
-        this.permanentUpazillaId = defaultString(permanentUpazillaId);
+        this.permanentUpazillaId = permanentUpazillaId;
     }
 
     public String getPermanentUnionId() {
@@ -703,7 +710,7 @@ public class Patient {
     }
 
     public void setPermanentUnionId(String permanentUnionId) {
-        this.permanentUnionId = defaultString(permanentUnionId);
+        this.permanentUnionId = permanentUnionId;
     }
 
     public String getPermanentHoldingNumber() {
@@ -711,7 +718,7 @@ public class Patient {
     }
 
     public void setPermanentHoldingNumber(String permanentHoldingNumber) {
-        this.permanentHoldingNumber = defaultString(permanentHoldingNumber);
+        this.permanentHoldingNumber = permanentHoldingNumber;
     }
 
     public String getPermanentStreet() {
@@ -719,7 +726,7 @@ public class Patient {
     }
 
     public void setPermanentStreet(String permanentStreet) {
-        this.permanentStreet = defaultString(permanentStreet);
+        this.permanentStreet = permanentStreet;
     }
 
     public String getPermanentAreaMouja() {
@@ -727,7 +734,7 @@ public class Patient {
     }
 
     public void setPermanentAreaMouja(String permanentAreaMouja) {
-        this.permanentAreaMouja = defaultString(permanentAreaMouja);
+        this.permanentAreaMouja = permanentAreaMouja;
     }
 
     public String getPermanentVillage() {
@@ -735,7 +742,7 @@ public class Patient {
     }
 
     public void setPermanentVillage(String permanentVillage) {
-        this.permanentVillage = defaultString(permanentVillage);
+        this.permanentVillage = permanentVillage;
     }
 
     public String getPermanentPostOffice() {
@@ -743,7 +750,7 @@ public class Patient {
     }
 
     public void setPermanentPostOffice(String permanentPostOffice) {
-        this.permanentPostOffice = defaultString(permanentPostOffice);
+        this.permanentPostOffice = permanentPostOffice;
     }
 
     public String getPermanentPostCode() {
@@ -751,7 +758,7 @@ public class Patient {
     }
 
     public void setPermanentPostCode(String permanentPostCode) {
-        this.permanentPostCode = defaultString(permanentPostCode);
+        this.permanentPostCode = permanentPostCode;
     }
 
     public String getPermanentWardId() {
@@ -759,7 +766,7 @@ public class Patient {
     }
 
     public void setPermanentWardId(String permanentWardId) {
-        this.permanentWardId = defaultString(permanentWardId);
+        this.permanentWardId = permanentWardId;
     }
 
     public String getPermanentThanaId() {
@@ -767,7 +774,7 @@ public class Patient {
     }
 
     public void setPermanentThanaId(String permanentThanaId) {
-        this.permanentThanaId = defaultString(permanentThanaId);
+        this.permanentThanaId = permanentThanaId;
     }
 
     public String getPermanentCityCorporationId() {
@@ -775,7 +782,7 @@ public class Patient {
     }
 
     public void setPermanentCityCorporationId(String permanentCityCorporationId) {
-        this.permanentCityCorporationId = defaultString(permanentCityCorporationId);
+        this.permanentCityCorporationId = permanentCityCorporationId;
     }
 
     public String getPermanentCountryCode() {
@@ -839,7 +846,7 @@ public class Patient {
     }
 
     public void setPhoneNumberCountryCode(String phoneNumberCountryCode) {
-        this.phoneNumberCountryCode = defaultString(phoneNumberCountryCode);
+        this.phoneNumberCountryCode = phoneNumberCountryCode;
     }
 
     public String getPhoneNumberAreaCode() {
@@ -847,7 +854,7 @@ public class Patient {
     }
 
     public void setPhoneNumberAreaCode(String phoneNumberAreaCode) {
-        this.phoneNumberAreaCode = defaultString(phoneNumberAreaCode);
+        this.phoneNumberAreaCode = phoneNumberAreaCode;
     }
 
     public String getPhoneNumberExtension() {
@@ -855,7 +862,7 @@ public class Patient {
     }
 
     public void setPhoneNumberExtension(String phoneNumberExtension) {
-        this.phoneNumberExtension = defaultString(phoneNumberExtension);
+        this.phoneNumberExtension = phoneNumberExtension;
     }
 
     public String getPrimaryContactNumberCountryCode() {
@@ -863,7 +870,7 @@ public class Patient {
     }
 
     public void setPrimaryContactNumberCountryCode(String primaryContactNumberCountryCode) {
-        this.primaryContactNumberCountryCode = defaultString(primaryContactNumberCountryCode);
+        this.primaryContactNumberCountryCode = primaryContactNumberCountryCode;
     }
 
     public String getPrimaryContactNumberAreaCode() {
@@ -871,7 +878,7 @@ public class Patient {
     }
 
     public void setPrimaryContactNumberAreaCode(String primaryContactNumberAreaCode) {
-        this.primaryContactNumberAreaCode = defaultString(primaryContactNumberAreaCode);
+        this.primaryContactNumberAreaCode = primaryContactNumberAreaCode;
     }
 
     public String getPrimaryContactNumberExtension() {
@@ -879,7 +886,7 @@ public class Patient {
     }
 
     public void setPrimaryContactNumberExtension(String primaryContactNumberExtension) {
-        this.primaryContactNumberExtension = defaultString(primaryContactNumberExtension);
+        this.primaryContactNumberExtension = primaryContactNumberExtension;
     }
 
     public String getCreatedBy() {
@@ -927,11 +934,11 @@ public class Patient {
     public String getLocationLevel3() {
         String ut = "";
 
-        if(this.getUpazillaId() != null) {
+        if (this.getUpazillaId() != null) {
             ut = this.getUpazillaId();
         }
 
-        if(this.getThanaId() != null) {
+        if (this.getThanaId() != null) {
             ut = ut + this.getThanaId();
         }
 
@@ -953,11 +960,11 @@ public class Patient {
     public String getLocationLevel5() {
         String uw = "";
 
-        if(this.getUnionId() != null) {
+        if (this.getUnionId() != null) {
             uw = this.getUnionId();
         }
 
-        if(this.getWardId() != null) {
+        if (this.getWardId() != null) {
             uw = uw + this.getWardId();
         }
 
@@ -982,5 +989,107 @@ public class Patient {
 
     public void setLowerGivenName(String lowerGivenName) {
         this.lowerGivenName = lowerGivenName;
+    }
+
+    public PatientData convert() {
+        PatientData data = new PatientData();
+
+        // TODO: Fix this implementation
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            List<Relation> relations = objectMapper.readValue(this.getRelations(),
+                    objectMapper.getTypeFactory().constructCollectionType(List.class, Relation.class));
+            data.setRelations(relations);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        data.setHealthId(this.getHealthId());
+        data.setNationalId(this.getNationalId());
+        data.setBirthRegistrationNumber(this.getBirthRegistrationNumber());
+        data.setUid(this.getUid());
+        data.setPlaceOfBirth(this.getPlaceOfBirth());
+
+        data.setReligion(this.getReligion());
+        data.setBloodGroup(this.getBloodGroup());
+        data.setNameBangla(this.getFullNameBangla());
+
+        data.setGivenName(this.getGivenName());
+        data.setSurName(this.getSurName());
+        data.setDateOfBirth(ISO_DATE_FORMAT.format(this.getDateOfBirth()));
+        data.setGender(this.getGender());
+        data.setOccupation(this.getOccupation());
+        data.setEducationLevel(this.getEducationLevel());
+        data.setNationality(this.getNationality());
+        data.setDisability(this.getDisability());
+        data.setEthnicity(this.getEthnicity());
+        data.setIsAlive(this.getIsAlive());
+        data.setMaritalStatus(this.getMaritalStatus());
+        data.setPrimaryContact(this.getPrimaryContact());
+
+        Address address = new Address();
+        address.setAddressLine(this.getAddressLine());
+        address.setDivisionId(this.getDivisionId());
+        address.setDistrictId(this.getDistrictId());
+        address.setUpazillaId(this.getUpazillaId());
+        address.setCityCorporationId(this.getCityCorporationId());
+        address.setUnionId(this.getUnionId());
+        address.setWardId(this.getWardId());
+        address.setHoldingNumber(this.getHoldingNumber());
+        address.setStreet(this.getStreet());
+        address.setAreaMouja(this.getAreaMouja());
+        address.setVillage(this.getVillage());
+        address.setPostOffice(this.getPostOffice());
+        address.setPostCode(this.getPostCode());
+        address.setThanaId(this.getThanaId());
+        address.setCountryCode(this.getCountryCode());
+        data.setAddress(address);
+
+        Address permanentAddress = new Address();
+        permanentAddress.setAddressLine(this.getPermanentAddressLine());
+        permanentAddress.setDivisionId(this.getPermanentDivisionId());
+        permanentAddress.setDistrictId(this.getPermanentDistrictId());
+        permanentAddress.setUpazillaId(this.getPermanentUpazillaId());
+        permanentAddress.setCityCorporationId(this.getPermanentCityCorporationId());
+        permanentAddress.setUnionId(this.getPermanentUnionId());
+        permanentAddress.setWardId(this.getPermanentWardId());
+        permanentAddress.setHoldingNumber(this.getPermanentHoldingNumber());
+        permanentAddress.setStreet(this.getPermanentStreet());
+        permanentAddress.setAreaMouja(this.getPermanentAreaMouja());
+        permanentAddress.setVillage(this.getPermanentVillage());
+        permanentAddress.setPostOffice(this.getPermanentPostOffice());
+        permanentAddress.setPostCode(this.getPermanentPostCode());
+        permanentAddress.setThanaId(this.getPermanentThanaId());
+        permanentAddress.setCountryCode(this.getPermanentCountryCode());
+        if (permanentAddress.getCountryCode() != null) {
+            if ("050".equals(permanentAddress.getCountryCode()) && permanentAddress.getDistrictId() != null) {
+                data.setPermanentAddress(permanentAddress);
+            }
+            if (!"050".equals(permanentAddress.getCountryCode())) {
+                data.setPermanentAddress(permanentAddress);
+            }
+        }
+
+        PhoneNumber phoneNumber = new PhoneNumber();
+        phoneNumber.setNumber(this.getCellNo());
+        phoneNumber.setAreaCode(this.getPhoneNumberAreaCode());
+        phoneNumber.setCountryCode(this.getPhoneNumberCountryCode());
+        phoneNumber.setExtension(this.getPhoneNumberExtension());
+        if (phoneNumber.getNumber() != null) {
+            data.setPhoneNumber(phoneNumber);
+        }
+
+        PhoneNumber primaryContactNumber = new PhoneNumber();
+        primaryContactNumber.setNumber(this.getPrimaryCellNo());
+        primaryContactNumber.setAreaCode(this.getPrimaryContactNumberAreaCode());
+        primaryContactNumber.setExtension(this.getPrimaryContactNumberExtension());
+        primaryContactNumber.setCountryCode(this.getPrimaryContactNumberCountryCode());
+        if (primaryContactNumber.getNumber() != null) {
+            data.setPrimaryContactNumber(primaryContactNumber);
+        }
+
+        data.setCreatedAt(this.getCreatedAt());
+        data.setUpdatedAt(this.getUpdatedAt());
+        return data;
     }
 }

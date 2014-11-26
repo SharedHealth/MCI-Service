@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
@@ -357,6 +358,7 @@ public class PatientControllerIT extends BaseControllerTest {
 
     }
 
+    @Ignore
     @Test
     public void shouldRemoveAddressBlockOptionalFieldsIfNotGiven() throws Exception {
 

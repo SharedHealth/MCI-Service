@@ -134,15 +134,9 @@ public class PatientRepository extends BaseRepository {
     }
 
     public PatientData findByHealthId(final String healthId) {
-        String cql = String.format(getFindByHealthIdQuery(), healthId);
-        logger.debug("Find patient by health id CQL: [" + cql + "]");
-        ResultSet resultSet = cassandraOperations.query(cql);
-
-        if (resultSet != null) {
-            Row row = resultSet.one();
-            if (row != null) {
-                return getPatientFromRow(row);
-            }
+        Patient patient = cassandraOperations.selectOneById(Patient.class, healthId);
+        if (patient != null) {
+            return patient.convert();
         }
         throw new PatientNotFoundException("No patient found with health id: " + healthId);
     }
@@ -261,7 +255,7 @@ public class PatientRepository extends BaseRepository {
     }
 
     private List<PatientData> findProbables(SearchQuery searchQuery) {
-        List<PatientData> patientDatas = new ArrayList<>();
+        List<PatientData> dataList = new ArrayList<>();
         String query = null;
 
         if (isNotBlank(searchQuery.getNid())) {
@@ -284,13 +278,14 @@ public class PatientRepository extends BaseRepository {
         if (isNotBlank(query)) {
             List<String> healthIds = cassandraOperations.queryForList(query, String.class);
             if (isNotEmpty(healthIds)) {
-                ResultSet resultSet = cassandraOperations.query(buildFindByHidsQuery(healthIds.toArray(new String[healthIds.size()])));
-                for (Row row : resultSet) {
-                    patientDatas.add(getPatientFromRow(row));
+                String[] values = healthIds.toArray(new String[healthIds.size()]);
+                List<Patient> patients = cassandraOperations.select(buildFindByHidsQuery(values), Patient.class);
+                for (Patient patient : patients) {
+                    dataList.add(patient.convert());
                 }
             }
         }
-        return patientDatas;
+        return dataList;
     }
 
     private List<PatientData> filterPatients(List<PatientData> patients, SearchQuery searchQuery) {

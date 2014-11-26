@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.validator.constraints.NotBlank;
 import org.sharedhealth.mci.validation.constraints.*;
 import org.sharedhealth.mci.validation.constraints.Location;
@@ -44,7 +45,7 @@ public class PatientData {
 
     @JsonProperty(GIVEN_NAME)
     @NotNull(message = "1001", groups = RequiredGroup.class)
-    @Length(max = 100, min=1, message = "1002")
+    @Length(max = 100, min = 1, message = "1002")
     private String givenName;
 
     @JsonProperty(SUR_NAME)
@@ -55,7 +56,7 @@ public class PatientData {
     @JsonProperty(DATE_OF_BIRTH)
     @NotNull(message = "1001", groups = RequiredGroup.class)
     @Date(format = "yyyy-MM-dd", message = "1002")
-    @Length(min=1,max = 10,message = "1002")
+    @Length(min = 1, max = 10, message = "1002")
     private String dateOfBirth;
 
     @JsonProperty(GENDER)
@@ -70,7 +71,7 @@ public class PatientData {
 
     @JsonProperty(EDU_LEVEL)
     @JsonInclude(NON_EMPTY)
-    @Code(type="education_level", regexp = "[\\d]{2}", message = "1004")
+    @Code(type = "education_level", regexp = "[\\d]{2}", message = "1004")
     private String educationLevel;
 
     @JsonProperty(RELATIONS)
@@ -116,7 +117,7 @@ public class PatientData {
     @JsonProperty(PRESENT_ADDRESS)
     @NotNull(message = "1001", groups = RequiredGroup.class)
     @Valid
-    @Location(message = "1004",country_code = "050")
+    @Location(message = "1004", country_code = "050")
     @PostCode(message = "1004", country_code = "050")
     private Address address;
 
@@ -379,24 +380,6 @@ public class PatientData {
         return null;
     }
 
-    public boolean isSimilarTo(PatientData patient) {
-        int matches = 0;
-
-        if (this.getNationalId() != null && this.getNationalId().equals(patient.getNationalId())) {
-            matches++;
-        }
-
-        if (this.getBirthRegistrationNumber() != null && this.getBirthRegistrationNumber().equals(patient.getBirthRegistrationNumber())) {
-            matches++;
-        }
-
-        if (this.getUid() != null && this.getUid().equals(patient.getUid())) {
-            matches++;
-        }
-
-        return matches > 1;
-    }
-
     public void setRelations(List<Relation> relations) {
         this.relations = relations;
     }
@@ -471,5 +454,10 @@ public class PatientData {
             count++;
         }
         return count > 1;
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
     }
 }

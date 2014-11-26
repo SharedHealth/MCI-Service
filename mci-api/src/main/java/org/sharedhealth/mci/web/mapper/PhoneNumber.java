@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
 
 import javax.validation.constraints.NotNull;
@@ -72,25 +73,12 @@ public class PhoneNumber {
     }
 
     @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("{");
-        if(countryCode!=null) {
-            sb.append("countryCode='").append(countryCode).append('\'');
-        }
-        if(areaCode!=null) {
-            sb.append("areaCode='").append(areaCode).append('\'');
-        }
-        if(number!=null) {
-            sb.append("number='").append(number).append('\'');
-        }
-        if(extension!=null) {
-            sb.append("extension='").append(extension).append('\'');
-        }
-        sb.append('}');
-        return sb.toString();
-    }
-    @Override
     public boolean equals(Object rhs) {
         return EqualsBuilder.reflectionEquals(this, rhs);
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
     }
 }

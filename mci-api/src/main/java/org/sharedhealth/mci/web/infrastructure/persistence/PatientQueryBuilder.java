@@ -92,27 +92,6 @@ public class PatientQueryBuilder {
     public static final String PRIMARY_CONTACT_NUMBER_AREA_CODE = "primary_contact_number_area_code";
     public static final String PRIMARY_CONTACT_NUMBER_EXTENSION = "primary_contact_number_extension";
 
-
-    public static String getFindByHealthIdQuery() {
-        return String.format("SELECT * FROM patient WHERE %s = '%%s'", HEALTH_ID);
-    }
-
-    public static String getFindByNationalIdQuery() {
-        return String.format("SELECT * FROM patient WHERE %s = '%%s'", NATIONAL_ID);
-    }
-
-    public static String getFindByBirthRegistrationNumberQuery() {
-        return String.format("SELECT * FROM patient WHERE %s = '%%s'", BIN_BRN);
-    }
-
-    public static String getFindByNameQuery() {
-        return String.format("SELECT * FROM patient WHERE %s = '%%s'", FULL_NAME);
-    }
-
-    public static String getFindByUidQuery() {
-        return String.format("SELECT * FROM patient WHERE %s = '%%s'", UID);
-    }
-
     public static String buildFindByHidsQuery(String[] values) {
         return select().from(CF_PATIENT).where(in(HEALTH_ID, values)).toString();
     }

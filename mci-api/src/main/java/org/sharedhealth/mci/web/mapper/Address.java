@@ -1,9 +1,5 @@
 package org.sharedhealth.mci.web.mapper;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -11,8 +7,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.sharedhealth.mci.validation.constraints.Code;
 import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
+
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static org.sharedhealth.mci.web.utils.PatientFieldProperties.*;
@@ -118,65 +119,8 @@ public class Address {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("{");
-        if(addressLine!=null) {
-            sb.append("addressLine='").append(addressLine).append('\'');
-        }
-        if (divisionId!=null){
-        sb.append(", divisionId='").append(divisionId).append('\'');
-        }
-        if(districtId!=null) {
-            sb.append(", districtId='").append(districtId).append('\'');
-        }
-        if (upazillaId!=null){
-            sb.append(", upazillaId='").append(upazillaId).append('\'');
-
-        }
-        if (unionId!=null){
-            sb.append(", unionId='").append(unionId).append('\'');
-
-        }
-        if (holdingNumber!=null){
-            sb.append(", holdingNumber='").append(holdingNumber).append('\'');
-
-        }
-        if (street!=null){
-            sb.append(", street='").append(street).append('\'');
-
-        }
-        if (areaMouja!=null){
-            sb.append(", areaMouja='").append(areaMouja).append('\'');
-
-        }
-        if (village!=null){
-            sb.append(", village='").append(village).append('\'');
-
-        }
-        if (postOffice!=null){
-            sb.append(", postOffice='").append(postOffice).append('\'');
-
-        }
-        if (postCode!=null){
-            sb.append(", postCode='").append(postCode).append('\'');
-
-        }
-        if (wardId!=null){
-            sb.append(", wardId='").append(wardId).append('\'');
-
-        }
-        if (thanaId!=null){
-            sb.append(", thanaId='").append(thanaId).append('\'');
-        }
-        if (cityCorporationId!=null){
-            sb.append(", cityCorporationId='").append(cityCorporationId).append('\'');
-        }
-        if (countryCode!=null){
-            sb.append(", countryCode='").append(countryCode).append('\'');
-        }
-        sb.append('}');
-        return sb.toString();
+        return ToStringBuilder.reflectionToString(this);
     }
-
 
     public String getAddressLine() {
         return addressLine;

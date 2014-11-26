@@ -1,15 +1,16 @@
 package org.sharedhealth.mci.web.mapper;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.sharedhealth.mci.validation.constraints.Code;
 import org.sharedhealth.mci.validation.constraints.Length;
 import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
+
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static org.sharedhealth.mci.web.utils.PatientFieldProperties.*;
@@ -161,27 +162,7 @@ public class Relation {
 
     @Override
     public String toString() {
-
-        final StringBuilder sb = new StringBuilder("{");
-        appendKeyValue(sb, "type", type);
-        appendKeyValue(sb, "healthId", healthId);
-        appendKeyValue(sb, "nationalId", nationalId);
-        appendKeyValue(sb, "uid", uid);
-        appendKeyValue(sb, "birthRegistrationNumber", birthRegistrationNumber);
-        appendKeyValue(sb, "nameBangla", nameBangla);
-        appendKeyValue(sb, "givenName", givenName);
-        appendKeyValue(sb, "surName", surName);
-        appendKeyValue(sb, "marriageId", marriageId);
-        appendKeyValue(sb, "relationalStatus", relationalStatus);
-        appendKeyValue(sb, "id", id);
-        sb.append('}');
-        return sb.toString();
-    }
-
-    private void appendKeyValue(StringBuilder sb, String key, String property) {
-        if (property != null) {
-            sb.append(key + ":'").append(property).append("'");
-        }
+        return ToStringBuilder.reflectionToString(this);
     }
 
     @Override
