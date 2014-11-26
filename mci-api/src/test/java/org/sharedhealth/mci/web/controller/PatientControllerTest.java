@@ -12,7 +12,7 @@ import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.Location;
-import org.sharedhealth.mci.web.mapper.PatientMapper;
+import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.SearchQuery;
 import org.sharedhealth.mci.web.service.LocationService;
 import org.sharedhealth.mci.web.service.PatientService;
@@ -56,10 +56,10 @@ public class PatientControllerTest {
     @Mock
     private LocalValidatorFactoryBean localValidatorFactoryBean;
 
-    private PatientMapper patientMapper;
+    private PatientData patient1;
 
     private PatientController controller;
-    private PatientMapper patientDto;
+    private PatientData patient2;
     private Location location;
     private MockMvc mockMvc;
     private String nationalId = "1234567890123";
@@ -71,7 +71,7 @@ public class PatientControllerTest {
     public static final String GEO_CODE = "1004092001";
     private SearchQuery searchQuery;
     private StringBuilder stringBuilder;
-    private List<PatientMapper> patientDtos;
+    private List<PatientData> patients;
     private int maxLimit;
 
     @Before
@@ -82,13 +82,13 @@ public class PatientControllerTest {
                 .setValidator(validator())
                 .build();
 
-        patientMapper = new PatientMapper();
-        patientMapper.setNationalId(nationalId);
-        patientMapper.setBirthRegistrationNumber(birthRegistrationNumber);
-        patientMapper.setGivenName("Scott");
-        patientMapper.setSurName("Tiger");
-        patientMapper.setGender("M");
-        patientMapper.setDateOfBirth("2014-12-01");
+        patient1 = new PatientData();
+        patient1.setNationalId(nationalId);
+        patient1.setBirthRegistrationNumber(birthRegistrationNumber);
+        patient1.setGivenName("Scott");
+        patient1.setSurName("Tiger");
+        patient1.setGender("M");
+        patient1.setDateOfBirth("2014-12-01");
 
         Address address = new Address();
         address.setAddressLine("house-10");
@@ -100,7 +100,7 @@ public class PatientControllerTest {
         address.setWardId("01");
         address.setCountryCode("050");
 
-        patientMapper.setAddress(address);
+        patient1.setAddress(address);
 
         location = new Location();
 
@@ -113,30 +113,30 @@ public class PatientControllerTest {
 
         searchQuery = new SearchQuery();
         stringBuilder = new StringBuilder(200);
-        patientDtos = new ArrayList<>();
+        patients = new ArrayList<>();
         maxLimit = 25;
     }
 
 
     @Test
     public void shouldCreatePatientAndReturnHealthId() throws Exception {
-        String json = new ObjectMapper().writeValueAsString(patientDto);
+        String json = new ObjectMapper().writeValueAsString(patient2);
         String healthId = "healthId-100";
         MCIResponse mciResponse = new MCIResponse(healthId, CREATED);
         when(locationService.findByGeoCode(GEO_CODE)).thenReturn(new PreResolvedListenableFuture<>(location));
-        when(patientService.create(patientDto)).thenReturn(mciResponse);
+        when(patientService.create(patient2)).thenReturn(mciResponse);
 
         mockMvc.perform(post(API_END_POINT).content(json).contentType(APPLICATION_JSON))
                 .andExpect(request().asyncResult(new ResponseEntity<>(mciResponse, CREATED)));
-        verify(patientService).create(patientDto);
+        verify(patientService).create(patient2);
     }
 
     @Test
     public void shouldFindPatientByHealthId() throws Exception {
         String healthId = "healthId-100";
-        when(patientService.findByHealthId(healthId)).thenReturn(patientDto);
+        when(patientService.findByHealthId(healthId)).thenReturn(patient2);
         mockMvc.perform(get(API_END_POINT + "/" + healthId))
-                .andExpect(request().asyncResult(new ResponseEntity<>(patientDto, OK)));
+                .andExpect(request().asyncResult(new ResponseEntity<>(patient2, OK)));
         verify(patientService).findByHealthId(healthId);
     }
 
@@ -196,16 +196,16 @@ public class PatientControllerTest {
         searchQuery.setPresent_address(address);
         stringBuilder.append("present_address=" + address);
 
-        patientDtos.add(patientDto);
-        patientDtos.add(patientDto);
-        patientDtos.add(patientDto);
+        patients.add(patient2);
+        patients.add(patient2);
+        patients.add(patient2);
         maxLimit = 4;
 
         assertFindAllBy(searchQuery, stringBuilder.toString());
     }
 
     private void assertFindAllBy(SearchQuery searchQuery, String queryString) throws Exception {
-        patientDtos.add(patientDto);
+        patients.add(patient2);
 
         searchQuery.setMaximum_limit(maxLimit);
 
@@ -215,13 +215,13 @@ public class PatientControllerTest {
         final int limit = patientService.getPerPageMaximumLimit();
         final String note = patientService.getPerPageMaximumLimitNote();
         HashMap<String, String> additionalInfo = new HashMap<>();
-        if (patientDtos.size() > limit) {
-            patientDtos.remove(limit);
+        if (patients.size() > limit) {
+            patients.remove(limit);
             additionalInfo.put("note", note);
         }
 
-        when(patientService.findAllByQuery(searchQuery)).thenReturn(patientDtos);
-        MCIMultiResponse mciMultiResponse = new MCIMultiResponse<>(patientDtos, additionalInfo, OK);
+        when(patientService.findAllByQuery(searchQuery)).thenReturn(patients);
+        MCIMultiResponse mciMultiResponse = new MCIMultiResponse<>(patients, additionalInfo, OK);
 
         mockMvc.perform(get(API_END_POINT + "?" + queryString))
                 .andExpect(request().asyncResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject)));
@@ -231,15 +231,15 @@ public class PatientControllerTest {
 
     @Test
     public void shouldUpdatePatientAndReturnHealthId() throws Exception {
-        String json = new ObjectMapper().writeValueAsString(patientDto);
+        String json = new ObjectMapper().writeValueAsString(patient2);
         String healthId = "healthId-100";
         MCIResponse mciResponse = new MCIResponse(healthId, ACCEPTED);
         when(locationService.findByGeoCode(GEO_CODE)).thenReturn(new PreResolvedListenableFuture<>(location));
-        when(patientService.update(patientDto, healthId)).thenReturn(mciResponse);
+        when(patientService.update(patient2, healthId)).thenReturn(mciResponse);
 
         mockMvc.perform(put(PUT_API_END_POINT, healthId).content(json).contentType(APPLICATION_JSON))
                 .andExpect(request().asyncResult(new ResponseEntity<>(mciResponse, ACCEPTED)));
-        verify(patientService).update(patientDto, healthId);
+        verify(patientService).update(patient2, healthId);
 
     }
 
@@ -248,8 +248,8 @@ public class PatientControllerTest {
         StringBuilder stringBuilder = new StringBuilder(200);
         String address = location.getDivisionId() + location.getDistrictId() + location.getUpazillaId();
         searchQuery.setPresent_address(address);
-        searchQuery.setSur_name(patientMapper.getSurName());
-        stringBuilder.append("sur_name=" + patientMapper.getSurName());
+        searchQuery.setSur_name(patient1.getSurName());
+        stringBuilder.append("sur_name=" + patient1.getSurName());
         stringBuilder.append("&present_address=" + address);
 
         assertFindAllBy(searchQuery, stringBuilder.toString());
@@ -260,8 +260,8 @@ public class PatientControllerTest {
         StringBuilder stringBuilder = new StringBuilder(200);
         String address = location.getDivisionId() + location.getDistrictId() + location.getUpazillaId();
         searchQuery.setPresent_address(address);
-        searchQuery.setGiven_name(patientMapper.getGivenName());
-        stringBuilder.append("given_name=" + patientMapper.getGivenName());
+        searchQuery.setGiven_name(patient1.getGivenName());
+        stringBuilder.append("given_name=" + patient1.getGivenName());
         stringBuilder.append("&present_address=" + address);
 
         assertFindAllBy(searchQuery, stringBuilder.toString());
@@ -274,12 +274,12 @@ public class PatientControllerTest {
         String address = location.getDivisionId() + location.getDistrictId() + location.getUpazillaId();
         searchQuery.setPresent_address(address);
         stringBuilder.append("present_address=" + address);
-        stringBuilder.append("&sur_name=" + patientMapper.getSurName());
-        searchQuery.setSur_name(patientMapper.getSurName());
+        stringBuilder.append("&sur_name=" + patient1.getSurName());
+        searchQuery.setSur_name(patient1.getSurName());
 
-        patientDtos.add(patientDto);
-        patientDtos.add(patientDto);
-        patientDtos.add(patientDto);
+        patients.add(patient2);
+        patients.add(patient2);
+        patients.add(patient2);
         maxLimit = 4;
 
         assertFindAllBy(searchQuery, stringBuilder.toString());
@@ -292,20 +292,20 @@ public class PatientControllerTest {
     public void shouldNotUpdatePatient_FieldsMarkedForApproval() throws Exception {
 
         String healthId = "healthId-100";
-        patientDto.setHealthId(healthId);
+        patient2.setHealthId(healthId);
 
-        PatientMapper patientDtoUpdated = createPatientDto();
-        patientDtoUpdated.setGivenName("Bulla");
-        patientDtoUpdated.setGender("F");
-        patientDtoUpdated.setDateOfBirth("2000-02-10");
-        patientDtoUpdated.setHealthId(healthId);
-        String json = new ObjectMapper().writeValueAsString(patientDtoUpdated);
-        PatientMapper patientDtoModified = createPatientDto();
-        patientDtoModified.setGivenName("Bulla");
+        PatientData patientUpdated = buildPatientData();
+        patientUpdated.setGivenName("Bulla");
+        patientUpdated.setGender("F");
+        patientUpdated.setDateOfBirth("2000-02-10");
+        patientUpdated.setHealthId(healthId);
+        String json = new ObjectMapper().writeValueAsString(patientUpdated);
+        PatientData patientModified = buildPatientData();
+        patientModified.setGivenName("Bulla");
 
-        when(patientService.findByHealthId(healthId)).thenReturn(patientDtoModified);
-        when(patientRepository.findByHealthId(healthId)).thenReturn(patientDto);
-        when(patientService.update(patientDtoUpdated, healthId)).thenReturn(new MCIResponse(healthId, ACCEPTED));
+        when(patientService.findByHealthId(healthId)).thenReturn(patientModified);
+        when(patientRepository.findByHealthId(healthId)).thenReturn(patient2);
+        when(patientService.update(patientUpdated, healthId)).thenReturn(new MCIResponse(healthId, ACCEPTED));
 
         mockMvc.perform(put(PUT_API_END_POINT, healthId).content(json).contentType(APPLICATION_JSON))
                 .andExpect(status().isAccepted());
@@ -317,19 +317,19 @@ public class PatientControllerTest {
                 .andExpect(jsonPath("$.sur_name", is("Tiger")))
                 .andExpect(jsonPath("$.date_of_birth", is("2014-12-01")))
                 .andExpect(jsonPath("$.present_address.address_line", is("house-10")));
-        verify(patientService).update(patientDtoUpdated, healthId);
+        verify(patientService).update(patientUpdated, healthId);
         verify(patientService).findByHealthId(healthId);
 
     }
 
-    private PatientMapper createPatientDto() throws ParseException {
-        patientDto = new PatientMapper();
-        patientDto.setNationalId(nationalId);
-        patientDto.setBirthRegistrationNumber(birthRegistrationNumber);
-        patientDto.setGivenName("Scott");
-        patientDto.setSurName("Tiger");
-        patientDto.setGender("M");
-        patientDto.setDateOfBirth("2014-12-01");
+    private PatientData buildPatientData() throws ParseException {
+        patient2 = new PatientData();
+        patient2.setNationalId(nationalId);
+        patient2.setBirthRegistrationNumber(birthRegistrationNumber);
+        patient2.setGivenName("Scott");
+        patient2.setSurName("Tiger");
+        patient2.setGender("M");
+        patient2.setDateOfBirth("2014-12-01");
 
         Address address = new Address();
         address.setAddressLine("house-10");
@@ -341,7 +341,7 @@ public class PatientControllerTest {
         address.setWardId("01");
         address.setCountryCode("050");
 
-        patientDto.setAddress(address);
+        patient2.setAddress(address);
 
         location = new Location();
 
@@ -351,7 +351,7 @@ public class PatientControllerTest {
         location.setUpazillaId("09");
         location.setPaurashavaId("20");
         location.setUnionId("01");
-        return patientDto;
+        return patient2;
     }
 }
 

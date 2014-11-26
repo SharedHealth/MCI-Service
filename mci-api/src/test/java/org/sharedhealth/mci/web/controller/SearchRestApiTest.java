@@ -11,7 +11,7 @@ import org.sharedhealth.mci.web.config.EnvironmentMock;
 import org.sharedhealth.mci.web.config.WebMvcConfig;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.mapper.Address;
-import org.sharedhealth.mci.web.mapper.PatientMapper;
+import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
 import org.sharedhealth.mci.web.service.LocationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,22 +47,22 @@ public class SearchRestApiTest extends BaseControllerTest {
         MockitoAnnotations.initMocks(this);
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
-        patientMapper = new PatientMapper();
-        patientMapper.setGivenName("Raju");
-        patientMapper.setSurName("Mazumder");
-        patientMapper.setGender("M");
-        patientMapper.setDateOfBirth("2014-12-01");
-        patientMapper.setEducationLevel("01");
-        patientMapper.setOccupation("02");
-        patientMapper.setMaritalStatus("1");
+        patientData = new PatientData();
+        patientData.setGivenName("Raju");
+        patientData.setSurName("Mazumder");
+        patientData.setGender("M");
+        patientData.setDateOfBirth("2014-12-01");
+        patientData.setEducationLevel("01");
+        patientData.setOccupation("02");
+        patientData.setMaritalStatus("1");
         PhoneNumber phoneNumber = new PhoneNumber();
         phoneNumber.setNumber("1716528608");
         phoneNumber.setCountryCode("880");
         phoneNumber.setExtension("02");
         phoneNumber.setAreaCode("01");
 
-        patientMapper.setPhoneNumber(phoneNumber);
-        patientMapper.setPrimaryContactNumber(phoneNumber);
+        patientData.setPhoneNumber(phoneNumber);
+        patientData.setPrimaryContactNumber(phoneNumber);
 
         Address address = new Address();
         address.setAddressLine("house-12");
@@ -74,12 +74,12 @@ public class SearchRestApiTest extends BaseControllerTest {
         address.setWardId("01");
         address.setCountryCode("050");
 
-        patientMapper.setAddress(address);
+        patientData.setAddress(address);
     }
 
     @Test
     public void shouldReturnBadRequestIfOnlySurNameGiven() throws Exception {
-        String json = new ObjectMapper().writeValueAsString(patientMapper);
+        String json = new ObjectMapper().writeValueAsString(patientData);
 
         MvcResult result = mockMvc.perform(get(API_END_POINT + "?sur_name=Mazumder").accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
@@ -89,7 +89,7 @@ public class SearchRestApiTest extends BaseControllerTest {
 
     @Test
     public void shouldReturnBadRequestIfOnlyGivenNameGiven() throws Exception {
-        String json = new ObjectMapper().writeValueAsString(patientMapper);
+        String json = new ObjectMapper().writeValueAsString(patientData);
 
         MvcResult result = mockMvc.perform(get(API_END_POINT + "?given_name=Mazumder").accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
@@ -99,9 +99,9 @@ public class SearchRestApiTest extends BaseControllerTest {
 
     @Test
     public void shouldReturnOkResponseIfPatientNotExistWithGivenNameAndAddress() throws Exception {
-        String json = new ObjectMapper().writeValueAsString(patientMapper);
-        String present_address = patientMapper.getAddress().getDivisionId() +
-                patientMapper.getAddress().getDistrictId() + patientMapper.getAddress().getUpazillaId();
+        String json = new ObjectMapper().writeValueAsString(patientData);
+        String present_address = patientData.getAddress().getDivisionId() +
+                patientData.getAddress().getDistrictId() + patientData.getAddress().getUpazillaId();
         String givenName = "Rajus";
         MvcResult result = mockMvc.perform(get(API_END_POINT + "?given_name=" + givenName + "&present_address=" + present_address).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -115,7 +115,7 @@ public class SearchRestApiTest extends BaseControllerTest {
     public void shouldReturnPatientIfGivenNameAndAddressMatchWithAnyPatient() throws Exception {
         String json = asString("jsons/patient/full_payload.json");
 
-        PatientMapper original = getPatientObjectFromString(json);
+        PatientData original = getPatientObjectFromString(json);
 
         MvcResult result = createPatient(json);
         String present_address = original.getAddress().getDivisionId() +
@@ -126,7 +126,7 @@ public class SearchRestApiTest extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
         final MCIMultiResponse body = getMciMultiResponse(searchResult);
-        PatientMapper patient = getPatientObjectFromString(mapper.writeValueAsString(body.getResults().get(0)));
+        PatientData patient = getPatientObjectFromString(mapper.writeValueAsString(body.getResults().get(0)));
 
         assertPatientEquals(original, patient);
     }
@@ -136,7 +136,7 @@ public class SearchRestApiTest extends BaseControllerTest {
 
         String json = asString("jsons/patient/full_payload.json");
 
-        PatientMapper original = getPatientObjectFromString(json);
+        PatientData original = getPatientObjectFromString(json);
 
         MvcResult result = createPatient(json);
         String present_address = original.getAddress().getDivisionId() +
@@ -148,20 +148,20 @@ public class SearchRestApiTest extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
         final MCIMultiResponse body = getMciMultiResponse(searchResult);
-        PatientMapper patient = getPatientObjectFromString(mapper.writeValueAsString(body.getResults().get(0)));
+        PatientData patient = getPatientObjectFromString(mapper.writeValueAsString(body.getResults().get(0)));
 
         assertPatientEquals(original, patient);
     }
 
     @Test
     public void shouldReturnPatientWithAdditionalNoteWhenSearchFindMorePatient() throws Exception {
-        String json = new ObjectMapper().writeValueAsString(patientMapper);
+        String json = new ObjectMapper().writeValueAsString(patientData);
 
         for (int x = 0; x <= PER_PAGE_MAXIMUM_LIMIT; x++) {
             createPatient(json);
         }
-        String present_address = patientMapper.getAddress().getDivisionId() +
-                patientMapper.getAddress().getDistrictId() + patientMapper.getAddress().getUpazillaId();
+        String present_address = patientData.getAddress().getDivisionId() +
+                patientData.getAddress().getDistrictId() + patientData.getAddress().getUpazillaId();
         String givenName = "raju";
         String surName = "mazumder";
         MvcResult result = mockMvc.perform(get(API_END_POINT + "?given_name=" + givenName +
@@ -176,7 +176,7 @@ public class SearchRestApiTest extends BaseControllerTest {
 
     @Test
     public void shouldReturnBadRequestIfOnlyExtensionOrCountryCodeOrAreaCodeGiven() throws Exception {
-        String json = new ObjectMapper().writeValueAsString(patientMapper);
+        String json = new ObjectMapper().writeValueAsString(patientData);
 
         MvcResult result = mockMvc.perform(get(API_END_POINT +
                 "?country_code=880&area_code=02&extension=122").accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
@@ -187,7 +187,7 @@ public class SearchRestApiTest extends BaseControllerTest {
 
     @Test
     public void shouldReturnBadRequestIfPresentAddressNotGivenWithPhoneNumber() throws Exception {
-        String json = new ObjectMapper().writeValueAsString(patientMapper);
+        String json = new ObjectMapper().writeValueAsString(patientData);
 
         MvcResult result = mockMvc.perform(get(API_END_POINT +
                 "?phone_number=1716528608").accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
@@ -198,7 +198,7 @@ public class SearchRestApiTest extends BaseControllerTest {
 
     @Test
     public void shouldReturnBadRequestIfOnlyCountryCodeGiven() throws Exception {
-        String json = new ObjectMapper().writeValueAsString(patientMapper);
+        String json = new ObjectMapper().writeValueAsString(patientData);
 
         MvcResult result = mockMvc.perform(get(API_END_POINT +
                 "?country_code=880").accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
@@ -209,10 +209,10 @@ public class SearchRestApiTest extends BaseControllerTest {
 
     @Test
     public void shouldReturnOkResponseIfPatientNotExistWithPhoneNumber() throws Exception {
-        patientMapper.setHealthId("health-100");
-        String json = new ObjectMapper().writeValueAsString(patientMapper);
-        String present_address = patientMapper.getAddress().getDivisionId() +
-                patientMapper.getAddress().getDistrictId() + patientMapper.getAddress().getUpazillaId();
+        patientData.setHealthId("health-100");
+        String json = new ObjectMapper().writeValueAsString(patientData);
+        String present_address = patientData.getAddress().getDivisionId() +
+                patientData.getAddress().getDistrictId() + patientData.getAddress().getUpazillaId();
         MvcResult result = mockMvc.perform(get(API_END_POINT +
                 "?phone_no=123456&country_code=880&present_address=" + present_address).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -224,9 +224,9 @@ public class SearchRestApiTest extends BaseControllerTest {
 
     @Test
     public void shouldReturnAllTheCreatedPatientIfPhoneNumberMatchBySearch() throws Exception {
-        String json = new ObjectMapper().writeValueAsString(patientMapper);
-        String present_address = patientMapper.getAddress().getDivisionId() +
-                patientMapper.getAddress().getDistrictId() + patientMapper.getAddress().getUpazillaId();
+        String json = new ObjectMapper().writeValueAsString(patientData);
+        String present_address = patientData.getAddress().getDivisionId() +
+                patientData.getAddress().getDistrictId() + patientData.getAddress().getUpazillaId();
         createPatient(json);
         createPatient(json);
         createPatient(json);
@@ -237,8 +237,8 @@ public class SearchRestApiTest extends BaseControllerTest {
                 .andReturn();
 
         final MCIMultiResponse body = getMciMultiResponse(result);
-        PatientMapper patientMapper1 = (PatientMapper) body.getResults().get(0);
-        Assert.assertEquals("1716528608", patientMapper1.getPhoneNumber().getNumber());
+        PatientData patientData1 = (PatientData) body.getResults().get(0);
+        Assert.assertEquals("1716528608", patientData1.getPhoneNumber().getNumber());
         Assert.assertEquals(200, body.getHttpStatus());
     }
 }

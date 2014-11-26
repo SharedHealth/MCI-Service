@@ -7,7 +7,7 @@ import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.mapper.PaginationQuery;
-import org.sharedhealth.mci.web.mapper.PatientMapper;
+import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.SearchQuery;
 import org.sharedhealth.mci.web.service.PatientService;
 import org.slf4j.Logger;
@@ -45,7 +45,7 @@ public class PatientController {
     @RequestMapping(method = RequestMethod.POST, consumes = {APPLICATION_JSON_VALUE})
     public DeferredResult<ResponseEntity<MCIResponse>> create(
             @RequestBody @Validated({RequiredGroup.class, Default.class})
-            PatientMapper patientDto,
+            PatientData patient,
             BindingResult bindingResult) {
 
         logger.debug("Trying to create patient.");
@@ -55,17 +55,17 @@ public class PatientController {
             throw new ValidationException(bindingResult);
         }
 
-        MCIResponse mciResponse = patientService.create(patientDto);
+        MCIResponse mciResponse = patientService.create(patient);
         deferredResult.setResult(new ResponseEntity<>(mciResponse, mciResponse.httpStatusObject));
         return deferredResult;
     }
 
     @RequestMapping(value = "/{healthId}", method = RequestMethod.GET)
-    public DeferredResult<ResponseEntity<PatientMapper>> findByHealthId(@PathVariable String healthId) {
+    public DeferredResult<ResponseEntity<PatientData>> findByHealthId(@PathVariable String healthId) {
         logger.debug("Trying to find patient by health id [" + healthId + "]");
-        final DeferredResult<ResponseEntity<PatientMapper>> deferredResult = new DeferredResult<>();
+        final DeferredResult<ResponseEntity<PatientData>> deferredResult = new DeferredResult<>();
 
-        PatientMapper result = patientService.findByHealthId(healthId);
+        PatientData result = patientService.findByHealthId(healthId);
         deferredResult.setResult(new ResponseEntity<>(result, OK));
         return deferredResult;
     }
@@ -91,7 +91,7 @@ public class PatientController {
         final String note = patientService.getPerPageMaximumLimitNote();
         searchQuery.setMaximum_limit(limit);
 
-        List<PatientMapper> results = patientService.findAllByQuery(searchQuery);
+        List<PatientData> results = patientService.findAllByQuery(searchQuery);
         HashMap<String, String> additionalInfo = new HashMap<>();
         if (results.size() > limit) {
             results.remove(limit);
@@ -106,7 +106,7 @@ public class PatientController {
     @RequestMapping(method = RequestMethod.PUT, value = "/{healthId}", consumes = {APPLICATION_JSON_VALUE})
     public DeferredResult<ResponseEntity<MCIResponse>> update(
             @PathVariable String healthId,
-            @Validated({RequiredOnUpdateGroup.class, Default.class}) @RequestBody PatientMapper patientDto,
+            @Validated({RequiredOnUpdateGroup.class, Default.class}) @RequestBody PatientData patient,
             BindingResult bindingResult) {
 
         logger.debug(" Health id [" + healthId + "]");
@@ -116,7 +116,7 @@ public class PatientController {
             throw new ValidationException(bindingResult);
         }
 
-        MCIResponse mciResponse = patientService.update(patientDto, healthId);
+        MCIResponse mciResponse = patientService.update(patient, healthId);
         deferredResult.setResult(new ResponseEntity<>(mciResponse, mciResponse.httpStatusObject));
         return deferredResult;
     }
@@ -134,9 +134,9 @@ public class PatientController {
         logger.debug("Find all patients  for catchment of facility [" + facilityId + "]");
         final DeferredResult<ResponseEntity<MCIMultiResponse>> deferredResult = new DeferredResult<>();
 
-        patientService.findAllByFacility(facilityId, paginationQuery.getLast(), paginationQuery.getDateSince()).addCallback(new ListenableFutureCallback<List<PatientMapper>>() {
+        patientService.findAllByFacility(facilityId, paginationQuery.getLast(), paginationQuery.getDateSince()).addCallback(new ListenableFutureCallback<List<PatientData>>() {
             @Override
-            public void onSuccess(List<PatientMapper> results) {
+            public void onSuccess(List<PatientData> results) {
                 HashMap<String, String> additionalInfo = null;
                 MCIMultiResponse mciMultiResponse = new MCIMultiResponse<>(results, additionalInfo, OK);
                 deferredResult.setResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject));

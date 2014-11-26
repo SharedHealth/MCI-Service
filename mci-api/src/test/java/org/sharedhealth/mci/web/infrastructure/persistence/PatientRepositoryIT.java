@@ -11,7 +11,7 @@ import org.sharedhealth.mci.web.exception.HealthIDExistException;
 import org.sharedhealth.mci.web.exception.PatientNotFoundException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.mapper.Address;
-import org.sharedhealth.mci.web.mapper.PatientMapper;
+import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -41,7 +41,7 @@ public class PatientRepositoryIT {
     @Autowired
     private PatientRepository patientRepository;
 
-    private PatientMapper patientDto;
+    private PatientData data;
     private String nationalId = "1234567890123";
     private String birthRegistrationNumber = "12345678901234567";
     private String uid = "12345678901";
@@ -54,12 +54,12 @@ public class PatientRepositoryIT {
 
     @Before
     public void setup() throws ExecutionException, InterruptedException {
-        patientDto = createPatient();
+        data = createPatient();
     }
 
     @Test
     public void shouldCreatePatientAndMappings() {
-        String id = patientRepository.create(patientDto).getId();
+        String id = patientRepository.create(data).getId();
         assertNotNull(id);
 
         String healthId = cassandraOperations.queryForObject(buildFindByNidQuery(nationalId), String.class);
@@ -81,13 +81,13 @@ public class PatientRepositoryIT {
 
     @Test
     public void shouldFindPatientWithMatchingGeneratedHealthId() throws ExecutionException, InterruptedException {
-        MCIResponse mciResponse = patientRepository.create(patientDto);
-        PatientMapper p = patientRepository.findByHealthId(mciResponse.id);
+        MCIResponse mciResponse = patientRepository.create(data);
+        PatientData p = patientRepository.findByHealthId(mciResponse.id);
         assertNotNull(p);
-        patientDto.setHealthId(mciResponse.id);
-        patientDto.setCreatedAt(p.getCreatedAt());
-        patientDto.setUpdatedAt(p.getUpdatedAt());
-        assertEquals(patientDto, p);
+        data.setHealthId(mciResponse.id);
+        data.setCreatedAt(p.getCreatedAt());
+        data.setUpdatedAt(p.getUpdatedAt());
+        assertEquals(data, p);
     }
 
     @Test(expected = PatientNotFoundException.class)
@@ -97,49 +97,49 @@ public class PatientRepositoryIT {
 
     @Test(expected = HealthIDExistException.class)
     public void shouldThrowException_IfHealthIdProvidedForCreate() throws ExecutionException, InterruptedException {
-        patientDto.setHealthId("12");
-        patientRepository.create(patientDto);
+        data.setHealthId("12");
+        patientRepository.create(data);
     }
 
     @Test
     public void shouldReturnAccepted_IfPatientExistWithProvidedTwoIdFieldsOnCreate() throws ExecutionException, InterruptedException {
-        patientRepository.create(patientDto);
-        patientDto.setHealthId(null);
-        MCIResponse mciResponse = patientRepository.create(patientDto);
+        patientRepository.create(data);
+        data.setHealthId(null);
+        MCIResponse mciResponse = patientRepository.create(data);
         assertEquals(mciResponse.getHttpStatus(), ACCEPTED.value());
     }
 
     @Test(expected = PatientNotFoundException.class)
     public void shouldThrowErrorIfPatientNotFound() throws Exception {
-        patientRepository.update(new PatientMapper(), "1");
+        patientRepository.update(new PatientData(), "1");
     }
 
     @Test
     public void shouldUpdatePatient() throws Exception {
-        PatientMapper patientDto = createPatient();
-        MCIResponse mciResponseForCreate = patientRepository.create(patientDto);
+        PatientData data = createPatient();
+        MCIResponse mciResponseForCreate = patientRepository.create(data);
         assertEquals(201, mciResponseForCreate.getHttpStatus());
         String healthId = mciResponseForCreate.getId();
-        patientDto.setHealthId(healthId);
-        patientDto.setGivenName("Danny");
-        MCIResponse mciResponseForUpdate = patientRepository.update(patientDto, patientDto.getHealthId());
+        data.setHealthId(healthId);
+        data.setGivenName("Danny");
+        MCIResponse mciResponseForUpdate = patientRepository.update(data, data.getHealthId());
         assertEquals(202, mciResponseForUpdate.getHttpStatus());
-        PatientMapper savedPatient = patientRepository.findByHealthId(healthId);
-        assertPatient(savedPatient, patientDto);
+        PatientData savedPatient = patientRepository.findByHealthId(healthId);
+        assertPatient(savedPatient, data);
     }
 
     @Test
     public void shouldNotUpdateFieldsThatNeedApprovalPatient() throws Exception {
-        PatientMapper patientDto = createPatient();
-        MCIResponse mciResponseForCreate = patientRepository.create(patientDto);
+        PatientData data = createPatient();
+        MCIResponse mciResponseForCreate = patientRepository.create(data);
         assertEquals(201, mciResponseForCreate.getHttpStatus());
         String healthId = mciResponseForCreate.getId();
-        patientDto.setHealthId(healthId);
+        data.setHealthId(healthId);
 
-        patientDto.setGender("F");
-        MCIResponse mciResponseForUpdate = patientRepository.update(patientDto, patientDto.getHealthId());
+        data.setGender("F");
+        MCIResponse mciResponseForUpdate = patientRepository.update(data, data.getHealthId());
         assertEquals(202, mciResponseForUpdate.getHttpStatus());
-        PatientMapper savedPatient = patientRepository.findByHealthId(healthId);
+        PatientData savedPatient = patientRepository.findByHealthId(healthId);
         assertEquals("M", savedPatient.getGender());
     }
 
@@ -154,62 +154,62 @@ public class PatientRepositoryIT {
     }
 
     private void assertPatientsFoundByCatchment(String location, int expectedRecordCount) throws InterruptedException, ExecutionException {
-        List<PatientMapper> patients;
+        List<PatientData> patients;
         patients = patientRepository.findAllByLocation(location, null, 0, null).get();
         assertEquals(expectedRecordCount, patients.size());
     }
 
     private void generatePatientSet() throws Exception {
         String json = asString("jsons/patient/required_only_payload.json");
-        PatientMapper patientMapper = new ObjectMapper().readValue(json, PatientMapper.class);
-        createMultiplePatients(patientMapper, 10);
-        patientMapper.setAddress(createAddress("10", "04", "09", "20", "01"));
-        createMultiplePatients(patientMapper, 5);
+        PatientData patientData = new ObjectMapper().readValue(json, PatientData.class);
+        createMultiplePatients(patientData, 10);
+        patientData.setAddress(createAddress("10", "04", "09", "20", "01"));
+        createMultiplePatients(patientData, 5);
     }
 
-    private void createMultiplePatients(PatientMapper patientDto, int n) throws Exception {
+    private void createMultiplePatients(PatientData data, int n) throws Exception {
         for (int x = 0; x < n; x++) {
-            patientRepository.create(patientDto);
-            patientDto.setHealthId(null);
+            patientRepository.create(data);
+            data.setHealthId(null);
         }
     }
 
-    private void assertPatient(PatientMapper savedPatient, PatientMapper patientDto) {
-        assertEquals(patientDto.getHealthId(), savedPatient.getHealthId());
-        assertEquals(patientDto.getDateOfBirth(), savedPatient.getDateOfBirth());
-        assertEquals(patientDto.getGender(), savedPatient.getGender());
-        assertEquals(patientDto.getNationalId(), savedPatient.getNationalId());
-        assertEquals(patientDto.getBirthRegistrationNumber(), savedPatient.getBirthRegistrationNumber());
-        assertTrue(patientDto.getAddress().equals(savedPatient.getAddress()));
-        assertEquals(patientDto.getPermanentAddress(), savedPatient.getPermanentAddress());
-        assertEquals(patientDto.getUid(), savedPatient.getUid());
-        assertEquals(patientDto.getGivenName(), savedPatient.getGivenName());
-        assertEquals(patientDto.getSurName(), savedPatient.getSurName());
-        assertEquals(patientDto.getOccupation(), savedPatient.getOccupation());
-        assertEquals(patientDto.getEducationLevel(), savedPatient.getEducationLevel());
+    private void assertPatient(PatientData savedPatient, PatientData data) {
+        assertEquals(data.getHealthId(), savedPatient.getHealthId());
+        assertEquals(data.getDateOfBirth(), savedPatient.getDateOfBirth());
+        assertEquals(data.getGender(), savedPatient.getGender());
+        assertEquals(data.getNationalId(), savedPatient.getNationalId());
+        assertEquals(data.getBirthRegistrationNumber(), savedPatient.getBirthRegistrationNumber());
+        assertTrue(data.getAddress().equals(savedPatient.getAddress()));
+        assertEquals(data.getPermanentAddress(), savedPatient.getPermanentAddress());
+        assertEquals(data.getUid(), savedPatient.getUid());
+        assertEquals(data.getGivenName(), savedPatient.getGivenName());
+        assertEquals(data.getSurName(), savedPatient.getSurName());
+        assertEquals(data.getOccupation(), savedPatient.getOccupation());
+        assertEquals(data.getEducationLevel(), savedPatient.getEducationLevel());
         assertNotNull(savedPatient.getUpdatedAt());
         assertNotNull(savedPatient.getCreatedAt());
     }
 
-    private PatientMapper createPatient() {
-        PatientMapper patientDto1 = new PatientMapper();
-        patientDto1.setNationalId(nationalId);
-        patientDto1.setBirthRegistrationNumber(birthRegistrationNumber);
-        patientDto1.setUid(uid);
-        patientDto1.setGivenName(givenName);
-        patientDto1.setSurName(surname);
-        patientDto1.setDateOfBirth("2014-12-01");
-        patientDto1.setGender("M");
-        patientDto1.setOccupation("salaried");
-        patientDto1.setEducationLevel("BA");
+    private PatientData createPatient() {
+        PatientData data = new PatientData();
+        data.setNationalId(nationalId);
+        data.setBirthRegistrationNumber(birthRegistrationNumber);
+        data.setUid(uid);
+        data.setGivenName(givenName);
+        data.setSurName(surname);
+        data.setDateOfBirth("2014-12-01");
+        data.setGender("M");
+        data.setOccupation("salaried");
+        data.setEducationLevel("BA");
         PhoneNumber phone = new PhoneNumber();
         phone.setNumber(phoneNumber);
-        patientDto1.setPhoneNumber(phone);
+        data.setPhoneNumber(phone);
 
         Address address = createAddress(divisionId, districtId, upazilaId, "20", "01");
-        patientDto1.setAddress(address);
+        data.setAddress(address);
 
-        return patientDto1;
+        return data;
     }
 
     private Address createAddress(String division, String district, String upazilla, String cityCorp, String ward) {

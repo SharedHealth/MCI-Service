@@ -10,7 +10,7 @@ import org.junit.runner.RunWith;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
 import org.sharedhealth.mci.web.config.WebMvcConfigTest;
 import org.sharedhealth.mci.web.mapper.Address;
-import org.sharedhealth.mci.web.mapper.PatientMapper;
+import org.sharedhealth.mci.web.mapper.PatientData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -43,14 +43,14 @@ public class LocationValidatorTest {
 
     @Test
     public void shouldPassForValidAddress() throws Exception {
-        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "address", address);
+        Set<ConstraintViolation<PatientData>> constraintViolations = validator.validateValue(PatientData.class, "address", address);
         assertEquals(0, constraintViolations.size());
     }
 
     @Test
     public void shouldFailForInvalidAddress() throws Exception {
         address.setDivisionId("00");
-        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "address", address);
+        Set<ConstraintViolation<PatientData>> constraintViolations = validator.validateValue(PatientData.class, "address", address);
         assertEquals(1, constraintViolations.size());
         assertEquals("1004", constraintViolations.iterator().next().getMessage());
     }
@@ -58,7 +58,7 @@ public class LocationValidatorTest {
     @Test
     public void shouldFailForInvalidCountryForPresentAddress() throws Exception {
         address.setCountryCode("051");
-        Set<ConstraintViolation<PatientMapper>> constraintViolations = validator.validateValue(PatientMapper.class, "address", address);
+        Set<ConstraintViolation<PatientData>> constraintViolations = validator.validateValue(PatientData.class, "address", address);
         assertEquals(1, constraintViolations.size());
         assertEquals("1004", constraintViolations.iterator().next().getMessage());
     }

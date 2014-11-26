@@ -4,7 +4,7 @@ package org.sharedhealth.mci.web.service;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.infrastructure.fr.FacilityRegistryWrapper;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
-import org.sharedhealth.mci.web.mapper.PatientMapper;
+import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.SearchQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -31,27 +31,27 @@ public class PatientService {
         this.settingService = settingService;
     }
 
-    public MCIResponse create(PatientMapper patientDto) {
-        return patientRepository.create(patientDto);
+    public MCIResponse create(PatientData patient) {
+        return patientRepository.create(patient);
     }
 
-    public MCIResponse update(PatientMapper patientDto, String healthId) {
-        return patientRepository.update(patientDto, healthId);
+    public MCIResponse update(PatientData patient, String healthId) {
+        return patientRepository.update(patient, healthId);
     }
 
-    public PatientMapper findByHealthId(String healthId) {
+    public PatientData findByHealthId(String healthId) {
         return patientRepository.findByHealthId(healthId);
     }
 
-    public List<PatientMapper> findAllByQuery(SearchQuery searchQuery) {
+    public List<PatientData> findAllByQuery(SearchQuery searchQuery) {
         return patientRepository.findAllByQuery(searchQuery);
     }
 
-    public ListenableFuture<List<PatientMapper>> findAllByLocations(List<String> locations, String last, Date since) {
+    public ListenableFuture<List<PatientData>> findAllByLocations(List<String> locations, String last, Date since) {
         return patientRepository.findAllByLocations(locations, last, since);
     }
 
-    public ListenableFuture<List<PatientMapper>> findAllByFacility(String facilityId, String last, Date since) {
+    public ListenableFuture<List<PatientData>> findAllByFacility(String facilityId, String last, Date since) {
 
         List<String> locations = facilityRegistryWrapper.getCatchmentAreasByFacility(facilityId);
 

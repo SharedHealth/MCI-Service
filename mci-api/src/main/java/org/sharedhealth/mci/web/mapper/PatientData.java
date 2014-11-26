@@ -23,7 +23,7 @@ import static org.sharedhealth.mci.web.utils.PatientFieldProperties.*;
 
 @MaritalRelation(message = "1005", field = "maritalStatus")
 @JsonIgnoreProperties({"created_at"})
-public class PatientMapper {
+public class PatientData {
 
     @JsonProperty(HID)
     private String healthId;
@@ -379,18 +379,18 @@ public class PatientMapper {
         return null;
     }
 
-    public boolean isSimilarTo(PatientMapper patientDto) {
+    public boolean isSimilarTo(PatientData patient) {
         int matches = 0;
 
-        if (this.getNationalId() != null && this.getNationalId().equals(patientDto.getNationalId())) {
+        if (this.getNationalId() != null && this.getNationalId().equals(patient.getNationalId())) {
             matches++;
         }
 
-        if (this.getBirthRegistrationNumber() != null && this.getBirthRegistrationNumber().equals(patientDto.getBirthRegistrationNumber())) {
+        if (this.getBirthRegistrationNumber() != null && this.getBirthRegistrationNumber().equals(patient.getBirthRegistrationNumber())) {
             matches++;
         }
 
-        if (this.getUid() != null && this.getUid().equals(patientDto.getUid())) {
+        if (this.getUid() != null && this.getUid().equals(patient.getUid())) {
             matches++;
         }
 

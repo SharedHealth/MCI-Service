@@ -9,7 +9,7 @@ public class PatientMapperTest {
 
     @Test
     public void shouldReturnFalseWhenNoIdPresent() {
-        PatientMapper mapper = new PatientMapper();
+        PatientData mapper = new PatientData();
         mapper.setNationalId("   ");
         mapper.setBirthRegistrationNumber("");
         mapper.setUid(null);
@@ -18,7 +18,7 @@ public class PatientMapperTest {
 
     @Test
     public void shouldReturnFalseWhenSingleIdPresent() {
-        PatientMapper mapper = new PatientMapper();
+        PatientData mapper = new PatientData();
         mapper.setNationalId("100");
         mapper.setBirthRegistrationNumber("");
         mapper.setUid(null);
@@ -27,7 +27,7 @@ public class PatientMapperTest {
 
     @Test
     public void shouldReturnTrueWhenNidAndBrnPresent() {
-        PatientMapper mapper = new PatientMapper();
+        PatientData mapper = new PatientData();
         mapper.setNationalId("100");
         mapper.setBirthRegistrationNumber("200");
         mapper.setUid(null);
@@ -36,7 +36,7 @@ public class PatientMapperTest {
 
     @Test
     public void shouldReturnTrueWhenNidAndUidPresent() {
-        PatientMapper mapper = new PatientMapper();
+        PatientData mapper = new PatientData();
         mapper.setNationalId("100");
         mapper.setBirthRegistrationNumber(null);
         mapper.setUid("300");
@@ -45,7 +45,7 @@ public class PatientMapperTest {
 
     @Test
     public void shouldReturnTrueWhenBrnAndUidPresent() {
-        PatientMapper mapper = new PatientMapper();
+        PatientData mapper = new PatientData();
         mapper.setNationalId(null);
         mapper.setBirthRegistrationNumber("200");
         mapper.setUid("300");

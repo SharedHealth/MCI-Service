@@ -2,7 +2,7 @@ package org.sharedhealth.mci.web.handler;
 
 import org.sharedhealth.mci.web.infrastructure.persistence.Approval;
 import org.sharedhealth.mci.web.mapper.Address;
-import org.sharedhealth.mci.web.mapper.PatientMapper;
+import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
 
 import java.util.Date;
@@ -17,62 +17,62 @@ public class PatientFilter {
     private static final String NEEDS_APPROVAL = "NA";
     private static final String NON_UPDATEABLE = "NU";
     private Properties properties;
-    private PatientMapper existingPatient;
-    private PatientMapper patientToBeUpdated;
-    private PatientMapper patientDto;
+    private PatientData existingPatient;
+    private PatientData patientToBeUpdated;
+    private PatientData patient;
 
-    public PatientFilter(Properties properties, PatientMapper existingPatient, PatientMapper patientToBeUpdated, PatientMapper patientDto) {
+    public PatientFilter(Properties properties, PatientData existingPatient, PatientData patientToBeUpdated, PatientData patient) {
         this.properties = properties;
         this.existingPatient = existingPatient;
         this.patientToBeUpdated = patientToBeUpdated;
-        this.patientDto = patientDto;
+        this.patient = patient;
     }
 
     public Approval filter() {
-        Map<String, String> filteredFeildMap = filterFeilds(patientDto);
+        Map<String, String> filteredFeildMap = filterFeilds(patient);
         if (filteredFeildMap.isEmpty())
             return null;
         Approval approval = new Approval();
-        approval.setHealth_id(patientDto.getHealthId());
+        approval.setHealth_id(patient.getHealthId());
         approval.setFacility_id("10000059");
         approval.setFieldsToApprovedMaps(filteredFeildMap);
         approval.setDatetime(new Date());
         return approval;
     }
 
-    private Map<String, String> filterFeilds(PatientMapper patientDto) {
+    private Map<String, String> filterFeilds(PatientData patient) {
         HashMap<String, String> map = new HashMap<>();
-        patientDto.setHealthId(toBeApproved(map, HID, existingPatient.getHealthId(), patientToBeUpdated.getHealthId()));
-        patientDto.setNationalId(toBeApproved(map, NID, existingPatient.getNationalId(), patientToBeUpdated.getNationalId()));
-        patientDto.setNameBangla(toBeApproved(map, NAME_BANGLA, existingPatient.getNameBangla(), patientToBeUpdated.getNameBangla()));
-        patientDto.setBirthRegistrationNumber(toBeApproved(map, BIN_BRN, existingPatient.getBirthRegistrationNumber(), patientToBeUpdated.getBirthRegistrationNumber()));
-        patientDto.setGivenName(toBeApproved(map, GIVEN_NAME, existingPatient.getGivenName(), patientToBeUpdated.getGivenName()));
-        patientDto.setSurName(toBeApproved(map, SUR_NAME, existingPatient.getSurName(), patientToBeUpdated.getSurName()));
-        patientDto.setDateOfBirth(toBeApproved(map, DATE_OF_BIRTH, existingPatient.getDateOfBirth(), patientToBeUpdated.getDateOfBirth()));
-        patientDto.setGender(toBeApproved(map, GENDER, existingPatient.getGender(), patientToBeUpdated.getGender()));
-        patientDto.setOccupation(toBeApproved(map, OCCUPATION, existingPatient.getOccupation(), patientToBeUpdated.getOccupation()));
-        patientDto.setEducationLevel(toBeApproved(map, EDU_LEVEL, existingPatient.getEducationLevel(), patientToBeUpdated.getEducationLevel()));
+        patient.setHealthId(toBeApproved(map, HID, existingPatient.getHealthId(), patientToBeUpdated.getHealthId()));
+        patient.setNationalId(toBeApproved(map, NID, existingPatient.getNationalId(), patientToBeUpdated.getNationalId()));
+        patient.setNameBangla(toBeApproved(map, NAME_BANGLA, existingPatient.getNameBangla(), patientToBeUpdated.getNameBangla()));
+        patient.setBirthRegistrationNumber(toBeApproved(map, BIN_BRN, existingPatient.getBirthRegistrationNumber(), patientToBeUpdated.getBirthRegistrationNumber()));
+        patient.setGivenName(toBeApproved(map, GIVEN_NAME, existingPatient.getGivenName(), patientToBeUpdated.getGivenName()));
+        patient.setSurName(toBeApproved(map, SUR_NAME, existingPatient.getSurName(), patientToBeUpdated.getSurName()));
+        patient.setDateOfBirth(toBeApproved(map, DATE_OF_BIRTH, existingPatient.getDateOfBirth(), patientToBeUpdated.getDateOfBirth()));
+        patient.setGender(toBeApproved(map, GENDER, existingPatient.getGender(), patientToBeUpdated.getGender()));
+        patient.setOccupation(toBeApproved(map, OCCUPATION, existingPatient.getOccupation(), patientToBeUpdated.getOccupation()));
+        patient.setEducationLevel(toBeApproved(map, EDU_LEVEL, existingPatient.getEducationLevel(), patientToBeUpdated.getEducationLevel()));
         //TODO : rewrite after relations bug is fixed.
-        patientDto.setRelations(patientToBeUpdated.getRelations());
-        patientDto.setUid(toBeApproved(map, UID, existingPatient.getUid(), patientToBeUpdated.getUid()));
-        patientDto.setPlaceOfBirth(toBeApproved(map, PLACE_OF_BIRTH, existingPatient.getPlaceOfBirth(), patientToBeUpdated.getPlaceOfBirth()));
-        patientDto.setReligion(toBeApproved(map, RELIGION, existingPatient.getReligion(), patientToBeUpdated.getReligion()));
-        patientDto.setBloodGroup(toBeApproved(map, BLOOD_GROUP, existingPatient.getBloodGroup(), patientToBeUpdated.getBloodGroup()));
-        patientDto.setNationality(toBeApproved(map, NATIONALITY, existingPatient.getNationality(), patientToBeUpdated.getNationality()));
-        patientDto.setDisability(toBeApproved(map, DISABILITY, existingPatient.getDisability(), patientToBeUpdated.getDisability()));
-        patientDto.setEthnicity(toBeApproved(map, ETHNICITY, existingPatient.getEthnicity(), patientToBeUpdated.getEthnicity()));
-        patientDto.setPrimaryContact(toBeApproved(map, PRIMARY_CONTACT, existingPatient.getPrimaryContact(), patientToBeUpdated.getPrimaryContact()));
-        patientDto.setMaritalStatus(toBeApproved(map, MARITAL_STATUS, existingPatient.getMaritalStatus(), patientToBeUpdated.getMaritalStatus()));
-        patientDto.setFullName(toBeApproved(map, FULL_NAME, existingPatient.getFullName(), patientToBeUpdated.getFullName()));
-        patientDto.setIsAlive(toBeApproved(map, IS_ALIVE, existingPatient.getIsAlive(), patientToBeUpdated.getIsAlive()));
-        patientDto.setCreatedAt(toBeApproved(map, CREATED, existingPatient.getCreatedAt(), patientToBeUpdated.getCreatedAt()));
-        patientDto.setUpdatedAt(toBeApproved(map, MODIFIED, existingPatient.getUpdatedAt(), patientToBeUpdated.getUpdatedAt()));
-        patientDto.setPhoneNumber(toBeapprovedPhoneNumber(map, PHONE_NUMBER, existingPatient.getPhoneNumber(), patientToBeUpdated.getPhoneNumber()));
+        patient.setRelations(patientToBeUpdated.getRelations());
+        patient.setUid(toBeApproved(map, UID, existingPatient.getUid(), patientToBeUpdated.getUid()));
+        patient.setPlaceOfBirth(toBeApproved(map, PLACE_OF_BIRTH, existingPatient.getPlaceOfBirth(), patientToBeUpdated.getPlaceOfBirth()));
+        patient.setReligion(toBeApproved(map, RELIGION, existingPatient.getReligion(), patientToBeUpdated.getReligion()));
+        patient.setBloodGroup(toBeApproved(map, BLOOD_GROUP, existingPatient.getBloodGroup(), patientToBeUpdated.getBloodGroup()));
+        patient.setNationality(toBeApproved(map, NATIONALITY, existingPatient.getNationality(), patientToBeUpdated.getNationality()));
+        patient.setDisability(toBeApproved(map, DISABILITY, existingPatient.getDisability(), patientToBeUpdated.getDisability()));
+        patient.setEthnicity(toBeApproved(map, ETHNICITY, existingPatient.getEthnicity(), patientToBeUpdated.getEthnicity()));
+        patient.setPrimaryContact(toBeApproved(map, PRIMARY_CONTACT, existingPatient.getPrimaryContact(), patientToBeUpdated.getPrimaryContact()));
+        patient.setMaritalStatus(toBeApproved(map, MARITAL_STATUS, existingPatient.getMaritalStatus(), patientToBeUpdated.getMaritalStatus()));
+        patient.setFullName(toBeApproved(map, FULL_NAME, existingPatient.getFullName(), patientToBeUpdated.getFullName()));
+        patient.setIsAlive(toBeApproved(map, IS_ALIVE, existingPatient.getIsAlive(), patientToBeUpdated.getIsAlive()));
+        patient.setCreatedAt(toBeApproved(map, CREATED, existingPatient.getCreatedAt(), patientToBeUpdated.getCreatedAt()));
+        patient.setUpdatedAt(toBeApproved(map, MODIFIED, existingPatient.getUpdatedAt(), patientToBeUpdated.getUpdatedAt()));
+        patient.setPhoneNumber(toBeapprovedPhoneNumber(map, PHONE_NUMBER, existingPatient.getPhoneNumber(), patientToBeUpdated.getPhoneNumber()));
         if (patientToBeUpdated.getAddress() != null) {
-            patientDto.setAddress(toBeApprovedAddress(map, PRESENT_ADDRESS, existingPatient.getAddress(), patientToBeUpdated.getAddress()));
+            patient.setAddress(toBeApprovedAddress(map, PRESENT_ADDRESS, existingPatient.getAddress(), patientToBeUpdated.getAddress()));
         }
         if (patientToBeUpdated.getPermanentAddress() != null) {
-            patientDto.setPermanentAddress(toBeApprovedAddress(map, PERMANENT_ADDRESS, existingPatient.getPermanentAddress(), patientToBeUpdated.getPermanentAddress()));
+            patient.setPermanentAddress(toBeApprovedAddress(map, PERMANENT_ADDRESS, existingPatient.getPermanentAddress(), patientToBeUpdated.getPermanentAddress()));
         }
         return map;
     }

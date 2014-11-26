@@ -4,7 +4,7 @@ import org.junit.Test;
 import org.sharedhealth.mci.web.infrastructure.persistence.Approval;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.Location;
-import org.sharedhealth.mci.web.mapper.PatientMapper;
+import org.sharedhealth.mci.web.mapper.PatientData;
 
 import java.text.ParseException;
 import java.util.Properties;
@@ -19,17 +19,17 @@ public class PatientFilterTest {
         Properties properties = new Properties();
         String genderKey = "gender";
         properties.setProperty(genderKey, "NA");
-        PatientMapper patientDtoUpdated = createPatientDto();
-        PatientMapper patientDtoExisting = createPatientDto();
-        PatientMapper patientDtoToBeSaved = new PatientMapper();
-        patientDtoExisting.setGender("M");
-        patientDtoUpdated.setGender("F");
+        PatientData patientUpdated = buildPatientData();
+        PatientData patientExisting = buildPatientData();
+        PatientData patientToBeSaved = new PatientData();
+        patientExisting.setGender("M");
+        patientUpdated.setGender("F");
 
-        PatientFilter patientFilter = new PatientFilter(properties, patientDtoExisting, patientDtoUpdated,patientDtoToBeSaved);
+        PatientFilter patientFilter = new PatientFilter(properties, patientExisting, patientUpdated,patientToBeSaved);
         Approval approval = patientFilter.filter();
 
         assertEquals("F", approval.getFieldsToApprovedMaps().get(genderKey));
-        assertEquals(patientDtoToBeSaved.getGender(), patientDtoExisting.getGender());
+        assertEquals(patientToBeSaved.getGender(), patientExisting.getGender());
     }
 
     @Test
@@ -37,44 +37,44 @@ public class PatientFilterTest {
         Properties properties = new Properties();
         String dobKey = "date_of_birth";
         properties.setProperty(dobKey, "NU");
-        PatientMapper patientDtoUpdated = createPatientDto();
-        PatientMapper patientDtoExisting = createPatientDto();
-        PatientMapper patientDtoToBeSaved = new PatientMapper();
-        patientDtoExisting.setDateOfBirth("2000-02-10");
-        patientDtoUpdated.setDateOfBirth("2000-02-10");
+        PatientData patientUpdated = buildPatientData();
+        PatientData patientExisting = buildPatientData();
+        PatientData patientToBeSaved = new PatientData();
+        patientExisting.setDateOfBirth("2000-02-10");
+        patientUpdated.setDateOfBirth("2000-02-10");
 
-        PatientFilter patientFilter = new PatientFilter(properties, patientDtoExisting, patientDtoUpdated,patientDtoToBeSaved);
+        PatientFilter patientFilter = new PatientFilter(properties, patientExisting, patientUpdated,patientToBeSaved);
         Approval approval = patientFilter.filter();
 
         assertNull(approval);
-        assertEquals(patientDtoToBeSaved.getDateOfBirth(), patientDtoExisting.getDateOfBirth());
+        assertEquals(patientToBeSaved.getDateOfBirth(), patientExisting.getDateOfBirth());
     }
 
     @Test
     public void shouldUpdateFieldsWhichNeedNotBeApprovedOrNotMarkedAsNonUpdateable() throws ParseException {
         Properties properties = new Properties();
         String dobKey = "date_of_birth";
-        PatientMapper patientDtoUpdated = createPatientDto();
-        PatientMapper patientDtoExisting = createPatientDto();
-        PatientMapper patientDtoToBeSaved = new PatientMapper();
-        patientDtoExisting.setDateOfBirth("2000-02-10");
-        patientDtoUpdated.setDateOfBirth("2001-02-10");
+        PatientData patientUpdated = buildPatientData();
+        PatientData patientExisting = buildPatientData();
+        PatientData patientToBeSaved = new PatientData();
+        patientExisting.setDateOfBirth("2000-02-10");
+        patientUpdated.setDateOfBirth("2001-02-10");
 
-        PatientFilter patientFilter = new PatientFilter(properties, patientDtoExisting, patientDtoUpdated,patientDtoToBeSaved);
+        PatientFilter patientFilter = new PatientFilter(properties, patientExisting, patientUpdated,patientToBeSaved);
         Approval approval = patientFilter.filter();
 
         assertNull(approval);
-        assertEquals(patientDtoToBeSaved.getDateOfBirth(), patientDtoUpdated.getDateOfBirth());
+        assertEquals(patientToBeSaved.getDateOfBirth(), patientUpdated.getDateOfBirth());
     }
 
-    private PatientMapper createPatientDto() throws ParseException {
-       PatientMapper patientDto = new PatientMapper();
-        patientDto.setNationalId("1234567890123");
-        patientDto.setBirthRegistrationNumber("12345678901234567");
-        patientDto.setGivenName("Scott");
-        patientDto.setSurName("Tiger");
-        patientDto.setGender("M");
-        patientDto.setDateOfBirth("2014-12-01");
+    private PatientData buildPatientData() throws ParseException {
+       PatientData patient = new PatientData();
+        patient.setNationalId("1234567890123");
+        patient.setBirthRegistrationNumber("12345678901234567");
+        patient.setGivenName("Scott");
+        patient.setSurName("Tiger");
+        patient.setGender("M");
+        patient.setDateOfBirth("2014-12-01");
 
         Address address = new Address();
         address.setAddressLine("house-10");
@@ -86,7 +86,7 @@ public class PatientFilterTest {
         address.setWardId("01");
         address.setCountryCode("050");
 
-        patientDto.setAddress(address);
+        patient.setAddress(address);
 
         Address presentAdress = new Address();
         presentAdress.setAddressLine("house-10");
@@ -98,7 +98,7 @@ public class PatientFilterTest {
         presentAdress.setWardId("01");
         presentAdress.setCountryCode("050");
 
-        patientDto.setPermanentAddress(presentAdress);
+        patient.setPermanentAddress(presentAdress);
 
         Location location = new Location();
         location = new Location();
@@ -109,7 +109,7 @@ public class PatientFilterTest {
         location.setUpazillaId("09");
         location.setPaurashavaId("20");
         location.setUnionId("01");
-        return patientDto;
+        return patient;
     }
 
 }

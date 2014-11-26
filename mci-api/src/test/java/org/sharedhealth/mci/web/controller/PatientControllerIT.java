@@ -13,7 +13,7 @@ import org.sharedhealth.mci.web.handler.ErrorHandler;
 import org.sharedhealth.mci.web.handler.MCIError;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.mapper.Address;
-import org.sharedhealth.mci.web.mapper.PatientMapper;
+import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
 import org.sharedhealth.mci.web.mapper.Relation;
 import org.springframework.http.ResponseEntity;
@@ -45,14 +45,14 @@ public class PatientControllerIT extends BaseControllerTest {
         MockitoAnnotations.initMocks(this);
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
-        patientMapper = new PatientMapper();
-        patientMapper.setGivenName("Scott");
-        patientMapper.setSurName("Tiger");
-        patientMapper.setGender("M");
-        patientMapper.setDateOfBirth("2014-12-01");
-        patientMapper.setEducationLevel("01");
-        patientMapper.setOccupation("02");
-        patientMapper.setMaritalStatus("1");
+        patientData = new PatientData();
+        patientData.setGivenName("Scott");
+        patientData.setSurName("Tiger");
+        patientData.setGender("M");
+        patientData.setDateOfBirth("2014-12-01");
+        patientData.setEducationLevel("01");
+        patientData.setOccupation("02");
+        patientData.setMaritalStatus("1");
 
         PhoneNumber phoneNumber = new PhoneNumber();
         phoneNumber.setNumber("1716528608");
@@ -60,8 +60,8 @@ public class PatientControllerIT extends BaseControllerTest {
         phoneNumber.setExtension("02");
         phoneNumber.setAreaCode("01");
 
-        patientMapper.setPhoneNumber(phoneNumber);
-        patientMapper.setPrimaryContactNumber(phoneNumber);
+        patientData.setPhoneNumber(phoneNumber);
+        patientData.setPrimaryContactNumber(phoneNumber);
 
         Address presentAddress = new Address();
         presentAddress.setAddressLine("house-12");
@@ -73,7 +73,7 @@ public class PatientControllerIT extends BaseControllerTest {
         presentAddress.setWardId("01");
         presentAddress.setCountryCode("050");
 
-        patientMapper.setAddress(presentAddress);
+        patientData.setAddress(presentAddress);
 
         Address permanentAddress = new Address();
         permanentAddress.setAddressLine("house-12");
@@ -85,12 +85,12 @@ public class PatientControllerIT extends BaseControllerTest {
         permanentAddress.setWardId("01");
         permanentAddress.setCountryCode("050");
 
-        patientMapper.setPermanentAddress(permanentAddress);
+        patientData.setPermanentAddress(permanentAddress);
     }
 
     @Test
     public void shouldCreatePatient() throws Exception {
-        String json = mapper.writeValueAsString(patientMapper);
+        String json = mapper.writeValueAsString(patientData);
 
         MvcResult result = createPatient(json);
 
@@ -103,9 +103,9 @@ public class PatientControllerIT extends BaseControllerTest {
 
     @Test
     public void shouldCreatePatientForAnyPostCodeWithPermanentAddressWhenCountryCodeIsNotBangladesh() throws Exception {
-        patientMapper.getPermanentAddress().setCountryCode("051");
-        patientMapper.getPermanentAddress().setPostCode("12345");
-        String json = mapper.writeValueAsString(patientMapper);
+        patientData.getPermanentAddress().setCountryCode("051");
+        patientData.getPermanentAddress().setPostCode("12345");
+        String json = mapper.writeValueAsString(patientData);
 
         MvcResult result = createPatient(json);
 
@@ -118,9 +118,9 @@ public class PatientControllerIT extends BaseControllerTest {
 
     @Test
     public void shouldReturnBadRequestForInvalidPostCodeWithPermanentAddressWhenCountryCodeIsBangladesh() throws Exception {
-        patientMapper.getPermanentAddress().setCountryCode("050");
-        patientMapper.getPermanentAddress().setPostCode("12345");
-        String json = mapper.writeValueAsString(patientMapper);
+        patientData.getPermanentAddress().setCountryCode("050");
+        patientData.getPermanentAddress().setPostCode("12345");
+        String json = mapper.writeValueAsString(patientData);
 
         mockMvc.perform(MockMvcRequestBuilders.post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
@@ -130,8 +130,8 @@ public class PatientControllerIT extends BaseControllerTest {
 
     @Test
     public void shouldReturnBadRequestForInvalidRequestData() throws Exception {
-        patientMapper.getAddress().setAddressLine("h");
-        String json = mapper.writeValueAsString(patientMapper);
+        patientData.getAddress().setAddressLine("h");
+        String json = mapper.writeValueAsString(patientData);
         MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
@@ -140,9 +140,9 @@ public class PatientControllerIT extends BaseControllerTest {
 
     @Test
     public void shouldReturnBadRequestWithErrorDetailsForMultipleInvalidRequestData() throws Exception {
-        patientMapper.getAddress().setAddressLine("h");
-        patientMapper.setGender("0");
-        String json = mapper.writeValueAsString(patientMapper);
+        patientData.getAddress().setAddressLine("h");
+        patientData.setGender("0");
+        String json = mapper.writeValueAsString(patientData);
 
         MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
@@ -160,7 +160,7 @@ public class PatientControllerIT extends BaseControllerTest {
 
     @Test
     public void shouldReturnBadRequestForInvalidJson() throws Exception {
-        String json = mapper.writeValueAsString(patientMapper);
+        String json = mapper.writeValueAsString(patientData);
 
         MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content("invalidate" + json).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
@@ -170,8 +170,8 @@ public class PatientControllerIT extends BaseControllerTest {
 
     @Test
     public void shouldReturnBadRequestIfPresentAddressIsNull() throws Exception {
-        patientMapper.setAddress(null);
-        String json = mapper.writeValueAsString(patientMapper);
+        patientData.setAddress(null);
+        String json = mapper.writeValueAsString(patientData);
 
         MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
@@ -192,11 +192,11 @@ public class PatientControllerIT extends BaseControllerTest {
     @Test
     public void ShouldPassIFAddressIsValidTillUpazilaLevel() throws Exception {
 
-        patientMapper.getAddress().setWardId(null);
-        patientMapper.getAddress().setCityCorporationId(null);
-        patientMapper.getAddress().setUnionId(null);
+        patientData.getAddress().setWardId(null);
+        patientData.getAddress().setCityCorporationId(null);
+        patientData.getAddress().setUnionId(null);
 
-        String json = mapper.writeValueAsString(patientMapper);
+        String json = mapper.writeValueAsString(patientData);
 
         createPatient(json);
 
@@ -216,7 +216,7 @@ public class PatientControllerIT extends BaseControllerTest {
 
     @Test
     public void shouldReturnNotFoundResponseIfPatientNotExistForUpdate() throws Exception {
-        String json = mapper.writeValueAsString(patientMapper);
+        String json = mapper.writeValueAsString(patientData);
 
         mockMvc.perform(put(API_END_POINT + "/health-1000").accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
                 .andExpect(status().isNotFound())
@@ -236,8 +236,8 @@ public class PatientControllerIT extends BaseControllerTest {
 
     @Test
     public void shouldReturnNotFoundResponseIfHIDNotMatchWithUrlHid() throws Exception {
-        patientMapper.setHealthId("health-100");
-        String json = mapper.writeValueAsString(patientMapper);
+        patientData.setHealthId("health-100");
+        String json = mapper.writeValueAsString(patientData);
 
         MvcResult result = mockMvc.perform(put(API_END_POINT + "/health-1001").accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
@@ -249,7 +249,7 @@ public class PatientControllerIT extends BaseControllerTest {
     public void shouldReturnAllTheCreatedPatientFieldAfterGetAPICall() throws Exception {
         String json = asString("jsons/patient/full_payload.json");
 
-        PatientMapper original = getPatientObjectFromString(json);
+        PatientData original = getPatientObjectFromString(json);
 
         MvcResult result = createPatient(json);
 
@@ -260,9 +260,9 @@ public class PatientControllerIT extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        final ResponseEntity asyncResult = (ResponseEntity<PatientMapper>) getResult.getAsyncResult();
+        final ResponseEntity asyncResult = (ResponseEntity<PatientData>) getResult.getAsyncResult();
 
-        PatientMapper patient = getPatientObjectFromResponse(asyncResult);
+        PatientData patient = getPatientObjectFromResponse(asyncResult);
 
         assertPatientEquals(original, patient);
     }
@@ -271,7 +271,7 @@ public class PatientControllerIT extends BaseControllerTest {
     public void shouldGoToUpdateFlowIfCreatePatientRequestWithSimilarPatientData() throws Exception {
         String json = asString("jsons/patient/full_payload.json");
 
-        PatientMapper original = getPatientObjectFromString(json);
+        PatientData original = getPatientObjectFromString(json);
 
         MvcResult firstTimeResponse = createPatient(json);
 
@@ -290,9 +290,9 @@ public class PatientControllerIT extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        final ResponseEntity asyncResult = (ResponseEntity<PatientMapper>) getResult.getAsyncResult();
+        final ResponseEntity asyncResult = (ResponseEntity<PatientData>) getResult.getAsyncResult();
 
-        PatientMapper patient = getPatientObjectFromResponse(asyncResult);
+        PatientData patient = getPatientObjectFromResponse(asyncResult);
 
         Assert.assertEquals("Updated Full Name", patient.getGivenName());
     }
@@ -301,14 +301,14 @@ public class PatientControllerIT extends BaseControllerTest {
     public void shouldCreateRelationsData() throws Exception {
         String json = asString("jsons/patient/payload_with_multiple_relations.json");
 
-        PatientMapper original = getPatientObjectFromString(json);
+        PatientData original = getPatientObjectFromString(json);
 
         MvcResult result = createPatient(json);
 
         final MCIResponse body = getMciResponse(result);
         String healthId = body.getId();
 
-        PatientMapper patient = getPatientMapperObjectByHealthId(healthId);
+        PatientData patient = getPatientMapperObjectByHealthId(healthId);
         Assert.assertTrue(isRelationsEqual(original.getRelations(), patient.getRelations()));
     }
 
@@ -316,7 +316,7 @@ public class PatientControllerIT extends BaseControllerTest {
     public void shouldUpdatePatientSuccessfullyForValidData() throws Exception {
         String json = asString("jsons/patient/full_payload.json");
 
-        PatientMapper original = getPatientObjectFromString(json);
+        PatientData original = getPatientObjectFromString(json);
 
         MvcResult createdResult = createPatient(json);
 
@@ -327,7 +327,7 @@ public class PatientControllerIT extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        PatientMapper patient = getPatientMapperObjectByHealthId(healthId);
+        PatientData patient = getPatientMapperObjectByHealthId(healthId);
 
         assertPatientEquals(original, patient);
 
@@ -339,7 +339,7 @@ public class PatientControllerIT extends BaseControllerTest {
         String fullPayloadJson = asString("jsons/patient/full_payload.json");
         String nid = "9934677890120";
 
-        PatientMapper original = getPatientObjectFromString(fullPayloadJson);
+        PatientData original = getPatientObjectFromString(fullPayloadJson);
 
         MvcResult createdResult = createPatient(fullPayloadJson);
 
@@ -351,7 +351,7 @@ public class PatientControllerIT extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        PatientMapper patient = getPatientMapperObjectByHealthId(healthId);
+        PatientData patient = getPatientMapperObjectByHealthId(healthId);
         original.setNationalId(nid);
         assertPatientEquals(original, patient);
 
@@ -367,15 +367,15 @@ public class PatientControllerIT extends BaseControllerTest {
         final MCIResponse createdResponse = getMciResponse(createdResult);
         String healthId = createdResponse.getId();
         String addressJson = asString("jsons/patient/payload_with_address.json");
-        PatientMapper patientMapper1 = getPatientObjectFromString(addressJson);
+        PatientData patientData1 = getPatientObjectFromString(addressJson);
 
         MvcResult updatedResult = mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(addressJson).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        PatientMapper patient = getPatientMapperObjectByHealthId(healthId);
+        PatientData patient = getPatientMapperObjectByHealthId(healthId);
 
-        assertEquals(patientMapper1.getAddress(), patient.getAddress());
+        assertEquals(patientData1.getAddress(), patient.getAddress());
 
     }
 
@@ -388,21 +388,21 @@ public class PatientControllerIT extends BaseControllerTest {
 
         final MCIResponse createdResponse = getMciResponse(createdResult);
         String healthId = createdResponse.getId();
-        PatientMapper original = getPatientMapperObjectByHealthId(healthId);
+        PatientData original = getPatientMapperObjectByHealthId(healthId);
 
         String relationJson = asString("jsons/patient/payload_relation_with_id.json");
 
         Relation fth = original.getRelationOfType("FTH");
         relationJson = relationJson.replace("__RELATION_ID__", fth.getId());
 
-        PatientMapper updateRequestPatientMapper = getPatientObjectFromString(relationJson);
-        original.getRelations().set(original.getRelations().indexOf(fth), updateRequestPatientMapper.getRelations().get(0));
+        PatientData updateRequestPatientData = getPatientObjectFromString(relationJson);
+        original.getRelations().set(original.getRelations().indexOf(fth), updateRequestPatientData.getRelations().get(0));
 
         mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(relationJson).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        PatientMapper updatedPatient = getPatientMapperObjectByHealthId(healthId);
+        PatientData updatedPatient = getPatientMapperObjectByHealthId(healthId);
 
         assertTrue(isRelationsEqual(original.getRelations(), updatedPatient.getRelations()));
     }
@@ -416,7 +416,7 @@ public class PatientControllerIT extends BaseControllerTest {
 
         final MCIResponse createdResponse = getMciResponse(createdResult);
         String healthId = createdResponse.getId();
-        PatientMapper original = getPatientMapperObjectByHealthId(healthId);
+        PatientData original = getPatientMapperObjectByHealthId(healthId);
 
         String relationJson = asString("jsons/patient/payload_with_empty_relation.json");
 
@@ -429,7 +429,7 @@ public class PatientControllerIT extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        PatientMapper updatedPatient = getPatientMapperObjectByHealthId(healthId);
+        PatientData updatedPatient = getPatientMapperObjectByHealthId(healthId);
 
         assertTrue(isRelationsEqual(original.getRelations(), updatedPatient.getRelations()));
     }
@@ -443,19 +443,19 @@ public class PatientControllerIT extends BaseControllerTest {
 
         final MCIResponse createdResponse = getMciResponse(createdResult);
         String healthId = createdResponse.getId();
-        PatientMapper original = getPatientMapperObjectByHealthId(healthId);
+        PatientData original = getPatientMapperObjectByHealthId(healthId);
 
         String relationJson = asString("jsons/patient/payload_with_new_relation.json");
 
-        PatientMapper newPatientMapper = getPatientObjectFromString(relationJson);
+        PatientData newPatientData = getPatientObjectFromString(relationJson);
 
-        original.getRelations().add(newPatientMapper.getRelations().get(0));
+        original.getRelations().add(newPatientData.getRelations().get(0));
 
         mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(relationJson).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        PatientMapper updatedPatient = getPatientMapperObjectByHealthId(healthId);
+        PatientData updatedPatient = getPatientMapperObjectByHealthId(healthId);
 
         assertTrue(isRelationsEqual(original.getRelations(), updatedPatient.getRelations()));
     }
@@ -469,7 +469,7 @@ public class PatientControllerIT extends BaseControllerTest {
 
         final MCIResponse createdResponse = getMciResponse(createdResult);
         String healthId = createdResponse.getId();
-        PatientMapper original = getPatientMapperObjectByHealthId(healthId);
+        PatientData original = getPatientMapperObjectByHealthId(healthId);
 
         assertEquals(1, original.getRelations().size());
 
@@ -484,7 +484,7 @@ public class PatientControllerIT extends BaseControllerTest {
 
         final MCIResponse createdResponse = getMciResponse(createdResult);
         String healthId = createdResponse.getId();
-        PatientMapper original = getPatientMapperObjectByHealthId(healthId);
+        PatientData original = getPatientMapperObjectByHealthId(healthId);
 
         String relationJson = asString("jsons/patient/payload_with_empty_relation.json");
 

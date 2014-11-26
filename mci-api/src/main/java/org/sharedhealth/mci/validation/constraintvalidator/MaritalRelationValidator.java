@@ -1,11 +1,11 @@
 package org.sharedhealth.mci.validation.constraintvalidator;
 import org.sharedhealth.mci.validation.constraints.MaritalRelation;
-import org.sharedhealth.mci.web.mapper.PatientMapper;
+import org.sharedhealth.mci.web.mapper.PatientData;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-public class MaritalRelationValidator implements ConstraintValidator<MaritalRelation, PatientMapper> {
+public class MaritalRelationValidator implements ConstraintValidator<MaritalRelation, PatientData> {
 
     private String field;
 
@@ -15,7 +15,7 @@ public class MaritalRelationValidator implements ConstraintValidator<MaritalRela
     }
 
     @Override
-    public boolean isValid(final PatientMapper value, final ConstraintValidatorContext context) {
+    public boolean isValid(final PatientData value, final ConstraintValidatorContext context) {
 
         if (value == null) return true;
 

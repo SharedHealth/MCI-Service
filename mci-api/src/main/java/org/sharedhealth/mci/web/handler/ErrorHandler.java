@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
 import org.sharedhealth.mci.utils.FieldPropertyNameReader;
 import org.sharedhealth.mci.web.exception.ValidationException;
-import org.sharedhealth.mci.web.mapper.PatientMapper;
+import org.sharedhealth.mci.web.mapper.PatientData;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 
@@ -143,7 +143,7 @@ public class ErrorHandler {
             FieldError fieldError = (FieldError) error;
             String field = fieldError.getField();
 
-            return FieldPropertyNameReader.getFieldPropertyName(PatientMapper.class, field);
+            return FieldPropertyNameReader.getFieldPropertyName(PatientData.class, field);
         }
 
         return "";

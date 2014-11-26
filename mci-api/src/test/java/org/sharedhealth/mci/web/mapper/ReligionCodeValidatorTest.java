@@ -11,17 +11,17 @@ import org.springframework.test.context.web.WebAppConfiguration;
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 @ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfigTest.class)
-public class ReligionCodeValidatorTest extends BaseCodeValidatorTest<PatientMapper> {
+public class ReligionCodeValidatorTest extends BaseCodeValidatorTest<PatientData> {
 
     @Test
     public void shouldPassForValidValues() throws Exception {
         String[] validStatuses = {"0", "1", "2", "9"};
-        assertValidValues(validStatuses, "religion", PatientMapper.class);
+        assertValidValues(validStatuses, "religion", PatientData.class);
     }
 
     @Test
     public void shouldFailForInvalidValues() throws Exception {
         String[] inValidRelations = {"", "some_invalid_code", "04", "10"};
-        assertInvalidValues(inValidRelations, "religion", PatientMapper.class);
+        assertInvalidValues(inValidRelations, "religion", PatientData.class);
     }
 }
