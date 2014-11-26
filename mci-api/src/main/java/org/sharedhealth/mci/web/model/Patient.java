@@ -1,22 +1,15 @@
 package org.sharedhealth.mci.web.model;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.sharedhealth.mci.web.mapper.Address;
-import org.sharedhealth.mci.web.mapper.PatientData;
-import org.sharedhealth.mci.web.mapper.PhoneNumber;
-import org.sharedhealth.mci.web.mapper.Relation;
 import org.springframework.data.cassandra.mapping.Column;
 import org.springframework.data.cassandra.mapping.PrimaryKey;
 import org.springframework.data.cassandra.mapping.Table;
 
 import java.util.Date;
-import java.util.List;
 
-import static org.apache.commons.lang.time.DateFormatUtils.ISO_DATE_FORMAT;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.sharedhealth.mci.utils.DateUtil.string2Date;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
@@ -989,107 +982,5 @@ public class Patient {
 
     public void setLowerGivenName(String lowerGivenName) {
         this.lowerGivenName = lowerGivenName;
-    }
-
-    public PatientData convert() {
-        PatientData data = new PatientData();
-
-        // TODO: Fix this implementation
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            List<Relation> relations = objectMapper.readValue(this.getRelations(),
-                    objectMapper.getTypeFactory().constructCollectionType(List.class, Relation.class));
-            data.setRelations(relations);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        data.setHealthId(this.getHealthId());
-        data.setNationalId(this.getNationalId());
-        data.setBirthRegistrationNumber(this.getBirthRegistrationNumber());
-        data.setUid(this.getUid());
-        data.setPlaceOfBirth(this.getPlaceOfBirth());
-
-        data.setReligion(this.getReligion());
-        data.setBloodGroup(this.getBloodGroup());
-        data.setNameBangla(this.getFullNameBangla());
-
-        data.setGivenName(this.getGivenName());
-        data.setSurName(this.getSurName());
-        data.setDateOfBirth(ISO_DATE_FORMAT.format(this.getDateOfBirth()));
-        data.setGender(this.getGender());
-        data.setOccupation(this.getOccupation());
-        data.setEducationLevel(this.getEducationLevel());
-        data.setNationality(this.getNationality());
-        data.setDisability(this.getDisability());
-        data.setEthnicity(this.getEthnicity());
-        data.setIsAlive(this.getIsAlive());
-        data.setMaritalStatus(this.getMaritalStatus());
-        data.setPrimaryContact(this.getPrimaryContact());
-
-        Address address = new Address();
-        address.setAddressLine(this.getAddressLine());
-        address.setDivisionId(this.getDivisionId());
-        address.setDistrictId(this.getDistrictId());
-        address.setUpazillaId(this.getUpazillaId());
-        address.setCityCorporationId(this.getCityCorporationId());
-        address.setUnionId(this.getUnionId());
-        address.setWardId(this.getWardId());
-        address.setHoldingNumber(this.getHoldingNumber());
-        address.setStreet(this.getStreet());
-        address.setAreaMouja(this.getAreaMouja());
-        address.setVillage(this.getVillage());
-        address.setPostOffice(this.getPostOffice());
-        address.setPostCode(this.getPostCode());
-        address.setThanaId(this.getThanaId());
-        address.setCountryCode(this.getCountryCode());
-        data.setAddress(address);
-
-        Address permanentAddress = new Address();
-        permanentAddress.setAddressLine(this.getPermanentAddressLine());
-        permanentAddress.setDivisionId(this.getPermanentDivisionId());
-        permanentAddress.setDistrictId(this.getPermanentDistrictId());
-        permanentAddress.setUpazillaId(this.getPermanentUpazillaId());
-        permanentAddress.setCityCorporationId(this.getPermanentCityCorporationId());
-        permanentAddress.setUnionId(this.getPermanentUnionId());
-        permanentAddress.setWardId(this.getPermanentWardId());
-        permanentAddress.setHoldingNumber(this.getPermanentHoldingNumber());
-        permanentAddress.setStreet(this.getPermanentStreet());
-        permanentAddress.setAreaMouja(this.getPermanentAreaMouja());
-        permanentAddress.setVillage(this.getPermanentVillage());
-        permanentAddress.setPostOffice(this.getPermanentPostOffice());
-        permanentAddress.setPostCode(this.getPermanentPostCode());
-        permanentAddress.setThanaId(this.getPermanentThanaId());
-        permanentAddress.setCountryCode(this.getPermanentCountryCode());
-        if (permanentAddress.getCountryCode() != null) {
-            if ("050".equals(permanentAddress.getCountryCode()) && permanentAddress.getDistrictId() != null) {
-                data.setPermanentAddress(permanentAddress);
-            }
-            if (!"050".equals(permanentAddress.getCountryCode())) {
-                data.setPermanentAddress(permanentAddress);
-            }
-        }
-
-        PhoneNumber phoneNumber = new PhoneNumber();
-        phoneNumber.setNumber(this.getCellNo());
-        phoneNumber.setAreaCode(this.getPhoneNumberAreaCode());
-        phoneNumber.setCountryCode(this.getPhoneNumberCountryCode());
-        phoneNumber.setExtension(this.getPhoneNumberExtension());
-        if (phoneNumber.getNumber() != null) {
-            data.setPhoneNumber(phoneNumber);
-        }
-
-        PhoneNumber primaryContactNumber = new PhoneNumber();
-        primaryContactNumber.setNumber(this.getPrimaryCellNo());
-        primaryContactNumber.setAreaCode(this.getPrimaryContactNumberAreaCode());
-        primaryContactNumber.setExtension(this.getPrimaryContactNumberExtension());
-        primaryContactNumber.setCountryCode(this.getPrimaryContactNumberCountryCode());
-        if (primaryContactNumber.getNumber() != null) {
-            data.setPrimaryContactNumber(primaryContactNumber);
-        }
-
-        data.setCreatedAt(this.getCreatedAt());
-        data.setUpdatedAt(this.getUpdatedAt());
-        return data;
     }
 }

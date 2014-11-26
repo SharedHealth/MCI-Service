@@ -3,8 +3,6 @@ package org.sharedhealth.mci.web.infrastructure.persistence;
 import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.utils.UidGenerator;
 import org.sharedhealth.mci.web.exception.HealthIDExistException;
@@ -12,7 +10,10 @@ import org.sharedhealth.mci.web.exception.PatientNotFoundException;
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.handler.PatientFilter;
-import org.sharedhealth.mci.web.mapper.*;
+import org.sharedhealth.mci.web.mapper.Address;
+import org.sharedhealth.mci.web.mapper.PatientData;
+import org.sharedhealth.mci.web.mapper.PatientMapper;
+import org.sharedhealth.mci.web.mapper.SearchQuery;
 import org.sharedhealth.mci.web.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +28,10 @@ import org.springframework.validation.FieldError;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Properties;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
@@ -40,13 +44,13 @@ import static org.springframework.data.cassandra.core.CassandraTemplate.toUpdate
 public class PatientRepository extends BaseRepository {
 
     protected static final Logger logger = LoggerFactory.getLogger(PatientRepository.class);
-
     private static final UidGenerator uid = new UidGenerator();
-    private final ObjectMapper mapper = new ObjectMapper();
+    private PatientMapper mapper;
 
     @Autowired
-    public PatientRepository(@Qualifier("MCICassandraTemplate") CassandraOperations cassandraOperations) {
+    public PatientRepository(@Qualifier("MCICassandraTemplate") CassandraOperations cassandraOperations, PatientMapper mapper) {
         super(cassandraOperations);
+        this.mapper = mapper;
     }
 
     public MCIResponse create(PatientData patientData) {
@@ -61,8 +65,7 @@ public class PatientRepository extends BaseRepository {
             return update(patientData, existingPatient.getHealthId());
         }
 
-        Patient p = getEntityFromPatientMapper(patientData);
-
+        Patient p = mapper.map(patientData, new PatientData());
         p.setHealthId(uid.getId());
         p.setCreatedAt(new Date());
         p.setUpdatedAt(new Date());
@@ -130,7 +133,7 @@ public class PatientRepository extends BaseRepository {
     public PatientData findByHealthId(final String healthId) {
         Patient patient = cassandraOperations.selectOneById(Patient.class, healthId);
         if (patient != null) {
-            return patient.convert();
+            return mapper.map(patient);
         }
         throw new PatientNotFoundException("No patient found with health id: " + healthId);
     }
@@ -166,7 +169,7 @@ public class PatientRepository extends BaseRepository {
                 String[] values = healthIds.toArray(new String[healthIds.size()]);
                 List<Patient> patients = cassandraOperations.select(buildFindByHidsQuery(values), Patient.class);
                 for (Patient patient : patients) {
-                    dataList.add(patient.convert());
+                    dataList.add(mapper.map(patient));
                 }
             }
         }
@@ -255,7 +258,7 @@ public class PatientRepository extends BaseRepository {
             fullName = fullName + " " + patientData.getSurName();
         }
 
-        Patient patient = getEntityFromPatientData(patientToSave, existingPatient);
+        Patient patient = mapper.map(patientToSave, existingPatient);
         patient.setHealthId(hid);
         patient.setFullName(fullName);
         patient.setUpdatedAt(new Date());
@@ -316,18 +319,7 @@ public class PatientRepository extends BaseRepository {
         if (limit > 0) {
             select.limit(limit);
         }
-        return convert(cassandraOperations.select(select, Patient.class));
-    }
-
-    private List<PatientData> convert(List<Patient> patients) {
-        List<PatientData> dataList = new ArrayList<>();
-        if (isNotEmpty(patients)) {
-            for (Patient patient : patients) {
-                PatientData data = patient.convert();
-                dataList.add(data);
-            }
-        }
-        return dataList;
+        return mapper.map(cassandraOperations.select(select, Patient.class));
     }
 
     private String getLocationPointer(List<String> locations, String start, String d) {
@@ -339,261 +331,10 @@ public class PatientRepository extends BaseRepository {
     }
 
     private boolean isLocationBelongsToCatchment(String location, String catchment) {
-
         return StringUtils.isBlank(location) || location.startsWith(catchment);
-
     }
 
     private String getAddressHierarchyField(int length) {
         return "location_level" + (length / 2);
-    }
-
-    public Patient getEntityFromPatientMapper(PatientData p) {
-        return getEntityFromPatientData(p, new PatientData());
-    }
-
-    public Patient getEntityFromPatientData(PatientData data, PatientData existing) {
-
-        Patient patient = new Patient();
-
-        prepareRelationBlock(data, existing, patient);
-
-        Address address = data.getAddress();
-        Address permanentAddress = data.getPermanentAddress();
-
-        PhoneNumber phoneNumber = data.getPhoneNumber();
-        PhoneNumber primaryContactNumber = data.getPrimaryContactNumber();
-
-        patient.setHealthId(data.getHealthId());
-        patient.setNationalId(data.getNationalId());
-        patient.setBirthRegistrationNumber(data.getBirthRegistrationNumber());
-        patient.setFullNameBangla(StringUtils.trim(data.getNameBangla()));
-        patient.setGivenName(StringUtils.trim(data.getGivenName()));
-        if (data.getGivenName() != null) {
-            patient.setLowerGivenName(StringUtils.trim(data.getGivenName()).toLowerCase());
-        }
-        patient.setSurName(StringUtils.trim(data.getSurName()));
-        if (data.getSurName() != null) {
-            patient.setLowerSurName(StringUtils.trim(data.getSurName()).toLowerCase());
-        }
-        patient.setDateOfBirth(data.getDateOfBirth());
-        patient.setGender(data.getGender());
-        patient.setOccupation(data.getOccupation());
-        patient.setEducationLevel(data.getEducationLevel());
-
-        patient.setUid(data.getUid());
-        patient.setPlaceOfBirth(StringUtils.trim(data.getPlaceOfBirth()));
-        patient.setReligion(data.getReligion());
-        patient.setBloodGroup(data.getBloodGroup());
-        patient.setNationality(StringUtils.trim(data.getNationality()));
-        patient.setDisability(data.getDisability());
-        patient.setEthnicity(data.getEthnicity());
-        patient.setIsAlive(data.getIsAlive());
-        patient.setMaritalStatus(data.getMaritalStatus());
-
-        if (address != null) {
-            patient.setAddressLine(address.getAddressLine());
-            patient.setDivisionId(address.getDivisionId());
-            patient.setDistrictId(address.getDistrictId());
-            patient.setUpazillaId(address.getUpazillaId());
-            patient.setUnionId(address.getUnionId());
-            patient.setHoldingNumber(StringUtils.trim(address.getHoldingNumber()));
-            patient.setStreet(StringUtils.trim(address.getStreet()));
-            patient.setAreaMouja(StringUtils.trim(address.getAreaMouja()));
-            patient.setVillage(StringUtils.trim(address.getVillage()));
-            patient.setPostOffice(StringUtils.trim(address.getPostOffice()));
-            patient.setPostCode(address.getPostCode());
-            patient.setWardId(address.getWardId());
-            patient.setThanaId(address.getThanaId());
-            patient.setCityCorporationId(address.getCityCorporationId());
-            patient.setCountryCode(address.getCountryCode());
-        }
-
-        if (permanentAddress != null) {
-            patient.setPermanentAddressLine(permanentAddress.getAddressLine());
-            patient.setPermanentDivisionId(permanentAddress.getDivisionId());
-            patient.setPermanentDistrictId(permanentAddress.getDistrictId());
-            patient.setPermanentUpazillaId(permanentAddress.getUpazillaId());
-            patient.setPermanentUnionId(permanentAddress.getUnionId());
-            patient.setPermanentHoldingNumber(StringUtils.trim(permanentAddress.getHoldingNumber()));
-            patient.setPermanentStreet(StringUtils.trim(permanentAddress.getStreet()));
-            patient.setPermanentAreaMouja(StringUtils.trim(permanentAddress.getAreaMouja()));
-            patient.setPermanentVillage(StringUtils.trim(permanentAddress.getVillage()));
-            patient.setPermanentPostOffice(StringUtils.trim(permanentAddress.getPostOffice()));
-            patient.setPermanentPostCode(permanentAddress.getPostCode());
-            patient.setPermanentWardId(permanentAddress.getWardId());
-            patient.setPermanentThanaId(permanentAddress.getThanaId());
-            patient.setPermanentCityCorporationId(permanentAddress.getCityCorporationId());
-            patient.setPermanentCountryCode(permanentAddress.getCountryCode());
-        }
-
-        if (phoneNumber != null) {
-            patient.setCellNo(phoneNumber.getNumber());
-            patient.setPhoneNumberAreaCode(phoneNumber.getAreaCode());
-            patient.setPhoneNumberCountryCode(phoneNumber.getCountryCode());
-            patient.setPhoneNumberExtension(phoneNumber.getExtension());
-        }
-
-        if (primaryContactNumber != null) {
-            patient.setPrimaryCellNo(primaryContactNumber.getNumber());
-            patient.setPrimaryContactNumberAreaCode(primaryContactNumber.getAreaCode());
-            patient.setPrimaryContactNumberCountryCode(primaryContactNumber.getCountryCode());
-            patient.setPrimaryContactNumberExtension(primaryContactNumber.getExtension());
-        }
-
-        patient.setPrimaryContact(StringUtils.trim(data.getPrimaryContact()));
-
-        return patient;
-    }
-
-    private void prepareRelationBlock(PatientData data, PatientData existingData, Patient patient) {
-
-        List<Relation> relations = data.getRelations();
-
-        if (relations == null) {
-            return;
-        }
-
-        removeDuplicateRelationBlock(relations);
-        appendExistingRelationBlock(data, existingData);
-        handleRelationRemovalRequest(relations);
-        populateRelationId(relations);
-
-        prepareFathersInfo(data, patient);
-        prepareMothersInfo(data, patient);
-
-        try {
-            patient.setRelations(mapper.writeValueAsString(data.getRelations()));
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void removeDuplicateRelationBlock(List<Relation> r) {
-        Set<Relation> uniqueRelations = new LinkedHashSet<>(r);
-        r.clear();
-        r.addAll(uniqueRelations);
-    }
-
-    private void handleRelationRemovalRequest(List<Relation> relations) {
-        if (relations == null) {
-            return;
-        }
-
-        List<Relation> relationsToRemoved = new ArrayList<>();
-
-        for (Relation relation : relations) {
-            if (relation.isEmpty()) {
-                relationsToRemoved.add(relation);
-            }
-        }
-
-        for (Relation relation : relationsToRemoved) {
-            relations.remove(relation);
-        }
-    }
-
-    private void prepareMothersInfo(PatientData data, Patient patient) {
-        Relation mother = data.getRelationOfType("MTH");
-
-        if (mother != null) {
-            patient.setMothersNameBangla(StringUtils.trim(mother.getNameBangla()));
-            patient.setMothersGivenName(StringUtils.trim(mother.getGivenName()));
-            patient.setMothersSurName(StringUtils.trim(mother.getSurName()));
-            patient.setMothersBrn(mother.getBirthRegistrationNumber());
-            patient.setMothersNid(mother.getNationalId());
-            patient.setMothersUid(mother.getUid());
-        } else {
-            patient.setMothersNameBangla("");
-            patient.setMothersGivenName("");
-            patient.setMothersSurName("");
-            patient.setMothersBrn("");
-            patient.setMothersNid("");
-            patient.setMothersUid("");
-        }
-    }
-
-    private void prepareFathersInfo(PatientData data, Patient patient) {
-        Relation father = data.getRelationOfType("FTH");
-        if (father != null) {
-            patient.setFathersNameBangla(StringUtils.trim(father.getNameBangla()));
-            patient.setFathersGivenName(StringUtils.trim(father.getGivenName()));
-            patient.setFathersSurName(StringUtils.trim(father.getSurName()));
-            patient.setFathersBrn(father.getBirthRegistrationNumber());
-            patient.setFathersNid(father.getNationalId());
-            patient.setFathersUid(father.getUid());
-        } else {
-            patient.setFathersNameBangla("");
-            patient.setFathersGivenName("");
-            patient.setFathersSurName("");
-            patient.setFathersBrn("");
-            patient.setFathersNid("");
-            patient.setFathersUid("");
-        }
-    }
-
-    private Boolean isValidRelationBlock(List<Relation> relations, List<Relation> existing) {
-
-        for (Relation relation : relations) {
-            if (isNotBlank(relation.getId()) && !relationExistWithId(existing, relation.getId())) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private void appendExistingRelationBlock(PatientData patient, PatientData existingPatient) {
-
-        List<Relation> r = patient.getRelations();
-
-        if (r == null) {
-            r = new ArrayList<>();
-        }
-
-        List<Relation> relations = existingPatient.getRelations();
-
-        if (!isValidRelationBlock(r, relations)) {
-            DirectFieldBindingResult bindingResult = new DirectFieldBindingResult(patient, "patient");
-            bindingResult.addError(new FieldError("patient", "relations", "1004"));
-            throw new ValidationException(bindingResult);
-        }
-
-        if (relations == null) {
-            return;
-        }
-
-        for (Relation relation : relations) {
-            if (r.contains(relation)) {
-                r.get(r.indexOf(relation)).setId(relation.getId());
-            } else if (patient.getRelationById(relation.getId()) == null) {
-                r.add(relation);
-            }
-        }
-    }
-
-    private void populateRelationId(List<Relation> r) {
-        int y = r.size();
-        for (int x = 0; x < y; x = x + 1) {
-            if (StringUtils.isBlank(r.get(x).getId())) {
-                r.get(x).setId(UUID.randomUUID().toString());
-            }
-        }
-    }
-
-    public Boolean relationExistWithId(List<Relation> relations, String id) {
-
-        if (relations == null) {
-            return false;
-        }
-
-        for (Relation relation : relations) {
-
-            if (relation.getId() != null && relation.getId().equals(id)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }
