@@ -1,5 +1,7 @@
 package org.sharedhealth.mci.web.mapper;
 
+import java.util.*;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -8,8 +10,6 @@ import org.sharedhealth.mci.web.model.Patient;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.FieldError;
-
-import java.util.*;
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang.time.DateFormatUtils.ISO_DATE_FORMAT;
@@ -239,14 +239,18 @@ public class PatientMapper {
         try {
             patient.setRelations(objectMapper.writeValueAsString(data.getRelations()));
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            System.out.println("Error on preparing relation : " + e.getMessage());
         }
     }
 
     private void removeDuplicateRelationBlock(List<Relation> r) {
-        Set<Relation> uniqueRelations = new LinkedHashSet<>(r);
-        r.clear();
-        r.addAll(uniqueRelations);
+        try {
+            Set<Relation> uniqueRelations = new LinkedHashSet<>(r);
+            r.clear();
+            r.addAll(uniqueRelations);
+        }catch (Exception e) {
+            System.out.println("Error on removing duplicate : " + e.getMessage());
+        }
     }
 
     private void appendExistingRelationBlock(PatientData patient, PatientData existingPatient) {

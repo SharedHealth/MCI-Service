@@ -28,4 +28,8 @@ public abstract class BaseCodeValidatorTest<T> {
             assertEquals("1004", constraintViolations.iterator().next().getMessage());
         }
     }
+
+    public Validator getValidator() {
+        return validator;
+    }
 }

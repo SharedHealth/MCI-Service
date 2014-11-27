@@ -1,5 +1,7 @@
 package org.sharedhealth.mci.web.mapper;
 
+import javax.validation.constraints.Pattern;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -7,21 +9,18 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.sharedhealth.mci.validation.constraints.Code;
 import org.sharedhealth.mci.validation.constraints.Length;
-import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
-
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
+import org.sharedhealth.mci.validation.constraints.RelationType;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static org.sharedhealth.mci.web.utils.PatientFieldProperties.*;
 
+@RelationType(message = "1001", field = "type")
 public class Relation {
 
     private final String RELATION_TYPE = "type";
     private final String RELATIONS_CODE_TYPE = "relations";
     @JsonProperty(RELATION_TYPE)
     @JsonInclude(NON_EMPTY)
-    @NotNull(message = "1001", groups = RequiredOnUpdateGroup.class)
     @Code(type = RELATIONS_CODE_TYPE, message = "1004")
     private String type;
 
