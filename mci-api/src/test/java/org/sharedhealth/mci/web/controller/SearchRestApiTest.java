@@ -79,7 +79,6 @@ public class SearchRestApiTest extends BaseControllerTest {
 
     @Test
     public void shouldReturnBadRequestIfOnlySurNameGiven() throws Exception {
-        String json = new ObjectMapper().writeValueAsString(patientData);
 
         MvcResult result = mockMvc.perform(get(API_END_POINT + "?sur_name=Mazumder").accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
@@ -89,7 +88,6 @@ public class SearchRestApiTest extends BaseControllerTest {
 
     @Test
     public void shouldReturnBadRequestIfOnlyGivenNameGiven() throws Exception {
-        String json = new ObjectMapper().writeValueAsString(patientData);
 
         MvcResult result = mockMvc.perform(get(API_END_POINT + "?given_name=Mazumder").accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
@@ -99,7 +97,6 @@ public class SearchRestApiTest extends BaseControllerTest {
 
     @Test
     public void shouldReturnOkResponseIfPatientNotExistWithGivenNameAndAddress() throws Exception {
-        String json = new ObjectMapper().writeValueAsString(patientData);
         String present_address = patientData.getAddress().getDivisionId() +
                 patientData.getAddress().getDistrictId() + patientData.getAddress().getUpazillaId();
         String givenName = "Rajus";
@@ -176,7 +173,6 @@ public class SearchRestApiTest extends BaseControllerTest {
 
     @Test
     public void shouldReturnBadRequestIfOnlyExtensionOrCountryCodeOrAreaCodeGiven() throws Exception {
-        String json = new ObjectMapper().writeValueAsString(patientData);
 
         MvcResult result = mockMvc.perform(get(API_END_POINT +
                 "?country_code=880&area_code=02&extension=122").accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
@@ -187,7 +183,6 @@ public class SearchRestApiTest extends BaseControllerTest {
 
     @Test
     public void shouldReturnBadRequestIfPresentAddressNotGivenWithPhoneNumber() throws Exception {
-        String json = new ObjectMapper().writeValueAsString(patientData);
 
         MvcResult result = mockMvc.perform(get(API_END_POINT +
                 "?phone_number=1716528608").accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
@@ -198,7 +193,6 @@ public class SearchRestApiTest extends BaseControllerTest {
 
     @Test
     public void shouldReturnBadRequestIfOnlyCountryCodeGiven() throws Exception {
-        String json = new ObjectMapper().writeValueAsString(patientData);
 
         MvcResult result = mockMvc.perform(get(API_END_POINT +
                 "?country_code=880").accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
@@ -210,7 +204,6 @@ public class SearchRestApiTest extends BaseControllerTest {
     @Test
     public void shouldReturnOkResponseIfPatientNotExistWithPhoneNumber() throws Exception {
         patientData.setHealthId("health-100");
-        String json = new ObjectMapper().writeValueAsString(patientData);
         String present_address = patientData.getAddress().getDivisionId() +
                 patientData.getAddress().getDistrictId() + patientData.getAddress().getUpazillaId();
         MvcResult result = mockMvc.perform(get(API_END_POINT +
