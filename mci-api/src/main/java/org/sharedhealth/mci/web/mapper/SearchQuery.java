@@ -1,13 +1,13 @@
 package org.sharedhealth.mci.web.mapper;
 
+import javax.validation.constraints.Pattern;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.sharedhealth.mci.validation.constraints.Length;
 import org.sharedhealth.mci.validation.constraints.SearchQueryConstraint;
-
-import javax.validation.constraints.Pattern;
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -116,6 +116,22 @@ public class SearchQuery extends PaginationQuery {
         this.divisionId = present_address.substring(0, 2);
         this.districtId = present_address.substring(2, 4);
         this.upazilaId = present_address.substring(4, 6);
+    }
+
+    @Override
+    public String toString() {
+        return "SearchQuery{" +
+                "nid='" + nid + '\'' +
+                ", bin_brn='" + bin_brn + '\'' +
+                ", uid='" + uid + '\'' +
+                ", present_address='" + present_address + '\'' +
+                ", sur_name='" + sur_name + '\'' +
+                ", given_name='" + given_name + '\'' +
+                ", phone_no='" + phone_no + '\'' +
+                ", country_code='" + country_code + '\'' +
+                ", area_code='" + area_code + '\'' +
+                ", extension='" + extension + '\'' +
+                '}';
     }
 
     public String getDivisionId() {
