@@ -51,7 +51,6 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
 
         if(StringUtils.isNotEmpty(this.countryCode) && value.getCountryCode() != null && !value.getCountryCode().equals(this.countryCode)) {
             isValid = false;
-            //addConstraintViolation(context, ERROR_CODE_PATTERN, "countryCode");
         }
 
         if (StringUtils.isBlank(value.getDivisionId())) {
@@ -77,6 +76,10 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
             addConstraintViolation(context, ERROR_CODE_DEPENDENT, "unionAndWard");
         }
 
+        if(isInvalidHierarchy(value)){
+            isValid = false;
+        }
+
         isValid = isValid && isExistInLocationRegistry(geoCode);
 
         if(!isValid) {
@@ -85,6 +88,16 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
 
         return isValid;
 
+    }
+
+    private boolean isInvalidHierarchy(Address address) {
+        if (StringUtils.isNotBlank(address.getUnionOrWard()) && StringUtils.isBlank(address.getCityCorporationId())) {
+            return true;
+        } else if (StringUtils.isNotBlank(address.getCityCorporationId()) && StringUtils.isBlank(address.getUpazilaOrThana())) {
+            return true;
+        }
+
+        return false;
     }
 
     private boolean isExistInLocationRegistry(String geoCode) {
