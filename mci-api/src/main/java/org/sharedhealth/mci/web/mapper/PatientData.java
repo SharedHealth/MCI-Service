@@ -17,6 +17,8 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -165,15 +167,8 @@ public class PatientData {
     @JsonInclude(NON_EMPTY)
     private String updatedAt;
 
-    @Override
-    public boolean equals(Object rhs) {
-        return EqualsBuilder.reflectionEquals(this, rhs);
-    }
-
-    @Override
-    public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
-    }
+    @JsonIgnore
+    private Map<UUID, String> approvals;
 
     public String getNationalId() {
         return nationalId;
@@ -454,6 +449,24 @@ public class PatientData {
             count++;
         }
         return count > 1;
+    }
+
+    public Map<UUID, String> getApprovals() {
+        return approvals;
+    }
+
+    public void setApprovals(Map<UUID, String> approvals) {
+        this.approvals = approvals;
+    }
+
+    @Override
+    public boolean equals(Object rhs) {
+        return EqualsBuilder.reflectionEquals(this, rhs);
+    }
+
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override

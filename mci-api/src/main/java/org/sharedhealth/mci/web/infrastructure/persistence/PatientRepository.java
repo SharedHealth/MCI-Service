@@ -1,8 +1,10 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
-import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
+import com.datastax.driver.core.utils.UUIDs;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.utils.UidGenerator;
 import org.sharedhealth.mci.web.exception.HealthIDExistException;
@@ -14,12 +16,13 @@ import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PatientMapper;
 import org.sharedhealth.mci.web.mapper.SearchQuery;
-import org.sharedhealth.mci.web.model.*;
+import org.sharedhealth.mci.web.model.Approval;
+import org.sharedhealth.mci.web.model.ApprovalMapping;
+import org.sharedhealth.mci.web.model.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.cassandra.convert.CassandraConverter;
 import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -37,14 +40,13 @@ import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
-import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
-import static org.springframework.data.cassandra.core.CassandraTemplate.toUpdateQuery;
 
 @Component
 public class PatientRepository extends BaseRepository {
 
     protected static final Logger logger = LoggerFactory.getLogger(PatientRepository.class);
     private static final UidGenerator uid = new UidGenerator();
+    private ObjectMapper objectMapper = new ObjectMapper();
     private PatientMapper mapper;
 
     @Autowired
@@ -71,8 +73,69 @@ public class PatientRepository extends BaseRepository {
         p.setUpdatedAt(new Date());
         p.setSurName(patientData.getSurName());
 
-        cassandraOperations.execute(buildSaveBatch(p));
+        cassandraOperations.execute(buildSaveBatch(p, cassandraOperations.getConverter()));
         return new MCIResponse(p.getHealthId(), HttpStatus.CREATED);
+    }
+
+    public MCIResponse update(PatientData patientData, final String hid) {
+        if (patientData.getHealthId() != null && !StringUtils.equals(patientData.getHealthId(), hid)) {
+            DirectFieldBindingResult bindingResult = new DirectFieldBindingResult(patientData, "patient");
+            bindingResult.addError(new FieldError("patient", "hid", "1004"));
+            throw new ValidationException(bindingResult);
+        }
+        PatientData existingPatient;
+        try {
+            existingPatient = findByHealthId(hid);
+        } catch (Exception e) {
+            throw new PatientNotFoundException("No patient found with health id: " + hid);
+        }
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("approvalFeilds.properties");
+        Properties properties = new Properties();
+        try {
+            properties.load(inputStream);
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to read approval property file.", e);
+        }
+        //TODO : move to mapper
+        PatientData patientToSave = new PatientData();
+        patientToSave.setHealthId(hid);
+        patientData.setHealthId(hid);
+        PatientFilter patientFilter = new PatientFilter(properties, existingPatient, patientData, patientToSave);
+
+        Approval approval = patientFilter.filter();
+
+        String fullName = "";
+
+        if (patientData.getGivenName() != null) {
+            fullName = patientData.getGivenName();
+        }
+
+        if (patientData.getSurName() != null) {
+            fullName = fullName + " " + patientData.getSurName();
+        }
+
+        Patient patient = mapper.map(patientToSave, existingPatient);
+        patient.setHealthId(hid);
+        patient.setFullName(fullName);
+        patient.setUpdatedAt(new Date());
+
+        ApprovalMapping approvalMapping = null;
+        if (approval != null) {
+            try {
+                patient.addApproval(UUIDs.timeBased(), objectMapper.writeValueAsString(approval));
+                approvalMapping = new ApprovalMapping();
+                approvalMapping.setDivisionId(existingPatient.getAddress().getDivisionId());
+                approvalMapping.setDistrictId(existingPatient.getAddress().getDistrictId());
+                approvalMapping.setUpazilaId(existingPatient.getAddress().getUpazillaId());
+                approvalMapping.setCreatedAt(UUIDs.timeBased());
+                approvalMapping.setHealthId(hid);
+
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException("Error setting approvals during update.", e);
+            }
+        }
+        cassandraOperations.execute(buildUpdateBatch(patient, approvalMapping, cassandraOperations.getConverter()));
+        return new MCIResponse(patient.getHealthId(), HttpStatus.ACCEPTED);
     }
 
     private PatientData getExistingPatient(PatientData mapper) {
@@ -88,46 +151,6 @@ public class PatientRepository extends BaseRepository {
             return mappers.get(0);
         }
         return null;
-    }
-
-    private Batch buildSaveBatch(Patient patient) {
-        String healthId = patient.getHealthId();
-        Batch batch = QueryBuilder.batch();
-        CassandraConverter converter = cassandraOperations.getConverter();
-
-        batch.add(createInsertQuery(CF_PATIENT, patient, null, converter));
-
-        String nationalId = patient.getNationalId();
-        if (isNotBlank(nationalId)) {
-            batch.add(createInsertQuery(CF_NID_MAPPING, new NidMapping(nationalId, healthId), null, converter));
-        }
-
-        String brn = patient.getBirthRegistrationNumber();
-        if (isNotBlank(brn)) {
-            batch.add(createInsertQuery(CF_BRN_MAPPING, new BrnMapping(brn, healthId), null, converter));
-        }
-
-        String uid = patient.getUid();
-        if (isNotBlank(uid)) {
-            batch.add(createInsertQuery(CF_UID_MAPPING, new UidMapping(uid, healthId), null, converter));
-        }
-
-        String phoneNumber = patient.getCellNo();
-        if (isNotBlank(phoneNumber)) {
-            batch.add(createInsertQuery(CF_PHONE_NUMBER_MAPPING,
-                    new PhoneNumberMapping(phoneNumber, healthId), null, converter));
-        }
-
-        String divisionId = patient.getDivisionId();
-        String districtId = patient.getDistrictId();
-        String upazilaId = patient.getUpazillaId();
-        String givenName = patient.getGivenName();
-        String surname = patient.getSurName();
-        if (isNotBlank(divisionId) && isNotBlank(districtId) && isNotBlank(upazilaId) && isNotBlank(givenName) && isNotBlank(surname)) {
-            NameMapping mapping = new NameMapping(divisionId, districtId, upazilaId, givenName.toLowerCase(), surname.toLowerCase(), healthId);
-            batch.add(createInsertQuery(CF_NAME_MAPPING, mapping, null, converter));
-        }
-        return batch;
     }
 
     public PatientData findByHealthId(final String healthId) {
@@ -219,58 +242,6 @@ public class PatientRepository extends BaseRepository {
             return false;
         }
         return true;
-    }
-
-    public MCIResponse update(PatientData patientData, final String hid) {
-        if (patientData.getHealthId() != null && !StringUtils.equals(patientData.getHealthId(), hid)) {
-            DirectFieldBindingResult bindingResult = new DirectFieldBindingResult(patientData, "patient");
-            bindingResult.addError(new FieldError("patient", "hid", "1004"));
-            throw new ValidationException(bindingResult);
-        }
-        PatientData existingPatient;
-        try {
-            existingPatient = findByHealthId(hid);
-        } catch (Exception e) {
-            throw new PatientNotFoundException("No patient found with health id: " + hid);
-        }
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("approvalFeilds.properties");
-        Properties properties = new Properties();
-        try {
-            properties.load(inputStream);
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to read approval property file.", e);
-        }
-        //TODO : move to mapper
-        PatientData patientToSave = new PatientData();
-        patientToSave.setHealthId(hid);
-        patientData.setHealthId(hid);
-        PatientFilter patientFilter = new PatientFilter(properties, existingPatient, patientData, patientToSave);
-
-        Approval approval = patientFilter.filter();
-
-        String fullName = "";
-
-        if (patientData.getGivenName() != null) {
-            fullName = patientData.getGivenName();
-        }
-
-        if (patientData.getSurName() != null) {
-            fullName = fullName + " " + patientData.getSurName();
-        }
-
-        Patient patient = mapper.map(patientToSave, existingPatient);
-        patient.setHealthId(hid);
-        patient.setFullName(fullName);
-        patient.setUpdatedAt(new Date());
-
-        CassandraConverter converter = cassandraOperations.getConverter();
-        Batch batch = QueryBuilder.batch();
-        batch.add(toUpdateQuery("patient", patient, null, converter));
-        if (approval != null) {
-            batch.add(toUpdateQuery("approval", approval, null, converter));
-        }
-        cassandraOperations.execute(batch);
-        return new MCIResponse(patient.getHealthId(), HttpStatus.ACCEPTED);
     }
 
     public List<PatientData> findAllByLocations(List<String> locations, String start, Date since) {

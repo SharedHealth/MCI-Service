@@ -1,6 +1,5 @@
 package org.sharedhealth.mci.web.model;
 
-import org.springframework.data.cassandra.mapping.Column;
 import org.springframework.data.cassandra.mapping.PrimaryKeyColumn;
 import org.springframework.data.cassandra.mapping.Table;
 
@@ -29,15 +28,6 @@ public class NameMapping {
     @PrimaryKeyColumn(name = HEALTH_ID, ordinal = 5, type = CLUSTERED)
     private String healthId;
 
-    @Column("city_corp_id")
-    private String cityCorpId;
-
-    @Column("ward_id")
-    private String wardId;
-
-    @Column("rural_ward_id")
-    private String ruralWardId;
-
     public NameMapping(String divisionId, String districtId, String upazilaId, String givenName, String surname, String healthId) {
         this.divisionId = divisionId;
         this.districtId = districtId;
@@ -45,17 +35,5 @@ public class NameMapping {
         this.givenName = givenName;
         this.surname = surname;
         this.healthId = healthId;
-    }
-
-    public void setCityCorpId(String cityCorpId) {
-        this.cityCorpId = cityCorpId;
-    }
-
-    public void setWardId(String wardId) {
-        this.wardId = wardId;
-    }
-
-    public void setRuralWardId(String ruralWardId) {
-        this.ruralWardId = ruralWardId;
     }
 }

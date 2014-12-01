@@ -81,6 +81,8 @@ CREATE TABLE IF NOT EXISTS patient (
   primary_contact_number_country_code varchar,
   primary_contact_number_extension varchar,
 
+  approval map<timeuuid, text>,
+
   location_level1 varchar,
   location_level2 varchar,
   location_level3 varchar,
@@ -93,10 +95,6 @@ CREATE TABLE IF NOT EXISTS patient (
   full_name varchar,
   PRIMARY KEY (health_id)
 );
-
-CREATE INDEX uid_key ON patient (uid);
-CREATE INDEX national_id_key ON patient (national_id);
-CREATE INDEX bin_brn_key ON patient (bin_brn);
 
 CREATE INDEX location_level1_key ON patient (location_level1);
 CREATE INDEX location_level2_key ON patient (location_level2);

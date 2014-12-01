@@ -1,11 +1,10 @@
 package org.sharedhealth.mci.web.handler;
 
-import org.sharedhealth.mci.web.infrastructure.persistence.Approval;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
+import org.sharedhealth.mci.web.model.Approval;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -30,13 +29,12 @@ public class PatientFilter {
 
     public Approval filter() {
         Map<String, String> filteredFeildMap = filterFeilds(patient);
-        if (filteredFeildMap.isEmpty())
+        if (filteredFeildMap.isEmpty()) {
             return null;
+        }
         Approval approval = new Approval();
-        approval.setHealth_id(patient.getHealthId());
-        approval.setFacility_id("10000059");
-        approval.setFieldsToApprovedMaps(filteredFeildMap);
-        approval.setDatetime(new Date());
+        approval.setFacilityId("10000059");
+        approval.setFields(filteredFeildMap);
         return approval;
     }
 
@@ -110,18 +108,6 @@ public class PatientFilter {
                 return existingPatientKeyValue;
             } else if (value.equals(NEEDS_APPROVAL) && !existingPatientKeyValue.equals(patientToBeUpdatedKeyValue))
                 map.put(key, patientToBeUpdatedKeyValue);
-            return existingPatientKeyValue;
-        }
-        return patientToBeUpdatedKeyValue;
-    }
-
-    private Date toBeApproved(Map<String, String> map, String key, Date existingPatientKeyValue, Date patientToBeUpdatedKeyValue) {
-        String value = properties.getProperty(key);
-        if (value != null && patientToBeUpdatedKeyValue != null) {
-            if (value.equals(NON_UPDATEABLE)) {
-                return existingPatientKeyValue;
-            } else if (value.equals(NEEDS_APPROVAL) && !existingPatientKeyValue.equals(patientToBeUpdatedKeyValue))
-                map.put(key, patientToBeUpdatedKeyValue.toString());
             return existingPatientKeyValue;
         }
         return patientToBeUpdatedKeyValue;

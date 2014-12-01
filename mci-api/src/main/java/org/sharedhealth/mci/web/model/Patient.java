@@ -9,6 +9,9 @@ import org.springframework.data.cassandra.mapping.PrimaryKey;
 import org.springframework.data.cassandra.mapping.Table;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.sharedhealth.mci.utils.DateUtil.string2Date;
@@ -267,6 +270,9 @@ public class Patient {
 
     @Column("lower_given_name")
     private String lowerGivenName;
+
+    @Column("approval")
+    private Map<UUID, String> approvals;
 
     @Override
     public boolean equals(Object rhs) {
@@ -982,5 +988,22 @@ public class Patient {
 
     public void setLowerGivenName(String lowerGivenName) {
         this.lowerGivenName = lowerGivenName;
+    }
+
+    public Map<UUID, String> getApprovals() {
+        return approvals;
+    }
+
+    public void setApprovals(Map<UUID, String> approvals) {
+        this.approvals = approvals;
+    }
+
+    public void addApproval(UUID key, String json) {
+        Map<UUID, String> approvalList = new HashMap<>();
+        if (this.approvals != null) {
+            approvalList.putAll(this.approvals);
+        }
+        approvalList.put(key, json);
+        this.setApprovals(approvalList);
     }
 }

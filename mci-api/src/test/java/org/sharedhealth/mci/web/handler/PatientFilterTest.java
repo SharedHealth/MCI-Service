@@ -1,10 +1,10 @@
 package org.sharedhealth.mci.web.handler;
 
 import org.junit.Test;
-import org.sharedhealth.mci.web.infrastructure.persistence.Approval;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.Location;
 import org.sharedhealth.mci.web.mapper.PatientData;
+import org.sharedhealth.mci.web.model.Approval;
 
 import java.text.ParseException;
 import java.util.Properties;
@@ -28,7 +28,7 @@ public class PatientFilterTest {
         PatientFilter patientFilter = new PatientFilter(properties, patientExisting, patientUpdated,patientToBeSaved);
         Approval approval = patientFilter.filter();
 
-        assertEquals("F", approval.getFieldsToApprovedMaps().get(genderKey));
+        assertEquals("F", approval.getFields().get(genderKey));
         assertEquals(patientToBeSaved.getGender(), patientExisting.getGender());
     }
 

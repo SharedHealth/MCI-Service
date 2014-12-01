@@ -1,7 +1,5 @@
 package org.sharedhealth.mci.web.mapper;
 
-import java.util.*;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -10,6 +8,8 @@ import org.sharedhealth.mci.web.model.Patient;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.FieldError;
+
+import java.util.*;
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang.time.DateFormatUtils.ISO_DATE_FORMAT;
@@ -33,12 +33,14 @@ public class PatientMapper {
 
     public PatientData map(Patient patient) {
         PatientData data = new PatientData();
-        try {
-            List<Relation> relations = objectMapper.readValue(patient.getRelations(),
-                    objectMapper.getTypeFactory().constructCollectionType(List.class, Relation.class));
-            data.setRelations(relations);
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (patient.getRelations() != null) {
+            try {
+                List<Relation> relations = objectMapper.readValue(patient.getRelations(),
+                        objectMapper.getTypeFactory().constructCollectionType(List.class, Relation.class));
+                data.setRelations(relations);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         data.setHealthId(patient.getHealthId());
         data.setNationalId(patient.getNationalId());
@@ -124,6 +126,7 @@ public class PatientMapper {
             data.setPrimaryContactNumber(primaryContactNumber);
         }
 
+        data.setApprovals(patient.getApprovals());
         data.setCreatedAt(patient.getCreatedAt());
         data.setUpdatedAt(patient.getUpdatedAt());
         return data;
@@ -217,6 +220,7 @@ public class PatientMapper {
         }
 
         patient.setPrimaryContact(StringUtils.trim(data.getPrimaryContact()));
+        patient.setApprovals(existing.getApprovals());
 
         return patient;
     }
@@ -248,7 +252,7 @@ public class PatientMapper {
             Set<Relation> uniqueRelations = new LinkedHashSet<>(r);
             r.clear();
             r.addAll(uniqueRelations);
-        }catch (Exception e) {
+        } catch (Exception e) {
             System.out.println("Error on removing duplicate : " + e.getMessage());
         }
     }

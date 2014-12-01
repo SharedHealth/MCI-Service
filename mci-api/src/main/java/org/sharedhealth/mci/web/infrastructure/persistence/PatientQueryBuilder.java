@@ -1,8 +1,16 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
+import com.datastax.driver.core.querybuilder.Batch;
+import com.datastax.driver.core.querybuilder.QueryBuilder;
+import org.sharedhealth.mci.web.model.*;
+import org.springframework.data.cassandra.convert.CassandraConverter;
+
 import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
 import static com.datastax.driver.core.querybuilder.Select.Where;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
+import static org.springframework.data.cassandra.core.CassandraTemplate.toUpdateQuery;
 
 public class PatientQueryBuilder {
 
@@ -12,8 +20,10 @@ public class PatientQueryBuilder {
     public static final String CF_UID_MAPPING = "uid_mapping";
     public static final String CF_PHONE_NUMBER_MAPPING = "phone_number_mapping";
     public static final String CF_NAME_MAPPING = "name_mapping";
+    public static final String CF_APPROVAL_MAPPING = "approval_mapping";
 
     public static final String HEALTH_ID = "health_id";
+    public static final String CREATED_AT = "created_at";
     public static final String NATIONAL_ID = "national_id";
     public static final String FULL_NAME_BANGLA = "full_name_bangla";
     public static final String GIVEN_NAME = "given_name";
@@ -123,5 +133,53 @@ public class PatientQueryBuilder {
             where = where.and(eq(SUR_NAME, surname.toLowerCase()));
         }
         return where.toString();
+    }
+
+    public static Batch buildSaveBatch(Patient patient, CassandraConverter converter) {
+        String healthId = patient.getHealthId();
+        Batch batch = QueryBuilder.batch();
+
+        batch.add(createInsertQuery(CF_PATIENT, patient, null, converter));
+
+        String nationalId = patient.getNationalId();
+        if (isNotBlank(nationalId)) {
+            batch.add(createInsertQuery(CF_NID_MAPPING, new NidMapping(nationalId, healthId), null, converter));
+        }
+
+        String brn = patient.getBirthRegistrationNumber();
+        if (isNotBlank(brn)) {
+            batch.add(createInsertQuery(CF_BRN_MAPPING, new BrnMapping(brn, healthId), null, converter));
+        }
+
+        String uid = patient.getUid();
+        if (isNotBlank(uid)) {
+            batch.add(createInsertQuery(CF_UID_MAPPING, new UidMapping(uid, healthId), null, converter));
+        }
+
+        String phoneNumber = patient.getCellNo();
+        if (isNotBlank(phoneNumber)) {
+            batch.add(createInsertQuery(CF_PHONE_NUMBER_MAPPING,
+                    new PhoneNumberMapping(phoneNumber, healthId), null, converter));
+        }
+
+        String divisionId = patient.getDivisionId();
+        String districtId = patient.getDistrictId();
+        String upazilaId = patient.getUpazillaId();
+        String givenName = patient.getGivenName();
+        String surname = patient.getSurName();
+        if (isNotBlank(divisionId) && isNotBlank(districtId) && isNotBlank(upazilaId) && isNotBlank(givenName) && isNotBlank(surname)) {
+            NameMapping mapping = new NameMapping(divisionId, districtId, upazilaId, givenName.toLowerCase(), surname.toLowerCase(), healthId);
+            batch.add(createInsertQuery(CF_NAME_MAPPING, mapping, null, converter));
+        }
+        return batch;
+    }
+
+    public static Batch buildUpdateBatch(Patient patient, ApprovalMapping approvalMapping, CassandraConverter converter) {
+        Batch batch = QueryBuilder.batch();
+        batch.add(toUpdateQuery(CF_PATIENT, patient, null, converter));
+        if (approvalMapping != null) {
+            batch.add(toUpdateQuery(CF_APPROVAL_MAPPING, approvalMapping, null, converter));
+        }
+        return batch;
     }
 }
