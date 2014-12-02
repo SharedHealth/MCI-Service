@@ -11,7 +11,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @Configuration
 @EnableWebMvc
 @EnableAutoConfiguration
-@ComponentScan(basePackages = "org.sharedhealth.mci.web")
+@ComponentScan(basePackages = "org.sharedhealth.mci")
 @EnableCaching
 public class WebMvcConfigTest extends WebMvcConfig {
 

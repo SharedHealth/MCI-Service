@@ -13,9 +13,9 @@ import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.handler.PatientFilter;
 import org.sharedhealth.mci.web.mapper.*;
+import org.sharedhealth.mci.web.model.Patient;
 import org.sharedhealth.mci.web.model.PendingApproval;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
-import org.sharedhealth.mci.web.model.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,14 +39,17 @@ import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBu
 public class PatientRepository extends BaseRepository {
 
     protected static final Logger logger = LoggerFactory.getLogger(PatientRepository.class);
-    private static final UidGenerator uid = new UidGenerator();
     private ObjectMapper objectMapper = new ObjectMapper();
+    private UidGenerator uid;
     private PatientMapper mapper;
 
     @Autowired
-    public PatientRepository(@Qualifier("MCICassandraTemplate") CassandraOperations cassandraOperations, PatientMapper mapper) {
+    public PatientRepository(@Qualifier("MCICassandraTemplate") CassandraOperations cassandraOperations,
+                             PatientMapper mapper,
+                             UidGenerator uid) {
         super(cassandraOperations);
         this.mapper = mapper;
+        this.uid = uid;
     }
 
     public MCIResponse create(PatientData patientData) {

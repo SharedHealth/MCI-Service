@@ -22,7 +22,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
 @Configuration
 @EnableWebMvc
 @EnableAutoConfiguration
-@ComponentScan(basePackages = "org.sharedhealth.mci.web")
+@ComponentScan(basePackages = "org.sharedhealth.mci")
 @EnableCaching
 public class WebMvcConfig extends WebMvcConfigurationSupport {
 

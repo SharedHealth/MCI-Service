@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 
 @EnableAutoConfiguration
-@ComponentScan(basePackages = "org.sharedhealth.mci.web")
+@ComponentScan(basePackages = "org.sharedhealth.mci")
 public class Main {
 
 
