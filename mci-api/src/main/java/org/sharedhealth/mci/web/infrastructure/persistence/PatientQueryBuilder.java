@@ -2,10 +2,14 @@ package org.sharedhealth.mci.web.infrastructure.persistence;
 
 import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
+import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.model.*;
 import org.springframework.data.cassandra.convert.CassandraConverter;
 
+import java.util.UUID;
+
 import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.gt;
 import static com.datastax.driver.core.querybuilder.Select.Where;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -120,6 +124,18 @@ public class PatientQueryBuilder {
 
     public static String buildFindByPhoneNumberQuery(String phoneNumber) {
         return select(HEALTH_ID).from(CF_PHONE_NUMBER_MAPPING).where(eq(PHONE_NO, phoneNumber)).toString();
+    }
+
+    public static String buildFindPendingApprovalMappingQuery(Catchment catchment, UUID since) {
+        Where where = select(HEALTH_ID, CREATED_AT).from(CF_PENDING_APPROVAL_MAPPING)
+                .where(eq(DIVISION_ID, catchment.getDivisionId()))
+                .and(eq(DISTRICT_ID, catchment.getDistrictId()))
+                .and(eq(UPAZILLA_ID, catchment.getUpazilaId()));
+
+        if (since != null) {
+            where = where.and(gt(CREATED_AT, since));
+        }
+        return where.toString();
     }
 
     public static String buildFindByNameQuery(String divisionId, String districtId, String upazilaId, String givenName, String surname) {

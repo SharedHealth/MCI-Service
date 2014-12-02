@@ -1,5 +1,6 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
+import com.datastax.driver.core.utils.UUIDs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.After;
 import org.junit.Before;
@@ -11,6 +12,7 @@ import org.sharedhealth.mci.web.exception.HealthIDExistException;
 import org.sharedhealth.mci.web.exception.PatientNotFoundException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.mapper.Address;
+import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
 import org.sharedhealth.mci.web.model.PendingApproval;
@@ -22,12 +24,14 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
+import static java.util.Arrays.asList;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.junit.Assert.*;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
@@ -242,6 +246,63 @@ public class PatientRepositoryIT {
         address.setWardId(ward);
 
         return address;
+    }
+
+    @Test
+    public void shouldFindAllPendingApprovalMappingsInDescendingOrderOfCreationTime() {
+        cassandraOperations.insert(asList(buildPendingApprovalMapping("31", "h101"),
+                buildPendingApprovalMapping("30", "h102"),
+                buildPendingApprovalMapping("30", "h103"),
+                buildPendingApprovalMapping("32", "h104"),
+                buildPendingApprovalMapping("30", "h105")));
+
+        List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(new Catchment("10", "20", "30"), null);
+        assertEquals(3, mappings.size());
+        PendingApprovalMapping mapping1 = mappings.get(0);
+        PendingApprovalMapping mapping2 = mappings.get(1);
+        PendingApprovalMapping mapping3 = mappings.get(2);
+
+        assertEquals("h105", mapping1.getHealthId());
+        assertEquals("h103", mapping2.getHealthId());
+        assertEquals("h102", mapping3.getHealthId());
+
+        Date date1 = new Date(UUIDs.unixTimestamp(mapping1.getCreatedAt()));
+        Date date2 = new Date(UUIDs.unixTimestamp(mapping2.getCreatedAt()));
+        Date date3 = new Date(UUIDs.unixTimestamp(mapping3.getCreatedAt()));
+
+        assertTrue(date1.after(date2));
+        assertTrue(date2.after(date3));
+    }
+
+    @Test
+    public void shouldFindPendingApprovalMappingsSinceGivenTime() {
+        List<PendingApprovalMapping> entities = asList(buildPendingApprovalMapping("30", "h101"),
+                buildPendingApprovalMapping("30", "h102"),
+                buildPendingApprovalMapping("30", "h103"),
+                buildPendingApprovalMapping("30", "h104"),
+                buildPendingApprovalMapping("30", "h105"));
+        cassandraOperations.insert(entities);
+
+        List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(new Catchment("10", "20", "30"), entities.get(1).getCreatedAt());
+        assertEquals(3, mappings.size());
+        assertEquals("h105", mappings.get(0).getHealthId());
+        assertEquals("h104", mappings.get(1).getHealthId());
+        assertEquals("h103", mappings.get(2).getHealthId());
+    }
+
+    private PendingApprovalMapping buildPendingApprovalMapping(String upazilaId, String healthId) {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        PendingApprovalMapping mapping = new PendingApprovalMapping();
+        mapping.setHealthId(healthId);
+        mapping.setDivisionId("10");
+        mapping.setDistrictId("20");
+        mapping.setUpazilaId(upazilaId);
+        mapping.setCreatedAt(UUIDs.timeBased());
+        return mapping;
     }
 
     @After

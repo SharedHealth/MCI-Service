@@ -12,10 +12,7 @@ import org.sharedhealth.mci.web.exception.PatientNotFoundException;
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.handler.PatientFilter;
-import org.sharedhealth.mci.web.mapper.Address;
-import org.sharedhealth.mci.web.mapper.PatientData;
-import org.sharedhealth.mci.web.mapper.PatientMapper;
-import org.sharedhealth.mci.web.mapper.SearchQuery;
+import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.model.PendingApproval;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
 import org.sharedhealth.mci.web.model.Patient;
@@ -31,10 +28,7 @@ import org.springframework.validation.FieldError;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
@@ -307,5 +301,9 @@ public class PatientRepository extends BaseRepository {
 
     private String getAddressHierarchyField(int length) {
         return "location_level" + (length / 2);
+    }
+
+    public List<PendingApprovalMapping> findPendingApprovalMapping(Catchment catchment, UUID since) {
+        return cassandraOperations.select(buildFindPendingApprovalMappingQuery(catchment, since), PendingApprovalMapping.class);
     }
 }
