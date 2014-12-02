@@ -1,6 +1,6 @@
 package org.sharedhealth.mci.web.utils;
 
-public class PatientFieldProperties {
+public class JsonConstants {
     public static final String HID = "hid";
     public static final String NID = "nid";
     public static final String NAME_BANGLA = "name_bangla";
@@ -48,4 +48,6 @@ public class PatientFieldProperties {
     public static final String UPAZILA_ID_OR_THANA_ID = "(upazila_id/thana_id)";
     public static final String UPAZILLA_ID_AND_THANA_ID = "(upazila_id,thana_id)";
     public static final String UNION_ID_AND_WARD_ID = "(union_id,ward_id)";
+
+    public static final String PENDING_APPROVAL = "pending_approval";
 }

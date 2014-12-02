@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import static org.sharedhealth.mci.web.utils.PatientFieldProperties.*;
+import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
 public class PatientFilter {
 

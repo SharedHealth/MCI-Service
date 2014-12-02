@@ -12,7 +12,7 @@ import org.sharedhealth.mci.validation.constraints.Length;
 import org.sharedhealth.mci.validation.constraints.RelationType;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
-import static org.sharedhealth.mci.web.utils.PatientFieldProperties.*;
+import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
 @RelationType(message = "1001", field = "type")
 public class Relation {

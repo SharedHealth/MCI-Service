@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.util.*;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
@@ -152,10 +153,19 @@ public class PatientRepository extends BaseRepository {
 
     public PatientData findByHealthId(final String healthId) {
         Patient patient = cassandraOperations.selectOneById(Patient.class, healthId);
-        if (patient != null) {
-            return mapper.map(patient);
+        if (patient == null) {
+            throw new PatientNotFoundException("No patient found with health id: " + healthId);
         }
-        throw new PatientNotFoundException("No patient found with health id: " + healthId);
+        return mapper.map(patient);
+    }
+
+    public List<PatientData> findByHealthId(List<String> healthIds) {
+        String[] values = healthIds.toArray(new String[healthIds.size()]);
+        List<Patient> patients = cassandraOperations.select(buildFindByHidQuery(values), Patient.class);
+        if (isEmpty(patients)) {
+            throw new PatientNotFoundException("No patient found with health ids: " + healthIds);
+        }
+        return mapper.map(patients);
     }
 
     public List<PatientData> findAllByQuery(SearchQuery searchQuery) {
@@ -186,11 +196,7 @@ public class PatientRepository extends BaseRepository {
         if (isNotBlank(query)) {
             List<String> healthIds = cassandraOperations.queryForList(query, String.class);
             if (isNotEmpty(healthIds)) {
-                String[] values = healthIds.toArray(new String[healthIds.size()]);
-                List<Patient> patients = cassandraOperations.select(buildFindByHidsQuery(values), Patient.class);
-                for (Patient patient : patients) {
-                    dataList.add(mapper.map(patient));
-                }
+                dataList.addAll(this.findByHealthId(healthIds));
             }
         }
         return dataList;

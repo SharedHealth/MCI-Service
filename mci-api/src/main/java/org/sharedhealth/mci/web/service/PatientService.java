@@ -4,13 +4,18 @@ package org.sharedhealth.mci.web.service;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.infrastructure.fr.FacilityRegistryWrapper;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
+import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.PatientData;
+import org.sharedhealth.mci.web.mapper.PendingApprovalResponse;
 import org.sharedhealth.mci.web.mapper.SearchQuery;
+import org.sharedhealth.mci.web.model.PendingApprovalMapping;
+import org.sharedhealth.mci.web.utils.JsonConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 @Component
 public class PatientService {
@@ -67,5 +72,38 @@ public class PatientService {
             return PER_PAGE_MAXIMUM_LIMIT_NOTE;
         }
         return note;
+    }
+
+    public PendingApprovalResponse findPendingApprovals(Catchment catchment, UUID since) {
+        List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(catchment, since);
+        if (isNotEmpty(mappings)) {
+            List<PatientData> patients = patientRepository.findByHealthId(getHealthIds(mappings));
+            UUID until = mappings.get(0).getCreatedAt();
+            return buildPendingApprovalResponse(patients, until);
+        }
+        return null;
+    }
+
+    private List<String> getHealthIds(List<PendingApprovalMapping> mappings) {
+        List<String> healthIds = new ArrayList<>();
+        for (PendingApprovalMapping mapping : mappings) {
+            healthIds.add(mapping.getHealthId());
+        }
+        return healthIds;
+    }
+
+    private PendingApprovalResponse buildPendingApprovalResponse(List<PatientData> patients, UUID until) {
+        List<Map<String, String>> pendingApprovals = new ArrayList<>();
+        for (PatientData patient : patients) {
+            Map<String, String> metadata = new HashMap<>();
+            metadata.put(JsonConstants.HID, patient.getHealthId());
+            metadata.put(JsonConstants.GIVEN_NAME, patient.getGivenName());
+            metadata.put(JsonConstants.SUR_NAME, patient.getSurName());
+            pendingApprovals.add(metadata);
+        }
+        PendingApprovalResponse response = new PendingApprovalResponse();
+        response.setPendingApprovals(pendingApprovals);
+        response.setUntil(until);
+        return response;
     }
 }

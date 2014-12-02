@@ -249,7 +249,7 @@ public class PatientRepositoryIT {
     }
 
     @Test
-    public void shouldFindAllPendingApprovalMappingsInDescendingOrderOfCreationTime() {
+    public void shouldFindAllPendingApprovalMappingsInDescendingOrderOfCreationTime() throws Exception {
         cassandraOperations.insert(asList(buildPendingApprovalMapping("31", "h101"),
                 buildPendingApprovalMapping("30", "h102"),
                 buildPendingApprovalMapping("30", "h103"),
@@ -275,7 +275,7 @@ public class PatientRepositoryIT {
     }
 
     @Test
-    public void shouldFindPendingApprovalMappingsSinceGivenTime() {
+    public void shouldFindPendingApprovalMappingsSinceGivenTime() throws Exception {
         List<PendingApprovalMapping> entities = asList(buildPendingApprovalMapping("30", "h101"),
                 buildPendingApprovalMapping("30", "h102"),
                 buildPendingApprovalMapping("30", "h103"),
@@ -283,19 +283,16 @@ public class PatientRepositoryIT {
                 buildPendingApprovalMapping("30", "h105"));
         cassandraOperations.insert(entities);
 
-        List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(new Catchment("10", "20", "30"), entities.get(1).getCreatedAt());
+        List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(
+                new Catchment("10", "20", "30"), entities.get(1).getCreatedAt());
         assertEquals(3, mappings.size());
         assertEquals("h105", mappings.get(0).getHealthId());
         assertEquals("h104", mappings.get(1).getHealthId());
         assertEquals("h103", mappings.get(2).getHealthId());
     }
 
-    private PendingApprovalMapping buildPendingApprovalMapping(String upazilaId, String healthId) {
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+    private PendingApprovalMapping buildPendingApprovalMapping(String upazilaId, String healthId) throws InterruptedException {
+        Thread.sleep(0, 10);
         PendingApprovalMapping mapping = new PendingApprovalMapping();
         mapping.setHealthId(healthId);
         mapping.setDivisionId("10");

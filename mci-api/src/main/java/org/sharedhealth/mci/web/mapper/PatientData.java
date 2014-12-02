@@ -22,7 +22,7 @@ import java.util.UUID;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.sharedhealth.mci.web.utils.PatientFieldProperties.*;
+import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
 @MaritalRelation(message = "1005", field = "maritalStatus")
 @JsonIgnoreProperties({"created_at"})

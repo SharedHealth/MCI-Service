@@ -106,7 +106,7 @@ public class PatientQueryBuilder {
     public static final String PRIMARY_CONTACT_NUMBER_AREA_CODE = "primary_contact_number_area_code";
     public static final String PRIMARY_CONTACT_NUMBER_EXTENSION = "primary_contact_number_extension";
 
-    public static String buildFindByHidsQuery(String[] values) {
+    public static String buildFindByHidQuery(String[] values) {
         return select().from(CF_PATIENT).where(in(HEALTH_ID, values)).toString();
     }
 

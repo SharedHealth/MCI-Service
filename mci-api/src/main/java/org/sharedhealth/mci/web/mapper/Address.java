@@ -16,7 +16,7 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
-import static org.sharedhealth.mci.web.utils.PatientFieldProperties.*;
+import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
 @JsonIgnoreProperties({"geoCode", "unionOrWard"})
 public class Address {
