@@ -168,7 +168,7 @@ public class PatientData {
     private String updatedAt;
 
     @JsonIgnore
-    private Map<UUID, String> approvals;
+    private Map<UUID, String> pendingApprovals;
 
     public String getNationalId() {
         return nationalId;
@@ -451,12 +451,12 @@ public class PatientData {
         return count > 1;
     }
 
-    public Map<UUID, String> getApprovals() {
-        return approvals;
+    public Map<UUID, String> getPendingApprovals() {
+        return pendingApprovals;
     }
 
-    public void setApprovals(Map<UUID, String> approvals) {
-        this.approvals = approvals;
+    public void setPendingApprovals(Map<UUID, String> pendingApprovals) {
+        this.pendingApprovals = pendingApprovals;
     }
 
     @Override

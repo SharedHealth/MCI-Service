@@ -16,8 +16,8 @@ import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PatientMapper;
 import org.sharedhealth.mci.web.mapper.SearchQuery;
-import org.sharedhealth.mci.web.model.Approval;
-import org.sharedhealth.mci.web.model.ApprovalMapping;
+import org.sharedhealth.mci.web.model.PendingApproval;
+import org.sharedhealth.mci.web.model.PendingApprovalMapping;
 import org.sharedhealth.mci.web.model.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,7 +102,7 @@ public class PatientRepository extends BaseRepository {
         patientData.setHealthId(hid);
         PatientFilter patientFilter = new PatientFilter(properties, existingPatient, patientData, patientToSave);
 
-        Approval approval = patientFilter.filter();
+        PendingApproval pendingApproval = patientFilter.filter();
 
         String fullName = "";
 
@@ -119,22 +119,22 @@ public class PatientRepository extends BaseRepository {
         patient.setFullName(fullName);
         patient.setUpdatedAt(new Date());
 
-        ApprovalMapping approvalMapping = null;
-        if (approval != null) {
+        PendingApprovalMapping pendingApprovalMapping = null;
+        if (pendingApproval != null) {
             try {
-                patient.addApproval(UUIDs.timeBased(), objectMapper.writeValueAsString(approval));
-                approvalMapping = new ApprovalMapping();
-                approvalMapping.setDivisionId(existingPatient.getAddress().getDivisionId());
-                approvalMapping.setDistrictId(existingPatient.getAddress().getDistrictId());
-                approvalMapping.setUpazilaId(existingPatient.getAddress().getUpazillaId());
-                approvalMapping.setCreatedAt(UUIDs.timeBased());
-                approvalMapping.setHealthId(hid);
+                patient.addApproval(UUIDs.timeBased(), objectMapper.writeValueAsString(pendingApproval));
+                pendingApprovalMapping = new PendingApprovalMapping();
+                pendingApprovalMapping.setDivisionId(existingPatient.getAddress().getDivisionId());
+                pendingApprovalMapping.setDistrictId(existingPatient.getAddress().getDistrictId());
+                pendingApprovalMapping.setUpazilaId(existingPatient.getAddress().getUpazillaId());
+                pendingApprovalMapping.setCreatedAt(UUIDs.timeBased());
+                pendingApprovalMapping.setHealthId(hid);
 
             } catch (JsonProcessingException e) {
                 throw new RuntimeException("Error setting approvals during update.", e);
             }
         }
-        cassandraOperations.execute(buildUpdateBatch(patient, approvalMapping, cassandraOperations.getConverter()));
+        cassandraOperations.execute(buildUpdateBatch(patient, pendingApprovalMapping, cassandraOperations.getConverter()));
         return new MCIResponse(patient.getHealthId(), HttpStatus.ACCEPTED);
     }
 

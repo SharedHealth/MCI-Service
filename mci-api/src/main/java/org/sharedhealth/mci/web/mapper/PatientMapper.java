@@ -126,7 +126,7 @@ public class PatientMapper {
             data.setPrimaryContactNumber(primaryContactNumber);
         }
 
-        data.setApprovals(patient.getApprovals());
+        data.setPendingApprovals(patient.getPendingApprovals());
         data.setCreatedAt(patient.getCreatedAt());
         data.setUpdatedAt(patient.getUpdatedAt());
         return data;
@@ -220,7 +220,7 @@ public class PatientMapper {
         }
 
         patient.setPrimaryContact(StringUtils.trim(data.getPrimaryContact()));
-        patient.setApprovals(existing.getApprovals());
+        patient.setPendingApprovals(existing.getPendingApprovals());
 
         return patient;
     }

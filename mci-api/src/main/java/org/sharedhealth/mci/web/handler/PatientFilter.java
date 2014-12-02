@@ -3,7 +3,7 @@ package org.sharedhealth.mci.web.handler;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
-import org.sharedhealth.mci.web.model.Approval;
+import org.sharedhealth.mci.web.model.PendingApproval;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,15 +27,15 @@ public class PatientFilter {
         this.patient = patient;
     }
 
-    public Approval filter() {
+    public PendingApproval filter() {
         Map<String, String> filteredFeildMap = filterFeilds(patient);
         if (filteredFeildMap.isEmpty()) {
             return null;
         }
-        Approval approval = new Approval();
-        approval.setFacilityId("10000059");
-        approval.setFields(filteredFeildMap);
-        return approval;
+        PendingApproval pendingApproval = new PendingApproval();
+        pendingApproval.setFacilityId("10000059");
+        pendingApproval.setFields(filteredFeildMap);
+        return pendingApproval;
     }
 
     private Map<String, String> filterFeilds(PatientData patient) {

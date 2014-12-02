@@ -20,7 +20,7 @@ public class PatientQueryBuilder {
     public static final String CF_UID_MAPPING = "uid_mapping";
     public static final String CF_PHONE_NUMBER_MAPPING = "phone_number_mapping";
     public static final String CF_NAME_MAPPING = "name_mapping";
-    public static final String CF_APPROVAL_MAPPING = "approval_mapping";
+    public static final String CF_PENDING_APPROVAL_MAPPING = "approval_mapping";
 
     public static final String HEALTH_ID = "health_id";
     public static final String CREATED_AT = "created_at";
@@ -174,11 +174,11 @@ public class PatientQueryBuilder {
         return batch;
     }
 
-    public static Batch buildUpdateBatch(Patient patient, ApprovalMapping approvalMapping, CassandraConverter converter) {
+    public static Batch buildUpdateBatch(Patient patient, PendingApprovalMapping pendingApprovalMapping, CassandraConverter converter) {
         Batch batch = QueryBuilder.batch();
         batch.add(toUpdateQuery(CF_PATIENT, patient, null, converter));
-        if (approvalMapping != null) {
-            batch.add(toUpdateQuery(CF_APPROVAL_MAPPING, approvalMapping, null, converter));
+        if (pendingApprovalMapping != null) {
+            batch.add(toUpdateQuery(CF_PENDING_APPROVAL_MAPPING, pendingApprovalMapping, null, converter));
         }
         return batch;
     }

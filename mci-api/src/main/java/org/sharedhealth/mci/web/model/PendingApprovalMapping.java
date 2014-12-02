@@ -11,8 +11,8 @@ import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBu
 import static org.springframework.cassandra.core.PrimaryKeyType.CLUSTERED;
 import static org.springframework.cassandra.core.PrimaryKeyType.PARTITIONED;
 
-@Table(value = CF_APPROVAL_MAPPING)
-public class ApprovalMapping {
+@Table(value = CF_PENDING_APPROVAL_MAPPING)
+public class PendingApprovalMapping {
     @PrimaryKeyColumn(name = DIVISION_ID, ordinal = 0, type = PARTITIONED)
     private String divisionId;
 

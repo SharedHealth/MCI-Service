@@ -272,7 +272,7 @@ public class Patient {
     private String lowerGivenName;
 
     @Column("approval")
-    private Map<UUID, String> approvals;
+    private Map<UUID, String> pendingApprovals;
 
     @Override
     public boolean equals(Object rhs) {
@@ -990,20 +990,20 @@ public class Patient {
         this.lowerGivenName = lowerGivenName;
     }
 
-    public Map<UUID, String> getApprovals() {
-        return approvals;
+    public Map<UUID, String> getPendingApprovals() {
+        return pendingApprovals;
     }
 
-    public void setApprovals(Map<UUID, String> approvals) {
-        this.approvals = approvals;
+    public void setPendingApprovals(Map<UUID, String> pendingApprovals) {
+        this.pendingApprovals = pendingApprovals;
     }
 
     public void addApproval(UUID key, String json) {
         Map<UUID, String> approvalList = new HashMap<>();
-        if (this.approvals != null) {
-            approvalList.putAll(this.approvals);
+        if (this.pendingApprovals != null) {
+            approvalList.putAll(this.pendingApprovals);
         }
         approvalList.put(key, json);
-        this.setApprovals(approvalList);
+        this.setPendingApprovals(approvalList);
     }
 }

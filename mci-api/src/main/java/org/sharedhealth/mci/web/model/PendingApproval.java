@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Map;
 
-public class Approval {
+public class PendingApproval {
     @JsonProperty("facility_id")
     private String facilityId;
 

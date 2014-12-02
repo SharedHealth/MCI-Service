@@ -4,7 +4,7 @@ import org.junit.Test;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.Location;
 import org.sharedhealth.mci.web.mapper.PatientData;
-import org.sharedhealth.mci.web.model.Approval;
+import org.sharedhealth.mci.web.model.PendingApproval;
 
 import java.text.ParseException;
 import java.util.Properties;
@@ -26,9 +26,9 @@ public class PatientFilterTest {
         patientUpdated.setGender("F");
 
         PatientFilter patientFilter = new PatientFilter(properties, patientExisting, patientUpdated,patientToBeSaved);
-        Approval approval = patientFilter.filter();
+        PendingApproval pendingApproval = patientFilter.filter();
 
-        assertEquals("F", approval.getFields().get(genderKey));
+        assertEquals("F", pendingApproval.getFields().get(genderKey));
         assertEquals(patientToBeSaved.getGender(), patientExisting.getGender());
     }
 
@@ -44,9 +44,9 @@ public class PatientFilterTest {
         patientUpdated.setDateOfBirth("2000-02-10");
 
         PatientFilter patientFilter = new PatientFilter(properties, patientExisting, patientUpdated,patientToBeSaved);
-        Approval approval = patientFilter.filter();
+        PendingApproval pendingApproval = patientFilter.filter();
 
-        assertNull(approval);
+        assertNull(pendingApproval);
         assertEquals(patientToBeSaved.getDateOfBirth(), patientExisting.getDateOfBirth());
     }
 
@@ -61,9 +61,9 @@ public class PatientFilterTest {
         patientUpdated.setDateOfBirth("2001-02-10");
 
         PatientFilter patientFilter = new PatientFilter(properties, patientExisting, patientUpdated,patientToBeSaved);
-        Approval approval = patientFilter.filter();
+        PendingApproval pendingApproval = patientFilter.filter();
 
-        assertNull(approval);
+        assertNull(pendingApproval);
         assertEquals(patientToBeSaved.getDateOfBirth(), patientUpdated.getDateOfBirth());
     }
 

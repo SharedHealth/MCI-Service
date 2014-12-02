@@ -13,8 +13,8 @@ import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
-import org.sharedhealth.mci.web.model.Approval;
-import org.sharedhealth.mci.web.model.ApprovalMapping;
+import org.sharedhealth.mci.web.model.PendingApproval;
+import org.sharedhealth.mci.web.model.PendingApprovalMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.cassandra.core.CassandraOperations;
@@ -147,16 +147,16 @@ public class PatientRepositoryIT {
         PatientData savedPatient = patientRepository.findByHealthId(healthId);
         assertEquals("M", savedPatient.getGender());
 
-        Map<UUID, String> approvals = savedPatient.getApprovals();
-        assertTrue(approvals != null && approvals.size() == 1);
-        Approval approval = new ObjectMapper().readValue(approvals.values().iterator().next(), Approval.class);
-        assertNotNull(approval);
-        Map<String, String> fields = approval.getFields();
+        Map<UUID, String> pendingApprovals = savedPatient.getPendingApprovals();
+        assertTrue(pendingApprovals != null && pendingApprovals.size() == 1);
+        PendingApproval pendingApproval = new ObjectMapper().readValue(pendingApprovals.values().iterator().next(), PendingApproval.class);
+        assertNotNull(pendingApproval);
+        Map<String, String> fields = pendingApproval.getFields();
         assertEquals("F", fields.get("gender"));
 
-        List<ApprovalMapping> mappings = cassandraOperations.select(select().from(CF_APPROVAL_MAPPING).toString(), ApprovalMapping.class);
+        List<PendingApprovalMapping> mappings = cassandraOperations.select(select().from(CF_PENDING_APPROVAL_MAPPING).toString(), PendingApprovalMapping.class);
         assertTrue(isNotEmpty(mappings));
-        ApprovalMapping mapping = mappings.get(0);
+        PendingApprovalMapping mapping = mappings.get(0);
         assertEquals(data.getAddress().getDivisionId(), mapping.getDivisionId());
         assertEquals(data.getAddress().getDistrictId(), mapping.getDistrictId());
         assertEquals(data.getAddress().getUpazillaId(), mapping.getUpazilaId());
@@ -252,6 +252,6 @@ public class PatientRepositoryIT {
         cassandraOperations.execute("truncate " + CF_UID_MAPPING);
         cassandraOperations.execute("truncate " + CF_PHONE_NUMBER_MAPPING);
         cassandraOperations.execute("truncate " + CF_NAME_MAPPING);
-        cassandraOperations.execute("truncate " + CF_APPROVAL_MAPPING);
+        cassandraOperations.execute("truncate " + CF_PENDING_APPROVAL_MAPPING);
     }
 }
