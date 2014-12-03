@@ -1,6 +1,8 @@
 package org.sharedhealth.mci.web.service;
 
 
+import org.apache.commons.lang3.StringUtils;
+import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.infrastructure.fr.FacilityRegistryWrapper;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
@@ -11,6 +13,8 @@ import org.sharedhealth.mci.web.mapper.SearchQuery;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.DirectFieldBindingResult;
+import org.springframework.validation.FieldError;
 
 import java.util.*;
 
@@ -25,8 +29,6 @@ public class PatientService {
     private PatientRepository patientRepository;
     private FacilityRegistryWrapper facilityRegistryWrapper;
     private SettingService settingService;
-    private static Integer perpageMaximimLimit = 25;
-    private static String perPageMaximimLimitNote = "There are more record for this search criteria. Please narrow down your search";
 
     @Autowired
     public PatientService(PatientRepository patientRepository, FacilityRegistryWrapper facilityRegistryWrapper, SettingService settingService) {
@@ -40,6 +42,11 @@ public class PatientService {
     }
 
     public MCIResponse update(PatientData patient, String healthId) {
+        if (patient.getHealthId() != null && !StringUtils.equals(patient.getHealthId(), healthId)) {
+            DirectFieldBindingResult bindingResult = new DirectFieldBindingResult(patient, "patient");
+            bindingResult.addError(new FieldError("patient", "hid", "1004"));
+            throw new ValidationException(bindingResult);
+        }
         return patientRepository.update(patient, healthId);
     }
 

@@ -10,7 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.utils.UidGenerator;
 import org.sharedhealth.mci.web.exception.HealthIDExistException;
 import org.sharedhealth.mci.web.exception.PatientNotFoundException;
-import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.handler.PatientFilter;
 import org.sharedhealth.mci.web.mapper.*;
@@ -76,18 +75,41 @@ public class PatientRepository extends BaseRepository {
         return new MCIResponse(p.getHealthId(), HttpStatus.CREATED);
     }
 
-    public MCIResponse update(PatientData patientData, final String hid) {
-        if (patientData.getHealthId() != null && !StringUtils.equals(patientData.getHealthId(), hid)) {
-            DirectFieldBindingResult bindingResult = new DirectFieldBindingResult(patientData, "patient");
-            bindingResult.addError(new FieldError("patient", "hid", "1004"));
-            throw new ValidationException(bindingResult);
+    public MCIResponse update(PatientData patientDataForUpdate, String healthId) {
+        PatientData existingPatientData = this.findByHealthId(healthId);
+
+        Properties properties = getApprovalProperties();
+        PatientData patientDataToSave = new PatientData();
+        patientDataToSave.setHealthId(healthId);
+        patientDataForUpdate.setHealthId(healthId);
+
+        PatientFilter patientFilter = new PatientFilter(properties, existingPatientData, patientDataForUpdate, patientDataToSave);
+        PendingApproval pendingApproval = patientFilter.filter();
+
+        String fullName = "";
+
+        if (patientDataForUpdate.getGivenName() != null) {
+            fullName = patientDataForUpdate.getGivenName();
         }
-        PatientData existingPatient;
-        try {
-            existingPatient = findByHealthId(hid);
-        } catch (Exception e) {
-            throw new PatientNotFoundException("No patient found with health id: " + hid);
+
+        if (patientDataForUpdate.getSurName() != null) {
+            fullName = fullName + " " + patientDataForUpdate.getSurName();
         }
+
+        Patient patientToSave = mapper.map(patientDataToSave, existingPatientData);
+        patientToSave.setHealthId(healthId);
+        patientToSave.setFullName(fullName);
+        patientToSave.setUpdatedAt(new Date());
+
+        Catchment catchment = new Catchment(existingPatientData.getAddress().getDivisionId(),
+                existingPatientData.getAddress().getDistrictId(),
+                existingPatientData.getAddress().getUpazillaId());
+
+        cassandraOperations.execute(buildUpdateBatch(patientToSave, pendingApproval, catchment));
+        return new MCIResponse(patientToSave.getHealthId(), HttpStatus.ACCEPTED);
+    }
+
+    private Properties getApprovalProperties() {
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream("approvalFeilds.properties");
         Properties properties = new Properties();
         try {
@@ -95,52 +117,27 @@ public class PatientRepository extends BaseRepository {
         } catch (IOException e) {
             throw new RuntimeException("Unable to read approval property file.", e);
         }
-        PatientData patientToSave = new PatientData();
-        patientToSave.setHealthId(hid);
-        patientData.setHealthId(hid);
-
-        PatientFilter patientFilter = new PatientFilter(properties, existingPatient, patientData, patientToSave);
-        PendingApproval pendingApproval = patientFilter.filter();
-
-        String fullName = "";
-
-        if (patientData.getGivenName() != null) {
-            fullName = patientData.getGivenName();
-        }
-
-        if (patientData.getSurName() != null) {
-            fullName = fullName + " " + patientData.getSurName();
-        }
-
-        Patient patient = mapper.map(patientToSave, existingPatient);
-        patient.setHealthId(hid);
-        patient.setFullName(fullName);
-        patient.setUpdatedAt(new Date());
-
-        Batch batch = handlePendingApproval(existingPatient, patient, pendingApproval);
-        batch.add(buildUpdateBatch(patient, cassandraOperations.getConverter()));
-        cassandraOperations.execute(batch);
-        return new MCIResponse(patient.getHealthId(), HttpStatus.ACCEPTED);
+        return properties;
     }
 
-    private Batch handlePendingApproval(PatientData existingPatient, Patient patient, PendingApproval pendingApproval) {
+    private Batch buildUpdateBatch(Patient patient, PendingApproval pendingApproval, Catchment catchment) {
         Batch batch = QueryBuilder.batch();
         if (pendingApproval != null) {
-            UUID uuid = UUIDs.timeBased();
-            Map<UUID, String> pendingApprovals = patient.getPendingApprovals();
-            String healthId = existingPatient.getHealthId();
+            Map<UUID, String> existingPendingApprovals = patient.getPendingApprovals();
+            String healthId = patient.getHealthId();
 
-            if (pendingApprovals != null && pendingApprovals.size() > 0) {
-                UUID createdAt = findLatestUuid(pendingApprovals);
-                PendingApprovalMapping mapping = buildPendingApprovalMapping(healthId, existingPatient, createdAt);
-                batch.add(buildCreatePendingApprovalMappingQuery(mapping, cassandraOperations.getConverter()));
-
-            } else {
-                PendingApprovalMapping mapping = buildPendingApprovalMapping(healthId, existingPatient, uuid);
-                batch.add(buildUpdatePendingApprovalMappingQuery(mapping, cassandraOperations.getConverter()));
+            if (existingPendingApprovals != null && existingPendingApprovals.size() > 0) {
+                UUID createdAt = findLatestUuid(patient.getPendingApprovals());
+                PendingApprovalMapping mapping = buildPendingApprovalMapping(catchment, createdAt, healthId);
+                batch.add(buildDeletePendingApprovalMappingQuery(mapping, cassandraOperations.getConverter()));
             }
+
+            UUID uuid = UUIDs.timeBased();
+            PendingApprovalMapping mapping = buildPendingApprovalMapping(catchment, uuid, healthId);
+            batch.add(buildCreatePendingApprovalMappingQuery(mapping, cassandraOperations.getConverter()));
             updatePatientPendingApproval(patient, uuid, pendingApproval);
         }
+        batch.add(buildUpdateQuery(patient, cassandraOperations.getConverter()));
         return batch;
     }
 
@@ -158,14 +155,14 @@ public class PatientRepository extends BaseRepository {
         return latest;
     }
 
-    private PendingApprovalMapping buildPendingApprovalMapping(String hid, PatientData existingPatient, UUID uuid) {
+    private PendingApprovalMapping buildPendingApprovalMapping(Catchment catchment, UUID uuid, String healthId) {
         PendingApprovalMapping pendingApprovalMapping;
         pendingApprovalMapping = new PendingApprovalMapping();
-        pendingApprovalMapping.setDivisionId(existingPatient.getAddress().getDivisionId());
-        pendingApprovalMapping.setDistrictId(existingPatient.getAddress().getDistrictId());
-        pendingApprovalMapping.setUpazilaId(existingPatient.getAddress().getUpazillaId());
+        pendingApprovalMapping.setDivisionId(catchment.getDivisionId());
+        pendingApprovalMapping.setDistrictId(catchment.getDistrictId());
+        pendingApprovalMapping.setUpazilaId(catchment.getUpazilaId());
         pendingApprovalMapping.setCreatedAt(uuid);
-        pendingApprovalMapping.setHealthId(hid);
+        pendingApprovalMapping.setHealthId(healthId);
         return pendingApprovalMapping;
     }
 

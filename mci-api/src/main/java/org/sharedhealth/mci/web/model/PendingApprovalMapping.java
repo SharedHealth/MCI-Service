@@ -14,57 +14,57 @@ import static org.springframework.cassandra.core.PrimaryKeyType.PARTITIONED;
 @Table(value = CF_PENDING_APPROVAL_MAPPING)
 public class PendingApprovalMapping {
     @PrimaryKeyColumn(name = DIVISION_ID, ordinal = 0, type = PARTITIONED)
-    private String divisionId;
+    private String division_id;
 
     @PrimaryKeyColumn(name = DISTRICT_ID, ordinal = 1, type = PARTITIONED)
-    private String districtId;
+    private String district_id;
 
     @PrimaryKeyColumn(name = UPAZILLA_ID, ordinal = 2, type = PARTITIONED)
-    private String upazilaId;
+    private String upazilla_id;
 
     @PrimaryKeyColumn(name = CREATED_AT, ordinal = 3, type = CLUSTERED)
-    private UUID createdAt;
+    private UUID created_at;
 
     @Column(HEALTH_ID)
-    private String healthId;
+    private String health_id;
 
     public String getDivisionId() {
-        return divisionId;
+        return division_id;
     }
 
     public void setDivisionId(String divisionId) {
-        this.divisionId = divisionId;
+        this.division_id = divisionId;
     }
 
     public String getDistrictId() {
-        return districtId;
+        return district_id;
     }
 
     public void setDistrictId(String districtId) {
-        this.districtId = districtId;
+        this.district_id = districtId;
     }
 
     public String getUpazilaId() {
-        return upazilaId;
+        return upazilla_id;
     }
 
     public void setUpazilaId(String upazilaId) {
-        this.upazilaId = upazilaId;
+        this.upazilla_id = upazilaId;
     }
 
     public UUID getCreatedAt() {
-        return createdAt;
+        return created_at;
     }
 
     public void setCreatedAt(UUID createdAt) {
-        this.createdAt = createdAt;
+        this.created_at = createdAt;
     }
 
     public String getHealthId() {
-        return healthId;
+        return health_id;
     }
 
     public void setHealthId(String healthId) {
-        this.healthId = healthId;
+        this.health_id = healthId;
     }
 }
