@@ -49,7 +49,6 @@ public class JsonConstants {
     public static final String UPAZILLA_ID_AND_THANA_ID = "(upazila_id,thana_id)";
     public static final String UNION_ID_AND_WARD_ID = "(union_id,ward_id)";
 
-    public static final String PENDING_APPROVAL = "pending_approval";
     public static final String FACILITY_ID = "facility_id";
-    public static final String PENDING_APPROVAL_FIELDS = "pending_approval_fields";
+    public static final String LAST_ITEM_ID = "last_item_id";
 }

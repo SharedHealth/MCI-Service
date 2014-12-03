@@ -83,13 +83,12 @@ public class PatientService {
         return note;
     }
 
-    public PendingApprovalResponse findPendingApprovals(Catchment catchment, UUID since) {
-        List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(catchment, since,
+    public PendingApprovalResponse findPendingApprovals(Catchment catchment, UUID lastItemId) {
+        List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(catchment, lastItemId,
                 getPerPageMaximumLimit());
         if (isNotEmpty(mappings)) {
             List<PatientData> patients = patientRepository.findByHealthId(getHealthIds(mappings));
-            UUID until = mappings.get(0).getCreatedAt();
-            return buildPendingApprovalResponse(patients, until);
+            return buildPendingApprovalResponse(patients, mappings.get(mappings.size() - 1).getCreatedAt());
         }
         return null;
     }
@@ -102,7 +101,7 @@ public class PatientService {
         return healthIds;
     }
 
-    private PendingApprovalResponse buildPendingApprovalResponse(List<PatientData> patients, UUID until) {
+    private PendingApprovalResponse buildPendingApprovalResponse(List<PatientData> patients, UUID lastItemId) {
         List<Map<String, String>> pendingApprovals = new ArrayList<>();
         for (PatientData patient : patients) {
             Map<String, String> metadata = new HashMap<>();
@@ -113,7 +112,7 @@ public class PatientService {
         }
         PendingApprovalResponse response = new PendingApprovalResponse();
         response.setPendingApprovals(pendingApprovals);
-        response.setUntil(until);
+        response.setLastItemId(lastItemId);
         return response;
     }
 }

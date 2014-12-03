@@ -1,5 +1,9 @@
 package org.sharedhealth.mci.web.mapper;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 public class Catchment {
 
     private String divisionId;
@@ -61,5 +65,20 @@ public class Catchment {
 
     public void setRuralWardId(String ruralWardId) {
         this.ruralWardId = ruralWardId;
+    }
+
+    @Override
+    public boolean equals(Object rhs) {
+        return EqualsBuilder.reflectionEquals(this, rhs);
+    }
+
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
     }
 }

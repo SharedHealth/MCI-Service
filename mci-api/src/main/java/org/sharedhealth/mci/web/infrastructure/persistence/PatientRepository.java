@@ -350,7 +350,7 @@ public class PatientRepository extends BaseRepository {
         return "location_level" + (length / 2);
     }
 
-    public List<PendingApprovalMapping> findPendingApprovalMapping(Catchment catchment, UUID since, int limit) {
-        return cassandraOperations.select(buildFindPendingApprovalMappingStmt(catchment, since, limit), PendingApprovalMapping.class);
+    public List<PendingApprovalMapping> findPendingApprovalMapping(Catchment catchment, UUID lastItemId, int limit) {
+        return cassandraOperations.select(buildFindPendingApprovalMappingStmt(catchment, lastItemId, limit), PendingApprovalMapping.class);
     }
 }

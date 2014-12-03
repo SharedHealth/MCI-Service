@@ -1,6 +1,7 @@
 package org.sharedhealth.mci.web.controller;
 
 
+import com.datastax.driver.core.utils.UUIDs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,29 +11,29 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
-import org.sharedhealth.mci.web.mapper.Address;
-import org.sharedhealth.mci.web.mapper.Location;
-import org.sharedhealth.mci.web.mapper.PatientData;
-import org.sharedhealth.mci.web.mapper.SearchQuery;
+import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.service.LocationService;
 import org.sharedhealth.mci.web.service.PatientService;
 import org.sharedhealth.mci.web.service.SettingService;
 import org.sharedhealth.mci.web.utils.concurrent.PreResolvedListenableFuture;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
+import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -68,6 +69,7 @@ public class PatientControllerTest {
     private String uid = "11111111111";
     public static final String API_END_POINT = "/api/v1/patients";
     public static final String PUT_API_END_POINT = "/api/v1/patients/{healthId}";
+    public static final String GET_PENDING_APPROVALS_API = "/api/v1/patients/pendingapprovals";
     public static final String GEO_CODE = "1004092001";
     private SearchQuery searchQuery;
     private StringBuilder stringBuilder;
@@ -352,6 +354,78 @@ public class PatientControllerTest {
         location.setPaurashavaId("20");
         location.setUnionId("01");
         return patient2;
+    }
+
+    @Test
+    public void shouldFindPendingApprovalsWithoutLastItemId() throws Exception {
+        Catchment catchment = new Catchment("10", "20", "30");
+        UUID lastItemId = UUIDs.timeBased();
+
+        PendingApprovalResponse response = new PendingApprovalResponse();
+        List<Map<String, String>> pendingApprovals = asList(buildPendingApproval(1),
+                buildPendingApproval(2),
+                buildPendingApproval(3));
+        response.setPendingApprovals(pendingApprovals);
+        response.setLastItemId(lastItemId);
+
+        when(patientService.findPendingApprovals(catchment, null)).thenReturn(response);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(DIVISION_ID, "10");
+        headers.add(DISTRICT_ID, "20");
+        headers.add(UPAZILLA_ID, "30");
+
+        MvcResult mvcResult = mockMvc.perform(get(GET_PENDING_APPROVALS_API).headers(headers))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.results[0].hid", is("hid-1")))
+                .andExpect(jsonPath("$.results[0].given_name", is("Scott-1")))
+                .andExpect(jsonPath("$.results[0].sur_name", is("Tiger-1")))
+
+                .andExpect(jsonPath("$.results[1].hid", is("hid-2")))
+                .andExpect(jsonPath("$.results[1].given_name", is("Scott-2")))
+                .andExpect(jsonPath("$.results[1].sur_name", is("Tiger-2")))
+
+                .andExpect(jsonPath("$.results[2].hid", is("hid-3")))
+                .andExpect(jsonPath("$.results[2].given_name", is("Scott-3")))
+                .andExpect(jsonPath("$.results[2].sur_name", is("Tiger-3")))
+
+                .andExpect(jsonPath("$.additional_info.last_item_id", is(lastItemId.toString())));
+
+        verify(patientService).findPendingApprovals(catchment, null);
+    }
+
+    private Map<String, String> buildPendingApproval(int suffix) {
+        Map<String, String> metadata = new HashMap<>();
+        metadata.put(HID, "hid-" + suffix);
+        metadata.put(GIVEN_NAME, "Scott-" + suffix);
+        metadata.put(SUR_NAME, "Tiger-" + suffix);
+        return metadata;
+    }
+
+    @Test
+    public void shouldFindPendingApprovalsWithLastItemId() throws Exception {
+        Catchment catchment = new Catchment("10", "20", "30");
+        UUID lastItemId = UUIDs.timeBased();
+        when(patientService.findPendingApprovals(catchment, lastItemId)).thenReturn(new PendingApprovalResponse());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(DIVISION_ID, "10");
+        headers.add(DISTRICT_ID, "20");
+        headers.add(UPAZILLA_ID, "30");
+
+        MvcResult mvcResult = mockMvc.perform(
+                get(GET_PENDING_APPROVALS_API + "?" + LAST_ITEM_ID + "=" + lastItemId).headers(headers))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isOk());
+
+        verify(patientService).findPendingApprovals(catchment, lastItemId);
     }
 }
 

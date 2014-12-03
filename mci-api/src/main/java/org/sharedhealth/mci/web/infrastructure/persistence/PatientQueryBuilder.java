@@ -123,14 +123,14 @@ public class PatientQueryBuilder {
         return select(HEALTH_ID).from(CF_PHONE_NUMBER_MAPPING).where(eq(PHONE_NO, phoneNumber)).toString();
     }
 
-    public static String buildFindPendingApprovalMappingStmt(Catchment catchment, UUID since, int limit) {
+    public static String buildFindPendingApprovalMappingStmt(Catchment catchment, UUID lastItemId, int limit) {
         Where where = select(HEALTH_ID, CREATED_AT).from(CF_PENDING_APPROVAL_MAPPING)
                 .where(eq(DIVISION_ID, catchment.getDivisionId()))
                 .and(eq(DISTRICT_ID, catchment.getDistrictId()))
                 .and(eq(UPAZILLA_ID, catchment.getUpazilaId()));
 
-        if (since != null) {
-            where = where.and(gt(CREATED_AT, since));
+        if (lastItemId != null) {
+            where = where.and(lt(CREATED_AT, lastItemId));
         }
         return where.limit(limit).toString();
     }

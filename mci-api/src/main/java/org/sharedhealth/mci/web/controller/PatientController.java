@@ -6,9 +6,7 @@ import org.sharedhealth.mci.web.exception.SearchQueryParameterException;
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.handler.MCIResponse;
-import org.sharedhealth.mci.web.mapper.PaginationQuery;
-import org.sharedhealth.mci.web.mapper.PatientData;
-import org.sharedhealth.mci.web.mapper.SearchQuery;
+import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.service.PatientService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,10 +19,12 @@ import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.validation.Valid;
 import javax.validation.groups.Default;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
+import java.util.UUID;
 
+import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -67,13 +67,6 @@ public class PatientController {
         PatientData result = patientService.findByHealthId(healthId);
         deferredResult.setResult(new ResponseEntity<>(result, OK));
         return deferredResult;
-    }
-
-    private Throwable extractAppException(Throwable e) {
-        if (e instanceof ExecutionException && e.getCause() != null) {
-            return e.getCause();
-        }
-        return e;
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
@@ -135,6 +128,34 @@ public class PatientController {
         List<PatientData> dataList = patientService.findAllByFacility(facilityId, paginationQuery.getLast(), paginationQuery.getDateSince());
         HashMap<String, String> additionalInfo = null;
         MCIMultiResponse mciMultiResponse = new MCIMultiResponse<>(dataList, additionalInfo, OK);
+        deferredResult.setResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject));
+        return deferredResult;
+    }
+
+    @RequestMapping(value = "/pendingapprovals", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
+    public DeferredResult<ResponseEntity<MCIMultiResponse>> findApprovals(
+            @RequestHeader(value = DIVISION_ID) String divisionId,
+            @RequestHeader(value = DISTRICT_ID) String districtId,
+            @RequestHeader(value = UPAZILLA_ID) String upazilaId,
+            @RequestParam(value = LAST_ITEM_ID, required = false) UUID lastItemId) {
+
+        logger.debug("Find list of pending approvals before : " + lastItemId);
+        final DeferredResult<ResponseEntity<MCIMultiResponse>> deferredResult = new DeferredResult<>();
+
+        Catchment catchment = new Catchment(divisionId, districtId, upazilaId);
+        PendingApprovalResponse response = patientService.findPendingApprovals(catchment, lastItemId);
+
+        MCIMultiResponse mciMultiResponse;
+        if (response != null) {
+            HashMap<String, String> additionalInfo = null;
+            if (response.getLastItemId() != null) {
+                additionalInfo = new HashMap<>();
+                additionalInfo.put(LAST_ITEM_ID, response.getLastItemId().toString());
+            }
+            mciMultiResponse = new MCIMultiResponse(response.getPendingApprovals(), additionalInfo, OK);
+        } else {
+            mciMultiResponse = new MCIMultiResponse(Collections.emptyList(), null, OK);
+        }
         deferredResult.setResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject));
         return deferredResult;
     }

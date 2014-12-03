@@ -37,7 +37,7 @@ import static org.junit.Assert.*;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.FACILITY_ID;
-import static org.sharedhealth.mci.web.utils.JsonConstants.PENDING_APPROVAL_FIELDS;
+import static org.sharedhealth.mci.web.utils.JsonConstants.LAST_ITEM_ID;
 import static org.springframework.http.HttpStatus.ACCEPTED;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -303,11 +303,12 @@ public class PatientRepositoryIT {
         cassandraOperations.insert(entities);
 
         List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(
-                new Catchment("10", "20", "30"), entities.get(1).getCreatedAt(), 25);
-        assertEquals(3, mappings.size());
-        assertEquals("h105", mappings.get(0).getHealthId());
-        assertEquals("h104", mappings.get(1).getHealthId());
-        assertEquals("h103", mappings.get(2).getHealthId());
+                new Catchment("10", "20", "30"), entities.get(4).getCreatedAt(), 25);
+        assertEquals(4, mappings.size());
+        assertEquals("h104", mappings.get(0).getHealthId());
+        assertEquals("h103", mappings.get(1).getHealthId());
+        assertEquals("h102", mappings.get(2).getHealthId());
+        assertEquals("h101", mappings.get(3).getHealthId());
     }
 
     @Test
@@ -351,7 +352,7 @@ public class PatientRepositoryIT {
         assertEquals("10000059", pendingApprovalMap.get(FACILITY_ID));
         Map<String, String> expectedPendingApprovalFields = new HashMap<>();
         expectedPendingApprovalFields.put(JsonConstants.GENDER, "F");
-        assertEquals(expectedPendingApprovalFields, pendingApprovalMap.get(PENDING_APPROVAL_FIELDS));
+        assertEquals(expectedPendingApprovalFields, pendingApprovalMap.get(LAST_ITEM_ID));
 
         List<PendingApprovalMapping> mappings = cassandraOperations.select(select().from(CF_PENDING_APPROVAL_MAPPING), PendingApprovalMapping.class);
         assertEquals(1, mappings.size());

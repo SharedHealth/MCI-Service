@@ -10,7 +10,7 @@ public class PendingApprovalResponse {
 
     @JsonProperty("pending_approval")
     private List<Map<String, String>> pendingApprovals;
-    private UUID until;
+    private UUID lastItemId;
 
     public List<Map<String, String>> getPendingApprovals() {
         return pendingApprovals;
@@ -20,11 +20,11 @@ public class PendingApprovalResponse {
         this.pendingApprovals = pendingApprovals;
     }
 
-    public UUID getUntil() {
-        return until;
+    public UUID getLastItemId() {
+        return lastItemId;
     }
 
-    public void setUntil(UUID until) {
-        this.until = until;
+    public void setLastItemId(UUID lastItemId) {
+        this.lastItemId = lastItemId;
     }
 }

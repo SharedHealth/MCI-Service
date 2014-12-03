@@ -45,28 +45,28 @@ public class PatientServiceTest {
     @Test
     public void shouldFindPendingApprovals() throws Exception {
         Catchment catchment = new Catchment("10", "20", "30");
-        UUID since = UUIDs.timeBased();
+        UUID lastItemId = UUIDs.timeBased();
 
         List<PendingApprovalMapping> mappings = asList(buildPendingApprovalMapping("hid-100"),
                 buildPendingApprovalMapping("hid-200"),
                 buildPendingApprovalMapping("hid-300"));
         Collections.reverse(mappings);
         when(settingService.getSettingAsIntegerByKey("PER_PAGE_MAXIMUM_LIMIT")).thenReturn(25);
-        when(patientRepository.findPendingApprovalMapping(catchment, since, 25)).thenReturn(mappings);
+        when(patientRepository.findPendingApprovalMapping(catchment, lastItemId, 25)).thenReturn(mappings);
 
         List<PatientData> patients = asList(buildPatient("hid-300"),
                 buildPatient("hid-200"),
                 buildPatient("hid-100"));
         when(patientRepository.findByHealthId(asList("hid-300", "hid-200", "hid-100"))).thenReturn(patients);
 
-        PendingApprovalResponse response = patientService.findPendingApprovals(catchment, since);
+        PendingApprovalResponse response = patientService.findPendingApprovals(catchment, lastItemId);
 
         InOrder inOrder = inOrder(patientRepository);
-        inOrder.verify(patientRepository).findPendingApprovalMapping(catchment, since, 25);
+        inOrder.verify(patientRepository).findPendingApprovalMapping(catchment, lastItemId, 25);
         inOrder.verify(patientRepository).findByHealthId(asList("hid-300", "hid-200", "hid-100"));
 
         assertNotNull(response);
-        assertEquals(mappings.get(0).getCreatedAt(), response.getUntil());
+        assertEquals(mappings.get(mappings.size() - 1).getCreatedAt(), response.getLastItemId());
         assertNotNull(response.getPendingApprovals());
         assertEquals(3, response.getPendingApprovals().size());
 
