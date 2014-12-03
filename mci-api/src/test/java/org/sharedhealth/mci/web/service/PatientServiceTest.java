@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.sharedhealth.mci.web.infrastructure.fr.FacilityRegistryWrapper;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
 import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.PatientData;
@@ -28,12 +29,17 @@ public class PatientServiceTest {
 
     @Mock
     private PatientRepository patientRepository;
+    @Mock
+    FacilityRegistryWrapper facilityRegistryWrapper;
+    @Mock
+    SettingService settingService;
+
     private PatientService patientService;
 
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-        patientService = new PatientService(patientRepository, null, null);
+        patientService = new PatientService(patientRepository, facilityRegistryWrapper, settingService);
     }
 
     @Test
@@ -45,7 +51,8 @@ public class PatientServiceTest {
                 buildPendingApprovalMapping("hid-200"),
                 buildPendingApprovalMapping("hid-300"));
         Collections.reverse(mappings);
-        when(patientRepository.findPendingApprovalMapping(catchment, since)).thenReturn(mappings);
+        when(settingService.getSettingAsIntegerByKey("PER_PAGE_MAXIMUM_LIMIT")).thenReturn(25);
+        when(patientRepository.findPendingApprovalMapping(catchment, since, 25)).thenReturn(mappings);
 
         List<PatientData> patients = asList(buildPatient("hid-300"),
                 buildPatient("hid-200"),
@@ -55,7 +62,7 @@ public class PatientServiceTest {
         PendingApprovalResponse response = patientService.findPendingApprovals(catchment, since);
 
         InOrder inOrder = inOrder(patientRepository);
-        inOrder.verify(patientRepository).findPendingApprovalMapping(catchment, since);
+        inOrder.verify(patientRepository).findPendingApprovalMapping(catchment, since, 25);
         inOrder.verify(patientRepository).findByHealthId(asList("hid-300", "hid-200", "hid-100"));
 
         assertNotNull(response);

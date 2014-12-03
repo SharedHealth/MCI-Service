@@ -129,15 +129,15 @@ public class PatientRepository extends BaseRepository {
             if (existingPendingApprovals != null && existingPendingApprovals.size() > 0) {
                 UUID createdAt = findLatestUuid(patient.getPendingApprovals());
                 PendingApprovalMapping mapping = buildPendingApprovalMapping(catchment, createdAt, healthId);
-                batch.add(buildDeletePendingApprovalMappingQuery(mapping, cassandraOperations.getConverter()));
+                batch.add(buildDeletePendingApprovalMappingStmt(mapping, cassandraOperations.getConverter()));
             }
 
             UUID uuid = UUIDs.timeBased();
             PendingApprovalMapping mapping = buildPendingApprovalMapping(catchment, uuid, healthId);
-            batch.add(buildCreatePendingApprovalMappingQuery(mapping, cassandraOperations.getConverter()));
+            batch.add(buildCreatePendingApprovalMappingStmt(mapping, cassandraOperations.getConverter()));
             updatePatientPendingApproval(patient, uuid, pendingApproval);
         }
-        batch.add(buildUpdateQuery(patient, cassandraOperations.getConverter()));
+        batch.add(buildUpdateStmt(patient, cassandraOperations.getConverter()));
         return batch;
     }
 
@@ -199,7 +199,7 @@ public class PatientRepository extends BaseRepository {
 
     public List<PatientData> findByHealthId(List<String> healthIds) {
         String[] values = healthIds.toArray(new String[healthIds.size()]);
-        List<Patient> patients = cassandraOperations.select(buildFindByHidQuery(values), Patient.class);
+        List<Patient> patients = cassandraOperations.select(buildFindByHidStmt(values), Patient.class);
         if (isEmpty(patients)) {
             throw new PatientNotFoundException("No patient found with health ids: " + healthIds);
         }
@@ -215,19 +215,19 @@ public class PatientRepository extends BaseRepository {
         String query = null;
 
         if (isNotBlank(searchQuery.getNid())) {
-            query = buildFindByNidQuery(searchQuery.getNid());
+            query = buildFindByNidStmt(searchQuery.getNid());
 
         } else if (isNotBlank(searchQuery.getBin_brn())) {
-            query = buildFindByBrnQuery(searchQuery.getBin_brn());
+            query = buildFindByBrnStmt(searchQuery.getBin_brn());
 
         } else if (isNotBlank(searchQuery.getUid())) {
-            query = buildFindByUidQuery(searchQuery.getUid());
+            query = buildFindByUidStmt(searchQuery.getUid());
 
         } else if (isNotBlank(searchQuery.getPhone_no())) {
-            query = buildFindByPhoneNumberQuery(searchQuery.getPhone_no());
+            query = buildFindByPhoneNumberStmt(searchQuery.getPhone_no());
 
         } else if (isNotBlank(searchQuery.getPresent_address()) && isNotBlank(searchQuery.getGiven_name())) {
-            query = buildFindByNameQuery(searchQuery.getDivisionId(), searchQuery.getDistrictId(),
+            query = buildFindByNameStmt(searchQuery.getDivisionId(), searchQuery.getDistrictId(),
                     searchQuery.getUpazilaId(), searchQuery.getGiven_name(), searchQuery.getSur_name());
         }
 
@@ -350,7 +350,7 @@ public class PatientRepository extends BaseRepository {
         return "location_level" + (length / 2);
     }
 
-    public List<PendingApprovalMapping> findPendingApprovalMapping(Catchment catchment, UUID since) {
-        return cassandraOperations.select(buildFindPendingApprovalMappingQuery(catchment, since), PendingApprovalMapping.class);
+    public List<PendingApprovalMapping> findPendingApprovalMapping(Catchment catchment, UUID since, int limit) {
+        return cassandraOperations.select(buildFindPendingApprovalMappingStmt(catchment, since, limit), PendingApprovalMapping.class);
     }
 }

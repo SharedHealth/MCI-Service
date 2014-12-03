@@ -103,27 +103,27 @@ public class PatientQueryBuilder {
     public static final String PRIMARY_CONTACT_NUMBER_AREA_CODE = "primary_contact_number_area_code";
     public static final String PRIMARY_CONTACT_NUMBER_EXTENSION = "primary_contact_number_extension";
 
-    public static String buildFindByHidQuery(String[] values) {
+    public static String buildFindByHidStmt(String[] values) {
         return select().from(CF_PATIENT).where(in(HEALTH_ID, values)).toString();
     }
 
-    public static String buildFindByNidQuery(String nid) {
+    public static String buildFindByNidStmt(String nid) {
         return select(HEALTH_ID).from(CF_NID_MAPPING).where(eq(NATIONAL_ID, nid)).toString();
     }
 
-    public static String buildFindByBrnQuery(String brn) {
+    public static String buildFindByBrnStmt(String brn) {
         return select(HEALTH_ID).from(CF_BRN_MAPPING).where(eq(BIN_BRN, brn)).toString();
     }
 
-    public static String buildFindByUidQuery(String uid) {
+    public static String buildFindByUidStmt(String uid) {
         return select(HEALTH_ID).from(CF_UID_MAPPING).where(eq(UID, uid)).toString();
     }
 
-    public static String buildFindByPhoneNumberQuery(String phoneNumber) {
+    public static String buildFindByPhoneNumberStmt(String phoneNumber) {
         return select(HEALTH_ID).from(CF_PHONE_NUMBER_MAPPING).where(eq(PHONE_NO, phoneNumber)).toString();
     }
 
-    public static String buildFindPendingApprovalMappingQuery(Catchment catchment, UUID since) {
+    public static String buildFindPendingApprovalMappingStmt(Catchment catchment, UUID since, int limit) {
         Where where = select(HEALTH_ID, CREATED_AT).from(CF_PENDING_APPROVAL_MAPPING)
                 .where(eq(DIVISION_ID, catchment.getDivisionId()))
                 .and(eq(DISTRICT_ID, catchment.getDistrictId()))
@@ -132,10 +132,10 @@ public class PatientQueryBuilder {
         if (since != null) {
             where = where.and(gt(CREATED_AT, since));
         }
-        return where.toString();
+        return where.limit(limit).toString();
     }
 
-    public static String buildFindByNameQuery(String divisionId, String districtId, String upazilaId, String givenName, String surname) {
+    public static String buildFindByNameStmt(String divisionId, String districtId, String upazilaId, String givenName, String surname) {
         Where where = select(HEALTH_ID).from(CF_NAME_MAPPING)
                 .where(eq(DIVISION_ID, divisionId))
                 .and(eq(DISTRICT_ID, districtId))
@@ -187,15 +187,15 @@ public class PatientQueryBuilder {
         return batch;
     }
 
-    public static Update buildUpdateQuery(Patient patient, CassandraConverter converter) {
+    public static Update buildUpdateStmt(Patient patient, CassandraConverter converter) {
         return toUpdateQuery(CF_PATIENT, patient, null, converter);
     }
 
-    public static Insert buildCreatePendingApprovalMappingQuery(PendingApprovalMapping mapping, CassandraConverter converter) {
+    public static Insert buildCreatePendingApprovalMappingStmt(PendingApprovalMapping mapping, CassandraConverter converter) {
         return createInsertQuery(CF_PENDING_APPROVAL_MAPPING, mapping, null, converter);
     }
 
-    public static Delete buildDeletePendingApprovalMappingQuery(PendingApprovalMapping mapping, CassandraConverter converter) {
+    public static Delete buildDeletePendingApprovalMappingStmt(PendingApprovalMapping mapping, CassandraConverter converter) {
         return createDeleteQuery(CF_PENDING_APPROVAL_MAPPING, mapping, null, converter);
     }
 }

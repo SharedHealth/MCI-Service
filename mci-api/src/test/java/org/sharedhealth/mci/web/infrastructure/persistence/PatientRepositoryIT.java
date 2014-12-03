@@ -73,19 +73,19 @@ public class PatientRepositoryIT {
         String id = patientRepository.create(data).getId();
         assertNotNull(id);
 
-        String healthId = cassandraOperations.queryForObject(buildFindByNidQuery(nationalId), String.class);
+        String healthId = cassandraOperations.queryForObject(buildFindByNidStmt(nationalId), String.class);
         assertEquals(healthId, id);
 
-        healthId = cassandraOperations.queryForObject(buildFindByBrnQuery(birthRegistrationNumber), String.class);
+        healthId = cassandraOperations.queryForObject(buildFindByBrnStmt(birthRegistrationNumber), String.class);
         assertEquals(healthId, id);
 
-        healthId = cassandraOperations.queryForObject(buildFindByUidQuery(uid), String.class);
+        healthId = cassandraOperations.queryForObject(buildFindByUidStmt(uid), String.class);
         assertEquals(healthId, id);
 
-        healthId = cassandraOperations.queryForObject(buildFindByPhoneNumberQuery(phoneNumber), String.class);
+        healthId = cassandraOperations.queryForObject(buildFindByPhoneNumberStmt(phoneNumber), String.class);
         assertEquals(healthId, id);
 
-        healthId = cassandraOperations.queryForObject(buildFindByNameQuery(divisionId, districtId, upazilaId,
+        healthId = cassandraOperations.queryForObject(buildFindByNameStmt(divisionId, districtId, upazilaId,
                 givenName.toLowerCase(), surname.toLowerCase()), String.class);
         assertEquals(healthId, id);
     }
@@ -275,7 +275,7 @@ public class PatientRepositoryIT {
                 buildPendingApprovalMapping("32", "h104"),
                 buildPendingApprovalMapping("30", "h105")));
 
-        List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(new Catchment("10", "20", "30"), null);
+        List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(new Catchment("10", "20", "30"), null, 25);
         assertEquals(3, mappings.size());
         PendingApprovalMapping mapping1 = mappings.get(0);
         PendingApprovalMapping mapping2 = mappings.get(1);
@@ -303,11 +303,25 @@ public class PatientRepositoryIT {
         cassandraOperations.insert(entities);
 
         List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(
-                new Catchment("10", "20", "30"), entities.get(1).getCreatedAt());
+                new Catchment("10", "20", "30"), entities.get(1).getCreatedAt(), 25);
         assertEquals(3, mappings.size());
         assertEquals("h105", mappings.get(0).getHealthId());
         assertEquals("h104", mappings.get(1).getHealthId());
         assertEquals("h103", mappings.get(2).getHealthId());
+    }
+
+    @Test
+    public void shouldFindPendingApprovalMappingsWithLimit() throws Exception {
+        List<PendingApprovalMapping> entities = asList(buildPendingApprovalMapping("30", "h101"),
+                buildPendingApprovalMapping("30", "h102"),
+                buildPendingApprovalMapping("30", "h103"),
+                buildPendingApprovalMapping("30", "h104"),
+                buildPendingApprovalMapping("30", "h105"));
+        cassandraOperations.insert(entities);
+        List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(new Catchment("10", "20", "30"), null, 5);
+        assertEquals(5, mappings.size());
+        mappings = patientRepository.findPendingApprovalMapping(new Catchment("10", "20", "30"), null, 3);
+        assertEquals(3, mappings.size());
     }
 
     private PendingApprovalMapping buildPendingApprovalMapping(String upazilaId, String healthId) throws InterruptedException {

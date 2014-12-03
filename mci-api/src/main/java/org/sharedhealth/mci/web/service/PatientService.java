@@ -24,14 +24,16 @@ import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 @Component
 public class PatientService {
 
-    private static final String PER_PAGE_MAXIMUM_LIMIT_NOTE = "There are more record for this search criteria. Please narrow down your search";
+    private static final String PER_PAGE_MAXIMUM_LIMIT_NOTE = "There are more record for this search criteria. " +
+            "Please narrow down your search";
     private static final int PER_PAGE_MAXIMUM_LIMIT = 25;
     private PatientRepository patientRepository;
     private FacilityRegistryWrapper facilityRegistryWrapper;
     private SettingService settingService;
 
     @Autowired
-    public PatientService(PatientRepository patientRepository, FacilityRegistryWrapper facilityRegistryWrapper, SettingService settingService) {
+    public PatientService(PatientRepository patientRepository, FacilityRegistryWrapper facilityRegistryWrapper,
+                          SettingService settingService) {
         this.patientRepository = patientRepository;
         this.facilityRegistryWrapper = facilityRegistryWrapper;
         this.settingService = settingService;
@@ -82,7 +84,8 @@ public class PatientService {
     }
 
     public PendingApprovalResponse findPendingApprovals(Catchment catchment, UUID since) {
-        List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(catchment, since);
+        List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(catchment, since,
+                getPerPageMaximumLimit());
         if (isNotEmpty(mappings)) {
             List<PatientData> patients = patientRepository.findByHealthId(getHealthIds(mappings));
             UUID until = mappings.get(0).getCreatedAt();
