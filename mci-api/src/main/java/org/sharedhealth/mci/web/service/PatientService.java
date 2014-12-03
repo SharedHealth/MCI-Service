@@ -9,13 +9,13 @@ import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PendingApprovalResponse;
 import org.sharedhealth.mci.web.mapper.SearchQuery;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
-import org.sharedhealth.mci.web.utils.JsonConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
 @Component
 public class PatientService {
@@ -96,9 +96,9 @@ public class PatientService {
         List<Map<String, String>> pendingApprovals = new ArrayList<>();
         for (PatientData patient : patients) {
             Map<String, String> metadata = new HashMap<>();
-            metadata.put(JsonConstants.HID, patient.getHealthId());
-            metadata.put(JsonConstants.GIVEN_NAME, patient.getGivenName());
-            metadata.put(JsonConstants.SUR_NAME, patient.getSurName());
+            metadata.put(HID, patient.getHealthId());
+            metadata.put(GIVEN_NAME, patient.getGivenName());
+            metadata.put(SUR_NAME, patient.getSurName());
             pendingApprovals.add(metadata);
         }
         PendingApprovalResponse response = new PendingApprovalResponse();

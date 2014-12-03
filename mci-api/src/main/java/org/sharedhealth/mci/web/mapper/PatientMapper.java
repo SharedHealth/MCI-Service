@@ -54,7 +54,9 @@ public class PatientMapper {
 
         data.setGivenName(patient.getGivenName());
         data.setSurName(patient.getSurName());
-        data.setDateOfBirth(ISO_DATE_FORMAT.format(patient.getDateOfBirth()));
+        if (patient.getDateOfBirth() != null) {
+            data.setDateOfBirth(ISO_DATE_FORMAT.format(patient.getDateOfBirth()));
+        }
         data.setGender(patient.getGender());
         data.setOccupation(patient.getOccupation());
         data.setEducationLevel(patient.getEducationLevel());

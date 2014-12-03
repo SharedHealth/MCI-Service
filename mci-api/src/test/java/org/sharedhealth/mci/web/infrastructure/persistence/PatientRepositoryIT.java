@@ -33,6 +33,7 @@ import java.util.concurrent.ExecutionException;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
 import static java.util.Arrays.asList;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.junit.Assert.*;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
@@ -165,6 +166,23 @@ public class PatientRepositoryIT {
         assertEquals(data.getAddress().getDistrictId(), mapping.getDistrictId());
         assertEquals(data.getAddress().getUpazillaId(), mapping.getUpazilaId());
         assertEquals(data.getHealthId(), mapping.getHealthId());
+    }
+
+    @Test
+    public void shouldFindByHealthIdsInTheOrderIdsArePassed() {
+        PatientData patient = new PatientData();
+        data.setGivenName("Scott");
+        String healthId1 = patientRepository.create(patient).getId();
+        assertTrue(isNotBlank(healthId1));
+        String healthId2 = patientRepository.create(patient).getId();
+        assertTrue(isNotBlank(healthId2));
+        String healthId3 = patientRepository.create(patient).getId();
+        assertTrue(isNotBlank(healthId3));
+
+        List<PatientData> patients = patientRepository.findByHealthId(asList(healthId1, healthId2, healthId3));
+        assertEquals(healthId1, patients.get(0).getHealthId());
+        assertEquals(healthId2, patients.get(1).getHealthId());
+        assertEquals(healthId3, patients.get(2).getHealthId());
     }
 
     @Test

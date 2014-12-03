@@ -1,5 +1,6 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
+import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
 import com.datastax.driver.core.utils.UUIDs;
@@ -94,12 +95,11 @@ public class PatientRepository extends BaseRepository {
         } catch (IOException e) {
             throw new RuntimeException("Unable to read approval property file.", e);
         }
-        //TODO : move to mapper
         PatientData patientToSave = new PatientData();
         patientToSave.setHealthId(hid);
         patientData.setHealthId(hid);
-        PatientFilter patientFilter = new PatientFilter(properties, existingPatient, patientData, patientToSave);
 
+        PatientFilter patientFilter = new PatientFilter(properties, existingPatient, patientData, patientToSave);
         PendingApproval pendingApproval = patientFilter.filter();
 
         String fullName = "";
@@ -117,23 +117,64 @@ public class PatientRepository extends BaseRepository {
         patient.setFullName(fullName);
         patient.setUpdatedAt(new Date());
 
-        PendingApprovalMapping pendingApprovalMapping = null;
-        if (pendingApproval != null) {
-            try {
-                patient.addApproval(UUIDs.timeBased(), objectMapper.writeValueAsString(pendingApproval));
-                pendingApprovalMapping = new PendingApprovalMapping();
-                pendingApprovalMapping.setDivisionId(existingPatient.getAddress().getDivisionId());
-                pendingApprovalMapping.setDistrictId(existingPatient.getAddress().getDistrictId());
-                pendingApprovalMapping.setUpazilaId(existingPatient.getAddress().getUpazillaId());
-                pendingApprovalMapping.setCreatedAt(UUIDs.timeBased());
-                pendingApprovalMapping.setHealthId(hid);
+        Batch batch = handlePendingApproval(existingPatient, patient, pendingApproval);
+        batch.add(buildUpdateBatch(patient, cassandraOperations.getConverter()));
+        cassandraOperations.execute(batch);
+        return new MCIResponse(patient.getHealthId(), HttpStatus.ACCEPTED);
+    }
 
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException("Error setting approvals during update.", e);
+    private Batch handlePendingApproval(PatientData existingPatient, Patient patient, PendingApproval pendingApproval) {
+        Batch batch = QueryBuilder.batch();
+        if (pendingApproval != null) {
+            UUID uuid = UUIDs.timeBased();
+            Map<UUID, String> pendingApprovals = patient.getPendingApprovals();
+            String healthId = existingPatient.getHealthId();
+
+            if (pendingApprovals != null && pendingApprovals.size() > 0) {
+                UUID createdAt = findLatestUuid(pendingApprovals);
+                PendingApprovalMapping mapping = buildPendingApprovalMapping(healthId, existingPatient, createdAt);
+                batch.add(buildCreatePendingApprovalMappingQuery(mapping, cassandraOperations.getConverter()));
+
+            } else {
+                PendingApprovalMapping mapping = buildPendingApprovalMapping(healthId, existingPatient, uuid);
+                batch.add(buildUpdatePendingApprovalMappingQuery(mapping, cassandraOperations.getConverter()));
+            }
+            updatePatientPendingApproval(patient, uuid, pendingApproval);
+        }
+        return batch;
+    }
+
+    UUID findLatestUuid(Map<UUID, String> pendingApprovals) {
+        UUID latest = null;
+        for (UUID uuid : pendingApprovals.keySet()) {
+            if (latest == null) {
+                latest = uuid;
+                continue;
+            }
+            if (UUIDs.unixTimestamp(uuid) > UUIDs.unixTimestamp(latest)) {
+                latest = uuid;
             }
         }
-        cassandraOperations.execute(buildUpdateBatch(patient, pendingApprovalMapping, cassandraOperations.getConverter()));
-        return new MCIResponse(patient.getHealthId(), HttpStatus.ACCEPTED);
+        return latest;
+    }
+
+    private PendingApprovalMapping buildPendingApprovalMapping(String hid, PatientData existingPatient, UUID uuid) {
+        PendingApprovalMapping pendingApprovalMapping;
+        pendingApprovalMapping = new PendingApprovalMapping();
+        pendingApprovalMapping.setDivisionId(existingPatient.getAddress().getDivisionId());
+        pendingApprovalMapping.setDistrictId(existingPatient.getAddress().getDistrictId());
+        pendingApprovalMapping.setUpazilaId(existingPatient.getAddress().getUpazillaId());
+        pendingApprovalMapping.setCreatedAt(uuid);
+        pendingApprovalMapping.setHealthId(hid);
+        return pendingApprovalMapping;
+    }
+
+    private void updatePatientPendingApproval(Patient patient, UUID uuid, PendingApproval pendingApproval) {
+        try {
+            patient.addApproval(uuid, objectMapper.writeValueAsString(pendingApproval));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Error setting approvals during update.", e);
+        }
     }
 
     private PatientData getExistingPatient(PatientData mapper) {

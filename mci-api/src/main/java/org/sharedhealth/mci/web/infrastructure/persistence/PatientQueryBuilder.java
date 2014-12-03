@@ -1,7 +1,9 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
 import com.datastax.driver.core.querybuilder.Batch;
+import com.datastax.driver.core.querybuilder.Insert;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
+import com.datastax.driver.core.querybuilder.Update;
 import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.model.*;
 import org.springframework.data.cassandra.convert.CassandraConverter;
@@ -9,7 +11,6 @@ import org.springframework.data.cassandra.convert.CassandraConverter;
 import java.util.UUID;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.gt;
 import static com.datastax.driver.core.querybuilder.Select.Where;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -190,12 +191,15 @@ public class PatientQueryBuilder {
         return batch;
     }
 
-    public static Batch buildUpdateBatch(Patient patient, PendingApprovalMapping pendingApprovalMapping, CassandraConverter converter) {
-        Batch batch = QueryBuilder.batch();
-        batch.add(toUpdateQuery(CF_PATIENT, patient, null, converter));
-        if (pendingApprovalMapping != null) {
-            batch.add(toUpdateQuery(CF_PENDING_APPROVAL_MAPPING, pendingApprovalMapping, null, converter));
-        }
-        return batch;
+    public static Update buildUpdateBatch(Patient patient, CassandraConverter converter) {
+        return toUpdateQuery(CF_PATIENT, patient, null, converter);
+    }
+
+    public static Insert buildCreatePendingApprovalMappingQuery(PendingApprovalMapping mapping, CassandraConverter converter) {
+        return createInsertQuery(CF_PENDING_APPROVAL_MAPPING, mapping, null, converter);
+    }
+
+    public static Update buildUpdatePendingApprovalMappingQuery(PendingApprovalMapping mapping, CassandraConverter converter) {
+        return toUpdateQuery(CF_PENDING_APPROVAL_MAPPING, mapping, null, converter);
     }
 }
