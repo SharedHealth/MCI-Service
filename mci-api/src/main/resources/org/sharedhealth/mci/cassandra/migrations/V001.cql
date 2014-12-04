@@ -11,12 +11,11 @@ CREATE TABLE IF NOT EXISTS patient (
   address_line varchar,
   division_id varchar,
   district_id varchar,
-  thana_id varchar,
-  union_id varchar,
-  area_mouja varchar,
-  upazilla_id varchar,
-  ward_id varchar,
+  upazila_id varchar,
   city_corporation_id varchar,
+  union_or_urban_ward_id varchar,
+  rural_ward_id varchar,
+  area_mouja varchar,
   street varchar,
   village varchar,
   post_code varchar,
@@ -27,11 +26,10 @@ CREATE TABLE IF NOT EXISTS patient (
   permanent_address_line varchar,
   permanent_division_id varchar,
   permanent_district_id varchar,
-  permanent_thana_id varchar,
-  permanent_union_id varchar,
-  permanent_ward_id  varchar,
-  permanent_upazilla_id varchar,
+  permanent_upazila_id varchar,
   permanent_city_corporation_id varchar,
+  permanent_union_or_urban_ward_id varchar,
+  permanent_rural_ward_id  varchar,
   permanent_area_mouja varchar,
   permanent_country_code varchar,
   permanent_holding_number varchar,
@@ -88,6 +86,7 @@ CREATE TABLE IF NOT EXISTS patient (
   location_level3 varchar,
   location_level4 varchar,
   location_level5 varchar,
+  location_level6 varchar,
   created_at timestamp,
   created_by varchar,
   updated_at timestamp,
@@ -101,5 +100,6 @@ CREATE INDEX location_level2_key ON patient (location_level2);
 CREATE INDEX location_level3_key ON patient (location_level3);
 CREATE INDEX location_level4_key ON patient (location_level4);
 CREATE INDEX location_level5_key ON patient (location_level5);
+CREATE INDEX location_level6_key ON patient (location_level6);
 
 

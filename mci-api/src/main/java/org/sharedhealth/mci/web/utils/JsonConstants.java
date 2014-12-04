@@ -33,21 +33,17 @@ public class JsonConstants {
     public static final String ADDRESS_LINE = "address_line";
     public static final String DIVISION_ID = "division_id";
     public static final String DISTRICT_ID = "district_id";
-    public static final String UPAZILLA_ID = "upazilla_id";
-    public static final String UNION_ID = "union_id";
+    public static final String UPAZILA_ID = "upazila_id";
+    public static final String UNION_OR_URBAN_WARD_ID = "union_or_urban_ward_id";
     public static final String HOLDING_NUMBER = "holding_number";
     public static final String STREET = "street";
     public static final String AREA_MOUJA = "area_mouja";
     public static final String VILLAGE = "village";
     public static final String POST_OFFICE = "post_office";
     public static final String POST_CODE = "post_code";
-    public static final String WARD_ID = "ward_id";
-    public static final String THANA_ID = "thana_id";
+    public static final String RURAL_WARD_ID = "rural_ward_id";
     public static final String CITY_CORPORATION_ID = "city_corporation_id";
     public static final String COUNTRY_CODE = "country_code";
-    public static final String UPAZILA_ID_OR_THANA_ID = "(upazila_id/thana_id)";
-    public static final String UPAZILLA_ID_AND_THANA_ID = "(upazila_id,thana_id)";
-    public static final String UNION_ID_AND_WARD_ID = "(union_id,ward_id)";
 
     public static final String FACILITY_ID = "facility_id";
     public static final String LAST_ITEM_ID = "last_item_id";

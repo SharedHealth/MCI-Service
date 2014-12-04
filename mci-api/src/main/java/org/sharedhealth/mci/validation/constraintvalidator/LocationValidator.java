@@ -18,8 +18,6 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
     private static final Logger logger = LoggerFactory.getLogger(LocationValidator.class);
     private static final String BD_COUNTRY_CODE = "050";
     private static final String ERROR_CODE_REQUIRED = "1001";
-    private static final String ERROR_CODE_PATTERN = "1004";
-    private static final String ERROR_CODE_DEPENDENT = "1005";
 
     private LocationService locationService;
     private String countryCode;
@@ -53,28 +51,7 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
             isValid = false;
         }
 
-        if (StringUtils.isBlank(value.getDivisionId())) {
-            isValid = false;
-            addConstraintViolation(context, ERROR_CODE_REQUIRED, "divisionId");
-        }
-
-        if (StringUtils.isBlank(value.getDistrictId())) {
-            isValid = false;
-            addConstraintViolation(context, ERROR_CODE_REQUIRED, "districtId");
-        }
-
-        if (StringUtils.isBlank(value.getUpazilaOrThana())) {
-            isValid = false;
-            addConstraintViolation(context, ERROR_CODE_REQUIRED, "upazilaOrThana");
-        } else if (StringUtils.isNotBlank(value.getUpazillaId()) && StringUtils.isNotBlank(value.getThanaId())) {
-            isValid = false;
-            addConstraintViolation(context, ERROR_CODE_DEPENDENT, "upazilaAndThana");
-        }
-
-        if (StringUtils.isNotBlank(value.getUnionId()) && StringUtils.isNotBlank(value.getWardId())) {
-            isValid = false;
-            addConstraintViolation(context, ERROR_CODE_DEPENDENT, "unionAndWard");
-        }
+        isValid = isMinimumRequiredFieldsGiven(value, context, isValid);
 
         if(isInvalidHierarchy(value)){
             isValid = false;
@@ -90,10 +67,32 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
 
     }
 
+    private boolean isMinimumRequiredFieldsGiven(Address value, ConstraintValidatorContext context, boolean isValid) {
+
+        if (StringUtils.isBlank(value.getDivisionId())) {
+            isValid = false;
+            addConstraintViolation(context, ERROR_CODE_REQUIRED, "divisionId");
+        }
+
+        if (StringUtils.isBlank(value.getDistrictId())) {
+            isValid = false;
+            addConstraintViolation(context, ERROR_CODE_REQUIRED, "districtId");
+        }
+
+        if (StringUtils.isBlank(value.getUpazilaId())) {
+            isValid = false;
+            addConstraintViolation(context, ERROR_CODE_REQUIRED, "upazila_id");
+        }
+
+        return isValid;
+    }
+
     private boolean isInvalidHierarchy(Address address) {
-        if (StringUtils.isNotBlank(address.getUnionOrWard()) && StringUtils.isBlank(address.getCityCorporationId())) {
+        if (StringUtils.isNotBlank(address.getRuralWardId()) && StringUtils.isBlank(address.getUnionOrUrbanWardId())) {
             return true;
-        } else if (StringUtils.isNotBlank(address.getCityCorporationId()) && StringUtils.isBlank(address.getUpazilaOrThana())) {
+        } else if (StringUtils.isNotBlank(address.getUnionOrUrbanWardId()) && StringUtils.isBlank(address.getCityCorporationId())) {
+            return true;
+        } else if (StringUtils.isNotBlank(address.getCityCorporationId()) && StringUtils.isBlank(address.getUpazilaId())) {
             return true;
         }
 
@@ -102,15 +101,23 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
 
     private boolean isExistInLocationRegistry(String geoCode) {
         logger.debug("Validation testing for code : [" + geoCode + "]");
+
+        //@TODO Use value.getGeoCode() when the rural_Ward_id data populated
+        String geoCodeTill5ThLevel = geoCode;
+
+        if(geoCodeTill5ThLevel.length() > 10) {
+            geoCodeTill5ThLevel = geoCode.substring(0, 10);
+        }
+
         try {
-            org.sharedhealth.mci.web.mapper.Location location = locationService.findByGeoCode(geoCode).get();
+            org.sharedhealth.mci.web.mapper.Location location = locationService.findByGeoCode(geoCodeTill5ThLevel).get();
 
             if (!StringUtils.isBlank(location.getGeoCode())) {
                 return true;
             }
 
         } catch (Exception e) {
-            logger.debug("Validation error for : [" + geoCode + "]");
+            logger.debug("Validation error for : [" + geoCodeTill5ThLevel + "]");
         }
 
         return false;

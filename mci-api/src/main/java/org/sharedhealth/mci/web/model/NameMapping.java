@@ -16,7 +16,7 @@ public class NameMapping {
     @PrimaryKeyColumn(name = DISTRICT_ID, ordinal = 1, type = PARTITIONED)
     private String districtId;
 
-    @PrimaryKeyColumn(name = UPAZILLA_ID, ordinal = 2, type = PARTITIONED)
+    @PrimaryKeyColumn(name = UPAZILA_ID, ordinal = 2, type = PARTITIONED)
     private String upazilaId;
 
     @PrimaryKeyColumn(name = GIVEN_NAME, ordinal = 3, type = CLUSTERED)

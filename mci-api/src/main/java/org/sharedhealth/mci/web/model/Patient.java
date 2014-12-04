@@ -1,17 +1,17 @@
 package org.sharedhealth.mci.web.model;
 
 
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.data.cassandra.mapping.Column;
 import org.springframework.data.cassandra.mapping.PrimaryKey;
 import org.springframework.data.cassandra.mapping.Table;
-
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.sharedhealth.mci.utils.DateUtil.string2Date;
@@ -121,11 +121,11 @@ public class Patient {
     @Column(DISTRICT_ID)
     private String districtId;
 
-    @Column(UPAZILLA_ID)
-    private String upazillaId;
+    @Column(UPAZILA_ID)
+    private String upazilaId;
 
-    @Column(UNION_ID)
-    private String unionId;
+    @Column(UNION_OR_URBAN_WARD_ID)
+    private String unionOrUrbanWardId;
 
     @Column(HOLDING_NUMBER)
     private String holdingNumber;
@@ -145,11 +145,8 @@ public class Patient {
     @Column(POST_CODE)
     private String postCode;
 
-    @Column(WARD)
-    private String wardId;
-
-    @Column(THANA)
-    private String thanaId;
+    @Column(RURAL_WARD_ID)
+    private String ruralWardId;
 
     @Column(CITY_CORPORATION)
     private String cityCorporationId;
@@ -172,6 +169,9 @@ public class Patient {
     @Column("location_level5")
     private String locationLevel5;
 
+    @Column("location_level6")
+    private String locationLevel6;
+
     @Column(PERMANENT_ADDRESS_LINE)
     private String permanentAddressLine;
 
@@ -181,11 +181,11 @@ public class Patient {
     @Column(PERMANENT_DISTRICT_ID)
     private String permanentDistrictId;
 
-    @Column(PERMANENT_UPAZILLA_ID)
-    private String permanentUpazillaId;
+    @Column(PERMANENT_UPAZILA_ID)
+    private String permanentUpazilaId;
 
-    @Column(PERMANENT_UNION_ID)
-    private String permanentUnionId;
+    @Column(PERMANENT_UNION_OR_URBAN_WARD_ID)
+    private String permanentUnionOrUrbanWardId;
 
     @Column(PERMANENT_HOLDING_NUMBER)
     private String permanentHoldingNumber;
@@ -205,11 +205,8 @@ public class Patient {
     @Column(PERMANENT_POST_CODE)
     private String permanentPostCode;
 
-    @Column(PERMANENT_WARD)
-    private String permanentWardId;
-
-    @Column(PERMANENT_THANA)
-    private String permanentThanaId;
+    @Column(PERMANENT_RURAL_WARD_ID)
+    private String permanentRuralWardId;
 
     @Column(PERMANENT_CITY_CORPORATION)
     private String permanentCityCorporationId;
@@ -571,21 +568,21 @@ public class Patient {
         this.updateLocationLevels();
     }
 
-    public String getUpazillaId() {
-        return upazillaId;
+    public String getUpazilaId() {
+        return upazilaId;
     }
 
-    public void setUpazillaId(String upazillaId) {
-        this.upazillaId = upazillaId;
+    public void setUpazilaId(String upazilaId) {
+        this.upazilaId = upazilaId;
         this.updateLocationLevels();
     }
 
-    public String getUnionId() {
-        return unionId;
+    public String getUnionOrUrbanWardId() {
+        return unionOrUrbanWardId;
     }
 
-    public void setUnionId(String unionId) {
-        this.unionId = unionId;
+    public void setUnionOrUrbanWardId(String unionOrUrbanWardId) {
+        this.unionOrUrbanWardId = unionOrUrbanWardId;
         this.updateLocationLevels();
     }
 
@@ -637,21 +634,12 @@ public class Patient {
         this.postCode = postCode;
     }
 
-    public String getWardId() {
-        return wardId;
+    public String getRuralWardId() {
+        return ruralWardId;
     }
 
-    public void setWardId(String wardId) {
-        this.wardId = wardId;
-        this.updateLocationLevels();
-    }
-
-    public String getThanaId() {
-        return thanaId;
-    }
-
-    public void setThanaId(String thanaId) {
-        this.thanaId = thanaId;
+    public void setRuralWardId(String ruralWardId) {
+        this.ruralWardId = ruralWardId;
         this.updateLocationLevels();
     }
 
@@ -696,20 +684,20 @@ public class Patient {
         this.permanentDistrictId = permanentDistrictId;
     }
 
-    public String getPermanentUpazillaId() {
-        return permanentUpazillaId;
+    public String getPermanentUpazilaId() {
+        return permanentUpazilaId;
     }
 
-    public void setPermanentUpazillaId(String permanentUpazillaId) {
-        this.permanentUpazillaId = permanentUpazillaId;
+    public void setPermanentUpazilaId(String permanentUpazilaId) {
+        this.permanentUpazilaId = permanentUpazilaId;
     }
 
-    public String getPermanentUnionId() {
-        return permanentUnionId;
+    public String getPermanentUnionOrUrbanWardId() {
+        return permanentUnionOrUrbanWardId;
     }
 
-    public void setPermanentUnionId(String permanentUnionId) {
-        this.permanentUnionId = permanentUnionId;
+    public void setPermanentUnionOrUrbanWardId(String permanentUnionOrUrbanWardId) {
+        this.permanentUnionOrUrbanWardId = permanentUnionOrUrbanWardId;
     }
 
     public String getPermanentHoldingNumber() {
@@ -760,20 +748,12 @@ public class Patient {
         this.permanentPostCode = permanentPostCode;
     }
 
-    public String getPermanentWardId() {
-        return permanentWardId;
+    public String getPermanentRuralWardId() {
+        return permanentRuralWardId;
     }
 
-    public void setPermanentWardId(String permanentWardId) {
-        this.permanentWardId = permanentWardId;
-    }
-
-    public String getPermanentThanaId() {
-        return permanentThanaId;
-    }
-
-    public void setPermanentThanaId(String permanentThanaId) {
-        this.permanentThanaId = permanentThanaId;
+    public void setPermanentRuralWardId(String permanentRuralWardId) {
+        this.permanentRuralWardId = permanentRuralWardId;
     }
 
     public String getPermanentCityCorporationId() {
@@ -910,6 +890,7 @@ public class Patient {
         this.locationLevel3 = this.getLocationLevel3();
         this.locationLevel4 = this.getLocationLevel4();
         this.locationLevel5 = this.getLocationLevel5();
+        this.locationLevel6 = this.getLocationLevel6();
     }
 
     public String getLocationLevel1() {
@@ -931,21 +912,12 @@ public class Patient {
     }
 
     public String getLocationLevel3() {
-        String ut = "";
 
-        if (this.getUpazillaId() != null) {
-            ut = this.getUpazillaId();
-        }
-
-        if (this.getThanaId() != null) {
-            ut = ut + this.getThanaId();
-        }
-
-        if (StringUtils.isBlank(ut)) {
+        if (StringUtils.isBlank(this.getUpazilaId())){
             return "";
         }
 
-        return this.getLocationLevel2() + ut;
+        return this.getLocationLevel2() + this.getUpazilaId();
     }
 
     public String getLocationLevel4() {
@@ -957,21 +929,21 @@ public class Patient {
     }
 
     public String getLocationLevel5() {
-        String uw = "";
 
-        if (this.getUnionId() != null) {
-            uw = this.getUnionId();
-        }
-
-        if (this.getWardId() != null) {
-            uw = uw + this.getWardId();
-        }
-
-        if (StringUtils.isBlank(uw)) {
+        if (StringUtils.isBlank(this.getUnionOrUrbanWardId())) {
             return "";
         }
 
-        return this.getLocationLevel4() + uw;
+        return this.getLocationLevel4() + this.getUnionOrUrbanWardId();
+    }
+
+    public String getLocationLevel6() {
+
+        if (StringUtils.isBlank(this.getRuralWardId())) {
+            return "";
+        }
+
+        return this.getLocationLevel5() + this.getRuralWardId();
     }
 
     public String getLowerSurName() {

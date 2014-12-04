@@ -1,11 +1,11 @@
 package org.sharedhealth.mci.web.model;
 
 
+import java.util.UUID;
+
 import org.springframework.data.cassandra.mapping.Column;
 import org.springframework.data.cassandra.mapping.PrimaryKeyColumn;
 import org.springframework.data.cassandra.mapping.Table;
-
-import java.util.UUID;
 
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
 import static org.springframework.cassandra.core.PrimaryKeyType.CLUSTERED;
@@ -19,8 +19,8 @@ public class PendingApprovalMapping {
     @PrimaryKeyColumn(name = DISTRICT_ID, ordinal = 1, type = PARTITIONED)
     private String district_id;
 
-    @PrimaryKeyColumn(name = UPAZILLA_ID, ordinal = 2, type = PARTITIONED)
-    private String upazilla_id;
+    @PrimaryKeyColumn(name = UPAZILA_ID, ordinal = 2, type = PARTITIONED)
+    private String upazila_id;
 
     @PrimaryKeyColumn(name = CREATED_AT, ordinal = 3, type = CLUSTERED)
     private UUID created_at;
@@ -45,11 +45,11 @@ public class PendingApprovalMapping {
     }
 
     public String getUpazilaId() {
-        return upazilla_id;
+        return upazila_id;
     }
 
     public void setUpazilaId(String upazilaId) {
-        this.upazilla_id = upazilaId;
+        this.upazila_id = upazilaId;
     }
 
     public UUID getCreatedAt() {

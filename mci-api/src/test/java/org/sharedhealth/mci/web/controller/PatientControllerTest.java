@@ -96,10 +96,10 @@ public class PatientControllerTest {
         address.setAddressLine("house-10");
         address.setDivisionId("10");
         address.setDistrictId("04");
-        address.setUpazillaId("09");
+        address.setUpazilaId("09");
         address.setCityCorporationId("20");
         address.setVillage("10");
-        address.setWardId("01");
+        address.setRuralWardId("01");
         address.setCountryCode("050");
 
         patient1.setAddress(address);
@@ -109,7 +109,7 @@ public class PatientControllerTest {
         location.setGeoCode(GEO_CODE);
         location.setDivisionId("10");
         location.setDistrictId("04");
-        location.setUpazillaId("09");
+        location.setUpazilaId("09");
         location.setPaurashavaId("20");
         location.setUnionId("01");
 
@@ -172,7 +172,7 @@ public class PatientControllerTest {
 
     @Test
     public void shouldFindPatientsByAddress() throws Exception {
-        String address = location.getDivisionId() + location.getDistrictId() + location.getUpazillaId();
+        String address = location.getDivisionId() + location.getDistrictId() + location.getUpazilaId();
         searchQuery.setPresent_address(address);
         stringBuilder.append("present_address=" + address);
         assertFindAllBy(searchQuery, stringBuilder.toString());
@@ -181,7 +181,7 @@ public class PatientControllerTest {
     @Test
     public void shouldFindPatientsByAddressAndUid() throws Exception {
         StringBuilder stringBuilder = new StringBuilder(200);
-        String address = location.getDivisionId() + location.getDistrictId() + location.getUpazillaId();
+        String address = location.getDivisionId() + location.getDistrictId() + location.getUpazilaId();
         searchQuery.setPresent_address(address);
         searchQuery.setUid(uid);
         stringBuilder.append("uid=" + uid);
@@ -194,7 +194,7 @@ public class PatientControllerTest {
     public void shouldFindPatientsByAddressAndShowNoteForMoreRecord() throws Exception {
 
         StringBuilder stringBuilder = new StringBuilder(200);
-        String address = location.getDivisionId() + location.getDistrictId() + location.getUpazillaId();
+        String address = location.getDivisionId() + location.getDistrictId() + location.getUpazilaId();
         searchQuery.setPresent_address(address);
         stringBuilder.append("present_address=" + address);
 
@@ -248,7 +248,7 @@ public class PatientControllerTest {
     @Test
     public void shouldFindPatientsByAddressAndSurName() throws Exception {
         StringBuilder stringBuilder = new StringBuilder(200);
-        String address = location.getDivisionId() + location.getDistrictId() + location.getUpazillaId();
+        String address = location.getDivisionId() + location.getDistrictId() + location.getUpazilaId();
         searchQuery.setPresent_address(address);
         searchQuery.setSur_name(patient1.getSurName());
         stringBuilder.append("sur_name=" + patient1.getSurName());
@@ -260,7 +260,7 @@ public class PatientControllerTest {
     @Test
     public void shouldFindPatientsByAddressAndGivenName() throws Exception {
         StringBuilder stringBuilder = new StringBuilder(200);
-        String address = location.getDivisionId() + location.getDistrictId() + location.getUpazillaId();
+        String address = location.getDivisionId() + location.getDistrictId() + location.getUpazilaId();
         searchQuery.setPresent_address(address);
         searchQuery.setGiven_name(patient1.getGivenName());
         stringBuilder.append("given_name=" + patient1.getGivenName());
@@ -273,7 +273,7 @@ public class PatientControllerTest {
     public void shouldFindPatientsByAddressAndSurNameAndShowNoteForMoreRecord() throws Exception {
 
         StringBuilder stringBuilder = new StringBuilder(200);
-        String address = location.getDivisionId() + location.getDistrictId() + location.getUpazillaId();
+        String address = location.getDivisionId() + location.getDistrictId() + location.getUpazilaId();
         searchQuery.setPresent_address(address);
         stringBuilder.append("present_address=" + address);
         stringBuilder.append("&sur_name=" + patient1.getSurName());
@@ -337,10 +337,10 @@ public class PatientControllerTest {
         address.setAddressLine("house-10");
         address.setDivisionId("10");
         address.setDistrictId("04");
-        address.setUpazillaId("09");
+        address.setUpazilaId("09");
         address.setCityCorporationId("20");
         address.setVillage("10");
-        address.setWardId("01");
+        address.setRuralWardId("01");
         address.setCountryCode("050");
 
         patient2.setAddress(address);
@@ -350,7 +350,7 @@ public class PatientControllerTest {
         location.setGeoCode(GEO_CODE);
         location.setDivisionId("10");
         location.setDistrictId("04");
-        location.setUpazillaId("09");
+        location.setUpazilaId("09");
         location.setPaurashavaId("20");
         location.setUnionId("01");
         return patient2;
@@ -373,7 +373,7 @@ public class PatientControllerTest {
         HttpHeaders headers = new HttpHeaders();
         headers.add(DIVISION_ID, "10");
         headers.add(DISTRICT_ID, "20");
-        headers.add(UPAZILLA_ID, "30");
+        headers.add(UPAZILA_ID, "30");
 
         MvcResult mvcResult = mockMvc.perform(get(GET_PENDING_APPROVALS_API).headers(headers))
                 .andExpect(request().asyncStarted())
@@ -415,7 +415,7 @@ public class PatientControllerTest {
         HttpHeaders headers = new HttpHeaders();
         headers.add(DIVISION_ID, "10");
         headers.add(DISTRICT_ID, "20");
-        headers.add(UPAZILLA_ID, "30");
+        headers.add(UPAZILA_ID, "30");
 
         MvcResult mvcResult = mockMvc.perform(
                 get(GET_PENDING_APPROVALS_API + "?" + LAST_ITEM_ID + "=" + lastItemId).headers(headers))

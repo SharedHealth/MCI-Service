@@ -30,14 +30,18 @@ public class LocationValidatorTest {
 
     @Before
     public void setup() {
+        initAddressObject();
+    }
+
+    private void initAddressObject() {
         address = new Address();
         address.setAddressLine("house-10");
         address.setDivisionId("10");
         address.setDistrictId("04");
-        address.setUpazillaId("09");
+        address.setUpazilaId("09");
         address.setCityCorporationId("20");
-        address.setVillage("10");
-        address.setWardId("01");
+        address.setUnionOrUrbanWardId("01");
+        address.setRuralWardId("01");
         address.setCountryCode("050");
     }
 
@@ -48,16 +52,35 @@ public class LocationValidatorTest {
     }
 
     @Test
+    public void ruralWardIdIsOptional() throws Exception {
+        address.setRuralWardId(null);
+        Set<ConstraintViolation<PatientData>> constraintViolations = validator.validateValue(PatientData.class, "address", address);
+        assertEquals(0, constraintViolations.size());
+    }
+
+    @Test
     public void shouldFailForInvalidAddress() throws Exception {
         address.setDivisionId("00");
-        Set<ConstraintViolation<PatientData>> constraintViolations = validator.validateValue(PatientData.class, "address", address);
-        assertEquals(1, constraintViolations.size());
-        assertEquals("1004", constraintViolations.iterator().next().getMessage());
+        assertInvalidAddressValue();
+    }
+
+    @Test
+    public void shouldFailForInvalidAddressHierarchy() throws Exception {
+        address.setUnionOrUrbanWardId(null);
+        assertInvalidAddressValue();
+
+        initAddressObject();
+        address.setCityCorporationId(null);
+        assertInvalidAddressValue();
     }
 
     @Test
     public void shouldFailForInvalidCountryForPresentAddress() throws Exception {
         address.setCountryCode("051");
+        assertInvalidAddressValue();
+    }
+
+    private void assertInvalidAddressValue() {
         Set<ConstraintViolation<PatientData>> constraintViolations = validator.validateValue(PatientData.class, "address", address);
         assertEquals(1, constraintViolations.size());
         assertEquals("1004", constraintViolations.iterator().next().getMessage());

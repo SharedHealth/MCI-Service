@@ -69,8 +69,8 @@ public class LocationRepository extends BaseRepository {
         location.setDivisionName(row.getString("division_name"));
         location.setDistrictId(row.getString("district_id"));
         location.setDistrictName(row.getString("district_name"));
-        location.setUpazillaId(row.getString("upazilla_id"));
-        location.setUpazillaName(row.getString("upazilla_name"));
+        location.setUpazilaId(row.getString("upazilla_id"));
+        location.setUpazilaName(row.getString("upazilla_name"));
         location.setPaurashavaId(row.getString("pourashava_id"));
         location.setPaurashavaName(row.getString("pourashava_name"));
         location.setUnionId(row.getString("union_id"));

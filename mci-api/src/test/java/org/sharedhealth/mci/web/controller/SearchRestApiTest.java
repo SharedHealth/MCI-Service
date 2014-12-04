@@ -68,10 +68,10 @@ public class SearchRestApiTest extends BaseControllerTest {
         address.setAddressLine("house-12");
         address.setDivisionId("10");
         address.setDistrictId("04");
-        address.setUpazillaId("09");
+        address.setUpazilaId("09");
         address.setCityCorporationId("20");
         address.setVillage("10");
-        address.setWardId("01");
+        address.setUnionOrUrbanWardId("01");
         address.setCountryCode("050");
 
         patientData.setAddress(address);
@@ -98,7 +98,7 @@ public class SearchRestApiTest extends BaseControllerTest {
     @Test
     public void shouldReturnOkResponseIfPatientNotExistWithGivenNameAndAddress() throws Exception {
         String present_address = patientData.getAddress().getDivisionId() +
-                patientData.getAddress().getDistrictId() + patientData.getAddress().getUpazillaId();
+                patientData.getAddress().getDistrictId() + patientData.getAddress().getUpazilaId();
         String givenName = "Rajus";
         MvcResult result = mockMvc.perform(get(API_END_POINT + "?given_name=" + givenName + "&present_address=" + present_address).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -116,7 +116,7 @@ public class SearchRestApiTest extends BaseControllerTest {
 
         MvcResult result = createPatient(json);
         String present_address = original.getAddress().getDivisionId() +
-                original.getAddress().getDistrictId() + original.getAddress().getUpazillaId();
+                original.getAddress().getDistrictId() + original.getAddress().getUpazilaId();
         String givenName = "Zaman";
 
         MvcResult searchResult = mockMvc.perform(get(API_END_POINT + "?given_name=" + givenName + "&present_address=" + present_address).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
@@ -137,7 +137,7 @@ public class SearchRestApiTest extends BaseControllerTest {
 
         MvcResult result = createPatient(json);
         String present_address = original.getAddress().getDivisionId() +
-                original.getAddress().getDistrictId() + original.getAddress().getUpazillaId();
+                original.getAddress().getDistrictId() + original.getAddress().getUpazilaId();
         String givenName = "zaman";
         String surName = "aymaan";
         MvcResult searchResult = mockMvc.perform(get(API_END_POINT + "?given_name=" + givenName +
@@ -158,7 +158,7 @@ public class SearchRestApiTest extends BaseControllerTest {
             createPatient(json);
         }
         String present_address = patientData.getAddress().getDivisionId() +
-                patientData.getAddress().getDistrictId() + patientData.getAddress().getUpazillaId();
+                patientData.getAddress().getDistrictId() + patientData.getAddress().getUpazilaId();
         String givenName = "raju";
         String surName = "mazumder";
         MvcResult result = mockMvc.perform(get(API_END_POINT + "?given_name=" + givenName +
@@ -205,7 +205,7 @@ public class SearchRestApiTest extends BaseControllerTest {
     public void shouldReturnOkResponseIfPatientNotExistWithPhoneNumber() throws Exception {
         patientData.setHealthId("health-100");
         String present_address = patientData.getAddress().getDivisionId() +
-                patientData.getAddress().getDistrictId() + patientData.getAddress().getUpazillaId();
+                patientData.getAddress().getDistrictId() + patientData.getAddress().getUpazilaId();
         MvcResult result = mockMvc.perform(get(API_END_POINT +
                 "?phone_no=123456&country_code=880&present_address=" + present_address).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -219,7 +219,7 @@ public class SearchRestApiTest extends BaseControllerTest {
     public void shouldReturnAllTheCreatedPatientIfPhoneNumberMatchBySearch() throws Exception {
         String json = new ObjectMapper().writeValueAsString(patientData);
         String present_address = patientData.getAddress().getDivisionId() +
-                patientData.getAddress().getDistrictId() + patientData.getAddress().getUpazillaId();
+                patientData.getAddress().getDistrictId() + patientData.getAddress().getUpazilaId();
         createPatient(json);
         createPatient(json);
         createPatient(json);

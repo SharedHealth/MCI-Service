@@ -80,10 +80,10 @@ public class PatientFilterTest {
         address.setAddressLine("house-10");
         address.setDivisionId("10");
         address.setDistrictId("04");
-        address.setUpazillaId("09");
+        address.setUpazilaId("09");
         address.setCityCorporationId("20");
         address.setVillage("10");
-        address.setWardId("01");
+        address.setRuralWardId("01");
         address.setCountryCode("050");
 
         patient.setAddress(address);
@@ -92,10 +92,10 @@ public class PatientFilterTest {
         presentAdress.setAddressLine("house-10");
         presentAdress.setDivisionId("10");
         presentAdress.setDistrictId("04");
-        presentAdress.setUpazillaId("09");
+        presentAdress.setUpazilaId("09");
         presentAdress.setCityCorporationId("20");
         presentAdress.setVillage("10");
-        presentAdress.setWardId("01");
+        presentAdress.setRuralWardId("01");
         presentAdress.setCountryCode("050");
 
         patient.setPermanentAddress(presentAdress);
@@ -106,7 +106,7 @@ public class PatientFilterTest {
         location.setGeoCode("1004092001");
         location.setDivisionId("10");
         location.setDistrictId("04");
-        location.setUpazillaId("09");
+        location.setUpazilaId("09");
         location.setPaurashavaId("20");
         location.setUnionId("01");
         return patient;

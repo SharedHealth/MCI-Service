@@ -1,5 +1,9 @@
 package org.sharedhealth.mci.web.controller;
 
+import java.text.ParseException;
+import java.util.Collections;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
@@ -25,15 +29,14 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.text.ParseException;
-import java.util.Collections;
-import java.util.List;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -68,10 +71,11 @@ public class PatientControllerIT extends BaseControllerTest {
         presentAddress.setAddressLine("house-12");
         presentAddress.setDivisionId("10");
         presentAddress.setDistrictId("04");
-        presentAddress.setUpazillaId("09");
+        presentAddress.setUpazilaId("09");
         presentAddress.setCityCorporationId("20");
+        presentAddress.setUnionOrUrbanWardId("01");
+        presentAddress.setRuralWardId("01");
         presentAddress.setVillage("10");
-        presentAddress.setWardId("01");
         presentAddress.setCountryCode("050");
 
         patientData.setAddress(presentAddress);
@@ -80,10 +84,11 @@ public class PatientControllerIT extends BaseControllerTest {
         permanentAddress.setAddressLine("house-12");
         permanentAddress.setDivisionId("10");
         permanentAddress.setDistrictId("04");
-        permanentAddress.setUpazillaId("09");
+        permanentAddress.setUpazilaId("09");
         permanentAddress.setCityCorporationId("20");
+        permanentAddress.setUnionOrUrbanWardId("06");
+        permanentAddress.setRuralWardId(null);
         permanentAddress.setVillage("10");
-        permanentAddress.setWardId("01");
         permanentAddress.setCountryCode("050");
 
         patientData.setPermanentAddress(permanentAddress);
@@ -193,9 +198,9 @@ public class PatientControllerIT extends BaseControllerTest {
     @Test
     public void ShouldPassIFAddressIsValidTillUpazilaLevel() throws Exception {
 
-        patientData.getAddress().setWardId(null);
+        patientData.getAddress().setRuralWardId(null);
         patientData.getAddress().setCityCorporationId(null);
-        patientData.getAddress().setUnionId(null);
+        patientData.getAddress().setUnionOrUrbanWardId(null);
 
         String json = mapper.writeValueAsString(patientData);
 
@@ -279,7 +284,7 @@ public class PatientControllerIT extends BaseControllerTest {
         final MCIResponse body1 = getMciResponse(firstTimeResponse);
         String healthId = body1.getId();
 
-        original.setGivenName("Updated Full Name");
+        original.setGivenName("Updated Given Name");
 
         MvcResult result = createPatient(mapper.writeValueAsString(original));
 
@@ -295,7 +300,7 @@ public class PatientControllerIT extends BaseControllerTest {
 
         PatientData patient = getPatientObjectFromResponse(asyncResult);
 
-        Assert.assertEquals("Updated Full Name", patient.getGivenName());
+        Assert.assertEquals("Updated Given Name", patient.getGivenName());
     }
 
     @Test

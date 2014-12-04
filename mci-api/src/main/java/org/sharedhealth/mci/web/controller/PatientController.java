@@ -135,7 +135,7 @@ public class PatientController {
     public DeferredResult<ResponseEntity<MCIMultiResponse>> findApprovals(
             @RequestHeader(value = DIVISION_ID) String divisionId,
             @RequestHeader(value = DISTRICT_ID) String districtId,
-            @RequestHeader(value = UPAZILLA_ID) String upazilaId,
+            @RequestHeader(value = UPAZILA_ID) String upazilaId,
             @RequestParam(value = LAST_ITEM_ID, required = false) UUID lastItemId) {
 
         logger.debug("Find list of pending approvals before : " + lastItemId);

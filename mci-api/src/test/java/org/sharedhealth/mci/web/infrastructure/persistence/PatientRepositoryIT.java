@@ -1,5 +1,8 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+
 import com.datastax.driver.core.utils.UUIDs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.After;
@@ -26,14 +29,13 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import java.util.*;
-import java.util.concurrent.ExecutionException;
-
 import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
 import static java.util.Arrays.asList;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.FACILITY_ID;
@@ -156,7 +158,7 @@ public class PatientRepositoryIT {
         PendingApprovalMapping mapping = mappings.get(0);
         assertEquals(data.getAddress().getDivisionId(), mapping.getDivisionId());
         assertEquals(data.getAddress().getDistrictId(), mapping.getDistrictId());
-        assertEquals(data.getAddress().getUpazillaId(), mapping.getUpazilaId());
+        assertEquals(data.getAddress().getUpazilaId(), mapping.getUpazilaId());
         assertEquals(data.getHealthId(), mapping.getHealthId());
     }
 
@@ -251,9 +253,9 @@ public class PatientRepositoryIT {
         address.setAddressLine("house-10");
         address.setDivisionId(division);
         address.setDistrictId(district);
-        address.setUpazillaId(upazilla);
+        address.setUpazilaId(upazilla);
         address.setCityCorporationId(cityCorp);
-        address.setWardId(ward);
+        address.setUnionOrUrbanWardId(ward);
 
         return address;
     }
@@ -351,7 +353,7 @@ public class PatientRepositoryIT {
         assertEquals(healthId, mapping.getHealthId());
         assertEquals(data.getAddress().getDivisionId(), mapping.getDivisionId());
         assertEquals(data.getAddress().getDistrictId(), mapping.getDistrictId());
-        assertEquals(data.getAddress().getUpazillaId(), mapping.getUpazilaId());
+        assertEquals(data.getAddress().getUpazilaId(), mapping.getUpazilaId());
         assertEquals(pendingApprovalsMap.keySet().iterator().next(), mapping.getCreatedAt());
     }
 
@@ -377,7 +379,7 @@ public class PatientRepositoryIT {
         assertEquals(healthId, mapping.getHealthId());
         assertEquals(data.getAddress().getDivisionId(), mapping.getDivisionId());
         assertEquals(data.getAddress().getDistrictId(), mapping.getDistrictId());
-        assertEquals(data.getAddress().getUpazillaId(), mapping.getUpazilaId());
+        assertEquals(data.getAddress().getUpazilaId(), mapping.getUpazilaId());
         UUID latestUuid = patientRepository.findLatestUuid(pendingApprovalsMap);
         assertEquals(latestUuid, mapping.getCreatedAt());
     }

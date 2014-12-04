@@ -22,10 +22,10 @@ public class Location {
     private String districtName;
 
     @JsonProperty("upazilla_id")
-    private String upazillaId;
+    private String upazilaId;
 
     @JsonProperty("upazilla_name")
-    private String upazillaName;
+    private String upazilaName;
 
     @JsonProperty("pourashava_id")
     private String paurashavaId;
@@ -73,12 +73,12 @@ public class Location {
         this.districtId = districtId;
     }
 
-    public String getUpazillaId() {
-        return upazillaId;
+    public String getUpazilaId() {
+        return upazilaId;
     }
 
-    public void setUpazillaId(String upazillaId) {
-        this.upazillaId = upazillaId;
+    public void setUpazilaId(String upazilaId) {
+        this.upazilaId = upazilaId;
     }
 
     public String getUnionId() {
@@ -113,12 +113,12 @@ public class Location {
         this.districtName = districtName;
     }
 
-    public String getUpazillaName() {
-        return upazillaName;
+    public String getUpazilaName() {
+        return upazilaName;
     }
 
-    public void setUpazillaName(String upazillaName) {
-        this.upazillaName = upazillaName;
+    public void setUpazilaName(String upazilaName) {
+        this.upazilaName = upazilaName;
     }
 
     public String getPaurashavaName() {

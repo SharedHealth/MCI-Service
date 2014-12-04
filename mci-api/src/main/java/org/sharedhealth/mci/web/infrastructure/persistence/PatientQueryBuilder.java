@@ -1,17 +1,22 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
+import java.util.UUID;
+
 import com.datastax.driver.core.querybuilder.*;
 import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.model.*;
 import org.springframework.data.cassandra.convert.CassandraConverter;
 
-import java.util.UUID;
-
-import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.in;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.lt;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
 import static com.datastax.driver.core.querybuilder.Select.Where;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static org.springframework.data.cassandra.core.CassandraTemplate.*;
+import static org.springframework.data.cassandra.core.CassandraTemplate.createDeleteQuery;
+import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
+import static org.springframework.data.cassandra.core.CassandraTemplate.toUpdateQuery;
 
 public class PatientQueryBuilder {
 
@@ -36,8 +41,8 @@ public class PatientQueryBuilder {
     public static final String ADDRESS_LINE = "address_line";
     public static final String DIVISION_ID = "division_id";
     public static final String DISTRICT_ID = "district_id";
-    public static final String UPAZILLA_ID = "upazilla_id";
-    public static final String UNION_ID = "union_id";
+    public static final String UPAZILA_ID = "upazila_id";
+    public static final String UNION_OR_URBAN_WARD_ID = "union_or_urban_ward_id";
     public static final String BIN_BRN = "bin_brn";
     public static final String UID = "uid";
     public static final String FATHERS_NAME_BANGLA = "fathers_name_bangla";
@@ -69,23 +74,21 @@ public class PatientQueryBuilder {
     public static final String VILLAGE = "village";
     public static final String POST_OFFICE = "post_office";
     public static final String POST_CODE = "post_code";
-    public static final String WARD = "ward_id";
-    public static final String THANA = "thana_id";
+    public static final String RURAL_WARD_ID = "rural_ward_id";
     public static final String CITY_CORPORATION = "city_corporation_id";
     public static final String COUNTRY = "country_code";
     public static final String PERMANENT_ADDRESS_LINE = "permanent_address_line";
     public static final String PERMANENT_DIVISION_ID = "permanent_division_id";
     public static final String PERMANENT_DISTRICT_ID = "permanent_district_id";
-    public static final String PERMANENT_UPAZILLA_ID = "permanent_upazilla_id";
-    public static final String PERMANENT_UNION_ID = "permanent_union_id";
+    public static final String PERMANENT_UPAZILA_ID = "permanent_upazila_id";
+    public static final String PERMANENT_UNION_OR_URBAN_WARD_ID = "permanent_union_or_urban_ward_id";
     public static final String PERMANENT_HOLDING_NUMBER = "permanent_holding_number";
     public static final String PERMANENT_STREET = "permanent_street";
     public static final String PERMANENT_AREA_MOUJA = "permanent_area_mouja";
     public static final String PERMANENT_VILLAGE = "permanent_village";
     public static final String PERMANENT_POST_OFFICE = "permanent_post_office";
     public static final String PERMANENT_POST_CODE = "permanent_post_code";
-    public static final String PERMANENT_WARD = "permanent_ward_id";
-    public static final String PERMANENT_THANA = "permanent_thana_id";
+    public static final String PERMANENT_RURAL_WARD_ID = "permanent_rural_ward_id";
     public static final String PERMANENT_CITY_CORPORATION = "permanent_city_corporation_id";
     public static final String PERMANENT_COUNTRY = "permanent_country_code";
     public static final String FULL_NAME = "full_name";
@@ -127,7 +130,7 @@ public class PatientQueryBuilder {
         Where where = select(HEALTH_ID, CREATED_AT).from(CF_PENDING_APPROVAL_MAPPING)
                 .where(eq(DIVISION_ID, catchment.getDivisionId()))
                 .and(eq(DISTRICT_ID, catchment.getDistrictId()))
-                .and(eq(UPAZILLA_ID, catchment.getUpazilaId()));
+                .and(eq(UPAZILA_ID, catchment.getUpazilaId()));
 
         if (lastItemId != null) {
             where = where.and(lt(CREATED_AT, lastItemId));
@@ -139,7 +142,7 @@ public class PatientQueryBuilder {
         Where where = select(HEALTH_ID).from(CF_NAME_MAPPING)
                 .where(eq(DIVISION_ID, divisionId))
                 .and(eq(DISTRICT_ID, districtId))
-                .and(eq(UPAZILLA_ID, upazilaId))
+                .and(eq(UPAZILA_ID, upazilaId))
                 .and(eq(GIVEN_NAME, givenName.toLowerCase()));
 
         if (isNotEmpty(surname)) {
@@ -177,7 +180,7 @@ public class PatientQueryBuilder {
 
         String divisionId = patient.getDivisionId();
         String districtId = patient.getDistrictId();
-        String upazilaId = patient.getUpazillaId();
+        String upazilaId = patient.getUpazilaId();
         String givenName = patient.getGivenName();
         String surname = patient.getSurName();
         if (isNotBlank(divisionId) && isNotBlank(districtId) && isNotBlank(upazilaId) && isNotBlank(givenName) && isNotBlank(surname)) {

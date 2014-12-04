@@ -1,5 +1,7 @@
 package org.sharedhealth.mci.web.mapper;
 
+import java.util.*;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -8,8 +10,6 @@ import org.sharedhealth.mci.web.model.Patient;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.FieldError;
-
-import java.util.*;
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang.time.DateFormatUtils.ISO_DATE_FORMAT;
@@ -71,17 +71,16 @@ public class PatientMapper {
         address.setAddressLine(patient.getAddressLine());
         address.setDivisionId(patient.getDivisionId());
         address.setDistrictId(patient.getDistrictId());
-        address.setUpazillaId(patient.getUpazillaId());
+        address.setUpazilaId(patient.getUpazilaId());
         address.setCityCorporationId(patient.getCityCorporationId());
-        address.setUnionId(patient.getUnionId());
-        address.setWardId(patient.getWardId());
+        address.setUnionOrUrbanWardId(patient.getUnionOrUrbanWardId());
+        address.setRuralWardId(patient.getRuralWardId());
         address.setHoldingNumber(patient.getHoldingNumber());
         address.setStreet(patient.getStreet());
         address.setAreaMouja(patient.getAreaMouja());
         address.setVillage(patient.getVillage());
         address.setPostOffice(patient.getPostOffice());
         address.setPostCode(patient.getPostCode());
-        address.setThanaId(patient.getThanaId());
         address.setCountryCode(patient.getCountryCode());
         data.setAddress(address);
 
@@ -89,17 +88,16 @@ public class PatientMapper {
         permanentAddress.setAddressLine(patient.getPermanentAddressLine());
         permanentAddress.setDivisionId(patient.getPermanentDivisionId());
         permanentAddress.setDistrictId(patient.getPermanentDistrictId());
-        permanentAddress.setUpazillaId(patient.getPermanentUpazillaId());
+        permanentAddress.setUpazilaId(patient.getPermanentUpazilaId());
         permanentAddress.setCityCorporationId(patient.getPermanentCityCorporationId());
-        permanentAddress.setUnionId(patient.getPermanentUnionId());
-        permanentAddress.setWardId(patient.getPermanentWardId());
+        permanentAddress.setUnionOrUrbanWardId(patient.getPermanentUnionOrUrbanWardId());
+        permanentAddress.setRuralWardId(patient.getPermanentRuralWardId());
         permanentAddress.setHoldingNumber(patient.getPermanentHoldingNumber());
         permanentAddress.setStreet(patient.getPermanentStreet());
         permanentAddress.setAreaMouja(patient.getPermanentAreaMouja());
         permanentAddress.setVillage(patient.getPermanentVillage());
         permanentAddress.setPostOffice(patient.getPermanentPostOffice());
         permanentAddress.setPostCode(patient.getPermanentPostCode());
-        permanentAddress.setThanaId(patient.getPermanentThanaId());
         permanentAddress.setCountryCode(patient.getPermanentCountryCode());
         if (permanentAddress.getCountryCode() != null) {
             if ("050".equals(permanentAddress.getCountryCode()) && permanentAddress.getDistrictId() != null) {
@@ -175,16 +173,15 @@ public class PatientMapper {
             patient.setAddressLine(address.getAddressLine());
             patient.setDivisionId(address.getDivisionId());
             patient.setDistrictId(address.getDistrictId());
-            patient.setUpazillaId(address.getUpazillaId());
-            patient.setUnionId(address.getUnionId());
+            patient.setUpazilaId(address.getUpazilaId());
+            patient.setUnionOrUrbanWardId(address.getUnionOrUrbanWardId());
             patient.setHoldingNumber(StringUtils.trim(address.getHoldingNumber()));
             patient.setStreet(StringUtils.trim(address.getStreet()));
             patient.setAreaMouja(StringUtils.trim(address.getAreaMouja()));
             patient.setVillage(StringUtils.trim(address.getVillage()));
             patient.setPostOffice(StringUtils.trim(address.getPostOffice()));
             patient.setPostCode(address.getPostCode());
-            patient.setWardId(address.getWardId());
-            patient.setThanaId(address.getThanaId());
+            patient.setRuralWardId(address.getRuralWardId());
             patient.setCityCorporationId(address.getCityCorporationId());
             patient.setCountryCode(address.getCountryCode());
         }
@@ -193,16 +190,15 @@ public class PatientMapper {
             patient.setPermanentAddressLine(permanentAddress.getAddressLine());
             patient.setPermanentDivisionId(permanentAddress.getDivisionId());
             patient.setPermanentDistrictId(permanentAddress.getDistrictId());
-            patient.setPermanentUpazillaId(permanentAddress.getUpazillaId());
-            patient.setPermanentUnionId(permanentAddress.getUnionId());
+            patient.setPermanentUpazilaId(permanentAddress.getUpazilaId());
+            patient.setPermanentUnionOrUrbanWardId(permanentAddress.getUnionOrUrbanWardId());
             patient.setPermanentHoldingNumber(StringUtils.trim(permanentAddress.getHoldingNumber()));
             patient.setPermanentStreet(StringUtils.trim(permanentAddress.getStreet()));
             patient.setPermanentAreaMouja(StringUtils.trim(permanentAddress.getAreaMouja()));
             patient.setPermanentVillage(StringUtils.trim(permanentAddress.getVillage()));
             patient.setPermanentPostOffice(StringUtils.trim(permanentAddress.getPostOffice()));
             patient.setPermanentPostCode(permanentAddress.getPostCode());
-            patient.setPermanentWardId(permanentAddress.getWardId());
-            patient.setPermanentThanaId(permanentAddress.getThanaId());
+            patient.setPermanentRuralWardId(permanentAddress.getRuralWardId());
             patient.setPermanentCityCorporationId(permanentAddress.getCityCorporationId());
             patient.setPermanentCountryCode(permanentAddress.getCountryCode());
         }

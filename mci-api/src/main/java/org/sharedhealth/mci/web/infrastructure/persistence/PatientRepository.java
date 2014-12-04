@@ -96,7 +96,7 @@ public class PatientRepository extends BaseRepository {
 
         Catchment catchment = new Catchment(existingPatientData.getAddress().getDivisionId(),
                 existingPatientData.getAddress().getDistrictId(),
-                existingPatientData.getAddress().getUpazillaId());
+                existingPatientData.getAddress().getUpazilaId());
 
         cassandraOperations.execute(buildUpdateBatch(patientToSave, pendingApproval, catchment));
         return new MCIResponse(patientToSave.getHealthId(), HttpStatus.ACCEPTED);
@@ -251,7 +251,7 @@ public class PatientRepository extends BaseRepository {
         if (isNotBlank(searchQuery.getDistrictId()) && !searchQuery.getDistrictId().equals(address.getDistrictId())) {
             return false;
         }
-        if (isNotBlank(searchQuery.getUpazilaId()) && !searchQuery.getUpazilaId().equals(address.getUpazillaId())) {
+        if (isNotBlank(searchQuery.getUpazilaId()) && !searchQuery.getUpazilaId().equals(address.getUpazilaId())) {
             return false;
         }
         if (isNotBlank(searchQuery.getGiven_name()) && !searchQuery.getGiven_name().equalsIgnoreCase(p.getGivenName())) {

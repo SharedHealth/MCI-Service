@@ -1,6 +1,9 @@
 package org.sharedhealth.mci.web.mapper;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -10,10 +13,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.sharedhealth.mci.validation.constraints.Code;
 import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
-
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
@@ -36,15 +35,25 @@ public class Address {
     @Pattern(regexp = "[\\d]{2}", message = "1002")
     private String districtId;
 
-    @JsonProperty(UPAZILLA_ID)
+    @JsonProperty(UPAZILA_ID)
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "[\\d]{2}", message = "1002")
-    private String upazillaId;
+    private String upazilaId;
 
-    @JsonProperty(UNION_ID)
+    @JsonProperty(CITY_CORPORATION_ID)
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "[\\d]{2}", message = "1002")
-    private String unionId;
+    private String cityCorporationId;
+
+    @JsonProperty(UNION_OR_URBAN_WARD_ID)
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "[\\d]{2}", message = "1002")
+    private String unionOrUrbanWardId;
+
+    @JsonProperty(RURAL_WARD_ID)
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "[\\d]{2}", message = "1002")
+    private String ruralWardId;
 
     @JsonProperty(HOLDING_NUMBER)
     @JsonInclude(NON_EMPTY)
@@ -75,37 +84,11 @@ public class Address {
     @JsonInclude(NON_EMPTY)
     private String postCode;
 
-    @JsonProperty(WARD_ID)
-    @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[\\d]{2}", message = "1002")
-    private String wardId;
-
-    @JsonProperty(THANA_ID)
-    @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[\\d]{2}", message = "1002")
-    private String thanaId;
-
-    @JsonProperty(CITY_CORPORATION_ID)
-    @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[\\d]{2}", message = "1002")
-    private String cityCorporationId;
 
     @JsonProperty(COUNTRY_CODE)
     @JsonInclude(NON_EMPTY)
     @Code(type = "country_code", regexp = "[\\d]{3}", message = "1004")
     private String countryCode = "050";
-
-    @JsonIgnore
-    @JsonProperty(UPAZILA_ID_OR_THANA_ID)
-    private String upazilaOrThana;
-
-    @JsonIgnore
-    @JsonProperty(UPAZILLA_ID_AND_THANA_ID)
-    private String upazilaAndThana;
-
-    @JsonIgnore
-    @JsonProperty(UNION_ID_AND_WARD_ID)
-    private String unionAndWard;
 
     @Override
     public boolean equals(Object rhs) {
@@ -146,20 +129,20 @@ public class Address {
         this.districtId = districtId;
     }
 
-    public String getUpazillaId() {
-        return upazillaId;
+    public String getUpazilaId() {
+        return upazilaId;
     }
 
-    public void setUpazillaId(String upazillaId) {
-        this.upazillaId = upazillaId;
+    public void setUpazilaId(String upazilaId) {
+        this.upazilaId = upazilaId;
     }
 
-    public String getUnionId() {
-        return unionId;
+    public String getUnionOrUrbanWardId() {
+        return unionOrUrbanWardId;
     }
 
-    public void setUnionId(String unionId) {
-        this.unionId = unionId;
+    public void setUnionOrUrbanWardId(String unionOrUrbanWardId) {
+        this.unionOrUrbanWardId = unionOrUrbanWardId;
     }
 
     public String getHoldingNumber() {
@@ -218,20 +201,12 @@ public class Address {
         this.cityCorporationId = cityCorporationId;
     }
 
-    public String getThanaId() {
-        return thanaId;
+    public String getRuralWardId() {
+        return ruralWardId;
     }
 
-    public void setThanaId(String thanaId) {
-        this.thanaId = thanaId;
-    }
-
-    public String getWardId() {
-        return wardId;
-    }
-
-    public void setWardId(String wardId) {
-        this.wardId = wardId;
+    public void setRuralWardId(String ruralWardId) {
+        this.ruralWardId = ruralWardId;
     }
 
     public String getPostCode() {
@@ -240,35 +215,6 @@ public class Address {
 
     public void setPostCode(String postCode) {
         this.postCode = postCode;
-    }
-
-    @JsonIgnore
-    public String getUpazilaOrThana() {
-        String ut = "";
-
-        if (this.getUpazillaId() != null) {
-            ut = this.getUpazillaId();
-        }
-
-        if (this.getThanaId() != null) {
-            ut = ut + this.getThanaId();
-        }
-
-        return ut;
-    }
-
-    public String getUnionOrWard() {
-        String uw = "";
-
-        if (this.getUnionId() != null) {
-            uw = this.getUnionId();
-        }
-
-        if (this.getWardId() != null) {
-            uw = uw + this.getWardId();
-        }
-
-        return uw;
     }
 
     public String getGeoCode() {
@@ -282,28 +228,22 @@ public class Address {
             gCode += this.getDistrictId();
         }
 
-        if (StringUtils.isNotBlank(this.getUpazilaOrThana())) {
-            gCode += this.getUpazilaOrThana();
+        if (StringUtils.isNotBlank(this.getUpazilaId())) {
+            gCode += this.getUpazilaId();
         }
 
         if (StringUtils.isNotBlank(this.getCityCorporationId())) {
             gCode += this.getCityCorporationId();
         }
 
-        if (StringUtils.isNotBlank(this.getUnionOrWard())) {
-            gCode += this.getUnionOrWard();
+        if (StringUtils.isNotBlank(this.getUnionOrUrbanWardId())) {
+            gCode += this.getUnionOrUrbanWardId();
+        }
+
+        if (StringUtils.isNotBlank(this.getRuralWardId())) {
+            gCode += this.getRuralWardId();
         }
 
         return gCode;
-    }
-
-    @JsonIgnore
-    public String getUpazilaAndThana() {
-        return null;
-    }
-
-    @JsonIgnore
-    public String getUnionAndWard() {
-        return null;
     }
 }

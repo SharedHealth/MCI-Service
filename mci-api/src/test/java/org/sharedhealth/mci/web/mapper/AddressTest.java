@@ -54,25 +54,14 @@ public class AddressTest extends ValidationAwareMapper{
     }
 
     @Test
-    public void shouldPassIfUpazillaIsValid() {
-        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "upazillaId", "15");
+    public void shouldPassIfUpazilaIsValid() {
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "upazilaId", "15");
         assertEquals(0, constraintViolations.size());
     }
 
     @Test
-    public void shouldFailIfUpazillaIdIsInvalid() {
-        assertInvalidAddressId("upazillaId");
-    }
-
-    @Test
-    public void shouldPassIfThanaIsValid() {
-        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "thanaId", "15");
-        assertEquals(0, constraintViolations.size());
-    }
-
-    @Test
-    public void shouldFailIfThanaIdIsInvalid() {
-        assertInvalidAddressId("thanaId");
+    public void shouldFailIfUpazilaIdIsInvalid() {
+        assertInvalidAddressId("upazilaId");
     }
 
     @Test
@@ -87,26 +76,26 @@ public class AddressTest extends ValidationAwareMapper{
     }
 
     @Test
-    public void shouldPassIfWardIdIsValid() {
-        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "wardId", "13");
+    public void shouldPassIfRuralWardIdIsValid() {
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "ruralWardId", "13");
         assertEquals(0, constraintViolations.size());
     }
 
     @Test
-    public void shouldFailIfWardIdIsInvalid() {
-        assertInvalidAddressId("wardId");
+    public void shouldFailIfRuralWardIdIsInvalid() {
+        assertInvalidAddressId("ruralWardId");
     }
 
 
     @Test
-    public void shouldPassIfUnionIdIsValid() {
-        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "unionId", "15");
+    public void shouldPassIfUnionOrUrbanWardIdIsValid() {
+        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "unionOrUrbanWardId", "15");
         assertEquals(0, constraintViolations.size());
     }
 
     @Test
     public void shouldFailIfUnionIdIsInvalid() {
-        assertInvalidAddressId("unionId");
+        assertInvalidAddressId("unionOrUrbanWardId");
     }
 
     @Test
