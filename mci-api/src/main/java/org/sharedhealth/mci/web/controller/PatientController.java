@@ -43,8 +43,7 @@ public class PatientController {
 
     @RequestMapping(method = RequestMethod.POST, consumes = {APPLICATION_JSON_VALUE})
     public DeferredResult<ResponseEntity<MCIResponse>> create(
-            @RequestBody @Validated({RequiredGroup.class, Default.class})
-            PatientData patient,
+            @RequestBody @Validated({RequiredGroup.class, Default.class}) PatientData patient,
             BindingResult bindingResult) {
 
         logger.debug("Trying to create patient.");

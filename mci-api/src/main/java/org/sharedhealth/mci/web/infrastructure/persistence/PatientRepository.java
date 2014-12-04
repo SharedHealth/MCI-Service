@@ -41,16 +41,16 @@ public class PatientRepository extends BaseRepository {
 
     protected static final Logger logger = LoggerFactory.getLogger(PatientRepository.class);
     private ObjectMapper objectMapper = new ObjectMapper();
-    private UidGenerator uid;
+    private UidGenerator uidGenerator;
     private PatientMapper mapper;
 
     @Autowired
     public PatientRepository(@Qualifier("MCICassandraTemplate") CassandraOperations cassandraOperations,
                              PatientMapper mapper,
-                             UidGenerator uid) {
+                             UidGenerator uidGenerator) {
         super(cassandraOperations);
         this.mapper = mapper;
-        this.uid = uid;
+        this.uidGenerator = uidGenerator;
     }
 
     public MCIResponse create(PatientData patientData) {
@@ -59,20 +59,13 @@ public class PatientRepository extends BaseRepository {
             bindingResult.addError(new FieldError("patient", "hid", "3001"));
             throw new HealthIDExistException(bindingResult);
         }
+        Patient patient = mapper.map(patientData, new PatientData());
+        patient.setHealthId(uidGenerator.getId());
+        patient.setCreatedAt(new Date());
+        patient.setUpdatedAt(new Date());
 
-        PatientData existingPatient = getExistingPatient(patientData);
-        if (existingPatient != null) {
-            return update(patientData, existingPatient.getHealthId());
-        }
-
-        Patient p = mapper.map(patientData, new PatientData());
-        p.setHealthId(uid.getId());
-        p.setCreatedAt(new Date());
-        p.setUpdatedAt(new Date());
-        p.setSurName(patientData.getSurName());
-
-        cassandraOperations.execute(buildSaveBatch(p, cassandraOperations.getConverter()));
-        return new MCIResponse(p.getHealthId(), HttpStatus.CREATED);
+        cassandraOperations.execute(buildSaveBatch(patient, cassandraOperations.getConverter()));
+        return new MCIResponse(patient.getHealthId(), HttpStatus.CREATED);
     }
 
     public MCIResponse update(PatientData patientDataForUpdate, String healthId) {
@@ -172,21 +165,6 @@ public class PatientRepository extends BaseRepository {
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Error setting approvals during update.", e);
         }
-    }
-
-    private PatientData getExistingPatient(PatientData mapper) {
-        if (!mapper.containsMultipleIdentifier()) {
-            return null;
-        }
-        SearchQuery searchQuery = new SearchQuery();
-        searchQuery.setNid(mapper.getNationalId());
-        searchQuery.setBin_brn(mapper.getBirthRegistrationNumber());
-        searchQuery.setUid(mapper.getUid());
-        List<PatientData> mappers = findAllByQuery(searchQuery);
-        if (isNotEmpty(mappers)) {
-            return mappers.get(0);
-        }
-        return null;
     }
 
     public PatientData findByHealthId(final String healthId) {

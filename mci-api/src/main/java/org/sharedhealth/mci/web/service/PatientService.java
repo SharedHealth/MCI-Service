@@ -19,6 +19,7 @@ import org.springframework.validation.FieldError;
 import java.util.*;
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
 @Component
@@ -32,7 +33,8 @@ public class PatientService {
     private SettingService settingService;
 
     @Autowired
-    public PatientService(PatientRepository patientRepository, FacilityRegistryWrapper facilityRegistryWrapper,
+    public PatientService(PatientRepository patientRepository,
+                          FacilityRegistryWrapper facilityRegistryWrapper,
                           SettingService settingService) {
         this.patientRepository = patientRepository;
         this.facilityRegistryWrapper = facilityRegistryWrapper;
@@ -40,7 +42,40 @@ public class PatientService {
     }
 
     public MCIResponse create(PatientData patient) {
+        PatientData existingPatient = findPatientByMultipleIds(patient);
+        if (existingPatient != null) {
+            return this.update(patient, existingPatient.getHealthId());
+        }
         return patientRepository.create(patient);
+    }
+
+    private PatientData findPatientByMultipleIds(PatientData patient) {
+        if (!this.containsMultipleIds(patient)) {
+            return null;
+        }
+        SearchQuery searchQuery = new SearchQuery();
+        searchQuery.setNid(patient.getNationalId());
+        searchQuery.setBin_brn(patient.getBirthRegistrationNumber());
+        searchQuery.setUid(patient.getUid());
+        List<PatientData> patients = this.findAllByQuery(searchQuery);
+        if (isNotEmpty(patients)) {
+            return patients.get(0);
+        }
+        return null;
+    }
+
+    boolean containsMultipleIds(PatientData patient) {
+        int count = 0;
+        if (isNotBlank(patient.getNationalId())) {
+            count++;
+        }
+        if (isNotBlank(patient.getBirthRegistrationNumber())) {
+            count++;
+        }
+        if (isNotBlank(patient.getUid())) {
+            count++;
+        }
+        return count > 1;
     }
 
     public MCIResponse update(PatientData patient, String healthId) {

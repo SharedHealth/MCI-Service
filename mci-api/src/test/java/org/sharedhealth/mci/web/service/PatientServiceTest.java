@@ -10,6 +10,7 @@ import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
 import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PendingApprovalResponse;
+import org.sharedhealth.mci.web.mapper.SearchQuery;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
 
 import java.util.Collections;
@@ -18,10 +19,9 @@ import java.util.Map;
 import java.util.UUID;
 
 import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
@@ -40,6 +40,30 @@ public class PatientServiceTest {
     public void setUp() throws Exception {
         initMocks(this);
         patientService = new PatientService(patientRepository, facilityRegistryWrapper, settingService);
+    }
+
+    @Test
+    public void shouldUpdateInsteadofCreatingWhenMatchingPatientExists() throws Exception {
+        PatientData patientData = new PatientData();
+        patientData.setNationalId("nid-100");
+        patientData.setBirthRegistrationNumber("brn-100");
+
+        SearchQuery searchQuery = new SearchQuery();
+        searchQuery.setNid("nid-100");
+        searchQuery.setBin_brn("brn-100");
+
+        PatientData patientDataFromDb = new PatientData();
+        patientDataFromDb.setHealthId("hid-100");
+        patientDataFromDb.setNationalId("nid-100");
+        patientDataFromDb.setBirthRegistrationNumber("brn-100");
+
+        when(patientRepository.findAllByQuery(searchQuery)).thenReturn(asList(patientDataFromDb));
+
+        patientService.create(patientData);
+        InOrder inOrder = inOrder(patientRepository);
+        inOrder.verify(patientRepository).findAllByQuery(searchQuery);
+        inOrder.verify(patientRepository).update(patientData, "hid-100");
+        inOrder.verify(patientRepository, never()).create(any(PatientData.class));
     }
 
     @Test
@@ -94,5 +118,41 @@ public class PatientServiceTest {
         patient.setGivenName("Scott-" + healthId);
         patient.setSurName("Tiger-" + healthId);
         return patient;
+    }
+
+    @Test
+    public void shouldReturnFalseWhenPatientDoesNotHaveMultipleIds() {
+        PatientData patient = new PatientData();
+        patient.setNationalId("100");
+        patient.setBirthRegistrationNumber("");
+        patient.setUid(null);
+        assertFalse(patientService.containsMultipleIds(patient));
+    }
+
+    @Test
+    public void shouldReturnTrueWhenPatientHasNidAndBrn() {
+        PatientData patient = new PatientData();
+        patient.setNationalId("100");
+        patient.setBirthRegistrationNumber("200");
+        patient.setUid(null);
+        assertTrue(patientService.containsMultipleIds(patient));
+    }
+
+    @Test
+    public void shouldReturnTrueWhenPatientHasNidAndUid() {
+        PatientData patient = new PatientData();
+        patient.setNationalId("100");
+        patient.setBirthRegistrationNumber(null);
+        patient.setUid("300");
+        assertTrue(patientService.containsMultipleIds(patient));
+    }
+
+    @Test
+    public void shouldReturnTrueWhenPatientHasBrnAndUid() {
+        PatientData patient = new PatientData();
+        patient.setNationalId(null);
+        patient.setBirthRegistrationNumber("200");
+        patient.setUid("300");
+        assertTrue(patientService.containsMultipleIds(patient));
     }
 }

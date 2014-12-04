@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
 @MaritalRelation(message = "1005", field = "maritalStatus")
@@ -435,20 +434,6 @@ public class PatientData {
 
     public void setPrimaryContactNumber(PhoneNumber primaryContactNumber) {
         this.primaryContactNumber = primaryContactNumber;
-    }
-
-    public boolean containsMultipleIdentifier() {
-        int count = 0;
-        if (isNotBlank(this.getNationalId())) {
-            count++;
-        }
-        if (isNotBlank(this.getBirthRegistrationNumber())) {
-            count++;
-        }
-        if (isNotBlank(this.getUid())) {
-            count++;
-        }
-        return count > 1;
     }
 
     public Map<UUID, String> getPendingApprovals() {

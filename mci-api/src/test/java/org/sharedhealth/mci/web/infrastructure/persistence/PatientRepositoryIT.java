@@ -38,7 +38,6 @@ import static org.sharedhealth.mci.utils.FileUtil.asString;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.FACILITY_ID;
 import static org.sharedhealth.mci.web.utils.JsonConstants.LAST_ITEM_ID;
-import static org.springframework.http.HttpStatus.ACCEPTED;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -110,14 +109,6 @@ public class PatientRepositoryIT {
     public void shouldThrowException_IfHealthIdProvidedForCreate() throws ExecutionException, InterruptedException {
         data.setHealthId("12");
         patientRepository.create(data);
-    }
-
-    @Test
-    public void shouldReturnAccepted_IfPatientExistWithProvidedTwoIdFieldsOnCreate() throws ExecutionException, InterruptedException {
-        patientRepository.create(data);
-        data.setHealthId(null);
-        MCIResponse mciResponse = patientRepository.create(data);
-        assertEquals(mciResponse.getHttpStatus(), ACCEPTED.value());
     }
 
     @Test(expected = PatientNotFoundException.class)
