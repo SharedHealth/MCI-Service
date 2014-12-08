@@ -29,7 +29,7 @@ public class SearchQuery extends PaginationQuery {
     private String uid;
 
     @JsonProperty("present_address")
-    @Pattern(regexp = "[\\d]{6}|[\\d]{8}|[\\d]{10}", message = "1002")
+    @Pattern(regexp = "[\\d]{6}|[\\d]{8}|[\\d]{10}|[\\d]{12}", message = "1002")
     private String present_address;
 
     private String divisionId;
