@@ -64,7 +64,7 @@ public class Relation {
 
     @JsonProperty(SUR_NAME)
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^(\\s*)([A-Za-z0-9]{0,25})(\\b\\s*$)", message = "1002")
+    @Pattern(regexp = "[A-Za-z0-9]{0,25}", message = "1002")
     @JsonDeserialize(using = WhiteSpaceRemovalDeserializer.class)
     private String surName;
 
