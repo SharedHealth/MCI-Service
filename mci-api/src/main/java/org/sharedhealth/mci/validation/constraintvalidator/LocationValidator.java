@@ -3,6 +3,8 @@ package org.sharedhealth.mci.validation.constraintvalidator;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+import java.util.regex.Pattern;
+
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.validation.constraints.Location;
 import org.sharedhealth.mci.web.mapper.Address;
@@ -18,6 +20,8 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
     private static final Logger logger = LoggerFactory.getLogger(LocationValidator.class);
     private static final String BD_COUNTRY_CODE = "050";
     private static final String ERROR_CODE_REQUIRED = "1001";
+    private static final String ERROR_CODE_PATTERN = "1004";
+    public static final int BANGLADESH_POST_CODE_LENGTH = 4;
 
     private LocationService locationService;
     private String countryCode;
@@ -53,6 +57,9 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
 
         isValid = isMinimumRequiredFieldsGiven(value, context, isValid);
 
+        isValid = isValid && isValidPostCode(value.getPostCode(), context);
+
+
         if(isInvalidHierarchy(value)){
             isValid = false;
         }
@@ -65,6 +72,20 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
 
         return isValid;
 
+    }
+
+    private boolean isValidPostCode(String postCode, ConstraintValidatorContext context) {
+
+        if(isInvalidPostCodePattern(postCode)) {
+            addConstraintViolation(context, ERROR_CODE_PATTERN, "postCode");
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean isInvalidPostCodePattern(String postCode) {
+        return postCode != null && !Pattern.compile("[\\d]{" + BANGLADESH_POST_CODE_LENGTH + "}").matcher(postCode).matches();
     }
 
     private boolean isMinimumRequiredFieldsGiven(Address value, ConstraintValidatorContext context, boolean isValid) {

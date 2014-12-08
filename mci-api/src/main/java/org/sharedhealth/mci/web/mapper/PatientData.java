@@ -1,5 +1,12 @@
 package org.sharedhealth.mci.web.mapper;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -12,13 +19,6 @@ import org.hibernate.validator.constraints.NotBlank;
 import org.sharedhealth.mci.validation.constraints.*;
 import org.sharedhealth.mci.validation.constraints.Location;
 import org.sharedhealth.mci.validation.group.RequiredGroup;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
@@ -119,7 +119,6 @@ public class PatientData {
     @NotNull(message = "1001", groups = RequiredGroup.class)
     @Valid
     @Location(message = "1004", country_code = "050")
-    @PostCode(message = "1004", country_code = "050")
     private Address address;
 
     @JsonProperty(PRIMARY_CONTACT)
@@ -141,7 +140,6 @@ public class PatientData {
     @Valid
     @JsonInclude(NON_EMPTY)
     @Location(message = "1004")
-    @PostCode(message = "1004", country_code = "050")
     private Address permanentAddress;
 
     @JsonProperty(MARITAL_STATUS)
