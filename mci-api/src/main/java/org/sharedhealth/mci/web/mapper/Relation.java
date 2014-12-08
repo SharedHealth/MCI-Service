@@ -5,8 +5,10 @@ import javax.validation.constraints.Pattern;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.sharedhealth.mci.utils.WhiteSpaceRemovalDeserializer;
 import org.sharedhealth.mci.validation.constraints.Code;
 import org.sharedhealth.mci.validation.constraints.Length;
 import org.sharedhealth.mci.validation.constraints.RelationType;
@@ -26,41 +28,50 @@ public class Relation {
 
     @JsonProperty(HID)
     @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "[\\d]{19}", message = "1002")
+    @JsonDeserialize(using = WhiteSpaceRemovalDeserializer.class)
     private String healthId;
 
     @JsonProperty("nid")
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "[\\d]{13}|[\\d]{17}", message = "1002")
+    @JsonDeserialize(using = WhiteSpaceRemovalDeserializer.class)
     private String nationalId;
 
     @JsonProperty(UID)
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "[a-zA-Z0-9]{11}", message = "1002")
+    @JsonDeserialize(using = WhiteSpaceRemovalDeserializer.class)
     private String uid;
 
     @JsonProperty(BIN_BRN)
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "[\\d]{17}", message = "1002")
+    @JsonDeserialize(using = WhiteSpaceRemovalDeserializer.class)
     private String birthRegistrationNumber;
 
     @JsonProperty(NAME_BANGLA)
     @JsonInclude(NON_EMPTY)
     @Length(max = 125, message = "1002")
+    @JsonDeserialize(using = WhiteSpaceRemovalDeserializer.class)
     private String nameBangla;
 
     @JsonProperty(GIVEN_NAME)
     @JsonInclude(NON_EMPTY)
     @Length(max = 100, message = "1002")
+    @JsonDeserialize(using = WhiteSpaceRemovalDeserializer.class)
     private String givenName;
 
     @JsonProperty(SUR_NAME)
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "^(\\s*)([A-Za-z0-9]{0,25})(\\b\\s*$)", message = "1002")
+    @JsonDeserialize(using = WhiteSpaceRemovalDeserializer.class)
     private String surName;
 
     @JsonProperty("marriage_id")
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "[a-zA-Z0-9]{8}", message = "1002")
+    @JsonDeserialize(using = WhiteSpaceRemovalDeserializer.class)
     private String marriageId;
 
     @JsonProperty("relational_status")
@@ -76,7 +87,7 @@ public class Relation {
     }
 
     public void setNameBangla(String nameBangla) {
-        this.nameBangla = nameBangla;
+        this.nameBangla = nameBangla.trim();
     }
 
     public String getGivenName() {
@@ -84,7 +95,7 @@ public class Relation {
     }
 
     public void setGivenName(String givenName) {
-        this.givenName = givenName;
+        this.givenName = givenName.trim();
     }
 
     public String getSurName() {
@@ -92,7 +103,7 @@ public class Relation {
     }
 
     public void setSurName(String surName) {
-        this.surName = surName;
+        this.surName = surName.trim();
     }
 
     public String getUid() {
