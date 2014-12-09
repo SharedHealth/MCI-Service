@@ -1,6 +1,5 @@
 package org.sharedhealth.mci.web.exception;
 
-import java.lang.String;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
+import org.sharedhealth.mci.web.handler.ErrorHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -22,8 +22,6 @@ import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
-import org.sharedhealth.mci.web.handler.ErrorHandler;
-
 @ControllerAdvice
 public class GlobalExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
@@ -31,10 +29,7 @@ public class GlobalExceptionHandler {
     public static final int ERROR_CODE_JSON_PARSE = 2001;
     public static final int ERROR_CODE_UNRECOGNIZED_FIELD = 2002;
     public static final int ERROR_CODE_FIELD_NOT_PERMITTED = 3001;
-    public static final int ERROR_SEARCH_PARAMETER = 1006;
 
-    
-    
     @ResponseStatus(value = BAD_REQUEST)
     @ExceptionHandler(ValidationException.class)
     @ResponseBody
@@ -122,16 +117,13 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public ErrorHandler searchQueryParameterException(SearchQueryParameterException e) {
         logger.error("Handling Search Query parameter exception. ", e);
-        int code;
-        String msg;
+
         ErrorHandler errorHandler;
 
         errorHandler = new ErrorHandler(BAD_REQUEST.value(),
                 ErrorHandler.VALIDATION_ERROR_CODE, "validation error");
-        code = ERROR_SEARCH_PARAMETER;
-        msg = "Invalid search parameter";
 
-        return errorHandler.handleSearchQueryParameterError(errorHandler, code, msg);
+        return errorHandler.handleSearchQueryParameterError(e);
     }
 
     @ResponseStatus(value = INTERNAL_SERVER_ERROR)

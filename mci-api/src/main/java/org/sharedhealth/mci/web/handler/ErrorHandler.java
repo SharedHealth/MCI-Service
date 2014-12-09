@@ -2,11 +2,13 @@ package org.sharedhealth.mci.web.handler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
 import org.sharedhealth.mci.utils.FieldPropertyNameReader;
+import org.sharedhealth.mci.web.exception.SearchQueryParameterException;
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.springframework.validation.FieldError;
@@ -22,6 +24,7 @@ public class ErrorHandler {
     public static final int VALIDATION_ERROR_CODE = 1000;
     public static final int INVALID_REQUEST_ERROR_CODE = 2000;
     public static final int PERMISSION_ERROR_CODE = 3000;
+    private static final int ERROR_SEARCH_PARAMETER = 1006;
 
 
     @JsonProperty("error_code")
@@ -106,30 +109,33 @@ public class ErrorHandler {
         return errorHandler;
     }
 
-    public ErrorHandler handleSearchQueryParameterError(ErrorHandler errorHandler, int code, String message) {
+    public ErrorHandler handleSearchQueryParameterError(SearchQueryParameterException e) {
 
-        MCIError mciError = new MCIError(code, message);
-        errorHandler.addError(mciError);
+        if(e.getBindingResult().getAllErrors().get(0).getDefaultMessage().matches("\\d+")) {
+            return this.handleValidationError(this, new ValidationException(e.getBindingResult()));
+        }
 
-        return errorHandler;
+        this.addError(new MCIError(ERROR_SEARCH_PARAMETER, e.getBindingResult().getAllErrors().get(0).getDefaultMessage()));
+
+        return this;
     }
 
+    private MCIError getValidationErrorInfo(ObjectError error ) {
+        return getValidationErrorInfo(error, 0);
+    }
 
-    private MCIError getValidationErrorInfo(ObjectError error) {
+    private MCIError getValidationErrorInfo(ObjectError error, int code) {
 
-        int code;
         String message,field;
 
         if (error.getDefaultMessage().matches("\\d+")) {
             code = Integer.parseInt(error.getDefaultMessage());
-        } else {
-            code = 0;
         }
 
         message = error.getDefaultMessage();
         field = getErrorField(error);
 
-        if (field != "") {
+        if (!Objects.equals(field, "")) {
             message = "invalid " + field;
         }
 

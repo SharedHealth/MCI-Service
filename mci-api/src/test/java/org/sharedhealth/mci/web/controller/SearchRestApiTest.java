@@ -83,7 +83,7 @@ public class SearchRestApiTest extends BaseControllerTest {
         MvcResult result = mockMvc.perform(get(API_END_POINT + "?sur_name=Mazumder").accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
-        Assert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1006,\"message\":\"Invalid search parameter\"}]}", result.getResponse().getContentAsString());
+        Assert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1001,\"field\":\"given_name\",\"message\":\"invalid given_name\"}]}", result.getResponse().getContentAsString());
     }
 
     @Test
@@ -92,7 +92,7 @@ public class SearchRestApiTest extends BaseControllerTest {
         MvcResult result = mockMvc.perform(get(API_END_POINT + "?given_name=Mazumder").accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
-        Assert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1006,\"message\":\"Invalid search parameter\"}]}", result.getResponse().getContentAsString());
+        Assert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1006,\"message\":\"Please provide a valid ID, Address or Phone number\"}]}", result.getResponse().getContentAsString());
     }
 
     @Test
@@ -178,17 +178,7 @@ public class SearchRestApiTest extends BaseControllerTest {
                 "?country_code=880&area_code=02&extension=122").accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
-        Assert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1006,\"message\":\"Invalid search parameter\"}]}", result.getResponse().getContentAsString());
-    }
-
-    @Test
-    public void shouldReturnBadRequestIfPresentAddressNotGivenWithPhoneNumber() throws Exception {
-
-        MvcResult result = mockMvc.perform(get(API_END_POINT +
-                "?phone_number=1716528608").accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andReturn();
-        Assert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1006,\"message\":\"Invalid search parameter\"}]}", result.getResponse().getContentAsString());
+        Assert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1001,\"field\":\"phone_no\",\"message\":\"invalid phone_no\"}]}", result.getResponse().getContentAsString());
     }
 
     @Test
@@ -198,7 +188,7 @@ public class SearchRestApiTest extends BaseControllerTest {
                 "?country_code=880").accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
-        Assert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1006,\"message\":\"Invalid search parameter\"}]}", result.getResponse().getContentAsString());
+        Assert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1001,\"field\":\"phone_no\",\"message\":\"invalid phone_no\"}]}", result.getResponse().getContentAsString());
     }
 
     @Test

@@ -31,7 +31,6 @@ public class SearchQuery extends PaginationQuery {
     private String uid;
 
     @JsonProperty("present_address")
-    @Pattern(regexp = "[\\d]{6}|[\\d]{8}|[\\d]{10}|[\\d]{12}", message = "1002")
     private String present_address;
 
     private String divisionId;
@@ -115,9 +114,9 @@ public class SearchQuery extends PaginationQuery {
 
     public void setPresent_address(String present_address) {
         this.present_address = present_address;
-        this.divisionId = present_address.substring(0, 2);
-        this.districtId = present_address.substring(2, 4);
-        this.upazilaId = present_address.substring(4, 6);
+        if(present_address.length() > 1) this.divisionId = present_address.substring(0, 2);
+        if(present_address.length() > 3) this.districtId = present_address.substring(2, 4);
+        if(present_address.length() > 5) this.upazilaId = present_address.substring(4, 6);
     }
 
     @Override

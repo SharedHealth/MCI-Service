@@ -9,11 +9,14 @@ import org.sharedhealth.mci.web.mapper.SearchQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 public class SearchQueryValidator implements ConstraintValidator<SearchQueryConstraint, SearchQuery> {
 
     private static final Logger logger = LoggerFactory.getLogger(SearchQueryValidator.class);
-    private static final String ERROR_CODE_INCOMPLETE = "1006";
     private static final String ERROR_CODE_REQUIRED = "1001";
+    private static final String ERROR_CODE_PATTERN = "1002";
 
     @Override
     public void initialize(SearchQueryConstraint constraintAnnotation) {
@@ -27,7 +30,7 @@ public class SearchQueryValidator implements ConstraintValidator<SearchQueryCons
 
         context.disableDefaultConstraintViolation();
 
-        isValid = isRequiredFieldMissing(value, context);
+        isValid = isValidDataGiven(value, context);
 
         return isValid && isBusinessRulesValidationPassed(value, context);
 
@@ -36,24 +39,37 @@ public class SearchQueryValidator implements ConstraintValidator<SearchQueryCons
     private boolean isBusinessRulesValidationPassed(SearchQuery searchQuery, ConstraintValidatorContext context) {
 
         if (searchQuery.isEmpty()) {
-            addConstraintViolation(context, ERROR_CODE_REQUIRED);
+            addConstraintViolation(context, "No valid search parameter given");
             return false;
         }
 
         final boolean isValid = isSingleSearchableFieldsGiven(searchQuery) || isNameAndAddressGiven(searchQuery);
 
         if (!isValid) {
-            addConstraintViolation(context, ERROR_CODE_INCOMPLETE);
+            registerProperErrorMessage(searchQuery, context);
         }
 
         return isValid;
+    }
+
+    private void registerProperErrorMessage(SearchQuery searchQuery, ConstraintValidatorContext context) {
+        String msg = "Incomplete search criteria!";
+            if(isBlank(searchQuery.getGiven_name()) && isGivenNameRequired(searchQuery)) {
+                msg =  "Please enter a valid name";
+            }else if(isNotBlank(searchQuery.getGiven_name()) || isNotBlank(searchQuery.getGiven_name())){
+                msg =  "Please provide a valid ID, Address or Phone number";
+            }else if(isNotBlank(searchQuery.getPresent_address())){
+                msg =  "Please provide a valid ID, Name or Phone number";
+            }
+
+        addConstraintViolation(context, msg);
     }
 
     private boolean isNameAndAddressGiven(SearchQuery value) {
         return value.getPresent_address() != null && value.getGiven_name() != null;
     }
 
-    private boolean isRequiredFieldMissing(SearchQuery searchQuery, ConstraintValidatorContext context) {
+    private boolean isValidDataGiven(SearchQuery searchQuery, ConstraintValidatorContext context) {
         boolean isValid = true;
 
         if (searchQuery.getGiven_name() == null && isGivenNameRequired(searchQuery)) {
@@ -66,7 +82,16 @@ public class SearchQueryValidator implements ConstraintValidator<SearchQueryCons
             addConstraintViolation(context, ERROR_CODE_REQUIRED, "phone_no");
         }
 
+        if (isInvalidAddressPattern(searchQuery.getPresent_address())) {
+            isValid = false;
+            addConstraintViolation(context, ERROR_CODE_PATTERN, "present_address");
+        }
+
         return isValid;
+    }
+
+    private boolean isInvalidAddressPattern(String present_address) {
+        return present_address != null  && !present_address.matches("[\\d]{6}|[\\d]{8}|[\\d]{10}|[\\d]{12}");
     }
 
     private void addConstraintViolation(ConstraintValidatorContext context, String code) {

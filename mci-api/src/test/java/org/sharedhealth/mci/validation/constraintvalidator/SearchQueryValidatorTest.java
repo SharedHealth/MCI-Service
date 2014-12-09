@@ -14,7 +14,7 @@ public class SearchQueryValidatorTest extends ValidationAwareMapper {
     @Test
     public void shouldFailForEmptySearchQuery() throws Exception {
         SearchQuery searchQuery = getEmptySearchQuery();
-        assertInvalidSearchQuery(searchQuery, "1001");
+        assertInvalidSearchQuery(searchQuery, "No valid search parameter given");
     }
 
     @Test
@@ -98,6 +98,31 @@ public class SearchQueryValidatorTest extends ValidationAwareMapper {
         SearchQuery searchQuery = getEmptySearchQuery();
         searchQuery.setCountry_code("1234");
         assertInvalidSearchQuery(searchQuery, "1001");
+    }
+
+    @Test
+    public void addressShouldComplyWithValidPattern() throws Exception {
+        SearchQuery searchQuery = getEmptySearchQuery();
+        searchQuery.setGiven_name("given name");
+        assertSearchQueryWithInvalidAddress(searchQuery);
+        assertSearchQueryWithValidAddress(searchQuery);
+    }
+
+    private void assertSearchQueryWithInvalidAddress(SearchQuery searchQuery) {
+
+        String[] inValidAddress = {"", "somevalue", "12", "1234", "12345", "1234567", "123456789", "12345678901", "1234567890121"};
+        for (String address : inValidAddress) {
+            searchQuery.setPresent_address(address);
+            assertInvalidSearchQuery(searchQuery, "1002");
+        }
+    }
+
+    private void assertSearchQueryWithValidAddress(SearchQuery searchQuery) {
+        String[] validAddress = {"123456", "12345678", "1234567890", "123456789012"};
+        for (String address : validAddress) {
+            searchQuery.setPresent_address(address);
+            assertValidSearchQuery(searchQuery);
+        }
     }
 
     private void assertInvalidSearchQuery(SearchQuery searchQuery, String expectedErrorCode) {
