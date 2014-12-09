@@ -42,7 +42,7 @@ public class SearchQueryValidator implements ConstraintValidator<SearchQueryCons
 
         final boolean isValid = isSingleSearchableFieldsGiven(searchQuery) || isNameAndAddressGiven(searchQuery);
 
-        if(!isValid) {
+        if (!isValid) {
             addConstraintViolation(context, ERROR_CODE_INCOMPLETE);
         }
 
