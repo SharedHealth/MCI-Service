@@ -507,4 +507,30 @@ public class PatientControllerIT extends BaseControllerTest {
         assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1004,\"field\":\"relations\",\"message\":\"invalid relations\"}]}", result.getResponse().getContentAsString());
 
     }
+
+    @Test
+    public void shouldUpdateAllUpdatablePatientDataSuccessfullyForValidData() throws Exception {
+        String json = asString("jsons/patient/full_payload.json");
+        String updatedJson = asString("jsons/patient/full_payload_with_updated_data.json");
+
+        PatientData updatedPatient = getPatientObjectFromString(updatedJson);
+        MvcResult createdResult = createPatient(json);
+
+        final MCIResponse createdResponse = getMciResponse(createdResult);
+        String healthId = createdResponse.getId();
+
+        mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(updatedJson).contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        PatientData patient = getPatientMapperObjectByHealthId(healthId);
+        patient.setHealthId(patient.getHealthId());
+        patient.setDateOfBirth(updatedPatient.getDateOfBirth());
+        patient.setGender(updatedPatient.getGender());
+        patient.setPhoneNumber(updatedPatient.getPhoneNumber());
+        updatedPatient.setRelations(patient.getRelations());
+
+        assertPatientEquals(updatedPatient, patient);
+
+    }
 }

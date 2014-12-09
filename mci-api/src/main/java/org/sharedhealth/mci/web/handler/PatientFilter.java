@@ -66,6 +66,7 @@ public class PatientFilter {
         patient.setCreatedAt(toBeApproved(map, CREATED, existingPatient.getCreatedAt(), patientToBeUpdated.getCreatedAt()));
         patient.setUpdatedAt(toBeApproved(map, MODIFIED, existingPatient.getUpdatedAt(), patientToBeUpdated.getUpdatedAt()));
         patient.setPhoneNumber(toBeapprovedPhoneNumber(map, PHONE_NUMBER, existingPatient.getPhoneNumber(), patientToBeUpdated.getPhoneNumber()));
+        patient.setPrimaryContactNumber(toBeapprovedPhoneNumber(map, PRIMARY_CONTACT_NUMBER, existingPatient.getPrimaryContactNumber(), patientToBeUpdated.getPrimaryContactNumber()));
         if (patientToBeUpdated.getAddress() != null) {
             patient.setAddress(toBeApprovedAddress(map, PRESENT_ADDRESS, existingPatient.getAddress(), patientToBeUpdated.getAddress()));
         }
