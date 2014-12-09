@@ -9,7 +9,7 @@ import org.sharedhealth.mci.web.infrastructure.fr.FacilityRegistryWrapper;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
 import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.PatientData;
-import org.sharedhealth.mci.web.mapper.PendingApprovalResponse;
+import org.sharedhealth.mci.web.mapper.PendingApprovalListResponse;
 import org.sharedhealth.mci.web.mapper.SearchQuery;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
 
@@ -83,7 +83,7 @@ public class PatientServiceTest {
                 buildPatient("hid-100"));
         when(patientRepository.findByHealthId(asList("hid-300", "hid-200", "hid-100"))).thenReturn(patients);
 
-        PendingApprovalResponse response = patientService.findPendingApprovals(catchment, lastItemId);
+        PendingApprovalListResponse response = patientService.findPendingApprovals(catchment, lastItemId);
 
         InOrder inOrder = inOrder(patientRepository);
         inOrder.verify(patientRepository).findPendingApprovalMapping(catchment, lastItemId, 25);

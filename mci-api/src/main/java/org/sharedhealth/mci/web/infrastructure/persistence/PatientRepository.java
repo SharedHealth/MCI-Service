@@ -14,7 +14,7 @@ import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.handler.PatientFilter;
 import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.model.Patient;
-import org.sharedhealth.mci.web.model.PendingApproval;
+import org.sharedhealth.mci.web.model.PendingApprovalRequest;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,7 +77,7 @@ public class PatientRepository extends BaseRepository {
         patientDataForUpdate.setHealthId(healthId);
 
         PatientFilter patientFilter = new PatientFilter(properties, existingPatientData, patientDataForUpdate, patientDataToSave);
-        PendingApproval pendingApproval = patientFilter.filter();
+        PendingApprovalRequest pendingApprovalRequest = patientFilter.filter();
 
         String fullName = "";
 
@@ -98,7 +98,7 @@ public class PatientRepository extends BaseRepository {
                 existingPatientData.getAddress().getDistrictId(),
                 existingPatientData.getAddress().getUpazilaId());
 
-        cassandraOperations.execute(buildUpdateBatch(patientToSave, pendingApproval, catchment));
+        cassandraOperations.execute(buildUpdateBatch(patientToSave, pendingApprovalRequest, catchment));
         return new MCIResponse(patientToSave.getHealthId(), HttpStatus.ACCEPTED);
     }
 
@@ -113,9 +113,9 @@ public class PatientRepository extends BaseRepository {
         return properties;
     }
 
-    private Batch buildUpdateBatch(Patient patient, PendingApproval pendingApproval, Catchment catchment) {
+    private Batch buildUpdateBatch(Patient patient, PendingApprovalRequest pendingApprovalRequest, Catchment catchment) {
         Batch batch = QueryBuilder.batch();
-        if (pendingApproval != null) {
+        if (pendingApprovalRequest != null) {
             Map<UUID, String> existingPendingApprovals = patient.getPendingApprovals();
             String healthId = patient.getHealthId();
 
@@ -128,7 +128,7 @@ public class PatientRepository extends BaseRepository {
             UUID uuid = UUIDs.timeBased();
             PendingApprovalMapping mapping = buildPendingApprovalMapping(catchment, uuid, healthId);
             batch.add(buildCreatePendingApprovalMappingStmt(mapping, cassandraOperations.getConverter()));
-            updatePatientPendingApproval(patient, uuid, pendingApproval);
+            updatePatientPendingApproval(patient, uuid, pendingApprovalRequest);
         }
         batch.add(buildUpdateStmt(patient, cassandraOperations.getConverter()));
         return batch;
@@ -159,9 +159,9 @@ public class PatientRepository extends BaseRepository {
         return pendingApprovalMapping;
     }
 
-    private void updatePatientPendingApproval(Patient patient, UUID uuid, PendingApproval pendingApproval) {
+    private void updatePatientPendingApproval(Patient patient, UUID uuid, PendingApprovalRequest pendingApprovalRequest) {
         try {
-            patient.addApproval(uuid, objectMapper.writeValueAsString(pendingApproval));
+            patient.addApproval(uuid, objectMapper.writeValueAsString(pendingApprovalRequest));
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Error setting approvals during update.", e);
         }

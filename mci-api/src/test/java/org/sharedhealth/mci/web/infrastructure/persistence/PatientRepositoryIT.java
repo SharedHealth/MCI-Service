@@ -1,8 +1,5 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
-import java.util.*;
-import java.util.concurrent.ExecutionException;
-
 import com.datastax.driver.core.utils.UUIDs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.After;
@@ -19,8 +16,8 @@ import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
 import org.sharedhealth.mci.web.model.Patient;
-import org.sharedhealth.mci.web.model.PendingApproval;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
+import org.sharedhealth.mci.web.model.PendingApprovalRequest;
 import org.sharedhealth.mci.web.utils.JsonConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -29,17 +26,16 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+
 import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
 import static java.util.Arrays.asList;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
-import static org.sharedhealth.mci.web.utils.JsonConstants.FACILITY_ID;
-import static org.sharedhealth.mci.web.utils.JsonConstants.LAST_ITEM_ID;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -148,9 +144,9 @@ public class PatientRepositoryIT {
 
         Map<UUID, String> pendingApprovals = savedPatient.getPendingApprovals();
         assertTrue(pendingApprovals != null && pendingApprovals.size() == 1);
-        PendingApproval pendingApproval = new ObjectMapper().readValue(pendingApprovals.values().iterator().next(), PendingApproval.class);
-        assertNotNull(pendingApproval);
-        Map<String, String> fields = pendingApproval.getFields();
+        PendingApprovalRequest pendingApprovalRequest = new ObjectMapper().readValue(pendingApprovals.values().iterator().next(), PendingApprovalRequest.class);
+        assertNotNull(pendingApprovalRequest);
+        Map<String, String> fields = pendingApprovalRequest.getFields();
         assertEquals("F", fields.get("gender"));
 
         List<PendingApprovalMapping> mappings = cassandraOperations.select(select().from(CF_PENDING_APPROVAL_MAPPING).toString(), PendingApprovalMapping.class);
@@ -340,12 +336,14 @@ public class PatientRepositoryIT {
         Map<UUID, String> pendingApprovalsMap = patient.getPendingApprovals();
         assertNotNull(pendingApprovalsMap);
         assertEquals(1, pendingApprovalsMap.size());
+        
         String pendingApprovalJson = pendingApprovalsMap.values().iterator().next();
-        Map pendingApprovalMap = new ObjectMapper().readValue(pendingApprovalJson.getBytes(), Map.class);
-        assertEquals("10000059", pendingApprovalMap.get(FACILITY_ID));
+        PendingApprovalRequest pendingApprovalRequest = new ObjectMapper().readValue(pendingApprovalJson.getBytes(), PendingApprovalRequest.class);
+        assertEquals("10000059", pendingApprovalRequest.getFacilityId());
+
         Map<String, String> expectedPendingApprovalFields = new HashMap<>();
         expectedPendingApprovalFields.put(JsonConstants.GENDER, "F");
-        assertEquals(expectedPendingApprovalFields, pendingApprovalMap.get(LAST_ITEM_ID));
+        assertEquals(expectedPendingApprovalFields, pendingApprovalRequest.getFields());
 
         List<PendingApprovalMapping> mappings = cassandraOperations.select(select().from(CF_PENDING_APPROVAL_MAPPING), PendingApprovalMapping.class);
         assertEquals(1, mappings.size());

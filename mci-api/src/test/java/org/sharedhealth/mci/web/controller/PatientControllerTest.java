@@ -361,7 +361,7 @@ public class PatientControllerTest {
         Catchment catchment = new Catchment("10", "20", "30");
         UUID lastItemId = UUIDs.timeBased();
 
-        PendingApprovalResponse response = new PendingApprovalResponse();
+        PendingApprovalListResponse response = new PendingApprovalListResponse();
         List<Map<String, String>> pendingApprovals = asList(buildPendingApproval(1),
                 buildPendingApproval(2),
                 buildPendingApproval(3));
@@ -410,7 +410,7 @@ public class PatientControllerTest {
     public void shouldFindPendingApprovalsWithLastItemId() throws Exception {
         Catchment catchment = new Catchment("10", "20", "30");
         UUID lastItemId = UUIDs.timeBased();
-        when(patientService.findPendingApprovals(catchment, lastItemId)).thenReturn(new PendingApprovalResponse());
+        when(patientService.findPendingApprovals(catchment, lastItemId)).thenReturn(new PendingApprovalListResponse());
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(DIVISION_ID, "10");

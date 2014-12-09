@@ -5,13 +5,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Map;
 
 import static org.sharedhealth.mci.web.utils.JsonConstants.FACILITY_ID;
-import static org.sharedhealth.mci.web.utils.JsonConstants.LAST_ITEM_ID;
+import static org.sharedhealth.mci.web.utils.JsonConstants.FIELDS;
 
-public class PendingApproval {
+public class PendingApprovalRequest {
     @JsonProperty(FACILITY_ID)
     private String facilityId;
 
-    @JsonProperty(LAST_ITEM_ID)
+    @JsonProperty(FIELDS)
     private Map<String, String> fields;
 
     public String getFacilityId() {

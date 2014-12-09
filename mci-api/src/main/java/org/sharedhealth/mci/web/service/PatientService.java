@@ -8,7 +8,7 @@ import org.sharedhealth.mci.web.infrastructure.fr.FacilityRegistryWrapper;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
 import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.PatientData;
-import org.sharedhealth.mci.web.mapper.PendingApprovalResponse;
+import org.sharedhealth.mci.web.mapper.PendingApprovalListResponse;
 import org.sharedhealth.mci.web.mapper.SearchQuery;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,7 +118,7 @@ public class PatientService {
         return note;
     }
 
-    public PendingApprovalResponse findPendingApprovals(Catchment catchment, UUID lastItemId) {
+    public PendingApprovalListResponse findPendingApprovals(Catchment catchment, UUID lastItemId) {
         List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(catchment, lastItemId,
                 getPerPageMaximumLimit());
         if (isNotEmpty(mappings)) {
@@ -136,7 +136,7 @@ public class PatientService {
         return healthIds;
     }
 
-    private PendingApprovalResponse buildPendingApprovalResponse(List<PatientData> patients, UUID lastItemId) {
+    private PendingApprovalListResponse buildPendingApprovalResponse(List<PatientData> patients, UUID lastItemId) {
         List<Map<String, String>> pendingApprovals = new ArrayList<>();
         for (PatientData patient : patients) {
             Map<String, String> metadata = new HashMap<>();
@@ -145,7 +145,7 @@ public class PatientService {
             metadata.put(SUR_NAME, patient.getSurName());
             pendingApprovals.add(metadata);
         }
-        PendingApprovalResponse response = new PendingApprovalResponse();
+        PendingApprovalListResponse response = new PendingApprovalListResponse();
         response.setPendingApprovals(pendingApprovals);
         response.setLastItemId(lastItemId);
         return response;

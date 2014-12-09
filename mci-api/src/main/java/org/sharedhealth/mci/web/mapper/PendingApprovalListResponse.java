@@ -6,10 +6,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public class PendingApprovalResponse {
+import static org.sharedhealth.mci.web.utils.JsonConstants.LAST_ITEM_ID;
+import static org.sharedhealth.mci.web.utils.JsonConstants.PENDING_APPROVALS;
 
-    @JsonProperty("pending_approval")
+public class PendingApprovalListResponse {
+
+    @JsonProperty(PENDING_APPROVALS)
     private List<Map<String, String>> pendingApprovals;
+
+    @JsonProperty(LAST_ITEM_ID)
     private UUID lastItemId;
 
     public List<Map<String, String>> getPendingApprovals() {

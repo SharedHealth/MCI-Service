@@ -46,5 +46,7 @@ public class JsonConstants {
     public static final String COUNTRY_CODE = "country_code";
 
     public static final String FACILITY_ID = "facility_id";
+    public static final String FIELDS = "fields";
     public static final String LAST_ITEM_ID = "last_item_id";
+    public static final String PENDING_APPROVALS = "pending_approvals";
 }
