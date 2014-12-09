@@ -102,7 +102,7 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
 
         if (StringUtils.isBlank(value.getUpazilaId())) {
             isValid = false;
-            addConstraintViolation(context, ERROR_CODE_REQUIRED, "upazila_id");
+            addConstraintViolation(context, ERROR_CODE_REQUIRED, "upazilaId");
         }
 
         return isValid;

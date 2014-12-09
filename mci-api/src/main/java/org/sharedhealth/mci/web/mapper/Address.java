@@ -17,7 +17,7 @@ import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
-@JsonIgnoreProperties({"geoCode", "unionOrWard"})
+@JsonIgnoreProperties({"geoCode"})
 public class Address {
 
     @JsonProperty(ADDRESS_LINE)
