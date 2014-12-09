@@ -2,8 +2,10 @@ package org.sharedhealth.mci.web.mapper;
 
 import javax.validation.constraints.Pattern;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.sharedhealth.mci.validation.constraints.Length;
@@ -192,5 +194,25 @@ public class SearchQuery extends PaginationQuery {
 
     public void setExtension(String extension) {
         this.extension = extension;
+    }
+
+    @JsonIgnore
+    public boolean isEmpty() {
+
+        if (StringUtils.isNotBlank(nid)) return false;
+        if (StringUtils.isNotBlank(bin_brn)) return false;
+        if (StringUtils.isNotBlank(uid)) return false;
+        if (StringUtils.isNotBlank(present_address)) return false;
+        if (StringUtils.isNotBlank(sur_name)) return false;
+        if (StringUtils.isNotBlank(given_name)) return false;
+        if (StringUtils.isNotBlank(phone_no)) return false;
+        if (StringUtils.isNotBlank(country_code)) return false;
+        if (StringUtils.isNotBlank(area_code)) return false;
+        if (StringUtils.isNotBlank(extension)) return false;
+        if (StringUtils.isNotBlank(divisionId)) return false;
+        if (StringUtils.isNotBlank(districtId)) return false;
+        if (StringUtils.isNotBlank(upazilaId)) return false;
+
+        return true;
     }
 }

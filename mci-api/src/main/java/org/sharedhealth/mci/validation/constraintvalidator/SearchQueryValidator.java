@@ -2,7 +2,6 @@ package org.sharedhealth.mci.validation.constraintvalidator;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-import java.lang.reflect.Field;
 
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.validation.constraints.SearchQueryConstraint;
@@ -36,7 +35,7 @@ public class SearchQueryValidator implements ConstraintValidator<SearchQueryCons
 
     private boolean isBusinessRulesValidationPassed(SearchQuery searchQuery, ConstraintValidatorContext context) {
 
-        if (isAllFieldNull(searchQuery)) {
+        if (searchQuery.isEmpty()) {
             addConstraintViolation(context, ERROR_CODE_REQUIRED);
             return false;
         }
@@ -79,24 +78,6 @@ public class SearchQueryValidator implements ConstraintValidator<SearchQueryCons
         context.buildConstraintViolationWithTemplate(code)
                 .addPropertyNode(field)
                 .addConstraintViolation();
-    }
-
-    private boolean isAllFieldNull(SearchQuery searchQuery) {
-        for (Field field : searchQuery.getClass().getDeclaredFields()) {
-            field.setAccessible(true);
-            logger.debug("Search Field" + field);
-
-            try {
-                logger.debug("Search Field" + field.get(searchQuery));
-                if (field.get(searchQuery) != null) {
-                    return false;
-                }
-            } catch (IllegalAccessException e) {
-                logger.debug("Error accessing property");
-            }
-        }
-
-        return true;
     }
 
     private boolean isGivenNameRequired(SearchQuery searchQuery) {
