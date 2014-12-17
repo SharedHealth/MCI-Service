@@ -19,11 +19,12 @@ import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.validation.Valid;
 import javax.validation.groups.Default;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.UUID;
 
+import static java.util.Collections.emptyList;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -132,7 +133,7 @@ public class PatientController {
     }
 
     @RequestMapping(value = "/pendingapprovals", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
-    public DeferredResult<ResponseEntity<MCIMultiResponse>> findApprovals(
+    public DeferredResult<ResponseEntity<MCIMultiResponse>> findPendingApprovalList(
             @RequestHeader(value = DIVISION_ID) String divisionId,
             @RequestHeader(value = DISTRICT_ID) String districtId,
             @RequestHeader(value = UPAZILA_ID) String upazilaId,
@@ -153,9 +154,27 @@ public class PatientController {
             }
             mciMultiResponse = new MCIMultiResponse(response.getPendingApprovals(), additionalInfo, OK);
         } else {
-            mciMultiResponse = new MCIMultiResponse(Collections.emptyList(), null, OK);
+            mciMultiResponse = new MCIMultiResponse(emptyList(), null, OK);
         }
         deferredResult.setResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject));
+        return deferredResult;
+    }
+
+    @RequestMapping(value = "/pendingapprovals/{healthId}", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
+    public DeferredResult<ResponseEntity<MCIMultiResponse>> findPendingApprovalDetails(@PathVariable String healthId) {
+        logger.debug("Find list of pending approval details. Health ID : " + healthId);
+        final DeferredResult<ResponseEntity<MCIMultiResponse>> deferredResult = new DeferredResult<>();
+
+        TreeSet<PendingApprovalDetails> response = patientService.findPendingApprovalDetails(healthId);
+
+        MCIMultiResponse mciMultiResponse;
+        if (response != null) {
+            mciMultiResponse = new MCIMultiResponse(response, null, OK);
+        } else {
+            mciMultiResponse = new MCIMultiResponse(emptyList(), null, OK);
+        }
+        deferredResult.setResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject));
+
         return deferredResult;
     }
 }

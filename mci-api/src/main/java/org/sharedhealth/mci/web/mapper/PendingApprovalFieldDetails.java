@@ -1,11 +1,15 @@
 package org.sharedhealth.mci.web.mapper;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import static org.sharedhealth.mci.web.utils.JsonConstants.FACILITY_ID;
+
 public class PendingApprovalFieldDetails {
 
+    @JsonProperty(FACILITY_ID)
     private String facilityId;
     private String value;
 

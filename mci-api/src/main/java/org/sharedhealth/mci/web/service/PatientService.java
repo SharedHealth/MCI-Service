@@ -150,7 +150,7 @@ public class PatientService {
         return response;
     }
 
-    public TreeSet<PendingApprovalDetails> findPendingApprovals(String healthId) {
+    public TreeSet<PendingApprovalDetails> findPendingApprovalDetails(String healthId) {
         PatientData patient = this.findByHealthId(healthId);
         if (patient == null) {
             return null;

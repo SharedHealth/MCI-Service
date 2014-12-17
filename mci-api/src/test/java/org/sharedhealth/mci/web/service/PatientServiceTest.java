@@ -130,7 +130,7 @@ public class PatientServiceTest {
         patient.setPendingApprovals(buildPendingApprovalRequestMap(uuids));
 
         when(patientRepository.findByHealthId(healthId)).thenReturn(patient);
-        TreeSet<PendingApprovalDetails> actualResponse = patientService.findPendingApprovals(healthId);
+        TreeSet<PendingApprovalDetails> actualResponse = patientService.findPendingApprovalDetails(healthId);
         verify(patientRepository).findByHealthId(healthId);
 
         TreeSet<PendingApprovalDetails> expectedResponse = new TreeSet<>();

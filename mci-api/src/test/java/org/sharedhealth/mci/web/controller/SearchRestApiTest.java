@@ -123,7 +123,7 @@ public class SearchRestApiTest extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
         final MCIMultiResponse body = getMciMultiResponse(searchResult);
-        PatientData patient = getPatientObjectFromString(mapper.writeValueAsString(body.getResults().get(0)));
+        PatientData patient = getPatientObjectFromString(mapper.writeValueAsString(body.getResults().iterator().next()));
 
         assertPatientEquals(original, patient);
     }
@@ -145,7 +145,7 @@ public class SearchRestApiTest extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
         final MCIMultiResponse body = getMciMultiResponse(searchResult);
-        PatientData patient = getPatientObjectFromString(mapper.writeValueAsString(body.getResults().get(0)));
+        PatientData patient = getPatientObjectFromString(mapper.writeValueAsString(body.getResults().iterator().next()));
 
         assertPatientEquals(original, patient);
     }
@@ -220,7 +220,7 @@ public class SearchRestApiTest extends BaseControllerTest {
                 .andReturn();
 
         final MCIMultiResponse body = getMciMultiResponse(result);
-        PatientData patientData1 = (PatientData) body.getResults().get(0);
+        PatientData patientData1 = (PatientData) body.getResults().iterator().next();
         Assert.assertEquals("1716528608", patientData1.getPhoneNumber().getNumber());
         Assert.assertEquals(200, body.getHttpStatus());
     }
