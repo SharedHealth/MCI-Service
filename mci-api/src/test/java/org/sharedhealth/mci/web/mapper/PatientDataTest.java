@@ -8,8 +8,9 @@ import javax.validation.ConstraintViolation;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.sharedhealth.mci.web.utils.JsonConstants.GIVEN_NAME;
 
-public class PatientDataTest extends ValidationAwareMapper{
+public class PatientDataTest extends ValidationAwareMapper {
 
     @Test
     public void shouldFailIfGivenNameIsBlank() {
@@ -213,4 +214,12 @@ public class PatientDataTest extends ValidationAwareMapper{
         assertEquals("1002", constraintViolations.iterator().next().getMessage());
     }
 
+    @Test
+    public void shouldRetrieveFieldValueFromJsonKey() {
+        PatientData patient = new PatientData();
+        patient.setGivenName("Harry");
+        patient.setSurName("Potter");
+        String value = patient.getValue(GIVEN_NAME);
+        assertEquals(patient.getGivenName(), value);
+    }
 }

@@ -1,12 +1,5 @@
 package org.sharedhealth.mci.web.mapper;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -19,6 +12,14 @@ import org.hibernate.validator.constraints.NotBlank;
 import org.sharedhealth.mci.validation.constraints.*;
 import org.sharedhealth.mci.validation.constraints.Location;
 import org.sharedhealth.mci.validation.group.RequiredGroup;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import java.lang.reflect.Field;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
@@ -440,6 +441,24 @@ public class PatientData {
 
     public void setPendingApprovals(Map<UUID, String> pendingApprovals) {
         this.pendingApprovals = pendingApprovals;
+    }
+
+    public String getValue(String jsonKey) {
+        for (Field field : PatientData.class.getDeclaredFields()) {
+            JsonProperty jsonProperty = field.getAnnotation(JsonProperty.class);
+            if (jsonProperty != null) {
+                String value = jsonProperty.value();
+                if (value != null && value.equals(jsonKey)) {
+                    try {
+                        Object o = field.get(this);
+                        return o == null ? null : o.toString();
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     @Override

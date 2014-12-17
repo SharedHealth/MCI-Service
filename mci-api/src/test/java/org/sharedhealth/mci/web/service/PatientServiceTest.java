@@ -7,23 +7,20 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.sharedhealth.mci.web.infrastructure.fr.FacilityRegistryWrapper;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
-import org.sharedhealth.mci.web.mapper.Catchment;
-import org.sharedhealth.mci.web.mapper.PatientData;
-import org.sharedhealth.mci.web.mapper.PendingApprovalListResponse;
-import org.sharedhealth.mci.web.mapper.SearchQuery;
+import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
+import org.sharedhealth.mci.web.model.PendingApprovalRequest;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static java.util.Arrays.asList;
+import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
+import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
 
 public class PatientServiceTest {
 
@@ -67,7 +64,7 @@ public class PatientServiceTest {
     }
 
     @Test
-    public void shouldFindPendingApprovals() throws Exception {
+    public void shouldFindPendingApprovalListByCatchment() throws Exception {
         Catchment catchment = new Catchment("10", "20", "30");
         UUID lastItemId = UUIDs.timeBased();
 
@@ -83,7 +80,7 @@ public class PatientServiceTest {
                 buildPatient("hid-100"));
         when(patientRepository.findByHealthId(asList("hid-300", "hid-200", "hid-100"))).thenReturn(patients);
 
-        PendingApprovalListResponse response = patientService.findPendingApprovals(catchment, lastItemId);
+        PendingApprovalListResponse response = patientService.findPendingApprovalList(catchment, lastItemId);
 
         InOrder inOrder = inOrder(patientRepository);
         inOrder.verify(patientRepository).findPendingApprovalMapping(catchment, lastItemId, 25);
@@ -118,6 +115,121 @@ public class PatientServiceTest {
         patient.setGivenName("Scott-" + healthId);
         patient.setSurName("Tiger-" + healthId);
         return patient;
+    }
+
+    @Test
+    public void shouldFindPendingApprovalsByHealthId() throws Exception {
+        String healthId = "healthId-100";
+        PatientData patient = new PatientData();
+        patient.setGivenName("Harry");
+        patient.setSurName("Potter");
+        patient.setBloodGroup("As if I care!");
+        patient.setOccupation("Wizard");
+
+        List<UUID> uuids = generateUUIDs();
+        patient.setPendingApprovals(buildPendingApprovalRequestMap(uuids));
+
+        when(patientRepository.findByHealthId(healthId)).thenReturn(patient);
+        TreeSet<PendingApprovalDetails> actualResponse = patientService.findPendingApprovals(healthId);
+        verify(patientRepository).findByHealthId(healthId);
+
+        TreeSet<PendingApprovalDetails> expectedResponse = new TreeSet<>();
+        expectedResponse.add(buildPendingApprovalField(GIVEN_NAME, "Harry", uuids));
+        expectedResponse.add(buildPendingApprovalField(SUR_NAME, "Potter", uuids));
+        expectedResponse.add(buildPendingApprovalField(BLOOD_GROUP, "As if I care!", uuids));
+        expectedResponse.add(buildPendingApprovalField(OCCUPATION, "Wizard", uuids.get(3), "facility-4", "Jobless"));
+
+        assertEquals(4, actualResponse.size());
+        for (int i = 0; i < 4; i++) {
+            PendingApprovalDetails lhs = expectedResponse.pollFirst();
+            PendingApprovalDetails rhs = actualResponse.pollFirst();
+            assertTrue(reflectionEquals(lhs, rhs));
+        }
+    }
+
+    private Map<UUID, String> buildPendingApprovalRequestMap(List<UUID> uuids) {
+        Map<UUID, String> requests = new HashMap<>();
+
+        Map<String, String> fields1 = new HashMap<>();
+        fields1.put(GIVEN_NAME, "A." + GIVEN_NAME);
+        fields1.put(SUR_NAME, "A." + SUR_NAME);
+        fields1.put(BLOOD_GROUP, "A." + BLOOD_GROUP);
+        requests.put(uuids.get(0), buildPendingApprovalRequest("facility-1", fields1));
+
+        Map<String, String> fields2 = new HashMap<>();
+        fields2.put(GIVEN_NAME, "B." + GIVEN_NAME);
+        fields2.put(SUR_NAME, "B." + SUR_NAME);
+        fields2.put(BLOOD_GROUP, "B." + BLOOD_GROUP);
+        requests.put(uuids.get(1), buildPendingApprovalRequest("facility-2", fields2));
+
+        Map<String, String> fields3 = new HashMap<>();
+        fields3.put(GIVEN_NAME, "C." + GIVEN_NAME);
+        fields3.put(SUR_NAME, "C." + SUR_NAME);
+        fields3.put(BLOOD_GROUP, "C." + BLOOD_GROUP);
+        requests.put(uuids.get(2), buildPendingApprovalRequest("facility-3", fields3));
+
+        Map<String, String> fields4 = new HashMap<>();
+        fields4.put(OCCUPATION, "Jobless");
+        requests.put(uuids.get(3), buildPendingApprovalRequest("facility-4", fields4));
+
+        return requests;
+    }
+
+    private List<UUID> generateUUIDs() throws Exception {
+        List<UUID> uuids = new ArrayList<>();
+        for (int i = 0; i < 4; i++) {
+            uuids.add(UUIDs.timeBased());
+            Thread.sleep(0, 10);
+        }
+        return uuids;
+    }
+
+    private String buildPendingApprovalRequest(String facilityId, Map<String, String> fields) {
+        PendingApprovalRequest request = new PendingApprovalRequest();
+        request.setFacilityId(facilityId);
+        request.setFields(fields);
+        return writeValueAsString(request);
+    }
+
+    private PendingApprovalDetails buildPendingApprovalField(String name, String currentValue, List<UUID> uuids) {
+        PendingApprovalDetails fieldDetails = new PendingApprovalDetails();
+        fieldDetails.setName(name);
+        fieldDetails.setCurrentValue(currentValue);
+
+        TreeMap<UUID, PendingApprovalFieldDetails> detailsMap = new TreeMap<>();
+
+        PendingApprovalFieldDetails details1 = new PendingApprovalFieldDetails();
+        details1.setFacilityId("facility-1");
+        details1.setValue("A." + name);
+        detailsMap.put(uuids.get(0), details1);
+
+        PendingApprovalFieldDetails details2 = new PendingApprovalFieldDetails();
+        details2.setFacilityId("facility-2");
+        details2.setValue("B." + name);
+        detailsMap.put(uuids.get(1), details2);
+
+        PendingApprovalFieldDetails details3 = new PendingApprovalFieldDetails();
+        details3.setFacilityId("facility-3");
+        details3.setValue("C." + name);
+        detailsMap.put(uuids.get(2), details3);
+
+        fieldDetails.setDetails(detailsMap);
+        return fieldDetails;
+    }
+
+    private PendingApprovalDetails buildPendingApprovalField(String name, String currentValue, UUID uuid, String facilityId, String value) {
+        PendingApprovalDetails fieldDetails = new PendingApprovalDetails();
+        fieldDetails.setName(name);
+        fieldDetails.setCurrentValue(currentValue);
+
+        TreeMap<UUID, PendingApprovalFieldDetails> detailsMap = new TreeMap<>();
+        PendingApprovalFieldDetails details = new PendingApprovalFieldDetails();
+        details.setFacilityId(facilityId);
+        details.setValue(value);
+        detailsMap.put(uuid, details);
+
+        fieldDetails.setDetails(detailsMap);
+        return fieldDetails;
     }
 
     @Test

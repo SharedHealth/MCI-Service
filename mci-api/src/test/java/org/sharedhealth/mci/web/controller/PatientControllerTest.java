@@ -368,7 +368,7 @@ public class PatientControllerTest {
         response.setPendingApprovals(pendingApprovals);
         response.setLastItemId(lastItemId);
 
-        when(patientService.findPendingApprovals(catchment, null)).thenReturn(response);
+        when(patientService.findPendingApprovalList(catchment, null)).thenReturn(response);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(DIVISION_ID, "10");
@@ -395,7 +395,7 @@ public class PatientControllerTest {
 
                 .andExpect(jsonPath("$.additional_info.last_item_id", is(lastItemId.toString())));
 
-        verify(patientService).findPendingApprovals(catchment, null);
+        verify(patientService).findPendingApprovalList(catchment, null);
     }
 
     private Map<String, String> buildPendingApproval(int suffix) {
@@ -410,7 +410,7 @@ public class PatientControllerTest {
     public void shouldFindPendingApprovalsWithLastItemId() throws Exception {
         Catchment catchment = new Catchment("10", "20", "30");
         UUID lastItemId = UUIDs.timeBased();
-        when(patientService.findPendingApprovals(catchment, lastItemId)).thenReturn(new PendingApprovalListResponse());
+        when(patientService.findPendingApprovalList(catchment, lastItemId)).thenReturn(new PendingApprovalListResponse());
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(DIVISION_ID, "10");
@@ -425,7 +425,7 @@ public class PatientControllerTest {
         mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk());
 
-        verify(patientService).findPendingApprovals(catchment, lastItemId);
+        verify(patientService).findPendingApprovalList(catchment, lastItemId);
     }
 }
 

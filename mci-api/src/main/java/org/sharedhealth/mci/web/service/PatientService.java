@@ -6,11 +6,9 @@ import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.infrastructure.fr.FacilityRegistryWrapper;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
-import org.sharedhealth.mci.web.mapper.Catchment;
-import org.sharedhealth.mci.web.mapper.PatientData;
-import org.sharedhealth.mci.web.mapper.PendingApprovalListResponse;
-import org.sharedhealth.mci.web.mapper.SearchQuery;
+import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
+import org.sharedhealth.mci.web.model.PendingApprovalRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.DirectFieldBindingResult;
@@ -21,6 +19,7 @@ import java.util.*;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
+import static org.sharedhealth.mci.web.utils.JsonMapper.readValue;
 
 @Component
 public class PatientService {
@@ -118,7 +117,7 @@ public class PatientService {
         return note;
     }
 
-    public PendingApprovalListResponse findPendingApprovals(Catchment catchment, UUID lastItemId) {
+    public PendingApprovalListResponse findPendingApprovalList(Catchment catchment, UUID lastItemId) {
         List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(catchment, lastItemId,
                 getPerPageMaximumLimit());
         if (isNotEmpty(mappings)) {
@@ -149,5 +148,54 @@ public class PatientService {
         response.setPendingApprovals(pendingApprovals);
         response.setLastItemId(lastItemId);
         return response;
+    }
+
+    public TreeSet<PendingApprovalDetails> findPendingApprovals(String healthId) {
+        PatientData patient = this.findByHealthId(healthId);
+        if (patient == null) {
+            return null;
+        }
+        return buildPendingApproval(patient);
+    }
+
+    private TreeSet<PendingApprovalDetails> buildPendingApproval(PatientData patient) {
+        TreeSet<PendingApprovalDetails> detailsSet = new TreeSet<>();
+        Map<UUID, String> requestMap = patient.getPendingApprovals();
+
+        if (requestMap != null && requestMap.size() > 0) {
+
+            for (Map.Entry<UUID, String> requestMapEntrySet : requestMap.entrySet()) {
+                PendingApprovalRequest request = readValue(requestMapEntrySet.getValue(), PendingApprovalRequest.class);
+                Map<String, String> requestFieldsMap = request.getFields();
+
+                for (String fieldName : requestFieldsMap.keySet()) {
+                    PendingApprovalDetails details = new PendingApprovalDetails();
+                    details.setName(fieldName);
+                    details.setCurrentValue(patient.getValue(fieldName));
+
+                    TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap = new TreeMap<>();
+                    PendingApprovalFieldDetails fieldDetails = new PendingApprovalFieldDetails();
+                    fieldDetails.setFacilityId(request.getFacilityId());
+                    fieldDetails.setValue(requestFieldsMap.get(fieldName));
+                    fieldDetailsMap.put(requestMapEntrySet.getKey(), fieldDetails);
+
+                    details.setDetails(fieldDetailsMap);
+                    this.updateDetailsSet(detailsSet, details);
+                }
+            }
+        }
+        return detailsSet;
+    }
+
+    private void updateDetailsSet(TreeSet<PendingApprovalDetails> detailsSet, PendingApprovalDetails details) {
+        if (!detailsSet.contains(details)) {
+            detailsSet.add(details);
+        }
+        for (PendingApprovalDetails d : detailsSet) {
+            if (d.equals(details)) {
+                d.setCurrentValue(details.getCurrentValue());
+                d.addDetails(details.getDetails());
+            }
+        }
     }
 }

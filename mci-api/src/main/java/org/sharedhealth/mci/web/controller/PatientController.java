@@ -142,7 +142,7 @@ public class PatientController {
         final DeferredResult<ResponseEntity<MCIMultiResponse>> deferredResult = new DeferredResult<>();
 
         Catchment catchment = new Catchment(divisionId, districtId, upazilaId);
-        PendingApprovalListResponse response = patientService.findPendingApprovals(catchment, lastItemId);
+        PendingApprovalListResponse response = patientService.findPendingApprovalList(catchment, lastItemId);
 
         MCIMultiResponse mciMultiResponse;
         if (response != null) {
