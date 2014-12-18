@@ -66,36 +66,35 @@ public class PatientServiceTest {
     @Test
     public void shouldFindPendingApprovalListByCatchment() throws Exception {
         Catchment catchment = new Catchment("10", "20", "30");
-        UUID lastItemId = UUIDs.timeBased();
+        UUID after = UUIDs.timeBased();
 
         List<PendingApprovalMapping> mappings = asList(buildPendingApprovalMapping("hid-100"),
                 buildPendingApprovalMapping("hid-200"),
                 buildPendingApprovalMapping("hid-300"));
-        Collections.reverse(mappings);
+
+        when(patientRepository.findPendingApprovalMapping(catchment, after, null, 25)).thenReturn(mappings);
+        when(patientRepository.findByHealthId("hid-100")).thenReturn(buildPatient("hid-100"));
+        when(patientRepository.findByHealthId("hid-200")).thenReturn(buildPatient("hid-200"));
+        when(patientRepository.findByHealthId("hid-300")).thenReturn(buildPatient("hid-300"));
         when(settingService.getSettingAsIntegerByKey("PER_PAGE_MAXIMUM_LIMIT")).thenReturn(25);
-        when(patientRepository.findPendingApprovalMapping(catchment, lastItemId, 25)).thenReturn(mappings);
 
-        List<PatientData> patients = asList(buildPatient("hid-300"),
-                buildPatient("hid-200"),
-                buildPatient("hid-100"));
-        when(patientRepository.findByHealthId(asList("hid-300", "hid-200", "hid-100"))).thenReturn(patients);
-
-        PendingApprovalListResponse response = patientService.findPendingApprovalList(catchment, lastItemId);
+        List<PendingApprovalListResponse> pendingApprovals = patientService.findPendingApprovalList(catchment, after, null);
 
         InOrder inOrder = inOrder(patientRepository);
-        inOrder.verify(patientRepository).findPendingApprovalMapping(catchment, lastItemId, 25);
-        inOrder.verify(patientRepository).findByHealthId(asList("hid-300", "hid-200", "hid-100"));
+        inOrder.verify(patientRepository).findPendingApprovalMapping(catchment, after, null, 25);
+        inOrder.verify(patientRepository).findByHealthId("hid-100");
+        inOrder.verify(patientRepository).findByHealthId("hid-200");
+        inOrder.verify(patientRepository).findByHealthId("hid-300");
 
-        assertNotNull(response);
-        assertEquals(mappings.get(mappings.size() - 1).getCreatedAt(), response.getLastItemId());
-        assertNotNull(response.getPendingApprovals());
-        assertEquals(3, response.getPendingApprovals().size());
+        assertNotNull(pendingApprovals);
+        assertEquals(3, pendingApprovals.size());
 
-        Map<String, String> metadata = response.getPendingApprovals().get(0);
-        String healthId = metadata.get(HID);
-        assertNotNull(healthId);
-        assertEquals("Scott-" + healthId, metadata.get(GIVEN_NAME));
-        assertEquals("Tiger-" + healthId, metadata.get(SUR_NAME));
+        PendingApprovalListResponse pendingApproval = pendingApprovals.iterator().next();
+        String healthId = pendingApproval.getHealthId();
+        assertNotNull("hid-100", healthId);
+        assertEquals("Scott-" + healthId, pendingApproval.getGivenName());
+        assertEquals("Tiger-" + healthId, pendingApproval.getSurname());
+        assertEquals(mappings.get(0).getCreatedAt(), pendingApproval.getLastUpdated());
     }
 
     private PendingApprovalMapping buildPendingApprovalMapping(String healthId) throws InterruptedException {

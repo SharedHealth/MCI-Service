@@ -137,22 +137,18 @@ public class PatientController {
             @RequestHeader(value = DIVISION_ID) String divisionId,
             @RequestHeader(value = DISTRICT_ID) String districtId,
             @RequestHeader(value = UPAZILA_ID) String upazilaId,
-            @RequestParam(value = LAST_ITEM_ID, required = false) UUID lastItemId) {
+            @RequestParam(value = AFTER, required = false) UUID after,
+            @RequestParam(value = BEFORE, required = false) UUID before) {
 
-        logger.debug("Find list of pending approvals before : " + lastItemId);
+        logger.debug("Find list of pending approvals.");
         final DeferredResult<ResponseEntity<MCIMultiResponse>> deferredResult = new DeferredResult<>();
 
         Catchment catchment = new Catchment(divisionId, districtId, upazilaId);
-        PendingApprovalListResponse response = patientService.findPendingApprovalList(catchment, lastItemId);
+        List<PendingApprovalListResponse> response = patientService.findPendingApprovalList(catchment, after, before);
 
         MCIMultiResponse mciMultiResponse;
         if (response != null) {
-            HashMap<String, String> additionalInfo = null;
-            if (response.getLastItemId() != null) {
-                additionalInfo = new HashMap<>();
-                additionalInfo.put(LAST_ITEM_ID, response.getLastItemId().toString());
-            }
-            mciMultiResponse = new MCIMultiResponse(response.getPendingApprovals(), additionalInfo, OK);
+            mciMultiResponse = new MCIMultiResponse(response, null, OK);
         } else {
             mciMultiResponse = new MCIMultiResponse(emptyList(), null, OK);
         }

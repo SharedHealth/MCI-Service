@@ -18,7 +18,6 @@ import java.util.*;
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonMapper.readValue;
 
 @Component
@@ -117,37 +116,25 @@ public class PatientService {
         return note;
     }
 
-    public PendingApprovalListResponse findPendingApprovalList(Catchment catchment, UUID lastItemId) {
-        List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(catchment, lastItemId,
-                getPerPageMaximumLimit());
+    public List<PendingApprovalListResponse> findPendingApprovalList(Catchment catchment, UUID after, UUID before) {
+        List<PendingApprovalListResponse> pendingApprovals = new ArrayList<>();
+        List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(catchment, after, before, getPerPageMaximumLimit());
         if (isNotEmpty(mappings)) {
-            List<PatientData> patients = patientRepository.findByHealthId(getHealthIds(mappings));
-            return buildPendingApprovalResponse(patients, mappings.get(mappings.size() - 1).getCreatedAt());
+            for (PendingApprovalMapping mapping : mappings) {
+                PatientData patient = patientRepository.findByHealthId(mapping.getHealthId());
+                pendingApprovals.add(buildPendingApprovalListResponse(patient, mapping.getCreatedAt()));
+            }
         }
-        return null;
+        return pendingApprovals;
     }
 
-    private List<String> getHealthIds(List<PendingApprovalMapping> mappings) {
-        List<String> healthIds = new ArrayList<>();
-        for (PendingApprovalMapping mapping : mappings) {
-            healthIds.add(mapping.getHealthId());
-        }
-        return healthIds;
-    }
-
-    private PendingApprovalListResponse buildPendingApprovalResponse(List<PatientData> patients, UUID lastItemId) {
-        List<Map<String, String>> pendingApprovals = new ArrayList<>();
-        for (PatientData patient : patients) {
-            Map<String, String> metadata = new HashMap<>();
-            metadata.put(HID, patient.getHealthId());
-            metadata.put(GIVEN_NAME, patient.getGivenName());
-            metadata.put(SUR_NAME, patient.getSurName());
-            pendingApprovals.add(metadata);
-        }
-        PendingApprovalListResponse response = new PendingApprovalListResponse();
-        response.setPendingApprovals(pendingApprovals);
-        response.setLastItemId(lastItemId);
-        return response;
+    private PendingApprovalListResponse buildPendingApprovalListResponse(PatientData patient, UUID lastUpdated) {
+        PendingApprovalListResponse pendingApproval = new PendingApprovalListResponse();
+        pendingApproval.setHealthId(patient.getHealthId());
+        pendingApproval.setGivenName(patient.getGivenName());
+        pendingApproval.setSurname(patient.getSurName());
+        pendingApproval.setLastUpdated(lastUpdated);
+        return pendingApproval;
     }
 
     public TreeSet<PendingApprovalDetails> findPendingApprovalDetails(String healthId) {

@@ -39,7 +39,7 @@ public class MasterDataRepository extends BaseRepository {
         select.where(QueryBuilder.eq("type", type));
         select.where(QueryBuilder.eq("key", key));
 
-        cassandraOperations.queryAsynchronously(select, new AsynchronousQueryListener() {
+        cassandraOps.queryAsynchronously(select, new AsynchronousQueryListener() {
             @Override
             public void onQueryComplete(ResultSetFuture rsf) {
                 try {

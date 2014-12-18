@@ -45,10 +45,11 @@ public class JsonConstants {
     public static final String CITY_CORPORATION_ID = "city_corporation_id";
     public static final String COUNTRY_CODE = "country_code";
 
+    public static final String AFTER = "after";
+    public static final String BEFORE = "before";
     public static final String FACILITY_ID = "facility_id";
     public static final String FIELDS = "fields";
-    public static final String LAST_ITEM_ID = "last_item_id";
-    public static final String PENDING_APPROVALS = "pending_approvals";
+    public static final String LAST_UPDATED = "last_updated";
     public static final String FIELD_NAME = "field_name";
     public static final String CURRENT_VALUE = "current_value";
     public static final String FIELD_DETAILS = "field_details";

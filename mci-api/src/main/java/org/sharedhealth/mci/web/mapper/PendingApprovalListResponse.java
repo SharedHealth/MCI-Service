@@ -2,34 +2,53 @@ package org.sharedhealth.mci.web.mapper;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
-import static org.sharedhealth.mci.web.utils.JsonConstants.LAST_ITEM_ID;
-import static org.sharedhealth.mci.web.utils.JsonConstants.PENDING_APPROVALS;
+import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
 public class PendingApprovalListResponse {
 
-    @JsonProperty(PENDING_APPROVALS)
-    private List<Map<String, String>> pendingApprovals;
+    @JsonProperty(HID)
+    private String healthId;
 
-    @JsonProperty(LAST_ITEM_ID)
-    private UUID lastItemId;
+    @JsonProperty(GIVEN_NAME)
+    private String givenName;
 
-    public List<Map<String, String>> getPendingApprovals() {
-        return pendingApprovals;
+    @JsonProperty(SUR_NAME)
+    private String surname;
+
+    @JsonProperty(LAST_UPDATED)
+    private UUID lastUpdated;
+
+    public String getHealthId() {
+        return healthId;
     }
 
-    public void setPendingApprovals(List<Map<String, String>> pendingApprovals) {
-        this.pendingApprovals = pendingApprovals;
+    public void setHealthId(String healthId) {
+        this.healthId = healthId;
     }
 
-    public UUID getLastItemId() {
-        return lastItemId;
+    public String getGivenName() {
+        return givenName;
     }
 
-    public void setLastItemId(UUID lastItemId) {
-        this.lastItemId = lastItemId;
+    public void setGivenName(String givenName) {
+        this.givenName = givenName;
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
+
+    public UUID getLastUpdated() {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated(UUID lastUpdated) {
+        this.lastUpdated = lastUpdated;
     }
 }

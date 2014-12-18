@@ -1,11 +1,11 @@
 package org.sharedhealth.mci.web.model;
 
 
-import java.util.UUID;
-
 import org.springframework.data.cassandra.mapping.Column;
 import org.springframework.data.cassandra.mapping.PrimaryKeyColumn;
 import org.springframework.data.cassandra.mapping.Table;
+
+import java.util.UUID;
 
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
 import static org.springframework.cassandra.core.PrimaryKeyType.CLUSTERED;

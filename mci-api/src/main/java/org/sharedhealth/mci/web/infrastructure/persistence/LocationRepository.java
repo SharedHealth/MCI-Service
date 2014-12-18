@@ -33,7 +33,7 @@ public class LocationRepository extends BaseRepository {
         logger.debug("Find location by geo_code CQL: [" + cql + "]");
         final SettableFuture<Location> result = SettableFuture.create();
 
-        cassandraOperations.queryAsynchronously(cql, new AsynchronousQueryListener() {
+        cassandraOps.queryAsynchronously(cql, new AsynchronousQueryListener() {
             @Override
             public void onQueryComplete(ResultSetFuture rsf) {
                 try {
