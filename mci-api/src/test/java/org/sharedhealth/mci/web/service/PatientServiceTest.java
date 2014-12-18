@@ -94,7 +94,7 @@ public class PatientServiceTest {
         assertNotNull("hid-100", healthId);
         assertEquals("Scott-" + healthId, pendingApproval.getGivenName());
         assertEquals("Tiger-" + healthId, pendingApproval.getSurname());
-        assertEquals(mappings.get(0).getCreatedAt(), pendingApproval.getLastUpdated());
+        assertEquals(mappings.get(0).getLastUpdated(), pendingApproval.getLastUpdated());
     }
 
     private PendingApprovalMapping buildPendingApprovalMapping(String healthId) throws InterruptedException {
@@ -103,7 +103,7 @@ public class PatientServiceTest {
         mapping.setDivisionId("10");
         mapping.setDistrictId("20");
         mapping.setUpazilaId("30");
-        mapping.setCreatedAt(UUIDs.timeBased());
+        mapping.setLastUpdated(UUIDs.timeBased());
         Thread.sleep(0, 10);
         return mapping;
     }

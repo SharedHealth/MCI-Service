@@ -122,7 +122,7 @@ public class PatientService {
         if (isNotEmpty(mappings)) {
             for (PendingApprovalMapping mapping : mappings) {
                 PatientData patient = patientRepository.findByHealthId(mapping.getHealthId());
-                pendingApprovals.add(buildPendingApprovalListResponse(patient, mapping.getCreatedAt()));
+                pendingApprovals.add(buildPendingApprovalListResponse(patient, mapping.getLastUpdated()));
             }
         }
         return pendingApprovals;

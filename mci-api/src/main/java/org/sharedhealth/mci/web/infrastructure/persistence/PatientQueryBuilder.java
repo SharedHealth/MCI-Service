@@ -21,10 +21,10 @@ public class PatientQueryBuilder {
     public static final String CF_UID_MAPPING = "uid_mapping";
     public static final String CF_PHONE_NUMBER_MAPPING = "phone_number_mapping";
     public static final String CF_NAME_MAPPING = "name_mapping";
-    public static final String CF_PENDING_APPROVAL_MAPPING = "approval_mapping";
+    public static final String CF_PENDING_APPROVAL_MAPPING = "pending_approval_mapping";
 
     public static final String HEALTH_ID = "health_id";
-    public static final String CREATED_AT = "created_at";
+    public static final String LAST_UPDATED = "last_updated";
     public static final String NATIONAL_ID = "national_id";
     public static final String FULL_NAME_BANGLA = "full_name_bangla";
     public static final String GIVEN_NAME = "given_name";
@@ -122,16 +122,16 @@ public class PatientQueryBuilder {
     }
 
     public static String buildFindPendingApprovalMappingStmt(Catchment catchment, UUID after, UUID before, int limit) {
-        Where where = select(HEALTH_ID, CREATED_AT).from(CF_PENDING_APPROVAL_MAPPING)
+        Where where = select(HEALTH_ID, LAST_UPDATED).from(CF_PENDING_APPROVAL_MAPPING)
                 .where(eq(DIVISION_ID, catchment.getDivisionId()))
                 .and(eq(DISTRICT_ID, catchment.getDistrictId()))
                 .and(eq(UPAZILA_ID, catchment.getUpazilaId()));
 
         if (after != null) {
-            where = where.and(gt(CREATED_AT, after));
+            where = where.and(gt(LAST_UPDATED, after));
         }
         if (before != null) {
-            where = where.and(lt(CREATED_AT, before));
+            where = where.and(lt(LAST_UPDATED, before));
         }
         return where.limit(limit).toString();
     }

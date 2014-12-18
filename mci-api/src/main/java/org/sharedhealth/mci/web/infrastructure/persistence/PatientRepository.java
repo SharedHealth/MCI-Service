@@ -154,7 +154,7 @@ public class PatientRepository extends BaseRepository {
         pendingApprovalMapping.setDivisionId(catchment.getDivisionId());
         pendingApprovalMapping.setDistrictId(catchment.getDistrictId());
         pendingApprovalMapping.setUpazilaId(catchment.getUpazilaId());
-        pendingApprovalMapping.setCreatedAt(uuid);
+        pendingApprovalMapping.setLastUpdated(uuid);
         pendingApprovalMapping.setHealthId(healthId);
         return pendingApprovalMapping;
     }

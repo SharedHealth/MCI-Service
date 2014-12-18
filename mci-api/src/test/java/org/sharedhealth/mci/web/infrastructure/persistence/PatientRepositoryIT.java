@@ -274,9 +274,9 @@ public class PatientRepositoryIT {
         assertEquals("h103", mapping2.getHealthId());
         assertEquals("h105", mapping3.getHealthId());
 
-        Date date1 = new Date(UUIDs.unixTimestamp(mapping1.getCreatedAt()));
-        Date date2 = new Date(UUIDs.unixTimestamp(mapping2.getCreatedAt()));
-        Date date3 = new Date(UUIDs.unixTimestamp(mapping3.getCreatedAt()));
+        Date date1 = new Date(UUIDs.unixTimestamp(mapping1.getLastUpdated()));
+        Date date2 = new Date(UUIDs.unixTimestamp(mapping2.getLastUpdated()));
+        Date date3 = new Date(UUIDs.unixTimestamp(mapping3.getLastUpdated()));
 
         assertTrue(date1.before(date2));
         assertTrue(date2.before(date3));
@@ -291,7 +291,7 @@ public class PatientRepositoryIT {
                 buildPendingApprovalMapping("30", "h105"));
         cassandraOperations.insert(entities);
 
-        UUID after = entities.get(1).getCreatedAt();
+        UUID after = entities.get(1).getLastUpdated();
         List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(new Catchment("10", "20", "30"), after, null, 25);
         assertEquals(3, mappings.size());
         assertEquals("h103", mappings.get(0).getHealthId());
@@ -308,7 +308,7 @@ public class PatientRepositoryIT {
                 buildPendingApprovalMapping("30", "h105"));
         cassandraOperations.insert(entities);
 
-        UUID before = entities.get(3).getCreatedAt();
+        UUID before = entities.get(3).getLastUpdated();
         List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(new Catchment("10", "20", "30"), null, before, 25);
         assertEquals(3, mappings.size());
         assertEquals("h101", mappings.get(0).getHealthId());
@@ -325,8 +325,8 @@ public class PatientRepositoryIT {
                 buildPendingApprovalMapping("30", "h105"));
         cassandraOperations.insert(entities);
 
-        UUID after = entities.get(0).getCreatedAt();
-        UUID before = entities.get(4).getCreatedAt();
+        UUID after = entities.get(0).getLastUpdated();
+        UUID before = entities.get(4).getLastUpdated();
         List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(new Catchment("10", "20", "30"), after, before, 25);
         assertEquals(3, mappings.size());
         assertEquals("h102", mappings.get(0).getHealthId());
@@ -355,7 +355,7 @@ public class PatientRepositoryIT {
         mapping.setDivisionId("10");
         mapping.setDistrictId("20");
         mapping.setUpazilaId(upazilaId);
-        mapping.setCreatedAt(UUIDs.timeBased());
+        mapping.setLastUpdated(UUIDs.timeBased());
         return mapping;
     }
 
@@ -386,7 +386,7 @@ public class PatientRepositoryIT {
         assertEquals(data.getAddress().getDivisionId(), mapping.getDivisionId());
         assertEquals(data.getAddress().getDistrictId(), mapping.getDistrictId());
         assertEquals(data.getAddress().getUpazilaId(), mapping.getUpazilaId());
-        assertEquals(pendingApprovalsMap.keySet().iterator().next(), mapping.getCreatedAt());
+        assertEquals(pendingApprovalsMap.keySet().iterator().next(), mapping.getLastUpdated());
     }
 
     @Test
@@ -413,7 +413,7 @@ public class PatientRepositoryIT {
         assertEquals(data.getAddress().getDistrictId(), mapping.getDistrictId());
         assertEquals(data.getAddress().getUpazilaId(), mapping.getUpazilaId());
         UUID latestUuid = patientRepository.findLatestUuid(pendingApprovalsMap);
-        assertEquals(latestUuid, mapping.getCreatedAt());
+        assertEquals(latestUuid, mapping.getLastUpdated());
     }
 
     @After
