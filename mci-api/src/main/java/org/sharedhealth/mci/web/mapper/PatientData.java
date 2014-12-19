@@ -443,15 +443,14 @@ public class PatientData {
         this.pendingApprovals = pendingApprovals;
     }
 
-    public String getValue(String jsonKey) {
+    public Object getValue(String jsonKey) {
         for (Field field : PatientData.class.getDeclaredFields()) {
             JsonProperty jsonProperty = field.getAnnotation(JsonProperty.class);
             if (jsonProperty != null) {
                 String value = jsonProperty.value();
                 if (value != null && value.equals(jsonKey)) {
                     try {
-                        Object o = field.get(this);
-                        return o == null ? null : o.toString();
+                        return field.get(this);
                     } catch (IllegalAccessException e) {
                         throw new RuntimeException(e);
                     }

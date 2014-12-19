@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
+import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
 
 public class PatientFilter {
 
@@ -82,7 +83,7 @@ public class PatientFilter {
             if (value.equals(NON_UPDATEABLE)) {
                 return phoneNumberExisting;
             } else if (value.equals(NEEDS_APPROVAL) && !phoneNumberExisting.equals(phoneNumberUpdated)) {
-                map.put(phoneNumber, phoneNumberUpdated.toString());
+                map.put(phoneNumber, writeValueAsString(phoneNumberUpdated));
                 return phoneNumberExisting;
             }
         }
@@ -95,7 +96,7 @@ public class PatientFilter {
             if (value.equals(NON_UPDATEABLE)) {
                 return existingAddress;
             } else if (value.equals(NEEDS_APPROVAL) && !existingAddress.equals(updatedAddress)) {
-                map.put(addressType, updatedAddress.toString());
+                map.put(addressType, writeValueAsString(updatedAddress));
                 return existingAddress;
             }
         }

@@ -14,7 +14,7 @@ public class PendingApprovalDetails implements Comparable<PendingApprovalDetails
     private String name;
 
     @JsonProperty(CURRENT_VALUE)
-    private String currentValue;
+    private Object currentValue;
 
     @JsonProperty(FIELD_DETAILS)
     TreeMap<UUID, PendingApprovalFieldDetails> details;
@@ -27,11 +27,11 @@ public class PendingApprovalDetails implements Comparable<PendingApprovalDetails
         this.name = name;
     }
 
-    public String getCurrentValue() {
+    public Object getCurrentValue() {
         return currentValue;
     }
 
-    public void setCurrentValue(String currentValue) {
+    public void setCurrentValue(Object currentValue) {
         this.currentValue = currentValue;
     }
 

@@ -219,7 +219,7 @@ public class PatientDataTest extends ValidationAwareMapper {
         PatientData patient = new PatientData();
         patient.setGivenName("Harry");
         patient.setSurName("Potter");
-        String value = patient.getValue(GIVEN_NAME);
+        Object value = patient.getValue(GIVEN_NAME);
         assertEquals(patient.getGivenName(), value);
     }
 }
