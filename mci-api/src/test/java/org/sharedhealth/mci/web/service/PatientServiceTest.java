@@ -154,13 +154,13 @@ public class PatientServiceTest {
         newPhoneNumber.setCountryCode("91");
         newPhoneNumber.setAreaCode("033");
         newPhoneNumber.setNumber("30001234");
-        expectedResponse.add(buildPendingApprovalField(PHONE_NUMBER, phoneNumber, uuids.get(0), "facility-1", writeValueAsString(newPhoneNumber)));
+        expectedResponse.add(buildPendingApprovalField(PHONE_NUMBER, phoneNumber, uuids.get(0), "facility-1", newPhoneNumber));
 
         Address newAddress = new Address();
         newAddress.setDivisionId("10");
         newAddress.setDistrictId("21");
         newAddress.setUpazilaId("31");
-        expectedResponse.add(buildPendingApprovalField(PRESENT_ADDRESS, address, uuids.get(0), "facility-1", writeValueAsString(newAddress)));
+        expectedResponse.add(buildPendingApprovalField(PRESENT_ADDRESS, address, uuids.get(0), "facility-1", newAddress));
 
         assertEquals(6, actualResponse.size());
         for (int i = 0; i < 6; i++) {
@@ -253,7 +253,7 @@ public class PatientServiceTest {
         return fieldDetails;
     }
 
-    private PendingApprovalDetails buildPendingApprovalField(String name, Object currentValue, UUID uuid, String facilityId, String value) {
+    private PendingApprovalDetails buildPendingApprovalField(String name, Object currentValue, UUID uuid, String facilityId, Object value) {
         PendingApprovalDetails fieldDetails = new PendingApprovalDetails();
         fieldDetails.setName(name);
         fieldDetails.setCurrentValue(currentValue);

@@ -18,6 +18,7 @@ import java.util.*;
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonMapper.readValue;
 
 @Component
@@ -163,7 +164,7 @@ public class PatientService {
                     TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap = new TreeMap<>();
                     PendingApprovalFieldDetails fieldDetails = new PendingApprovalFieldDetails();
                     fieldDetails.setFacilityId(request.getFacilityId());
-                    fieldDetails.setValue(requestFieldsMap.get(fieldName));
+                    fieldDetails.setValue(getPendingApprovalFieldDetailsValue(requestFieldsMap, fieldName));
                     fieldDetailsMap.put(requestMapEntrySet.getKey(), fieldDetails);
 
                     details.setFieldDetails(fieldDetailsMap);
@@ -172,6 +173,16 @@ public class PatientService {
             }
         }
         return detailsSet;
+    }
+
+    private Object getPendingApprovalFieldDetailsValue(Map<String, String> requestFieldsMap, String fieldName) {
+        if (PHONE_NUMBER.equals(fieldName)) {
+            return readValue(requestFieldsMap.get(fieldName), PhoneNumber.class);
+        }
+        if (PRESENT_ADDRESS.equals(fieldName) || PERMANENT_ADDRESS.equals(fieldName)) {
+            return readValue(requestFieldsMap.get(fieldName), Address.class);
+        }
+        return requestFieldsMap.get(fieldName);
     }
 
     private void updateDetailsSet(TreeSet<PendingApprovalDetails> detailsSet, PendingApprovalDetails details) {
