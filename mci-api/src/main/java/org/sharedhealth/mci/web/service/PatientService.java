@@ -1,6 +1,8 @@
 package org.sharedhealth.mci.web.service;
 
 
+import java.util.*;
+
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
@@ -13,8 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.FieldError;
-
-import java.util.*;
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -92,6 +92,10 @@ public class PatientService {
 
     public List<PatientData> findAllByQuery(SearchQuery searchQuery) {
         return patientRepository.findAllByQuery(searchQuery);
+    }
+
+    public List<PatientSummaryData> findAllSummaryByQuery(SearchQuery searchQuery) {
+        return patientRepository.findAllSummaryByQuery(searchQuery);
     }
 
     public List<PatientData> findAllByFacility(String facilityId, String last, Date since) {

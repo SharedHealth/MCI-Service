@@ -31,6 +31,17 @@ public class PatientMapper {
         return dataList;
     }
 
+    public List<PatientSummaryData> mapSummary(List<PatientData> patients) {
+        List<PatientSummaryData> dataList = new ArrayList<>();
+        if (isNotEmpty(patients)) {
+            for (PatientData patient : patients) {
+                PatientSummaryData data = this.map(patient);
+                dataList.add(data);
+            }
+        }
+        return dataList;
+    }
+
     public PatientData map(Patient patient) {
         PatientData data = new PatientData();
         if (patient.getRelations() != null) {
@@ -221,6 +232,28 @@ public class PatientMapper {
         patient.setPendingApprovals(existing.getPendingApprovals());
 
         return patient;
+    }
+
+    public PatientSummaryData map(PatientData patient) {
+
+        if(patient == null) {
+            return null;
+        }
+
+        PatientSummaryData data = new PatientSummaryData();
+
+        data.setHealthId(patient.getHealthId());
+        data.setNationalId(patient.getNationalId());
+        data.setUid(patient.getUid());
+        data.setBirthRegistrationNumber(patient.getBirthRegistrationNumber());
+        data.setGivenName(StringUtils.trim(patient.getGivenName()));
+        data.setSurName(StringUtils.trim(patient.getSurName()));
+        data.setDateOfBirth(patient.getDateOfBirth());
+        data.setGender(patient.getGender());
+        data.setAddress(patient.getAddress());
+        data.setPhoneNumber(patient.getPhoneNumber());
+
+        return data;
     }
 
     private void prepareRelationBlock(PatientData data, PatientData existingData, Patient patient) {

@@ -1,5 +1,9 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
+
 import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
@@ -25,10 +29,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.FieldError;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
@@ -186,6 +186,10 @@ public class PatientRepository extends BaseRepository {
 
     public List<PatientData> findAllByQuery(SearchQuery searchQuery) {
         return filterPatients(findProbables(searchQuery), searchQuery);
+    }
+
+    public List<PatientSummaryData> findAllSummaryByQuery(SearchQuery searchQuery) {
+        return mapper.mapSummary(filterPatients(findProbables(searchQuery), searchQuery));
     }
 
     private List<PatientData> findProbables(SearchQuery searchQuery) {

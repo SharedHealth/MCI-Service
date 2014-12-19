@@ -1,6 +1,9 @@
 package org.sharedhealth.mci.web.controller;
 
 
+import java.text.ParseException;
+import java.util.*;
+
 import com.datastax.driver.core.utils.UUIDs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
@@ -23,20 +26,22 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
-import java.text.ParseException;
-import java.util.*;
-
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.ACCEPTED;
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PatientControllerTest {
@@ -55,6 +60,8 @@ public class PatientControllerTest {
 
     @Mock
     private LocalValidatorFactoryBean localValidatorFactoryBean;
+
+    private PatientMapper mapper;
 
     private PatientData patient1;
 
@@ -116,6 +123,7 @@ public class PatientControllerTest {
         stringBuilder = new StringBuilder(200);
         patients = new ArrayList<>();
         maxLimit = 25;
+        mapper = new PatientMapper();
     }
 
 
@@ -206,7 +214,7 @@ public class PatientControllerTest {
     }
 
     private void assertFindAllBy(SearchQuery searchQuery, String queryString) throws Exception {
-        patients.add(patient2);
+        patients.add(patient1);
 
         searchQuery.setMaximum_limit(maxLimit);
 
@@ -221,13 +229,15 @@ public class PatientControllerTest {
             additionalInfo.put("note", note);
         }
 
-        when(patientService.findAllByQuery(searchQuery)).thenReturn(patients);
-        MCIMultiResponse mciMultiResponse = new MCIMultiResponse<>(patients, additionalInfo, OK);
+        List<PatientSummaryData> patientSummaryDataList = mapper.mapSummary(patients);
+
+        when(patientService.findAllSummaryByQuery(searchQuery)).thenReturn(patientSummaryDataList);
+        MCIMultiResponse mciMultiResponse = new MCIMultiResponse<>(patientSummaryDataList, additionalInfo, OK);
 
         mockMvc.perform(get(API_END_POINT + "?" + queryString))
                 .andExpect(request().asyncResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject)));
 
-        verify(patientService).findAllByQuery(searchQuery);
+        verify(patientService).findAllSummaryByQuery(searchQuery);
     }
 
     @Test

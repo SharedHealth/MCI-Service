@@ -1,5 +1,12 @@
 package org.sharedhealth.mci.web.controller;
 
+import javax.validation.Valid;
+import javax.validation.groups.Default;
+import java.util.HashMap;
+import java.util.List;
+import java.util.TreeSet;
+import java.util.UUID;
+
 import org.sharedhealth.mci.validation.group.RequiredGroup;
 import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
 import org.sharedhealth.mci.web.exception.SearchQueryParameterException;
@@ -16,13 +23,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
-
-import javax.validation.Valid;
-import javax.validation.groups.Default;
-import java.util.HashMap;
-import java.util.List;
-import java.util.TreeSet;
-import java.util.UUID;
 
 import static java.util.Collections.emptyList;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
@@ -83,7 +83,7 @@ public class PatientController {
         final String note = patientService.getPerPageMaximumLimitNote();
         searchQuery.setMaximum_limit(limit);
 
-        List<PatientData> results = patientService.findAllByQuery(searchQuery);
+        List<PatientSummaryData> results = patientService.findAllSummaryByQuery(searchQuery);
         HashMap<String, String> additionalInfo = new HashMap<>();
         if (results.size() > limit) {
             results.remove(limit);
