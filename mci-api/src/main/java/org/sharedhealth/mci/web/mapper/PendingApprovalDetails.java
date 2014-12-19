@@ -3,6 +3,7 @@ package org.sharedhealth.mci.web.mapper;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import java.util.Comparator;
 import java.util.TreeMap;
 import java.util.UUID;
 
@@ -17,7 +18,7 @@ public class PendingApprovalDetails implements Comparable<PendingApprovalDetails
     private Object currentValue;
 
     @JsonProperty(FIELD_DETAILS)
-    TreeMap<UUID, PendingApprovalFieldDetails> details;
+    TreeMap<UUID, PendingApprovalFieldDetails> fieldDetails;
 
     public String getName() {
         return name;
@@ -35,19 +36,20 @@ public class PendingApprovalDetails implements Comparable<PendingApprovalDetails
         this.currentValue = currentValue;
     }
 
-    public TreeMap<UUID, PendingApprovalFieldDetails> getDetails() {
-        return details;
+    public TreeMap<UUID, PendingApprovalFieldDetails> getFieldDetails() {
+        return fieldDetails;
     }
 
-    public void setDetails(TreeMap<UUID, PendingApprovalFieldDetails> details) {
-        this.details = details;
-    }
-
-    public void addDetails(TreeMap<UUID, PendingApprovalFieldDetails> details) {
-        if (this.details == null) {
-            this.details = new TreeMap<>();
+    public void setFieldDetails(TreeMap<UUID, PendingApprovalFieldDetails> fieldDetails) {
+        if (this.fieldDetails == null) {
+            this.fieldDetails = new TreeMap<>(new Comparator<UUID>() {
+                @Override
+                public int compare(UUID o1, UUID o2) {
+                    return o2.compareTo(o1);
+                }
+            });
         }
-        this.details.putAll(details);
+        this.fieldDetails.putAll(fieldDetails);
     }
 
     @Override

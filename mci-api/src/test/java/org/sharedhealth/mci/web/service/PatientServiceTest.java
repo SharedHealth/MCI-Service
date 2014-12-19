@@ -125,6 +125,18 @@ public class PatientServiceTest {
         patient.setBloodGroup("As if I care!");
         patient.setOccupation("Wizard");
 
+        PhoneNumber phoneNumber = new PhoneNumber();
+        phoneNumber.setCountryCode("91");
+        phoneNumber.setAreaCode("033");
+        phoneNumber.setNumber("20001234");
+        patient.setPhoneNumber(phoneNumber);
+
+        Address address = new Address();
+        address.setDivisionId("10");
+        address.setDistrictId("20");
+        address.setUpazilaId("30");
+        patient.setAddress(address);
+
         List<UUID> uuids = generateUUIDs();
         patient.setPendingApprovals(buildPendingApprovalRequestMap(uuids));
 
@@ -138,8 +150,20 @@ public class PatientServiceTest {
         expectedResponse.add(buildPendingApprovalField(BLOOD_GROUP, "As if I care!", uuids));
         expectedResponse.add(buildPendingApprovalField(OCCUPATION, "Wizard", uuids.get(3), "facility-4", "Jobless"));
 
-        assertEquals(4, actualResponse.size());
-        for (int i = 0; i < 4; i++) {
+        PhoneNumber newPhoneNumber = new PhoneNumber();
+        newPhoneNumber.setCountryCode("91");
+        newPhoneNumber.setAreaCode("033");
+        newPhoneNumber.setNumber("30001234");
+        expectedResponse.add(buildPendingApprovalField(PHONE_NUMBER, phoneNumber, uuids.get(0), "facility-1", writeValueAsString(newPhoneNumber)));
+
+        Address newAddress = new Address();
+        newAddress.setDivisionId("10");
+        newAddress.setDistrictId("21");
+        newAddress.setUpazilaId("31");
+        expectedResponse.add(buildPendingApprovalField(PRESENT_ADDRESS, address, uuids.get(0), "facility-1", writeValueAsString(newAddress)));
+
+        assertEquals(6, actualResponse.size());
+        for (int i = 0; i < 6; i++) {
             PendingApprovalDetails lhs = expectedResponse.pollFirst();
             PendingApprovalDetails rhs = actualResponse.pollFirst();
             assertTrue(reflectionEquals(lhs, rhs));
@@ -153,6 +177,19 @@ public class PatientServiceTest {
         fields1.put(GIVEN_NAME, "A." + GIVEN_NAME);
         fields1.put(SUR_NAME, "A." + SUR_NAME);
         fields1.put(BLOOD_GROUP, "A." + BLOOD_GROUP);
+
+        PhoneNumber phoneNumber = new PhoneNumber();
+        phoneNumber.setCountryCode("91");
+        phoneNumber.setAreaCode("033");
+        phoneNumber.setNumber("30001234");
+        fields1.put(PHONE_NUMBER, writeValueAsString(phoneNumber));
+
+        Address address = new Address();
+        address.setDivisionId("10");
+        address.setDistrictId("21");
+        address.setUpazilaId("31");
+        fields1.put(PRESENT_ADDRESS, writeValueAsString(address));
+
         requests.put(uuids.get(0), buildPendingApprovalRequest("facility-1", fields1));
 
         Map<String, String> fields2 = new HashMap<>();
@@ -212,11 +249,11 @@ public class PatientServiceTest {
         details3.setValue("C." + name);
         detailsMap.put(uuids.get(2), details3);
 
-        fieldDetails.setDetails(detailsMap);
+        fieldDetails.setFieldDetails(detailsMap);
         return fieldDetails;
     }
 
-    private PendingApprovalDetails buildPendingApprovalField(String name, String currentValue, UUID uuid, String facilityId, String value) {
+    private PendingApprovalDetails buildPendingApprovalField(String name, Object currentValue, UUID uuid, String facilityId, String value) {
         PendingApprovalDetails fieldDetails = new PendingApprovalDetails();
         fieldDetails.setName(name);
         fieldDetails.setCurrentValue(currentValue);
@@ -227,7 +264,7 @@ public class PatientServiceTest {
         details.setValue(value);
         detailsMap.put(uuid, details);
 
-        fieldDetails.setDetails(detailsMap);
+        fieldDetails.setFieldDetails(detailsMap);
         return fieldDetails;
     }
 

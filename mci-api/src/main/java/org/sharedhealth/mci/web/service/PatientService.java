@@ -142,10 +142,10 @@ public class PatientService {
         if (patient == null) {
             return null;
         }
-        return buildPendingApproval(patient);
+        return buildPendingApprovalDetails(patient);
     }
 
-    private TreeSet<PendingApprovalDetails> buildPendingApproval(PatientData patient) {
+    private TreeSet<PendingApprovalDetails> buildPendingApprovalDetails(PatientData patient) {
         TreeSet<PendingApprovalDetails> detailsSet = new TreeSet<>();
         Map<UUID, String> requestMap = patient.getPendingApprovals();
 
@@ -166,7 +166,7 @@ public class PatientService {
                     fieldDetails.setValue(requestFieldsMap.get(fieldName));
                     fieldDetailsMap.put(requestMapEntrySet.getKey(), fieldDetails);
 
-                    details.setDetails(fieldDetailsMap);
+                    details.setFieldDetails(fieldDetailsMap);
                     this.updateDetailsSet(detailsSet, details);
                 }
             }
@@ -181,7 +181,7 @@ public class PatientService {
         for (PendingApprovalDetails d : detailsSet) {
             if (d.equals(details)) {
                 d.setCurrentValue(details.getCurrentValue());
-                d.addDetails(details.getDetails());
+                d.setFieldDetails(details.getFieldDetails());
             }
         }
     }

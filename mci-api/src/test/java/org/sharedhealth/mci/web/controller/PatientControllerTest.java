@@ -483,7 +483,7 @@ public class PatientControllerTest {
         approvalFieldDetails.setValue("some value");
         UUID timeuuid = UUIDs.timeBased();
         fieldDetailsMap.put(timeuuid, approvalFieldDetails);
-        details.setDetails(fieldDetailsMap);
+        details.setFieldDetails(fieldDetailsMap);
 
         TreeSet<PendingApprovalDetails> pendingApprovals = new TreeSet<>();
         pendingApprovals.add(details);
