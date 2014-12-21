@@ -39,7 +39,7 @@ public class LocationRepository extends BaseRepository {
         select.where(QueryBuilder.eq("parent", parent));
         select.where(QueryBuilder.eq("code", code));
 
-        Location location = cassandraOperations.selectOne(select, Location.class);
+        Location location = cassandraOps.selectOne(select, Location.class);
         if (location != null) {
             return mapper.map(location);
         }
@@ -56,7 +56,7 @@ public class LocationRepository extends BaseRepository {
         Select select = select().from("locations");
         select.where(QueryBuilder.eq("parent", parent));
 
-        List<Location> locations = cassandraOperations.select(select, Location.class);
+        List<Location> locations = cassandraOps.select(select, Location.class);
         return mapper.map(locations);
 
     }
