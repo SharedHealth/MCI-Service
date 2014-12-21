@@ -1,26 +1,25 @@
 package org.sharedhealth.mci.web.service;
 
 
+import java.util.*;
+
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.infrastructure.fr.FacilityRegistryWrapper;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
-import org.sharedhealth.mci.web.mapper.Catchment;
-import org.sharedhealth.mci.web.mapper.PatientData;
-import org.sharedhealth.mci.web.mapper.PendingApprovalResponse;
-import org.sharedhealth.mci.web.mapper.SearchQuery;
+import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
+import org.sharedhealth.mci.web.model.PendingApprovalRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.FieldError;
 
-import java.util.*;
-
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
+import static org.sharedhealth.mci.web.utils.JsonMapper.readValue;
 
 @Component
 public class PatientService {
@@ -95,6 +94,10 @@ public class PatientService {
         return patientRepository.findAllByQuery(searchQuery);
     }
 
+    public List<PatientSummaryData> findAllSummaryByQuery(SearchQuery searchQuery) {
+        return patientRepository.findAllSummaryByQuery(searchQuery);
+    }
+
     public List<PatientData> findAllByFacility(String facilityId, String last, Date since) {
         List<String> locations = facilityRegistryWrapper.getCatchmentAreasByFacility(facilityId);
         return patientRepository.findAllByLocations(locations, last, since);
@@ -118,36 +121,83 @@ public class PatientService {
         return note;
     }
 
-    public PendingApprovalResponse findPendingApprovals(Catchment catchment, UUID lastItemId) {
-        List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(catchment, lastItemId,
-                getPerPageMaximumLimit());
+    public List<PendingApprovalListResponse> findPendingApprovalList(Catchment catchment, UUID after, UUID before) {
+        List<PendingApprovalListResponse> pendingApprovals = new ArrayList<>();
+        List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(catchment, after, before, getPerPageMaximumLimit());
         if (isNotEmpty(mappings)) {
-            List<PatientData> patients = patientRepository.findByHealthId(getHealthIds(mappings));
-            return buildPendingApprovalResponse(patients, mappings.get(mappings.size() - 1).getCreatedAt());
+            for (PendingApprovalMapping mapping : mappings) {
+                PatientData patient = patientRepository.findByHealthId(mapping.getHealthId());
+                pendingApprovals.add(buildPendingApprovalListResponse(patient, mapping.getLastUpdated()));
+            }
         }
-        return null;
+        return pendingApprovals;
     }
 
-    private List<String> getHealthIds(List<PendingApprovalMapping> mappings) {
-        List<String> healthIds = new ArrayList<>();
-        for (PendingApprovalMapping mapping : mappings) {
-            healthIds.add(mapping.getHealthId());
-        }
-        return healthIds;
+    private PendingApprovalListResponse buildPendingApprovalListResponse(PatientData patient, UUID lastUpdated) {
+        PendingApprovalListResponse pendingApproval = new PendingApprovalListResponse();
+        pendingApproval.setHealthId(patient.getHealthId());
+        pendingApproval.setGivenName(patient.getGivenName());
+        pendingApproval.setSurname(patient.getSurName());
+        pendingApproval.setLastUpdated(lastUpdated);
+        return pendingApproval;
     }
 
-    private PendingApprovalResponse buildPendingApprovalResponse(List<PatientData> patients, UUID lastItemId) {
-        List<Map<String, String>> pendingApprovals = new ArrayList<>();
-        for (PatientData patient : patients) {
-            Map<String, String> metadata = new HashMap<>();
-            metadata.put(HID, patient.getHealthId());
-            metadata.put(GIVEN_NAME, patient.getGivenName());
-            metadata.put(SUR_NAME, patient.getSurName());
-            pendingApprovals.add(metadata);
+    public TreeSet<PendingApprovalDetails> findPendingApprovalDetails(String healthId) {
+        PatientData patient = this.findByHealthId(healthId);
+        if (patient == null) {
+            return null;
         }
-        PendingApprovalResponse response = new PendingApprovalResponse();
-        response.setPendingApprovals(pendingApprovals);
-        response.setLastItemId(lastItemId);
-        return response;
+        return buildPendingApprovalDetails(patient);
+    }
+
+    private TreeSet<PendingApprovalDetails> buildPendingApprovalDetails(PatientData patient) {
+        TreeSet<PendingApprovalDetails> detailsSet = new TreeSet<>();
+        Map<UUID, String> requestMap = patient.getPendingApprovals();
+
+        if (requestMap != null && requestMap.size() > 0) {
+
+            for (Map.Entry<UUID, String> requestMapEntrySet : requestMap.entrySet()) {
+                PendingApprovalRequest request = readValue(requestMapEntrySet.getValue(), PendingApprovalRequest.class);
+                Map<String, String> requestFieldsMap = request.getFields();
+
+                for (String fieldName : requestFieldsMap.keySet()) {
+                    PendingApprovalDetails details = new PendingApprovalDetails();
+                    details.setName(fieldName);
+                    details.setCurrentValue(patient.getValue(fieldName));
+
+                    TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap = new TreeMap<>();
+                    PendingApprovalFieldDetails fieldDetails = new PendingApprovalFieldDetails();
+                    fieldDetails.setFacilityId(request.getFacilityId());
+                    fieldDetails.setValue(getPendingApprovalFieldDetailsValue(requestFieldsMap, fieldName));
+                    fieldDetailsMap.put(requestMapEntrySet.getKey(), fieldDetails);
+
+                    details.setFieldDetails(fieldDetailsMap);
+                    this.updateDetailsSet(detailsSet, details);
+                }
+            }
+        }
+        return detailsSet;
+    }
+
+    private Object getPendingApprovalFieldDetailsValue(Map<String, String> requestFieldsMap, String fieldName) {
+        if (PHONE_NUMBER.equals(fieldName)) {
+            return readValue(requestFieldsMap.get(fieldName), PhoneNumber.class);
+        }
+        if (PRESENT_ADDRESS.equals(fieldName) || PERMANENT_ADDRESS.equals(fieldName)) {
+            return readValue(requestFieldsMap.get(fieldName), Address.class);
+        }
+        return requestFieldsMap.get(fieldName);
+    }
+
+    private void updateDetailsSet(TreeSet<PendingApprovalDetails> detailsSet, PendingApprovalDetails details) {
+        if (!detailsSet.contains(details)) {
+            detailsSet.add(details);
+        }
+        for (PendingApprovalDetails d : detailsSet) {
+            if (d.equals(details)) {
+                d.setCurrentValue(details.getCurrentValue());
+                d.setFieldDetails(details.getFieldDetails());
+            }
+        }
     }
 }

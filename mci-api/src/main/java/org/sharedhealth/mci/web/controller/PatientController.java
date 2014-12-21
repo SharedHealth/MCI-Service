@@ -1,5 +1,12 @@
 package org.sharedhealth.mci.web.controller;
 
+import javax.validation.Valid;
+import javax.validation.groups.Default;
+import java.util.HashMap;
+import java.util.List;
+import java.util.TreeSet;
+import java.util.UUID;
+
 import org.sharedhealth.mci.validation.group.RequiredGroup;
 import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
 import org.sharedhealth.mci.web.exception.SearchQueryParameterException;
@@ -17,13 +24,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
-import javax.validation.Valid;
-import javax.validation.groups.Default;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
-
+import static java.util.Collections.emptyList;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -82,7 +83,7 @@ public class PatientController {
         final String note = patientService.getPerPageMaximumLimitNote();
         searchQuery.setMaximum_limit(limit);
 
-        List<PatientData> results = patientService.findAllByQuery(searchQuery);
+        List<PatientSummaryData> results = patientService.findAllSummaryByQuery(searchQuery);
         HashMap<String, String> additionalInfo = new HashMap<>();
         if (results.size() > limit) {
             results.remove(limit);
@@ -132,30 +133,44 @@ public class PatientController {
     }
 
     @RequestMapping(value = "/pendingapprovals", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
-    public DeferredResult<ResponseEntity<MCIMultiResponse>> findApprovals(
+    public DeferredResult<ResponseEntity<MCIMultiResponse>> findPendingApprovalList(
             @RequestHeader(value = DIVISION_ID) String divisionId,
             @RequestHeader(value = DISTRICT_ID) String districtId,
             @RequestHeader(value = UPAZILA_ID) String upazilaId,
-            @RequestParam(value = LAST_ITEM_ID, required = false) UUID lastItemId) {
+            @RequestParam(value = AFTER, required = false) UUID after,
+            @RequestParam(value = BEFORE, required = false) UUID before) {
 
-        logger.debug("Find list of pending approvals before : " + lastItemId);
+        logger.debug("Find list of pending approvals.");
         final DeferredResult<ResponseEntity<MCIMultiResponse>> deferredResult = new DeferredResult<>();
 
         Catchment catchment = new Catchment(divisionId, districtId, upazilaId);
-        PendingApprovalResponse response = patientService.findPendingApprovals(catchment, lastItemId);
+        List<PendingApprovalListResponse> response = patientService.findPendingApprovalList(catchment, after, before);
 
         MCIMultiResponse mciMultiResponse;
         if (response != null) {
-            HashMap<String, String> additionalInfo = null;
-            if (response.getLastItemId() != null) {
-                additionalInfo = new HashMap<>();
-                additionalInfo.put(LAST_ITEM_ID, response.getLastItemId().toString());
-            }
-            mciMultiResponse = new MCIMultiResponse(response.getPendingApprovals(), additionalInfo, OK);
+            mciMultiResponse = new MCIMultiResponse(response, null, OK);
         } else {
-            mciMultiResponse = new MCIMultiResponse(Collections.emptyList(), null, OK);
+            mciMultiResponse = new MCIMultiResponse(emptyList(), null, OK);
         }
         deferredResult.setResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject));
+        return deferredResult;
+    }
+
+    @RequestMapping(value = "/pendingapprovals/{healthId}", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
+    public DeferredResult<ResponseEntity<MCIMultiResponse>> findPendingApprovalDetails(@PathVariable String healthId) {
+        logger.debug("Find list of pending approval details. Health ID : " + healthId);
+        final DeferredResult<ResponseEntity<MCIMultiResponse>> deferredResult = new DeferredResult<>();
+
+        TreeSet<PendingApprovalDetails> response = patientService.findPendingApprovalDetails(healthId);
+
+        MCIMultiResponse mciMultiResponse;
+        if (response != null) {
+            mciMultiResponse = new MCIMultiResponse(response, null, OK);
+        } else {
+            mciMultiResponse = new MCIMultiResponse(emptyList(), null, OK);
+        }
+        deferredResult.setResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject));
+
         return deferredResult;
     }
 }

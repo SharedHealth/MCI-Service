@@ -3,13 +3,14 @@ package org.sharedhealth.mci.web.handler;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
-import org.sharedhealth.mci.web.model.PendingApproval;
+import org.sharedhealth.mci.web.model.PendingApprovalRequest;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
+import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
 
 public class PatientFilter {
 
@@ -27,15 +28,15 @@ public class PatientFilter {
         this.patient = patient;
     }
 
-    public PendingApproval filter() {
+    public PendingApprovalRequest filter() {
         Map<String, String> filteredFeildMap = filterFeilds(patient);
         if (filteredFeildMap.isEmpty()) {
             return null;
         }
-        PendingApproval pendingApproval = new PendingApproval();
-        pendingApproval.setFacilityId("10000059");
-        pendingApproval.setFields(filteredFeildMap);
-        return pendingApproval;
+        PendingApprovalRequest pendingApprovalRequest = new PendingApprovalRequest();
+        pendingApprovalRequest.setFacilityId("10000059");
+        pendingApprovalRequest.setFields(filteredFeildMap);
+        return pendingApprovalRequest;
     }
 
     private Map<String, String> filterFeilds(PatientData patient) {
@@ -82,7 +83,7 @@ public class PatientFilter {
             if (value.equals(NON_UPDATEABLE)) {
                 return phoneNumberExisting;
             } else if (value.equals(NEEDS_APPROVAL) && !phoneNumberExisting.equals(phoneNumberUpdated)) {
-                map.put(phoneNumber, phoneNumberUpdated.toString());
+                map.put(phoneNumber, writeValueAsString(phoneNumberUpdated));
                 return phoneNumberExisting;
             }
         }
@@ -95,7 +96,7 @@ public class PatientFilter {
             if (value.equals(NON_UPDATEABLE)) {
                 return existingAddress;
             } else if (value.equals(NEEDS_APPROVAL) && !existingAddress.equals(updatedAddress)) {
-                map.put(addressType, updatedAddress.toString());
+                map.put(addressType, writeValueAsString(updatedAddress));
                 return existingAddress;
             }
         }

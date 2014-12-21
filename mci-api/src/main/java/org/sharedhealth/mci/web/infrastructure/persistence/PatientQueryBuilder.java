@@ -1,22 +1,17 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
-import java.util.UUID;
-
 import com.datastax.driver.core.querybuilder.*;
 import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.model.*;
 import org.springframework.data.cassandra.convert.CassandraConverter;
 
-import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.in;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.lt;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
+import java.util.UUID;
+
+import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
 import static com.datastax.driver.core.querybuilder.Select.Where;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static org.springframework.data.cassandra.core.CassandraTemplate.createDeleteQuery;
-import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
-import static org.springframework.data.cassandra.core.CassandraTemplate.toUpdateQuery;
+import static org.springframework.data.cassandra.core.CassandraTemplate.*;
 
 public class PatientQueryBuilder {
 
@@ -26,10 +21,10 @@ public class PatientQueryBuilder {
     public static final String CF_UID_MAPPING = "uid_mapping";
     public static final String CF_PHONE_NUMBER_MAPPING = "phone_number_mapping";
     public static final String CF_NAME_MAPPING = "name_mapping";
-    public static final String CF_PENDING_APPROVAL_MAPPING = "approval_mapping";
+    public static final String CF_PENDING_APPROVAL_MAPPING = "pending_approval_mapping";
 
     public static final String HEALTH_ID = "health_id";
-    public static final String CREATED_AT = "created_at";
+    public static final String LAST_UPDATED = "last_updated";
     public static final String NATIONAL_ID = "national_id";
     public static final String FULL_NAME_BANGLA = "full_name_bangla";
     public static final String GIVEN_NAME = "given_name";
@@ -126,14 +121,17 @@ public class PatientQueryBuilder {
         return select(HEALTH_ID).from(CF_PHONE_NUMBER_MAPPING).where(eq(PHONE_NO, phoneNumber)).toString();
     }
 
-    public static String buildFindPendingApprovalMappingStmt(Catchment catchment, UUID lastItemId, int limit) {
-        Where where = select(HEALTH_ID, CREATED_AT).from(CF_PENDING_APPROVAL_MAPPING)
+    public static String buildFindPendingApprovalMappingStmt(Catchment catchment, UUID after, UUID before, int limit) {
+        Where where = select(HEALTH_ID, LAST_UPDATED).from(CF_PENDING_APPROVAL_MAPPING)
                 .where(eq(DIVISION_ID, catchment.getDivisionId()))
                 .and(eq(DISTRICT_ID, catchment.getDistrictId()))
                 .and(eq(UPAZILA_ID, catchment.getUpazilaId()));
 
-        if (lastItemId != null) {
-            where = where.and(lt(CREATED_AT, lastItemId));
+        if (after != null) {
+            where = where.and(gt(LAST_UPDATED, after));
+        }
+        if (before != null) {
+            where = where.and(lt(LAST_UPDATED, before));
         }
         return where.limit(limit).toString();
     }

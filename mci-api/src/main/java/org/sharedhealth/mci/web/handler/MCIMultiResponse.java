@@ -1,5 +1,6 @@
 package org.sharedhealth.mci.web.handler;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -13,14 +14,14 @@ import org.springframework.http.HttpStatus;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
-@JsonIgnoreProperties(value = { "httpStatusObject" })
-@JsonPropertyOrder({"http_status","results","additional_info"})
-public class MCIMultiResponse <T, A>{
+@JsonIgnoreProperties(value = {"httpStatusObject"})
+@JsonPropertyOrder({"http_status", "results", "additional_info"})
+public class MCIMultiResponse<T> {
 
     @JsonProperty("http_status")
     public int httpStatus;
 
-    public List<T> results;
+    public Collection<T> results;
 
     @JsonProperty("additional_info")
     @JsonInclude(NON_EMPTY)
@@ -28,7 +29,7 @@ public class MCIMultiResponse <T, A>{
 
     public HttpStatus httpStatusObject;
 
-    public MCIMultiResponse(List<T> results, HashMap<String, String> additionalInfo, HttpStatus httpStatusObject) {
+    public MCIMultiResponse(Collection<T> results, HashMap<String, String> additionalInfo, HttpStatus httpStatusObject) {
         this.httpStatusObject = httpStatusObject;
         this.httpStatus = httpStatusObject.value();
         this.results = results;
@@ -48,7 +49,7 @@ public class MCIMultiResponse <T, A>{
         this.httpStatus = httpStatus;
     }
 
-    public List<T> getResults() {
+    public Collection<T> getResults() {
         return results;
     }
 

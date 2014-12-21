@@ -4,7 +4,7 @@ import org.junit.Test;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.Location;
 import org.sharedhealth.mci.web.mapper.PatientData;
-import org.sharedhealth.mci.web.model.PendingApproval;
+import org.sharedhealth.mci.web.model.PendingApprovalRequest;
 
 import java.text.ParseException;
 import java.util.Properties;
@@ -26,9 +26,9 @@ public class PatientFilterTest {
         patientUpdated.setGender("F");
 
         PatientFilter patientFilter = new PatientFilter(properties, patientExisting, patientUpdated,patientToBeSaved);
-        PendingApproval pendingApproval = patientFilter.filter();
+        PendingApprovalRequest pendingApprovalRequest = patientFilter.filter();
 
-        assertEquals("F", pendingApproval.getFields().get(genderKey));
+        assertEquals("F", pendingApprovalRequest.getFields().get(genderKey));
         assertEquals(patientToBeSaved.getGender(), patientExisting.getGender());
     }
 
@@ -44,9 +44,9 @@ public class PatientFilterTest {
         patientUpdated.setDateOfBirth("2000-02-10");
 
         PatientFilter patientFilter = new PatientFilter(properties, patientExisting, patientUpdated,patientToBeSaved);
-        PendingApproval pendingApproval = patientFilter.filter();
+        PendingApprovalRequest pendingApprovalRequest = patientFilter.filter();
 
-        assertNull(pendingApproval);
+        assertNull(pendingApprovalRequest);
         assertEquals(patientToBeSaved.getDateOfBirth(), patientExisting.getDateOfBirth());
     }
 
@@ -61,9 +61,9 @@ public class PatientFilterTest {
         patientUpdated.setDateOfBirth("2001-02-10");
 
         PatientFilter patientFilter = new PatientFilter(properties, patientExisting, patientUpdated,patientToBeSaved);
-        PendingApproval pendingApproval = patientFilter.filter();
+        PendingApprovalRequest pendingApprovalRequest = patientFilter.filter();
 
-        assertNull(pendingApproval);
+        assertNull(pendingApprovalRequest);
         assertEquals(patientToBeSaved.getDateOfBirth(), patientUpdated.getDateOfBirth());
     }
 

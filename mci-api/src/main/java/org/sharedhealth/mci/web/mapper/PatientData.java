@@ -3,6 +3,7 @@ package org.sharedhealth.mci.web.mapper;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -34,6 +35,7 @@ public class PatientData {
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "[\\d]{13}|[\\d]{17}", message = "1002")
     private String nationalId;
+
     @JsonProperty(BIN_BRN)
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "[\\d]{17}", message = "1002")
@@ -440,6 +442,23 @@ public class PatientData {
 
     public void setPendingApprovals(Map<UUID, String> pendingApprovals) {
         this.pendingApprovals = pendingApprovals;
+    }
+
+    public Object getValue(String jsonKey) {
+        for (Field field : PatientData.class.getDeclaredFields()) {
+            JsonProperty jsonProperty = field.getAnnotation(JsonProperty.class);
+            if (jsonProperty != null) {
+                String value = jsonProperty.value();
+                if (value != null && value.equals(jsonKey)) {
+                    try {
+                        return field.get(this);
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     @Override

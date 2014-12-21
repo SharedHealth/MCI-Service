@@ -1,6 +1,9 @@
 package org.sharedhealth.mci.web.controller;
 
 
+import java.text.ParseException;
+import java.util.*;
+
 import com.datastax.driver.core.utils.UUIDs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
@@ -23,21 +26,22 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
-import java.text.ParseException;
-import java.util.*;
-
-import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.ACCEPTED;
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PatientControllerTest {
@@ -56,6 +60,8 @@ public class PatientControllerTest {
 
     @Mock
     private LocalValidatorFactoryBean localValidatorFactoryBean;
+
+    private PatientMapper mapper;
 
     private PatientData patient1;
 
@@ -117,6 +123,7 @@ public class PatientControllerTest {
         stringBuilder = new StringBuilder(200);
         patients = new ArrayList<>();
         maxLimit = 25;
+        mapper = new PatientMapper();
     }
 
 
@@ -207,7 +214,7 @@ public class PatientControllerTest {
     }
 
     private void assertFindAllBy(SearchQuery searchQuery, String queryString) throws Exception {
-        patients.add(patient2);
+        patients.add(patient1);
 
         searchQuery.setMaximum_limit(maxLimit);
 
@@ -222,13 +229,15 @@ public class PatientControllerTest {
             additionalInfo.put("note", note);
         }
 
-        when(patientService.findAllByQuery(searchQuery)).thenReturn(patients);
-        MCIMultiResponse mciMultiResponse = new MCIMultiResponse<>(patients, additionalInfo, OK);
+        List<PatientSummaryData> patientSummaryDataList = mapper.mapSummary(patients);
+
+        when(patientService.findAllSummaryByQuery(searchQuery)).thenReturn(patientSummaryDataList);
+        MCIMultiResponse mciMultiResponse = new MCIMultiResponse<>(patientSummaryDataList, additionalInfo, OK);
 
         mockMvc.perform(get(API_END_POINT + "?" + queryString))
                 .andExpect(request().asyncResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject)));
 
-        verify(patientService).findAllByQuery(searchQuery);
+        verify(patientService).findAllSummaryByQuery(searchQuery);
     }
 
     @Test
@@ -357,18 +366,14 @@ public class PatientControllerTest {
     }
 
     @Test
-    public void shouldFindPendingApprovalsWithoutLastItemId() throws Exception {
+    public void shouldFindPendingApprovalsWithoutGivenTime() throws Exception {
         Catchment catchment = new Catchment("10", "20", "30");
-        UUID lastItemId = UUIDs.timeBased();
+        List<PendingApprovalListResponse> pendingApprovals = new ArrayList<>();
+        pendingApprovals.add(buildPendingApprovalListResponse(1));
+        pendingApprovals.add(buildPendingApprovalListResponse(2));
+        pendingApprovals.add(buildPendingApprovalListResponse(3));
 
-        PendingApprovalResponse response = new PendingApprovalResponse();
-        List<Map<String, String>> pendingApprovals = asList(buildPendingApproval(1),
-                buildPendingApproval(2),
-                buildPendingApproval(3));
-        response.setPendingApprovals(pendingApprovals);
-        response.setLastItemId(lastItemId);
-
-        when(patientService.findPendingApprovals(catchment, null)).thenReturn(response);
+        when(patientService.findPendingApprovalList(catchment, null, null)).thenReturn(pendingApprovals);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(DIVISION_ID, "10");
@@ -384,33 +389,35 @@ public class PatientControllerTest {
                 .andExpect(jsonPath("$.results[0].hid", is("hid-1")))
                 .andExpect(jsonPath("$.results[0].given_name", is("Scott-1")))
                 .andExpect(jsonPath("$.results[0].sur_name", is("Tiger-1")))
+                .andExpect(jsonPath("$.results[0].last_updated", is(pendingApprovals.get(0).getLastUpdated().toString())))
 
                 .andExpect(jsonPath("$.results[1].hid", is("hid-2")))
                 .andExpect(jsonPath("$.results[1].given_name", is("Scott-2")))
                 .andExpect(jsonPath("$.results[1].sur_name", is("Tiger-2")))
+                .andExpect(jsonPath("$.results[1].last_updated", is(pendingApprovals.get(1).getLastUpdated().toString())))
 
                 .andExpect(jsonPath("$.results[2].hid", is("hid-3")))
                 .andExpect(jsonPath("$.results[2].given_name", is("Scott-3")))
                 .andExpect(jsonPath("$.results[2].sur_name", is("Tiger-3")))
+                .andExpect(jsonPath("$.results[2].last_updated", is(pendingApprovals.get(2).getLastUpdated().toString())));
 
-                .andExpect(jsonPath("$.additional_info.last_item_id", is(lastItemId.toString())));
-
-        verify(patientService).findPendingApprovals(catchment, null);
+        verify(patientService).findPendingApprovalList(catchment, null, null);
     }
 
-    private Map<String, String> buildPendingApproval(int suffix) {
-        Map<String, String> metadata = new HashMap<>();
-        metadata.put(HID, "hid-" + suffix);
-        metadata.put(GIVEN_NAME, "Scott-" + suffix);
-        metadata.put(SUR_NAME, "Tiger-" + suffix);
-        return metadata;
+    private PendingApprovalListResponse buildPendingApprovalListResponse(int suffix) {
+        PendingApprovalListResponse pendingApproval = new PendingApprovalListResponse();
+        pendingApproval.setHealthId("hid-" + suffix);
+        pendingApproval.setGivenName("Scott-" + suffix);
+        pendingApproval.setSurname("Tiger-" + suffix);
+        pendingApproval.setLastUpdated(UUID.randomUUID());
+        return pendingApproval;
     }
 
     @Test
-    public void shouldFindPendingApprovalsWithLastItemId() throws Exception {
+    public void shouldFindPendingApprovalsAfterGivenTime() throws Exception {
         Catchment catchment = new Catchment("10", "20", "30");
-        UUID lastItemId = UUIDs.timeBased();
-        when(patientService.findPendingApprovals(catchment, lastItemId)).thenReturn(new PendingApprovalResponse());
+        UUID after = UUIDs.timeBased();
+        when(patientService.findPendingApprovalList(catchment, after, null)).thenReturn(new ArrayList<PendingApprovalListResponse>());
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(DIVISION_ID, "10");
@@ -418,14 +425,92 @@ public class PatientControllerTest {
         headers.add(UPAZILA_ID, "30");
 
         MvcResult mvcResult = mockMvc.perform(
-                get(GET_PENDING_APPROVALS_API + "?" + LAST_ITEM_ID + "=" + lastItemId).headers(headers))
+                get(GET_PENDING_APPROVALS_API + "?" + AFTER + "=" + after).headers(headers))
                 .andExpect(request().asyncStarted())
                 .andReturn();
 
         mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk());
 
-        verify(patientService).findPendingApprovals(catchment, lastItemId);
+        verify(patientService).findPendingApprovalList(catchment, after, null);
+    }
+
+    @Test
+    public void shouldFindPendingApprovalsABeforeGivenTime() throws Exception {
+        Catchment catchment = new Catchment("10", "20", "30");
+        UUID before = UUIDs.timeBased();
+        when(patientService.findPendingApprovalList(catchment, null, before)).thenReturn(new ArrayList<PendingApprovalListResponse>());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(DIVISION_ID, "10");
+        headers.add(DISTRICT_ID, "20");
+        headers.add(UPAZILA_ID, "30");
+
+        MvcResult mvcResult = mockMvc.perform(
+                get(GET_PENDING_APPROVALS_API + "?" + BEFORE + "=" + before).headers(headers))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isOk());
+
+        verify(patientService).findPendingApprovalList(catchment, null, before);
+    }
+
+    @Test
+    public void shouldFindPendingApprovalsABetweenGivenTimes() throws Exception {
+        Catchment catchment = new Catchment("10", "20", "30");
+        UUID after = UUIDs.timeBased();
+        UUID before = UUIDs.timeBased();
+        when(patientService.findPendingApprovalList(catchment, after, before)).thenReturn(new ArrayList<PendingApprovalListResponse>());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(DIVISION_ID, "10");
+        headers.add(DISTRICT_ID, "20");
+        headers.add(UPAZILA_ID, "30");
+
+        MvcResult mvcResult = mockMvc.perform(
+                get(GET_PENDING_APPROVALS_API + "?" + AFTER + "=" + after + "&" + BEFORE + "=" + before).headers(headers))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isOk());
+
+        verify(patientService).findPendingApprovalList(catchment, after, before);
+    }
+
+    @Test
+    public void shouldFindPendingApprovalDetailsForGivenHealthId() throws Exception {
+        String healthId = "health-100";
+        PendingApprovalDetails details = new PendingApprovalDetails();
+        details.setName("x_y_z");
+        details.setCurrentValue("curr val");
+
+        TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap = new TreeMap<>();
+        PendingApprovalFieldDetails approvalFieldDetails = new PendingApprovalFieldDetails();
+        approvalFieldDetails.setFacilityId("facility-100");
+        approvalFieldDetails.setValue("some value");
+        UUID timeuuid = UUIDs.timeBased();
+        fieldDetailsMap.put(timeuuid, approvalFieldDetails);
+        details.setFieldDetails(fieldDetailsMap);
+
+        TreeSet<PendingApprovalDetails> pendingApprovals = new TreeSet<>();
+        pendingApprovals.add(details);
+        when(patientService.findPendingApprovalDetails(healthId)).thenReturn(pendingApprovals);
+
+        MvcResult mvcResult = mockMvc.perform(get(GET_PENDING_APPROVALS_API + "/" + healthId))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.results[0].field_name", is("x_y_z")))
+                .andExpect(jsonPath("$.results[0].current_value", is("curr val")))
+                .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".facility_id", is("facility-100")))
+                .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".value", is("some value")));
+
+        verify(patientService).findPendingApprovalDetails(healthId);
     }
 }
 

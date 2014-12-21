@@ -1,8 +1,5 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
-import java.util.*;
-import java.util.concurrent.ExecutionException;
-
 import com.datastax.driver.core.utils.UUIDs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.After;
@@ -19,8 +16,8 @@ import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
 import org.sharedhealth.mci.web.model.Patient;
-import org.sharedhealth.mci.web.model.PendingApproval;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
+import org.sharedhealth.mci.web.model.PendingApprovalRequest;
 import org.sharedhealth.mci.web.utils.JsonConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -29,17 +26,16 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+
 import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
 import static java.util.Arrays.asList;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
-import static org.sharedhealth.mci.web.utils.JsonConstants.FACILITY_ID;
-import static org.sharedhealth.mci.web.utils.JsonConstants.LAST_ITEM_ID;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -148,9 +144,9 @@ public class PatientRepositoryIT {
 
         Map<UUID, String> pendingApprovals = savedPatient.getPendingApprovals();
         assertTrue(pendingApprovals != null && pendingApprovals.size() == 1);
-        PendingApproval pendingApproval = new ObjectMapper().readValue(pendingApprovals.values().iterator().next(), PendingApproval.class);
-        assertNotNull(pendingApproval);
-        Map<String, String> fields = pendingApproval.getFields();
+        PendingApprovalRequest pendingApprovalRequest = new ObjectMapper().readValue(pendingApprovals.values().iterator().next(), PendingApprovalRequest.class);
+        assertNotNull(pendingApprovalRequest);
+        Map<String, String> fields = pendingApprovalRequest.getFields();
         assertEquals("F", fields.get("gender"));
 
         List<PendingApprovalMapping> mappings = cassandraOperations.select(select().from(CF_PENDING_APPROVAL_MAPPING).toString(), PendingApprovalMapping.class);
@@ -261,33 +257,33 @@ public class PatientRepositoryIT {
     }
 
     @Test
-    public void shouldFindAllPendingApprovalMappingsInDescendingOrderOfCreationTime() throws Exception {
+    public void shouldFindAllPendingApprovalMappingsInAscendingOrderOfLastUpdated() throws Exception {
         cassandraOperations.insert(asList(buildPendingApprovalMapping("31", "h101"),
                 buildPendingApprovalMapping("30", "h102"),
                 buildPendingApprovalMapping("30", "h103"),
                 buildPendingApprovalMapping("32", "h104"),
                 buildPendingApprovalMapping("30", "h105")));
 
-        List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(new Catchment("10", "20", "30"), null, 25);
+        List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(new Catchment("10", "20", "30"), null, null, 25);
         assertEquals(3, mappings.size());
         PendingApprovalMapping mapping1 = mappings.get(0);
         PendingApprovalMapping mapping2 = mappings.get(1);
         PendingApprovalMapping mapping3 = mappings.get(2);
 
-        assertEquals("h105", mapping1.getHealthId());
+        assertEquals("h102", mapping1.getHealthId());
         assertEquals("h103", mapping2.getHealthId());
-        assertEquals("h102", mapping3.getHealthId());
+        assertEquals("h105", mapping3.getHealthId());
 
-        Date date1 = new Date(UUIDs.unixTimestamp(mapping1.getCreatedAt()));
-        Date date2 = new Date(UUIDs.unixTimestamp(mapping2.getCreatedAt()));
-        Date date3 = new Date(UUIDs.unixTimestamp(mapping3.getCreatedAt()));
+        Date date1 = new Date(UUIDs.unixTimestamp(mapping1.getLastUpdated()));
+        Date date2 = new Date(UUIDs.unixTimestamp(mapping2.getLastUpdated()));
+        Date date3 = new Date(UUIDs.unixTimestamp(mapping3.getLastUpdated()));
 
-        assertTrue(date1.after(date2));
-        assertTrue(date2.after(date3));
+        assertTrue(date1.before(date2));
+        assertTrue(date2.before(date3));
     }
 
     @Test
-    public void shouldFindPendingApprovalMappingsSinceGivenTime() throws Exception {
+    public void shouldFindPendingApprovalMappingsAfterGivenTime() throws Exception {
         List<PendingApprovalMapping> entities = asList(buildPendingApprovalMapping("30", "h101"),
                 buildPendingApprovalMapping("30", "h102"),
                 buildPendingApprovalMapping("30", "h103"),
@@ -295,13 +291,47 @@ public class PatientRepositoryIT {
                 buildPendingApprovalMapping("30", "h105"));
         cassandraOperations.insert(entities);
 
-        List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(
-                new Catchment("10", "20", "30"), entities.get(4).getCreatedAt(), 25);
-        assertEquals(4, mappings.size());
-        assertEquals("h104", mappings.get(0).getHealthId());
+        UUID after = entities.get(1).getLastUpdated();
+        List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(new Catchment("10", "20", "30"), after, null, 25);
+        assertEquals(3, mappings.size());
+        assertEquals("h103", mappings.get(0).getHealthId());
+        assertEquals("h104", mappings.get(1).getHealthId());
+        assertEquals("h105", mappings.get(2).getHealthId());
+    }
+
+    @Test
+    public void shouldFindPendingApprovalMappingsBeforeGivenTime() throws Exception {
+        List<PendingApprovalMapping> entities = asList(buildPendingApprovalMapping("30", "h101"),
+                buildPendingApprovalMapping("30", "h102"),
+                buildPendingApprovalMapping("30", "h103"),
+                buildPendingApprovalMapping("30", "h104"),
+                buildPendingApprovalMapping("30", "h105"));
+        cassandraOperations.insert(entities);
+
+        UUID before = entities.get(3).getLastUpdated();
+        List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(new Catchment("10", "20", "30"), null, before, 25);
+        assertEquals(3, mappings.size());
+        assertEquals("h101", mappings.get(0).getHealthId());
+        assertEquals("h102", mappings.get(1).getHealthId());
+        assertEquals("h103", mappings.get(2).getHealthId());
+    }
+
+    @Test
+    public void shouldFindPendingApprovalMappingsBetweenGivenTimes() throws Exception {
+        List<PendingApprovalMapping> entities = asList(buildPendingApprovalMapping("30", "h101"),
+                buildPendingApprovalMapping("30", "h102"),
+                buildPendingApprovalMapping("30", "h103"),
+                buildPendingApprovalMapping("30", "h104"),
+                buildPendingApprovalMapping("30", "h105"));
+        cassandraOperations.insert(entities);
+
+        UUID after = entities.get(0).getLastUpdated();
+        UUID before = entities.get(4).getLastUpdated();
+        List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(new Catchment("10", "20", "30"), after, before, 25);
+        assertEquals(3, mappings.size());
+        assertEquals("h102", mappings.get(0).getHealthId());
         assertEquals("h103", mappings.get(1).getHealthId());
-        assertEquals("h102", mappings.get(2).getHealthId());
-        assertEquals("h101", mappings.get(3).getHealthId());
+        assertEquals("h104", mappings.get(2).getHealthId());
     }
 
     @Test
@@ -312,9 +342,9 @@ public class PatientRepositoryIT {
                 buildPendingApprovalMapping("30", "h104"),
                 buildPendingApprovalMapping("30", "h105"));
         cassandraOperations.insert(entities);
-        List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(new Catchment("10", "20", "30"), null, 5);
+        List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(new Catchment("10", "20", "30"), null, null, 5);
         assertEquals(5, mappings.size());
-        mappings = patientRepository.findPendingApprovalMapping(new Catchment("10", "20", "30"), null, 3);
+        mappings = patientRepository.findPendingApprovalMapping(new Catchment("10", "20", "30"), null, null, 3);
         assertEquals(3, mappings.size());
     }
 
@@ -325,7 +355,7 @@ public class PatientRepositoryIT {
         mapping.setDivisionId("10");
         mapping.setDistrictId("20");
         mapping.setUpazilaId(upazilaId);
-        mapping.setCreatedAt(UUIDs.timeBased());
+        mapping.setLastUpdated(UUIDs.timeBased());
         return mapping;
     }
 
@@ -340,12 +370,14 @@ public class PatientRepositoryIT {
         Map<UUID, String> pendingApprovalsMap = patient.getPendingApprovals();
         assertNotNull(pendingApprovalsMap);
         assertEquals(1, pendingApprovalsMap.size());
+
         String pendingApprovalJson = pendingApprovalsMap.values().iterator().next();
-        Map pendingApprovalMap = new ObjectMapper().readValue(pendingApprovalJson.getBytes(), Map.class);
-        assertEquals("10000059", pendingApprovalMap.get(FACILITY_ID));
+        PendingApprovalRequest pendingApprovalRequest = new ObjectMapper().readValue(pendingApprovalJson.getBytes(), PendingApprovalRequest.class);
+        assertEquals("10000059", pendingApprovalRequest.getFacilityId());
+
         Map<String, String> expectedPendingApprovalFields = new HashMap<>();
         expectedPendingApprovalFields.put(JsonConstants.GENDER, "F");
-        assertEquals(expectedPendingApprovalFields, pendingApprovalMap.get(LAST_ITEM_ID));
+        assertEquals(expectedPendingApprovalFields, pendingApprovalRequest.getFields());
 
         List<PendingApprovalMapping> mappings = cassandraOperations.select(select().from(CF_PENDING_APPROVAL_MAPPING), PendingApprovalMapping.class);
         assertEquals(1, mappings.size());
@@ -354,7 +386,7 @@ public class PatientRepositoryIT {
         assertEquals(data.getAddress().getDivisionId(), mapping.getDivisionId());
         assertEquals(data.getAddress().getDistrictId(), mapping.getDistrictId());
         assertEquals(data.getAddress().getUpazilaId(), mapping.getUpazilaId());
-        assertEquals(pendingApprovalsMap.keySet().iterator().next(), mapping.getCreatedAt());
+        assertEquals(pendingApprovalsMap.keySet().iterator().next(), mapping.getLastUpdated());
     }
 
     @Test
@@ -381,7 +413,7 @@ public class PatientRepositoryIT {
         assertEquals(data.getAddress().getDistrictId(), mapping.getDistrictId());
         assertEquals(data.getAddress().getUpazilaId(), mapping.getUpazilaId());
         UUID latestUuid = patientRepository.findLatestUuid(pendingApprovalsMap);
-        assertEquals(latestUuid, mapping.getCreatedAt());
+        assertEquals(latestUuid, mapping.getLastUpdated());
     }
 
     @After

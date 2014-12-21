@@ -39,7 +39,7 @@ public class SettingRepository extends BaseRepository {
 
         select.where(QueryBuilder.eq("key", key));
 
-        cassandraOperations.queryAsynchronously(select, new AsynchronousQueryListener() {
+        cassandraOps.queryAsynchronously(select, new AsynchronousQueryListener() {
             @Override
             public void onQueryComplete(ResultSetFuture rsf) {
                 try {
@@ -78,7 +78,7 @@ public class SettingRepository extends BaseRepository {
 
     @CacheEvict("mciSettings")
     public void save(Setting setting) {
-        cassandraOperations.insert(setting);
+        cassandraOps.insert(setting);
     }
 
     @Cacheable({"mciSettings"})

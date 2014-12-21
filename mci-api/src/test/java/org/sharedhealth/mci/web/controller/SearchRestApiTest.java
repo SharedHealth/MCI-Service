@@ -12,6 +12,7 @@ import org.sharedhealth.mci.web.config.WebMvcConfig;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientData;
+import org.sharedhealth.mci.web.mapper.PatientSummaryData;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
 import org.sharedhealth.mci.web.service.LocationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +23,9 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-
 import static org.sharedhealth.mci.utils.FileUtil.asString;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -112,7 +112,7 @@ public class SearchRestApiTest extends BaseControllerTest {
     public void shouldReturnPatientIfGivenNameAndAddressMatchWithAnyPatient() throws Exception {
         String json = asString("jsons/patient/full_payload.json");
 
-        PatientData original = getPatientObjectFromString(json);
+        PatientSummaryData original = getPatientSummaryObjectFromString(json);
 
         MvcResult result = createPatient(json);
         String present_address = original.getAddress().getDivisionId() +
@@ -123,9 +123,10 @@ public class SearchRestApiTest extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
         final MCIMultiResponse body = getMciMultiResponse(searchResult);
-        PatientData patient = getPatientObjectFromString(mapper.writeValueAsString(body.getResults().get(0)));
+        PatientSummaryData patient = getPatientSummaryObjectFromString(mapper.writeValueAsString(body.getResults().iterator().next()));
 
-        assertPatientEquals(original, patient);
+        original.setHealthId(patient.getHealthId());
+        Assert.assertEquals(original, patient);
     }
 
     @Test
@@ -133,7 +134,7 @@ public class SearchRestApiTest extends BaseControllerTest {
 
         String json = asString("jsons/patient/full_payload.json");
 
-        PatientData original = getPatientObjectFromString(json);
+        PatientSummaryData original = getPatientSummaryObjectFromString(json);
 
         MvcResult result = createPatient(json);
         String present_address = original.getAddress().getDivisionId() +
@@ -145,9 +146,10 @@ public class SearchRestApiTest extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
         final MCIMultiResponse body = getMciMultiResponse(searchResult);
-        PatientData patient = getPatientObjectFromString(mapper.writeValueAsString(body.getResults().get(0)));
 
-        assertPatientEquals(original, patient);
+        PatientSummaryData patient = getPatientSummaryObjectFromString(mapper.writeValueAsString(body.getResults().iterator().next()));
+
+        original.setHealthId(patient.getHealthId());
     }
 
     @Test
@@ -220,7 +222,7 @@ public class SearchRestApiTest extends BaseControllerTest {
                 .andReturn();
 
         final MCIMultiResponse body = getMciMultiResponse(result);
-        PatientData patientData1 = (PatientData) body.getResults().get(0);
+        PatientSummaryData patientData1 = (PatientSummaryData) body.getResults().iterator().next();
         Assert.assertEquals("1716528608", patientData1.getPhoneNumber().getNumber());
         Assert.assertEquals(200, body.getHttpStatus());
     }
