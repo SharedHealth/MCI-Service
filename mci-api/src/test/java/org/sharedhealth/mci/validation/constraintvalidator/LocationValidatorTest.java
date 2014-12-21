@@ -41,7 +41,6 @@ public class LocationValidatorTest {
         address.setUpazilaId("09");
         address.setCityCorporationId("20");
         address.setUnionOrUrbanWardId("01");
-        address.setRuralWardId("01");
         address.setCountryCode("050");
     }
 
@@ -66,9 +65,6 @@ public class LocationValidatorTest {
 
     @Test
     public void shouldFailForInvalidAddressHierarchy() throws Exception {
-        address.setUnionOrUrbanWardId(null);
-        assertInvalidAddressValue();
-
         initAddressObject();
         address.setCityCorporationId(null);
         assertInvalidAddressValue();
