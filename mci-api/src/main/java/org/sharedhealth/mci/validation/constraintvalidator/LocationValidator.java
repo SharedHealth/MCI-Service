@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.validation.constraints.Location;
 import org.sharedhealth.mci.web.mapper.Address;
+import org.sharedhealth.mci.web.mapper.LocationData;
 import org.sharedhealth.mci.web.service.LocationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,7 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
 
     @Override
     public void initialize(Location constraintAnnotation) {
-            this.countryCode = constraintAnnotation.country_code();
+        this.countryCode = constraintAnnotation.country_code();
     }
 
     @Override
@@ -51,7 +52,7 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
             return true;
         }
 
-        if(StringUtils.isNotEmpty(this.countryCode) && value.getCountryCode() != null && !value.getCountryCode().equals(this.countryCode)) {
+        if (StringUtils.isNotEmpty(this.countryCode) && value.getCountryCode() != null && !value.getCountryCode().equals(this.countryCode)) {
             isValid = false;
         }
 
@@ -60,13 +61,13 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
         isValid = isValid && isValidPostCode(value.getPostCode(), context);
 
 
-        if(isInvalidHierarchy(value)){
+        if (isInvalidHierarchy(value)) {
             isValid = false;
         }
 
         isValid = isValid && isExistInLocationRegistry(geoCode);
 
-        if(!isValid) {
+        if (!isValid) {
             addConstraintViolation(context, context.getDefaultConstraintMessageTemplate());
         }
 
@@ -76,7 +77,7 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
 
     private boolean isValidPostCode(String postCode, ConstraintValidatorContext context) {
 
-        if(isInvalidPostCodePattern(postCode)) {
+        if (isInvalidPostCodePattern(postCode)) {
             addConstraintViolation(context, ERROR_CODE_PATTERN, "postCode");
             return false;
         }
@@ -123,22 +124,10 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
     private boolean isExistInLocationRegistry(String geoCode) {
         logger.debug("Validation testing for code : [" + geoCode + "]");
 
-        //@TODO Use value.getGeoCode() when the rural_Ward_id data populated
-        String geoCodeTill5ThLevel = geoCode;
+        LocationData location = locationService.findByGeoCode(geoCode);
 
-        if(geoCodeTill5ThLevel.length() > 10) {
-            geoCodeTill5ThLevel = geoCode.substring(0, 10);
-        }
-
-        try {
-            org.sharedhealth.mci.web.mapper.Location location = locationService.findByGeoCode(geoCodeTill5ThLevel).get();
-
-            if (!StringUtils.isBlank(location.getGeoCode())) {
-                return true;
-            }
-
-        } catch (Exception e) {
-            logger.debug("Validation error for : [" + geoCodeTill5ThLevel + "]");
+        if (location != null) {
+            return true;
         }
 
         return false;

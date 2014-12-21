@@ -74,7 +74,7 @@ public class PatientControllerIT extends BaseControllerTest {
         presentAddress.setUpazilaId("09");
         presentAddress.setCityCorporationId("20");
         presentAddress.setUnionOrUrbanWardId("01");
-        presentAddress.setRuralWardId("01");
+        presentAddress.setRuralWardId(null);
         presentAddress.setVillage("10");
         presentAddress.setCountryCode("050");
 

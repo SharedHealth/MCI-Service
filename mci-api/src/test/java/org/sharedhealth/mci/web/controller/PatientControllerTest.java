@@ -18,7 +18,6 @@ import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.service.LocationService;
 import org.sharedhealth.mci.web.service.PatientService;
 import org.sharedhealth.mci.web.service.SettingService;
-import org.sharedhealth.mci.web.utils.concurrent.PreResolvedListenableFuture;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
@@ -67,7 +66,7 @@ public class PatientControllerTest {
 
     private PatientController controller;
     private PatientData patient2;
-    private Location location;
+    private LocationData location;
     private MockMvc mockMvc;
     private String nationalId = "1234567890123";
     private String birthRegistrationNumber = "12345678901234567";
@@ -110,14 +109,14 @@ public class PatientControllerTest {
 
         patient1.setAddress(address);
 
-        location = new Location();
+        location = new LocationData();
 
         location.setGeoCode(GEO_CODE);
         location.setDivisionId("10");
         location.setDistrictId("04");
         location.setUpazilaId("09");
-        location.setPaurashavaId("20");
-        location.setUnionId("01");
+        location.setCityCorporationId("20");
+        location.setUnionOrUrbanWardId("01");
 
         searchQuery = new SearchQuery();
         stringBuilder = new StringBuilder(200);
@@ -132,7 +131,7 @@ public class PatientControllerTest {
         String json = new ObjectMapper().writeValueAsString(patient2);
         String healthId = "healthId-100";
         MCIResponse mciResponse = new MCIResponse(healthId, CREATED);
-        when(locationService.findByGeoCode(GEO_CODE)).thenReturn(new PreResolvedListenableFuture<>(location));
+        when(locationService.findByGeoCode(GEO_CODE)).thenReturn(location);
         when(patientService.create(patient2)).thenReturn(mciResponse);
 
         mockMvc.perform(post(API_END_POINT).content(json).contentType(APPLICATION_JSON))
@@ -245,7 +244,7 @@ public class PatientControllerTest {
         String json = new ObjectMapper().writeValueAsString(patient2);
         String healthId = "healthId-100";
         MCIResponse mciResponse = new MCIResponse(healthId, ACCEPTED);
-        when(locationService.findByGeoCode(GEO_CODE)).thenReturn(new PreResolvedListenableFuture<>(location));
+        when(locationService.findByGeoCode(GEO_CODE)).thenReturn(location);
         when(patientService.update(patient2, healthId)).thenReturn(mciResponse);
 
         mockMvc.perform(put(PUT_API_END_POINT, healthId).content(json).contentType(APPLICATION_JSON))
@@ -354,14 +353,14 @@ public class PatientControllerTest {
 
         patient2.setAddress(address);
 
-        location = new Location();
+        location = new LocationData();
 
         location.setGeoCode(GEO_CODE);
         location.setDivisionId("10");
         location.setDistrictId("04");
         location.setUpazilaId("09");
-        location.setPaurashavaId("20");
-        location.setUnionId("01");
+        location.setCityCorporationId("20");
+        location.setUnionOrUrbanWardId("01");
         return patient2;
     }
 

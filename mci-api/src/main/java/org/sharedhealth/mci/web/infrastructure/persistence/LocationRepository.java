@@ -1,81 +1,63 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-
-import com.datastax.driver.core.ResultSetFuture;
-import com.datastax.driver.core.Row;
-import com.google.common.util.concurrent.SettableFuture;
-import org.sharedhealth.mci.web.mapper.Location;
-import org.sharedhealth.mci.web.utils.concurrent.SimpleListenableFuture;
+import com.datastax.driver.core.querybuilder.QueryBuilder;
+import com.datastax.driver.core.querybuilder.Select;
+import org.sharedhealth.mci.web.mapper.LocationCriteria;
+import org.sharedhealth.mci.web.mapper.LocationData;
+import org.sharedhealth.mci.web.mapper.LocationMapper;
+import org.sharedhealth.mci.web.model.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cassandra.core.AsynchronousQueryListener;
 import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.stereotype.Component;
-import org.springframework.util.concurrent.ListenableFuture;
+
+import java.util.List;
+
+import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
 
 @Component
 public class LocationRepository extends BaseRepository {
 
     private static final Logger logger = LoggerFactory.getLogger(LocationRepository.class);
-    public static final String LOCATION_FIND_BY_GEO_CODE_QUERY = "SELECT * FROM locations WHERE geo_code = '%s'";
+    public static final String DEFAULT_PARENT_CODE_FOR_DIVISION = "00";
+    private LocationMapper mapper;
 
     @Autowired
-    public LocationRepository(@Qualifier("MCICassandraTemplate") CassandraOperations cassandraOperations) {
+    public LocationRepository(@Qualifier("MCICassandraTemplate") CassandraOperations cassandraOperations, LocationMapper mapper) {
         super(cassandraOperations);
+        this.mapper = mapper;
     }
 
-    public ListenableFuture<Location> findByGeoCode(final String geoCode) {
-        String cql = String.format(LOCATION_FIND_BY_GEO_CODE_QUERY, geoCode);
-        logger.debug("Find location by geo_code CQL: [" + cql + "]");
-        final SettableFuture<Location> result = SettableFuture.create();
+    public LocationData findByGeoCode(final String geoCode) {
 
-        cassandraOps.queryAsynchronously(cql, new AsynchronousQueryListener() {
-            @Override
-            public void onQueryComplete(ResultSetFuture rsf) {
-                try {
-                    Row row = rsf.get(TIMEOUT_IN_MILLIS, TimeUnit.MILLISECONDS).one();
-                    setLocationOnResult(row, result);
-                } catch (Exception e) {
-                    logger.error("Error while finding locaiton by geo_code: " + geoCode, e);
-                    result.setException(e);
-                }
-            }
-        });
+        String code = geoCode.substring(geoCode.length() - 2, geoCode.length());
+        String parent = geoCode.substring(0, geoCode.length() - 2);
 
-        return new SimpleListenableFuture<Location, Location>(result) {
-            @Override
-            protected Location adapt(Location adapteeResult) throws ExecutionException {
-                return adapteeResult;
-            }
-        };
+        Select select = select().from("locations");
+        select.where(QueryBuilder.eq("parent", parent));
+        select.where(QueryBuilder.eq("code", code));
+
+        Location location = cassandraOperations.selectOne(select, Location.class);
+        if (location != null) {
+            return mapper.map(location);
+        }
+
+        return null;
     }
 
-    private void setLocationOnResult(Row r, SettableFuture<Location> result) throws InterruptedException, ExecutionException {
-        Location location = getLocationFromRow(r);
-        result.set(location);
-    }
+    public List<LocationData> findLocationsByParent(LocationCriteria locationCriteria) {
+        String parent = locationCriteria.getParent();
+        if (locationCriteria.isEmpty()) {
+            parent = DEFAULT_PARENT_CODE_FOR_DIVISION;
+        }
 
-    private Location getLocationFromRow(Row r) {
-        DatabaseRow row = new DatabaseRow(r);
+        Select select = select().from("locations");
+        select.where(QueryBuilder.eq("parent", parent));
 
-        Location location = new Location();
+        List<Location> locations = cassandraOperations.select(select, Location.class);
+        return mapper.map(locations);
 
-        location.setGeoCode(row.getString("geo_code"));
-        location.setDivisionId(row.getString("division_id"));
-        location.setDivisionName(row.getString("division_name"));
-        location.setDistrictId(row.getString("district_id"));
-        location.setDistrictName(row.getString("district_name"));
-        location.setUpazilaId(row.getString("upazilla_id"));
-        location.setUpazilaName(row.getString("upazilla_name"));
-        location.setPaurashavaId(row.getString("pourashava_id"));
-        location.setPaurashavaName(row.getString("pourashava_name"));
-        location.setUnionId(row.getString("union_id"));
-        location.setUnionName(row.getString("union_name"));
-
-        return location;
     }
 }

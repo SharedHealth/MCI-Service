@@ -2,7 +2,7 @@ package org.sharedhealth.mci.web.handler;
 
 import org.junit.Test;
 import org.sharedhealth.mci.web.mapper.Address;
-import org.sharedhealth.mci.web.mapper.Location;
+import org.sharedhealth.mci.web.mapper.LocationData;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.model.PendingApprovalRequest;
 
@@ -100,15 +100,14 @@ public class PatientFilterTest {
 
         patient.setPermanentAddress(presentAdress);
 
-        Location location = new Location();
-        location = new Location();
+        LocationData location = new LocationData();
 
         location.setGeoCode("1004092001");
         location.setDivisionId("10");
         location.setDistrictId("04");
         location.setUpazilaId("09");
-        location.setPaurashavaId("20");
-        location.setUnionId("01");
+        location.setCityCorporationId("20");
+        location.setUnionOrUrbanWardId("01");
         return patient;
     }
 

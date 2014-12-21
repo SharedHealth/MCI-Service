@@ -2,10 +2,12 @@ package org.sharedhealth.mci.web.service;
 
 
 import org.sharedhealth.mci.web.infrastructure.persistence.LocationRepository;
-import org.sharedhealth.mci.web.mapper.Location;
+import org.sharedhealth.mci.web.mapper.LocationData;
+import org.sharedhealth.mci.web.mapper.LocationCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.concurrent.ListenableFuture;
+
+import java.util.List;
 
 @Component
 public class LocationService {
@@ -17,7 +19,11 @@ public class LocationService {
         this.locationRepository = locationRepository;
     }
 
-    public ListenableFuture<Location> findByGeoCode(String geoCode) {
+    public LocationData findByGeoCode(String geoCode) {
         return locationRepository.findByGeoCode(geoCode);
+    }
+
+    public List<LocationData> findLocationsByParent(LocationCriteria locationCriteria) {
+        return locationRepository.findLocationsByParent(locationCriteria);
     }
 }
