@@ -1,9 +1,6 @@
 package org.sharedhealth.mci.web.controller;
 
 
-import java.text.ParseException;
-import java.util.*;
-
 import com.datastax.driver.core.utils.UUIDs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
@@ -25,22 +22,22 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
+import java.text.ParseException;
+import java.util.*;
+
+import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
-import static org.springframework.http.HttpStatus.ACCEPTED;
+import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PatientControllerTest {
@@ -487,10 +484,11 @@ public class PatientControllerTest {
         details.setCurrentValue("curr val");
 
         TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap = new TreeMap<>();
+        UUID timeuuid = UUIDs.timeBased();
         PendingApprovalFieldDetails approvalFieldDetails = new PendingApprovalFieldDetails();
         approvalFieldDetails.setFacilityId("facility-100");
         approvalFieldDetails.setValue("some value");
-        UUID timeuuid = UUIDs.timeBased();
+        approvalFieldDetails.setCreatedAt(unixTimestamp(timeuuid));
         fieldDetailsMap.put(timeuuid, approvalFieldDetails);
         details.setFieldDetails(fieldDetailsMap);
 
@@ -507,7 +505,8 @@ public class PatientControllerTest {
                 .andExpect(jsonPath("$.results[0].field_name", is("x_y_z")))
                 .andExpect(jsonPath("$.results[0].current_value", is("curr val")))
                 .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".facility_id", is("facility-100")))
-                .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".value", is("some value")));
+                .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".value", is("some value")))
+                .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".created_at", is(toIsoFormat(unixTimestamp(timeuuid)))));
 
         verify(patientService).findPendingApprovalDetails(healthId);
     }

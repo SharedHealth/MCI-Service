@@ -1,7 +1,6 @@
 package org.sharedhealth.mci.web.mapper;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.Comparator;
 import java.util.TreeMap;
@@ -67,11 +66,6 @@ public class PendingApprovalDetails implements Comparable<PendingApprovalDetails
     @Override
     public int hashCode() {
         return name.hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this);
     }
 
     @Override

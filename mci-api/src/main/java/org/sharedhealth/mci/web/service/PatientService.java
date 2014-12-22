@@ -1,8 +1,6 @@
 package org.sharedhealth.mci.web.service;
 
 
-import java.util.*;
-
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
@@ -16,6 +14,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.FieldError;
 
+import java.util.*;
+
+import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
@@ -169,7 +170,9 @@ public class PatientService {
                     PendingApprovalFieldDetails fieldDetails = new PendingApprovalFieldDetails();
                     fieldDetails.setFacilityId(request.getFacilityId());
                     fieldDetails.setValue(getPendingApprovalFieldDetailsValue(requestFieldsMap, fieldName));
-                    fieldDetailsMap.put(requestMapEntrySet.getKey(), fieldDetails);
+                    UUID timeuuid = requestMapEntrySet.getKey();
+                    fieldDetails.setCreatedAt(unixTimestamp(timeuuid));
+                    fieldDetailsMap.put(timeuuid, fieldDetails);
 
                     details.setFieldDetails(fieldDetailsMap);
                     this.updateDetailsSet(detailsSet, details);

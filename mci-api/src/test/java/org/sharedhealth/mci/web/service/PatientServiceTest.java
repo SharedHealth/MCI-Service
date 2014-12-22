@@ -13,6 +13,7 @@ import org.sharedhealth.mci.web.model.PendingApprovalRequest;
 
 import java.util.*;
 
+import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
 import static org.junit.Assert.*;
@@ -237,16 +238,19 @@ public class PatientServiceTest {
         PendingApprovalFieldDetails details1 = new PendingApprovalFieldDetails();
         details1.setFacilityId("facility-1");
         details1.setValue("A." + name);
+        details1.setCreatedAt(unixTimestamp(uuids.get(0)));
         detailsMap.put(uuids.get(0), details1);
 
         PendingApprovalFieldDetails details2 = new PendingApprovalFieldDetails();
         details2.setFacilityId("facility-2");
         details2.setValue("B." + name);
+        details2.setCreatedAt(unixTimestamp(uuids.get(1)));
         detailsMap.put(uuids.get(1), details2);
 
         PendingApprovalFieldDetails details3 = new PendingApprovalFieldDetails();
         details3.setFacilityId("facility-3");
         details3.setValue("C." + name);
+        details3.setCreatedAt(unixTimestamp(uuids.get(2)));
         detailsMap.put(uuids.get(2), details3);
 
         fieldDetails.setFieldDetails(detailsMap);
@@ -262,6 +266,7 @@ public class PatientServiceTest {
         PendingApprovalFieldDetails details = new PendingApprovalFieldDetails();
         details.setFacilityId(facilityId);
         details.setValue(value);
+        details.setCreatedAt(unixTimestamp(uuid));
         detailsMap.put(uuid, details);
 
         fieldDetails.setFieldDetails(detailsMap);

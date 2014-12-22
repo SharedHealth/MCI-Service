@@ -49,6 +49,7 @@ public class JsonConstants {
     public static final String BEFORE = "before";
     public static final String FACILITY_ID = "facility_id";
     public static final String FIELDS = "fields";
+    public static final String CREATED_AT = "created_at";
     public static final String LAST_UPDATED = "last_updated";
     public static final String FIELD_NAME = "field_name";
     public static final String CURRENT_VALUE = "current_value";
