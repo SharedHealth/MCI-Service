@@ -13,6 +13,7 @@ import org.springframework.validation.FieldError;
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang.time.DateFormatUtils.ISO_DATE_FORMAT;
+import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Component
@@ -181,57 +182,73 @@ public class PatientMapper {
         patient.setMaritalStatus(data.getMaritalStatus());
 
         if (address != null) {
-            patient.setAddressLine(address.getAddressLine());
-            patient.setDivisionId(address.getDivisionId());
-            patient.setDistrictId(address.getDistrictId());
-            patient.setUpazilaId(address.getUpazilaId());
-            patient.setUnionOrUrbanWardId(address.getUnionOrUrbanWardId());
-            patient.setHoldingNumber(StringUtils.trim(address.getHoldingNumber()));
-            patient.setStreet(StringUtils.trim(address.getStreet()));
-            patient.setAreaMouja(StringUtils.trim(address.getAreaMouja()));
-            patient.setVillage(StringUtils.trim(address.getVillage()));
-            patient.setPostOffice(StringUtils.trim(address.getPostOffice()));
-            patient.setPostCode(address.getPostCode());
-            patient.setRuralWardId(address.getRuralWardId());
-            patient.setCityCorporationId(address.getCityCorporationId());
-            patient.setCountryCode(address.getCountryCode());
+            mapAddress(patient, address);
         }
 
         if (permanentAddress != null) {
-            patient.setPermanentAddressLine(permanentAddress.getAddressLine());
-            patient.setPermanentDivisionId(permanentAddress.getDivisionId());
-            patient.setPermanentDistrictId(permanentAddress.getDistrictId());
-            patient.setPermanentUpazilaId(permanentAddress.getUpazilaId());
-            patient.setPermanentUnionOrUrbanWardId(permanentAddress.getUnionOrUrbanWardId());
-            patient.setPermanentHoldingNumber(StringUtils.trim(permanentAddress.getHoldingNumber()));
-            patient.setPermanentStreet(StringUtils.trim(permanentAddress.getStreet()));
-            patient.setPermanentAreaMouja(StringUtils.trim(permanentAddress.getAreaMouja()));
-            patient.setPermanentVillage(StringUtils.trim(permanentAddress.getVillage()));
-            patient.setPermanentPostOffice(StringUtils.trim(permanentAddress.getPostOffice()));
-            patient.setPermanentPostCode(permanentAddress.getPostCode());
-            patient.setPermanentRuralWardId(permanentAddress.getRuralWardId());
-            patient.setPermanentCityCorporationId(permanentAddress.getCityCorporationId());
-            patient.setPermanentCountryCode(permanentAddress.getCountryCode());
+            mapPermanentAddress(patient, permanentAddress);
         }
 
         if (phoneNumber != null) {
-            patient.setCellNo(phoneNumber.getNumber());
-            patient.setPhoneNumberAreaCode(phoneNumber.getAreaCode());
-            patient.setPhoneNumberCountryCode(phoneNumber.getCountryCode());
-            patient.setPhoneNumberExtension(phoneNumber.getExtension());
+            mapPhoneNumber(patient, phoneNumber);
         }
 
         if (primaryContactNumber != null) {
-            patient.setPrimaryCellNo(primaryContactNumber.getNumber());
-            patient.setPrimaryContactNumberAreaCode(primaryContactNumber.getAreaCode());
-            patient.setPrimaryContactNumberCountryCode(primaryContactNumber.getCountryCode());
-            patient.setPrimaryContactNumberExtension(primaryContactNumber.getExtension());
+            mapPrimaryContactNumber(patient, primaryContactNumber);
         }
 
         patient.setPrimaryContact(StringUtils.trim(data.getPrimaryContact()));
         patient.setPendingApprovals(existing.getPendingApprovals());
 
         return patient;
+    }
+
+    private void mapPrimaryContactNumber(Patient patient, PhoneNumber primaryContactNumber) {
+        patient.setPrimaryCellNo(primaryContactNumber.getNumber());
+        patient.setPrimaryContactNumberAreaCode(defaultString(primaryContactNumber.getAreaCode()));
+        patient.setPrimaryContactNumberCountryCode(defaultString(primaryContactNumber.getCountryCode()));
+        patient.setPrimaryContactNumberExtension(defaultString(primaryContactNumber.getExtension()));
+    }
+
+    private void mapPhoneNumber(Patient patient, PhoneNumber phoneNumber) {
+        patient.setCellNo(phoneNumber.getNumber());
+        patient.setPhoneNumberAreaCode(defaultString(phoneNumber.getAreaCode()));
+        patient.setPhoneNumberCountryCode(defaultString(phoneNumber.getCountryCode()));
+        patient.setPhoneNumberExtension(defaultString(phoneNumber.getExtension()));
+    }
+
+    private void mapPermanentAddress(Patient patient, Address permanentAddress) {
+        patient.setPermanentAddressLine(permanentAddress.getAddressLine());
+        patient.setPermanentDivisionId(permanentAddress.getDivisionId());
+        patient.setPermanentDistrictId(permanentAddress.getDistrictId());
+        patient.setPermanentUpazilaId(permanentAddress.getUpazilaId());
+        patient.setPermanentUnionOrUrbanWardId(defaultString(permanentAddress.getUnionOrUrbanWardId()));
+        patient.setPermanentHoldingNumber(defaultString(StringUtils.trim(permanentAddress.getHoldingNumber())));
+        patient.setPermanentStreet(defaultString(StringUtils.trim(permanentAddress.getStreet())));
+        patient.setPermanentAreaMouja(defaultString(StringUtils.trim(permanentAddress.getAreaMouja())));
+        patient.setPermanentVillage(defaultString(StringUtils.trim(permanentAddress.getVillage())));
+        patient.setPermanentPostOffice(defaultString(StringUtils.trim(permanentAddress.getPostOffice())));
+        patient.setPermanentPostCode(defaultString(permanentAddress.getPostCode()));
+        patient.setPermanentRuralWardId(defaultString(permanentAddress.getRuralWardId()));
+        patient.setPermanentCityCorporationId(defaultString(permanentAddress.getCityCorporationId()));
+        patient.setPermanentCountryCode(defaultString(permanentAddress.getCountryCode()));
+    }
+
+    private void mapAddress(Patient patient, Address address) {
+        patient.setAddressLine(address.getAddressLine());
+        patient.setDivisionId(address.getDivisionId());
+        patient.setDistrictId(address.getDistrictId());
+        patient.setUpazilaId(address.getUpazilaId());
+        patient.setUnionOrUrbanWardId(defaultString(address.getUnionOrUrbanWardId()));
+        patient.setHoldingNumber(defaultString(StringUtils.trim(address.getHoldingNumber())));
+        patient.setStreet(defaultString(StringUtils.trim(address.getStreet())));
+        patient.setAreaMouja(defaultString(StringUtils.trim(address.getAreaMouja())));
+        patient.setVillage(defaultString(StringUtils.trim(address.getVillage())));
+        patient.setPostOffice(defaultString(StringUtils.trim(address.getPostOffice())));
+        patient.setPostCode(defaultString(address.getPostCode()));
+        patient.setRuralWardId(defaultString(address.getRuralWardId()));
+        patient.setCityCorporationId(defaultString(address.getCityCorporationId()));
+        patient.setCountryCode(defaultString(address.getCountryCode()));
     }
 
     public PatientSummaryData map(PatientData patient) {

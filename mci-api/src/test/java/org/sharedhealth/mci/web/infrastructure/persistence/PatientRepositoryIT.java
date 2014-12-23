@@ -95,6 +95,23 @@ public class PatientRepositoryIT {
         data.setHealthId(mciResponse.id);
         data.setCreatedAt(p.getCreatedAt());
         data.setUpdatedAt(p.getUpdatedAt());
+
+        Address address = p.getAddress();
+        address.setRuralWardId(null);
+        address.setHoldingNumber(null);
+        address.setStreet(null);
+        address.setVillage(null);
+        address.setPostCode(null);
+        address.setPostOffice(null);
+        address.setAreaMouja(null);
+        p.setAddress(address);
+
+        PhoneNumber phoneNumber = p.getPhoneNumber();
+        phoneNumber.setAreaCode(null);
+        phoneNumber.setExtension(null);
+        phoneNumber.setCountryCode(null);
+        p.setPhoneNumber(phoneNumber);
+
         assertEquals(data, p);
     }
 
@@ -125,6 +142,16 @@ public class PatientRepositoryIT {
         MCIResponse mciResponseForUpdate = patientRepository.update(data, data.getHealthId());
         assertEquals(202, mciResponseForUpdate.getHttpStatus());
         PatientData savedPatient = patientRepository.findByHealthId(healthId);
+
+        Address address = savedPatient.getAddress();
+        address.setRuralWardId(null);
+        address.setHoldingNumber(null);
+        address.setStreet(null);
+        address.setVillage(null);
+        address.setPostCode(null);
+        address.setPostOffice(null);
+        address.setAreaMouja(null);
+        savedPatient.setAddress(address);
         assertPatient(savedPatient, data);
     }
 

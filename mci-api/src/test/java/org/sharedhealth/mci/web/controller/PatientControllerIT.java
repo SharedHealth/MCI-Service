@@ -363,7 +363,6 @@ public class PatientControllerIT extends BaseControllerTest {
 
     }
 
-    @Ignore
     @Test
     public void shouldRemoveAddressBlockOptionalFieldsIfNotGiven() throws Exception {
 
@@ -383,6 +382,29 @@ public class PatientControllerIT extends BaseControllerTest {
         PatientData patient = getPatientMapperObjectByHealthId(healthId);
 
         assertEquals(patientData1.getAddress(), patient.getAddress());
+
+    }
+
+    @Ignore
+    @Test
+    public void shouldRemovePhoneBlockOptionalFieldsIfNotGiven() throws Exception {
+
+        String fullPayloadJson = asString("jsons/patient/full_payload.json");
+
+        MvcResult createdResult = createPatient(fullPayloadJson);
+
+        final MCIResponse createdResponse = getMciResponse(createdResult);
+        String healthId = createdResponse.getId();
+        String phoneJson = asString("jsons/patient/payload_with_phone.json");
+        PatientData patientData1 = getPatientObjectFromString(phoneJson);
+
+        MvcResult updatedResult = mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(phoneJson).contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        PatientData patient = getPatientMapperObjectByHealthId(healthId);
+
+        assertEquals(patientData1.getPhoneNumber(), patient.getPhoneNumber());
 
     }
 
