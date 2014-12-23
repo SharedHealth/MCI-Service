@@ -61,5 +61,6 @@
         "post_code":"1213",
         "country_code":"050"
     },
-    "is_alive":"0"
+    "status":"deceased",
+    "date_of_death": "2014-01-01"
 }

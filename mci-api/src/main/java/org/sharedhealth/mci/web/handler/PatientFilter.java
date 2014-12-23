@@ -1,13 +1,13 @@
 package org.sharedhealth.mci.web.handler;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
 import org.sharedhealth.mci.web.model.PendingApprovalRequest;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
 
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
@@ -63,7 +63,8 @@ public class PatientFilter {
         patient.setPrimaryContact(toBeApproved(map, PRIMARY_CONTACT, existingPatient.getPrimaryContact(), patientToBeUpdated.getPrimaryContact()));
         patient.setMaritalStatus(toBeApproved(map, MARITAL_STATUS, existingPatient.getMaritalStatus(), patientToBeUpdated.getMaritalStatus()));
         patient.setFullName(toBeApproved(map, FULL_NAME, existingPatient.getFullName(), patientToBeUpdated.getFullName()));
-        patient.setIsAlive(toBeApproved(map, IS_ALIVE, existingPatient.getIsAlive(), patientToBeUpdated.getIsAlive()));
+        patient.setStatus(toBeApproved(map, PATIENT_STATUS, existingPatient.getStatus(), patientToBeUpdated.getStatus()));
+        patient.setDateOfDeath(toBeApproved(map, DATE_OF_DEATH, existingPatient.getDateOfDeath(), patientToBeUpdated.getDateOfDeath()));
         patient.setCreatedAt(toBeApproved(map, CREATED, existingPatient.getCreatedAt(), patientToBeUpdated.getCreatedAt()));
         patient.setUpdatedAt(toBeApproved(map, MODIFIED, existingPatient.getUpdatedAt(), patientToBeUpdated.getUpdatedAt()));
         patient.setPhoneNumber(toBeapprovedPhoneNumber(map, PHONE_NUMBER, existingPatient.getPhoneNumber(), patientToBeUpdated.getPhoneNumber()));

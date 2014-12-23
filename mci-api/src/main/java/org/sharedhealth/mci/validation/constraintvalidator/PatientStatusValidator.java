@@ -1,17 +1,16 @@
 package org.sharedhealth.mci.validation.constraintvalidator;
+
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import org.sharedhealth.mci.validation.constraints.MaritalRelation;
+import org.apache.commons.lang3.StringUtils;
+import org.sharedhealth.mci.validation.constraints.PatientStatus;
 import org.sharedhealth.mci.web.mapper.PatientData;
 
-public class MaritalRelationValidator implements ConstraintValidator<MaritalRelation, PatientData> {
-
-    private String field;
+public class PatientStatusValidator implements ConstraintValidator<PatientStatus, PatientData> {
 
     @Override
-    public void initialize(MaritalRelation constraintAnnotation) {
-        this.field = constraintAnnotation.field();
+    public void initialize(PatientStatus constraintAnnotation) {
     }
 
     @Override
@@ -19,20 +18,20 @@ public class MaritalRelationValidator implements ConstraintValidator<MaritalRela
 
         if (value == null) return true;
 
-        if (value.getRelationOfType("SPS") == null) return true;
+        if (StringUtils.isEmpty(value.getDateOfDeath())) return true;
 
-        if (isNotUnmarried(value.getMaritalStatus())) {
+        if (isDead(value.getStatus())) {
             return true;
         }
 
         context.disableDefaultConstraintViolation();
         context.buildConstraintViolationWithTemplate(context.getDefaultConstraintMessageTemplate())
-                .addPropertyNode(this.field)
+                .addPropertyNode("dateOfDeath")
                 .addConstraintViolation();
         return false;
     }
 
-    private boolean isNotUnmarried(String maritalStatus) {
-        return maritalStatus != null && !(maritalStatus.equals("1"));
+    private boolean isDead(String patientStatus) {
+        return patientStatus != null && patientStatus.equals("deceased");
     }
 }

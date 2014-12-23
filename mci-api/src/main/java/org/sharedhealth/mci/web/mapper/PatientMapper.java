@@ -66,6 +66,7 @@ public class PatientMapper {
 
         data.setGivenName(patient.getGivenName());
         data.setSurName(patient.getSurName());
+
         if (patient.getDateOfBirth() != null) {
             data.setDateOfBirth(ISO_DATE_FORMAT.format(patient.getDateOfBirth()));
         }
@@ -75,7 +76,12 @@ public class PatientMapper {
         data.setNationality(patient.getNationality());
         data.setDisability(patient.getDisability());
         data.setEthnicity(patient.getEthnicity());
-        data.setIsAlive(patient.getIsAlive());
+        data.setStatus(patient.getStatus());
+
+        if (patient.getDateOfDeath() != null) {
+            data.setDateOfDeath(ISO_DATE_FORMAT.format(patient.getDateOfDeath()));
+        }
+
         data.setMaritalStatus(patient.getMaritalStatus());
         data.setPrimaryContact(patient.getPrimaryContact());
 
@@ -178,7 +184,8 @@ public class PatientMapper {
         patient.setNationality(StringUtils.trim(data.getNationality()));
         patient.setDisability(data.getDisability());
         patient.setEthnicity(data.getEthnicity());
-        patient.setIsAlive(data.getIsAlive());
+        patient.setStatus(data.getStatus());
+        patient.setDateOfDeath(data.getDateOfDeath());
         patient.setMaritalStatus(data.getMaritalStatus());
 
         if (address != null) {

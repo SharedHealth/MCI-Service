@@ -217,8 +217,11 @@ public class Patient {
     @Column(FULL_NAME)
     private String fullName;
 
-    @Column(IS_ALIVE)
-    private String isAlive;
+    @Column(PATIENT_STATUS)
+    private String status;
+
+    @Column(DATE_OF_DEATH)
+    private Date dateOfDeath;
 
     @Column(PRIMARY_CONTACT)
     private String primaryContact;
@@ -534,12 +537,12 @@ public class Patient {
         this.fullName = fullName;
     }
 
-    public String getIsAlive() {
-        return isAlive;
+    public String getStatus() {
+        return status;
     }
 
-    public void setIsAlive(String isAlive) {
-        this.isAlive = isAlive;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public String getAddressLine() {
@@ -978,4 +981,17 @@ public class Patient {
         approvalList.put(key, json);
         this.setPendingApprovals(approvalList);
     }
+
+    public Date getDateOfDeath() {
+        return dateOfDeath;
+    }
+
+    public void setDateOfDeath(Date dateOfDeath) {
+        this.dateOfDeath = dateOfDeath;
+    }
+
+    public void setDateOfDeath(String dateOfDeath) {
+        this.dateOfDeath = string2Date(dateOfDeath, "yyyy-MM-dd");
+    }
+
 }

@@ -75,5 +75,6 @@
     "post_code":"1225",
     "country_code":"050"
   },
-  "is_alive":"1"
+  "status":"alive",
+  "date_of_death": null
 }

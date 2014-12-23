@@ -1,17 +1,19 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
+import java.util.UUID;
+
 import com.datastax.driver.core.querybuilder.*;
 import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.model.*;
 import org.springframework.data.cassandra.convert.CassandraConverter;
 
-import java.util.UUID;
-
 import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
 import static com.datastax.driver.core.querybuilder.Select.Where;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static org.springframework.data.cassandra.core.CassandraTemplate.*;
+import static org.springframework.data.cassandra.core.CassandraTemplate.createDeleteQuery;
+import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
+import static org.springframework.data.cassandra.core.CassandraTemplate.toUpdateQuery;
 
 public class PatientQueryBuilder {
 
@@ -87,7 +89,8 @@ public class PatientQueryBuilder {
     public static final String PERMANENT_CITY_CORPORATION = "permanent_city_corporation_id";
     public static final String PERMANENT_COUNTRY = "permanent_country_code";
     public static final String FULL_NAME = "full_name";
-    public static final String IS_ALIVE = "is_alive";
+    public static final String PATIENT_STATUS = "status";
+    public static final String DATE_OF_DEATH = "date_of_death";
     public static final String RELATIONS = "relations";
     public static final String PRIMARY_CONTACT = "primary_contact";
     public static final String PHONE_NO = "phone_no";

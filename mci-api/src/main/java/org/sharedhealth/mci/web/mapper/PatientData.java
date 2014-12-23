@@ -25,6 +25,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
 @MaritalRelation(message = "1005", field = "maritalStatus")
+@PatientStatus(message = "1005")
 @JsonIgnoreProperties({"created_at"})
 public class PatientData {
 
@@ -153,10 +154,15 @@ public class PatientData {
     @JsonInclude(NON_EMPTY)
     private String fullName;
 
-    @JsonProperty(IS_ALIVE)
+    @JsonProperty(PATIENT_STATUS)
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[0|1]{1}", message = "1004")
-    private String isAlive;
+    @Pattern(regexp = "^(alive|deceased|unknown)$", message = "1004")
+    private String status;
+
+    @JsonProperty(DATE_OF_DEATH)
+    @JsonInclude(NON_EMPTY)
+    @Date(format = "yyyy-MM-dd", message = "1002")
+    private String dateOfDeath;
 
     @JsonProperty(CREATED)
     @JsonInclude(NON_EMPTY)
@@ -330,12 +336,12 @@ public class PatientData {
         this.permanentAddress = permanentAddress;
     }
 
-    public String getIsAlive() {
-        return isAlive;
+    public String getStatus() {
+        return status;
     }
 
-    public void setIsAlive(String isAlive) {
-        this.isAlive = isAlive;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public List<Relation> getRelations() {
@@ -474,5 +480,13 @@ public class PatientData {
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
+    }
+
+    public String getDateOfDeath() {
+        return this.dateOfDeath;
+    }
+
+    public void setDateOfDeath(String dateOfDeath) {
+        this.dateOfDeath = dateOfDeath;
     }
 }

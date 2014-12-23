@@ -1,11 +1,11 @@
 package org.sharedhealth.mci.web.mapper;
 
+import javax.validation.ConstraintViolation;
+import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.sharedhealth.mci.validation.group.RequiredGroup;
-
-import javax.validation.ConstraintViolation;
-import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.sharedhealth.mci.web.utils.JsonConstants.GIVEN_NAME;
@@ -184,18 +184,23 @@ public class PatientDataTest extends ValidationAwareMapper {
     }
 
     @Test
-    public void shouldPassIfAliveIsValid() {
-        for (int i = 0; i < 2; i++) {
-            Set<ConstraintViolation<PatientData>> constraintViolations = validator.validateValue(PatientData.class, "isAlive", Integer.toString(i));
+    public void shouldPassIfPatientStatusIsValid() {
+
+        String[] validStatus = {"alive", "deceased", "unknown"};
+        for (String status : validStatus) {
+            Set<ConstraintViolation<PatientData>> constraintViolations = validator.validateValue(PatientData.class, "status", status);
             assertEquals(0, constraintViolations.size());
         }
     }
 
     @Test
-    public void shouldFailIfAliveIsInvalid() {
-        Set<ConstraintViolation<PatientData>> constraintViolations = validator.validateValue(PatientData.class, "isAlive", "3");
-        assertEquals(1, constraintViolations.size());
-        assertEquals("1004", constraintViolations.iterator().next().getMessage());
+    public void shouldFailIfPatientStatusIsInvalid() {
+        String[] inValidStatus = {"", "somevalue", "aalive", "alivea", "adeceased", "deceaseda", "aunknown", "unknowne"};
+        for (String status : inValidStatus) {
+            Set<ConstraintViolation<PatientData>> constraintViolations = validator.validateValue(PatientData.class, "status", status);
+            assertEquals(1, constraintViolations.size());
+            assertEquals("1004", constraintViolations.iterator().next().getMessage());
+        }
     }
 
     @Test
