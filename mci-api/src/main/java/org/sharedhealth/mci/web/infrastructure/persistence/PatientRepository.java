@@ -64,6 +64,10 @@ public class PatientRepository extends BaseRepository {
         patient.setCreatedAt(new Date());
         patient.setUpdatedAt(new Date());
 
+        if(StringUtils.isBlank(patient.getStatus())) {
+            patient.setStatus("alive");
+        }
+
         cassandraOps.execute(buildSaveBatch(patient, cassandraOps.getConverter()));
         return new MCIResponse(patient.getHealthId(), HttpStatus.CREATED);
     }

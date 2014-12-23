@@ -9,14 +9,6 @@
     "district_id":"04",
     "upazila_id":"09",
     "city_corporation_id":"20",
-    "union_or_urban_ward_id":"05",
-    "rural_ward_id":null,
-    "area_mouja":"Dhanmondi",
-    "village":"Lalmatia",
-    "holding_number":"Level 2,Taj Garden,House no.4/k",
-    "street":"Plot 51,Satmasjid Road",
-    "post_office":"Mohammadpur",
-    "post_code":"1207",
-    "country_code":"050"
+    "union_or_urban_ward_id":"05"
   }
 }

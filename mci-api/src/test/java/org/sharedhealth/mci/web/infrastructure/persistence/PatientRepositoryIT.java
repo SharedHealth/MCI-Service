@@ -1,5 +1,8 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+
 import com.datastax.driver.core.utils.UUIDs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.After;
@@ -26,14 +29,13 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import java.util.*;
-import java.util.concurrent.ExecutionException;
-
 import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
 import static java.util.Arrays.asList;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
 
@@ -95,6 +97,7 @@ public class PatientRepositoryIT {
         data.setHealthId(mciResponse.id);
         data.setCreatedAt(p.getCreatedAt());
         data.setUpdatedAt(p.getUpdatedAt());
+        data.setStatus("alive");
 
         Address address = p.getAddress();
         address.setRuralWardId(null);
