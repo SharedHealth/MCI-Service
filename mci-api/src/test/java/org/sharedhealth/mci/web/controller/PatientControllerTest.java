@@ -479,7 +479,7 @@ public class PatientControllerTest {
     @Test
     public void shouldFindPendingApprovalDetailsForGivenHealthId() throws Exception {
         String healthId = "health-100";
-        PendingApprovalDetails details = new PendingApprovalDetails();
+        PendingApproval details = new PendingApproval();
         details.setName("x_y_z");
         details.setCurrentValue("curr val");
 
@@ -492,7 +492,7 @@ public class PatientControllerTest {
         fieldDetailsMap.put(timeuuid, approvalFieldDetails);
         details.setFieldDetails(fieldDetailsMap);
 
-        TreeSet<PendingApprovalDetails> pendingApprovals = new TreeSet<>();
+        TreeSet<PendingApproval> pendingApprovals = new TreeSet<>();
         pendingApprovals.add(details);
         when(patientService.findPendingApprovalDetails(healthId)).thenReturn(pendingApprovals);
 

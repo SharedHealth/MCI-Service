@@ -550,6 +550,8 @@ public class PatientControllerIT extends BaseControllerTest {
         patient.setDateOfBirth(updatedPatient.getDateOfBirth());
         patient.setGender(updatedPatient.getGender());
         patient.setPhoneNumber(updatedPatient.getPhoneNumber());
+
+        updatedPatient.setOccupation(patient.getOccupation());
         updatedPatient.setRelations(patient.getRelations());
 
         assertPatientEquals(updatedPatient, patient);

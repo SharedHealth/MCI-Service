@@ -13,8 +13,7 @@ public class PendingApprovalFieldDetails {
 
     private Object value;
 
-    @JsonProperty(CREATED_AT)
-    private long createdAt;
+    private String createdAt;
 
     public String getFacilityId() {
         return facilityId;
@@ -32,12 +31,18 @@ public class PendingApprovalFieldDetails {
         this.value = value;
     }
 
+    @JsonProperty(CREATED_AT)
     public String getCreatedAt() {
-        return DateUtil.toIsoFormat(this.createdAt);
+        return this.createdAt;
+    }
+
+    @JsonProperty(CREATED_AT)
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
     }
 
     public void setCreatedAt(long createdAt) {
-        this.createdAt = createdAt;
+        this.createdAt = DateUtil.toIsoFormat(createdAt);
     }
 
     @Override
@@ -47,7 +52,7 @@ public class PendingApprovalFieldDetails {
 
         PendingApprovalFieldDetails that = (PendingApprovalFieldDetails) o;
 
-        if (createdAt != that.createdAt) return false;
+        if (!createdAt.equals(that.createdAt)) return false;
         if (!facilityId.equals(that.facilityId)) return false;
         if (!value.equals(that.value)) return false;
 
@@ -58,7 +63,7 @@ public class PendingApprovalFieldDetails {
     public int hashCode() {
         int result = facilityId.hashCode();
         result = 31 * result + value.hashCode();
-        result = 31 * result + (int) (createdAt ^ (createdAt >>> 32));
+        result = 31 * result + createdAt.hashCode();
         return result;
     }
 }

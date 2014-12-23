@@ -1,13 +1,5 @@
 package org.sharedhealth.mci.web.mapper;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import java.lang.reflect.Field;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -18,8 +10,14 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.validator.constraints.NotBlank;
 import org.sharedhealth.mci.validation.constraints.*;
-import org.sharedhealth.mci.validation.constraints.Location;
 import org.sharedhealth.mci.validation.group.RequiredGroup;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import java.lang.reflect.Field;
+import java.util.List;
+import java.util.TreeSet;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
@@ -173,7 +171,7 @@ public class PatientData {
     private String updatedAt;
 
     @JsonIgnore
-    private Map<UUID, String> pendingApprovals;
+    private TreeSet<PendingApproval> pendingApprovals;
 
     public String getNationalId() {
         return nationalId;
@@ -442,11 +440,11 @@ public class PatientData {
         this.primaryContactNumber = primaryContactNumber;
     }
 
-    public Map<UUID, String> getPendingApprovals() {
+    public TreeSet<PendingApproval> getPendingApprovals() {
         return pendingApprovals;
     }
 
-    public void setPendingApprovals(Map<UUID, String> pendingApprovals) {
+    public void setPendingApprovals(TreeSet<PendingApproval> pendingApprovals) {
         this.pendingApprovals = pendingApprovals;
     }
 

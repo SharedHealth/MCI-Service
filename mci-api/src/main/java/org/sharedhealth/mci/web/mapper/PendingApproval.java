@@ -8,7 +8,7 @@ import java.util.UUID;
 
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
-public class PendingApprovalDetails implements Comparable<PendingApprovalDetails> {
+public class PendingApproval implements Comparable<PendingApproval> {
 
     @JsonProperty(FIELD_NAME)
     private String name;
@@ -54,9 +54,9 @@ public class PendingApprovalDetails implements Comparable<PendingApprovalDetails
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof PendingApprovalDetails)) return false;
+        if (!(o instanceof PendingApproval)) return false;
 
-        PendingApprovalDetails that = (PendingApprovalDetails) o;
+        PendingApproval that = (PendingApproval) o;
 
         if (!name.equals(that.name)) return false;
 
@@ -69,7 +69,7 @@ public class PendingApprovalDetails implements Comparable<PendingApprovalDetails
     }
 
     @Override
-    public int compareTo(PendingApprovalDetails o) {
+    public int compareTo(PendingApproval o) {
         return this.getName().compareTo(o.getName());
     }
 }

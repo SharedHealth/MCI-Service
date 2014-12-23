@@ -1,6 +1,7 @@
 package org.sharedhealth.mci.web.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
@@ -23,7 +24,15 @@ public class JsonMapper {
         try {
             return objectMapper.readValue(content, valueType);
         } catch (IOException e) {
-            throw new RuntimeException(format("Error converting content string to %s.", valueType.toString()), e);
+            throw new RuntimeException(format("Error converting content string to %s.", valueType), e);
+        }
+    }
+
+    public static <T> T readValue(String content, TypeReference<T> valueTypeRef) {
+        try {
+            return objectMapper.readValue(content, valueTypeRef);
+        } catch (IOException e) {
+            throw new RuntimeException(format("Error converting content string to %s.", valueTypeRef), e);
         }
     }
 }

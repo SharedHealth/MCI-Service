@@ -161,7 +161,7 @@ public class PatientController {
         logger.debug("Find list of pending approval details. Health ID : " + healthId);
         final DeferredResult<ResponseEntity<MCIMultiResponse>> deferredResult = new DeferredResult<>();
 
-        TreeSet<PendingApprovalDetails> response = patientService.findPendingApprovalDetails(healthId);
+        TreeSet<PendingApproval> response = patientService.findPendingApprovalDetails(healthId);
 
         MCIMultiResponse mciMultiResponse;
         if (response != null) {

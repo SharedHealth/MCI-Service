@@ -1,14 +1,9 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
-
 import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
 import com.datastax.driver.core.utils.UUIDs;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.utils.UidGenerator;
@@ -30,7 +25,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.FieldError;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
+
 import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
+import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -117,35 +117,59 @@ public class PatientRepository extends BaseRepository {
         return properties;
     }
 
+    private TreeSet<PendingApproval> buildPendingApproval(UUID uuid, PendingApprovalRequest request) {
+        TreeSet<PendingApproval> pendingApprovals = new TreeSet<>();
+        Map<String, String> requestFields = request.getFields();
+
+        for (String fieldName : requestFields.keySet()) {
+            PendingApproval pendingApproval = new PendingApproval();
+            pendingApproval.setName(fieldName);
+            pendingApproval.setCurrentValue(null);
+
+            PendingApprovalFieldDetails fieldDetails = new PendingApprovalFieldDetails();
+            fieldDetails.setValue(requestFields.get(fieldName));
+            fieldDetails.setFacilityId(request.getFacilityId());
+            fieldDetails.setCreatedAt(unixTimestamp(uuid));
+
+            TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap = new TreeMap<>();
+            fieldDetailsMap.put(uuid, fieldDetails);
+            pendingApproval.setFieldDetails(fieldDetailsMap);
+            pendingApprovals.add(pendingApproval);
+        }
+        return pendingApprovals;
+    }
+
     private Batch buildUpdateBatch(Patient patient, PendingApprovalRequest pendingApprovalRequest, Catchment catchment) {
         Batch batch = QueryBuilder.batch();
         if (pendingApprovalRequest != null) {
-            Map<UUID, String> existingPendingApprovals = patient.getPendingApprovals();
+            TreeSet<PendingApproval> existingPendingApprovals = patient.getPendingApprovals();
             String healthId = patient.getHealthId();
 
             if (existingPendingApprovals != null && existingPendingApprovals.size() > 0) {
-                UUID createdAt = findLatestUuid(patient.getPendingApprovals());
-                PendingApprovalMapping mapping = buildPendingApprovalMapping(catchment, createdAt, healthId);
+                UUID lastUpdated = findLatestUuid(existingPendingApprovals);
+                PendingApprovalMapping mapping = buildPendingApprovalMapping(catchment, lastUpdated, healthId);
                 batch.add(buildDeletePendingApprovalMappingStmt(mapping, cassandraOps.getConverter()));
             }
 
             UUID uuid = UUIDs.timeBased();
             PendingApprovalMapping mapping = buildPendingApprovalMapping(catchment, uuid, healthId);
             batch.add(buildCreatePendingApprovalMappingStmt(mapping, cassandraOps.getConverter()));
-            updatePatientPendingApproval(patient, uuid, pendingApprovalRequest);
+
+            patient.addPendingApprovals(buildPendingApproval(uuid, pendingApprovalRequest));
         }
         batch.add(buildUpdateStmt(patient, cassandraOps.getConverter()));
         return batch;
     }
 
-    UUID findLatestUuid(Map<UUID, String> pendingApprovals) {
+    UUID findLatestUuid(TreeSet<PendingApproval> pendingApprovals) {
         UUID latest = null;
-        for (UUID uuid : pendingApprovals.keySet()) {
+        for (PendingApproval pendingApproval : pendingApprovals) {
+            UUID uuid = pendingApproval.getFieldDetails().keySet().iterator().next();
             if (latest == null) {
                 latest = uuid;
                 continue;
             }
-            if (UUIDs.unixTimestamp(uuid) > UUIDs.unixTimestamp(latest)) {
+            if (unixTimestamp(uuid) > unixTimestamp(latest)) {
                 latest = uuid;
             }
         }
@@ -161,14 +185,6 @@ public class PatientRepository extends BaseRepository {
         pendingApprovalMapping.setLastUpdated(uuid);
         pendingApprovalMapping.setHealthId(healthId);
         return pendingApprovalMapping;
-    }
-
-    private void updatePatientPendingApproval(Patient patient, UUID uuid, PendingApprovalRequest pendingApprovalRequest) {
-        try {
-            patient.addApproval(uuid, objectMapper.writeValueAsString(pendingApprovalRequest));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error setting approvals during update.", e);
-        }
     }
 
     public PatientData findByHealthId(final String healthId) {

@@ -1,21 +1,24 @@
 package org.sharedhealth.mci.web.model;
 
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.sharedhealth.mci.web.mapper.PendingApproval;
 import org.springframework.data.cassandra.mapping.Column;
 import org.springframework.data.cassandra.mapping.PrimaryKey;
 import org.springframework.data.cassandra.mapping.Table;
 
+import java.util.Date;
+import java.util.TreeSet;
+
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.sharedhealth.mci.utils.DateUtil.string2Date;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
+import static org.sharedhealth.mci.web.utils.JsonConstants.PENDING_APPROVALS;
+import static org.sharedhealth.mci.web.utils.JsonMapper.readValue;
+import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
 
 @Table(value = "patient")
 public class Patient {
@@ -271,8 +274,8 @@ public class Patient {
     @Column("lower_given_name")
     private String lowerGivenName;
 
-    @Column("approval")
-    private Map<UUID, String> pendingApprovals;
+    @Column(PENDING_APPROVALS)
+    private String pendingApprovals;
 
     @Override
     public boolean equals(Object rhs) {
@@ -916,7 +919,7 @@ public class Patient {
 
     public String getLocationLevel3() {
 
-        if (StringUtils.isBlank(this.getUpazilaId())){
+        if (StringUtils.isBlank(this.getUpazilaId())) {
             return "";
         }
 
@@ -965,21 +968,35 @@ public class Patient {
         this.lowerGivenName = lowerGivenName;
     }
 
-    public Map<UUID, String> getPendingApprovals() {
-        return pendingApprovals;
+    public TreeSet<PendingApproval> getPendingApprovals() {
+        return readValue(this.pendingApprovals, new TypeReference<TreeSet<PendingApproval>>() {
+        });
     }
 
-    public void setPendingApprovals(Map<UUID, String> pendingApprovals) {
-        this.pendingApprovals = pendingApprovals;
+    public void setPendingApprovals(TreeSet<PendingApproval> pendingApprovals) {
+        this.pendingApprovals = writeValueAsString(pendingApprovals);
     }
 
-    public void addApproval(UUID key, String json) {
-        Map<UUID, String> approvalList = new HashMap<>();
-        if (this.pendingApprovals != null) {
-            approvalList.putAll(this.pendingApprovals);
+    public void addPendingApprovals(TreeSet<PendingApproval> pendingApprovalsToAdd) {
+        TreeSet<PendingApproval> pendingApprovals = this.getPendingApprovals();
+        if (pendingApprovals == null) {
+            pendingApprovals = new TreeSet<>();
         }
-        approvalList.put(key, json);
-        this.setPendingApprovals(approvalList);
+
+        for (PendingApproval pendingApproval : pendingApprovalsToAdd) {
+            if (!pendingApprovals.contains(pendingApproval)) {
+                pendingApprovals.add(pendingApproval);
+
+            } else {
+                for (PendingApproval p : pendingApprovals) {
+                    if (p.equals(pendingApproval)) {
+                        p.setFieldDetails(pendingApproval.getFieldDetails());
+                    }
+                }
+            }
+        }
+
+        this.setPendingApprovals(pendingApprovals);
     }
 
     public Date getDateOfDeath() {

@@ -8,7 +8,6 @@ import org.sharedhealth.mci.web.infrastructure.fr.FacilityRegistryWrapper;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
 import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
-import org.sharedhealth.mci.web.model.PendingApprovalRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.DirectFieldBindingResult;
@@ -16,11 +15,8 @@ import org.springframework.validation.FieldError;
 
 import java.util.*;
 
-import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.sharedhealth.mci.web.utils.JsonConstants.*;
-import static org.sharedhealth.mci.web.utils.JsonMapper.readValue;
 
 @Component
 public class PatientService {
@@ -143,64 +139,17 @@ public class PatientService {
         return pendingApproval;
     }
 
-    public TreeSet<PendingApprovalDetails> findPendingApprovalDetails(String healthId) {
+    public TreeSet<PendingApproval> findPendingApprovalDetails(String healthId) {
         PatientData patient = this.findByHealthId(healthId);
         if (patient == null) {
             return null;
         }
-        return buildPendingApprovalDetails(patient);
-    }
-
-    private TreeSet<PendingApprovalDetails> buildPendingApprovalDetails(PatientData patient) {
-        TreeSet<PendingApprovalDetails> detailsSet = new TreeSet<>();
-        Map<UUID, String> requestMap = patient.getPendingApprovals();
-
-        if (requestMap != null && requestMap.size() > 0) {
-
-            for (Map.Entry<UUID, String> requestMapEntrySet : requestMap.entrySet()) {
-                PendingApprovalRequest request = readValue(requestMapEntrySet.getValue(), PendingApprovalRequest.class);
-                Map<String, String> requestFieldsMap = request.getFields();
-
-                for (String fieldName : requestFieldsMap.keySet()) {
-                    PendingApprovalDetails details = new PendingApprovalDetails();
-                    details.setName(fieldName);
-                    details.setCurrentValue(patient.getValue(fieldName));
-
-                    TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap = new TreeMap<>();
-                    PendingApprovalFieldDetails fieldDetails = new PendingApprovalFieldDetails();
-                    fieldDetails.setFacilityId(request.getFacilityId());
-                    fieldDetails.setValue(getPendingApprovalFieldDetailsValue(requestFieldsMap, fieldName));
-                    UUID timeuuid = requestMapEntrySet.getKey();
-                    fieldDetails.setCreatedAt(unixTimestamp(timeuuid));
-                    fieldDetailsMap.put(timeuuid, fieldDetails);
-
-                    details.setFieldDetails(fieldDetailsMap);
-                    this.updateDetailsSet(detailsSet, details);
-                }
+        TreeSet<PendingApproval> pendingApprovals = patient.getPendingApprovals();
+        if (isNotEmpty(pendingApprovals)) {
+            for (PendingApproval pendingApproval : pendingApprovals) {
+                pendingApproval.setCurrentValue(patient.getValue(pendingApproval.getName()));
             }
         }
-        return detailsSet;
-    }
-
-    private Object getPendingApprovalFieldDetailsValue(Map<String, String> requestFieldsMap, String fieldName) {
-        if (PHONE_NUMBER.equals(fieldName)) {
-            return readValue(requestFieldsMap.get(fieldName), PhoneNumber.class);
-        }
-        if (PRESENT_ADDRESS.equals(fieldName) || PERMANENT_ADDRESS.equals(fieldName)) {
-            return readValue(requestFieldsMap.get(fieldName), Address.class);
-        }
-        return requestFieldsMap.get(fieldName);
-    }
-
-    private void updateDetailsSet(TreeSet<PendingApprovalDetails> detailsSet, PendingApprovalDetails details) {
-        if (!detailsSet.contains(details)) {
-            detailsSet.add(details);
-        }
-        for (PendingApprovalDetails d : detailsSet) {
-            if (d.equals(details)) {
-                d.setCurrentValue(details.getCurrentValue());
-                d.setFieldDetails(details.getFieldDetails());
-            }
-        }
+        return pendingApprovals;
     }
 }

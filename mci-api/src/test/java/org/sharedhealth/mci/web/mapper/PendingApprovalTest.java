@@ -8,19 +8,19 @@ import java.util.*;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-public class PendingApprovalDetailsTest {
+public class PendingApprovalTest {
 
     @Test
     public void shouldSetDetailsInDescendingOrderOfTimeuuids() throws Exception {
-        PendingApprovalDetails details = new PendingApprovalDetails();
+        PendingApproval pendingApproval = new PendingApproval();
         List<UUID> uuids = generateUUIDs();
         TreeMap<UUID, PendingApprovalFieldDetails> fieldDetails = new TreeMap<>();
         for (int i = 0; i < 4; i++) {
             fieldDetails.put(uuids.get(i), null);
         }
-        details.setFieldDetails(fieldDetails);
+        pendingApproval.setFieldDetails(fieldDetails);
         Date date1 = null;
-        for (UUID uuid : details.getFieldDetails().keySet()) {
+        for (UUID uuid : pendingApproval.getFieldDetails().keySet()) {
             Date date2 = new Date(UUIDs.unixTimestamp(uuid));
             if (date1 != null) {
                 assertTrue(date1.after(date2));

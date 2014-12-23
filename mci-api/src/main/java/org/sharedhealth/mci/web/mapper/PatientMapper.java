@@ -1,7 +1,5 @@
 package org.sharedhealth.mci.web.mapper;
 
-import java.util.*;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -10,6 +8,8 @@ import org.sharedhealth.mci.web.model.Patient;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.FieldError;
+
+import java.util.*;
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang.time.DateFormatUtils.ISO_DATE_FORMAT;
@@ -143,7 +143,6 @@ public class PatientMapper {
         if (primaryContactNumber.getNumber() != null) {
             data.setPrimaryContactNumber(primaryContactNumber);
         }
-
         data.setPendingApprovals(patient.getPendingApprovals());
         data.setCreatedAt(patient.getCreatedAt());
         data.setUpdatedAt(patient.getUpdatedAt());
@@ -260,7 +259,7 @@ public class PatientMapper {
 
     public PatientSummaryData map(PatientData patient) {
 
-        if(patient == null) {
+        if (patient == null) {
             return null;
         }
 

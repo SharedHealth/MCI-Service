@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS patient (
   primary_contact_number_country_code varchar,
   primary_contact_number_extension varchar,
 
-  approval map<timeuuid, text>,
+  pending_approvals varchar,
 
   location_level1 varchar,
   location_level2 varchar,
