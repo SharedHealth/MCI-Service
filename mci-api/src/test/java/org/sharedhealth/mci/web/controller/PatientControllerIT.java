@@ -186,6 +186,24 @@ public class PatientControllerIT extends BaseControllerTest {
     }
 
     @Test
+    public void shouldReturnBadRequestIfAddressGivenInvalidCityCorporationCode() throws Exception {
+        patientData.getAddress().setDivisionId("10");
+        patientData.getAddress().setDistrictId("09");
+        patientData.getAddress().setUpazilaId("04");
+        patientData.getAddress().setCityCorporationId("99");
+        patientData.getAddress().setUnionOrUrbanWardId(null);
+        patientData.getAddress().setRuralWardId(null);
+        patientData.getAddress().setVillage(null);
+
+        String json = mapper.writeValueAsString(patientData);
+
+        MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+        assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1004,\"field\":\"present_address\",\"message\":\"invalid present_address\"}]}", result.getResponse().getContentAsString());
+    }
+
+    @Test
     public void shouldReturnBadRequestForInvalidDataProperty() throws Exception {
         String json = mapper.writeValueAsString(new InvalidPatient());
 
