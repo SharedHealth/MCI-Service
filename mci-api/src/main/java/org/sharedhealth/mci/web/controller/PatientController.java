@@ -1,12 +1,5 @@
 package org.sharedhealth.mci.web.controller;
 
-import javax.validation.Valid;
-import javax.validation.groups.Default;
-import java.util.HashMap;
-import java.util.List;
-import java.util.TreeSet;
-import java.util.UUID;
-
 import org.sharedhealth.mci.validation.group.RequiredGroup;
 import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
 import org.sharedhealth.mci.web.exception.SearchQueryParameterException;
@@ -24,10 +17,19 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
+import javax.validation.Valid;
+import javax.validation.groups.Default;
+import java.util.HashMap;
+import java.util.List;
+import java.util.TreeSet;
+import java.util.UUID;
+
 import static java.util.Collections.emptyList;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
+import static org.springframework.http.HttpStatus.ACCEPTED;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 @RestController
 @RequestMapping("/api/v1/patients")
@@ -42,7 +44,7 @@ public class PatientController {
         this.patientService = patientService;
     }
 
-    @RequestMapping(method = RequestMethod.POST, consumes = {APPLICATION_JSON_VALUE})
+    @RequestMapping(method = POST, consumes = {APPLICATION_JSON_VALUE})
     public DeferredResult<ResponseEntity<MCIResponse>> create(
             @RequestBody @Validated({RequiredGroup.class, Default.class}) PatientData patient,
             BindingResult bindingResult) {
@@ -59,7 +61,7 @@ public class PatientController {
         return deferredResult;
     }
 
-    @RequestMapping(value = "/{healthId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{healthId}", method = GET)
     public DeferredResult<ResponseEntity<PatientData>> findByHealthId(@PathVariable String healthId) {
         logger.debug("Trying to find patient by health id [" + healthId + "]");
         final DeferredResult<ResponseEntity<PatientData>> deferredResult = new DeferredResult<>();
@@ -69,7 +71,7 @@ public class PatientController {
         return deferredResult;
     }
 
-    @RequestMapping(method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
+    @RequestMapping(method = GET, produces = APPLICATION_JSON_VALUE)
     public DeferredResult<ResponseEntity<MCIMultiResponse>> findPatients(
             @Valid SearchQuery searchQuery,
             BindingResult bindingResult) {
@@ -95,7 +97,7 @@ public class PatientController {
         return deferredResult;
     }
 
-    @RequestMapping(method = RequestMethod.PUT, value = "/{healthId}", consumes = {APPLICATION_JSON_VALUE})
+    @RequestMapping(method = PUT, value = "/{healthId}", consumes = {APPLICATION_JSON_VALUE})
     public DeferredResult<ResponseEntity<MCIResponse>> update(
             @PathVariable String healthId,
             @Validated({RequiredOnUpdateGroup.class, Default.class}) @RequestBody PatientData patient,
@@ -113,7 +115,7 @@ public class PatientController {
         return deferredResult;
     }
 
-    @RequestMapping(value = "/facility/{facilityId}", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/facility/{facilityId}", method = GET, produces = APPLICATION_JSON_VALUE)
     public DeferredResult<ResponseEntity<MCIMultiResponse>> findAllPatientsInCatchment(
             @PathVariable String facilityId,
             @Valid PaginationQuery paginationQuery,
@@ -132,7 +134,7 @@ public class PatientController {
         return deferredResult;
     }
 
-    @RequestMapping(value = "/pendingapprovals", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/pendingapprovals", method = GET, produces = APPLICATION_JSON_VALUE)
     public DeferredResult<ResponseEntity<MCIMultiResponse>> findPendingApprovalList(
             @RequestHeader(value = DIVISION_ID) String divisionId,
             @RequestHeader(value = DISTRICT_ID) String districtId,
@@ -156,7 +158,7 @@ public class PatientController {
         return deferredResult;
     }
 
-    @RequestMapping(value = "/pendingapprovals/{healthId}", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/pendingapprovals/{healthId}", method = GET, produces = APPLICATION_JSON_VALUE)
     public DeferredResult<ResponseEntity<MCIMultiResponse>> findPendingApprovalDetails(@PathVariable String healthId) {
         logger.debug("Find list of pending approval details. Health ID : " + healthId);
         final DeferredResult<ResponseEntity<MCIMultiResponse>> deferredResult = new DeferredResult<>();
@@ -171,6 +173,27 @@ public class PatientController {
         }
         deferredResult.setResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject));
 
+        return deferredResult;
+    }
+
+    @RequestMapping(value = "/pendingapprovals/{healthId}", method = PUT, produces = APPLICATION_JSON_VALUE)
+    public DeferredResult<ResponseEntity<MCIResponse>> updatePendingApprovals(
+            @PathVariable String healthId,
+            @Validated({RequiredOnUpdateGroup.class, Default.class}) @RequestBody PatientData patient,
+            BindingResult bindingResult) {
+
+        logger.debug("Updating pending approvals. Health ID : " + healthId);
+        if (bindingResult.hasErrors()) {
+            throw new ValidationException(bindingResult);
+        }
+
+        final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
+
+        patient.setHealthId(healthId);
+        String hid = patientService.updatePendingApprovals(patient);
+
+        MCIResponse mciResponse = new MCIResponse(hid, ACCEPTED);
+        deferredResult.setResult(new ResponseEntity<>(mciResponse, mciResponse.httpStatusObject));
         return deferredResult;
     }
 }

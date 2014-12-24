@@ -32,6 +32,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
+import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -71,7 +72,7 @@ public class PatientControllerTest {
     private String uid = "11111111111";
     public static final String API_END_POINT = "/api/v1/patients";
     public static final String PUT_API_END_POINT = "/api/v1/patients/{healthId}";
-    public static final String GET_PENDING_APPROVALS_API = "/api/v1/patients/pendingapprovals";
+    public static final String PENDING_APPROVALS_API = "/api/v1/patients/pendingapprovals";
     public static final String GEO_CODE = "1004092001";
     private SearchQuery searchQuery;
     private StringBuilder stringBuilder;
@@ -376,7 +377,7 @@ public class PatientControllerTest {
         headers.add(DISTRICT_ID, "20");
         headers.add(UPAZILA_ID, "30");
 
-        MvcResult mvcResult = mockMvc.perform(get(GET_PENDING_APPROVALS_API).headers(headers))
+        MvcResult mvcResult = mockMvc.perform(get(PENDING_APPROVALS_API).headers(headers))
                 .andExpect(request().asyncStarted())
                 .andReturn();
 
@@ -421,7 +422,7 @@ public class PatientControllerTest {
         headers.add(UPAZILA_ID, "30");
 
         MvcResult mvcResult = mockMvc.perform(
-                get(GET_PENDING_APPROVALS_API + "?" + AFTER + "=" + after).headers(headers))
+                get(PENDING_APPROVALS_API + "?" + AFTER + "=" + after).headers(headers))
                 .andExpect(request().asyncStarted())
                 .andReturn();
 
@@ -443,7 +444,7 @@ public class PatientControllerTest {
         headers.add(UPAZILA_ID, "30");
 
         MvcResult mvcResult = mockMvc.perform(
-                get(GET_PENDING_APPROVALS_API + "?" + BEFORE + "=" + before).headers(headers))
+                get(PENDING_APPROVALS_API + "?" + BEFORE + "=" + before).headers(headers))
                 .andExpect(request().asyncStarted())
                 .andReturn();
 
@@ -466,7 +467,7 @@ public class PatientControllerTest {
         headers.add(UPAZILA_ID, "30");
 
         MvcResult mvcResult = mockMvc.perform(
-                get(GET_PENDING_APPROVALS_API + "?" + AFTER + "=" + after + "&" + BEFORE + "=" + before).headers(headers))
+                get(PENDING_APPROVALS_API + "?" + AFTER + "=" + after + "&" + BEFORE + "=" + before).headers(headers))
                 .andExpect(request().asyncStarted())
                 .andReturn();
 
@@ -496,7 +497,7 @@ public class PatientControllerTest {
         pendingApprovals.add(details);
         when(patientService.findPendingApprovalDetails(healthId)).thenReturn(pendingApprovals);
 
-        MvcResult mvcResult = mockMvc.perform(get(GET_PENDING_APPROVALS_API + "/" + healthId))
+        MvcResult mvcResult = mockMvc.perform(get(PENDING_APPROVALS_API + "/" + healthId))
                 .andExpect(request().asyncStarted())
                 .andReturn();
 
@@ -509,6 +510,23 @@ public class PatientControllerTest {
                 .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".created_at", is(toIsoFormat(unixTimestamp(timeuuid)))));
 
         verify(patientService).findPendingApprovalDetails(healthId);
+    }
+
+    @Test
+    public void shouldUpdatePendingApprovalsForGivenHealthId() throws Exception {
+        String healthId = "health-100";
+        PatientData patient = new PatientData();
+        patient.setHealthId(healthId);
+
+        when(patientService.updatePendingApprovals(patient)).thenReturn(healthId);
+
+        String content = writeValueAsString(patient);
+        MvcResult mvcResult = mockMvc.perform(put(PENDING_APPROVALS_API + "/" + healthId).content(content).contentType(APPLICATION_JSON))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isAccepted());
     }
 }
 

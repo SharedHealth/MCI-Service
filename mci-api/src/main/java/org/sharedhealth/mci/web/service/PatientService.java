@@ -152,4 +152,8 @@ public class PatientService {
         }
         return pendingApprovals;
     }
+
+    public String updatePendingApprovals(PatientData patient) {
+        return patientRepository.updatePendingApprovals(patient);
+    }
 }

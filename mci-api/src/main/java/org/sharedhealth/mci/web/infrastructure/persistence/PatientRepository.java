@@ -355,4 +355,8 @@ public class PatientRepository extends BaseRepository {
     public List<PendingApprovalMapping> findPendingApprovalMapping(Catchment catchment, UUID after, UUID before, int limit) {
         return cassandraOps.select(buildFindPendingApprovalMappingStmt(catchment, after, before, limit), PendingApprovalMapping.class);
     }
+
+    public String updatePendingApprovals(PatientData patient) {
+        return null;
+    }
 }
