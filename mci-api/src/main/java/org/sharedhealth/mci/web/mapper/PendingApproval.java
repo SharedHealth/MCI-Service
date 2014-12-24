@@ -17,7 +17,12 @@ public class PendingApproval implements Comparable<PendingApproval> {
     private Object currentValue;
 
     @JsonProperty(FIELD_DETAILS)
-    TreeMap<UUID, PendingApprovalFieldDetails> fieldDetails;
+    TreeMap<UUID, PendingApprovalFieldDetails> fieldDetails = new TreeMap<>(new Comparator<UUID>() {
+        @Override
+        public int compare(UUID o1, UUID o2) {
+            return o2.compareTo(o1);
+        }
+    });
 
     public String getName() {
         return name;
@@ -40,14 +45,6 @@ public class PendingApproval implements Comparable<PendingApproval> {
     }
 
     public void setFieldDetails(TreeMap<UUID, PendingApprovalFieldDetails> fieldDetails) {
-        if (this.fieldDetails == null) {
-            this.fieldDetails = new TreeMap<>(new Comparator<UUID>() {
-                @Override
-                public int compare(UUID o1, UUID o2) {
-                    return o2.compareTo(o1);
-                }
-            });
-        }
         this.fieldDetails.putAll(fieldDetails);
     }
 
