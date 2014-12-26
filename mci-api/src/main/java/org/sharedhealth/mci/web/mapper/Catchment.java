@@ -13,6 +13,9 @@ public class Catchment {
     private String unionOrUrbanWardId;
     private String ruralWardId;
 
+    public Catchment() {
+    }
+
     public Catchment(String divisionId, String districtId, String upazilaId) {
         this.divisionId = divisionId;
         this.districtId = districtId;

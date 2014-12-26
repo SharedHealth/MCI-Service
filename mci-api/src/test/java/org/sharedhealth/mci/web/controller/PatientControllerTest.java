@@ -518,10 +518,17 @@ public class PatientControllerTest {
         PatientData patient = new PatientData();
         patient.setHealthId(healthId);
 
-        when(patientService.updatePendingApprovals(patient)).thenReturn(healthId);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(DIVISION_ID, "10");
+        headers.add(DISTRICT_ID, "20");
+        headers.add(UPAZILA_ID, "30");
+        Catchment catchment = new PatientController(patientService).buildCatchment(headers);
+
+        when(patientService.updatePendingApprovals(patient, catchment)).thenReturn(healthId);
 
         String content = writeValueAsString(patient);
-        MvcResult mvcResult = mockMvc.perform(put(PENDING_APPROVALS_API + "/" + healthId).content(content).contentType(APPLICATION_JSON))
+        MvcResult mvcResult = mockMvc.perform(put(PENDING_APPROVALS_API + "/" + healthId).content(content)
+                .contentType(APPLICATION_JSON).headers(headers))
                 .andExpect(request().asyncStarted())
                 .andReturn();
 

@@ -36,7 +36,7 @@ public class PatientMapper {
         List<PatientSummaryData> dataList = new ArrayList<>();
         if (isNotEmpty(patients)) {
             for (PatientData patient : patients) {
-                PatientSummaryData data = this.map(patient);
+                PatientSummaryData data = this.mapSummary(patient);
                 dataList.add(data);
             }
         }
@@ -257,7 +257,7 @@ public class PatientMapper {
         patient.setCountryCode(defaultString(address.getCountryCode()));
     }
 
-    public PatientSummaryData map(PatientData patient) {
+    private PatientSummaryData mapSummary(PatientData patient) {
 
         if (patient == null) {
             return null;

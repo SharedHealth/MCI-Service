@@ -153,7 +153,8 @@ public class PatientService {
         return pendingApprovals;
     }
 
-    public String updatePendingApprovals(PatientData patient) {
-        return patientRepository.updatePendingApprovals(patient);
+    public String updatePendingApprovals(PatientData patient, Catchment catchment) {
+        PatientData existingPatient = this.findByHealthId(patient.getHealthId());
+        return patientRepository.updatePendingApprovals(patient, existingPatient, catchment);
     }
 }

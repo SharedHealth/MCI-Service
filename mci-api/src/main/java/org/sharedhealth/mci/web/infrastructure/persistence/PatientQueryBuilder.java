@@ -1,17 +1,18 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
-import java.util.UUID;
-
-import com.datastax.driver.core.querybuilder.*;
+import com.datastax.driver.core.querybuilder.Batch;
+import com.datastax.driver.core.querybuilder.QueryBuilder;
+import com.datastax.driver.core.querybuilder.Update;
 import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.model.*;
 import org.springframework.data.cassandra.convert.CassandraConverter;
+
+import java.util.UUID;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
 import static com.datastax.driver.core.querybuilder.Select.Where;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static org.springframework.data.cassandra.core.CassandraTemplate.createDeleteQuery;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
 import static org.springframework.data.cassandra.core.CassandraTemplate.toUpdateQuery;
 
@@ -193,13 +194,5 @@ public class PatientQueryBuilder {
 
     public static Update buildUpdateStmt(Patient patient, CassandraConverter converter) {
         return toUpdateQuery(CF_PATIENT, patient, null, converter);
-    }
-
-    public static Insert buildCreatePendingApprovalMappingStmt(PendingApprovalMapping mapping, CassandraConverter converter) {
-        return createInsertQuery(CF_PENDING_APPROVAL_MAPPING, mapping, null, converter);
-    }
-
-    public static Delete buildDeletePendingApprovalMappingStmt(PendingApprovalMapping mapping, CassandraConverter converter) {
-        return createDeleteQuery(CF_PENDING_APPROVAL_MAPPING, mapping, null, converter);
     }
 }

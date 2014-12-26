@@ -11,6 +11,7 @@ import org.sharedhealth.mci.web.service.PatientService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -25,6 +26,7 @@ import java.util.TreeSet;
 import java.util.UUID;
 
 import static java.util.Collections.emptyList;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 import static org.springframework.http.HttpStatus.ACCEPTED;
 import static org.springframework.http.HttpStatus.OK;
@@ -178,6 +180,7 @@ public class PatientController {
 
     @RequestMapping(value = "/pendingapprovals/{healthId}", method = PUT, produces = APPLICATION_JSON_VALUE)
     public DeferredResult<ResponseEntity<MCIResponse>> updatePendingApprovals(
+            @RequestHeader HttpHeaders headers,
             @PathVariable String healthId,
             @Validated({RequiredOnUpdateGroup.class, Default.class}) @RequestBody PatientData patient,
             BindingResult bindingResult) {
@@ -190,10 +193,29 @@ public class PatientController {
         final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
 
         patient.setHealthId(healthId);
-        String hid = patientService.updatePendingApprovals(patient);
+        String hid = patientService.updatePendingApprovals(patient, buildCatchment(headers));
 
         MCIResponse mciResponse = new MCIResponse(hid, ACCEPTED);
         deferredResult.setResult(new ResponseEntity<>(mciResponse, mciResponse.httpStatusObject));
         return deferredResult;
+    }
+
+    Catchment buildCatchment(HttpHeaders headers) {
+        Catchment catchment = new Catchment();
+        catchment.setDivisionId(getHeader(headers, DIVISION_ID));
+        catchment.setDistrictId(getHeader(headers, DISTRICT_ID));
+        catchment.setUpazilaId(getHeader(headers, UPAZILA_ID));
+        catchment.setCityCorpId(getHeader(headers, CITY_CORPORATION_ID));
+        catchment.setUnionOrUrbanWardId(getHeader(headers, UNION_OR_URBAN_WARD_ID));
+        catchment.setRuralWardId(getHeader(headers, RURAL_WARD_ID));
+        return catchment;
+    }
+
+    private String getHeader(HttpHeaders headers, String headerName) {
+        String headerValue = headers.getFirst(headerName);
+        if (isNotBlank(headerValue)) {
+            return headerValue;
+        }
+        return null;
     }
 }
