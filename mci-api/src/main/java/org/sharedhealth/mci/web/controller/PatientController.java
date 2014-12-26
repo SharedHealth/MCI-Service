@@ -201,8 +201,7 @@ public class PatientController {
     }
 
     Catchment buildCatchment(HttpHeaders headers) {
-        Catchment catchment = new Catchment();
-        catchment.setDivisionId(getHeader(headers, DIVISION_ID));
+        Catchment catchment = new Catchment(getHeader(headers, DIVISION_ID));
         catchment.setDistrictId(getHeader(headers, DISTRICT_ID));
         catchment.setUpazilaId(getHeader(headers, UPAZILA_ID));
         catchment.setCityCorpId(getHeader(headers, CITY_CORPORATION_ID));

@@ -2,6 +2,7 @@ package org.sharedhealth.mci.web.service;
 
 
 import org.apache.commons.lang3.StringUtils;
+import org.sharedhealth.mci.web.exception.InsufficientPrivilegeException;
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.infrastructure.fr.FacilityRegistryWrapper;
@@ -157,9 +158,15 @@ public class PatientService {
 
     public String acceptPendingApprovals(PatientData patient, Catchment catchment) {
         PatientData existingPatient = this.findByHealthId(patient.getHealthId());
-        // verify catchment
+        verifyCatchment(existingPatient, catchment);
         verifyPendingApprovalDetails(patient, existingPatient);
         return patientRepository.acceptPendingApprovals(patient, existingPatient, catchment);
+    }
+
+    private void verifyCatchment(PatientData patient, Catchment catchment) {
+        if (!patient.belongsTo(catchment)) {
+            throw new InsufficientPrivilegeException("insufficient.privilege");
+        }
     }
 
     private void verifyPendingApprovalDetails(PatientData patient, PatientData existingPatient) {

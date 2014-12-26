@@ -23,6 +23,7 @@ import java.util.TreeSet;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static java.lang.String.valueOf;
+import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
 @MaritalRelation(message = "1005", field = "maritalStatus")
@@ -487,6 +488,24 @@ public class PatientData {
             }
         }
         return fieldNames;
+    }
+
+    public boolean belongsTo(Catchment catchment) {
+        Address address = this.getAddress();
+
+        if (catchment == null || address == null) {
+            throw new IllegalArgumentException("invalid.catchment");
+        }
+
+        String catchmentId = defaultString(catchment.getDivisionId()) + defaultString(catchment.getDistrictId())
+                + defaultString(catchment.getUpazilaId()) + defaultString(catchment.getCityCorpId())
+                + defaultString(catchment.getUnionOrUrbanWardId()) + defaultString(catchment.getRuralWardId());
+
+        String addressId = defaultString(address.getDivisionId()) + defaultString(address.getDistrictId())
+                + defaultString(address.getUpazilaId()) + defaultString(address.getCityCorporationId())
+                + defaultString(address.getUnionOrUrbanWardId()) + defaultString(address.getRuralWardId());
+
+        return addressId.startsWith(catchmentId);
     }
 
     @Override

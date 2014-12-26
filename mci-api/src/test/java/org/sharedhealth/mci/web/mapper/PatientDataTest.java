@@ -251,4 +251,17 @@ public class PatientDataTest extends ValidationAwareMapper {
         assertTrue(fieldNames.contains(SUR_NAME));
         assertTrue(fieldNames.contains(PRESENT_ADDRESS));
     }
+
+    @Test
+    public void shouldReturnTrueIfPatientBelongsToCatchment() {
+        Catchment catchment = new Catchment("11", "22", "33");
+
+        Address address = new Address("11", "22", "33");
+        address.setCityCorporationId("44");
+        address.setUnionOrUrbanWardId("55");
+        PatientData patient = new PatientData();
+        patient.setAddress(address);
+
+        assertTrue(patient.belongsTo(catchment));
+    }
 }

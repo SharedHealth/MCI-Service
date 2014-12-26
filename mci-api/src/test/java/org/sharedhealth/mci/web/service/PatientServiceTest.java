@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.sharedhealth.mci.web.exception.InsufficientPrivilegeException;
 import org.sharedhealth.mci.web.infrastructure.fr.FacilityRegistryWrapper;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
 import org.sharedhealth.mci.web.mapper.*;
@@ -245,6 +246,7 @@ public class PatientServiceTest {
         pendingApprovals.add(buildPendingApproval(GENDER, "F"));
         pendingApprovals.add(buildPendingApproval(PRESENT_ADDRESS, address));
         existingPatient.setPendingApprovals(pendingApprovals);
+        existingPatient.setAddress(address);
 
         when(patientRepository.findByHealthId("hid-100")).thenReturn(existingPatient);
         patientService.acceptPendingApprovals(patient, catchment);
@@ -252,8 +254,28 @@ public class PatientServiceTest {
         verify(patientRepository).acceptPendingApprovals(patient, existingPatient, catchment);
     }
 
+    @Test(expected = InsufficientPrivilegeException.class)
+    public void shouldNotAcceptPendingApprovalFromDifferentCatchment() {
+        PatientData patient = new PatientData();
+        patient.setHealthId("hid-100");
+        Address address = new Address("10", "20", "30");
+        address.setAddressLine("house no. 10");
+        patient.setAddress(address);
+
+        Catchment catchment = new Catchment("10", "20", "40");
+
+        PatientData existingPatient = new PatientData();
+        TreeSet<PendingApproval> pendingApprovals = new TreeSet<>();
+        pendingApprovals.add(buildPendingApproval(GIVEN_NAME, "Happy Rotter"));
+        existingPatient.setAddress(address);
+        existingPatient.setPendingApprovals(pendingApprovals);
+
+        when(patientRepository.findByHealthId("hid-100")).thenReturn(existingPatient);
+        patientService.acceptPendingApprovals(patient, catchment);
+    }
+
     @Test(expected = IllegalArgumentException.class)
-    public void shouldNotAcceptPendingApprovalWhenExistingPendingApprovalForFieldNameDoesNotExist() throws Exception {
+    public void shouldNotAcceptPendingApprovalWhenExistingPendingApprovalForFieldNameDoesNotExist() {
         PatientData patient = new PatientData();
         patient.setHealthId("hid-100");
         patient.setGivenName("Happy Rotter");
@@ -271,8 +293,6 @@ public class PatientServiceTest {
 
         when(patientRepository.findByHealthId("hid-100")).thenReturn(existingPatient);
         patientService.acceptPendingApprovals(patient, catchment);
-
-        verify(patientRepository).acceptPendingApprovals(patient, existingPatient, catchment);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -286,8 +306,6 @@ public class PatientServiceTest {
         when(patientRepository.findByHealthId("hid-100")).thenReturn(existingPatient);
 
         patientService.acceptPendingApprovals(patient, catchment);
-
-        verify(patientRepository).acceptPendingApprovals(patient, existingPatient, catchment);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -305,8 +323,6 @@ public class PatientServiceTest {
 
         when(patientRepository.findByHealthId("hid-100")).thenReturn(existingPatient);
         patientService.acceptPendingApprovals(patient, catchment);
-
-        verify(patientRepository).acceptPendingApprovals(patient, existingPatient, catchment);
     }
 
     private PendingApproval buildPendingApproval(String fieldName, Object value) {

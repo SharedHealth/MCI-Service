@@ -1,5 +1,7 @@
 package org.sharedhealth.mci.web.mapper;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 public class Catchment {
 
     private String divisionId;
@@ -9,10 +11,17 @@ public class Catchment {
     private String unionOrUrbanWardId;
     private String ruralWardId;
 
-    public Catchment() {
+    public Catchment(String divisionId) {
+        if (isBlank(divisionId)) {
+            throw new IllegalArgumentException("Division ID cannot be blank");
+        }
+        this.divisionId = divisionId;
     }
 
     public Catchment(String divisionId, String districtId, String upazilaId) {
+        if (isBlank(divisionId)) {
+            throw new IllegalArgumentException("Division ID cannot be blank");
+        }
         this.divisionId = divisionId;
         this.districtId = districtId;
         this.upazilaId = upazilaId;
