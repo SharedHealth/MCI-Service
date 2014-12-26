@@ -1,9 +1,5 @@
 package org.sharedhealth.mci.web.mapper;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
 public class Catchment {
 
     private String divisionId;
@@ -71,17 +67,45 @@ public class Catchment {
     }
 
     @Override
-    public boolean equals(Object rhs) {
-        return EqualsBuilder.reflectionEquals(this, rhs);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Catchment)) return false;
+
+        Catchment catchment = (Catchment) o;
+
+        if (cityCorpId != null ? !cityCorpId.equals(catchment.cityCorpId) : catchment.cityCorpId != null) return false;
+        if (districtId != null ? !districtId.equals(catchment.districtId) : catchment.districtId != null) return false;
+        if (!divisionId.equals(catchment.divisionId)) return false;
+        if (ruralWardId != null ? !ruralWardId.equals(catchment.ruralWardId) : catchment.ruralWardId != null)
+            return false;
+        if (unionOrUrbanWardId != null ? !unionOrUrbanWardId.equals(catchment.unionOrUrbanWardId) : catchment.unionOrUrbanWardId != null)
+            return false;
+        if (upazilaId != null ? !upazilaId.equals(catchment.upazilaId) : catchment.upazilaId != null) return false;
+
+        return true;
     }
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        int result = divisionId.hashCode();
+        result = 31 * result + (districtId != null ? districtId.hashCode() : 0);
+        result = 31 * result + (upazilaId != null ? upazilaId.hashCode() : 0);
+        result = 31 * result + (cityCorpId != null ? cityCorpId.hashCode() : 0);
+        result = 31 * result + (unionOrUrbanWardId != null ? unionOrUrbanWardId.hashCode() : 0);
+        result = 31 * result + (ruralWardId != null ? ruralWardId.hashCode() : 0);
+        return result;
     }
 
     @Override
     public String toString() {
-        return ToStringBuilder.reflectionToString(this);
+        final StringBuilder sb = new StringBuilder("Catchment{");
+        sb.append("divisionId='").append(divisionId).append('\'');
+        sb.append(", districtId='").append(districtId).append('\'');
+        sb.append(", upazilaId='").append(upazilaId).append('\'');
+        sb.append(", cityCorpId='").append(cityCorpId).append('\'');
+        sb.append(", unionOrUrbanWardId='").append(unionOrUrbanWardId).append('\'');
+        sb.append(", ruralWardId='").append(ruralWardId).append('\'');
+        sb.append('}');
+        return sb.toString();
     }
 }

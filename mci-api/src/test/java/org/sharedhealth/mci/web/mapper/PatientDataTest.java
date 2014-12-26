@@ -1,14 +1,16 @@
 package org.sharedhealth.mci.web.mapper;
 
-import javax.validation.ConstraintViolation;
-import java.util.Set;
-
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.sharedhealth.mci.validation.group.RequiredGroup;
 
+import javax.validation.ConstraintViolation;
+import java.util.List;
+import java.util.Set;
+
 import static org.junit.Assert.assertEquals;
-import static org.sharedhealth.mci.web.utils.JsonConstants.GIVEN_NAME;
+import static org.junit.Assert.assertTrue;
+import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
 public class PatientDataTest extends ValidationAwareMapper {
 
@@ -224,7 +226,29 @@ public class PatientDataTest extends ValidationAwareMapper {
         PatientData patient = new PatientData();
         patient.setGivenName("Harry");
         patient.setSurName("Potter");
-        Object value = patient.getValue(GIVEN_NAME);
-        assertEquals(patient.getGivenName(), value);
+
+        Address address = new Address("1", "2", "3");
+        address.setAddressLine("House no. 10");
+        patient.setAddress(address);
+
+        assertEquals(patient.getGivenName(), patient.getValue(GIVEN_NAME));
+        assertEquals(patient.getAddress(), patient.getValue(PRESENT_ADDRESS));
+    }
+
+    @Test
+    public void shouldRetrieveNonEmptyFieldNames() {
+        PatientData patient = new PatientData();
+        patient.setGivenName("Harry");
+        patient.setSurName("Potter");
+
+        Address address = new Address("1", "2", "3");
+        address.setAddressLine("House no. 10");
+        patient.setAddress(address);
+
+        List<String> fieldNames = patient.findNonEmptyFieldNames();
+        assertEquals(3, fieldNames.size());
+        assertTrue(fieldNames.contains(GIVEN_NAME));
+        assertTrue(fieldNames.contains(SUR_NAME));
+        assertTrue(fieldNames.contains(PRESENT_ADDRESS));
     }
 }

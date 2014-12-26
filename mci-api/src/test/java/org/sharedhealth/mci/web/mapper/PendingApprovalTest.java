@@ -5,8 +5,7 @@ import org.junit.Test;
 
 import java.util.*;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class PendingApprovalTest {
 
@@ -37,5 +36,30 @@ public class PendingApprovalTest {
             Thread.sleep(0, 10);
         }
         return uuids;
+    }
+
+    @Test
+    public void shouldFindIfValuePresent() {
+        PendingApproval pendingApproval = new PendingApproval();
+        pendingApproval.setName("f_address");
+        TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap = new TreeMap<>();
+
+        Address address = new Address("1", "2", "3");
+        fieldDetailsMap.put(UUIDs.timeBased(), buildFieldDetails(address));
+
+        String city = "Bangalore";
+        fieldDetailsMap.put(UUIDs.timeBased(), buildFieldDetails(city));
+
+        pendingApproval.setFieldDetails(fieldDetailsMap);
+
+        assertTrue(pendingApproval.contains(address));
+        assertTrue(pendingApproval.contains(city));
+        assertFalse(pendingApproval.contains(new Address()));
+    }
+
+    private PendingApprovalFieldDetails buildFieldDetails(Object value) {
+        PendingApprovalFieldDetails fieldDetails = new PendingApprovalFieldDetails();
+        fieldDetails.setValue(value);
+        return fieldDetails;
     }
 }

@@ -179,7 +179,7 @@ public class PatientController {
     }
 
     @RequestMapping(value = "/pendingapprovals/{healthId}", method = PUT, produces = APPLICATION_JSON_VALUE)
-    public DeferredResult<ResponseEntity<MCIResponse>> updatePendingApprovals(
+    public DeferredResult<ResponseEntity<MCIResponse>> acceptPendingApprovals(
             @RequestHeader HttpHeaders headers,
             @PathVariable String healthId,
             @Validated({RequiredOnUpdateGroup.class, Default.class}) @RequestBody PatientData patient,
@@ -193,7 +193,7 @@ public class PatientController {
         final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
 
         patient.setHealthId(healthId);
-        String hid = patientService.updatePendingApprovals(patient, buildCatchment(headers));
+        String hid = patientService.acceptPendingApprovals(patient, buildCatchment(headers));
 
         MCIResponse mciResponse = new MCIResponse(hid, ACCEPTED);
         deferredResult.setResult(new ResponseEntity<>(mciResponse, mciResponse.httpStatusObject));

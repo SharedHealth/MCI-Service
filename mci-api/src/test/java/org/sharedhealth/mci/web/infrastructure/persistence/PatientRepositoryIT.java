@@ -455,7 +455,7 @@ public class PatientRepositoryIT {
     }
 
     @Test
-    public void shouldUpdatePendingApprovals() throws Exception {
+    public void shouldAcceptPendingApprovals() throws Exception {
         String healthId = patientRepository.create(data).getId();
 
         PatientData patientData = new PatientData();
@@ -486,7 +486,7 @@ public class PatientRepositoryIT {
         patientData.setGender("F");
         PatientData existingPatientData = patientRepository.findByHealthId(healthId);
         Catchment catchment = new Catchment(divisionId, districtId, upazilaId);
-        patientRepository.updatePendingApprovals(patientData, existingPatientData, catchment);
+        patientRepository.acceptPendingApprovals(patientData, existingPatientData, catchment);
 
         patient = cassandraOps.selectOneById(Patient.class, healthId);
         assertEquals("F", patient.getGender());

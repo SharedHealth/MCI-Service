@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.time.DateFormatUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -16,10 +17,12 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
+import static java.lang.String.valueOf;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
 @MaritalRelation(message = "1005", field = "maritalStatus")
@@ -463,6 +466,27 @@ public class PatientData {
             }
         }
         return null;
+    }
+
+    public List<String> findNonEmptyFieldNames() {
+        List<String> fieldNames = new ArrayList<>();
+        for (Field field : PatientData.class.getDeclaredFields()) {
+            try {
+                Object value = field.get(this);
+                if (value != null) {
+                    if (value instanceof String && StringUtils.isBlank(valueOf(value))) {
+                        continue;
+                    }
+                    JsonProperty jsonProperty = field.getAnnotation(JsonProperty.class);
+                    if (jsonProperty != null) {
+                        fieldNames.add(jsonProperty.value());
+                    }
+                }
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return fieldNames;
     }
 
     @Override

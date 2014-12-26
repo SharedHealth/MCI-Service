@@ -69,4 +69,16 @@ public class PendingApproval implements Comparable<PendingApproval> {
     public int compareTo(PendingApproval o) {
         return this.getName().compareTo(o.getName());
     }
+
+    public boolean contains(Object value) {
+        if (value == null) {
+            return false;
+        }
+        for (PendingApprovalFieldDetails fieldDetails : this.getFieldDetails().values()) {
+            if (value.equals(fieldDetails.getValue())) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

@@ -15,8 +15,10 @@ import org.springframework.validation.FieldError;
 
 import java.util.*;
 
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.sharedhealth.mci.web.utils.JsonConstants.HID;
 
 @Component
 public class PatientService {
@@ -153,8 +155,30 @@ public class PatientService {
         return pendingApprovals;
     }
 
-    public String updatePendingApprovals(PatientData patient, Catchment catchment) {
+    public String acceptPendingApprovals(PatientData patient, Catchment catchment) {
         PatientData existingPatient = this.findByHealthId(patient.getHealthId());
-        return patientRepository.updatePendingApprovals(patient, existingPatient, catchment);
+        // verify catchment
+        verifyPendingApprovalDetails(patient, existingPatient);
+        return patientRepository.acceptPendingApprovals(patient, existingPatient, catchment);
+    }
+
+    private void verifyPendingApprovalDetails(PatientData patient, PatientData existingPatient) {
+        if (isEmpty(existingPatient.getPendingApprovals())) {
+            throw new IllegalArgumentException("invalid.pending.approvals");
+        }
+        List<String> fieldNames = patient.findNonEmptyFieldNames();
+        fieldNames.remove(HID);
+
+        for (PendingApproval pendingApproval : existingPatient.getPendingApprovals()) {
+            String fieldName = pendingApproval.getName();
+            Object value = patient.getValue(fieldName);
+            if (!pendingApproval.contains(value)) {
+                throw new IllegalArgumentException("pending.approvals.mismatch");
+            }
+            fieldNames.remove(fieldName);
+        }
+        if (isNotEmpty(fieldNames)) {
+            throw new IllegalArgumentException("pending.approvals.mismatch");
+        }
     }
 }

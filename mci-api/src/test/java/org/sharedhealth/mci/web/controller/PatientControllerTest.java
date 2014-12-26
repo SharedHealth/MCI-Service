@@ -513,7 +513,7 @@ public class PatientControllerTest {
     }
 
     @Test
-    public void shouldUpdatePendingApprovalsForGivenHealthId() throws Exception {
+    public void shouldAcceptPendingApprovalsForGivenHealthId() throws Exception {
         String healthId = "health-100";
         PatientData patient = new PatientData();
         patient.setHealthId(healthId);
@@ -524,7 +524,7 @@ public class PatientControllerTest {
         headers.add(UPAZILA_ID, "30");
         Catchment catchment = new PatientController(patientService).buildCatchment(headers);
 
-        when(patientService.updatePendingApprovals(patient, catchment)).thenReturn(healthId);
+        when(patientService.acceptPendingApprovals(patient, catchment)).thenReturn(healthId);
 
         String content = writeValueAsString(patient);
         MvcResult mvcResult = mockMvc.perform(put(PENDING_APPROVALS_API + "/" + healthId).content(content)

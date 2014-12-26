@@ -90,6 +90,15 @@ public class Address {
     @Code(type = "country_code", regexp = "[\\d]{3}", message = "1004")
     private String countryCode = "050";
 
+    public Address() {
+    }
+
+    public Address(String divisionId, String districtId, String upazilaId) {
+        this.divisionId = divisionId;
+        this.districtId = districtId;
+        this.upazilaId = upazilaId;
+    }
+
     @Override
     public boolean equals(Object rhs) {
         return EqualsBuilder.reflectionEquals(this, rhs);

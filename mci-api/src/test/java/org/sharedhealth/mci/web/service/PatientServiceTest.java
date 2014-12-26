@@ -228,6 +228,99 @@ public class PatientServiceTest {
     }
 
     @Test
+    public void shouldAcceptPendingApproval() throws Exception {
+        PatientData patient = new PatientData();
+        patient.setHealthId("hid-100");
+        patient.setGivenName("Happy Rotter");
+        patient.setGender("F");
+        Address address = new Address("1", "2", "3");
+        address.setAddressLine("house no. 10");
+        patient.setAddress(address);
+
+        Catchment catchment = new Catchment("1", "2", "3");
+
+        PatientData existingPatient = new PatientData();
+        TreeSet<PendingApproval> pendingApprovals = new TreeSet<>();
+        pendingApprovals.add(buildPendingApproval(GIVEN_NAME, "Happy Rotter"));
+        pendingApprovals.add(buildPendingApproval(GENDER, "F"));
+        pendingApprovals.add(buildPendingApproval(PRESENT_ADDRESS, address));
+        existingPatient.setPendingApprovals(pendingApprovals);
+
+        when(patientRepository.findByHealthId("hid-100")).thenReturn(existingPatient);
+        patientService.acceptPendingApprovals(patient, catchment);
+
+        verify(patientRepository).acceptPendingApprovals(patient, existingPatient, catchment);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldNotAcceptPendingApprovalWhenExistingPendingApprovalForFieldNameDoesNotExist() throws Exception {
+        PatientData patient = new PatientData();
+        patient.setHealthId("hid-100");
+        patient.setGivenName("Happy Rotter");
+        patient.setGender("F");
+        Address address = new Address("1", "2", "3");
+        address.setAddressLine("house no. 10");
+        patient.setAddress(address);
+
+        Catchment catchment = new Catchment("1", "2", "3");
+
+        PatientData existingPatient = new PatientData();
+        TreeSet<PendingApproval> pendingApprovals = new TreeSet<>();
+        pendingApprovals.add(buildPendingApproval(GIVEN_NAME, "Happy Rotter"));
+        existingPatient.setPendingApprovals(pendingApprovals);
+
+        when(patientRepository.findByHealthId("hid-100")).thenReturn(existingPatient);
+        patientService.acceptPendingApprovals(patient, catchment);
+
+        verify(patientRepository).acceptPendingApprovals(patient, existingPatient, catchment);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldNotAcceptPendingApprovalWhenNoExistingPendingApproval() throws Exception {
+        PatientData patient = new PatientData();
+        patient.setHealthId("hid-100");
+        patient.setGivenName("Happy Rotter");
+
+        Catchment catchment = new Catchment("1", "2", "3");
+        PatientData existingPatient = new PatientData();
+        when(patientRepository.findByHealthId("hid-100")).thenReturn(existingPatient);
+
+        patientService.acceptPendingApprovals(patient, catchment);
+
+        verify(patientRepository).acceptPendingApprovals(patient, existingPatient, catchment);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldNotAcceptPendingApprovalWhenExistingPendingApprovalsDoNotMatch() throws Exception {
+        PatientData patient = new PatientData();
+        patient.setHealthId("hid-100");
+        patient.setGivenName("Happy Rotter");
+
+        Catchment catchment = new Catchment("1", "2", "3");
+
+        PatientData existingPatient = new PatientData();
+        TreeSet<PendingApproval> pendingApprovals = new TreeSet<>();
+        pendingApprovals.add(buildPendingApproval(GIVEN_NAME, "Harry Potter"));
+        existingPatient.setPendingApprovals(pendingApprovals);
+
+        when(patientRepository.findByHealthId("hid-100")).thenReturn(existingPatient);
+        patientService.acceptPendingApprovals(patient, catchment);
+
+        verify(patientRepository).acceptPendingApprovals(patient, existingPatient, catchment);
+    }
+
+    private PendingApproval buildPendingApproval(String fieldName, Object value) {
+        PendingApproval pendingApproval = new PendingApproval();
+        pendingApproval.setName(fieldName);
+        TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap = new TreeMap<>();
+        PendingApprovalFieldDetails fieldDetails = new PendingApprovalFieldDetails();
+        fieldDetails.setValue(value);
+        fieldDetailsMap.put(UUIDs.timeBased(), fieldDetails);
+        pendingApproval.setFieldDetails(fieldDetailsMap);
+        return pendingApproval;
+    }
+
+    @Test
     public void shouldReturnFalseWhenPatientDoesNotHaveMultipleIds() {
         PatientData patient = new PatientData();
         patient.setNationalId("100");
