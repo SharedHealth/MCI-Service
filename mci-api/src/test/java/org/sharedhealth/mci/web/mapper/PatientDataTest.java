@@ -186,26 +186,6 @@ public class PatientDataTest extends ValidationAwareMapper {
     }
 
     @Test
-    public void shouldPassIfPatientStatusIsValid() {
-
-        String[] validStatus = {"alive", "deceased", "unknown"};
-        for (String status : validStatus) {
-            Set<ConstraintViolation<PatientData>> constraintViolations = validator.validateValue(PatientData.class, "status", status);
-            assertEquals(0, constraintViolations.size());
-        }
-    }
-
-    @Test
-    public void shouldFailIfPatientStatusIsInvalid() {
-        String[] inValidStatus = {"", "somevalue", "aalive", "alivea", "adeceased", "deceaseda", "aunknown", "unknowne"};
-        for (String status : inValidStatus) {
-            Set<ConstraintViolation<PatientData>> constraintViolations = validator.validateValue(PatientData.class, "status", status);
-            assertEquals(1, constraintViolations.size());
-            assertEquals("1004", constraintViolations.iterator().next().getMessage());
-        }
-    }
-
-    @Test
     public void shouldFailIfPrimaryContactIsMoreThan_100_Characters() {
         assertLengthViolation("primaryContact", 100);
     }

@@ -14,6 +14,7 @@ import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.model.Patient;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
+import org.sharedhealth.mci.web.utils.PatientDataConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.cassandra.core.CassandraOperations;
@@ -31,6 +32,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.junit.Assert.*;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
+import static org.sharedhealth.mci.web.utils.PatientDataConstants.PATIENT_STATUS_ALIVE;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -90,7 +92,7 @@ public class PatientRepositoryIT {
         data.setHealthId(mciResponse.id);
         data.setCreatedAt(p.getCreatedAt());
         data.setUpdatedAt(p.getUpdatedAt());
-        data.setStatus("alive");
+        data.setStatus(PATIENT_STATUS_ALIVE);
 
         Address address = p.getAddress();
         address.setRuralWardId(null);

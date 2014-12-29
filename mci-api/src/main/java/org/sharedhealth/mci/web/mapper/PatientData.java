@@ -158,7 +158,7 @@ public class PatientData {
 
     @JsonProperty(PATIENT_STATUS)
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^(alive|deceased|unknown)$", message = "1004")
+    @Code(type = PATIENT_STATUS, regexp = "[\\d]{1}", message = "1004")
     private String status;
 
     @JsonProperty(DATE_OF_DEATH)

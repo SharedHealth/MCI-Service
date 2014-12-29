@@ -12,6 +12,7 @@ import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.model.Patient;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
 import org.sharedhealth.mci.web.model.PendingApprovalRequest;
+import org.sharedhealth.mci.web.utils.PatientDataConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,7 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
+import static org.sharedhealth.mci.web.utils.PatientDataConstants.PATIENT_STATUS_ALIVE;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createDeleteQuery;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
 
@@ -66,7 +68,7 @@ public class PatientRepository extends BaseRepository {
         patient.setUpdatedAt(new Date());
 
         if (isBlank(patient.getStatus())) {
-            patient.setStatus("alive");
+            patient.setStatus(PATIENT_STATUS_ALIVE);
         }
 
         cassandraOps.execute(buildSaveBatch(patient, cassandraOps.getConverter()));

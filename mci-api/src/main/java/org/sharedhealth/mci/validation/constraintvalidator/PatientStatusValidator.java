@@ -6,6 +6,9 @@ import javax.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.validation.constraints.PatientStatus;
 import org.sharedhealth.mci.web.mapper.PatientData;
+import org.sharedhealth.mci.web.utils.PatientDataConstants;
+
+import static org.sharedhealth.mci.web.utils.PatientDataConstants.PATIENT_STATUS_DEAD;
 
 public class PatientStatusValidator implements ConstraintValidator<PatientStatus, PatientData> {
 
@@ -32,6 +35,6 @@ public class PatientStatusValidator implements ConstraintValidator<PatientStatus
     }
 
     private boolean isDead(String patientStatus) {
-        return patientStatus != null && patientStatus.equals("deceased");
+        return patientStatus != null && patientStatus.equals(PATIENT_STATUS_DEAD);
     }
 }
