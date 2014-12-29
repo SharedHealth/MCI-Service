@@ -1,16 +1,15 @@
 package org.sharedhealth.mci.web.handler;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
 import org.sharedhealth.mci.web.model.PendingApprovalRequest;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
-import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
 
 public class PatientFilter {
 
@@ -29,7 +28,7 @@ public class PatientFilter {
     }
 
     public PendingApprovalRequest filter() {
-        Map<String, String> filteredFeildMap = filterFeilds(patient);
+        Map<String, Object> filteredFeildMap = filterFeilds(patient);
         if (filteredFeildMap.isEmpty()) {
             return null;
         }
@@ -39,8 +38,8 @@ public class PatientFilter {
         return pendingApprovalRequest;
     }
 
-    private Map<String, String> filterFeilds(PatientData patient) {
-        HashMap<String, String> map = new HashMap<>();
+    private Map<String, Object> filterFeilds(PatientData patient) {
+        HashMap<String, Object> map = new HashMap<>();
         patient.setHealthId(toBeApproved(map, HID, existingPatient.getHealthId(), patientToBeUpdated.getHealthId()));
         patient.setNationalId(toBeApproved(map, NID, existingPatient.getNationalId(), patientToBeUpdated.getNationalId()));
         patient.setNameBangla(toBeApproved(map, NAME_BANGLA, existingPatient.getNameBangla(), patientToBeUpdated.getNameBangla()));
@@ -78,33 +77,33 @@ public class PatientFilter {
         return map;
     }
 
-    private PhoneNumber toBeapprovedPhoneNumber(HashMap<String, String> map, String phoneNumber, PhoneNumber phoneNumberExisting, PhoneNumber phoneNumberUpdated) {
+    private PhoneNumber toBeapprovedPhoneNumber(HashMap<String, Object> map, String phoneNumber, PhoneNumber phoneNumberExisting, PhoneNumber phoneNumberUpdated) {
         String value = properties.getProperty(phoneNumber);
         if (value != null && phoneNumberUpdated != null) {
             if (value.equals(NON_UPDATEABLE)) {
                 return phoneNumberExisting;
             } else if (value.equals(NEEDS_APPROVAL) && !phoneNumberExisting.equals(phoneNumberUpdated)) {
-                map.put(phoneNumber, writeValueAsString(phoneNumberUpdated));
+                map.put(phoneNumber, phoneNumberUpdated);
                 return phoneNumberExisting;
             }
         }
         return phoneNumberUpdated;
     }
 
-    private Address toBeApprovedAddress(Map<String, String> map, String addressType, Address existingAddress, Address updatedAddress) {
+    private Address toBeApprovedAddress(Map<String, Object> map, String addressType, Address existingAddress, Address updatedAddress) {
         String value = properties.getProperty(addressType);
         if (value != null && updatedAddress != null) {
             if (value.equals(NON_UPDATEABLE)) {
                 return existingAddress;
             } else if (value.equals(NEEDS_APPROVAL) && !existingAddress.equals(updatedAddress)) {
-                map.put(addressType, writeValueAsString(updatedAddress));
+                map.put(addressType, updatedAddress);
                 return existingAddress;
             }
         }
         return updatedAddress;
     }
 
-    private String toBeApproved(Map<String, String> map, String key, String existingPatientKeyValue, String patientToBeUpdatedKeyValue) {
+    private String toBeApproved(Map<String, Object> map, String key, String existingPatientKeyValue, String patientToBeUpdatedKeyValue) {
         String value = properties.getProperty(key);
         if (value != null && patientToBeUpdatedKeyValue != null) {
             if (value.equals(NON_UPDATEABLE)) {

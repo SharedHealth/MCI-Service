@@ -121,7 +121,7 @@ public class PatientRepository extends BaseRepository {
 
     private TreeSet<PendingApproval> buildPendingApproval(UUID uuid, PendingApprovalRequest request) {
         TreeSet<PendingApproval> pendingApprovals = new TreeSet<>();
-        Map<String, String> requestFields = request.getFields();
+        Map<String, Object> requestFields = request.getFields();
 
         for (String fieldName : requestFields.keySet()) {
             PendingApproval pendingApproval = new PendingApproval();

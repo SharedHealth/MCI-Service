@@ -12,7 +12,7 @@ public class PendingApprovalRequest {
     private String facilityId;
 
     @JsonProperty(FIELDS)
-    private Map<String, String> fields;
+    private Map<String, Object> fields;
 
     public String getFacilityId() {
         return facilityId;
@@ -22,11 +22,11 @@ public class PendingApprovalRequest {
         this.facilityId = facilityId;
     }
 
-    public Map<String, String> getFields() {
+    public Map<String, Object> getFields() {
         return fields;
     }
 
-    public void setFields(Map<String, String> fields) {
+    public void setFields(Map<String, Object> fields) {
         this.fields = fields;
     }
 }
