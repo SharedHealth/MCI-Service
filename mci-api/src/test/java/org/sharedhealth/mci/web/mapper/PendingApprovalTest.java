@@ -44,16 +44,16 @@ public class PendingApprovalTest {
         pendingApproval.setName("f_address");
         TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap = new TreeMap<>();
 
-        Address address = new Address("1", "2", "3");
-        fieldDetailsMap.put(UUIDs.timeBased(), buildFieldDetails(address));
+        Address address1 = new Address("1", "2", "3");
+        fieldDetailsMap.put(UUIDs.timeBased(), buildFieldDetails(address1));
 
-        String city = "Bangalore";
-        fieldDetailsMap.put(UUIDs.timeBased(), buildFieldDetails(city));
+        Address address2 = new Address("1", "2", "3");
+        fieldDetailsMap.put(UUIDs.timeBased(), buildFieldDetails(address2));
 
         pendingApproval.setFieldDetails(fieldDetailsMap);
 
-        assertTrue(pendingApproval.contains(address));
-        assertTrue(pendingApproval.contains(city));
+        assertTrue(pendingApproval.contains(address1));
+        assertTrue(pendingApproval.contains(address2));
         assertFalse(pendingApproval.contains(new Address()));
     }
 
