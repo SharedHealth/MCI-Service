@@ -7,6 +7,7 @@ import java.util.TreeMap;
 import java.util.UUID;
 
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
+import static org.sharedhealth.mci.web.utils.JsonMapper.convertValue;
 
 public class PendingApproval implements Comparable<PendingApproval> {
 
@@ -79,10 +80,21 @@ public class PendingApproval implements Comparable<PendingApproval> {
             return false;
         }
         for (PendingApprovalFieldDetails fieldDetails : this.getFieldDetails().values()) {
-            if (value.equals(fieldDetails.getValue())) {
+            Object obj = convertFieldDetails(value.getClass(), fieldDetails.getValue());
+            if (value.equals(obj)) {
                 return true;
             }
         }
         return false;
+    }
+
+    private Object convertFieldDetails(Class type, Object value) {
+        if (PhoneNumber.class.equals(type)) {
+            return convertValue(value, PhoneNumber.class);
+        }
+        if (Address.class.equals(type)) {
+            return convertValue(value, Address.class);
+        }
+        return value;
     }
 }
