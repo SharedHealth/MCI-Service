@@ -193,7 +193,7 @@ public class PatientController {
         final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
 
         patient.setHealthId(healthId);
-        String hid = patientService.acceptPendingApprovals(patient, buildCatchment(headers));
+        String hid = patientService.processPendingApprovals(patient, buildCatchment(headers), true);
 
         MCIResponse mciResponse = new MCIResponse(hid, ACCEPTED);
         deferredResult.setResult(new ResponseEntity<>(mciResponse, mciResponse.httpStatusObject));

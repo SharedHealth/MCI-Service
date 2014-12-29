@@ -366,9 +366,16 @@ public class PatientRepository extends BaseRepository {
         return cassandraOps.select(buildFindPendingApprovalMappingStmt(catchment, after, before, limit), PendingApprovalMapping.class);
     }
 
-    public String acceptPendingApprovals(PatientData patientData, PatientData existingPatientData, Catchment catchment) {
+    public String processPendingApprovals(PatientData patientData, PatientData existingPatientData, Catchment catchment, boolean shouldAccept) {
         Batch batch = batch();
-        Patient patient = mapper.map(patientData, existingPatientData);
+        Patient patient;
+        if (shouldAccept) {
+            patient = mapper.map(patientData, existingPatientData);
+        } else {
+            patient = new Patient();
+            patient.setHealthId(patientData.getHealthId());
+            patient.setPendingApprovals(existingPatientData.getPendingApprovals());
+        }
 
         String healthId = patientData.getHealthId();
         UUID lastUpdated = findLatestUuid(patient.getPendingApprovals());

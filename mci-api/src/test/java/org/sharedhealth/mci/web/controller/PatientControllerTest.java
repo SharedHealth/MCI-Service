@@ -524,7 +524,7 @@ public class PatientControllerTest {
         headers.add(UPAZILA_ID, "30");
         Catchment catchment = new PatientController(patientService).buildCatchment(headers);
 
-        when(patientService.acceptPendingApprovals(patient, catchment)).thenReturn(healthId);
+        when(patientService.processPendingApprovals(patient, catchment, true)).thenReturn(healthId);
 
         String content = writeValueAsString(patient);
         MvcResult mvcResult = mockMvc.perform(put(PENDING_APPROVALS_API + "/" + healthId).content(content)

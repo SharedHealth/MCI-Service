@@ -249,9 +249,9 @@ public class PatientServiceTest {
         existingPatient.setAddress(address);
 
         when(patientRepository.findByHealthId("hid-100")).thenReturn(existingPatient);
-        patientService.acceptPendingApprovals(patient, catchment);
+        patientService.processPendingApprovals(patient, catchment, true);
 
-        verify(patientRepository).acceptPendingApprovals(patient, existingPatient, catchment);
+        verify(patientRepository).processPendingApprovals(patient, existingPatient, catchment, true);
     }
 
     @Test(expected = InsufficientPrivilegeException.class)
@@ -271,7 +271,7 @@ public class PatientServiceTest {
         existingPatient.setPendingApprovals(pendingApprovals);
 
         when(patientRepository.findByHealthId("hid-100")).thenReturn(existingPatient);
-        patientService.acceptPendingApprovals(patient, catchment);
+        patientService.processPendingApprovals(patient, catchment, true);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -292,7 +292,7 @@ public class PatientServiceTest {
         existingPatient.setPendingApprovals(pendingApprovals);
 
         when(patientRepository.findByHealthId("hid-100")).thenReturn(existingPatient);
-        patientService.acceptPendingApprovals(patient, catchment);
+        patientService.processPendingApprovals(patient, catchment, true);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -305,7 +305,7 @@ public class PatientServiceTest {
         PatientData existingPatient = new PatientData();
         when(patientRepository.findByHealthId("hid-100")).thenReturn(existingPatient);
 
-        patientService.acceptPendingApprovals(patient, catchment);
+        patientService.processPendingApprovals(patient, catchment, true);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -322,7 +322,7 @@ public class PatientServiceTest {
         existingPatient.setPendingApprovals(pendingApprovals);
 
         when(patientRepository.findByHealthId("hid-100")).thenReturn(existingPatient);
-        patientService.acceptPendingApprovals(patient, catchment);
+        patientService.processPendingApprovals(patient, catchment, true);
     }
 
     private PendingApproval buildPendingApproval(String fieldName, Object value) {

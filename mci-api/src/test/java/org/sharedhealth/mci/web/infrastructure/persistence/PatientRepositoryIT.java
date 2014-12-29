@@ -490,7 +490,7 @@ public class PatientRepositoryIT {
         patientData.setHealthId(healthId);
         patientData.setGender("F");
         PatientData existingPatientData = patientRepository.findByHealthId(healthId);
-        patientRepository.acceptPendingApprovals(patientData, existingPatientData, catchment);
+        patientRepository.processPendingApprovals(patientData, existingPatientData, catchment, true);
 
         patient = cassandraOps.selectOneById(Patient.class, healthId);
         assertEquals("F", patient.getGender());
@@ -527,7 +527,7 @@ public class PatientRepositoryIT {
         patientData.setGender("F");
         patientData.setPhoneNumber(phoneNumber);
         PatientData existingPatientData = patientRepository.findByHealthId(healthId);
-        patientRepository.acceptPendingApprovals(patientData, existingPatientData, catchment);
+        patientRepository.processPendingApprovals(patientData, existingPatientData, catchment, true);
 
         patient = cassandraOps.selectOneById(Patient.class, healthId);
         assertEquals("F", patient.getGender());
@@ -584,7 +584,7 @@ public class PatientRepositoryIT {
         patientData.setHealthId(healthId);
         patientData.setGender("F");
         PatientData existingPatientData = patientRepository.findByHealthId(healthId);
-        patientRepository.acceptPendingApprovals(patientData, existingPatientData, catchment);
+        patientRepository.processPendingApprovals(patientData, existingPatientData, catchment, true);
 
         patient = cassandraOps.selectOneById(Patient.class, healthId);
         assertEquals("F", patient.getGender());
@@ -636,7 +636,7 @@ public class PatientRepositoryIT {
         patientData.setHealthId(healthId);
         patientData.setPhoneNumber(phoneNumber);
         PatientData existingPatientData = patientRepository.findByHealthId(healthId);
-        patientRepository.acceptPendingApprovals(patientData, existingPatientData, catchment);
+        patientRepository.processPendingApprovals(patientData, existingPatientData, catchment, true);
 
         patient = cassandraOps.selectOneById(Patient.class, healthId);
         assertEquals(defaultString(phoneNumber.getCountryCode()), defaultString(patient.getPhoneNumberCountryCode()));

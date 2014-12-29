@@ -156,11 +156,11 @@ public class PatientService {
         return pendingApprovals;
     }
 
-    public String acceptPendingApprovals(PatientData patient, Catchment catchment) {
+    public String processPendingApprovals(PatientData patient, Catchment catchment, boolean shouldAccept) {
         PatientData existingPatient = this.findByHealthId(patient.getHealthId());
         verifyCatchment(existingPatient, catchment);
         verifyPendingApprovalDetails(patient, existingPatient);
-        return patientRepository.acceptPendingApprovals(patient, existingPatient, catchment);
+        return patientRepository.processPendingApprovals(patient, existingPatient, catchment, shouldAccept);
     }
 
     private void verifyCatchment(PatientData patient, Catchment catchment) {
