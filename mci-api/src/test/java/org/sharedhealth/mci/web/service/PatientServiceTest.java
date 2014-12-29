@@ -229,7 +229,7 @@ public class PatientServiceTest {
     }
 
     @Test
-    public void shouldAcceptPendingApproval() throws Exception {
+    public void shouldProcessPendingApprovalWhenAllFieldsMarkedForApprovalAreAccepted() throws Exception {
         PatientData patient = new PatientData();
         patient.setHealthId("hid-100");
         patient.setGivenName("Happy Rotter");
@@ -244,6 +244,31 @@ public class PatientServiceTest {
         TreeSet<PendingApproval> pendingApprovals = new TreeSet<>();
         pendingApprovals.add(buildPendingApproval(GIVEN_NAME, "Happy Rotter"));
         pendingApprovals.add(buildPendingApproval(GENDER, "F"));
+        pendingApprovals.add(buildPendingApproval(PRESENT_ADDRESS, address));
+        existingPatient.setPendingApprovals(pendingApprovals);
+        existingPatient.setAddress(address);
+
+        when(patientRepository.findByHealthId("hid-100")).thenReturn(existingPatient);
+        patientService.processPendingApprovals(patient, catchment, true);
+
+        verify(patientRepository).processPendingApprovals(patient, existingPatient, catchment, true);
+    }
+
+    @Test
+    public void shouldProcessPendingApprovalWhenSomeOfTheFieldsMarkedForApprovalAreAccepted() throws Exception {
+        PatientData patient = new PatientData();
+        patient.setHealthId("hid-100");
+        patient.setGivenName("Happy Rotter");
+        Address address = new Address("1", "2", "3");
+        address.setAddressLine("house no. 10");
+        patient.setAddress(address);
+
+        Catchment catchment = new Catchment("1", "2", "3");
+
+        PatientData existingPatient = new PatientData();
+        TreeSet<PendingApproval> pendingApprovals = new TreeSet<>();
+        pendingApprovals.add(buildPendingApproval(GIVEN_NAME, "Happy Rotter"));
+        pendingApprovals.add(buildPendingApproval(GENDER, "O"));
         pendingApprovals.add(buildPendingApproval(PRESENT_ADDRESS, address));
         existingPatient.setPendingApprovals(pendingApprovals);
         existingPatient.setAddress(address);
@@ -326,7 +351,7 @@ public class PatientServiceTest {
     }
 
     @Test
-    public void shouldRejectPendingApproval() throws Exception {
+    public void shouldProcessPendingApprovalWhenRejected() throws Exception {
         PatientData patient = new PatientData();
         patient.setHealthId("hid-100");
         patient.setGivenName("Happy Rotter");

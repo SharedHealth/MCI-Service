@@ -179,7 +179,7 @@ public class PatientService {
         for (PendingApproval pendingApproval : existingPatient.getPendingApprovals()) {
             String fieldName = pendingApproval.getName();
             Object value = patient.getValue(fieldName);
-            if (!pendingApproval.contains(value)) {
+            if (value != null && !pendingApproval.contains(value)) {
                 throw new IllegalArgumentException("pending.approvals.mismatch");
             }
             fieldNames.remove(fieldName);
