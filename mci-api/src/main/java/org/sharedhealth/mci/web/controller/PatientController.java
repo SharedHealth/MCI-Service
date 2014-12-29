@@ -185,7 +185,24 @@ public class PatientController {
             @Validated({RequiredOnUpdateGroup.class, Default.class}) @RequestBody PatientData patient,
             BindingResult bindingResult) {
 
-        logger.debug("Updating pending approvals. Health ID : " + healthId);
+        logger.debug("Accepting pending approvals. Health ID : " + healthId);
+        return processPendingApprovals(headers, healthId, patient, bindingResult, true);
+    }
+
+    @RequestMapping(value = "/pendingapprovals/{healthId}", method = DELETE, produces = APPLICATION_JSON_VALUE)
+    public DeferredResult<ResponseEntity<MCIResponse>> rejectPendingApprovals(
+            @RequestHeader HttpHeaders headers,
+            @PathVariable String healthId,
+            @Validated({RequiredOnUpdateGroup.class, Default.class}) @RequestBody PatientData patient,
+            BindingResult bindingResult) {
+
+        logger.debug("Accepting pending approvals. Health ID : " + healthId);
+        return processPendingApprovals(headers, healthId, patient, bindingResult, false);
+    }
+
+    private DeferredResult<ResponseEntity<MCIResponse>> processPendingApprovals(
+            HttpHeaders headers, String healthId, PatientData patient, BindingResult bindingResult, boolean shouldAccept) {
+
         if (bindingResult.hasErrors()) {
             throw new ValidationException(bindingResult);
         }
@@ -193,7 +210,7 @@ public class PatientController {
         final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
 
         patient.setHealthId(healthId);
-        String hid = patientService.processPendingApprovals(patient, buildCatchment(headers), true);
+        String hid = patientService.processPendingApprovals(patient, buildCatchment(headers), shouldAccept);
 
         MCIResponse mciResponse = new MCIResponse(hid, ACCEPTED);
         deferredResult.setResult(new ResponseEntity<>(mciResponse, mciResponse.httpStatusObject));

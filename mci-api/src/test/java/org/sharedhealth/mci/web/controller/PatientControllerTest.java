@@ -533,7 +533,37 @@ public class PatientControllerTest {
                 .andReturn();
 
         mockMvc.perform(asyncDispatch(mvcResult))
-                .andExpect(status().isAccepted());
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.id", is(healthId)));
+
+        verify(patientService).processPendingApprovals(patient, catchment, true);
+    }
+
+    @Test
+    public void shouldRejectPendingApprovalsForGivenHealthId() throws Exception {
+        String healthId = "health-100";
+        PatientData patient = new PatientData();
+        patient.setHealthId(healthId);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(DIVISION_ID, "10");
+        headers.add(DISTRICT_ID, "20");
+        headers.add(UPAZILA_ID, "30");
+        Catchment catchment = new PatientController(patientService).buildCatchment(headers);
+
+        when(patientService.processPendingApprovals(patient, catchment, false)).thenReturn(healthId);
+
+        String content = writeValueAsString(patient);
+        MvcResult mvcResult = mockMvc.perform(delete(PENDING_APPROVALS_API + "/" + healthId).content(content)
+                .contentType(APPLICATION_JSON).headers(headers))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.id", is(healthId)));
+
+        verify(patientService).processPendingApprovals(patient, catchment, false);
     }
 }
 

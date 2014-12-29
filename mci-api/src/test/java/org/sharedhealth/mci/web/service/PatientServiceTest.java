@@ -325,6 +325,32 @@ public class PatientServiceTest {
         patientService.processPendingApprovals(patient, catchment, true);
     }
 
+    @Test
+    public void shouldRejectPendingApproval() throws Exception {
+        PatientData patient = new PatientData();
+        patient.setHealthId("hid-100");
+        patient.setGivenName("Happy Rotter");
+        patient.setGender("F");
+        Address address = new Address("1", "2", "3");
+        address.setAddressLine("house no. 10");
+        patient.setAddress(address);
+
+        Catchment catchment = new Catchment("1", "2", "3");
+
+        PatientData existingPatient = new PatientData();
+        TreeSet<PendingApproval> pendingApprovals = new TreeSet<>();
+        pendingApprovals.add(buildPendingApproval(GIVEN_NAME, "Happy Rotter"));
+        pendingApprovals.add(buildPendingApproval(GENDER, "F"));
+        pendingApprovals.add(buildPendingApproval(PRESENT_ADDRESS, address));
+        existingPatient.setPendingApprovals(pendingApprovals);
+        existingPatient.setAddress(address);
+
+        when(patientRepository.findByHealthId("hid-100")).thenReturn(existingPatient);
+        patientService.processPendingApprovals(patient, catchment, false);
+
+        verify(patientRepository).processPendingApprovals(patient, existingPatient, catchment, false);
+    }
+
     private PendingApproval buildPendingApproval(String fieldName, Object value) {
         PendingApproval pendingApproval = new PendingApproval();
         pendingApproval.setName(fieldName);

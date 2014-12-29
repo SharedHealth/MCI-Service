@@ -32,6 +32,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.junit.Assert.*;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
+import static org.sharedhealth.mci.web.utils.JsonConstants.PHONE_NUMBER;
 import static org.sharedhealth.mci.web.utils.PatientDataConstants.PATIENT_STATUS_ALIVE;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -56,6 +57,7 @@ public class PatientRepositoryIT {
     public String divisionId = "10";
     public String districtId = "04";
     public String upazilaId = "09";
+    public Catchment catchment = new Catchment(divisionId, districtId, upazilaId);
 
     @Before
     public void setup() throws ExecutionException, InterruptedException {
@@ -431,7 +433,7 @@ public class PatientRepositoryIT {
     }
 
     @Test
-    public void shouldAddPendingApprovalsForMultipleFields() throws Exception {
+    public void shouldBeAbleToAddPendingApprovalsForMultipleFields() {
         PatientData patientData = new PatientData();
         patientData.setGivenName("John Doe");
         patientData.setGender("O");
@@ -451,13 +453,34 @@ public class PatientRepositoryIT {
         assertEquals(3, pendingApprovals.size());
 
         Iterator<PendingApproval> pendingApprovalIterator = pendingApprovals.iterator();
-        assertEquals("gender", pendingApprovalIterator.next().getName());
-        assertEquals("occupation", pendingApprovalIterator.next().getName());
-        assertEquals("phone_number", pendingApprovalIterator.next().getName());
+        assertEquals(GENDER, pendingApprovalIterator.next().getName());
+        assertEquals(OCCUPATION, pendingApprovalIterator.next().getName());
+        assertEquals(PHONE_NUMBER, pendingApprovalIterator.next().getName());
     }
 
     @Test
-    public void shouldAcceptPendingApprovalsWhenPatientHasOnePendingApproval() throws Exception {
+    public void shouldBeAbleToAcceptPendingApprovalsWhenPatientHasOnePendingApproval() {
+        String healthId = processPendingApprovalsWhenPatientHasOnePendingApproval(true);
+
+        Patient patient = cassandraOps.selectOneById(Patient.class, healthId);
+        assertEquals("F", patient.getGender());
+        assertTrue(isEmpty(patient.getPendingApprovals()));
+
+        assertTrue(isEmpty(patientRepository.findPendingApprovalMapping(catchment, null, null, 100)));
+    }
+
+    @Test
+    public void shouldBeAbleToRejectPendingApprovalsWhenPatientHasOnePendingApproval() throws Exception {
+        String healthId = processPendingApprovalsWhenPatientHasOnePendingApproval(false);
+
+        Patient patient = cassandraOps.selectOneById(Patient.class, healthId);
+        assertEquals(data.getGender(), patient.getGender());
+        assertTrue(isEmpty(patient.getPendingApprovals()));
+
+        assertTrue(isEmpty(patientRepository.findPendingApprovalMapping(catchment, null, null, 100)));
+    }
+
+    private String processPendingApprovalsWhenPatientHasOnePendingApproval(boolean shouldAccept) {
         String healthId = patientRepository.create(data).getId();
 
         PatientData patientData = new PatientData();
@@ -481,26 +504,75 @@ public class PatientRepositoryIT {
         PendingApprovalFieldDetails fieldDetails = fieldDetailsMap.values().iterator().next();
         assertEquals("F", fieldDetails.getValue());
 
-        Catchment catchment = new Catchment(divisionId, districtId, upazilaId);
         List<PendingApprovalMapping> pendingApprovalMappings = patientRepository.findPendingApprovalMapping(catchment, null, null, 100);
         assertEquals(1, pendingApprovalMappings.size());
-        assertEquals(healthId, pendingApprovalMappings.iterator().next().getHealthId());
+        PendingApprovalMapping pendingApprovalMapping = pendingApprovalMappings.iterator().next();
+        assertEquals(healthId, pendingApprovalMapping.getHealthId());
+        assertEquals(patientRepository.findLatestUuid(pendingApprovals), pendingApprovalMapping.getLastUpdated());
 
         patientData = new PatientData();
         patientData.setHealthId(healthId);
         patientData.setGender("F");
         PatientData existingPatientData = patientRepository.findByHealthId(healthId);
-        patientRepository.processPendingApprovals(patientData, existingPatientData, catchment, true);
-
-        patient = cassandraOps.selectOneById(Patient.class, healthId);
-        assertEquals("F", patient.getGender());
-        assertTrue(isEmpty(patient.getPendingApprovals()));
-
-        assertTrue(isEmpty(patientRepository.findPendingApprovalMapping(catchment, null, null, 100)));
+        return patientRepository.processPendingApprovals(patientData, existingPatientData, catchment, shouldAccept);
     }
 
     @Test
-    public void shouldAcceptPendingApprovalsWhenPatientHasOnePendingApprovalEachForMultipleFields() throws Exception {
+    public void shouldBeAbleToAcceptPendingApprovalsWhenPatientHasOnePendingApprovalEachForMultipleFields() {
+        String healthId = processPendingApprovalsWhenPatientHasOnePendingApprovalEachForMultipleFields(true);
+
+        Patient patient = cassandraOps.selectOneById(Patient.class, healthId);
+        assertEquals("F", patient.getGender());
+        assertEquals(data.getOccupation(), patient.getOccupation());
+        assertEquals("22334455", patient.getCellNo());
+
+        TreeSet<PendingApproval> pendingApprovals = patient.getPendingApprovals();
+        assertNotNull(pendingApprovals);
+        assertEquals(1, pendingApprovals.size());
+
+        PendingApproval pendingApproval = patient.getPendingApprovals().iterator().next();
+        assertEquals(OCCUPATION, pendingApproval.getName());
+        TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap = pendingApproval.getFieldDetails();
+        assertNotNull(fieldDetailsMap);
+        assertEquals(1, fieldDetailsMap.size());
+        PendingApprovalFieldDetails fieldDetails = fieldDetailsMap.values().iterator().next();
+        assertEquals("09", fieldDetails.getValue());
+
+        List<PendingApprovalMapping> pendingApprovalMappings = patientRepository.findPendingApprovalMapping(catchment, null, null, 100);
+        assertEquals(1, pendingApprovalMappings.size());
+        PendingApprovalMapping pendingApprovalMapping = pendingApprovalMappings.iterator().next();
+        assertEquals(healthId, pendingApprovalMapping.getHealthId());
+        assertEquals(patientRepository.findLatestUuid(pendingApprovals), pendingApprovalMapping.getLastUpdated());
+    }
+
+    @Test
+    public void shouldBeAbleToRejectPendingApprovalsWhenPatientHasOnePendingApprovalEachForMultipleFields() {
+        String healthId = processPendingApprovalsWhenPatientHasOnePendingApprovalEachForMultipleFields(false);
+
+        Patient patient = cassandraOps.selectOneById(Patient.class, healthId);
+        assertEquals(data.getGender(), patient.getGender());
+        assertEquals(data.getOccupation(), patient.getOccupation());
+        assertEquals(data.getPhoneNumber().getNumber(), patient.getCellNo());
+
+        TreeSet<PendingApproval> pendingApprovals = patient.getPendingApprovals();
+        assertNotNull(pendingApprovals);
+        assertEquals(1, pendingApprovals.size());
+        PendingApproval pendingApproval = patient.getPendingApprovals().iterator().next();
+        assertEquals(OCCUPATION, pendingApproval.getName());
+        TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap = pendingApproval.getFieldDetails();
+        assertNotNull(fieldDetailsMap);
+        assertEquals(1, fieldDetailsMap.size());
+        PendingApprovalFieldDetails fieldDetails = fieldDetailsMap.values().iterator().next();
+        assertEquals("09", fieldDetails.getValue());
+
+        List<PendingApprovalMapping> pendingApprovalMappings = patientRepository.findPendingApprovalMapping(catchment, null, null, 100);
+        assertEquals(1, pendingApprovalMappings.size());
+        PendingApprovalMapping pendingApprovalMapping = pendingApprovalMappings.iterator().next();
+        assertEquals(healthId, pendingApprovalMapping.getHealthId());
+        assertEquals(patientRepository.findLatestUuid(pendingApprovals), pendingApprovalMapping.getLastUpdated());
+    }
+
+    private String processPendingApprovalsWhenPatientHasOnePendingApprovalEachForMultipleFields(boolean shouldAccept) {
         String healthId = patientRepository.create(data).getId();
 
         PatientData patientData = new PatientData();
@@ -520,36 +592,65 @@ public class PatientRepositoryIT {
         Catchment catchment = new Catchment(divisionId, districtId, upazilaId);
         List<PendingApprovalMapping> pendingApprovalMappings = patientRepository.findPendingApprovalMapping(catchment, null, null, 100);
         assertEquals(1, pendingApprovalMappings.size());
-        assertEquals(healthId, pendingApprovalMappings.iterator().next().getHealthId());
+        PendingApprovalMapping pendingApprovalMapping = pendingApprovalMappings.iterator().next();
+        assertEquals(healthId, pendingApprovalMapping.getHealthId());
+        assertEquals(patientRepository.findLatestUuid(pendingApprovals), pendingApprovalMapping.getLastUpdated());
 
         patientData = new PatientData();
         patientData.setHealthId(healthId);
         patientData.setGender("F");
         patientData.setPhoneNumber(phoneNumber);
         PatientData existingPatientData = patientRepository.findByHealthId(healthId);
-        patientRepository.processPendingApprovals(patientData, existingPatientData, catchment, true);
-
-        patient = cassandraOps.selectOneById(Patient.class, healthId);
-        assertEquals("F", patient.getGender());
-        assertEquals(data.getOccupation(), patient.getOccupation());
-        assertEquals(phoneNumber.getNumber(), patient.getCellNo());
-
-        assertEquals(1, patient.getPendingApprovals().size());
-        PendingApproval pendingApproval = patient.getPendingApprovals().iterator().next();
-        assertEquals(OCCUPATION, pendingApproval.getName());
-        TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap = pendingApproval.getFieldDetails();
-        assertNotNull(fieldDetailsMap);
-        assertEquals(1, fieldDetailsMap.size());
-        PendingApprovalFieldDetails fieldDetails = fieldDetailsMap.values().iterator().next();
-        assertEquals("09", fieldDetails.getValue());
-
-        pendingApprovalMappings = patientRepository.findPendingApprovalMapping(catchment, null, null, 100);
-        assertEquals(1, pendingApprovalMappings.size());
-        assertEquals(healthId, pendingApprovalMappings.iterator().next().getHealthId());
+        return patientRepository.processPendingApprovals(patientData, existingPatientData, catchment, shouldAccept);
     }
 
     @Test
-    public void shouldAcceptPendingApprovalsWhenPatientHasMultiplePendingApprovalsForMultipleFields() throws Exception {
+    public void shouldBeAbleToAcceptPendingApprovalsWhenPatientHasMultiplePendingApprovalsForMultipleFields() throws Exception {
+        String healthId = processPendingApprovalsWhenPatientHasMultiplePendingApprovalsForMultipleFields(true);
+
+        Patient patient = cassandraOps.selectOneById(Patient.class, healthId);
+        assertEquals("F", patient.getGender());
+        assertEquals(data.getOccupation(), patient.getOccupation());
+
+        TreeSet<PendingApproval> pendingApprovals = patient.getPendingApprovals();
+        assertNotNull(pendingApprovals);
+        assertEquals(1, pendingApprovals.size());
+
+        PendingApproval pendingApproval = pendingApprovals.iterator().next();
+        assertNotNull(pendingApproval);
+        assertEquals(OCCUPATION, pendingApproval.getName());
+
+        List<PendingApprovalMapping> pendingApprovalMappings = patientRepository.findPendingApprovalMapping(catchment, null, null, 100);
+        assertEquals(1, pendingApprovalMappings.size());
+        PendingApprovalMapping pendingApprovalMapping = pendingApprovalMappings.iterator().next();
+        assertEquals(healthId, pendingApprovalMapping.getHealthId());
+        assertEquals(patientRepository.findLatestUuid(pendingApprovals), pendingApprovalMapping.getLastUpdated());
+    }
+
+    @Test
+    public void shouldBeAbleToRejectPendingApprovalsWhenPatientHasMultiplePendingApprovalsForMultipleFields() throws Exception {
+        String healthId = processPendingApprovalsWhenPatientHasMultiplePendingApprovalsForMultipleFields(false);
+
+        Patient patient = cassandraOps.selectOneById(Patient.class, healthId);
+        assertEquals(data.getGender(), patient.getGender());
+        assertEquals(data.getOccupation(), patient.getOccupation());
+
+        TreeSet<PendingApproval> pendingApprovals = patient.getPendingApprovals();
+        assertNotNull(pendingApprovals);
+        assertEquals(1, pendingApprovals.size());
+
+        PendingApproval pendingApproval = pendingApprovals.iterator().next();
+        assertNotNull(pendingApproval);
+        assertEquals(OCCUPATION, pendingApproval.getName());
+
+        List<PendingApprovalMapping> pendingApprovalMappings = patientRepository.findPendingApprovalMapping(catchment, null, null, 100);
+        assertEquals(1, pendingApprovalMappings.size());
+        PendingApprovalMapping pendingApprovalMapping = pendingApprovalMappings.iterator().next();
+        assertEquals(healthId, pendingApprovalMapping.getHealthId());
+        assertEquals(patientRepository.findLatestUuid(pendingApprovals), pendingApprovalMapping.getLastUpdated());
+    }
+
+    private String processPendingApprovalsWhenPatientHasMultiplePendingApprovalsForMultipleFields(boolean shouldAccept) throws Exception {
         String healthId = patientRepository.create(data).getId();
 
         PatientData patientData = new PatientData();
@@ -578,33 +679,51 @@ public class PatientRepositoryIT {
         Catchment catchment = new Catchment(divisionId, districtId, upazilaId);
         List<PendingApprovalMapping> pendingApprovalMappings = patientRepository.findPendingApprovalMapping(catchment, null, null, 100);
         assertEquals(1, pendingApprovalMappings.size());
-        assertEquals(healthId, pendingApprovalMappings.iterator().next().getHealthId());
+        PendingApprovalMapping pendingApprovalMapping = pendingApprovalMappings.iterator().next();
+        assertEquals(healthId, pendingApprovalMapping.getHealthId());
+        assertEquals(patientRepository.findLatestUuid(pendingApprovals), pendingApprovalMapping.getLastUpdated());
 
         patientData = new PatientData();
         patientData.setHealthId(healthId);
         patientData.setGender("F");
         PatientData existingPatientData = patientRepository.findByHealthId(healthId);
-        patientRepository.processPendingApprovals(patientData, existingPatientData, catchment, true);
-
-        patient = cassandraOps.selectOneById(Patient.class, healthId);
-        assertEquals("F", patient.getGender());
-        assertEquals(data.getOccupation(), patient.getOccupation());
-
-        pendingApprovals = patient.getPendingApprovals();
-        assertNotNull(pendingApprovals);
-        assertEquals(1, pendingApprovals.size());
-
-        PendingApproval pendingApproval = pendingApprovals.iterator().next();
-        assertNotNull(pendingApproval);
-        assertEquals(OCCUPATION, pendingApproval.getName());
-
-        pendingApprovalMappings = patientRepository.findPendingApprovalMapping(catchment, null, null, 100);
-        assertEquals(1, pendingApprovalMappings.size());
-        assertEquals(healthId, pendingApprovalMappings.iterator().next().getHealthId());
+        return patientRepository.processPendingApprovals(patientData, existingPatientData, catchment, shouldAccept);
     }
 
     @Test
-    public void shouldAcceptPendingApprovalsWhenPatientHasBlockPendingApprovals() throws Exception {
+    public void shouldBeAbleToAcceptPendingApprovalsWhenPatientHasBlockPendingApprovals() {
+        String healthId = processPendingApprovalsWhenPatientHasBlockPendingApprovals(true);
+
+        Patient patient = cassandraOps.selectOneById(Patient.class, healthId);
+        assertEquals("", defaultString(patient.getPhoneNumberCountryCode()));
+        assertEquals("011", defaultString(patient.getPhoneNumberAreaCode()));
+        assertEquals("10002001", defaultString(patient.getCellNo()));
+        assertEquals("", defaultString(patient.getPhoneNumberExtension()));
+
+        assertTrue(isEmpty(patient.getPendingApprovals()));
+
+        List<PendingApprovalMapping> pendingApprovalMappings = patientRepository.findPendingApprovalMapping(catchment, null, null, 100);
+        assertEquals(0, pendingApprovalMappings.size());
+    }
+
+    @Test
+    public void shouldBeAbleToRejectPendingApprovalsWhenPatientHasBlockPendingApprovals() {
+        String healthId = processPendingApprovalsWhenPatientHasBlockPendingApprovals(false);
+
+        Patient patient = cassandraOps.selectOneById(Patient.class, healthId);
+        assertEquals("91", patient.getPhoneNumberCountryCode());
+        assertEquals("080", patient.getPhoneNumberAreaCode());
+        assertEquals("10002000", patient.getCellNo());
+        assertEquals("999", patient.getPhoneNumberExtension());
+
+        assertTrue(isEmpty(patient.getPendingApprovals()));
+
+        List<PendingApprovalMapping> pendingApprovalMappings = patientRepository.findPendingApprovalMapping(catchment, null, null, 100);
+        assertEquals(0, pendingApprovalMappings.size());
+    }
+
+
+    private String processPendingApprovalsWhenPatientHasBlockPendingApprovals(boolean shouldAccept) {
         PatientData p = data;
         PhoneNumber phoneNo = new PhoneNumber();
         phoneNo.setCountryCode("91");
@@ -630,24 +749,15 @@ public class PatientRepositoryIT {
         Catchment catchment = new Catchment(divisionId, districtId, upazilaId);
         List<PendingApprovalMapping> pendingApprovalMappings = patientRepository.findPendingApprovalMapping(catchment, null, null, 100);
         assertEquals(1, pendingApprovalMappings.size());
-        assertEquals(healthId, pendingApprovalMappings.iterator().next().getHealthId());
+        PendingApprovalMapping pendingApprovalMapping = pendingApprovalMappings.iterator().next();
+        assertEquals(healthId, pendingApprovalMapping.getHealthId());
+        assertEquals(patientRepository.findLatestUuid(pendingApprovals), pendingApprovalMapping.getLastUpdated());
 
         patientData = new PatientData();
         patientData.setHealthId(healthId);
         patientData.setPhoneNumber(phoneNumber);
         PatientData existingPatientData = patientRepository.findByHealthId(healthId);
-        patientRepository.processPendingApprovals(patientData, existingPatientData, catchment, true);
-
-        patient = cassandraOps.selectOneById(Patient.class, healthId);
-        assertEquals(defaultString(phoneNumber.getCountryCode()), defaultString(patient.getPhoneNumberCountryCode()));
-        assertEquals(defaultString(phoneNumber.getAreaCode()), defaultString(patient.getPhoneNumberAreaCode()));
-        assertEquals(defaultString(phoneNumber.getNumber()), defaultString(patient.getCellNo()));
-        assertEquals(defaultString(phoneNumber.getExtension()), defaultString(patient.getPhoneNumberExtension()));
-
-        assertTrue(isEmpty(patient.getPendingApprovals()));
-
-        pendingApprovalMappings = patientRepository.findPendingApprovalMapping(catchment, null, null, 100);
-        assertEquals(0, pendingApprovalMappings.size());
+        return patientRepository.processPendingApprovals(patientData, existingPatientData, catchment, shouldAccept);
     }
 
     @After
