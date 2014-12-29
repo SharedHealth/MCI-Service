@@ -12,7 +12,6 @@ import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.model.Patient;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
 import org.sharedhealth.mci.web.model.PendingApprovalRequest;
-import org.sharedhealth.mci.web.utils.PatientDataConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
