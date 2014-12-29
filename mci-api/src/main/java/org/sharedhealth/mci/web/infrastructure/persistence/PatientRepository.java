@@ -377,10 +377,14 @@ public class PatientRepository extends BaseRepository {
         patient.setPendingApprovals(pendingApprovals);
         batch.add(buildUpdateStmt(patient, cassandraOps.getConverter()));
 
-        UUID toBeUpdated = findLatestUuid(patient.getPendingApprovals());
-        if (!toBeUpdated.equals(lastUpdated)) {
+        if (isNotEmpty(pendingApprovals)) {
+            UUID toBeUpdated = findLatestUuid(pendingApprovals);
+            if (!toBeUpdated.equals(lastUpdated)) {
+                batch.add(buildDeletePendingApprovalMappingStmt(healthId, catchment, lastUpdated));
+                batch.add(buildCreatePendingApprovalMappingStmt(healthId, catchment, toBeUpdated));
+            }
+        } else {
             batch.add(buildDeletePendingApprovalMappingStmt(healthId, catchment, lastUpdated));
-            batch.add(buildCreatePendingApprovalMappingStmt(healthId, catchment, toBeUpdated));
         }
 
         cassandraOps.execute(batch);
