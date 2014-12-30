@@ -969,7 +969,7 @@ public class Patient {
     }
 
     public TreeSet<PendingApproval> getPendingApprovals() {
-        return readValue(this.pendingApprovals, new TypeReference<TreeSet<PendingApproval>>() {
+        return readValue(defaultString(this.pendingApprovals), new TypeReference<TreeSet<PendingApproval>>() {
         });
     }
 
