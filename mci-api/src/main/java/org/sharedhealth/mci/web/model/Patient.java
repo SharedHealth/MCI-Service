@@ -2,7 +2,6 @@ package org.sharedhealth.mci.web.model;
 
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.sharedhealth.mci.web.mapper.PendingApproval;
@@ -14,6 +13,7 @@ import java.util.Date;
 import java.util.TreeSet;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.sharedhealth.mci.utils.DateUtil.string2Date;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.PENDING_APPROVALS;
@@ -901,7 +901,7 @@ public class Patient {
 
     public String getLocationLevel1() {
 
-        if (StringUtils.isBlank(this.getDivisionId())) {
+        if (isBlank(this.getDivisionId())) {
             return "";
         }
 
@@ -910,7 +910,7 @@ public class Patient {
 
     public String getLocationLevel2() {
 
-        if (StringUtils.isBlank(this.getDistrictId())) {
+        if (isBlank(this.getDistrictId())) {
             return "";
         }
 
@@ -919,7 +919,7 @@ public class Patient {
 
     public String getLocationLevel3() {
 
-        if (StringUtils.isBlank(this.getUpazilaId())) {
+        if (isBlank(this.getUpazilaId())) {
             return "";
         }
 
@@ -927,7 +927,7 @@ public class Patient {
     }
 
     public String getLocationLevel4() {
-        if (StringUtils.isBlank(this.getCityCorporationId())) {
+        if (isBlank(this.getCityCorporationId())) {
             return "";
         }
 
@@ -936,7 +936,7 @@ public class Patient {
 
     public String getLocationLevel5() {
 
-        if (StringUtils.isBlank(this.getUnionOrUrbanWardId())) {
+        if (isBlank(this.getUnionOrUrbanWardId())) {
             return "";
         }
 
@@ -945,7 +945,7 @@ public class Patient {
 
     public String getLocationLevel6() {
 
-        if (StringUtils.isBlank(this.getRuralWardId())) {
+        if (isBlank(this.getRuralWardId())) {
             return "";
         }
 
@@ -969,12 +969,17 @@ public class Patient {
     }
 
     public TreeSet<PendingApproval> getPendingApprovals() {
-        return readValue(defaultString(this.pendingApprovals), new TypeReference<TreeSet<PendingApproval>>() {
+        if (isBlank(this.pendingApprovals)) {
+            return null;
+        }
+        return readValue(this.pendingApprovals, new TypeReference<TreeSet<PendingApproval>>() {
         });
     }
 
     public void setPendingApprovals(TreeSet<PendingApproval> pendingApprovals) {
-        this.pendingApprovals = writeValueAsString(pendingApprovals);
+        if (pendingApprovals != null) {
+            this.pendingApprovals = writeValueAsString(pendingApprovals);
+        }
     }
 
     public void addPendingApprovals(TreeSet<PendingApproval> pendingApprovalsToAdd) {
