@@ -7,28 +7,59 @@ import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.model.PendingApprovalRequest;
 
 import java.text.ParseException;
+import java.util.Map;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.sharedhealth.mci.web.utils.JsonConstants.GENDER;
 
 public class PatientFilterTest {
 
     @Test
     public void shouldMapFieldsToBeApproved() throws ParseException {
         Properties properties = new Properties();
-        String genderKey = "gender";
-        properties.setProperty(genderKey, "NA");
-        PatientData patientUpdated = buildPatientData();
-        PatientData patientExisting = buildPatientData();
-        PatientData patientToBeSaved = new PatientData();
-        patientExisting.setGender("M");
-        patientUpdated.setGender("F");
+        properties.setProperty(GENDER, "NA");
 
-        PatientFilter patientFilter = new PatientFilter(properties, patientExisting, patientUpdated,patientToBeSaved);
+        PatientData patientToBeUpdated = buildPatientData();
+        patientToBeUpdated.setGender("F");
+
+        PatientData patientExisting = buildPatientData();
+        patientExisting.setGender("M");
+
+        PatientData patientToBeSaved = new PatientData();
+
+        PatientFilter patientFilter = new PatientFilter(properties, patientExisting, patientToBeUpdated, patientToBeSaved);
         PendingApprovalRequest pendingApprovalRequest = patientFilter.filter();
 
-        assertEquals("F", pendingApprovalRequest.getFields().get(genderKey));
+        Map<String, Object> fields = pendingApprovalRequest.getFields();
+        assertNotNull(fields);
+        assertEquals(1, fields.size());
+        assertEquals("F", fields.get(GENDER));
+        assertEquals(patientToBeSaved.getGender(), patientExisting.getGender());
+    }
+
+    @Test
+    public void shouldMapFieldsToBeApprovedWhenExistingValueIsNull() throws ParseException {
+        Properties properties = new Properties();
+        properties.setProperty(GENDER, "NA");
+
+        PatientData patientToBeUpdated = buildPatientData();
+        patientToBeUpdated.setGender("F");
+
+        PatientData patientExisting = buildPatientData();
+        patientExisting.setGender(null);
+
+        PatientData patientToBeSaved = new PatientData();
+
+        PatientFilter patientFilter = new PatientFilter(properties, patientExisting, patientToBeUpdated, patientToBeSaved);
+        PendingApprovalRequest pendingApprovalRequest = patientFilter.filter();
+
+        Map<String, Object> fields = pendingApprovalRequest.getFields();
+        assertNotNull(fields);
+        assertEquals(1, fields.size());
+        assertEquals("F", fields.get(GENDER));
         assertEquals(patientToBeSaved.getGender(), patientExisting.getGender());
     }
 
@@ -43,7 +74,7 @@ public class PatientFilterTest {
         patientExisting.setDateOfBirth("2000-02-10");
         patientUpdated.setDateOfBirth("2000-02-10");
 
-        PatientFilter patientFilter = new PatientFilter(properties, patientExisting, patientUpdated,patientToBeSaved);
+        PatientFilter patientFilter = new PatientFilter(properties, patientExisting, patientUpdated, patientToBeSaved);
         PendingApprovalRequest pendingApprovalRequest = patientFilter.filter();
 
         assertNull(pendingApprovalRequest);
@@ -60,7 +91,7 @@ public class PatientFilterTest {
         patientExisting.setDateOfBirth("2000-02-10");
         patientUpdated.setDateOfBirth("2001-02-10");
 
-        PatientFilter patientFilter = new PatientFilter(properties, patientExisting, patientUpdated,patientToBeSaved);
+        PatientFilter patientFilter = new PatientFilter(properties, patientExisting, patientUpdated, patientToBeSaved);
         PendingApprovalRequest pendingApprovalRequest = patientFilter.filter();
 
         assertNull(pendingApprovalRequest);
@@ -68,7 +99,7 @@ public class PatientFilterTest {
     }
 
     private PatientData buildPatientData() throws ParseException {
-       PatientData patient = new PatientData();
+        PatientData patient = new PatientData();
         patient.setNationalId("1234567890123");
         patient.setBirthRegistrationNumber("12345678901234567");
         patient.setGivenName("Scott");

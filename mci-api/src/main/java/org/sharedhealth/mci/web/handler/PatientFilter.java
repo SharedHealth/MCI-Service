@@ -103,15 +103,15 @@ public class PatientFilter {
         return updatedAddress;
     }
 
-    private String toBeApproved(Map<String, Object> map, String key, String existingPatientKeyValue, String patientToBeUpdatedKeyValue) {
-        String value = properties.getProperty(key);
-        if (value != null && patientToBeUpdatedKeyValue != null) {
-            if (value.equals(NON_UPDATEABLE)) {
-                return existingPatientKeyValue;
-            } else if (value.equals(NEEDS_APPROVAL) && !existingPatientKeyValue.equals(patientToBeUpdatedKeyValue))
-                map.put(key, patientToBeUpdatedKeyValue);
-            return existingPatientKeyValue;
+    private String toBeApproved(Map<String, Object> map, String key, String oldValue, String newValue) {
+        String property = properties.getProperty(key);
+        if (property != null && newValue != null) {
+            if (property.equals(NON_UPDATEABLE)) {
+                return oldValue;
+            } else if (property.equals(NEEDS_APPROVAL) && !newValue.equals(oldValue))
+                map.put(key, newValue);
+            return oldValue;
         }
-        return patientToBeUpdatedKeyValue;
+        return newValue;
     }
 }
