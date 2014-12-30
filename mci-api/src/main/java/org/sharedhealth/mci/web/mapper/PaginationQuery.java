@@ -4,8 +4,6 @@ import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import static org.sharedhealth.mci.utils.DateUtil.string2Date;
 
@@ -27,13 +25,27 @@ public class PaginationQuery {
     }
 
     @Override
-    public boolean equals(Object rhs) {
-        return EqualsBuilder.reflectionEquals(this, rhs);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PaginationQuery)) return false;
+
+        PaginationQuery that = (PaginationQuery) o;
+
+        if (limit != that.limit) return false;
+        if (maximum_limit != that.maximum_limit) return false;
+        if (last != null ? !last.equals(that.last) : that.last != null) return false;
+        if (since != null ? !since.equals(that.since) : that.since != null) return false;
+
+        return true;
     }
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        int result = last != null ? last.hashCode() : 0;
+        result = 31 * result + (since != null ? since.hashCode() : 0);
+        result = 31 * result + limit;
+        result = 31 * result + maximum_limit;
+        return result;
     }
 
     public String getLast() {

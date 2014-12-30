@@ -1,7 +1,5 @@
 package org.sharedhealth.mci.web.model;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.data.cassandra.mapping.Column;
 import org.springframework.data.cassandra.mapping.PrimaryKey;
 import org.springframework.data.cassandra.mapping.Table;
@@ -23,13 +21,23 @@ public class MasterData {
     }
 
     @Override
-    public boolean equals(Object rhs) {
-        return EqualsBuilder.reflectionEquals(this, rhs);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof MasterData)) return false;
+
+        MasterData that = (MasterData) o;
+
+        if (pk != null ? !pk.equals(that.pk) : that.pk != null) return false;
+        if (value != null ? !value.equals(that.value) : that.value != null) return false;
+
+        return true;
     }
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        int result = pk != null ? pk.hashCode() : 0;
+        result = 31 * result + (value != null ? value.hashCode() : 0);
+        return result;
     }
 
     public String getValue() {

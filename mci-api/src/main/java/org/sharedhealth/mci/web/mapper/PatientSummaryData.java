@@ -5,9 +5,6 @@ import javax.validation.constraints.Pattern;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
@@ -131,17 +128,55 @@ public class PatientSummaryData {
     }
 
     @Override
-    public boolean equals(Object rhs) {
-        return EqualsBuilder.reflectionEquals(this, rhs);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PatientSummaryData)) return false;
+
+        PatientSummaryData that = (PatientSummaryData) o;
+
+        if (address != null ? !address.equals(that.address) : that.address != null) return false;
+        if (birthRegistrationNumber != null ? !birthRegistrationNumber.equals(that.birthRegistrationNumber) : that.birthRegistrationNumber != null)
+            return false;
+        if (dateOfBirth != null ? !dateOfBirth.equals(that.dateOfBirth) : that.dateOfBirth != null) return false;
+        if (gender != null ? !gender.equals(that.gender) : that.gender != null) return false;
+        if (givenName != null ? !givenName.equals(that.givenName) : that.givenName != null) return false;
+        if (healthId != null ? !healthId.equals(that.healthId) : that.healthId != null) return false;
+        if (nationalId != null ? !nationalId.equals(that.nationalId) : that.nationalId != null) return false;
+        if (phoneNumber != null ? !phoneNumber.equals(that.phoneNumber) : that.phoneNumber != null) return false;
+        if (surName != null ? !surName.equals(that.surName) : that.surName != null) return false;
+        if (uid != null ? !uid.equals(that.uid) : that.uid != null) return false;
+
+        return true;
     }
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        int result = healthId != null ? healthId.hashCode() : 0;
+        result = 31 * result + (nationalId != null ? nationalId.hashCode() : 0);
+        result = 31 * result + (uid != null ? uid.hashCode() : 0);
+        result = 31 * result + (birthRegistrationNumber != null ? birthRegistrationNumber.hashCode() : 0);
+        result = 31 * result + (givenName != null ? givenName.hashCode() : 0);
+        result = 31 * result + (surName != null ? surName.hashCode() : 0);
+        result = 31 * result + (gender != null ? gender.hashCode() : 0);
+        result = 31 * result + (dateOfBirth != null ? dateOfBirth.hashCode() : 0);
+        result = 31 * result + (address != null ? address.hashCode() : 0);
+        result = 31 * result + (phoneNumber != null ? phoneNumber.hashCode() : 0);
+        return result;
     }
 
     @Override
     public String toString() {
-        return ToStringBuilder.reflectionToString(this);
+        return "PatientSummaryData{" +
+                "healthId='" + healthId + '\'' +
+                ", nationalId='" + nationalId + '\'' +
+                ", uid='" + uid + '\'' +
+                ", birthRegistrationNumber='" + birthRegistrationNumber + '\'' +
+                ", givenName='" + givenName + '\'' +
+                ", surName='" + surName + '\'' +
+                ", gender='" + gender + '\'' +
+                ", dateOfBirth='" + dateOfBirth + '\'' +
+                ", address=" + address +
+                ", phoneNumber=" + phoneNumber +
+                '}';
     }
 }

@@ -8,8 +8,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.http.HttpStatus;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
@@ -74,12 +72,27 @@ public class MCIMultiResponse<T> {
     }
 
     @Override
-    public boolean equals(Object rhs) {
-        return EqualsBuilder.reflectionEquals(this, rhs);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof MCIMultiResponse)) return false;
+
+        MCIMultiResponse that = (MCIMultiResponse) o;
+
+        if (httpStatus != that.httpStatus) return false;
+        if (additionalInfo != null ? !additionalInfo.equals(that.additionalInfo) : that.additionalInfo != null)
+            return false;
+        if (httpStatusObject != that.httpStatusObject) return false;
+        if (results != null ? !results.equals(that.results) : that.results != null) return false;
+
+        return true;
     }
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        int result = httpStatus;
+        result = 31 * result + (results != null ? results.hashCode() : 0);
+        result = 31 * result + (additionalInfo != null ? additionalInfo.hashCode() : 0);
+        result = 31 * result + (httpStatusObject != null ? httpStatusObject.hashCode() : 0);
+        return result;
     }
 }

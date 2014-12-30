@@ -8,9 +8,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.sharedhealth.mci.validation.constraints.Code;
 import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
 
@@ -100,18 +97,70 @@ public class Address {
     }
 
     @Override
-    public boolean equals(Object rhs) {
-        return EqualsBuilder.reflectionEquals(this, rhs);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Address)) return false;
+
+        Address address = (Address) o;
+
+        if (addressLine != null ? !addressLine.equals(address.addressLine) : address.addressLine != null) return false;
+        if (areaMouja != null ? !areaMouja.equals(address.areaMouja) : address.areaMouja != null) return false;
+        if (cityCorporationId != null ? !cityCorporationId.equals(address.cityCorporationId) : address.cityCorporationId != null)
+            return false;
+        if (countryCode != null ? !countryCode.equals(address.countryCode) : address.countryCode != null) return false;
+        if (districtId != null ? !districtId.equals(address.districtId) : address.districtId != null) return false;
+        if (divisionId != null ? !divisionId.equals(address.divisionId) : address.divisionId != null) return false;
+        if (holdingNumber != null ? !holdingNumber.equals(address.holdingNumber) : address.holdingNumber != null)
+            return false;
+        if (postCode != null ? !postCode.equals(address.postCode) : address.postCode != null) return false;
+        if (postOffice != null ? !postOffice.equals(address.postOffice) : address.postOffice != null) return false;
+        if (ruralWardId != null ? !ruralWardId.equals(address.ruralWardId) : address.ruralWardId != null) return false;
+        if (street != null ? !street.equals(address.street) : address.street != null) return false;
+        if (unionOrUrbanWardId != null ? !unionOrUrbanWardId.equals(address.unionOrUrbanWardId) : address.unionOrUrbanWardId != null)
+            return false;
+        if (upazilaId != null ? !upazilaId.equals(address.upazilaId) : address.upazilaId != null) return false;
+        if (village != null ? !village.equals(address.village) : address.village != null) return false;
+
+        return true;
     }
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        int result = addressLine != null ? addressLine.hashCode() : 0;
+        result = 31 * result + (divisionId != null ? divisionId.hashCode() : 0);
+        result = 31 * result + (districtId != null ? districtId.hashCode() : 0);
+        result = 31 * result + (upazilaId != null ? upazilaId.hashCode() : 0);
+        result = 31 * result + (cityCorporationId != null ? cityCorporationId.hashCode() : 0);
+        result = 31 * result + (unionOrUrbanWardId != null ? unionOrUrbanWardId.hashCode() : 0);
+        result = 31 * result + (ruralWardId != null ? ruralWardId.hashCode() : 0);
+        result = 31 * result + (holdingNumber != null ? holdingNumber.hashCode() : 0);
+        result = 31 * result + (street != null ? street.hashCode() : 0);
+        result = 31 * result + (areaMouja != null ? areaMouja.hashCode() : 0);
+        result = 31 * result + (village != null ? village.hashCode() : 0);
+        result = 31 * result + (postOffice != null ? postOffice.hashCode() : 0);
+        result = 31 * result + (postCode != null ? postCode.hashCode() : 0);
+        result = 31 * result + (countryCode != null ? countryCode.hashCode() : 0);
+        return result;
     }
 
     @Override
     public String toString() {
-        return ToStringBuilder.reflectionToString(this);
+        return "Address{" +
+                "addressLine='" + addressLine + '\'' +
+                ", divisionId='" + divisionId + '\'' +
+                ", districtId='" + districtId + '\'' +
+                ", upazilaId='" + upazilaId + '\'' +
+                ", cityCorporationId='" + cityCorporationId + '\'' +
+                ", unionOrUrbanWardId='" + unionOrUrbanWardId + '\'' +
+                ", ruralWardId='" + ruralWardId + '\'' +
+                ", holdingNumber='" + holdingNumber + '\'' +
+                ", street='" + street + '\'' +
+                ", areaMouja='" + areaMouja + '\'' +
+                ", village='" + village + '\'' +
+                ", postOffice='" + postOffice + '\'' +
+                ", postCode='" + postCode + '\'' +
+                ", countryCode='" + countryCode + '\'' +
+                '}';
     }
 
     public String getAddressLine() {

@@ -6,8 +6,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.sharedhealth.mci.validation.constraints.Length;
 import org.sharedhealth.mci.validation.constraints.SearchQueryConstraint;
 
@@ -64,17 +62,6 @@ public class SearchQuery extends PaginationQuery {
 
     public SearchQuery() {
     }
-
-    @Override
-    public boolean equals(Object rhs) {
-        return EqualsBuilder.reflectionEquals(this, rhs);
-    }
-
-    @Override
-    public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
-    }
-
 
     public String getFull_name() {
         return full_name;
@@ -213,5 +200,52 @@ public class SearchQuery extends PaginationQuery {
         if (StringUtils.isNotBlank(upazilaId)) return false;
 
         return true;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof SearchQuery)) return false;
+        if (!super.equals(o)) return false;
+
+        SearchQuery that = (SearchQuery) o;
+
+        if (area_code != null ? !area_code.equals(that.area_code) : that.area_code != null) return false;
+        if (bin_brn != null ? !bin_brn.equals(that.bin_brn) : that.bin_brn != null) return false;
+        if (country_code != null ? !country_code.equals(that.country_code) : that.country_code != null) return false;
+        if (districtId != null ? !districtId.equals(that.districtId) : that.districtId != null) return false;
+        if (divisionId != null ? !divisionId.equals(that.divisionId) : that.divisionId != null) return false;
+        if (extension != null ? !extension.equals(that.extension) : that.extension != null) return false;
+        if (full_name != null ? !full_name.equals(that.full_name) : that.full_name != null) return false;
+        if (given_name != null ? !given_name.equals(that.given_name) : that.given_name != null) return false;
+        if (nid != null ? !nid.equals(that.nid) : that.nid != null) return false;
+        if (phone_no != null ? !phone_no.equals(that.phone_no) : that.phone_no != null) return false;
+        if (present_address != null ? !present_address.equals(that.present_address) : that.present_address != null)
+            return false;
+        if (sur_name != null ? !sur_name.equals(that.sur_name) : that.sur_name != null) return false;
+        if (uid != null ? !uid.equals(that.uid) : that.uid != null) return false;
+        if (upazilaId != null ? !upazilaId.equals(that.upazilaId) : that.upazilaId != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (full_name != null ? full_name.hashCode() : 0);
+        result = 31 * result + (nid != null ? nid.hashCode() : 0);
+        result = 31 * result + (bin_brn != null ? bin_brn.hashCode() : 0);
+        result = 31 * result + (uid != null ? uid.hashCode() : 0);
+        result = 31 * result + (present_address != null ? present_address.hashCode() : 0);
+        result = 31 * result + (divisionId != null ? divisionId.hashCode() : 0);
+        result = 31 * result + (districtId != null ? districtId.hashCode() : 0);
+        result = 31 * result + (upazilaId != null ? upazilaId.hashCode() : 0);
+        result = 31 * result + (sur_name != null ? sur_name.hashCode() : 0);
+        result = 31 * result + (given_name != null ? given_name.hashCode() : 0);
+        result = 31 * result + (phone_no != null ? phone_no.hashCode() : 0);
+        result = 31 * result + (country_code != null ? country_code.hashCode() : 0);
+        result = 31 * result + (area_code != null ? area_code.hashCode() : 0);
+        result = 31 * result + (extension != null ? extension.hashCode() : 0);
+        return result;
     }
 }

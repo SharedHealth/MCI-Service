@@ -5,8 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -18,20 +16,30 @@ public class LocationCriteria extends PaginationQuery {
     }
 
     @Override
-    public boolean equals(Object rhs) {
-        return EqualsBuilder.reflectionEquals(this, rhs);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof LocationCriteria)) return false;
+        if (!super.equals(o)) return false;
+
+        LocationCriteria that = (LocationCriteria) o;
+
+        if (parent != null ? !parent.equals(that.parent) : that.parent != null) return false;
+
+        return true;
     }
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        int result = super.hashCode();
+        result = 31 * result + (parent != null ? parent.hashCode() : 0);
+        return result;
     }
-
 
     @Override
     public String toString() {
         return "LocationCriteria{" +
-                "parent='" + parent + '\'' + '}';
+                "parent='" + parent + '\'' +
+                '}';
     }
 
     public String getParent() {

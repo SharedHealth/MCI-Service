@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.sharedhealth.mci.utils.WhiteSpaceRemovalDeserializer;
 import org.sharedhealth.mci.validation.constraints.Code;
 import org.sharedhealth.mci.validation.constraints.Length;
@@ -172,7 +171,19 @@ public class Relation {
 
     @Override
     public String toString() {
-        return ToStringBuilder.reflectionToString(this);
+        return "Relation{" +
+                "type='" + type + '\'' +
+                ", healthId='" + healthId + '\'' +
+                ", nationalId='" + nationalId + '\'' +
+                ", uid='" + uid + '\'' +
+                ", birthRegistrationNumber='" + birthRegistrationNumber + '\'' +
+                ", nameBangla='" + nameBangla + '\'' +
+                ", givenName='" + givenName + '\'' +
+                ", surName='" + surName + '\'' +
+                ", marriageId='" + marriageId + '\'' +
+                ", relationalStatus='" + relationalStatus + '\'' +
+                ", id='" + id + '\'' +
+                '}';
     }
 
     @Override

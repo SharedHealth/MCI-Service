@@ -6,9 +6,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.validator.constraints.NotBlank;
 import org.sharedhealth.mci.validation.constraints.*;
 import org.sharedhealth.mci.validation.group.RequiredGroup;
@@ -509,18 +506,122 @@ public class PatientData {
     }
 
     @Override
-    public boolean equals(Object rhs) {
-        return EqualsBuilder.reflectionEquals(this, rhs);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PatientData)) return false;
+
+        PatientData that = (PatientData) o;
+
+        if (address != null ? !address.equals(that.address) : that.address != null) return false;
+        if (birthRegistrationNumber != null ? !birthRegistrationNumber.equals(that.birthRegistrationNumber) : that.birthRegistrationNumber != null)
+            return false;
+        if (bloodGroup != null ? !bloodGroup.equals(that.bloodGroup) : that.bloodGroup != null) return false;
+        if (createdAt != null ? !createdAt.equals(that.createdAt) : that.createdAt != null) return false;
+        if (dateOfBirth != null ? !dateOfBirth.equals(that.dateOfBirth) : that.dateOfBirth != null) return false;
+        if (dateOfDeath != null ? !dateOfDeath.equals(that.dateOfDeath) : that.dateOfDeath != null) return false;
+        if (disability != null ? !disability.equals(that.disability) : that.disability != null) return false;
+        if (educationLevel != null ? !educationLevel.equals(that.educationLevel) : that.educationLevel != null)
+            return false;
+        if (ethnicity != null ? !ethnicity.equals(that.ethnicity) : that.ethnicity != null) return false;
+        if (fullName != null ? !fullName.equals(that.fullName) : that.fullName != null) return false;
+        if (gender != null ? !gender.equals(that.gender) : that.gender != null) return false;
+        if (givenName != null ? !givenName.equals(that.givenName) : that.givenName != null) return false;
+        if (healthId != null ? !healthId.equals(that.healthId) : that.healthId != null) return false;
+        if (maritalStatus != null ? !maritalStatus.equals(that.maritalStatus) : that.maritalStatus != null)
+            return false;
+        if (nameBangla != null ? !nameBangla.equals(that.nameBangla) : that.nameBangla != null) return false;
+        if (nationalId != null ? !nationalId.equals(that.nationalId) : that.nationalId != null) return false;
+        if (nationality != null ? !nationality.equals(that.nationality) : that.nationality != null) return false;
+        if (occupation != null ? !occupation.equals(that.occupation) : that.occupation != null) return false;
+        if (pendingApprovals != null ? !pendingApprovals.equals(that.pendingApprovals) : that.pendingApprovals != null)
+            return false;
+        if (permanentAddress != null ? !permanentAddress.equals(that.permanentAddress) : that.permanentAddress != null)
+            return false;
+        if (phoneNumber != null ? !phoneNumber.equals(that.phoneNumber) : that.phoneNumber != null) return false;
+        if (placeOfBirth != null ? !placeOfBirth.equals(that.placeOfBirth) : that.placeOfBirth != null) return false;
+        if (primaryContact != null ? !primaryContact.equals(that.primaryContact) : that.primaryContact != null)
+            return false;
+        if (primaryContactNumber != null ? !primaryContactNumber.equals(that.primaryContactNumber) : that.primaryContactNumber != null)
+            return false;
+        if (relations != null ? !relations.equals(that.relations) : that.relations != null) return false;
+        if (religion != null ? !religion.equals(that.religion) : that.religion != null) return false;
+        if (status != null ? !status.equals(that.status) : that.status != null) return false;
+        if (surName != null ? !surName.equals(that.surName) : that.surName != null) return false;
+        if (uid != null ? !uid.equals(that.uid) : that.uid != null) return false;
+        if (updatedAt != null ? !updatedAt.equals(that.updatedAt) : that.updatedAt != null) return false;
+
+        return true;
     }
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        int result = healthId != null ? healthId.hashCode() : 0;
+        result = 31 * result + (nationalId != null ? nationalId.hashCode() : 0);
+        result = 31 * result + (birthRegistrationNumber != null ? birthRegistrationNumber.hashCode() : 0);
+        result = 31 * result + (nameBangla != null ? nameBangla.hashCode() : 0);
+        result = 31 * result + (givenName != null ? givenName.hashCode() : 0);
+        result = 31 * result + (surName != null ? surName.hashCode() : 0);
+        result = 31 * result + (dateOfBirth != null ? dateOfBirth.hashCode() : 0);
+        result = 31 * result + (gender != null ? gender.hashCode() : 0);
+        result = 31 * result + (occupation != null ? occupation.hashCode() : 0);
+        result = 31 * result + (educationLevel != null ? educationLevel.hashCode() : 0);
+        result = 31 * result + (relations != null ? relations.hashCode() : 0);
+        result = 31 * result + (uid != null ? uid.hashCode() : 0);
+        result = 31 * result + (placeOfBirth != null ? placeOfBirth.hashCode() : 0);
+        result = 31 * result + (religion != null ? religion.hashCode() : 0);
+        result = 31 * result + (bloodGroup != null ? bloodGroup.hashCode() : 0);
+        result = 31 * result + (nationality != null ? nationality.hashCode() : 0);
+        result = 31 * result + (disability != null ? disability.hashCode() : 0);
+        result = 31 * result + (ethnicity != null ? ethnicity.hashCode() : 0);
+        result = 31 * result + (address != null ? address.hashCode() : 0);
+        result = 31 * result + (primaryContact != null ? primaryContact.hashCode() : 0);
+        result = 31 * result + (phoneNumber != null ? phoneNumber.hashCode() : 0);
+        result = 31 * result + (primaryContactNumber != null ? primaryContactNumber.hashCode() : 0);
+        result = 31 * result + (permanentAddress != null ? permanentAddress.hashCode() : 0);
+        result = 31 * result + (maritalStatus != null ? maritalStatus.hashCode() : 0);
+        result = 31 * result + (fullName != null ? fullName.hashCode() : 0);
+        result = 31 * result + (status != null ? status.hashCode() : 0);
+        result = 31 * result + (dateOfDeath != null ? dateOfDeath.hashCode() : 0);
+        result = 31 * result + (createdAt != null ? createdAt.hashCode() : 0);
+        result = 31 * result + (updatedAt != null ? updatedAt.hashCode() : 0);
+        result = 31 * result + (pendingApprovals != null ? pendingApprovals.hashCode() : 0);
+        return result;
     }
 
     @Override
     public String toString() {
-        return ToStringBuilder.reflectionToString(this);
+        return "PatientData{" +
+                "healthId='" + healthId + '\'' +
+                ", nationalId='" + nationalId + '\'' +
+                ", birthRegistrationNumber='" + birthRegistrationNumber + '\'' +
+                ", nameBangla='" + nameBangla + '\'' +
+                ", givenName='" + givenName + '\'' +
+                ", surName='" + surName + '\'' +
+                ", dateOfBirth='" + dateOfBirth + '\'' +
+                ", gender='" + gender + '\'' +
+                ", occupation='" + occupation + '\'' +
+                ", educationLevel='" + educationLevel + '\'' +
+                ", relations=" + relations +
+                ", uid='" + uid + '\'' +
+                ", placeOfBirth='" + placeOfBirth + '\'' +
+                ", religion='" + religion + '\'' +
+                ", bloodGroup='" + bloodGroup + '\'' +
+                ", nationality='" + nationality + '\'' +
+                ", disability='" + disability + '\'' +
+                ", ethnicity='" + ethnicity + '\'' +
+                ", address=" + address +
+                ", primaryContact='" + primaryContact + '\'' +
+                ", phoneNumber=" + phoneNumber +
+                ", primaryContactNumber=" + primaryContactNumber +
+                ", permanentAddress=" + permanentAddress +
+                ", maritalStatus='" + maritalStatus + '\'' +
+                ", fullName='" + fullName + '\'' +
+                ", status='" + status + '\'' +
+                ", dateOfDeath='" + dateOfDeath + '\'' +
+                ", createdAt='" + createdAt + '\'' +
+                ", updatedAt='" + updatedAt + '\'' +
+                ", pendingApprovals=" + pendingApprovals +
+                '}';
     }
 
     public String getDateOfDeath() {

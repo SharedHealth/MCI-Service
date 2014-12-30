@@ -5,8 +5,6 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Facility {
@@ -30,13 +28,24 @@ public class Facility {
     }
 
     @Override
-    public boolean equals(Object rhs) {
-        return EqualsBuilder.reflectionEquals(this, rhs);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Facility)) return false;
+
+        Facility facility = (Facility) o;
+
+        if (facilityProperties != null ? !facilityProperties.equals(facility.facilityProperties) : facility.facilityProperties != null)
+            return false;
+        if (id != null ? !id.equals(facility.id) : facility.id != null) return false;
+
+        return true;
     }
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (facilityProperties != null ? facilityProperties.hashCode() : 0);
+        return result;
     }
 
     public List<String> getCatchments() {
