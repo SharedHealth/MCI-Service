@@ -11,12 +11,16 @@ import org.sharedhealth.mci.web.service.MasterDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 @Component
 public class CodeValidator implements ConstraintValidator<Code, String> {
 
     private Code code;
 
     private MasterDataService masterDataService;
+
+    private Pattern pattern;
 
     @Autowired
     public CodeValidator(MasterDataService dataService) {
@@ -26,6 +30,10 @@ public class CodeValidator implements ConstraintValidator<Code, String> {
     @Override
     public void initialize(Code constraintAnnotation) {
         this.code = constraintAnnotation;
+
+        if (isNotBlank(code.regexp())) {
+            this.pattern = Pattern.compile(this.code.regexp());
+        }
     }
 
     @Override
@@ -35,7 +43,7 @@ public class CodeValidator implements ConstraintValidator<Code, String> {
 
         if(StringUtils.isBlank(value)) return false;
 
-        if (StringUtils.isNotBlank(code.regexp()) && !Pattern.compile(code.regexp()).matcher(value).matches()) {
+        if (this.pattern != null && !this.pattern.matcher(value).matches()) {
             return false;
         }
 

@@ -26,6 +26,7 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
 
     private LocationService locationService;
     private String countryCode;
+    private Pattern pattern;
 
     @Autowired
     public LocationValidator(LocationService locationService) {
@@ -35,6 +36,7 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
     @Override
     public void initialize(Location constraintAnnotation) {
         this.countryCode = constraintAnnotation.country_code();
+        this.pattern = Pattern.compile("[\\d]{" + BANGLADESH_POST_CODE_LENGTH + "}");
     }
 
     @Override
@@ -86,7 +88,7 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
     }
 
     private boolean isInvalidPostCodePattern(String postCode) {
-        return postCode != null && !Pattern.compile("[\\d]{" + BANGLADESH_POST_CODE_LENGTH + "}").matcher(postCode).matches();
+        return postCode != null && !this.pattern.matcher(postCode).matches();
     }
 
     private boolean isMinimumRequiredFieldsGiven(Address value, ConstraintValidatorContext context, boolean isValid) {
