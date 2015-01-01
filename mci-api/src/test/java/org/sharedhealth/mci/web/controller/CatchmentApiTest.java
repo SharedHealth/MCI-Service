@@ -9,7 +9,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
-import org.sharedhealth.mci.web.config.WebMvcConfig;
+import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;

@@ -1,6 +1,6 @@
 package org.sharedhealth.mci.web.config;
 
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -10,7 +10,6 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 @Configuration
 @EnableWebMvc
-@EnableAutoConfiguration
 @ComponentScan(basePackages = "org.sharedhealth.mci")
 @EnableCaching
 public class WebMvcConfigTest extends WebMvcConfig {

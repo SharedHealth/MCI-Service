@@ -20,7 +20,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
-@ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfigTest.class)
+@ContextConfiguration(initializers = EnvironmentMock.class, classes = {WebMvcConfigTest.class})
 public class LocationValidatorTest {
 
     @Autowired

@@ -8,7 +8,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
-import org.sharedhealth.mci.web.config.WebMvcConfig;
+import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientData;

@@ -13,7 +13,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
-import org.sharedhealth.mci.web.config.WebMvcConfig;
+import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.handler.ErrorHandler;
 import org.sharedhealth.mci.web.handler.MCIError;
 import org.sharedhealth.mci.web.handler.MCIResponse;

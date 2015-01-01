@@ -7,7 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
-import org.sharedhealth.mci.web.config.WebMvcConfig;
+import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.exception.HealthIDExistException;
 import org.sharedhealth.mci.web.exception.PatientNotFoundException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
