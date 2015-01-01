@@ -3,24 +3,26 @@ package org.sharedhealth.mci.validation.constraintvalidator;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+import java.util.regex.Pattern;
+
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.validation.constraints.SearchQueryConstraint;
 import org.sharedhealth.mci.web.mapper.SearchQuery;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class SearchQueryValidator implements ConstraintValidator<SearchQueryConstraint, SearchQuery> {
 
-    private static final Logger logger = LoggerFactory.getLogger(SearchQueryValidator.class);
+    private static final String GEOCODE_VALID_PATTERN = "[\\d]{6}|[\\d]{8}|[\\d]{10}|[\\d]{12}";
+    private Pattern pattern;
+
     private static final String ERROR_CODE_REQUIRED = "1001";
     private static final String ERROR_CODE_PATTERN = "1002";
 
     @Override
     public void initialize(SearchQueryConstraint constraintAnnotation) {
-
+        this.pattern = Pattern.compile(GEOCODE_VALID_PATTERN);
     }
 
     @Override
@@ -90,8 +92,8 @@ public class SearchQueryValidator implements ConstraintValidator<SearchQueryCons
         return isValid;
     }
 
-    private boolean isInvalidAddressPattern(String present_address) {
-        return present_address != null  && !present_address.matches("[\\d]{6}|[\\d]{8}|[\\d]{10}|[\\d]{12}");
+    private boolean isInvalidAddressPattern(String geoCode) {
+        return geoCode!= null && !this.pattern.matcher(geoCode).matches();
     }
 
     private void addConstraintViolation(ConstraintValidatorContext context, String code) {
