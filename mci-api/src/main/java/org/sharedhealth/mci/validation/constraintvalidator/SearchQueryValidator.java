@@ -11,14 +11,20 @@ import org.sharedhealth.mci.web.mapper.SearchQuery;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
 public class SearchQueryValidator implements ConstraintValidator<SearchQueryConstraint, SearchQuery> {
 
-    private static final String GEOCODE_VALID_PATTERN = "[\\d]{6}|[\\d]{8}|[\\d]{10}|[\\d]{12}";
     private Pattern pattern;
 
+    private static final String GEOCODE_VALID_PATTERN = "[\\d]{6}|[\\d]{8}|[\\d]{10}|[\\d]{12}";
     private static final String ERROR_CODE_REQUIRED = "1001";
     private static final String ERROR_CODE_PATTERN = "1002";
+    private static final String ERROR_EMPTY_SEARCH_QUERY = "No valid search parameter given";
+    private static final String ERROR_INCOMPLETE_SEARCH_CRITERIA = "Incomplete search criteria!";
+    private static final String ERROR_GIVEN_NAME_REQUIRED = "Please enter a valid name";
+    private static final String ERROR_ID_ADDRESS_OR_PHONE_NUMBER_REQUIRED = "Please provide a valid ID, Address or Phone number";
+    private static final String ERROR_ID_NAME_OR_PHONE_NUMBER_REQUIRED = "Please provide a valid ID, Name or Phone number";
 
     @Override
     public void initialize(SearchQueryConstraint constraintAnnotation) {
@@ -41,7 +47,7 @@ public class SearchQueryValidator implements ConstraintValidator<SearchQueryCons
     private boolean isBusinessRulesValidationPassed(SearchQuery searchQuery, ConstraintValidatorContext context) {
 
         if (searchQuery.isEmpty()) {
-            addConstraintViolation(context, "No valid search parameter given");
+            addConstraintViolation(context, ERROR_EMPTY_SEARCH_QUERY);
             return false;
         }
 
@@ -55,13 +61,13 @@ public class SearchQueryValidator implements ConstraintValidator<SearchQueryCons
     }
 
     private void registerProperErrorMessage(SearchQuery searchQuery, ConstraintValidatorContext context) {
-        String msg = "Incomplete search criteria!";
+        String msg = ERROR_INCOMPLETE_SEARCH_CRITERIA;
             if(isBlank(searchQuery.getGiven_name()) && isGivenNameRequired(searchQuery)) {
-                msg =  "Please enter a valid name";
+                msg = ERROR_GIVEN_NAME_REQUIRED;
             }else if(isNotBlank(searchQuery.getGiven_name()) || isNotBlank(searchQuery.getGiven_name())){
-                msg =  "Please provide a valid ID, Address or Phone number";
+                msg = ERROR_ID_ADDRESS_OR_PHONE_NUMBER_REQUIRED;
             }else if(isNotBlank(searchQuery.getPresent_address())){
-                msg =  "Please provide a valid ID, Name or Phone number";
+                msg = ERROR_ID_NAME_OR_PHONE_NUMBER_REQUIRED;
             }
 
         addConstraintViolation(context, msg);
@@ -76,17 +82,17 @@ public class SearchQueryValidator implements ConstraintValidator<SearchQueryCons
 
         if (searchQuery.getGiven_name() == null && isGivenNameRequired(searchQuery)) {
             isValid = false;
-            addConstraintViolation(context, ERROR_CODE_REQUIRED, "given_name");
+            addConstraintViolation(context, ERROR_CODE_REQUIRED, GIVEN_NAME);
         }
 
         if (searchQuery.getPhone_no() == null && isPhoneNoRequired(searchQuery)) {
             isValid = false;
-            addConstraintViolation(context, ERROR_CODE_REQUIRED, "phone_no");
+            addConstraintViolation(context, ERROR_CODE_REQUIRED, PHONE_NO);
         }
 
         if (isInvalidAddressPattern(searchQuery.getPresent_address())) {
             isValid = false;
-            addConstraintViolation(context, ERROR_CODE_PATTERN, "present_address");
+            addConstraintViolation(context, ERROR_CODE_PATTERN, PRESENT_ADDRESS);
         }
 
         return isValid;
@@ -131,5 +137,4 @@ public class SearchQueryValidator implements ConstraintValidator<SearchQueryCons
                 searchQuery.getPhone_no() != null;
 
     }
-
 }

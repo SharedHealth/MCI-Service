@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.constraints.NotBlank;
+import org.sharedhealth.mci.utils.DateUtil;
 import org.sharedhealth.mci.validation.constraints.*;
 import org.sharedhealth.mci.validation.group.RequiredGroup;
 
@@ -21,10 +22,12 @@ import java.util.TreeSet;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static java.lang.String.valueOf;
 import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.sharedhealth.mci.web.utils.ErrorConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
+import static org.sharedhealth.mci.web.utils.PatientDataConstants.*;
 
-@MaritalRelation(message = "1005", field = "maritalStatus")
-@PatientStatus(message = "1005")
+@MaritalRelation(message = ERROR_CODE_DEPENDENT, field = "maritalStatus")
+@PatientStatus(message = ERROR_CODE_DEPENDENT)
 @JsonIgnoreProperties({"created_at"})
 public class PatientData {
 
@@ -33,48 +36,48 @@ public class PatientData {
 
     @JsonProperty(NID)
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[\\d]{13}|[\\d]{17}", message = "1002")
+    @Pattern(regexp = "[\\d]{13}|[\\d]{17}", message = ERROR_CODE_PATTERN)
     private String nationalId;
 
     @JsonProperty(BIN_BRN)
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[\\d]{17}", message = "1002")
+    @Pattern(regexp = "[\\d]{17}", message = ERROR_CODE_PATTERN)
     private String birthRegistrationNumber;
 
     @JsonProperty(NAME_BANGLA)
     @JsonInclude(NON_EMPTY)
-    @Length(max = 125, message = "1002")
+    @Length(max = 125, message = ERROR_CODE_PATTERN)
     private String nameBangla;
 
     @JsonProperty(GIVEN_NAME)
-    @NotNull(message = "1001", groups = RequiredGroup.class)
-    @Length(max = 100, min = 1, message = "1002")
+    @NotNull(message = ERROR_CODE_REQUIRED, groups = RequiredGroup.class)
+    @Length(max = 100, min = 1, message = ERROR_CODE_PATTERN)
     private String givenName;
 
     @JsonProperty(SUR_NAME)
-    @NotNull(message = "1001", groups = RequiredGroup.class)
-    @Pattern(regexp = "^(\\s*)([A-Za-z0-9]{1,25})(\\b\\s*$)", message = "1002")
+    @NotNull(message = ERROR_CODE_REQUIRED, groups = RequiredGroup.class)
+    @Pattern(regexp = "^(\\s*)([A-Za-z0-9]{1,25})(\\b\\s*$)", message = ERROR_CODE_PATTERN)
     private String surName;
 
     @JsonProperty(DATE_OF_BIRTH)
-    @NotNull(message = "1001", groups = RequiredGroup.class)
-    @Date(format = "yyyy-MM-dd", message = "1002")
-    @Length(min = 1, max = 10, message = "1002")
+    @NotNull(message = ERROR_CODE_REQUIRED, groups = RequiredGroup.class)
+    @Date(format = "yyyy-MM-dd", message = ERROR_CODE_PATTERN)
+    @Length(min = 1, max = 10, message = ERROR_CODE_PATTERN)
     private String dateOfBirth;
 
     @JsonProperty(GENDER)
-    @NotBlank(message = "1001", groups = RequiredGroup.class)
-    @Code(type = GENDER, regexp = "[A-Z]{1}", message = "1004")
+    @NotBlank(message = ERROR_CODE_REQUIRED, groups = RequiredGroup.class)
+    @Code(type = GENDER, regexp = "[A-Z]{1}", message = ERROR_CODE_INVALID)
     private String gender;
 
     @JsonProperty(OCCUPATION)
     @JsonInclude(NON_EMPTY)
-    @Code(type = OCCUPATION, regexp = "[\\d]{2}", message = "1004")
+    @Code(type = OCCUPATION, regexp = "[\\d]{2}", message = ERROR_CODE_INVALID)
     private String occupation;
 
     @JsonProperty(EDU_LEVEL)
     @JsonInclude(NON_EMPTY)
-    @Code(type = "education_level", regexp = "[\\d]{2}", message = "1004")
+    @Code(type = EDUCATION_LEVEL, regexp = "[\\d]{2}", message = ERROR_CODE_INVALID)
     private String educationLevel;
 
     @JsonProperty(RELATIONS)
@@ -84,48 +87,48 @@ public class PatientData {
 
     @JsonProperty(UID)
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[a-zA-Z0-9]{11}", message = "1002")
+    @Pattern(regexp = "[a-zA-Z0-9]{11}", message = ERROR_CODE_PATTERN)
     private String uid;
 
     @JsonInclude(NON_EMPTY)
     @JsonProperty(PLACE_OF_BIRTH)
-    @Pattern(regexp = "^[a-zA-Z0-9]{0,20}$", message = "1002")
+    @Pattern(regexp = "^[a-zA-Z0-9]{0,20}$", message = ERROR_CODE_PATTERN)
     private String placeOfBirth;
 
     @JsonProperty(RELIGION)
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[1|2|3|4|8|9|0]{1}", message = "1004")
+    @Pattern(regexp = "[1|2|3|4|8|9|0]{1}", message = ERROR_CODE_INVALID)
     private String religion;
 
     @JsonProperty(BLOOD_GROUP)
     @JsonInclude(NON_EMPTY)
-    @Code(type = "blood_group", regexp = "[\\d]{1}", message = "1004")
+    @Code(type = "blood_group", regexp = "[\\d]{1}", message = ERROR_CODE_INVALID)
     private String bloodGroup;
 
     @JsonProperty(NATIONALITY)
     @JsonInclude(NON_EMPTY)
-    @Length(max = 50, message = "1002")
+    @Length(max = 50, message = ERROR_CODE_PATTERN)
     private String nationality;
 
     @JsonProperty(DISABILITY)
     @JsonInclude(NON_EMPTY)
-    @Code(type = DISABILITY, regexp = "[\\d]{1}", message = "1004")
+    @Code(type = DISABILITY, regexp = "[\\d]{1}", message = ERROR_CODE_INVALID)
     private String disability;
 
     @JsonProperty(ETHNICITY)
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[0-9]{2}", message = "1004")
+    @Pattern(regexp = "[0-9]{2}", message = ERROR_CODE_INVALID)
     private String ethnicity;
 
     @JsonProperty(PRESENT_ADDRESS)
-    @NotNull(message = "1001", groups = RequiredGroup.class)
+    @NotNull(message = ERROR_CODE_REQUIRED, groups = RequiredGroup.class)
     @Valid
-    @Location(message = "1004", country_code = "050")
+    @Location(message = ERROR_CODE_INVALID, country_code = COUNTRY_CODE_BANGLADESH)
     private Address address;
 
     @JsonProperty(PRIMARY_CONTACT)
     @JsonInclude(NON_EMPTY)
-    @Length(max = 100, message = "1002")
+    @Length(max = 100, message = ERROR_CODE_PATTERN)
     private String primaryContact;
 
     @JsonProperty(PHONE_NUMBER)
@@ -141,12 +144,12 @@ public class PatientData {
     @JsonProperty(PERMANENT_ADDRESS)
     @Valid
     @JsonInclude(NON_EMPTY)
-    @Location(message = "1004")
+    @Location(message = ERROR_CODE_INVALID)
     private Address permanentAddress;
 
     @JsonProperty(MARITAL_STATUS)
     @JsonInclude(NON_EMPTY)
-    @Code(type = MARITAL_STATUS, regexp = "[\\d]{1}", message = "1004")
+    @Code(type = MARITAL_STATUS, regexp = "[\\d]{1}", message = ERROR_CODE_INVALID)
     private String maritalStatus;
 
     @JsonProperty(FULL_NAME)
@@ -155,12 +158,12 @@ public class PatientData {
 
     @JsonProperty(PATIENT_STATUS)
     @JsonInclude(NON_EMPTY)
-    @Code(type = PATIENT_STATUS, regexp = "[\\d]{1}", message = "1004")
+    @Code(type = PATIENT_STATUS, regexp = "[\\d]{1}", message = ERROR_CODE_INVALID)
     private String status;
 
     @JsonProperty(DATE_OF_DEATH)
     @JsonInclude(NON_EMPTY)
-    @Date(format = "yyyy-MM-dd", message = "1002")
+    @Date(format = DateUtil.DEFAULT_DATE_FORMAT, message = ERROR_CODE_PATTERN)
     private String dateOfDeath;
 
     @JsonProperty(CREATED)

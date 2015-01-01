@@ -104,6 +104,18 @@ public class PatientQueryBuilder {
     public static final String PRIMARY_CONTACT_NUMBER_COUNTRY_CODE = "primary_contact_number_country_code";
     public static final String PRIMARY_CONTACT_NUMBER_AREA_CODE = "primary_contact_number_area_code";
     public static final String PRIMARY_CONTACT_NUMBER_EXTENSION = "primary_contact_number_extension";
+    public static final String LOCATION_LEVEL1 = "location_level1";
+    public static final String LOCATION_LEVEL2 = "location_level2";
+    public static final String LOCATION_LEVEL3 = "location_level3";
+    public static final String LOCATION_LEVEL4 = "location_level4";
+    public static final String LOCATION_LEVEL5 = "location_level5";
+    public static final String LOCATION_LEVEL6 = "location_level6";
+    public static final String CREATED_AT = "created_at";
+    public static final String UPDATED_AT = "updated_at";
+    public static final String CREATED_BY = "created_by";
+    public static final String UPDATED_BY = "updated_by";
+    public static final String LOWER_SUR_NAME = "lower_sur_name";
+    public static final String LOWER_GIVEN_NAME = "lower_given_name";
 
     public static String buildFindByHidStmt(String[] values) {
         return select().from(CF_PATIENT).where(in(HEALTH_ID, values)).toString();

@@ -12,6 +12,7 @@ import org.sharedhealth.mci.validation.constraints.Code;
 import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
+import static org.sharedhealth.mci.web.utils.ErrorConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
 @JsonIgnoreProperties({"geoCode"})
@@ -19,62 +20,62 @@ public class Address {
 
     @JsonProperty(ADDRESS_LINE)
     @NotNull(message = "1001", groups = RequiredOnUpdateGroup.class)
-    @Size(min = 3, max = 255, message = "1002")
+    @Size(min = 3, max = 255, message = ERROR_CODE_PATTERN)
     private String addressLine;
 
     @JsonProperty(DIVISION_ID)
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[\\d]{2}", message = "1002")
+    @Pattern(regexp = "[\\d]{2}", message = ERROR_CODE_PATTERN)
     private String divisionId;
 
     @JsonProperty(DISTRICT_ID)
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[\\d]{2}", message = "1002")
+    @Pattern(regexp = "[\\d]{2}", message = ERROR_CODE_PATTERN)
     private String districtId;
 
     @JsonProperty(UPAZILA_ID)
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[\\d]{2}", message = "1002")
+    @Pattern(regexp = "[\\d]{2}", message = ERROR_CODE_PATTERN)
     private String upazilaId;
 
     @JsonProperty(CITY_CORPORATION_ID)
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[\\d]{2}", message = "1002")
+    @Pattern(regexp = "[\\d]{2}", message = ERROR_CODE_PATTERN)
     private String cityCorporationId;
 
     @JsonProperty(UNION_OR_URBAN_WARD_ID)
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[\\d]{2}", message = "1002")
+    @Pattern(regexp = "[\\d]{2}", message = ERROR_CODE_PATTERN)
     private String unionOrUrbanWardId;
 
     @JsonProperty(RURAL_WARD_ID)
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[\\d]{2}", message = "1002")
+    @Pattern(regexp = "[\\d]{2}", message = ERROR_CODE_PATTERN)
     private String ruralWardId;
 
     @JsonProperty(HOLDING_NUMBER)
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "1002")
+    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = ERROR_CODE_PATTERN)
     private String holdingNumber;
 
     @JsonProperty(STREET)
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "1002")
+    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = ERROR_CODE_PATTERN)
     private String street;
 
     @JsonProperty(AREA_MOUJA)
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "1002")
+    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = ERROR_CODE_PATTERN)
     private String areaMouja;
 
     @JsonProperty(VILLAGE)
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "1002")
+    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = ERROR_CODE_PATTERN)
     private String village;
 
     @JsonProperty(POST_OFFICE)
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = "1002")
+    @Pattern(regexp = "^[\\s\\S]{0,50}$", message = ERROR_CODE_PATTERN)
     private String postOffice;
 
     @JsonProperty(POST_CODE)
@@ -84,7 +85,7 @@ public class Address {
 
     @JsonProperty(COUNTRY_CODE)
     @JsonInclude(NON_EMPTY)
-    @Code(type = "country_code", regexp = "[\\d]{3}", message = "1004")
+    @Code(type = COUNTRY_CODE, regexp = "[\\d]{3}", message = ERROR_CODE_INVALID)
     private String countryCode = "050";
 
     public Address() {

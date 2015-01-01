@@ -56,4 +56,13 @@ public class JsonConstants {
     public static final String FIELD_NAME = "field_name";
     public static final String CURRENT_VALUE = "current_value";
     public static final String FIELD_DETAILS = "field_details";
+
+    //TODO: merge it with phone_number
+    public static final String PHONE_NO = "phone_no";
+    public static final String HTTP_STATUS = "http_status";
+    public static final String ADDITIONAL_INFO = "additional_info";
+    //TODO: merge it with edu_level
+    public static final String EDUCATION_LEVEL = "education_level";
+    public static final String RELATIONAL_STATUS = "relational_status";
+    public static final String MARRIAGE_ID = "marriage_id";
 }

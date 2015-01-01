@@ -5,6 +5,9 @@ import javax.validation.ConstraintValidatorContext;
 import org.sharedhealth.mci.validation.constraints.MaritalRelation;
 import org.sharedhealth.mci.web.mapper.PatientData;
 
+import static org.sharedhealth.mci.web.utils.PatientDataConstants.MARITAL_STATUS_UNMARRIED;
+import static org.sharedhealth.mci.web.utils.PatientDataConstants.RELATION_SPOUSE;
+
 public class MaritalRelationValidator implements ConstraintValidator<MaritalRelation, PatientData> {
 
     private String field;
@@ -19,7 +22,7 @@ public class MaritalRelationValidator implements ConstraintValidator<MaritalRela
 
         if (value == null) return true;
 
-        if (value.getRelationOfType("SPS") == null) return true;
+        if (value.getRelationOfType(RELATION_SPOUSE) == null) return true;
 
         if (isNotUnmarried(value.getMaritalStatus())) {
             return true;
@@ -33,6 +36,6 @@ public class MaritalRelationValidator implements ConstraintValidator<MaritalRela
     }
 
     private boolean isNotUnmarried(String maritalStatus) {
-        return maritalStatus != null && !(maritalStatus.equals("1"));
+        return !MARITAL_STATUS_UNMARRIED.equals(maritalStatus);
     }
 }

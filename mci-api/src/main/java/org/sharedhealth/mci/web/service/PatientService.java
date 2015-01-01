@@ -19,14 +19,19 @@ import java.util.*;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.sharedhealth.mci.web.utils.JsonConstants.HID;
+import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_INVALID;
+import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
 @Component
 public class PatientService {
 
+    private static final int PER_PAGE_MAXIMUM_LIMIT = 25;
     private static final String PER_PAGE_MAXIMUM_LIMIT_NOTE = "There are more record for this search criteria. " +
             "Please narrow down your search";
-    private static final int PER_PAGE_MAXIMUM_LIMIT = 25;
+    public static final String MESSAGE_INSUFFICIENT_PRIVILEGE = "insufficient.privilege";
+    public static final String MESSAGE_INVALID_PENDING_APPROVALS = "invalid.pending.approvals";
+    public static final String MESSAGE_PENDING_APPROVALS_MISMATCH = "pending.approvals.mismatch";
+
     private PatientRepository patientRepository;
     private FacilityRegistryWrapper facilityRegistryWrapper;
     private SettingService settingService;
@@ -80,7 +85,7 @@ public class PatientService {
     public MCIResponse update(PatientData patient, String healthId) {
         if (patient.getHealthId() != null && !StringUtils.equals(patient.getHealthId(), healthId)) {
             DirectFieldBindingResult bindingResult = new DirectFieldBindingResult(patient, "patient");
-            bindingResult.addError(new FieldError("patient", "hid", "1004"));
+            bindingResult.addError(new FieldError("patient", HID, ERROR_CODE_INVALID));
             throw new ValidationException(bindingResult);
         }
         return patientRepository.update(patient, healthId);
@@ -165,13 +170,13 @@ public class PatientService {
 
     private void verifyCatchment(PatientData patient, Catchment catchment) {
         if (!patient.belongsTo(catchment)) {
-            throw new InsufficientPrivilegeException("insufficient.privilege");
+            throw new InsufficientPrivilegeException(MESSAGE_INSUFFICIENT_PRIVILEGE);
         }
     }
 
     private void verifyPendingApprovalDetails(PatientData patient, PatientData existingPatient) {
         if (isEmpty(existingPatient.getPendingApprovals())) {
-            throw new IllegalArgumentException("invalid.pending.approvals");
+            throw new IllegalArgumentException(MESSAGE_INVALID_PENDING_APPROVALS);
         }
         List<String> fieldNames = patient.findNonEmptyFieldNames();
         fieldNames.remove(HID);
@@ -180,12 +185,12 @@ public class PatientService {
             String fieldName = pendingApproval.getName();
             Object value = patient.getValue(fieldName);
             if (value != null && !pendingApproval.contains(value)) {
-                throw new IllegalArgumentException("pending.approvals.mismatch");
+                throw new IllegalArgumentException(MESSAGE_PENDING_APPROVALS_MISMATCH);
             }
             fieldNames.remove(fieldName);
         }
         if (isNotEmpty(fieldNames)) {
-            throw new IllegalArgumentException("pending.approvals.mismatch");
+            throw new IllegalArgumentException(MESSAGE_PENDING_APPROVALS_MISMATCH);
         }
     }
 }

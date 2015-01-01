@@ -4,6 +4,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class Catchment {
 
+    public static final String ERROR_DIVISION_ID_REQUIRED = "Division ID cannot be blank";
     private String divisionId;
     private String districtId;
     private String upazilaId;
@@ -13,14 +14,14 @@ public class Catchment {
 
     public Catchment(String divisionId) {
         if (isBlank(divisionId)) {
-            throw new IllegalArgumentException("Division ID cannot be blank");
+            throw new IllegalArgumentException(ERROR_DIVISION_ID_REQUIRED);
         }
         this.divisionId = divisionId;
     }
 
     public Catchment(String divisionId, String districtId, String upazilaId) {
         if (isBlank(divisionId)) {
-            throw new IllegalArgumentException("Division ID cannot be blank");
+            throw new IllegalArgumentException(ERROR_DIVISION_ID_REQUIRED);
         }
         this.divisionId = divisionId;
         this.districtId = districtId;

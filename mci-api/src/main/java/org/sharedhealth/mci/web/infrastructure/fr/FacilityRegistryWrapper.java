@@ -6,8 +6,6 @@ import java.util.concurrent.ExecutionException;
 import org.sharedhealth.mci.web.config.MCIProperties;
 import org.sharedhealth.mci.web.exception.FacilityNotFoundException;
 import org.sharedhealth.mci.web.mapper.Facility;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
@@ -25,7 +23,7 @@ import org.springframework.web.client.AsyncRestTemplate;
 @Component
 public class FacilityRegistryWrapper {
 
-    private static final Logger logger = LoggerFactory.getLogger(FacilityRegistryWrapper.class);
+    public static final String AUTH_KEY = "X-Auth-Token";
     private AsyncRestTemplate mciRestTemplate;
     private MCIProperties mciProperties;
 
@@ -38,7 +36,7 @@ public class FacilityRegistryWrapper {
 
     private HttpEntity getHttpEntityWithAuthenticationHeader() {
         MultiValueMap<String, String> header = new LinkedMultiValueMap<>();
-        header.add("X-Auth-Token", mciProperties.getFacilityRegistryToken());
+        header.add(AUTH_KEY, mciProperties.getFacilityRegistryToken());
         return new HttpEntity(header);
     }
 

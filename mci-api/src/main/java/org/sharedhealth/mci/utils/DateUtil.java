@@ -8,6 +8,9 @@ import static java.util.TimeZone.getTimeZone;
 
 public class DateUtil {
 
+    public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
+    private static final String ISO_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm'Z'";
+
     public static Date string2Date(String value, String format) {
 
         if (value == null || value.trim().equals("")) {
@@ -24,11 +27,11 @@ public class DateUtil {
     }
 
     public static Date string2Date(String value) {
-        return string2Date(value, "yyyy-MM-dd");
+        return string2Date(value, DEFAULT_DATE_FORMAT);
     }
 
     public static String toIsoFormat(long date) {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+        DateFormat dateFormat = new SimpleDateFormat(ISO_DATE_TIME_FORMAT);
         dateFormat.setTimeZone(getTimeZone("UTC"));
         return dateFormat.format(date);
     }

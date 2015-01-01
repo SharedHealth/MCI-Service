@@ -9,23 +9,25 @@ import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.validation.constraints.Length;
 import org.sharedhealth.mci.validation.constraints.SearchQueryConstraint;
 
+import static org.sharedhealth.mci.web.utils.ErrorConstants.*;
+
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@SearchQueryConstraint(message = "1006")
+@SearchQueryConstraint(message = ERROR_CODE_SEARCH_PARAMETER)
 public class SearchQuery extends PaginationQuery {
     @JsonProperty("full_name")
     private String full_name;
 
     @JsonProperty("nid")
-    @Pattern(regexp = "[\\d]{13}|[\\d]{17}", message = "1002")
+    @Pattern(regexp = "[\\d]{13}|[\\d]{17}", message = ERROR_CODE_PATTERN)
     private String nid;
 
     @JsonProperty("bin_brn")
-    @Pattern(regexp = "[\\d]{17}", message = "1002")
+    @Pattern(regexp = "[\\d]{17}", message = ERROR_CODE_PATTERN)
     private String bin_brn;
 
     @JsonProperty("uid")
-    @Pattern(regexp = "[a-zA-Z0-9]{11}", message = "1002")
+    @Pattern(regexp = "[a-zA-Z0-9]{11}", message = ERROR_CODE_PATTERN)
     private String uid;
 
     @JsonProperty("present_address")
@@ -36,27 +38,27 @@ public class SearchQuery extends PaginationQuery {
     private String upazilaId;
 
     @JsonProperty("sur_name")
-    @Pattern(regexp = "^(\\s*)([A-Za-z0-9]{1,25})(\\b\\s*$)", message = "1002")
+    @Pattern(regexp = "^(\\s*)([A-Za-z0-9]{1,25})(\\b\\s*$)", message = ERROR_CODE_PATTERN)
     private String sur_name;
 
     @JsonProperty("given_name")
-    @Length(max = 100, min = 1, message = "1002")
+    @Length(max = 100, min = 1, message = ERROR_CODE_PATTERN)
     private String given_name;
 
     @JsonProperty("phone_no")
-    @Pattern(regexp = "[0-9]{1,12}$", message = "1002")
+    @Pattern(regexp = "[0-9]{1,12}$", message = ERROR_CODE_PATTERN)
     private String phone_no;
 
     @JsonProperty("country_code")
-    @Pattern(regexp = "[0-9]*$", message = "1002")
+    @Pattern(regexp = "[0-9]*$", message = ERROR_CODE_PATTERN)
     private String country_code;
 
     @JsonProperty("area_code")
-    @Pattern(regexp = "[0-9]*$", message = "1002")
+    @Pattern(regexp = "[0-9]*$", message = ERROR_CODE_PATTERN)
     private String area_code;
 
     @JsonProperty("extension")
-    @Pattern(regexp = "[0-9]*$", message = "1002")
+    @Pattern(regexp = "[0-9]*$", message = ERROR_CODE_PATTERN)
     private String extension;
 
 

@@ -7,11 +7,13 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import java.lang.String;
 
+import static org.sharedhealth.mci.web.utils.JsonConstants.HTTP_STATUS;
+
 @JsonIgnoreProperties(value = { "httpStatusObject" })
-@JsonPropertyOrder({"http_status","id"})
+@JsonPropertyOrder({HTTP_STATUS,"id"})
 public class MCIResponse {
 
-    @JsonProperty("http_status")
+    @JsonProperty(HTTP_STATUS)
     public int httpStatus;
 
     public String id;

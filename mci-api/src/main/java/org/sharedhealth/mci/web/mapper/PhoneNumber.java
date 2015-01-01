@@ -8,28 +8,29 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
+import static org.sharedhealth.mci.web.utils.ErrorConstants.*;
 
 public class PhoneNumber {
 
     @JsonProperty("country_code")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[0-9]*$", message = "1002")
+    @Pattern(regexp = "[0-9]*$", message = ERROR_CODE_PATTERN)
     private String countryCode;
 
     @JsonProperty("area_code")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[0-9]*$", message = "1002")
+    @Pattern(regexp = "[0-9]*$", message = ERROR_CODE_PATTERN)
     private String areaCode;
 
     @JsonProperty("number")
     @JsonInclude(NON_EMPTY)
-    @NotNull(message = "1001", groups = RequiredOnUpdateGroup.class)
-    @Pattern(regexp = "[0-9]{1,12}$", message = "1002")
+    @NotNull(message = ERROR_CODE_REQUIRED, groups = RequiredOnUpdateGroup.class)
+    @Pattern(regexp = "[0-9]{1,12}$", message = ERROR_CODE_PATTERN)
     private String number;
 
     @JsonProperty("extension")
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[0-9]*$", message = "1002")
+    @Pattern(regexp = "[0-9]*$", message = ERROR_CODE_PATTERN)
     private String extension;
 
     public String getCountryCode() {

@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import org.sharedhealth.mci.web.handler.ErrorHandler;
+import org.sharedhealth.mci.web.utils.JsonConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -29,6 +30,16 @@ public class GlobalExceptionHandler {
     public static final int ERROR_CODE_JSON_PARSE = 2001;
     public static final int ERROR_CODE_UNRECOGNIZED_FIELD = 2002;
     public static final int ERROR_CODE_FIELD_NOT_PERMITTED = 3001;
+    private static final String MESSAGE_VALIDATION_ERROR = "validation error";
+    private static final String MESSAGE_INVALID_REQUEST = "invalid.request";
+    private static final String MESSAGE_INVALID_JSON = "invalid.json";
+    private static final String MESSAGE_UNRECOGNIZED_FIELD = "Unrecognized field: '%s'";
+    private static final String MESSAGE_PATIENT_NOT_FOUND = "patient.not.found";
+    private static final String MESSAGE_FACILITY_NOT_FOUND = "facility.not.found";
+    private static final String MESSAGE_PATIENT_ALREADY_EXIST_WITH_HEALTH_ID = "Patient already exist with health id: %s";
+    private static final String MESSAGE_PERMISSION_ERROR = "permission.error";
+    private static final String MESSAGE_HID_FIELD_IS_NOT_PERMITTED = "hid field is not permitted";
+    private static final String MESSAGE_INTERNAL_SERVER_ERROR = "internal.server.error";
 
     @ResponseStatus(value = BAD_REQUEST)
     @ExceptionHandler(ValidationException.class)
@@ -37,7 +48,7 @@ public class GlobalExceptionHandler {
 
         logger.error("Handling ValidationException. ", e);
         ErrorHandler errorHandler = new ErrorHandler(BAD_REQUEST.value(),
-                ErrorHandler.VALIDATION_ERROR_CODE, "validation error");
+                ErrorHandler.VALIDATION_ERROR_CODE, MESSAGE_VALIDATION_ERROR);
 
         return errorHandler.handleValidationError(errorHandler, e);
     }
@@ -49,21 +60,21 @@ public class GlobalExceptionHandler {
         logger.error("Handling HttpMessageNotReadableExceptionException. ", e);
 
         int code = BAD_REQUEST.value();
-        String msg = "invalid.request";
+        String msg = MESSAGE_INVALID_REQUEST;
         String field = null;
         Throwable cause = e.getCause();
         ErrorHandler errorHandler = null;
         if (cause != null && cause.getClass() == UnrecognizedPropertyException.class) {
             errorHandler = new ErrorHandler(BAD_REQUEST.value(),
-                    ErrorHandler.INVALID_REQUEST_ERROR_CODE, "invalid.request");
+                    ErrorHandler.INVALID_REQUEST_ERROR_CODE, MESSAGE_INVALID_REQUEST);
             code = ERROR_CODE_UNRECOGNIZED_FIELD;
             field = ((UnrecognizedPropertyException) cause).getPropertyName();
-            msg = "Unrecognized field: '" + field + "'";
+            msg = String.format(MESSAGE_UNRECOGNIZED_FIELD, field);
         } else if (cause != null) {
             errorHandler = new ErrorHandler(BAD_REQUEST.value(),
-                    ErrorHandler.INVALID_REQUEST_ERROR_CODE, "invalid.request");
+                    ErrorHandler.INVALID_REQUEST_ERROR_CODE, MESSAGE_INVALID_REQUEST);
             code = ERROR_CODE_JSON_PARSE;
-            msg = "invalid.json";
+            msg = MESSAGE_INVALID_JSON;
         }
 
         return errorHandler != null ? errorHandler.handleHttpMessageNotReadableError(errorHandler, code, msg, field) : null;
@@ -74,7 +85,7 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public ErrorHandler handlePatientNotFoundException(PatientNotFoundException e) {
         logger.error("Handling PatientNotFoundException. ", e);
-        return new ErrorHandler(NOT_FOUND.value(), "patient.not.found");
+        return new ErrorHandler(NOT_FOUND.value(), MESSAGE_PATIENT_NOT_FOUND);
     }
 
     @ResponseStatus(value = NOT_FOUND)
@@ -83,7 +94,7 @@ public class GlobalExceptionHandler {
     public ErrorHandler handleFacilityNotFoundException(FacilityNotFoundException e) {
         logger.error("Handling FacilityNotFoundException. ", e);
 
-        return new ErrorHandler(NOT_FOUND.value(), "facility.not.found");
+        return new ErrorHandler(NOT_FOUND.value(), MESSAGE_FACILITY_NOT_FOUND);
     }
 
     @ResponseStatus(value = CONFLICT)
@@ -91,7 +102,7 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public ErrorInfo handlePatientAlreadyExistException(PatientAlreadyExistException e) {
         logger.error("Handling PatientAlreadyExistException. ", e);
-        return new ErrorInfo(CONFLICT.value(), "Patient already exist with health id: " + e.getMessage());
+        return new ErrorInfo(CONFLICT.value(), String.format(MESSAGE_PATIENT_ALREADY_EXIST_WITH_HEALTH_ID , e.getMessage()));
     }
 
     @ResponseStatus(value = BAD_REQUEST)
@@ -104,10 +115,10 @@ public class GlobalExceptionHandler {
         ErrorHandler errorHandler;
 
         errorHandler = new ErrorHandler(BAD_REQUEST.value(),
-                ErrorHandler.PERMISSION_ERROR_CODE, "permission.error");
+                ErrorHandler.PERMISSION_ERROR_CODE, MESSAGE_PERMISSION_ERROR);
         code = ERROR_CODE_FIELD_NOT_PERMITTED;
-        msg = "hid field is not permitted";
-        field = "hid";
+        msg = MESSAGE_HID_FIELD_IS_NOT_PERMITTED;
+        field = JsonConstants.HID;
 
         return errorHandler.handleHealthIDExistError(errorHandler, code, msg,field);
     }
@@ -121,7 +132,7 @@ public class GlobalExceptionHandler {
         ErrorHandler errorHandler;
 
         errorHandler = new ErrorHandler(BAD_REQUEST.value(),
-                ErrorHandler.VALIDATION_ERROR_CODE, "validation error");
+                ErrorHandler.VALIDATION_ERROR_CODE, MESSAGE_VALIDATION_ERROR);
 
         return errorHandler.handleSearchQueryParameterError(e);
     }
@@ -131,7 +142,7 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public ErrorInfo handleException(Exception e) {
         logger.error("Handling generic exception. ", e);
-        return new ErrorInfo(INTERNAL_SERVER_ERROR.value(), "internal.server.error");
+        return new ErrorInfo(INTERNAL_SERVER_ERROR.value(), MESSAGE_INTERNAL_SERVER_ERROR);
     }
 
     @JsonRootName(value = "error")
@@ -179,7 +190,8 @@ public class GlobalExceptionHandler {
 
         @Override
         public int compareTo(ErrorInfo e) {
-            return this.code > e.getCode() ? 1 : this.code < e.getCode() ? -1 : 0;
+            if (this.code < e.getCode()) return this.code > e.getCode() ? 1 : -1;
+            else return this.code > e.getCode() ? 1 : 0;
         }
     }
 }

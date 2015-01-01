@@ -12,16 +12,16 @@ import java.util.TreeSet;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.sharedhealth.mci.utils.DateUtil.DEFAULT_DATE_FORMAT;
 import static org.sharedhealth.mci.utils.DateUtil.string2Date;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.PENDING_APPROVALS;
 import static org.sharedhealth.mci.web.utils.JsonMapper.readValue;
 import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
+import static org.sharedhealth.mci.web.utils.PatientDataConstants.COUNTRY_CODE_BANGLADESH;
 
 @Table(value = "patient")
 public class Patient {
-
-    private static final String BD_COUNTRY_CODE = "050";
 
     @PrimaryKey(HEALTH_ID)
     private String healthId;
@@ -155,22 +155,22 @@ public class Patient {
     @Column(COUNTRY)
     private String countryCode;
 
-    @Column("location_level1")
+    @Column(LOCATION_LEVEL1)
     private String locationLevel1;
 
-    @Column("location_level2")
+    @Column(LOCATION_LEVEL2)
     private String locationLevel2;
 
-    @Column("location_level3")
+    @Column(LOCATION_LEVEL3)
     private String locationLevel3;
 
-    @Column("location_level4")
+    @Column(LOCATION_LEVEL4)
     private String locationLevel4;
 
-    @Column("location_level5")
+    @Column(LOCATION_LEVEL5)
     private String locationLevel5;
 
-    @Column("location_level6")
+    @Column(LOCATION_LEVEL6)
     private String locationLevel6;
 
     @Column(PERMANENT_ADDRESS_LINE)
@@ -251,25 +251,25 @@ public class Patient {
     @Column(PRIMARY_CONTACT_NUMBER_EXTENSION)
     private String primaryContactNumberExtension;
 
-    @Column("created_at")
+    @Column(CREATED_AT)
     private Date createdAt;
 
-    @Column("updated_at")
+    @Column(UPDATED_AT)
     private Date updatedAt;
 
-    @Column("created_by")
+    @Column(CREATED_BY)
     private String createdBy;
 
-    @Column("updated_by")
+    @Column(UPDATED_BY)
     private String updatedBy;
 
     @Column(RELATIONS)
     private String relations;
 
-    @Column("lower_sur_name")
+    @Column(LOWER_SUR_NAME)
     private String lowerSurName;
 
-    @Column("lower_given_name")
+    @Column(LOWER_GIVEN_NAME)
     private String lowerGivenName;
 
     @Column(PENDING_APPROVALS)
@@ -992,7 +992,7 @@ public class Patient {
     }
 
     public void setPermanentCountryCode(String permanentCountryCode) {
-        this.permanentCountryCode = defaultString(permanentCountryCode, BD_COUNTRY_CODE);
+        this.permanentCountryCode = defaultString(permanentCountryCode, COUNTRY_CODE_BANGLADESH);
     }
 
     public Date getCreatedAt() {
@@ -1230,7 +1230,7 @@ public class Patient {
     }
 
     public void setDateOfDeath(String dateOfDeath) {
-        this.dateOfDeath = string2Date(dateOfDeath, "yyyy-MM-dd");
+        this.dateOfDeath = string2Date(dateOfDeath, DEFAULT_DATE_FORMAT);
     }
 
 }

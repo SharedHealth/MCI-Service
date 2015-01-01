@@ -11,17 +11,19 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import org.springframework.http.HttpStatus;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
+import static org.sharedhealth.mci.web.utils.JsonConstants.ADDITIONAL_INFO;
+import static org.sharedhealth.mci.web.utils.JsonConstants.HTTP_STATUS;
 
 @JsonIgnoreProperties(value = {"httpStatusObject"})
-@JsonPropertyOrder({"http_status", "results", "additional_info"})
+@JsonPropertyOrder({HTTP_STATUS, "results", ADDITIONAL_INFO})
 public class MCIMultiResponse<T> {
 
-    @JsonProperty("http_status")
+    @JsonProperty(HTTP_STATUS)
     public int httpStatus;
 
     public Collection<T> results;
 
-    @JsonProperty("additional_info")
+    @JsonProperty(ADDITIONAL_INFO)
     @JsonInclude(NON_EMPTY)
     public HashMap<String, String> additionalInfo;
 

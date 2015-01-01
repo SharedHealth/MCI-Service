@@ -13,69 +13,71 @@ import org.sharedhealth.mci.validation.constraints.Length;
 import org.sharedhealth.mci.validation.constraints.RelationType;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
+import static org.sharedhealth.mci.web.utils.ErrorConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
-@RelationType(message = "1001", field = "type")
+@RelationType(message = ERROR_CODE_REQUIRED, field = "type")
 public class Relation {
 
     private final String RELATION_TYPE = "type";
     private final String RELATIONS_CODE_TYPE = "relations";
+    
     @JsonProperty(RELATION_TYPE)
     @JsonInclude(NON_EMPTY)
-    @Code(type = RELATIONS_CODE_TYPE, message = "1004")
+    @Code(type = RELATIONS_CODE_TYPE, message = ERROR_CODE_INVALID)
     private String type;
 
     @JsonProperty(HID)
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[\\d]{19}", message = "1002")
+    @Pattern(regexp = "[\\d]{19}", message = ERROR_CODE_PATTERN)
     @JsonDeserialize(using = WhiteSpaceRemovalDeserializer.class)
     private String healthId;
 
-    @JsonProperty("nid")
+    @JsonProperty(NID)
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[\\d]{13}|[\\d]{17}", message = "1002")
+    @Pattern(regexp = "[\\d]{13}|[\\d]{17}", message = ERROR_CODE_PATTERN)
     @JsonDeserialize(using = WhiteSpaceRemovalDeserializer.class)
     private String nationalId;
 
     @JsonProperty(UID)
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[a-zA-Z0-9]{11}", message = "1002")
+    @Pattern(regexp = "[a-zA-Z0-9]{11}", message = ERROR_CODE_PATTERN)
     @JsonDeserialize(using = WhiteSpaceRemovalDeserializer.class)
     private String uid;
 
     @JsonProperty(BIN_BRN)
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[\\d]{17}", message = "1002")
+    @Pattern(regexp = "[\\d]{17}", message = ERROR_CODE_PATTERN)
     @JsonDeserialize(using = WhiteSpaceRemovalDeserializer.class)
     private String birthRegistrationNumber;
 
     @JsonProperty(NAME_BANGLA)
     @JsonInclude(NON_EMPTY)
-    @Length(max = 125, message = "1002")
+    @Length(max = 125, message = ERROR_CODE_PATTERN)
     @JsonDeserialize(using = WhiteSpaceRemovalDeserializer.class)
     private String nameBangla;
 
     @JsonProperty(GIVEN_NAME)
     @JsonInclude(NON_EMPTY)
-    @Length(max = 100, message = "1002")
+    @Length(max = 100, message = ERROR_CODE_PATTERN)
     @JsonDeserialize(using = WhiteSpaceRemovalDeserializer.class)
     private String givenName;
 
     @JsonProperty(SUR_NAME)
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[A-Za-z0-9]{0,25}", message = "1002")
+    @Pattern(regexp = "[A-Za-z0-9]{0,25}", message = ERROR_CODE_PATTERN)
     @JsonDeserialize(using = WhiteSpaceRemovalDeserializer.class)
     private String surName;
 
-    @JsonProperty("marriage_id")
+    @JsonProperty(MARRIAGE_ID)
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[a-zA-Z0-9]{8}", message = "1002")
+    @Pattern(regexp = "[a-zA-Z0-9]{8}", message = ERROR_CODE_PATTERN)
     @JsonDeserialize(using = WhiteSpaceRemovalDeserializer.class)
     private String marriageId;
 
-    @JsonProperty("relational_status")
+    @JsonProperty(RELATIONAL_STATUS)
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[3|4|5]", message = "1004")
+    @Pattern(regexp = "[3|4|5]", message = ERROR_CODE_INVALID)
     private String relationalStatus;
 
     @JsonProperty("id")

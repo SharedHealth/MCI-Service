@@ -15,6 +15,8 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang.time.DateFormatUtils.ISO_DATE_FORMAT;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_INVALID;
+import static org.sharedhealth.mci.web.utils.JsonConstants.RELATIONS;
 
 @Component
 public class PatientMapper {
@@ -323,7 +325,7 @@ public class PatientMapper {
 
         if (!isValidRelationBlock(r, relations)) {
             DirectFieldBindingResult bindingResult = new DirectFieldBindingResult(patient, "patient");
-            bindingResult.addError(new FieldError("patient", "relations", "1004"));
+            bindingResult.addError(new FieldError("patient", RELATIONS, ERROR_CODE_INVALID));
             throw new ValidationException(bindingResult);
         }
 

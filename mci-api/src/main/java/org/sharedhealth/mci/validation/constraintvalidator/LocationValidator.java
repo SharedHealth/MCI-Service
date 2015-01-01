@@ -128,11 +128,8 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
 
         LocationData location = locationService.findByGeoCode(geoCode);
 
-        if (location != null) {
-            return true;
-        }
+        return location != null;
 
-        return false;
     }
 
     private void addConstraintViolation(ConstraintValidatorContext context, String code, String field) {
