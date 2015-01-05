@@ -12,12 +12,14 @@ import org.springframework.boot.context.embedded.ServletContextInitializer;
 import org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.web.servlet.DispatcherServlet;
 
 import static java.lang.Integer.valueOf;
 import static java.lang.System.getenv;
 
 @Configuration
+@Import(WebMvcConfig.class)
 public class Main {
 
     @Bean
