@@ -65,4 +65,5 @@ public class JsonConstants {
     public static final String EDUCATION_LEVEL = "education_level";
     public static final String RELATIONAL_STATUS = "relational_status";
     public static final String MARRIAGE_ID = "marriage_id";
+    public static final String CONFIDENTIAL = "confidential";
 }

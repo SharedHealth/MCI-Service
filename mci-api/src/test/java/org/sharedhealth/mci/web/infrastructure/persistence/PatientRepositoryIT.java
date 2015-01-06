@@ -34,6 +34,7 @@ import static org.sharedhealth.mci.utils.FileUtil.asString;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.PHONE_NUMBER;
 import static org.sharedhealth.mci.web.utils.PatientDataConstants.PATIENT_STATUS_ALIVE;
+import static org.sharedhealth.mci.web.utils.PatientDataConstants.STRING_NO;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -95,6 +96,7 @@ public class PatientRepositoryIT {
         data.setCreatedAt(p.getCreatedAt());
         data.setUpdatedAt(p.getUpdatedAt());
         data.setStatus(PATIENT_STATUS_ALIVE);
+        data.setConfidential(STRING_NO);
 
         Address address = p.getAddress();
         address.setRuralWardId(null);

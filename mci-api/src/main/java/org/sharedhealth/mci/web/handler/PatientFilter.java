@@ -64,7 +64,7 @@ public class PatientFilter {
         patient.setMaritalStatus(processString(map, MARITAL_STATUS, existingPatient.getMaritalStatus(), patientToBeUpdated.getMaritalStatus()));
         patient.setFullName(processString(map, FULL_NAME, existingPatient.getFullName(), patientToBeUpdated.getFullName()));
         patient.setStatus(processString(map, PATIENT_STATUS, existingPatient.getStatus(), patientToBeUpdated.getStatus()));
-        patient.setDateOfDeath(processString(map, DATE_OF_DEATH, existingPatient.getDateOfDeath(), patientToBeUpdated.getDateOfDeath()));
+        patient.setConfidential(processString(map, CONFIDENTIAL, existingPatient.getConfidential(), patientToBeUpdated.getConfidential()));
         patient.setCreatedAt(processString(map, CREATED, existingPatient.getCreatedAt(), patientToBeUpdated.getCreatedAt()));
         patient.setUpdatedAt(processString(map, MODIFIED, existingPatient.getUpdatedAt(), patientToBeUpdated.getUpdatedAt()));
         patient.setPhoneNumber(processPhoneNumber(map, PHONE_NUMBER, existingPatient.getPhoneNumber(), patientToBeUpdated.getPhoneNumber()));

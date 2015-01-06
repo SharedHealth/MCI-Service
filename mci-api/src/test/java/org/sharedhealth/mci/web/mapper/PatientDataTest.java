@@ -202,6 +202,28 @@ public class PatientDataTest extends ValidationAwareMapper {
     }
 
     @Test
+    public void shouldPassIfPatientConfidentialIsValid() {
+        String[] validStatus = {"yes", "no", "Yes", "nO"};
+
+        for (String status : validStatus) {
+            Set<ConstraintViolation<PatientData>> constraintViolations = validator.validateValue(PatientData.class, "confidential", status);
+            assertEquals(0, constraintViolations.size());
+        }
+    }
+
+    @Test
+    public void shouldFailIfPatientConfidentialIsInvalid() {
+        String[] inValidStatus = {"", "somevalue", "ayes", "noa", "ayesd", "dnoa"};
+
+        for (String status : inValidStatus) {
+            Set<ConstraintViolation<PatientData>> constraintViolations = validator.validateValue(PatientData.class, "confidential", status);
+            assertEquals(1, constraintViolations.size());
+            assertEquals("1004", constraintViolations.iterator().next().getMessage());
+        }
+    }
+
+
+    @Test
     public void shouldRetrieveFieldValueFromJsonKey() {
         PatientData patient = new PatientData();
         patient.setGivenName("Harry");

@@ -70,6 +70,10 @@ public class PatientRepository extends BaseRepository {
             patient.setStatus(PATIENT_STATUS_ALIVE);
         }
 
+        if (patient.getConfidential() == null) {
+            patient.setConfidential(false);
+        }
+
         cassandraOps.execute(buildSaveBatch(patient, cassandraOps.getConverter()));
         return new MCIResponse(patient.getHealthId(), HttpStatus.CREATED);
     }

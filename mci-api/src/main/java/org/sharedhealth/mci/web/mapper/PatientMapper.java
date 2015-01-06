@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.model.Patient;
+import org.sharedhealth.mci.web.utils.PatientDataConstants;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.FieldError;
@@ -17,6 +18,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_INVALID;
 import static org.sharedhealth.mci.web.utils.JsonConstants.RELATIONS;
+import static org.sharedhealth.mci.web.utils.PatientDataConstants.STRING_YES;
 
 @Component
 public class PatientMapper {
@@ -82,6 +84,10 @@ public class PatientMapper {
 
         if (patient.getDateOfDeath() != null) {
             data.setDateOfDeath(ISO_DATE_FORMAT.format(patient.getDateOfDeath()));
+        }
+
+        if (patient.getConfidential() != null) {
+            mapConfidentiality(patient, data);
         }
 
         data.setMaritalStatus(patient.getMaritalStatus());
@@ -151,6 +157,14 @@ public class PatientMapper {
         return data;
     }
 
+    private void mapConfidentiality(Patient patient, PatientData data) {
+        if (patient.getConfidential()) {
+            data.setConfidential(PatientDataConstants.STRING_YES);
+        } else {
+            data.setConfidential(PatientDataConstants.STRING_NO);
+        }
+    }
+
     public Patient map(PatientData data, PatientData existing) {
         Patient patient = new Patient();
         prepareRelationBlock(data, existing, patient);
@@ -188,6 +202,10 @@ public class PatientMapper {
         patient.setStatus(data.getStatus());
         patient.setDateOfDeath(data.getDateOfDeath());
         patient.setMaritalStatus(data.getMaritalStatus());
+
+        if(data.getConfidential() != null) {
+            patient.setConfidential(STRING_YES.equalsIgnoreCase(data.getConfidential()));
+        }
 
         if (address != null) {
             mapAddress(patient, address);

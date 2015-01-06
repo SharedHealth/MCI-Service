@@ -76,5 +76,6 @@
     "country_code":"050"
   },
   "status":"1",
-  "date_of_death": null
+  "date_of_death": null,
+  "confidential": "No"
 }

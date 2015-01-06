@@ -62,5 +62,6 @@
         "country_code":"050"
     },
     "status":"2",
-    "date_of_death": "2014-01-01"
+    "date_of_death": "2014-01-01",
+    "confidential": "Yes"
 }

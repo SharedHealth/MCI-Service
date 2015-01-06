@@ -3,6 +3,7 @@ package org.sharedhealth.mci.web.model;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.sharedhealth.mci.web.mapper.PendingApproval;
+import org.sharedhealth.mci.web.utils.JsonConstants;
 import org.springframework.data.cassandra.mapping.Column;
 import org.springframework.data.cassandra.mapping.PrimaryKey;
 import org.springframework.data.cassandra.mapping.Table;
@@ -275,6 +276,9 @@ public class Patient {
     @Column(PENDING_APPROVALS)
     private String pendingApprovals;
 
+    @Column(JsonConstants.CONFIDENTIAL)
+    private Boolean confidential;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -289,6 +293,8 @@ public class Patient {
         if (bloodGroup != null ? !bloodGroup.equals(patient.bloodGroup) : patient.bloodGroup != null) return false;
         if (cellNo != null ? !cellNo.equals(patient.cellNo) : patient.cellNo != null) return false;
         if (cityCorporationId != null ? !cityCorporationId.equals(patient.cityCorporationId) : patient.cityCorporationId != null)
+            return false;
+        if (confidential != null ? !confidential.equals(patient.confidential) : patient.confidential != null)
             return false;
         if (countryCode != null ? !countryCode.equals(patient.countryCode) : patient.countryCode != null) return false;
         if (createdAt != null ? !createdAt.equals(patient.createdAt) : patient.createdAt != null) return false;
@@ -501,6 +507,7 @@ public class Patient {
         result = 31 * result + (lowerSurName != null ? lowerSurName.hashCode() : 0);
         result = 31 * result + (lowerGivenName != null ? lowerGivenName.hashCode() : 0);
         result = 31 * result + (pendingApprovals != null ? pendingApprovals.hashCode() : 0);
+        result = 31 * result + (confidential != null ? confidential.hashCode() : 0);
         return result;
     }
 
@@ -1233,4 +1240,11 @@ public class Patient {
         this.dateOfDeath = string2Date(dateOfDeath, DEFAULT_DATE_FORMAT);
     }
 
+    public Boolean getConfidential() {
+        return confidential;
+    }
+
+    public void setConfidential(Boolean confidential) {
+        this.confidential = confidential;
+    }
 }

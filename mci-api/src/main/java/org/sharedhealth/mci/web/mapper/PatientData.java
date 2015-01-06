@@ -14,6 +14,7 @@ import org.sharedhealth.mci.validation.group.RequiredGroup;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Pattern.Flag;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -160,6 +161,11 @@ public class PatientData {
     @JsonInclude(NON_EMPTY)
     @Code(type = PATIENT_STATUS, regexp = "[\\d]{1}", message = ERROR_CODE_INVALID)
     private String status;
+
+    @JsonProperty(CONFIDENTIAL)
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "^(yes|no)$", message = ERROR_CODE_INVALID, flags = Flag.CASE_INSENSITIVE)
+    private String confidential;
 
     @JsonProperty(DATE_OF_DEATH)
     @JsonInclude(NON_EMPTY)
@@ -519,6 +525,7 @@ public class PatientData {
         if (birthRegistrationNumber != null ? !birthRegistrationNumber.equals(that.birthRegistrationNumber) : that.birthRegistrationNumber != null)
             return false;
         if (bloodGroup != null ? !bloodGroup.equals(that.bloodGroup) : that.bloodGroup != null) return false;
+        if (confidential != null ? !confidential.equals(that.confidential) : that.confidential != null) return false;
         if (createdAt != null ? !createdAt.equals(that.createdAt) : that.createdAt != null) return false;
         if (dateOfBirth != null ? !dateOfBirth.equals(that.dateOfBirth) : that.dateOfBirth != null) return false;
         if (dateOfDeath != null ? !dateOfDeath.equals(that.dateOfDeath) : that.dateOfDeath != null) return false;
@@ -584,6 +591,7 @@ public class PatientData {
         result = 31 * result + (maritalStatus != null ? maritalStatus.hashCode() : 0);
         result = 31 * result + (fullName != null ? fullName.hashCode() : 0);
         result = 31 * result + (status != null ? status.hashCode() : 0);
+        result = 31 * result + (confidential != null ? confidential.hashCode() : 0);
         result = 31 * result + (dateOfDeath != null ? dateOfDeath.hashCode() : 0);
         result = 31 * result + (createdAt != null ? createdAt.hashCode() : 0);
         result = 31 * result + (updatedAt != null ? updatedAt.hashCode() : 0);
@@ -633,5 +641,13 @@ public class PatientData {
 
     public void setDateOfDeath(String dateOfDeath) {
         this.dateOfDeath = dateOfDeath;
+    }
+
+    public String getConfidential() {
+        return confidential;
+    }
+
+    public void setConfidential(String confidential) {
+        this.confidential = confidential;
     }
 }
