@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import static java.lang.String.valueOf;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
 public class PatientFilter {
@@ -40,77 +41,68 @@ public class PatientFilter {
 
     private Map<String, Object> filterFeilds(PatientData patient) {
         HashMap<String, Object> map = new HashMap<>();
-        patient.setHealthId(toBeApproved(map, HID, existingPatient.getHealthId(), patientToBeUpdated.getHealthId()));
-        patient.setNationalId(toBeApproved(map, NID, existingPatient.getNationalId(), patientToBeUpdated.getNationalId()));
-        patient.setNameBangla(toBeApproved(map, NAME_BANGLA, existingPatient.getNameBangla(), patientToBeUpdated.getNameBangla()));
-        patient.setBirthRegistrationNumber(toBeApproved(map, BIN_BRN, existingPatient.getBirthRegistrationNumber(), patientToBeUpdated.getBirthRegistrationNumber()));
-        patient.setGivenName(toBeApproved(map, GIVEN_NAME, existingPatient.getGivenName(), patientToBeUpdated.getGivenName()));
-        patient.setSurName(toBeApproved(map, SUR_NAME, existingPatient.getSurName(), patientToBeUpdated.getSurName()));
-        patient.setDateOfBirth(toBeApproved(map, DATE_OF_BIRTH, existingPatient.getDateOfBirth(), patientToBeUpdated.getDateOfBirth()));
-        patient.setGender(toBeApproved(map, GENDER, existingPatient.getGender(), patientToBeUpdated.getGender()));
-        patient.setOccupation(toBeApproved(map, OCCUPATION, existingPatient.getOccupation(), patientToBeUpdated.getOccupation()));
-        patient.setEducationLevel(toBeApproved(map, EDU_LEVEL, existingPatient.getEducationLevel(), patientToBeUpdated.getEducationLevel()));
+        patient.setHealthId(processString(map, HID, existingPatient.getHealthId(), patientToBeUpdated.getHealthId()));
+        patient.setNationalId(processString(map, NID, existingPatient.getNationalId(), patientToBeUpdated.getNationalId()));
+        patient.setNameBangla(processString(map, NAME_BANGLA, existingPatient.getNameBangla(), patientToBeUpdated.getNameBangla()));
+        patient.setBirthRegistrationNumber(processString(map, BIN_BRN, existingPatient.getBirthRegistrationNumber(), patientToBeUpdated.getBirthRegistrationNumber()));
+        patient.setGivenName(processString(map, GIVEN_NAME, existingPatient.getGivenName(), patientToBeUpdated.getGivenName()));
+        patient.setSurName(processString(map, SUR_NAME, existingPatient.getSurName(), patientToBeUpdated.getSurName()));
+        patient.setDateOfBirth(processString(map, DATE_OF_BIRTH, existingPatient.getDateOfBirth(), patientToBeUpdated.getDateOfBirth()));
+        patient.setGender(processString(map, GENDER, existingPatient.getGender(), patientToBeUpdated.getGender()));
+        patient.setOccupation(processString(map, OCCUPATION, existingPatient.getOccupation(), patientToBeUpdated.getOccupation()));
+        patient.setEducationLevel(processString(map, EDU_LEVEL, existingPatient.getEducationLevel(), patientToBeUpdated.getEducationLevel()));
         //TODO : rewrite after relations bug is fixed.
         patient.setRelations(patientToBeUpdated.getRelations());
-        patient.setUid(toBeApproved(map, UID, existingPatient.getUid(), patientToBeUpdated.getUid()));
-        patient.setPlaceOfBirth(toBeApproved(map, PLACE_OF_BIRTH, existingPatient.getPlaceOfBirth(), patientToBeUpdated.getPlaceOfBirth()));
-        patient.setReligion(toBeApproved(map, RELIGION, existingPatient.getReligion(), patientToBeUpdated.getReligion()));
-        patient.setBloodGroup(toBeApproved(map, BLOOD_GROUP, existingPatient.getBloodGroup(), patientToBeUpdated.getBloodGroup()));
-        patient.setNationality(toBeApproved(map, NATIONALITY, existingPatient.getNationality(), patientToBeUpdated.getNationality()));
-        patient.setDisability(toBeApproved(map, DISABILITY, existingPatient.getDisability(), patientToBeUpdated.getDisability()));
-        patient.setEthnicity(toBeApproved(map, ETHNICITY, existingPatient.getEthnicity(), patientToBeUpdated.getEthnicity()));
-        patient.setPrimaryContact(toBeApproved(map, PRIMARY_CONTACT, existingPatient.getPrimaryContact(), patientToBeUpdated.getPrimaryContact()));
-        patient.setMaritalStatus(toBeApproved(map, MARITAL_STATUS, existingPatient.getMaritalStatus(), patientToBeUpdated.getMaritalStatus()));
-        patient.setFullName(toBeApproved(map, FULL_NAME, existingPatient.getFullName(), patientToBeUpdated.getFullName()));
-        patient.setStatus(toBeApproved(map, PATIENT_STATUS, existingPatient.getStatus(), patientToBeUpdated.getStatus()));
-        patient.setDateOfDeath(toBeApproved(map, DATE_OF_DEATH, existingPatient.getDateOfDeath(), patientToBeUpdated.getDateOfDeath()));
-        patient.setCreatedAt(toBeApproved(map, CREATED, existingPatient.getCreatedAt(), patientToBeUpdated.getCreatedAt()));
-        patient.setUpdatedAt(toBeApproved(map, MODIFIED, existingPatient.getUpdatedAt(), patientToBeUpdated.getUpdatedAt()));
-        patient.setPhoneNumber(toBeapprovedPhoneNumber(map, PHONE_NUMBER, existingPatient.getPhoneNumber(), patientToBeUpdated.getPhoneNumber()));
-        patient.setPrimaryContactNumber(toBeapprovedPhoneNumber(map, PRIMARY_CONTACT_NUMBER, existingPatient.getPrimaryContactNumber(), patientToBeUpdated.getPrimaryContactNumber()));
+        patient.setUid(processString(map, UID, existingPatient.getUid(), patientToBeUpdated.getUid()));
+        patient.setPlaceOfBirth(processString(map, PLACE_OF_BIRTH, existingPatient.getPlaceOfBirth(), patientToBeUpdated.getPlaceOfBirth()));
+        patient.setReligion(processString(map, RELIGION, existingPatient.getReligion(), patientToBeUpdated.getReligion()));
+        patient.setBloodGroup(processString(map, BLOOD_GROUP, existingPatient.getBloodGroup(), patientToBeUpdated.getBloodGroup()));
+        patient.setNationality(processString(map, NATIONALITY, existingPatient.getNationality(), patientToBeUpdated.getNationality()));
+        patient.setDisability(processString(map, DISABILITY, existingPatient.getDisability(), patientToBeUpdated.getDisability()));
+        patient.setEthnicity(processString(map, ETHNICITY, existingPatient.getEthnicity(), patientToBeUpdated.getEthnicity()));
+        patient.setPrimaryContact(processString(map, PRIMARY_CONTACT, existingPatient.getPrimaryContact(), patientToBeUpdated.getPrimaryContact()));
+        patient.setMaritalStatus(processString(map, MARITAL_STATUS, existingPatient.getMaritalStatus(), patientToBeUpdated.getMaritalStatus()));
+        patient.setFullName(processString(map, FULL_NAME, existingPatient.getFullName(), patientToBeUpdated.getFullName()));
+        patient.setStatus(processString(map, PATIENT_STATUS, existingPatient.getStatus(), patientToBeUpdated.getStatus()));
+        patient.setDateOfDeath(processString(map, DATE_OF_DEATH, existingPatient.getDateOfDeath(), patientToBeUpdated.getDateOfDeath()));
+        patient.setCreatedAt(processString(map, CREATED, existingPatient.getCreatedAt(), patientToBeUpdated.getCreatedAt()));
+        patient.setUpdatedAt(processString(map, MODIFIED, existingPatient.getUpdatedAt(), patientToBeUpdated.getUpdatedAt()));
+        patient.setPhoneNumber(processPhoneNumber(map, PHONE_NUMBER, existingPatient.getPhoneNumber(), patientToBeUpdated.getPhoneNumber()));
+        patient.setPrimaryContactNumber(processPhoneNumber(map, PRIMARY_CONTACT_NUMBER, existingPatient.getPrimaryContactNumber(), patientToBeUpdated.getPrimaryContactNumber()));
         if (patientToBeUpdated.getAddress() != null) {
-            patient.setAddress(toBeApprovedAddress(map, PRESENT_ADDRESS, existingPatient.getAddress(), patientToBeUpdated.getAddress()));
+            patient.setAddress(processAddress(map, PRESENT_ADDRESS, existingPatient.getAddress(), patientToBeUpdated.getAddress()));
         }
         if (patientToBeUpdated.getPermanentAddress() != null) {
-            patient.setPermanentAddress(toBeApprovedAddress(map, PERMANENT_ADDRESS, existingPatient.getPermanentAddress(), patientToBeUpdated.getPermanentAddress()));
+            patient.setPermanentAddress(processAddress(map, PERMANENT_ADDRESS, existingPatient.getPermanentAddress(), patientToBeUpdated.getPermanentAddress()));
         }
         return map;
     }
 
-    private PhoneNumber toBeapprovedPhoneNumber(HashMap<String, Object> map, String phoneNumber, PhoneNumber phoneNumberExisting, PhoneNumber phoneNumberUpdated) {
-        String value = properties.getProperty(phoneNumber);
-        if (value != null && phoneNumberUpdated != null) {
-            if (value.equals(NON_UPDATEABLE)) {
-                return phoneNumberExisting;
-            } else if (value.equals(NEEDS_APPROVAL) && !phoneNumberExisting.equals(phoneNumberUpdated)) {
-                map.put(phoneNumber, phoneNumberUpdated);
-                return phoneNumberExisting;
-            }
-        }
-        return phoneNumberUpdated;
+    private PhoneNumber processPhoneNumber(HashMap<String, Object> map, String key, PhoneNumber oldValue, PhoneNumber newValue) {
+        Object phoneNumber = process(map, key, oldValue, newValue);
+        return phoneNumber == null ? null : (PhoneNumber) phoneNumber;
     }
 
-    private Address toBeApprovedAddress(Map<String, Object> map, String addressType, Address existingAddress, Address updatedAddress) {
-        String value = properties.getProperty(addressType);
-        if (value != null && updatedAddress != null) {
-            if (value.equals(NON_UPDATEABLE)) {
-                return existingAddress;
-            } else if (value.equals(NEEDS_APPROVAL) && !existingAddress.equals(updatedAddress)) {
-                map.put(addressType, updatedAddress);
-                return existingAddress;
-            }
-        }
-        return updatedAddress;
+    private Address processAddress(Map<String, Object> map, String key, Address oldValue, Address newValue) {
+        Object address = process(map, key, oldValue, newValue);
+        return address == null ? null : (Address) address;
     }
 
-    private String toBeApproved(Map<String, Object> map, String key, String oldValue, String newValue) {
+    private String processString(Map<String, Object> map, String key, String oldValue, String newValue) {
+        Object value = process(map, key, oldValue, newValue);
+        return value == null ? null : valueOf(value);
+    }
+
+    private Object process(Map<String, Object> map, String key, Object oldValue, Object newValue) {
         String property = properties.getProperty(key);
         if (property != null && newValue != null) {
             if (property.equals(NON_UPDATEABLE)) {
                 return oldValue;
-            } else if (property.equals(NEEDS_APPROVAL) && !newValue.equals(oldValue))
+            }
+            if (property.equals(NEEDS_APPROVAL) && !newValue.equals(oldValue)) {
                 map.put(key, newValue);
-            return oldValue;
+                return oldValue;
+            }
         }
         return newValue;
     }

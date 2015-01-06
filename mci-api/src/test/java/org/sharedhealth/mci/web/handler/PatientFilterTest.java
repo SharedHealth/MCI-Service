@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.LocationData;
 import org.sharedhealth.mci.web.mapper.PatientData;
+import org.sharedhealth.mci.web.mapper.PhoneNumber;
 import org.sharedhealth.mci.web.model.PendingApprovalRequest;
 
 import java.text.ParseException;
@@ -13,7 +14,7 @@ import java.util.Properties;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.sharedhealth.mci.web.utils.JsonConstants.GENDER;
+import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
 public class PatientFilterTest {
 
@@ -44,12 +45,25 @@ public class PatientFilterTest {
     public void shouldMapFieldsToBeApprovedWhenExistingValueIsNull() throws ParseException {
         Properties properties = new Properties();
         properties.setProperty(GENDER, "NA");
-
-        PatientData patientToBeUpdated = buildPatientData();
-        patientToBeUpdated.setGender("F");
+        properties.setProperty(PHONE_NUMBER, "NA");
+        properties.setProperty(PRESENT_ADDRESS, "NA");
+        properties.setProperty(PERMANENT_ADDRESS, "NA");
 
         PatientData patientExisting = buildPatientData();
         patientExisting.setGender(null);
+        patientExisting.setPhoneNumber(null);
+        patientExisting.setAddress(null);
+        patientExisting.setPermanentAddress(null);
+
+        PatientData patientToBeUpdated = buildPatientData();
+        patientToBeUpdated.setGender("F");
+        PhoneNumber phoneNumber = new PhoneNumber();
+        phoneNumber.setNumber("123");
+        patientToBeUpdated.setPhoneNumber(phoneNumber);
+        Address presentAddress = new Address("10", "20", "30");
+        patientToBeUpdated.setAddress(presentAddress);
+        Address permanentAddress = new Address("11", "22", "33");
+        patientToBeUpdated.setPermanentAddress(permanentAddress);
 
         PatientData patientToBeSaved = new PatientData();
 
@@ -58,9 +72,15 @@ public class PatientFilterTest {
 
         Map<String, Object> fields = pendingApprovalRequest.getFields();
         assertNotNull(fields);
-        assertEquals(1, fields.size());
+        assertEquals(4, fields.size());
         assertEquals("F", fields.get(GENDER));
+        assertEquals(phoneNumber, fields.get(PHONE_NUMBER));
+        assertEquals(presentAddress, fields.get(PRESENT_ADDRESS));
+        assertEquals(permanentAddress, fields.get(PERMANENT_ADDRESS));
         assertEquals(patientToBeSaved.getGender(), patientExisting.getGender());
+        assertEquals(patientToBeSaved.getPhoneNumber(), patientExisting.getPhoneNumber());
+        assertEquals(patientToBeSaved.getAddress(), patientExisting.getAddress());
+        assertEquals(patientToBeSaved.getPermanentAddress(), patientExisting.getPermanentAddress());
     }
 
     @Test
