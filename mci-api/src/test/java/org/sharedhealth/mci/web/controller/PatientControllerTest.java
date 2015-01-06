@@ -480,9 +480,9 @@ public class PatientControllerTest {
     @Test
     public void shouldFindPendingApprovalDetailsForGivenHealthId() throws Exception {
         String healthId = "health-100";
-        PendingApproval details = new PendingApproval();
-        details.setName("x_y_z");
-        details.setCurrentValue("curr val");
+        PendingApproval pendingApproval = new PendingApproval();
+        pendingApproval.setName(OCCUPATION);
+        pendingApproval.setCurrentValue("curr val");
 
         TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap = new TreeMap<>();
         UUID timeuuid = UUIDs.timeBased();
@@ -491,10 +491,10 @@ public class PatientControllerTest {
         approvalFieldDetails.setValue("some value");
         approvalFieldDetails.setCreatedAt(unixTimestamp(timeuuid));
         fieldDetailsMap.put(timeuuid, approvalFieldDetails);
-        details.setFieldDetails(fieldDetailsMap);
+        pendingApproval.setFieldDetails(fieldDetailsMap);
 
         TreeSet<PendingApproval> pendingApprovals = new TreeSet<>();
-        pendingApprovals.add(details);
+        pendingApprovals.add(pendingApproval);
         when(patientService.findPendingApprovalDetails(healthId)).thenReturn(pendingApprovals);
 
         MvcResult mvcResult = mockMvc.perform(get(PENDING_APPROVALS_API + "/" + healthId))
@@ -503,7 +503,7 @@ public class PatientControllerTest {
 
         mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.results[0].field_name", is("x_y_z")))
+                .andExpect(jsonPath("$.results[0].field_name", is(OCCUPATION)))
                 .andExpect(jsonPath("$.results[0].current_value", is("curr val")))
                 .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".facility_id", is("facility-100")))
                 .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".value", is("some value")))

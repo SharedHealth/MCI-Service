@@ -384,7 +384,7 @@ public class PatientRepository extends BaseRepository {
         String healthId = patientData.getHealthId();
         UUID lastUpdated = findLatestUuid(patient.getPendingApprovals());
 
-        TreeSet<PendingApproval> pendingApprovals = updatePendingApprovals(patient.getPendingApprovals(), patientData);
+        TreeSet<PendingApproval> pendingApprovals = updatePendingApprovals(patient.getPendingApprovals(), patientData, shouldAccept);
         patient.setPendingApprovals(pendingApprovals);
         batch.add(buildUpdateStmt(patient, cassandraOps.getConverter()));
 
@@ -402,13 +402,33 @@ public class PatientRepository extends BaseRepository {
         return healthId;
     }
 
-    private TreeSet<PendingApproval> updatePendingApprovals(TreeSet<PendingApproval> pendingApprovals, PatientData patient) {
+    TreeSet<PendingApproval> updatePendingApprovals(TreeSet<PendingApproval> pendingApprovals, PatientData patient, boolean shouldAccept) {
         for (Iterator<PendingApproval> it = pendingApprovals.iterator(); it.hasNext(); ) {
-            String key = it.next().getName();
-            if (patient.getValue(key) != null) {
-                it.remove();
+            PendingApproval pendingApproval = it.next();
+            String key = pendingApproval.getName();
+            Object value = patient.getValue(key);
+
+            if (value != null) {
+                if (shouldAccept) {
+                    it.remove();
+                } else {
+                    removeMatchingPendingApproval(pendingApproval, value);
+                    TreeMap<UUID, PendingApprovalFieldDetails> fieldDetails = pendingApproval.getFieldDetails();
+                    if (fieldDetails == null || fieldDetails.size() == 0) {
+                        it.remove();
+                    }
+                }
             }
         }
         return pendingApprovals;
+    }
+
+    private void removeMatchingPendingApproval(PendingApproval pendingApproval, Object value) {
+        for (Iterator<PendingApprovalFieldDetails> it = pendingApproval.getFieldDetails().values().iterator(); it.hasNext(); ) {
+            PendingApprovalFieldDetails fieldDetails = it.next();
+            if (value.equals(fieldDetails.getValue())) {
+                it.remove();
+            }
+        }
     }
 }

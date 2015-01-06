@@ -6,6 +6,7 @@ import org.junit.Test;
 import java.util.*;
 
 import static org.junit.Assert.*;
+import static org.sharedhealth.mci.web.utils.JsonConstants.PRESENT_ADDRESS;
 
 public class PendingApprovalTest {
 
@@ -41,7 +42,7 @@ public class PendingApprovalTest {
     @Test
     public void shouldFindIfValuePresent() {
         PendingApproval pendingApproval = new PendingApproval();
-        pendingApproval.setName("f_address");
+        pendingApproval.setName(PRESENT_ADDRESS);
         TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap = new TreeMap<>();
 
         Address address1 = new Address("1", "2", "3");

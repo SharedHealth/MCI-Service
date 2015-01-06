@@ -46,6 +46,18 @@ public class PendingApproval implements Comparable<PendingApproval> {
     }
 
     public TreeMap<UUID, PendingApprovalFieldDetails> getFieldDetails() {
+        Class type;
+        if (PRESENT_ADDRESS.equals(this.name) || PERMANENT_ADDRESS.equals(this.name)) {
+            type = Address.class;
+        } else if (PHONE_NUMBER.equals(this.name)) {
+            type = PhoneNumber.class;
+        } else {
+            return this.fieldDetails;
+        }
+        for (PendingApprovalFieldDetails details : fieldDetails.values()) {
+            details.setValue(convertValue(details.getValue(), type));
+
+        }
         return fieldDetails;
     }
 
@@ -80,21 +92,10 @@ public class PendingApproval implements Comparable<PendingApproval> {
             return false;
         }
         for (PendingApprovalFieldDetails fieldDetails : this.getFieldDetails().values()) {
-            Object obj = convertFieldDetails(value.getClass(), fieldDetails.getValue());
-            if (value.equals(obj)) {
+            if (value.equals(fieldDetails.getValue())) {
                 return true;
             }
         }
         return false;
-    }
-
-    private Object convertFieldDetails(Class type, Object value) {
-        if (PhoneNumber.class.equals(type)) {
-            return convertValue(value, PhoneNumber.class);
-        }
-        if (Address.class.equals(type)) {
-            return convertValue(value, Address.class);
-        }
-        return value;
     }
 }

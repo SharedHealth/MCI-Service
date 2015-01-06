@@ -7,10 +7,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
-import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.exception.HealthIDExistException;
 import org.sharedhealth.mci.web.exception.PatientNotFoundException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
+import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.model.Patient;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
@@ -639,11 +639,29 @@ public class PatientRepositoryIT {
 
         TreeSet<PendingApproval> pendingApprovals = patient.getPendingApprovals();
         assertNotNull(pendingApprovals);
-        assertEquals(1, pendingApprovals.size());
+        assertEquals(2, pendingApprovals.size());
 
-        PendingApproval pendingApproval = pendingApprovals.iterator().next();
-        assertNotNull(pendingApproval);
-        assertEquals(OCCUPATION, pendingApproval.getName());
+        for (PendingApproval pendingApproval : pendingApprovals) {
+            if (GENDER.equals(pendingApproval.getName())) {
+                assertNotNull(pendingApproval.getFieldDetails());
+                Collection<PendingApprovalFieldDetails> fieldDetails = pendingApproval.getFieldDetails().values();
+                assertNotNull(fieldDetails);
+                assertEquals(1, fieldDetails.size());
+                assertEquals("O", fieldDetails.iterator().next().getValue());
+
+            } else if (OCCUPATION.equals(pendingApproval.getName())) {
+                assertNotNull(pendingApproval.getFieldDetails());
+                Collection<PendingApprovalFieldDetails> fieldDetails = pendingApproval.getFieldDetails().values();
+                assertNotNull(fieldDetails);
+                assertEquals(2, fieldDetails.size());
+                for (PendingApprovalFieldDetails fieldDetail : fieldDetails) {
+                    assertTrue(asList("05", "06").contains(fieldDetail.getValue()));
+                }
+
+            } else {
+                fail("Invalid pending approval.");
+            }
+        }
 
         List<PendingApprovalMapping> pendingApprovalMappings = patientRepository.findPendingApprovalMapping(catchment, null, null, 100);
         assertEquals(1, pendingApprovalMappings.size());
