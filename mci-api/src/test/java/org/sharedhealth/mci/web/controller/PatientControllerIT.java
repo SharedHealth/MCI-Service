@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
@@ -19,6 +20,7 @@ import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
+import org.sharedhealth.mci.web.mapper.Relation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -28,6 +30,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
@@ -330,7 +333,7 @@ public class PatientControllerIT extends BaseControllerTest {
         String healthId = body.getId();
 
         PatientData patient = getPatientMapperObjectByHealthId(healthId);
-        Assert.assertTrue(isRelationsEqual(original.getRelations(), patient.getRelations()));
+        assertTrue(isRelationsEqual(original.getRelations(), patient.getRelations()));
     }
 
     @Test
@@ -378,7 +381,7 @@ public class PatientControllerIT extends BaseControllerTest {
 
     }
 
-   /* @Test
+    @Test
     public void shouldRemoveAddressBlockOptionalFieldsIfNotGiven() throws Exception {
 
         String fullPayloadJson = asString("jsons/patient/full_payload.json");
@@ -571,5 +574,5 @@ public class PatientControllerIT extends BaseControllerTest {
 
         assertPatientEquals(updatedPatient, patient);
 
-    }*/
+    }
 }
