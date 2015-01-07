@@ -1,9 +1,5 @@
 package org.sharedhealth.mci.web.mapper;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -11,8 +7,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.validation.constraints.Code;
 import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
-import static org.sharedhealth.mci.web.utils.ErrorConstants.*;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_INVALID;
+import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_PATTERN;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
 @JsonIgnoreProperties({"geoCode"})
@@ -102,25 +104,22 @@ public class Address {
         if (this == o) return true;
         if (!(o instanceof Address)) return false;
 
-        Address address = (Address) o;
+        Address that = (Address) o;
 
-        if (addressLine != null ? !addressLine.equals(address.addressLine) : address.addressLine != null) return false;
-        if (areaMouja != null ? !areaMouja.equals(address.areaMouja) : address.areaMouja != null) return false;
-        if (cityCorporationId != null ? !cityCorporationId.equals(address.cityCorporationId) : address.cityCorporationId != null)
-            return false;
-        if (countryCode != null ? !countryCode.equals(address.countryCode) : address.countryCode != null) return false;
-        if (districtId != null ? !districtId.equals(address.districtId) : address.districtId != null) return false;
-        if (divisionId != null ? !divisionId.equals(address.divisionId) : address.divisionId != null) return false;
-        if (holdingNumber != null ? !holdingNumber.equals(address.holdingNumber) : address.holdingNumber != null)
-            return false;
-        if (postCode != null ? !postCode.equals(address.postCode) : address.postCode != null) return false;
-        if (postOffice != null ? !postOffice.equals(address.postOffice) : address.postOffice != null) return false;
-        if (ruralWardId != null ? !ruralWardId.equals(address.ruralWardId) : address.ruralWardId != null) return false;
-        if (street != null ? !street.equals(address.street) : address.street != null) return false;
-        if (unionOrUrbanWardId != null ? !unionOrUrbanWardId.equals(address.unionOrUrbanWardId) : address.unionOrUrbanWardId != null)
-            return false;
-        if (upazilaId != null ? !upazilaId.equals(address.upazilaId) : address.upazilaId != null) return false;
-        if (village != null ? !village.equals(address.village) : address.village != null) return false;
+        if (!defaultString(addressLine).equals(defaultString(that.addressLine))) return false;
+        if (!defaultString(divisionId).equals(defaultString(that.divisionId))) return false;
+        if (!defaultString(districtId).equals(defaultString(that.districtId))) return false;
+        if (!defaultString(upazilaId).equals(defaultString(that.upazilaId))) return false;
+        if (!defaultString(cityCorporationId).equals(defaultString(that.cityCorporationId))) return false;
+        if (!defaultString(unionOrUrbanWardId).equals(defaultString(that.unionOrUrbanWardId))) return false;
+        if (!defaultString(ruralWardId).equals(defaultString(that.ruralWardId))) return false;
+        if (!defaultString(holdingNumber).equals(defaultString(that.holdingNumber))) return false;
+        if (!defaultString(street).equals(defaultString(that.street))) return false;
+        if (!defaultString(areaMouja).equals(defaultString(that.areaMouja))) return false;
+        if (!defaultString(village).equals(defaultString(that.village))) return false;
+        if (!defaultString(postOffice).equals(defaultString(that.postOffice))) return false;
+        if (!defaultString(postCode).equals(defaultString(that.postCode))) return false;
+        if (!defaultString(countryCode).equals(defaultString(that.countryCode))) return false;
 
         return true;
     }

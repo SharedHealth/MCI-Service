@@ -11,9 +11,7 @@ import java.text.ParseException;
 import java.util.Map;
 import java.util.Properties;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
 public class PatientFilterTest {
@@ -81,6 +79,47 @@ public class PatientFilterTest {
         assertEquals(patientToBeSaved.getPhoneNumber(), patientExisting.getPhoneNumber());
         assertEquals(patientToBeSaved.getAddress(), patientExisting.getAddress());
         assertEquals(patientToBeSaved.getPermanentAddress(), patientExisting.getPermanentAddress());
+    }
+
+    @Test
+    public void shouldNotMapFieldsToBeApprovedWhenMarkedForApprovalButValueSameAsExisting() throws Exception {
+        Properties properties = new Properties();
+        properties.setProperty(PHONE_NUMBER, "NA");
+        properties.setProperty(PRESENT_ADDRESS, "NA");
+        properties.setProperty(PERMANENT_ADDRESS, "NA");
+
+        PatientData existingPatient = buildPatientData();
+
+        PhoneNumber existingPhoneNumber = new PhoneNumber();
+        existingPhoneNumber.setCountryCode("");
+        existingPhoneNumber.setAreaCode("");
+        existingPhoneNumber.setNumber("123");
+        existingPhoneNumber.setExtension("");
+        existingPatient.setPhoneNumber(existingPhoneNumber);
+
+        Address existingPresentAddress = new Address("10", "20", "30");
+        existingPresentAddress.setCityCorporationId("");
+        existingPresentAddress.setUnionOrUrbanWardId("");
+        existingPresentAddress.setRuralWardId("");
+        existingPatient.setAddress(existingPresentAddress);
+
+        Address existingPermanentAddress = new Address("11", "22", "33");
+        existingPermanentAddress.setCityCorporationId("");
+        existingPermanentAddress.setUnionOrUrbanWardId("");
+        existingPermanentAddress.setRuralWardId("");
+        existingPatient.setPermanentAddress(existingPermanentAddress);
+
+        PatientData patientToBeUpdated = buildPatientData();
+        PhoneNumber phoneNumberToBeUpdated = new PhoneNumber();
+        phoneNumberToBeUpdated.setNumber("123");
+        patientToBeUpdated.setPhoneNumber(phoneNumberToBeUpdated);
+        patientToBeUpdated.setAddress(new Address("10", "20", "30"));
+        patientToBeUpdated.setPermanentAddress(new Address("11", "22", "33"));
+
+        PatientData patientToBeSaved = new PatientData();
+
+        PatientFilter patientFilter = new PatientFilter(properties, existingPatient, patientToBeUpdated, patientToBeSaved);
+        assertNull(patientFilter.filter());
     }
 
     @Test

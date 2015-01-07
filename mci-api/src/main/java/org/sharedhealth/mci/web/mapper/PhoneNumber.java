@@ -8,7 +8,9 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
-import static org.sharedhealth.mci.web.utils.ErrorConstants.*;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_PATTERN;
+import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_REQUIRED;
 
 public class PhoneNumber {
 
@@ -72,10 +74,10 @@ public class PhoneNumber {
 
         PhoneNumber that = (PhoneNumber) o;
 
-        if (areaCode != null ? !areaCode.equals(that.areaCode) : that.areaCode != null) return false;
-        if (countryCode != null ? !countryCode.equals(that.countryCode) : that.countryCode != null) return false;
-        if (extension != null ? !extension.equals(that.extension) : that.extension != null) return false;
-        if (number != null ? !number.equals(that.number) : that.number != null) return false;
+        if (!defaultString(areaCode).equals(defaultString(that.areaCode))) return false;
+        if (!defaultString(countryCode).equals(defaultString(that.countryCode))) return false;
+        if (!defaultString(extension).equals(defaultString(that.extension))) return false;
+        if (!defaultString(number).equals(defaultString(that.number))) return false;
 
         return true;
     }
