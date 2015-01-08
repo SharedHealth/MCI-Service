@@ -36,6 +36,7 @@ public class PatientQueryBuilder {
     public static final String GENDER = "gender";
     public static final String OCCUPATION = "occupation";
     public static final String EDU_LEVEL = "edu_level";
+    public static final String CATCHMENT_ID = "catchment_id";
     public static final String ADDRESS_LINE = "address_line";
     public static final String DIVISION_ID = "division_id";
     public static final String DISTRICT_ID = "district_id";
@@ -139,9 +140,7 @@ public class PatientQueryBuilder {
 
     public static String buildFindPendingApprovalMappingStmt(Catchment catchment, UUID after, UUID before, int limit) {
         Where where = select(HEALTH_ID, LAST_UPDATED).from(CF_PENDING_APPROVAL_MAPPING)
-                .where(eq(DIVISION_ID, catchment.getDivisionId()))
-                .and(eq(DISTRICT_ID, catchment.getDistrictId()))
-                .and(eq(UPAZILA_ID, catchment.getUpazilaId()));
+                .where(eq(CATCHMENT_ID, catchment.getId()));
 
         if (after != null) {
             where = where.and(gt(LAST_UPDATED, after));

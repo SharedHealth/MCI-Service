@@ -100,9 +100,9 @@ public class PatientServiceTest {
     private PendingApprovalMapping buildPendingApprovalMapping(String healthId) throws InterruptedException {
         PendingApprovalMapping mapping = new PendingApprovalMapping();
         mapping.setHealthId(healthId);
-        mapping.setDivisionId("10");
-        mapping.setDistrictId("20");
-        mapping.setUpazilaId("30");
+        Catchment catchment = new Catchment("10", "20");
+        catchment.setUpazilaId("30");
+        mapping.setCatchmentId(catchment.getId());
         mapping.setLastUpdated(UUIDs.timeBased());
         Thread.sleep(0, 10);
         return mapping;
@@ -287,7 +287,8 @@ public class PatientServiceTest {
         address.setAddressLine("house no. 10");
         patient.setAddress(address);
 
-        Catchment catchment = new Catchment("10", "20", "40");
+        Catchment catchment = new Catchment("10", "20");
+        catchment.setUpazilaId("40");
 
         PatientData existingPatient = new PatientData();
         TreeSet<PendingApproval> pendingApprovals = new TreeSet<>();

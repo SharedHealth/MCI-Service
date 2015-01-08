@@ -23,6 +23,7 @@ import java.util.TreeSet;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static java.lang.String.valueOf;
 import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 import static org.sharedhealth.mci.web.utils.PatientDataConstants.*;
@@ -31,6 +32,8 @@ import static org.sharedhealth.mci.web.utils.PatientDataConstants.*;
 @PatientStatus(message = ERROR_CODE_DEPENDENT)
 @JsonIgnoreProperties({"created_at"})
 public class PatientData {
+
+    private static final String INVALID_CATCHMENT = "invalid.catchment";
 
     @JsonProperty(HID)
     private String healthId;
@@ -500,7 +503,7 @@ public class PatientData {
         Address address = this.getAddress();
 
         if (catchment == null || address == null) {
-            throw new IllegalArgumentException("invalid.catchment");
+            throw new IllegalArgumentException(INVALID_CATCHMENT);
         }
 
         String catchmentId = defaultString(catchment.getDivisionId()) + defaultString(catchment.getDistrictId())
@@ -649,5 +652,32 @@ public class PatientData {
 
     public void setConfidential(String confidential) {
         this.confidential = confidential;
+    }
+
+    @JsonIgnore
+    public Catchment getCatchment() {
+        Address address = this.getAddress();
+        Catchment catchment = new Catchment(address.getDivisionId(), address.getDistrictId());
+        String upazilaId = address.getUpazilaId();
+
+        if (isNotBlank(upazilaId)) {
+            catchment.setUpazilaId(upazilaId);
+            String cityCorporationId = address.getCityCorporationId();
+
+            if (isNotBlank(cityCorporationId)) {
+                catchment.setCityCorpId(cityCorporationId);
+                String unionOrUrbanWardId = address.getUnionOrUrbanWardId();
+
+                if (isNotBlank(unionOrUrbanWardId)) {
+                    catchment.setUnionOrUrbanWardId(unionOrUrbanWardId);
+                    String ruralWardId = address.getRuralWardId();
+
+                    if (isNotBlank(ruralWardId)) {
+                        catchment.setRuralWardId(ruralWardId);
+                    }
+                }
+            }
+        }
+        return catchment;
     }
 }

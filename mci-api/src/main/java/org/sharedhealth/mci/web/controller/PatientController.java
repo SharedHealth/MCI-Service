@@ -138,16 +138,14 @@ public class PatientController {
 
     @RequestMapping(value = "/pendingapprovals", method = GET, produces = APPLICATION_JSON_VALUE)
     public DeferredResult<ResponseEntity<MCIMultiResponse>> findPendingApprovalList(
-            @RequestHeader(value = DIVISION_ID) String divisionId,
-            @RequestHeader(value = DISTRICT_ID) String districtId,
-            @RequestHeader(value = UPAZILA_ID) String upazilaId,
+            @RequestHeader HttpHeaders headers,
             @RequestParam(value = AFTER, required = false) UUID after,
             @RequestParam(value = BEFORE, required = false) UUID before) {
 
         logger.debug("Find list of pending approvals.");
         final DeferredResult<ResponseEntity<MCIMultiResponse>> deferredResult = new DeferredResult<>();
 
-        Catchment catchment = new Catchment(divisionId, districtId, upazilaId);
+        Catchment catchment = buildCatchment(headers);
         List<PendingApprovalListResponse> response = patientService.findPendingApprovalList(catchment, after, before);
 
         MCIMultiResponse mciMultiResponse;
@@ -218,20 +216,27 @@ public class PatientController {
     }
 
     Catchment buildCatchment(HttpHeaders headers) {
-        Catchment catchment = new Catchment(getHeader(headers, DIVISION_ID));
-        catchment.setDistrictId(getHeader(headers, DISTRICT_ID));
-        catchment.setUpazilaId(getHeader(headers, UPAZILA_ID));
-        catchment.setCityCorpId(getHeader(headers, CITY_CORPORATION_ID));
-        catchment.setUnionOrUrbanWardId(getHeader(headers, UNION_OR_URBAN_WARD_ID));
-        catchment.setRuralWardId(getHeader(headers, RURAL_WARD_ID));
-        return catchment;
-    }
+        Catchment catchment = new Catchment(headers.getFirst(DIVISION_ID), headers.getFirst(DISTRICT_ID));
+        String upazilaId = headers.getFirst(UPAZILA_ID);
 
-    private String getHeader(HttpHeaders headers, String headerName) {
-        String headerValue = headers.getFirst(headerName);
-        if (isNotBlank(headerValue)) {
-            return headerValue;
+        if (isNotBlank(upazilaId)) {
+            catchment.setUpazilaId(upazilaId);
+            String cityCorpId = headers.getFirst(CITY_CORPORATION_ID);
+
+            if (isNotBlank(cityCorpId)) {
+                catchment.setCityCorpId(cityCorpId);
+                String unionOrUrbanWardId = headers.getFirst(UNION_OR_URBAN_WARD_ID);
+
+                if (isNotBlank(unionOrUrbanWardId)) {
+                    catchment.setUnionOrUrbanWardId(unionOrUrbanWardId);
+                    String ruralWardId = headers.getFirst(RURAL_WARD_ID);
+
+                    if (isNotBlank(ruralWardId)) {
+                        catchment.setRuralWardId(ruralWardId);
+                    }
+                }
+            }
         }
-        return null;
+        return catchment;
     }
 }

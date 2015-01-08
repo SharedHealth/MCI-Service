@@ -1,8 +1,9 @@
 CREATE TABLE IF NOT EXISTS pending_approval_mapping (
-    division_id varchar,
-    district_id varchar,
-    upazila_id varchar,
+    catchment_id varchar,
     last_updated timeuuid,
     health_id varchar,
-    PRIMARY KEY ((division_id, district_id, upazila_id), last_updated)
-) WITH CLUSTERING ORDER BY (last_updated ASC);
+    PRIMARY KEY (catchment_id, last_updated)
+)WITH CLUSTERING ORDER BY (last_updated ASC);
+
+
+CREATE INDEX idx_pending_approval_mapping_health_id on pending_approval_mapping(health_id);

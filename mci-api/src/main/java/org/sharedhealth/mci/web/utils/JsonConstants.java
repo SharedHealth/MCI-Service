@@ -31,6 +31,7 @@ public class JsonConstants {
     public static final String CREATED = "created";
     public static final String MODIFIED = "modified";
 
+    public static final String CATCHMENT_ID = "catchment_id";
     public static final String ADDRESS_LINE = "address_line";
     public static final String DIVISION_ID = "division_id";
     public static final String DISTRICT_ID = "district_id";

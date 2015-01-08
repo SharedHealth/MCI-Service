@@ -27,6 +27,7 @@ import java.util.*;
 
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -564,6 +565,26 @@ public class PatientControllerTest {
                 .andExpect(jsonPath("$.id", is(healthId)));
 
         verify(patientService).processPendingApprovals(patient, catchment, false);
+    }
+
+    @Test
+    public void shouldBuildCatchmentFromHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(DIVISION_ID, "10");
+        headers.add(DISTRICT_ID, "20");
+        headers.add(UPAZILA_ID, "30");
+        headers.add(CITY_CORPORATION_ID, "40");
+        headers.add(UNION_OR_URBAN_WARD_ID, "50");
+        headers.add(RURAL_WARD_ID, "60");
+
+        Catchment catchment = new PatientController(null).buildCatchment(headers);
+
+        assertEquals("10", catchment.getDivisionId());
+        assertEquals("20", catchment.getDistrictId());
+        assertEquals("30", catchment.getUpazilaId());
+        assertEquals("40", catchment.getCityCorpId());
+        assertEquals("50", catchment.getUnionOrUrbanWardId());
+        assertEquals("60", catchment.getRuralWardId());
     }
 }
 

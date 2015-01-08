@@ -1,8 +1,9 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
-import com.datastax.driver.core.querybuilder.*;
+import com.datastax.driver.core.querybuilder.Batch;
+import com.datastax.driver.core.querybuilder.QueryBuilder;
+import com.datastax.driver.core.querybuilder.Select;
 import com.datastax.driver.core.utils.UUIDs;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.sharedhealth.mci.utils.UidGenerator;
 import org.sharedhealth.mci.web.exception.HealthIDExistException;
 import org.sharedhealth.mci.web.exception.PatientNotFoundException;
@@ -26,8 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
-import static com.datastax.driver.core.querybuilder.QueryBuilder.batch;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
@@ -42,7 +42,6 @@ import static org.springframework.data.cassandra.core.CassandraTemplate.createIn
 public class PatientRepository extends BaseRepository {
 
     protected static final Logger logger = LoggerFactory.getLogger(PatientRepository.class);
-    private ObjectMapper objectMapper = new ObjectMapper();
     private UidGenerator uidGenerator;
     private PatientMapper mapper;
 
@@ -104,10 +103,7 @@ public class PatientRepository extends BaseRepository {
         patientToSave.setFullName(fullName);
         patientToSave.setUpdatedAt(new Date());
 
-        Catchment catchment = new Catchment(existingPatientData.getAddress().getDivisionId(),
-                existingPatientData.getAddress().getDistrictId(),
-                existingPatientData.getAddress().getUpazilaId());
-
+        Catchment catchment = existingPatientData.getCatchment();
         cassandraOps.execute(buildUpdateBatch(patientToSave, pendingApprovalRequest, catchment));
         return new MCIResponse(patientToSave.getHealthId(), HttpStatus.ACCEPTED);
     }
@@ -152,12 +148,11 @@ public class PatientRepository extends BaseRepository {
             String healthId = patient.getHealthId();
 
             if (existingPendingApprovals != null && existingPendingApprovals.size() > 0) {
-                UUID latestUuid = findLatestUuid(existingPendingApprovals);
-                batch.add(buildDeletePendingApprovalMappingStmt(healthId, catchment, latestUuid));
+                buildDeletePendingApprovalMappingStmt(healthId, batch);
             }
 
             UUID uuid = UUIDs.timeBased();
-            batch.add(buildCreatePendingApprovalMappingStmt(healthId, catchment, uuid));
+            buildCreatePendingApprovalMappingStmt(catchment, healthId, uuid, batch);
 
             patient.addPendingApprovals(buildPendingApproval(uuid, pendingApprovalRequest));
         }
@@ -165,14 +160,19 @@ public class PatientRepository extends BaseRepository {
         return batch;
     }
 
-    private Delete buildDeletePendingApprovalMappingStmt(String healthId, Catchment catchment, UUID uuid) {
-        PendingApprovalMapping mapping = buildPendingApprovalMapping(catchment, uuid, healthId);
-        return createDeleteQuery(CF_PENDING_APPROVAL_MAPPING, mapping, null, cassandraOps.getConverter());
+    private void buildDeletePendingApprovalMappingStmt(String healthId, Batch batch) {
+        String cql = select().from(CF_PENDING_APPROVAL_MAPPING).where(eq(HEALTH_ID, healthId)).toString();
+        List<PendingApprovalMapping> mappings = cassandraOps.select(cql, PendingApprovalMapping.class);
+        for (PendingApprovalMapping mapping : mappings) {
+            batch.add(createDeleteQuery(CF_PENDING_APPROVAL_MAPPING, mapping, null, cassandraOps.getConverter()));
+        }
     }
 
-    private Insert buildCreatePendingApprovalMappingStmt(String healthId, Catchment catchment, UUID uuid) {
-        PendingApprovalMapping mapping = buildPendingApprovalMapping(catchment, uuid, healthId);
-        return createInsertQuery(CF_PENDING_APPROVAL_MAPPING, mapping, null, cassandraOps.getConverter());
+    private void buildCreatePendingApprovalMappingStmt(Catchment catchment, String healthId, UUID uuid, Batch batch) {
+        List<PendingApprovalMapping> mappings = buildPendingApprovalMappings(catchment, healthId, uuid);
+        for (PendingApprovalMapping mapping : mappings) {
+            batch.add(createInsertQuery(CF_PENDING_APPROVAL_MAPPING, mapping, null, cassandraOps.getConverter()));
+        }
     }
 
     UUID findLatestUuid(TreeSet<PendingApproval> pendingApprovals) {
@@ -190,15 +190,16 @@ public class PatientRepository extends BaseRepository {
         return latest;
     }
 
-    private PendingApprovalMapping buildPendingApprovalMapping(Catchment catchment, UUID uuid, String healthId) {
-        PendingApprovalMapping pendingApprovalMapping;
-        pendingApprovalMapping = new PendingApprovalMapping();
-        pendingApprovalMapping.setDivisionId(catchment.getDivisionId());
-        pendingApprovalMapping.setDistrictId(catchment.getDistrictId());
-        pendingApprovalMapping.setUpazilaId(catchment.getUpazilaId());
-        pendingApprovalMapping.setLastUpdated(uuid);
-        pendingApprovalMapping.setHealthId(healthId);
-        return pendingApprovalMapping;
+    private List<PendingApprovalMapping> buildPendingApprovalMappings(Catchment catchment, String healthId, UUID uuid) {
+        List<PendingApprovalMapping> mappings = new ArrayList<>();
+        for (String catchmentId : catchment.getAllIds()) {
+            PendingApprovalMapping mapping = new PendingApprovalMapping();
+            mapping.setCatchmentId(catchmentId);
+            mapping.setHealthId(healthId);
+            mapping.setLastUpdated(uuid);
+            mappings.add(mapping);
+        }
+        return mappings;
     }
 
     public PatientData findByHealthId(final String healthId) {
@@ -391,11 +392,11 @@ public class PatientRepository extends BaseRepository {
         if (isNotEmpty(pendingApprovals)) {
             UUID toBeUpdated = findLatestUuid(pendingApprovals);
             if (!toBeUpdated.equals(lastUpdated)) {
-                batch.add(buildDeletePendingApprovalMappingStmt(healthId, catchment, lastUpdated));
-                batch.add(buildCreatePendingApprovalMappingStmt(healthId, catchment, toBeUpdated));
+                buildDeletePendingApprovalMappingStmt(healthId, batch);
+                buildCreatePendingApprovalMappingStmt(catchment, healthId, toBeUpdated, batch);
             }
         } else {
-            batch.add(buildDeletePendingApprovalMappingStmt(healthId, catchment, lastUpdated));
+            buildDeletePendingApprovalMappingStmt(healthId, batch);
         }
 
         cassandraOps.execute(batch);
