@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.constraints.NotBlank;
 import org.sharedhealth.mci.utils.DateUtil;
@@ -24,9 +23,10 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static java.lang.String.valueOf;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
-import static org.sharedhealth.mci.web.utils.PatientDataConstants.*;
+import static org.sharedhealth.mci.web.utils.PatientDataConstants.COUNTRY_CODE_BANGLADESH;
 
 @MaritalRelation(message = ERROR_CODE_DEPENDENT, field = "maritalStatus")
 @PatientStatus(message = ERROR_CODE_DEPENDENT)
@@ -417,7 +417,7 @@ public class PatientData {
 
     @JsonIgnore
     public void setCreatedAt(java.util.Date createdAt) {
-        this.createdAt = (createdAt == null) ? null : DateFormatUtils.ISO_DATETIME_FORMAT.format(createdAt);
+        this.createdAt = createdAt != null ? toIsoFormat(createdAt.getTime()) : null;
     }
 
     public void setCreatedAt(String createdAt) {
@@ -430,7 +430,7 @@ public class PatientData {
 
     @JsonIgnore
     public void setUpdatedAt(java.util.Date updatedAt) {
-        this.updatedAt = (updatedAt == null) ? null : DateFormatUtils.ISO_DATETIME_FORMAT.format(updatedAt);
+        this.updatedAt = updatedAt != null ? toIsoFormat(updatedAt.getTime()) : null;
     }
 
     public void setUpdatedAt(String updatedAt) {

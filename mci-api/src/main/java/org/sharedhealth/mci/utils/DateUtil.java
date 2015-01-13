@@ -10,7 +10,8 @@ import static java.util.TimeZone.getTimeZone;
 public class DateUtil {
 
     public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
-    private static final String ISO_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm'Z'";
+    private static final String ISO_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+    private static final String UTC = "UTC";
 
     public static Date string2Date(String value, String format) {
 
@@ -32,18 +33,20 @@ public class DateUtil {
     }
 
     public static String toIsoFormat(long date) {
-        DateFormat dateFormat = new SimpleDateFormat(ISO_DATE_TIME_FORMAT);
-        dateFormat.setTimeZone(getTimeZone("UTC"));
-        return dateFormat.format(date);
+        return buildIsoDateFormat().format(date);
     }
 
     public static Date fromIsoFormat(String date) {
-        DateFormat dateFormat = new SimpleDateFormat(ISO_DATE_TIME_FORMAT);
-        dateFormat.setTimeZone(getTimeZone("UTC"));
         try {
-            return dateFormat.parse(date);
+            return buildIsoDateFormat().parse(date);
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static DateFormat buildIsoDateFormat() {
+        DateFormat dateFormat = new SimpleDateFormat(ISO_DATE_TIME_FORMAT);
+        dateFormat.setTimeZone(getTimeZone(UTC));
+        return dateFormat;
     }
 }

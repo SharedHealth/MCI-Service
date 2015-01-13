@@ -631,7 +631,7 @@ public class PatientControllerTest {
         String ruralWardId = "60";
         Catchment catchment = new Catchment(divisionId, districtId, upazilaId, cityCoryId, unionOrUrbanWardId, ruralWardId);
 
-        String after = "2015-01-01T10:20Z";
+        String after = "2015-01-01T10:20:30Z";
         when(patientService.findAllByCatchment(catchment, fromIsoFormat(after), facilityId)).thenReturn(
                 asList(buildPatientWithHid("h100"), buildPatientWithHid("h200"), buildPatientWithHid("h300")));
 
@@ -658,7 +658,7 @@ public class PatientControllerTest {
         String districtId = "20";
         Catchment catchment = new Catchment(divisionId, districtId, null, null, null, null);
 
-        String after = "2015-01-01T10:20Z";
+        String after = "2015-01-01T10:20:30Z";
         when(patientService.findAllByCatchment(catchment, fromIsoFormat(after), facilityId)).thenReturn(
                 asList(buildPatientWithHid("h100"), buildPatientWithHid("h200"), buildPatientWithHid("h300")));
 
@@ -685,7 +685,7 @@ public class PatientControllerTest {
         String upazilaId = "30";
         Catchment catchment = new Catchment(divisionId, districtId, upazilaId, null, null, null);
 
-        String after = "2015-01-01T10:20Z";
+        String after = "2015-01-01T10:20:30Z";
         when(patientService.findAllByCatchment(catchment, fromIsoFormat(after), facilityId)).thenReturn(
                 asList(buildPatientWithHid("h100"), buildPatientWithHid("h200"), buildPatientWithHid("h300")));
 
@@ -713,7 +713,7 @@ public class PatientControllerTest {
         String cityCoryId = "40";
         Catchment catchment = new Catchment(divisionId, districtId, upazilaId, cityCoryId, null, null);
 
-        String after = "2015-01-01T10:20Z";
+        String after = "2015-01-01T10:20:30Z";
         when(patientService.findAllByCatchment(catchment, fromIsoFormat(after), facilityId)).thenReturn(
                 asList(buildPatientWithHid("h100"), buildPatientWithHid("h200"), buildPatientWithHid("h300")));
 
@@ -743,7 +743,7 @@ public class PatientControllerTest {
         String unionId = "50";
         Catchment catchment = new Catchment(divisionId, districtId, upazilaId, cityCoryId, unionId, null);
 
-        String after = "2015-01-01T10:20Z";
+        String after = "2015-01-01T10:20:30Z";
         when(patientService.findAllByCatchment(catchment, fromIsoFormat(after), facilityId)).thenReturn(
                 asList(buildPatientWithHid("h100"), buildPatientWithHid("h200"), buildPatientWithHid("h300")));
 

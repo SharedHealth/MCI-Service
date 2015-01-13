@@ -215,7 +215,6 @@ public class PatientQueryBuilder {
             }
         }
 
-
         return batch;
     }
 
