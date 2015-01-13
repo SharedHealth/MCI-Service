@@ -1,7 +1,6 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
 import com.datastax.driver.core.utils.UUIDs;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,12 +24,13 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
+import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static java.util.Arrays.asList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.junit.Assert.*;
-import static org.sharedhealth.mci.utils.FileUtil.asString;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.PHONE_NUMBER;
 import static org.sharedhealth.mci.web.utils.PatientDataConstants.PATIENT_STATUS_ALIVE;
@@ -208,34 +208,41 @@ public class PatientRepositoryIT {
     }
 
     @Test
-    public void shouldReturnAllPatientsBelongsToSpecificLocation() throws Exception {
-        generatePatientSet();
+    public void shouldFindAllPatientsByCatchment() throws Exception {
+        List<String> healthIds = new ArrayList<>();
+        PatientData patient = createPatient();
+        Address address = new Address("10", "20", "30");
+        address.setCityCorporationId("40");
 
-        assertPatientsFoundByCatchment("1004092005", 10);
-        assertPatientsFoundByCatchment("1004092001", 5);
-        assertPatientsFoundByCatchment("10040920", 15);
-        assertPatientsFoundByCatchment("1004092006", 0);
-    }
-
-    private void assertPatientsFoundByCatchment(String location, int expectedRecordCount) throws InterruptedException, ExecutionException {
-        List<PatientData> patients;
-        patients = patientRepository.findAllByLocation(location, null, 0, null);
-        assertEquals(expectedRecordCount, patients.size());
-    }
-
-    private void generatePatientSet() throws Exception {
-        String json = asString("jsons/patient/required_only_payload.json");
-        PatientData patientData = new ObjectMapper().readValue(json, PatientData.class);
-        createMultiplePatients(patientData, 10);
-        patientData.setAddress(createAddress("10", "04", "09", "20", "01"));
-        createMultiplePatients(patientData, 5);
-    }
-
-    private void createMultiplePatients(PatientData data, int n) throws Exception {
-        for (int x = 0; x < n; x++) {
-            patientRepository.create(data);
-            data.setHealthId(null);
+        for (int i = 1; i <= 5; i++) {
+            address.setUnionOrUrbanWardId("5" + i);
+            address.setRuralWardId("6" + i);
+            patient.setAddress(address);
+            healthIds.add(patientRepository.create(patient).getId());
+            Thread.sleep(0, 10);
         }
+
+
+        Catchment catchment = new Catchment("10", "20", "30");
+        catchment.setCityCorpId("40");
+        Date after = cassandraOps.selectOneById(Patient.class, healthIds.get(0)).getUpdatedAt();
+        int limit = 3;
+        List<PatientData> patients = patientRepository.findAllByCatchment(catchment, after, limit);
+
+        assertTrue(isNotEmpty(patients));
+        assertEquals(limit, patients.size());
+        assertEquals(healthIds.get(1), patients.get(0).getHealthId());
+        assertEquals(healthIds.get(2), patients.get(1).getHealthId());
+        assertEquals(healthIds.get(3), patients.get(2).getHealthId());
+    }
+
+    @Test
+    public void shouldReturnEmptyCollectionIfNoPatientFoundInCatchment() {
+        Catchment catchment = new Catchment("10", "20", "30");
+        catchment.setCityCorpId("40");
+        List<PatientData> patients = patientRepository.findAllByCatchment(catchment, new Date(), 100);
+        assertNotNull(patients);
+        assertTrue(isEmpty(patients));
     }
 
     private void assertPatient(PatientData savedPatient, PatientData data) {
@@ -401,7 +408,7 @@ public class PatientRepositoryIT {
         PendingApprovalMapping mapping = new PendingApprovalMapping();
         mapping.setCatchmentId(new Catchment("10", "20", upazilaId).getId());
         mapping.setHealthId(healthId);
-        mapping.setLastUpdated(UUIDs.timeBased());
+        mapping.setLastUpdated(timeBased());
         return mapping;
     }
 
@@ -795,5 +802,6 @@ public class PatientRepositoryIT {
         cassandraOps.execute("truncate " + CF_PHONE_NUMBER_MAPPING);
         cassandraOps.execute("truncate " + CF_NAME_MAPPING);
         cassandraOps.execute("truncate " + CF_PENDING_APPROVAL_MAPPING);
+        cassandraOps.execute("truncate " + CF_CATCHMENT_MAPPING);
     }
 }

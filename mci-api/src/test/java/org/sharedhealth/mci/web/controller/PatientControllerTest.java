@@ -26,11 +26,14 @@ import java.text.ParseException;
 import java.util.*;
 
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
+import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.sharedhealth.mci.utils.DateUtil.fromIsoFormat;
 import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
@@ -585,6 +588,185 @@ public class PatientControllerTest {
         assertEquals("40", catchment.getCityCorpId());
         assertEquals("50", catchment.getUnionOrUrbanWardId());
         assertEquals("60", catchment.getRuralWardId());
+    }
+
+    @Test
+    public void shouldFindPatientByCatchment() throws Exception {
+        String facilityId = "123456";
+        String divisionId = "10";
+        String districtId = "20";
+        String upazilaId = "30";
+        String cityCoryId = "40";
+        String unionOrUrbanWardId = "50";
+        String ruralWardId = "60";
+        Catchment catchment = new Catchment(divisionId, districtId, upazilaId, cityCoryId, unionOrUrbanWardId, ruralWardId);
+
+        when(patientService.findAllByCatchment(catchment, null, facilityId)).thenReturn(
+                asList(buildPatientWithHid("h100"), buildPatientWithHid("h200"), buildPatientWithHid("h300")));
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(FACILITY_ID, facilityId);
+        String url = format("%s/division/%s/district/%s/upazila/%s/citycorp/%s/union-urbanward/%s/ruralward/%s",
+                API_END_POINT, divisionId, districtId, upazilaId, cityCoryId, unionOrUrbanWardId, ruralWardId);
+
+        MvcResult mvcResult = mockMvc.perform(get(url).contentType(APPLICATION_JSON).headers(headers))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.results[0].hid", is("h100")));
+
+        verify(patientService).findAllByCatchment(catchment, null, facilityId);
+    }
+
+    @Test
+    public void shouldFindPatientByCatchmentUpdatedAfterADate() throws Exception {
+        String facilityId = "123456";
+        String divisionId = "10";
+        String districtId = "20";
+        String upazilaId = "30";
+        String cityCoryId = "40";
+        String unionOrUrbanWardId = "50";
+        String ruralWardId = "60";
+        Catchment catchment = new Catchment(divisionId, districtId, upazilaId, cityCoryId, unionOrUrbanWardId, ruralWardId);
+
+        String after = "2015-01-01T10:20Z";
+        when(patientService.findAllByCatchment(catchment, fromIsoFormat(after), facilityId)).thenReturn(
+                asList(buildPatientWithHid("h100"), buildPatientWithHid("h200"), buildPatientWithHid("h300")));
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(FACILITY_ID, facilityId);
+        String url = format("%s/division/%s/district/%s/upazila/%s/citycorp/%s/union-urbanward/%s/ruralward/%s?after=%s",
+                API_END_POINT, divisionId, districtId, upazilaId, cityCoryId, unionOrUrbanWardId, ruralWardId, after);
+
+        MvcResult mvcResult = mockMvc.perform(get(url).contentType(APPLICATION_JSON).headers(headers))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.results[0].hid", is("h100")));
+
+        verify(patientService).findAllByCatchment(catchment, fromIsoFormat(after), facilityId);
+    }
+
+    @Test
+    public void shouldFindPatientByCatchmentWithDivisionAndDistrictUpdatedAfterADate() throws Exception {
+        String facilityId = "123456";
+        String divisionId = "10";
+        String districtId = "20";
+        Catchment catchment = new Catchment(divisionId, districtId, null, null, null, null);
+
+        String after = "2015-01-01T10:20Z";
+        when(patientService.findAllByCatchment(catchment, fromIsoFormat(after), facilityId)).thenReturn(
+                asList(buildPatientWithHid("h100"), buildPatientWithHid("h200"), buildPatientWithHid("h300")));
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(FACILITY_ID, facilityId);
+        String url = format("%s/division/%s/district/%s?after=%s", API_END_POINT, divisionId, districtId, after);
+
+        MvcResult mvcResult = mockMvc.perform(get(url).contentType(APPLICATION_JSON).headers(headers))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.results[0].hid", is("h100")));
+
+        verify(patientService).findAllByCatchment(catchment, fromIsoFormat(after), facilityId);
+    }
+
+    @Test
+    public void shouldFindPatientByCatchmentWithDivisionDistrictAndUpazilaUpdatedAfterADate() throws Exception {
+        String facilityId = "123456";
+        String divisionId = "10";
+        String districtId = "20";
+        String upazilaId = "30";
+        Catchment catchment = new Catchment(divisionId, districtId, upazilaId, null, null, null);
+
+        String after = "2015-01-01T10:20Z";
+        when(patientService.findAllByCatchment(catchment, fromIsoFormat(after), facilityId)).thenReturn(
+                asList(buildPatientWithHid("h100"), buildPatientWithHid("h200"), buildPatientWithHid("h300")));
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(FACILITY_ID, facilityId);
+        String url = format("%s/division/%s/district/%s/upazila/%s?after=%s", API_END_POINT, divisionId, districtId, upazilaId, after);
+
+        MvcResult mvcResult = mockMvc.perform(get(url).contentType(APPLICATION_JSON).headers(headers))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.results[0].hid", is("h100")));
+
+        verify(patientService).findAllByCatchment(catchment, fromIsoFormat(after), facilityId);
+    }
+
+    @Test
+    public void shouldFindPatientByCatchmentWithDivisionDistrictUpazilaAndCityCorpUpdatedAfterADate() throws Exception {
+        String facilityId = "123456";
+        String divisionId = "10";
+        String districtId = "20";
+        String upazilaId = "30";
+        String cityCoryId = "40";
+        Catchment catchment = new Catchment(divisionId, districtId, upazilaId, cityCoryId, null, null);
+
+        String after = "2015-01-01T10:20Z";
+        when(patientService.findAllByCatchment(catchment, fromIsoFormat(after), facilityId)).thenReturn(
+                asList(buildPatientWithHid("h100"), buildPatientWithHid("h200"), buildPatientWithHid("h300")));
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(FACILITY_ID, facilityId);
+        String url = format("%s/division/%s/district/%s/upazila/%s/citycorp/%s?after=%s",
+                API_END_POINT, divisionId, districtId, upazilaId, cityCoryId, after);
+
+        MvcResult mvcResult = mockMvc.perform(get(url).contentType(APPLICATION_JSON).headers(headers))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.results[0].hid", is("h100")));
+
+        verify(patientService).findAllByCatchment(catchment, fromIsoFormat(after), facilityId);
+    }
+
+    @Test
+    public void shouldFindPatientByCatchmentWithDivisionDistrictUpazilaCityCorpAndUnionUpdatedAfterADate() throws Exception {
+        String facilityId = "123456";
+        String divisionId = "10";
+        String districtId = "20";
+        String upazilaId = "30";
+        String cityCoryId = "40";
+        String unionId = "50";
+        Catchment catchment = new Catchment(divisionId, districtId, upazilaId, cityCoryId, unionId, null);
+
+        String after = "2015-01-01T10:20Z";
+        when(patientService.findAllByCatchment(catchment, fromIsoFormat(after), facilityId)).thenReturn(
+                asList(buildPatientWithHid("h100"), buildPatientWithHid("h200"), buildPatientWithHid("h300")));
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(FACILITY_ID, facilityId);
+        String url = format("%s/division/%s/district/%s/upazila/%s/citycorp/%s/union-urbanward/%s?after=%s",
+                API_END_POINT, divisionId, districtId, upazilaId, cityCoryId, unionId, after);
+
+        MvcResult mvcResult = mockMvc.perform(get(url).contentType(APPLICATION_JSON).headers(headers))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.results[0].hid", is("h100")));
+
+        verify(patientService).findAllByCatchment(catchment, fromIsoFormat(after), facilityId);
+    }
+
+    private PatientData buildPatientWithHid(String healthId) {
+        PatientData patient = new PatientData();
+        patient.setHealthId(healthId);
+        return patient;
     }
 }
 

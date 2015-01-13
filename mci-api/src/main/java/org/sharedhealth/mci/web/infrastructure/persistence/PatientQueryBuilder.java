@@ -7,6 +7,7 @@ import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.model.*;
 import org.springframework.data.cassandra.convert.CassandraConverter;
 
+import java.util.Date;
 import java.util.UUID;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
@@ -25,6 +26,7 @@ public class PatientQueryBuilder {
     public static final String CF_PHONE_NUMBER_MAPPING = "phone_number_mapping";
     public static final String CF_NAME_MAPPING = "name_mapping";
     public static final String CF_PENDING_APPROVAL_MAPPING = "pending_approval_mapping";
+    public static final String CF_CATCHMENT_MAPPING = "catchment_mapping";
 
     public static final String HEALTH_ID = "health_id";
     public static final String LAST_UPDATED = "last_updated";
@@ -194,16 +196,40 @@ public class PatientQueryBuilder {
         String divisionId = patient.getDivisionId();
         String districtId = patient.getDistrictId();
         String upazilaId = patient.getUpazilaId();
+        String cityCorpId = patient.getCityCorporationId();
+        String unionOrUrbanWardId = patient.getUnionOrUrbanWardId();
+        String ruralWardId = patient.getRuralWardId();
         String givenName = patient.getGivenName();
         String surname = patient.getSurName();
+
         if (isNotBlank(divisionId) && isNotBlank(districtId) && isNotBlank(upazilaId) && isNotBlank(givenName) && isNotBlank(surname)) {
             NameMapping mapping = new NameMapping(divisionId, districtId, upazilaId, givenName.toLowerCase(), surname.toLowerCase(), healthId);
             batch.add(createInsertQuery(CF_NAME_MAPPING, mapping, null, converter));
         }
+
+        if (isNotBlank(divisionId) && isNotBlank(districtId)) {
+            Catchment catchment = new Catchment(divisionId, districtId, upazilaId, cityCorpId, unionOrUrbanWardId, ruralWardId);
+            for (String catchmentId : catchment.getAllIds()) {
+                CatchmentMapping mapping = new CatchmentMapping(catchmentId, patient.getUpdatedAt(), healthId);
+                batch.add(createInsertQuery(CF_CATCHMENT_MAPPING, mapping, null, converter));
+            }
+        }
+
+
         return batch;
     }
 
     public static Update buildUpdateStmt(Patient patient, CassandraConverter converter) {
         return toUpdateQuery(CF_PATIENT, patient, null, converter);
+    }
+
+    public static String buildFindByCatchmentStmt(Catchment catchment, Date after, int limit) {
+        Where where = select(HEALTH_ID, LAST_UPDATED).from(CF_CATCHMENT_MAPPING)
+                .where(eq(CATCHMENT_ID, catchment.getId()));
+
+        if (after != null) {
+            where = where.and(gt(LAST_UPDATED, after));
+        }
+        return where.limit(limit).toString();
     }
 }

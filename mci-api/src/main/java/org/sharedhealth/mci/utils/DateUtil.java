@@ -1,6 +1,7 @@
 package org.sharedhealth.mci.utils;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -34,5 +35,15 @@ public class DateUtil {
         DateFormat dateFormat = new SimpleDateFormat(ISO_DATE_TIME_FORMAT);
         dateFormat.setTimeZone(getTimeZone("UTC"));
         return dateFormat.format(date);
+    }
+
+    public static Date fromIsoFormat(String date) {
+        DateFormat dateFormat = new SimpleDateFormat(ISO_DATE_TIME_FORMAT);
+        dateFormat.setTimeZone(getTimeZone("UTC"));
+        try {
+            return dateFormat.parse(date);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

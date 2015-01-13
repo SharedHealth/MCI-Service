@@ -19,19 +19,38 @@ public class Catchment {
     private String cityCorpId;
     private String unionOrUrbanWardId;
     private String ruralWardId;
-    private Object ids;
 
     public Catchment(String divisionId, String districtId) {
         this(divisionId, districtId, null);
     }
 
     public Catchment(String divisionId, String districtId, String upazilaId) {
+        this(divisionId, districtId, upazilaId, null, null, null);
+    }
+
+    public Catchment(String divisionId, String districtId, String upazilaId, String cityCorpId,
+                     String unionOrUrbanWardId, String ruralWardId) {
         if (isBlank(divisionId) || isBlank(districtId)) {
             throw new IllegalArgumentException(INVALID_DIVISION_OR_DISTRICT);
         }
         this.divisionId = divisionId;
         this.districtId = districtId;
-        this.upazilaId = upazilaId;
+
+        if (isNotBlank(upazilaId)) {
+            this.setUpazilaId(upazilaId);
+
+            if (isNotBlank(cityCorpId)) {
+                this.setCityCorpId(cityCorpId);
+
+                if (isNotBlank(unionOrUrbanWardId)) {
+                    this.setUnionOrUrbanWardId(unionOrUrbanWardId);
+
+                    if (isNotBlank(ruralWardId)) {
+                        this.setRuralWardId(ruralWardId);
+                    }
+                }
+            }
+        }
     }
 
     public String getId() {

@@ -64,6 +64,39 @@ public class PatientServiceTest {
     }
 
     @Test
+    public void shouldFindPatientsByCatchment() {
+        Catchment catchment = new Catchment("10", "20", "30");
+        Date after = new Date();
+        String facilityId = "123456";
+        int limit = 25;
+        PatientData patient = new PatientData();
+        String healthId = "h101";
+        patient.setHealthId(healthId);
+
+        when(settingService.getSettingAsIntegerByKey("PER_PAGE_MAXIMUM_LIMIT")).thenReturn(limit);
+        when(facilityRegistryWrapper.getCatchmentAreasByFacility(facilityId)).thenReturn(asList(catchment.getId()));
+        when(patientRepository.findAllByCatchment(catchment, after, limit)).thenReturn(asList(patient));
+
+        List<PatientData> patients = patientService.findAllByCatchment(catchment, after, facilityId);
+
+        verify(facilityRegistryWrapper).getCatchmentAreasByFacility(facilityId);
+        verify(settingService).getSettingAsIntegerByKey("PER_PAGE_MAXIMUM_LIMIT");
+        verify(patientRepository).findAllByCatchment(catchment, after, limit);
+
+        assertNotNull(patients);
+        assertEquals(1, patients.size());
+        assertEquals(healthId, patient.getHealthId());
+    }
+
+    @Test(expected = InsufficientPrivilegeException.class)
+    public void shouldThrowExceptionWhenCatchmentInPatientSearchDoesNotBelongToGivenFacility() {
+        String facilityId = "123456";
+        when(facilityRegistryWrapper.getCatchmentAreasByFacility(facilityId)).thenReturn(asList(new Catchment("11", "22").getId()));
+
+        patientService.findAllByCatchment(new Catchment("10", "20"), new Date(), facilityId);
+    }
+
+    @Test
     public void shouldFindPendingApprovalListByCatchment() throws Exception {
         Catchment catchment = new Catchment("10", "20", "30");
         UUID after = UUIDs.timeBased();

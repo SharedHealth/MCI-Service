@@ -1,15 +1,13 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
 import com.datastax.driver.core.querybuilder.Batch;
-import com.datastax.driver.core.querybuilder.QueryBuilder;
-import com.datastax.driver.core.querybuilder.Select;
-import com.datastax.driver.core.utils.UUIDs;
 import org.sharedhealth.mci.utils.UidGenerator;
 import org.sharedhealth.mci.web.exception.HealthIDExistException;
 import org.sharedhealth.mci.web.exception.PatientNotFoundException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.handler.PatientFilter;
 import org.sharedhealth.mci.web.mapper.*;
+import org.sharedhealth.mci.web.model.CatchmentMapping;
 import org.sharedhealth.mci.web.model.Patient;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
 import org.sharedhealth.mci.web.model.PendingApprovalRequest;
@@ -28,7 +26,9 @@ import java.io.InputStream;
 import java.util.*;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
+import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
+import static java.util.Collections.emptyList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -151,7 +151,7 @@ public class PatientRepository extends BaseRepository {
                 buildDeletePendingApprovalMappingStmt(healthId, batch);
             }
 
-            UUID uuid = UUIDs.timeBased();
+            UUID uuid = timeBased();
             buildCreatePendingApprovalMappingStmt(catchment, healthId, uuid, batch);
 
             patient.addPendingApprovals(buildPendingApproval(uuid, pendingApprovalRequest));
@@ -302,69 +302,16 @@ public class PatientRepository extends BaseRepository {
         return true;
     }
 
-    public List<PatientData> findAllByLocations(List<String> locations, String start, Date since) {
-        List<PatientData> dataList = new ArrayList<>();
-        int limit = PER_PAGE_LIMIT;
-
-        if (locations != null && locations.size() > 0) {
-            String locationPointer = getLocationPointer(locations, start, null);
-
-            for (String catchment : locations) {
-                if (dataList.size() == 0 && !isLocationBelongsToCatchment(locationPointer, catchment)) {
-                    continue;
-                }
-                try {
-                    dataList.addAll(this.findAllByLocation(catchment, start, limit, since));
-                    if (dataList.size() < PER_PAGE_LIMIT) {
-                        start = null;
-                        limit = PER_PAGE_LIMIT - dataList.size();
-                        locationPointer = null;
-                    } else {
-                        break;
-                    }
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        } else {
-            return this.findAllByLocation(null, start, limit, since);
+    public List<PatientData> findAllByCatchment(Catchment catchment, Date after, int limit) {
+        List<CatchmentMapping> mappings = cassandraOps.select(buildFindByCatchmentStmt(catchment, after, limit), CatchmentMapping.class);
+        if (isEmpty(mappings)) {
+            return emptyList();
         }
-        return dataList;
-    }
-
-    List<PatientData> findAllByLocation(String location, String start, int limit, Date since) {
-        Select select = select().from("patient");
-        select.where(QueryBuilder.eq(getAddressHierarchyField(location.length()), location));
-
-        if (isNotBlank(start)) {
-            select.where(QueryBuilder.gt(QueryBuilder.token("health_id"), QueryBuilder.raw("token('" + start + "')")));
+        List<String> healthIds = new ArrayList<>();
+        for (CatchmentMapping mapping : mappings) {
+            healthIds.add(mapping.getHealthId());
         }
-        if (since != null) {
-            select.where(QueryBuilder.gt("updated_at", since));
-            select.allowFiltering();
-        }
-
-        if (limit > 0) {
-            select.limit(limit);
-        }
-        return mapper.map(cassandraOps.select(select, Patient.class));
-    }
-
-    private String getLocationPointer(List<String> locations, String start, String d) {
-        if (locations.size() > 1 && isNotBlank(start)) {
-            PatientData p = findByHealthId(start);
-            return p.getAddress().getGeoCode();
-        }
-        return d;
-    }
-
-    private boolean isLocationBelongsToCatchment(String location, String catchment) {
-        return isBlank(location) || location.startsWith(catchment);
-    }
-
-    private String getAddressHierarchyField(int length) {
-        return "location_level" + (length / 2);
+        return findByHealthId(healthIds);
     }
 
     public List<PendingApprovalMapping> findPendingApprovalMapping(Catchment catchment, UUID after, UUID before, int limit) {

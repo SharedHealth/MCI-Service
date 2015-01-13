@@ -20,7 +20,7 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_INVALID;
-import static org.sharedhealth.mci.web.utils.JsonConstants.*;
+import static org.sharedhealth.mci.web.utils.JsonConstants.HID;
 
 @Component
 public class PatientService {
@@ -103,9 +103,9 @@ public class PatientService {
         return patientRepository.findAllSummaryByQuery(searchQuery);
     }
 
-    public List<PatientData> findAllByFacility(String facilityId, String last, Date since) {
-        List<String> locations = facilityRegistryWrapper.getCatchmentAreasByFacility(facilityId);
-        return patientRepository.findAllByLocations(locations, last, since);
+    public List<PatientData> findAllByCatchment(Catchment catchment, Date after, String facilityId) {
+        verifyCatchment(facilityId, catchment);
+        return patientRepository.findAllByCatchment(catchment, after, getPerPageMaximumLimit());
     }
 
     public int getPerPageMaximumLimit() {
@@ -166,6 +166,13 @@ public class PatientService {
         verifyCatchment(existingPatient, catchment);
         verifyPendingApprovalDetails(patient, existingPatient);
         return patientRepository.processPendingApprovals(patient, existingPatient, catchment, shouldAccept);
+    }
+
+    private void verifyCatchment(String facilityId, Catchment catchment) {
+        List<String> catchments = facilityRegistryWrapper.getCatchmentAreasByFacility(facilityId);
+        if (!catchments.contains(catchment.getId())) {
+            throw new InsufficientPrivilegeException(MESSAGE_INSUFFICIENT_PRIVILEGE);
+        }
     }
 
     private void verifyCatchment(PatientData patient, Catchment catchment) {

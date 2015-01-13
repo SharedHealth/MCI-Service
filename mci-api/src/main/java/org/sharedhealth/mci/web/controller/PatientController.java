@@ -20,13 +20,12 @@ import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.validation.Valid;
 import javax.validation.groups.Default;
-import java.util.HashMap;
-import java.util.List;
-import java.util.TreeSet;
-import java.util.UUID;
+import java.util.*;
 
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.sharedhealth.mci.utils.DateUtil.fromIsoFormat;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 import static org.springframework.http.HttpStatus.ACCEPTED;
 import static org.springframework.http.HttpStatus.OK;
@@ -117,24 +116,75 @@ public class PatientController {
         return deferredResult;
     }
 
-    @RequestMapping(value = "/facility/{facilityId}", method = GET, produces = APPLICATION_JSON_VALUE)
-    public DeferredResult<ResponseEntity<MCIMultiResponse>> findAllPatientsInCatchment(
-            @PathVariable String facilityId,
-            @Valid PaginationQuery paginationQuery,
-            BindingResult bindingResult) {
+    @RequestMapping(value = "/division/{divisionId}/district/{districtId}", method = GET, produces = APPLICATION_JSON_VALUE)
+    public DeferredResult<ResponseEntity<MCIMultiResponse>> findAllPatientsByCatchment(
+            @PathVariable String divisionId,
+            @PathVariable String districtId,
+            @RequestParam(value = AFTER, required = false) String after,
+            @RequestHeader(FACILITY_ID) String facilityId) {
+        return this.findAllPatientsByCatchment(divisionId, districtId, null, null, null, null, after, facilityId);
+    }
 
-        if (bindingResult.hasErrors()) {
-            throw new ValidationException(bindingResult);
-        }
-        logger.debug("Find all patients  for catchment of facility [" + facilityId + "]");
+    @RequestMapping(value = "/division/{divisionId}/district/{districtId}/upazila/{upazilaId}", method = GET,
+            produces = APPLICATION_JSON_VALUE)
+    public DeferredResult<ResponseEntity<MCIMultiResponse>> findAllPatientsByCatchment(
+            @RequestHeader(FACILITY_ID) String facilityId,
+            @PathVariable String divisionId,
+            @PathVariable String districtId,
+            @PathVariable String upazilaId,
+            @RequestParam(value = AFTER, required = false) String after) {
+        return this.findAllPatientsByCatchment(divisionId, districtId, upazilaId, null, null, null, after, facilityId);
+    }
+
+    @RequestMapping(value = "/division/{divisionId}/district/{districtId}/upazila/{upazilaId}/citycorp/{cityCorpId}",
+            method = GET, produces = APPLICATION_JSON_VALUE)
+    public DeferredResult<ResponseEntity<MCIMultiResponse>> findAllPatientsByCatchment(
+            @PathVariable String divisionId,
+            @PathVariable String districtId,
+            @PathVariable String upazilaId,
+            @PathVariable String cityCorpId,
+            @RequestParam(value = AFTER, required = false) String after,
+            @RequestHeader(FACILITY_ID) String facilityId) {
+        return this.findAllPatientsByCatchment(divisionId, districtId, upazilaId, cityCorpId, null, null, after, facilityId);
+    }
+
+    @RequestMapping(value = "/division/{divisionId}/district/{districtId}/upazila/{upazilaId}/citycorp/{cityCorpId}/union-urbanward/{unionOrUrbanWardId}",
+            method = GET, produces = APPLICATION_JSON_VALUE)
+    public DeferredResult<ResponseEntity<MCIMultiResponse>> findAllPatientsByCatchment(
+            @PathVariable String divisionId,
+            @PathVariable String districtId,
+            @PathVariable String upazilaId,
+            @PathVariable String cityCorpId,
+            @PathVariable String unionOrUrbanWardId,
+            @RequestParam(value = AFTER, required = false) String after,
+            @RequestHeader(FACILITY_ID) String facilityId) {
+        return this.findAllPatientsByCatchment(divisionId, districtId, upazilaId, cityCorpId, unionOrUrbanWardId, null, after, facilityId);
+    }
+
+    @RequestMapping(value = "/division/{divisionId}/district/{districtId}/upazila/{upazilaId}/citycorp/{cityCorpId}/union-urbanward/{unionOrUrbanWardId}/ruralward/{ruralWardId}",
+            method = GET, produces = APPLICATION_JSON_VALUE)
+    public DeferredResult<ResponseEntity<MCIMultiResponse>> findAllPatientsByCatchment(
+            @PathVariable String divisionId,
+            @PathVariable String districtId,
+            @PathVariable String upazilaId,
+            @PathVariable String cityCorpId,
+            @PathVariable String unionOrUrbanWardId,
+            @PathVariable String ruralWardId,
+            @RequestParam(value = AFTER, required = false) String after,
+            @RequestHeader(FACILITY_ID) String facilityId) {
+
+        Catchment catchment = new Catchment(divisionId, districtId, upazilaId, cityCorpId, unionOrUrbanWardId, ruralWardId);
+        logger.debug(format("Find all patients  for %s, after %s", catchment, after));
         final DeferredResult<ResponseEntity<MCIMultiResponse>> deferredResult = new DeferredResult<>();
 
-        List<PatientData> dataList = patientService.findAllByFacility(facilityId, paginationQuery.getLast(), paginationQuery.getDateSince());
-        HashMap<String, String> additionalInfo = null;
-        MCIMultiResponse mciMultiResponse = new MCIMultiResponse<>(dataList, additionalInfo, OK);
+        Date date = isNotBlank(after) ? fromIsoFormat(after) : null;
+        List<PatientData> dataList = patientService.findAllByCatchment(catchment, date, facilityId);
+
+        MCIMultiResponse mciMultiResponse = new MCIMultiResponse<>(dataList, null, OK);
         deferredResult.setResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject));
         return deferredResult;
     }
+
 
     @RequestMapping(value = "/pendingapprovals", method = GET, produces = APPLICATION_JSON_VALUE)
     public DeferredResult<ResponseEntity<MCIMultiResponse>> findPendingApprovalList(
