@@ -1,10 +1,12 @@
 package org.sharedhealth.mci.web.mapper;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Facility {
@@ -48,9 +50,9 @@ public class Facility {
         return result;
     }
 
-    public List<String> getCatchments() {
+    public List<Catchment> getCatchments() {
 
-        if(facilityProperties == null) {
+        if (facilityProperties == null) {
             return new ArrayList<>();
         }
 
@@ -61,27 +63,34 @@ public class Facility {
     private class FacilityProperties {
 
         @JsonProperty("org_level")
-        private String organizaitonLevel;
+        private String organizationLevel;
 
-        @JsonProperty("catchment")
-        private List<String> catchments;
+        private List<Catchment> catchments;
 
-        public FacilityProperties(){}
+        public FacilityProperties() {
+            this.catchments = new ArrayList<>();
+        }
 
-        public List<String> getCatchments() {
+        public List<Catchment> getCatchments() {
             return catchments;
         }
 
+        @JsonProperty("catchment")
         public void setCatchments(List<String> catchments) {
-            this.catchments = catchments;
+            if (isEmpty(catchments)) {
+                return;
+            }
+            for (String catchment : catchments) {
+                this.catchments.add(new Catchment(catchment));
+            }
         }
 
-        public String getOrganizaitonLevel() {
-            return organizaitonLevel;
+        public String getOrganizationLevel() {
+            return organizationLevel;
         }
 
-        public void setOrganizaitonLevel(String organizaitonLevel) {
-            this.organizaitonLevel = organizaitonLevel;
+        public void setOrganizationLevel(String organizationLevel) {
+            this.organizationLevel = organizationLevel;
         }
     }
 }

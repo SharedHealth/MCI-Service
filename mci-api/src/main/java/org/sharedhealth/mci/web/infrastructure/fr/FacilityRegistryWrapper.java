@@ -5,6 +5,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.sharedhealth.mci.web.config.MCIProperties;
 import org.sharedhealth.mci.web.exception.FacilityNotFoundException;
+import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.Facility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -59,7 +60,7 @@ public class FacilityRegistryWrapper {
     }
 
     @Cacheable({"facilities"})
-    public List<String> getCatchmentAreasByFacility(String facilityId) throws FacilityNotFoundException {
+    public List<Catchment> getCatchmentAreasByFacility(String facilityId) throws FacilityNotFoundException {
         Facility facility;
         ListenableFuture<Facility> facilityResponse = getFacility(facilityId);
 

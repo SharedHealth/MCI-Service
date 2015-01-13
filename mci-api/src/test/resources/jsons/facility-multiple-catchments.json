@@ -1,7 +1,7 @@
 {
     "name": "Amta Union Sub Center",
     "url": "",
-    "id": "10000059",
+    "id": "10000069",
     "active": 1,
     "createdAt": "",
     "updatedAt": "-0001-11-30 00:00:00",
@@ -37,7 +37,7 @@
             "fax": null
         },
         "catchment": [
-            "302614"
+            "302614", "302615", "302616"
         ]
     }
 }

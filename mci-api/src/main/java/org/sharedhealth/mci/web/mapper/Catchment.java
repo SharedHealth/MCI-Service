@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.String.format;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 public class Catchment {
 
@@ -51,6 +50,14 @@ public class Catchment {
                 }
             }
         }
+    }
+
+    /**
+     * This constructor assumes each level is of length 2.
+     */
+    public Catchment(String catchment) {
+        this(substring(catchment, 0, 2), substring(catchment, 2, 4), substring(catchment, 4, 6),
+                substring(catchment, 6, 8), substring(catchment, 8, 10), substring(catchment, 10, 12));
     }
 
     public String getId() {

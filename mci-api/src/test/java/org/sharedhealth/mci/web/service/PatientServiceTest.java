@@ -74,7 +74,7 @@ public class PatientServiceTest {
         patient.setHealthId(healthId);
 
         when(settingService.getSettingAsIntegerByKey("PER_PAGE_MAXIMUM_LIMIT")).thenReturn(limit);
-        when(facilityRegistryWrapper.getCatchmentAreasByFacility(facilityId)).thenReturn(asList(catchment.getId()));
+        when(facilityRegistryWrapper.getCatchmentAreasByFacility(facilityId)).thenReturn(asList(catchment));
         when(patientRepository.findAllByCatchment(catchment, after, limit)).thenReturn(asList(patient));
 
         List<PatientData> patients = patientService.findAllByCatchment(catchment, after, facilityId);
@@ -91,7 +91,7 @@ public class PatientServiceTest {
     @Test(expected = InsufficientPrivilegeException.class)
     public void shouldThrowExceptionWhenCatchmentInPatientSearchDoesNotBelongToGivenFacility() {
         String facilityId = "123456";
-        when(facilityRegistryWrapper.getCatchmentAreasByFacility(facilityId)).thenReturn(asList(new Catchment("11", "22").getId()));
+        when(facilityRegistryWrapper.getCatchmentAreasByFacility(facilityId)).thenReturn(asList(new Catchment("11", "22")));
 
         patientService.findAllByCatchment(new Catchment("10", "20"), new Date(), facilityId);
     }

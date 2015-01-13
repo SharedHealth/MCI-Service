@@ -169,8 +169,8 @@ public class PatientService {
     }
 
     private void verifyCatchment(String facilityId, Catchment catchment) {
-        List<String> catchments = facilityRegistryWrapper.getCatchmentAreasByFacility(facilityId);
-        if (!catchments.contains(catchment.getId())) {
+        List<Catchment> catchments = facilityRegistryWrapper.getCatchmentAreasByFacility(facilityId);
+        if (!catchments.contains(catchment)) {
             throw new InsufficientPrivilegeException(MESSAGE_INSUFFICIENT_PRIVILEGE);
         }
     }
