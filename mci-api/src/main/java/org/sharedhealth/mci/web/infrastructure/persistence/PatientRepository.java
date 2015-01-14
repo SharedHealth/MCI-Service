@@ -103,9 +103,7 @@ public class PatientRepository extends BaseRepository {
         patientToSave.setFullName(fullName);
         patientToSave.setUpdatedAt(new Date());
 
-        Catchment catchment = existingPatientData.getCatchment();
-
-        final Batch batch = buildUpdateBatch(patientToSave, pendingApprovalRequest, catchment);
+        final Batch batch = buildUpdateBatch(patientToSave, pendingApprovalRequest, existingPatientData);
         buildCreateUpdateLogStmt(patientDataToSave, existingPatientData, batch);
 
         cassandraOps.execute(batch);
@@ -145,23 +143,36 @@ public class PatientRepository extends BaseRepository {
         return pendingApprovals;
     }
 
-    private Batch buildUpdateBatch(Patient patient, PendingApprovalRequest pendingApprovalRequest, Catchment catchment) {
+    private Batch buildUpdateBatch(Patient patientToSave, PendingApprovalRequest pendingApprovalRequest, PatientData existingPatient) {
         Batch batch = batch();
         if (pendingApprovalRequest != null) {
-            TreeSet<PendingApproval> existingPendingApprovals = patient.getPendingApprovals();
-            String healthId = patient.getHealthId();
+            TreeSet<PendingApproval> existingPendingApprovals = patientToSave.getPendingApprovals();
+            String healthId = patientToSave.getHealthId();
 
             if (existingPendingApprovals != null && existingPendingApprovals.size() > 0) {
                 buildDeletePendingApprovalMappingStmt(healthId, batch);
             }
 
             UUID uuid = timeBased();
-            buildCreatePendingApprovalMappingStmt(catchment, healthId, uuid, batch);
+            buildCreatePendingApprovalMappingStmt(existingPatient.getCatchment(), healthId, uuid, batch);
 
-            patient.addPendingApprovals(buildPendingApproval(uuid, pendingApprovalRequest));
+            patientToSave.addPendingApprovals(buildPendingApproval(uuid, pendingApprovalRequest));
         }
-        batch.add(buildUpdateStmt(patient, cassandraOps.getConverter()));
+
+        buildUpdateCatchmentMappingsStmt(patientToSave, existingPatient, batch);
+
+        batch.add(buildUpdateStmt(patientToSave, cassandraOps.getConverter()));
         return batch;
+    }
+
+    private void buildUpdateCatchmentMappingsStmt(Patient patientToSave, PatientData existingPatient, Batch batch) {
+        buildDeleteCatchmentMappingsStmt(existingPatient.getCatchment(), existingPatient.getUpdatedAt(), existingPatient.getHealthId(),
+                cassandraOps.getConverter(), batch);
+
+        Catchment catchment = patientToSave.getCatchment() != null ? patientToSave.getCatchment() : existingPatient.getCatchment();
+
+        buildCreateCatchmentMappingsStmt(catchment, patientToSave.getUpdatedAt(), patientToSave.getHealthId(),
+                cassandraOps.getConverter(), batch);
     }
 
     private void buildDeletePendingApprovalMappingStmt(String healthId, Batch batch) {

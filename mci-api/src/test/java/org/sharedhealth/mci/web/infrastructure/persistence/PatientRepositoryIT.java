@@ -33,9 +33,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.junit.Assert.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.CF_PENDING_APPROVAL_MAPPING;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.GENDER;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.OCCUPATION;
+import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.PHONE_NUMBER;
 import static org.sharedhealth.mci.web.utils.PatientDataConstants.PATIENT_STATUS_ALIVE;
 import static org.sharedhealth.mci.web.utils.PatientDataConstants.STRING_NO;
@@ -123,8 +121,11 @@ public class PatientRepositoryIT {
                 givenName.toLowerCase(), surname.toLowerCase()), String.class);
         assertEquals(healthId, id);
 
-        PatientData patient = patientRepository.findByHealthId(healthId);
-        List<CatchmentMapping> catchmentMappings = cassandraOps.select(buildFindCatchmentMappingStmt(patient),
+        assertCatchmentMappings(patientRepository.findByHealthId(healthId));
+    }
+
+    private void assertCatchmentMappings(PatientData patient) {
+        List<CatchmentMapping> catchmentMappings = cassandraOps.select(buildFindCatchmentMappingsStmt(patient),
                 CatchmentMapping.class);
         assertNotNull(catchmentMappings);
 
@@ -133,7 +134,7 @@ public class PatientRepositoryIT {
 
         for (CatchmentMapping catchmentMapping : catchmentMappings) {
             assertTrue(catchmentIds.contains(catchmentMapping.getCatchmentId()));
-            assertEquals(healthId, catchmentMapping.getHealthId());
+            assertEquals(patient.getHealthId(), catchmentMapping.getHealthId());
             assertEquals(patient.getUpdatedAt(), catchmentMapping.getLastUpdated());
         }
     }
@@ -209,9 +210,26 @@ public class PatientRepositoryIT {
     }
 
     @Test
+    public void shouldUpdateCatchmentMappingsWhenPatientIsUpdated() {
+        PatientData patient = createPatient();
+        String healthId = patientRepository.create(patient).getId();
+        assertCatchmentMappings(patientRepository.findByHealthId(healthId));
+
+        patient.setHealthId(healthId);
+        patient.setGivenName("Harry");
+        patient.setAddress(new Address("99", "88", "77"));
+        patientRepository.update(patient, patient.getHealthId());
+
+        assertCatchmentMappings(patientRepository.findByHealthId(healthId));
+    }
+
+    @Test
     public void shouldFindByHealthIdsInTheOrderIdsArePassed() {
-        PatientData patient = new PatientData();
-        data.setGivenName("Scott");
+        PatientData patient = createPatient();
+        patient.setNationalId(null);
+        patient.setBirthRegistrationNumber(null);
+        patient.setUid(null);
+
         String healthId1 = patientRepository.create(patient).getId();
         assertTrue(isNotBlank(healthId1));
         String healthId2 = patientRepository.create(patient).getId();

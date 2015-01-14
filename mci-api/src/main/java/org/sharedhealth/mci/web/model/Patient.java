@@ -2,8 +2,10 @@ package org.sharedhealth.mci.web.model;
 
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.PendingApproval;
 import org.sharedhealth.mci.web.utils.JsonConstants;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.cassandra.mapping.Column;
 import org.springframework.data.cassandra.mapping.PrimaryKey;
 import org.springframework.data.cassandra.mapping.Table;
@@ -1246,5 +1248,16 @@ public class Patient {
 
     public void setConfidential(Boolean confidential) {
         this.confidential = confidential;
+    }
+
+    @Transient
+    public Catchment getCatchment() {
+        String divisionId = this.getDivisionId();
+        String districtId = this.getDistrictId();
+        if (isBlank(divisionId) || isBlank(districtId)) {
+            return null;
+        }
+        return new Catchment(divisionId, districtId, this.getUpazilaId(),
+                this.getCityCorporationId(), this.getUnionOrUrbanWardId(), this.getRuralWardId());
     }
 }

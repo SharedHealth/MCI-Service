@@ -22,6 +22,7 @@ import java.util.TreeSet;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static java.lang.String.valueOf;
 import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.utils.DateUtil.fromIsoFormat;
 import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
@@ -672,7 +673,12 @@ public class PatientData {
     @JsonIgnore
     public Catchment getCatchment() {
         Address address = this.getAddress();
-        return new Catchment(address.getDivisionId(), address.getDistrictId(), address.getUpazilaId(),
+        String divisionId = address.getDivisionId();
+        String districtId = address.getDistrictId();
+        if (isBlank(divisionId) || isBlank(districtId)) {
+            return null;
+        }
+        return new Catchment(divisionId, districtId, address.getUpazilaId(),
                 address.getCityCorporationId(), address.getUnionOrUrbanWardId(), address.getRuralWardId());
     }
 }
