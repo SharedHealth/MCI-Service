@@ -11,6 +11,7 @@ import org.sharedhealth.mci.web.exception.PatientNotFoundException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.mapper.*;
+import org.sharedhealth.mci.web.model.CatchmentMapping;
 import org.sharedhealth.mci.web.model.Patient;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,7 +100,7 @@ public class PatientRepositoryIT {
     }
 
     @Test
-    public void shouldCreatePatientAndMappings() {
+    public void shouldCreateMappingsWhenPatientIsCreated() {
         String id = patientRepository.create(data).getId();
         assertNotNull(id);
 
@@ -118,6 +119,20 @@ public class PatientRepositoryIT {
         healthId = cassandraOps.queryForObject(buildFindByNameStmt(divisionId, districtId, upazilaId,
                 givenName.toLowerCase(), surname.toLowerCase()), String.class);
         assertEquals(healthId, id);
+
+        PatientData patient = patientRepository.findByHealthId(healthId);
+        List<CatchmentMapping> catchmentMappings = cassandraOps.select(buildFindCatchmentMappingStmt(patient),
+                CatchmentMapping.class);
+        assertNotNull(catchmentMappings);
+
+        List<String> catchmentIds = patient.getCatchment().getAllIds();
+        assertEquals(catchmentIds.size(), catchmentMappings.size());
+
+        for (CatchmentMapping catchmentMapping : catchmentMappings) {
+            assertTrue(catchmentIds.contains(catchmentMapping.getCatchmentId()));
+            assertEquals(healthId, catchmentMapping.getHealthId());
+            assertEquals(patient.getUpdatedAt(), catchmentMapping.getLastUpdated());
+        }
     }
 
     @Test

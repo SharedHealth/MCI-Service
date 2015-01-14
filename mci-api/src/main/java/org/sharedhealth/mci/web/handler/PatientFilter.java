@@ -5,6 +5,7 @@ import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
 import org.sharedhealth.mci.web.model.PendingApprovalRequest;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -66,8 +67,8 @@ public class PatientFilter {
         patient.setStatus(processString(map, PATIENT_STATUS, existingPatient.getStatus(), patientToBeUpdated.getStatus()));
         patient.setDateOfDeath(processString(map, DATE_OF_DEATH, existingPatient.getDateOfDeath(), patientToBeUpdated.getDateOfDeath()));
         patient.setConfidential(processString(map, CONFIDENTIAL, existingPatient.getConfidential(), patientToBeUpdated.getConfidential()));
-        patient.setCreatedAt(processString(map, CREATED, existingPatient.getCreatedAt(), patientToBeUpdated.getCreatedAt()));
-        patient.setUpdatedAt(processString(map, MODIFIED, existingPatient.getUpdatedAt(), patientToBeUpdated.getUpdatedAt()));
+        patient.setCreatedAt(processDate(map, CREATED, existingPatient.getCreatedAt(), patientToBeUpdated.getCreatedAt()));
+        patient.setUpdatedAt(processDate(map, MODIFIED, existingPatient.getUpdatedAt(), patientToBeUpdated.getUpdatedAt()));
         patient.setPhoneNumber(processPhoneNumber(map, PHONE_NUMBER, existingPatient.getPhoneNumber(), patientToBeUpdated.getPhoneNumber()));
         patient.setPrimaryContactNumber(processPhoneNumber(map, PRIMARY_CONTACT_NUMBER, existingPatient.getPrimaryContactNumber(), patientToBeUpdated.getPrimaryContactNumber()));
         if (patientToBeUpdated.getAddress() != null) {
@@ -87,6 +88,11 @@ public class PatientFilter {
     private Address processAddress(Map<String, Object> map, String key, Address oldValue, Address newValue) {
         Object address = process(map, key, oldValue, newValue);
         return address == null ? null : (Address) address;
+    }
+
+    private Date processDate(Map<String, Object> map, String key, Date oldValue, Date newValue) {
+        Object value = process(map, key, oldValue, newValue);
+        return value == null ? null : (Date) value;
     }
 
     private String processString(Map<String, Object> map, String key, String oldValue, String newValue) {

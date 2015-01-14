@@ -4,10 +4,12 @@ import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Update;
 import org.sharedhealth.mci.web.mapper.Catchment;
+import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.model.*;
 import org.springframework.data.cassandra.convert.CassandraConverter;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
@@ -234,5 +236,13 @@ public class PatientQueryBuilder {
             where = where.and(gt(LAST_UPDATED, after));
         }
         return where.limit(limit).toString();
+    }
+
+    public static String buildFindCatchmentMappingStmt(PatientData patient) {
+        List<String> catchmentIds = patient.getCatchment().getAllIds();
+        return select().from(CF_CATCHMENT_MAPPING)
+                .where(in(CATCHMENT_ID, catchmentIds.toArray(new String[catchmentIds.size()])))
+                .and(eq(LAST_UPDATED, patient.getUpdatedAt()))
+                .and(eq(HEALTH_ID, patient.getHealthId())).toString();
     }
 }
