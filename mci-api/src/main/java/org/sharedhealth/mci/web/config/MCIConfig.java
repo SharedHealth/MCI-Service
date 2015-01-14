@@ -1,7 +1,5 @@
 package org.sharedhealth.mci.web.config;
 
-import java.util.Arrays;
-
 import org.sharedhealth.mci.web.security.WebSecurityConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
@@ -15,6 +13,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.AsyncRestTemplate;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableCaching

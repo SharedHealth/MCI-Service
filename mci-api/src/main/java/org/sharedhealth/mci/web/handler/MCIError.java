@@ -1,14 +1,11 @@
 package org.sharedhealth.mci.web.handler;
 
 
-import java.lang.Comparable;
-import java.lang.String;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
-public class MCIError implements Comparable<MCIError>{
+public class MCIError implements Comparable<MCIError> {
 
     private int code;
 

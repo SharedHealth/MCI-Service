@@ -1,7 +1,5 @@
 package org.sharedhealth.mci.web.mapper;
 
-import javax.validation.constraints.Pattern;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -9,7 +7,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.validation.constraints.Length;
 import org.sharedhealth.mci.validation.constraints.SearchQueryConstraint;
 
-import static org.sharedhealth.mci.web.utils.ErrorConstants.*;
+import javax.validation.constraints.Pattern;
+
+import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_PATTERN;
+import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_SEARCH_PARAMETER;
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -103,9 +104,9 @@ public class SearchQuery extends PaginationQuery {
 
     public void setPresent_address(String present_address) {
         this.present_address = present_address;
-        if(present_address.length() > 1) this.divisionId = present_address.substring(0, 2);
-        if(present_address.length() > 3) this.districtId = present_address.substring(2, 4);
-        if(present_address.length() > 5) this.upazilaId = present_address.substring(4, 6);
+        if (present_address.length() > 1) this.divisionId = present_address.substring(0, 2);
+        if (present_address.length() > 3) this.districtId = present_address.substring(2, 4);
+        if (present_address.length() > 5) this.upazilaId = present_address.substring(4, 6);
     }
 
     @Override

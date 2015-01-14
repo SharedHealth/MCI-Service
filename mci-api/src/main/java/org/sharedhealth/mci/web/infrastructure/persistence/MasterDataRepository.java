@@ -1,8 +1,5 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-
 import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
@@ -19,6 +16,9 @@ import org.springframework.cassandra.core.AsynchronousQueryListener;
 import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFuture;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class MasterDataRepository extends BaseRepository {
@@ -78,7 +78,7 @@ public class MasterDataRepository extends BaseRepository {
         try {
             masterData = findDataListenableFutureByKey(type, key).get();
         } catch (Exception e) {
-            logger.debug("Could not find Setting for key : [" + key + "] of type [" + type + "]" );
+            logger.debug("Could not find Setting for key : [" + key + "] of type [" + type + "]");
         }
 
         return masterData;

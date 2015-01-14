@@ -33,6 +33,9 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.junit.Assert.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
+import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.CF_PENDING_APPROVAL_MAPPING;
+import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.GENDER;
+import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.OCCUPATION;
 import static org.sharedhealth.mci.web.utils.JsonConstants.PHONE_NUMBER;
 import static org.sharedhealth.mci.web.utils.PatientDataConstants.PATIENT_STATUS_ALIVE;
 import static org.sharedhealth.mci.web.utils.PatientDataConstants.STRING_NO;
@@ -810,13 +813,13 @@ public class PatientRepositoryIT {
 
     @After
     public void tearDown() {
-        cassandraOps.execute("truncate " + CF_PATIENT);
-        cassandraOps.execute("truncate " + CF_NID_MAPPING);
-        cassandraOps.execute("truncate " + CF_BRN_MAPPING);
-        cassandraOps.execute("truncate " + CF_UID_MAPPING);
-        cassandraOps.execute("truncate " + CF_PHONE_NUMBER_MAPPING);
-        cassandraOps.execute("truncate " + CF_NAME_MAPPING);
+        cassandraOps.execute("truncate " + PatientRepositoryConstants.CF_PATIENT);
+        cassandraOps.execute("truncate " + PatientRepositoryConstants.CF_NID_MAPPING);
+        cassandraOps.execute("truncate " + PatientRepositoryConstants.CF_BRN_MAPPING);
+        cassandraOps.execute("truncate " + PatientRepositoryConstants.CF_UID_MAPPING);
+        cassandraOps.execute("truncate " + PatientRepositoryConstants.CF_PHONE_NUMBER_MAPPING);
+        cassandraOps.execute("truncate " + PatientRepositoryConstants.CF_NAME_MAPPING);
         cassandraOps.execute("truncate " + CF_PENDING_APPROVAL_MAPPING);
-        cassandraOps.execute("truncate " + CF_CATCHMENT_MAPPING);
+        cassandraOps.execute("truncate " + PatientRepositoryConstants.CF_CATCHMENT_MAPPING);
     }
 }

@@ -1,9 +1,9 @@
 package org.sharedhealth.mci.validation.constraintvalidator;
 
+import org.sharedhealth.mci.validation.constraints.Length;
+
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-
-import org.sharedhealth.mci.validation.constraints.Length;
 
 
 public class LengthValidator implements ConstraintValidator<Length, String> {
@@ -18,7 +18,7 @@ public class LengthValidator implements ConstraintValidator<Length, String> {
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
 
-        if(value == null) return true;
+        if (value == null) return true;
 
         String trimValue = value.trim();
 

@@ -1,13 +1,13 @@
 package org.sharedhealth.mci.utils;
 
 
-import java.nio.charset.Charset;
-import java.util.Arrays;
-
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.util.MultiValueMap;
+
+import java.nio.charset.Charset;
+import java.util.Arrays;
 
 public class HttpUtil {
 

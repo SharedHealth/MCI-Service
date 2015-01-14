@@ -1,12 +1,12 @@
 package org.sharedhealth.mci.validation.constraints;
 
+import org.sharedhealth.mci.validation.constraintvalidator.LengthValidator;
+
 import javax.validation.Constraint;
 import javax.validation.Payload;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-
-import org.sharedhealth.mci.validation.constraintvalidator.LengthValidator;
 
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
@@ -17,6 +17,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Documented
 public @interface Length {
     String message() default "invalid";
+
     int max() default 0;
 
     Class<?>[] groups() default {};

@@ -3,7 +3,8 @@ package org.sharedhealth.mci.web.mapper;
 import org.sharedhealth.mci.web.model.Location;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 

@@ -1,9 +1,10 @@
 package org.sharedhealth.mci.validation.constraintvalidator;
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
 
 import org.sharedhealth.mci.validation.constraints.MaritalRelation;
 import org.sharedhealth.mci.web.mapper.PatientData;
+
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
 
 import static org.sharedhealth.mci.web.utils.PatientDataConstants.MARITAL_STATUS_UNMARRIED;
 import static org.sharedhealth.mci.web.utils.PatientDataConstants.RELATION_SPOUSE;

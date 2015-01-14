@@ -15,7 +15,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.sharedhealth.mci.utils.DateUtil.DEFAULT_DATE_FORMAT;
 import static org.sharedhealth.mci.utils.DateUtil.string2Date;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
+import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.PENDING_APPROVALS;
 import static org.sharedhealth.mci.web.utils.JsonMapper.readValue;
 import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;

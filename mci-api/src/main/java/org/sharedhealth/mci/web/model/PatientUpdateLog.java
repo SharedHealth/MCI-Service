@@ -1,18 +1,14 @@
 package org.sharedhealth.mci.web.model;
 
 
-import java.util.Calendar;
-import java.util.Date;
-
 import org.springframework.data.cassandra.mapping.Column;
 import org.springframework.data.cassandra.mapping.PrimaryKeyColumn;
 import org.springframework.data.cassandra.mapping.Table;
 
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.CF_PATIENT_UPDATE_LOG;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.CHANGE_SET;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.EVENT_TIME;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.HEALTH_ID;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.YEAR;
+import java.util.Calendar;
+import java.util.Date;
+
+import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.*;
 import static org.springframework.cassandra.core.PrimaryKeyType.CLUSTERED;
 import static org.springframework.cassandra.core.PrimaryKeyType.PARTITIONED;
 

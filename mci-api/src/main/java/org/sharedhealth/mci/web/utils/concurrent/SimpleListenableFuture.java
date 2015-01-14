@@ -1,11 +1,11 @@
 package org.sharedhealth.mci.web.utils.concurrent;
 
-import java.util.concurrent.ExecutionException;
-
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import org.springframework.util.concurrent.FutureAdapter;
 import org.springframework.util.concurrent.ListenableFutureCallback;
+
+import java.util.concurrent.ExecutionException;
 
 /**
  * It is necessary that the adapt method does not take long to execute since we are using the same thread executor.

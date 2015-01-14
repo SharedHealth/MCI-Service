@@ -1,8 +1,6 @@
 package org.sharedhealth.mci.web.launch;
 
 
-import java.util.List;
-
 import org.sharedhealth.mci.web.config.MCIConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -13,6 +11,8 @@ import org.springframework.web.servlet.config.annotation.ContentNegotiationConfi
 import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+
+import java.util.List;
 
 @Configuration
 @Import({MCIConfig.class})

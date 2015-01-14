@@ -1,15 +1,15 @@
 package org.sharedhealth.mci.validation.constraintvalidator;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
-import java.util.regex.Pattern;
-
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.validation.constraints.Code;
 import org.sharedhealth.mci.web.model.MasterData;
 import org.sharedhealth.mci.web.service.MasterDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
+import java.util.regex.Pattern;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -39,9 +39,9 @@ public class CodeValidator implements ConstraintValidator<Code, String> {
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
 
-        if(value == null) return true;
+        if (value == null) return true;
 
-        if(StringUtils.isBlank(value)) return false;
+        if (StringUtils.isBlank(value)) return false;
 
         if (this.pattern != null && !this.pattern.matcher(value).matches()) {
             return false;

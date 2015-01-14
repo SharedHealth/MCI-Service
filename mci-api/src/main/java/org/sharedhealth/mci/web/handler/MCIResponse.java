@@ -1,16 +1,14 @@
 package org.sharedhealth.mci.web.handler;
 
-import org.springframework.http.HttpStatus;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
-import java.lang.String;
+import org.springframework.http.HttpStatus;
 
 import static org.sharedhealth.mci.web.utils.JsonConstants.HTTP_STATUS;
 
-@JsonIgnoreProperties(value = { "httpStatusObject" })
-@JsonPropertyOrder({HTTP_STATUS,"id"})
+@JsonIgnoreProperties(value = {"httpStatusObject"})
+@JsonPropertyOrder({HTTP_STATUS, "id"})
 public class MCIResponse {
 
     @JsonProperty(HTTP_STATUS)

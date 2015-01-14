@@ -1,13 +1,12 @@
 package org.sharedhealth.mci.validation.constraintvalidator;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
-
-import java.util.regex.Pattern;
-
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.validation.constraints.SearchQueryConstraint;
 import org.sharedhealth.mci.web.mapper.SearchQuery;
+
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
+import java.util.regex.Pattern;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -62,13 +61,13 @@ public class SearchQueryValidator implements ConstraintValidator<SearchQueryCons
 
     private void registerProperErrorMessage(SearchQuery searchQuery, ConstraintValidatorContext context) {
         String msg = ERROR_INCOMPLETE_SEARCH_CRITERIA;
-            if(isBlank(searchQuery.getGiven_name()) && isGivenNameRequired(searchQuery)) {
-                msg = ERROR_GIVEN_NAME_REQUIRED;
-            }else if(isNotBlank(searchQuery.getGiven_name()) || isNotBlank(searchQuery.getGiven_name())){
-                msg = ERROR_ID_ADDRESS_OR_PHONE_NUMBER_REQUIRED;
-            }else if(isNotBlank(searchQuery.getPresent_address())){
-                msg = ERROR_ID_NAME_OR_PHONE_NUMBER_REQUIRED;
-            }
+        if (isBlank(searchQuery.getGiven_name()) && isGivenNameRequired(searchQuery)) {
+            msg = ERROR_GIVEN_NAME_REQUIRED;
+        } else if (isNotBlank(searchQuery.getGiven_name()) || isNotBlank(searchQuery.getGiven_name())) {
+            msg = ERROR_ID_ADDRESS_OR_PHONE_NUMBER_REQUIRED;
+        } else if (isNotBlank(searchQuery.getPresent_address())) {
+            msg = ERROR_ID_NAME_OR_PHONE_NUMBER_REQUIRED;
+        }
 
         addConstraintViolation(context, msg);
     }
@@ -99,7 +98,7 @@ public class SearchQueryValidator implements ConstraintValidator<SearchQueryCons
     }
 
     private boolean isInvalidAddressPattern(String geoCode) {
-        return geoCode!= null && !this.pattern.matcher(geoCode).matches();
+        return geoCode != null && !this.pattern.matcher(geoCode).matches();
     }
 
     private void addConstraintViolation(ConstraintValidatorContext context, String code) {

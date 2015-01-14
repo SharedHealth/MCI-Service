@@ -1,11 +1,11 @@
 package org.sharedhealth.mci.utils;
 
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
+
+import java.io.IOException;
 
 public class WhiteSpaceRemovalDeserializer extends JsonDeserializer<String> {
     @Override

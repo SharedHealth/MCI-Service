@@ -1,10 +1,5 @@
 package org.sharedhealth.mci.validation.constraintvalidator;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
-
-import java.util.regex.Pattern;
-
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.validation.constraints.Location;
 import org.sharedhealth.mci.web.mapper.Address;
@@ -14,6 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
+import java.util.regex.Pattern;
 
 @Component
 public class LocationValidator implements ConstraintValidator<Location, Address> {

@@ -1,14 +1,14 @@
 package org.sharedhealth.mci.web.handler;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import org.springframework.http.HttpStatus;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static org.sharedhealth.mci.web.utils.JsonConstants.ADDITIONAL_INFO;

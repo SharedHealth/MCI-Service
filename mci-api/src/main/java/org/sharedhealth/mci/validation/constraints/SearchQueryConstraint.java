@@ -27,8 +27,7 @@ public @interface SearchQueryConstraint {
     @Target({TYPE, ANNOTATION_TYPE})
     @Retention(RUNTIME)
     @Documented
-        @interface List
-    {
+    @interface List {
         SearchQueryConstraint[] value();
     }
 }

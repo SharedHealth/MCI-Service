@@ -1,11 +1,11 @@
 package org.sharedhealth.mci.utils;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
 import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class FieldPropertyNameReader {
 

@@ -1,11 +1,11 @@
 package org.sharedhealth.mci.web.model;
 
-import java.io.Serializable;
-
 import org.springframework.cassandra.core.Ordering;
 import org.springframework.cassandra.core.PrimaryKeyType;
 import org.springframework.data.cassandra.mapping.PrimaryKeyClass;
 import org.springframework.data.cassandra.mapping.PrimaryKeyColumn;
+
+import java.io.Serializable;
 
 
 @PrimaryKeyClass
@@ -17,10 +17,10 @@ public class MasterDataKey implements Serializable {
     @PrimaryKeyColumn(name = "key", ordinal = 1, type = PrimaryKeyType.CLUSTERED, ordering = Ordering.DESCENDING)
     private String key;
 
-    public MasterDataKey(){}
+    public MasterDataKey() {
+    }
 
-    public MasterDataKey(String type, String key)
-    {
+    public MasterDataKey(String type, String key) {
         this.key = key;
         this.type = type;
     }

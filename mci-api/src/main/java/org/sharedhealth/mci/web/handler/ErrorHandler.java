@@ -1,9 +1,5 @@
 package org.sharedhealth.mci.web.handler;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
@@ -13,6 +9,10 @@ import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
@@ -111,7 +111,7 @@ public class ErrorHandler {
 
     public ErrorHandler handleSearchQueryParameterError(SearchQueryParameterException e) {
 
-        if(e.getBindingResult().getAllErrors().get(0).getDefaultMessage().matches("\\d+")) {
+        if (e.getBindingResult().getAllErrors().get(0).getDefaultMessage().matches("\\d+")) {
             return this.handleValidationError(this, new ValidationException(e.getBindingResult()));
         }
 
@@ -120,13 +120,13 @@ public class ErrorHandler {
         return this;
     }
 
-    private MCIError getValidationErrorInfo(ObjectError error ) {
+    private MCIError getValidationErrorInfo(ObjectError error) {
         return getValidationErrorInfo(error, 0);
     }
 
     private MCIError getValidationErrorInfo(ObjectError error, int code) {
 
-        String message,field;
+        String message, field;
 
         if (error.getDefaultMessage().matches("\\d+")) {
             code = Integer.parseInt(error.getDefaultMessage());

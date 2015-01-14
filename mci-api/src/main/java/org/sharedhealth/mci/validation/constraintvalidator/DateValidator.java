@@ -1,11 +1,11 @@
 package org.sharedhealth.mci.validation.constraintvalidator;
 
+import org.sharedhealth.mci.validation.constraints.Date;
+
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-
-import org.sharedhealth.mci.validation.constraints.Date;
 
 public class DateValidator implements ConstraintValidator<Date, String> {
 

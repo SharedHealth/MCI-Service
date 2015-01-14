@@ -1,12 +1,12 @@
 package org.sharedhealth.mci.utils;
 
 
-import java.io.IOException;
-
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 public class FileUtil {
     private static Logger logger = LoggerFactory.getLogger(FileUtil.class);

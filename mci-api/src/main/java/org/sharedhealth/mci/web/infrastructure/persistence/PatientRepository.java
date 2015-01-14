@@ -33,6 +33,7 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
+import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.*;
 import static org.sharedhealth.mci.web.utils.PatientDataConstants.PATIENT_STATUS_ALIVE;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createDeleteQuery;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
@@ -178,12 +179,11 @@ public class PatientRepository extends BaseRepository {
         }
     }
 
-    private void buildCreateUpdateLogStmt(PatientData patientDataToSave, PatientData existingPatientData, Batch batch)
-    {
+    private void buildCreateUpdateLogStmt(PatientData patientDataToSave, PatientData existingPatientData, Batch batch) {
         PatientUpdateLog patientUpdateLog = new PatientUpdateLog();
         String changeSet = getChangeSet(patientDataToSave, existingPatientData);
 
-        if(changeSet != null) {
+        if (changeSet != null) {
             patientUpdateLog.setHealthId(existingPatientData.getHealthId());
             patientUpdateLog.setEventTime(new Date());
             patientUpdateLog.setChangeSet(changeSet);
@@ -199,7 +199,7 @@ public class PatientRepository extends BaseRepository {
         patient.setConfidential(getChangedValueIgnoreCase(newData.getConfidential(), oldData.getConfidential()));
         patient.setAddress(getChangedValue(newData.getAddress(), oldData.getAddress()));
 
-        if(patient.getSurName() !=null || patient.getGivenName() != null) {
+        if (patient.getSurName() != null || patient.getGivenName() != null) {
             ObjectMapper oMapper = new ObjectMapper();
             try {
                 return oMapper.writeValueAsString(patient);
@@ -211,18 +211,15 @@ public class PatientRepository extends BaseRepository {
         return null;
     }
 
-    private Address getChangedValue(Address newValue, Address old)
-    {
+    private Address getChangedValue(Address newValue, Address old) {
         return newValue != null && !newValue.equals(old) ? newValue : null;
     }
 
-    private String getChangedValue(String newValue, String old)
-    {
+    private String getChangedValue(String newValue, String old) {
         return newValue != null && !newValue.equals(old) ? newValue : null;
     }
 
-    private String getChangedValueIgnoreCase(String newValue, String old)
-    {
+    private String getChangedValueIgnoreCase(String newValue, String old) {
         return newValue != null && !newValue.equalsIgnoreCase(old) ? newValue : null;
     }
 

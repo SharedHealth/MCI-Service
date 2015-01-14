@@ -203,7 +203,7 @@ public class PatientMapper {
         patient.setDateOfDeath(data.getDateOfDeath());
         patient.setMaritalStatus(data.getMaritalStatus());
 
-        if(data.getConfidential() != null) {
+        if (data.getConfidential() != null) {
             patient.setConfidential(STRING_YES.equalsIgnoreCase(data.getConfidential()));
         }
 

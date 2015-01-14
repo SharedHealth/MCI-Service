@@ -1,8 +1,5 @@
 package org.sharedhealth.mci.web.exception;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
@@ -17,16 +14,16 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.CONFLICT;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.*;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
-    
+
     public static final int ERROR_CODE_JSON_PARSE = 2001;
     public static final int ERROR_CODE_UNRECOGNIZED_FIELD = 2002;
     public static final int ERROR_CODE_FIELD_NOT_PERMITTED = 3001;
@@ -102,7 +99,7 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public ErrorInfo handlePatientAlreadyExistException(PatientAlreadyExistException e) {
         logger.error("Handling PatientAlreadyExistException. ", e);
-        return new ErrorInfo(CONFLICT.value(), String.format(MESSAGE_PATIENT_ALREADY_EXIST_WITH_HEALTH_ID , e.getMessage()));
+        return new ErrorInfo(CONFLICT.value(), String.format(MESSAGE_PATIENT_ALREADY_EXIST_WITH_HEALTH_ID, e.getMessage()));
     }
 
     @ResponseStatus(value = BAD_REQUEST)
@@ -120,7 +117,7 @@ public class GlobalExceptionHandler {
         msg = MESSAGE_HID_FIELD_IS_NOT_PERMITTED;
         field = JsonConstants.HID;
 
-        return errorHandler.handleHealthIDExistError(errorHandler, code, msg,field);
+        return errorHandler.handleHealthIDExistError(errorHandler, code, msg, field);
     }
 
     @ResponseStatus(value = BAD_REQUEST)

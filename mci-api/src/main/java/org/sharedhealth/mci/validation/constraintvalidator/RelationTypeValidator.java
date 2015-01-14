@@ -1,11 +1,11 @@
 package org.sharedhealth.mci.validation.constraintvalidator;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
-
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.validation.constraints.RelationType;
 import org.sharedhealth.mci.web.mapper.Relation;
+
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
 
 public class RelationTypeValidator implements ConstraintValidator<RelationType, Relation> {
 
