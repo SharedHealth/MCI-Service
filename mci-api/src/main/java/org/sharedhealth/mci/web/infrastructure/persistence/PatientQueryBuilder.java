@@ -27,6 +27,7 @@ public class PatientQueryBuilder {
     public static final String CF_NAME_MAPPING = "name_mapping";
     public static final String CF_PENDING_APPROVAL_MAPPING = "pending_approval_mapping";
     public static final String CF_CATCHMENT_MAPPING = "catchment_mapping";
+    public static final String CF_PATIENT_UPDATE_LOG = "patient_update_log";
 
     public static final String HEALTH_ID = "health_id";
     public static final String LAST_UPDATED = "last_updated";
@@ -119,6 +120,9 @@ public class PatientQueryBuilder {
     public static final String UPDATED_BY = "updated_by";
     public static final String LOWER_SUR_NAME = "lower_sur_name";
     public static final String LOWER_GIVEN_NAME = "lower_given_name";
+    public static final String EVENT_TIME = "event_time";
+    public static final String CHANGE_SET = "change_set";
+    public static final String YEAR = "year";
 
     public static String buildFindByHidStmt(String[] values) {
         return select().from(CF_PATIENT).where(in(HEALTH_ID, values)).toString();

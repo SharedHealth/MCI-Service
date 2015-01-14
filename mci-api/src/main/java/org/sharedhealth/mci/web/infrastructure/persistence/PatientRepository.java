@@ -1,16 +1,15 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
 import com.datastax.driver.core.querybuilder.Batch;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.sharedhealth.mci.utils.UidGenerator;
 import org.sharedhealth.mci.web.exception.HealthIDExistException;
 import org.sharedhealth.mci.web.exception.PatientNotFoundException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.handler.PatientFilter;
 import org.sharedhealth.mci.web.mapper.*;
-import org.sharedhealth.mci.web.model.CatchmentMapping;
-import org.sharedhealth.mci.web.model.Patient;
-import org.sharedhealth.mci.web.model.PendingApprovalMapping;
-import org.sharedhealth.mci.web.model.PendingApprovalRequest;
+import org.sharedhealth.mci.web.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,7 +103,11 @@ public class PatientRepository extends BaseRepository {
         patientToSave.setUpdatedAt(new Date());
 
         Catchment catchment = existingPatientData.getCatchment();
-        cassandraOps.execute(buildUpdateBatch(patientToSave, pendingApprovalRequest, catchment));
+
+        final Batch batch = buildUpdateBatch(patientToSave, pendingApprovalRequest, catchment);
+        buildCreateUpdateLogStmt(patientDataToSave, existingPatientData, batch);
+
+        cassandraOps.execute(batch);
         return new MCIResponse(patientToSave.getHealthId(), HttpStatus.ACCEPTED);
     }
 
@@ -174,6 +177,55 @@ public class PatientRepository extends BaseRepository {
             batch.add(createInsertQuery(CF_PENDING_APPROVAL_MAPPING, mapping, null, cassandraOps.getConverter()));
         }
     }
+
+    private void buildCreateUpdateLogStmt(PatientData patientDataToSave, PatientData existingPatientData, Batch batch)
+    {
+        PatientUpdateLog patientUpdateLog = new PatientUpdateLog();
+        String changeSet = getChangeSet(patientDataToSave, existingPatientData);
+
+        if(changeSet != null) {
+            patientUpdateLog.setHealthId(existingPatientData.getHealthId());
+            patientUpdateLog.setEventTime(new Date());
+            patientUpdateLog.setChangeSet(changeSet);
+            batch.add(createInsertQuery(CF_PATIENT_UPDATE_LOG, patientUpdateLog, null, cassandraOps.getConverter()));
+        }
+    }
+
+    private String getChangeSet(PatientData newData, PatientData oldData) {
+        PatientData patient = new PatientData();
+
+        patient.setSurName(getChangedValue(newData.getSurName(), oldData.getSurName()));
+        patient.setGivenName(getChangedValue(newData.getGivenName(), oldData.getGivenName()));
+        patient.setConfidential(getChangedValueIgnoreCase(newData.getConfidential(), oldData.getConfidential()));
+        patient.setAddress(getChangedValue(newData.getAddress(), oldData.getAddress()));
+
+        if(patient.getSurName() !=null || patient.getGivenName() != null) {
+            ObjectMapper oMapper = new ObjectMapper();
+            try {
+                return oMapper.writeValueAsString(patient);
+            } catch (JsonProcessingException e) {
+                return null;
+            }
+        }
+
+        return null;
+    }
+
+    private Address getChangedValue(Address newValue, Address old)
+    {
+        return newValue != null && !newValue.equals(old) ? newValue : null;
+    }
+
+    private String getChangedValue(String newValue, String old)
+    {
+        return newValue != null && !newValue.equals(old) ? newValue : null;
+    }
+
+    private String getChangedValueIgnoreCase(String newValue, String old)
+    {
+        return newValue != null && !newValue.equalsIgnoreCase(old) ? newValue : null;
+    }
+
 
     UUID findLatestUuid(TreeSet<PendingApproval> pendingApprovals) {
         UUID latest = null;
