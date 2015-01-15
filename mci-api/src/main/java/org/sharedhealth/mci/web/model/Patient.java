@@ -788,7 +788,6 @@ public class Patient {
 
     public void setDivisionId(String divisionId) {
         this.divisionId = divisionId;
-        this.updateLocationLevels();
     }
 
     public String getDistrictId() {
@@ -797,7 +796,6 @@ public class Patient {
 
     public void setDistrictId(String districtId) {
         this.districtId = districtId;
-        this.updateLocationLevels();
     }
 
     public String getUpazilaId() {
@@ -806,7 +804,6 @@ public class Patient {
 
     public void setUpazilaId(String upazilaId) {
         this.upazilaId = upazilaId;
-        this.updateLocationLevels();
     }
 
     public String getUnionOrUrbanWardId() {
@@ -815,7 +812,6 @@ public class Patient {
 
     public void setUnionOrUrbanWardId(String unionOrUrbanWardId) {
         this.unionOrUrbanWardId = unionOrUrbanWardId;
-        this.updateLocationLevels();
     }
 
     public String getHoldingNumber() {
@@ -872,7 +868,6 @@ public class Patient {
 
     public void setRuralWardId(String ruralWardId) {
         this.ruralWardId = ruralWardId;
-        this.updateLocationLevels();
     }
 
     public String getCityCorporationId() {
@@ -881,7 +876,6 @@ public class Patient {
 
     public void setCityCorporationId(String cityCorporationId) {
         this.cityCorporationId = cityCorporationId;
-        this.updateLocationLevels();
     }
 
     public String getCountryCode() {
@@ -1114,84 +1108,6 @@ public class Patient {
 
     public void setUpdatedBy(String updatedBy) {
         this.updatedBy = updatedBy;
-    }
-
-    public void updateLocationLevels() {
-        this.locationLevel1 = this.getLocationLevel1();
-        this.locationLevel2 = this.getLocationLevel2();
-        this.locationLevel3 = this.getLocationLevel3();
-        this.locationLevel4 = this.getLocationLevel4();
-        this.locationLevel5 = this.getLocationLevel5();
-        this.locationLevel6 = this.getLocationLevel6();
-    }
-
-    public String getLocationLevel1() {
-
-        if (isBlank(this.getDivisionId())) {
-            return "";
-        }
-
-        return this.getDivisionId();
-    }
-
-    public String getLocationLevel2() {
-
-        if (isBlank(this.getDistrictId())) {
-            return "";
-        }
-
-        return this.getLocationLevel1() + this.getDistrictId();
-    }
-
-    public String getLocationLevel3() {
-
-        if (isBlank(this.getUpazilaId())) {
-            return "";
-        }
-
-        return this.getLocationLevel2() + this.getUpazilaId();
-    }
-
-    public String getLocationLevel4() {
-        if (isBlank(this.getCityCorporationId())) {
-            return "";
-        }
-
-        return this.getLocationLevel3() + this.getCityCorporationId();
-    }
-
-    public String getLocationLevel5() {
-
-        if (isBlank(this.getUnionOrUrbanWardId())) {
-            return "";
-        }
-
-        return this.getLocationLevel4() + this.getUnionOrUrbanWardId();
-    }
-
-    public String getLocationLevel6() {
-
-        if (isBlank(this.getRuralWardId())) {
-            return "";
-        }
-
-        return this.getLocationLevel5() + this.getRuralWardId();
-    }
-
-    public String getLowerSurName() {
-        return lowerSurName;
-    }
-
-    public void setLowerSurName(String lowerSurName) {
-        this.lowerSurName = lowerSurName;
-    }
-
-    public String getLowerGivenName() {
-        return lowerGivenName;
-    }
-
-    public void setLowerGivenName(String lowerGivenName) {
-        this.lowerGivenName = lowerGivenName;
     }
 
     public TreeSet<PendingApproval> getPendingApprovals() {

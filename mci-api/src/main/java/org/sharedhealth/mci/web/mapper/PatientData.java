@@ -21,9 +21,7 @@ import java.util.TreeSet;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static java.lang.String.valueOf;
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 import static org.sharedhealth.mci.utils.DateUtil.fromIsoFormat;
 import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.*;
@@ -481,6 +479,25 @@ public class PatientData {
 
     public void setPendingApprovals(TreeSet<PendingApproval> pendingApprovals) {
         this.pendingApprovals = pendingApprovals;
+    }
+
+    public void addPendingApproval(PendingApproval pendingApproval) {
+        TreeSet<PendingApproval> pendingApprovals = this.getPendingApprovals();
+        if (pendingApprovals == null) {
+            pendingApprovals = new TreeSet<>();
+        }
+
+        if (!pendingApprovals.contains(pendingApproval)) {
+            pendingApprovals.add(pendingApproval);
+
+        } else {
+            for (PendingApproval p : pendingApprovals) {
+                if (p.equals(pendingApproval)) {
+                    p.setFieldDetails(pendingApproval.getFieldDetails());
+                }
+            }
+        }
+        this.setPendingApprovals(pendingApprovals);
     }
 
     public Object getValue(String jsonKey) {

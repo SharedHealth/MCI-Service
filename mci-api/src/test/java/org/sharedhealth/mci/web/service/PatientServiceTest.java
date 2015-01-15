@@ -284,7 +284,7 @@ public class PatientServiceTest {
         when(patientRepository.findByHealthId("hid-100")).thenReturn(existingPatient);
         patientService.processPendingApprovals(patient, catchment, true);
 
-        verify(patientRepository).processPendingApprovals(patient, existingPatient, catchment, true);
+        verify(patientRepository).processPendingApprovals(patient, existingPatient, true);
     }
 
     @Test
@@ -309,7 +309,7 @@ public class PatientServiceTest {
         when(patientRepository.findByHealthId("hid-100")).thenReturn(existingPatient);
         patientService.processPendingApprovals(patient, catchment, true);
 
-        verify(patientRepository).processPendingApprovals(patient, existingPatient, catchment, true);
+        verify(patientRepository).processPendingApprovals(patient, existingPatient, true);
     }
 
     @Test(expected = InsufficientPrivilegeException.class)
@@ -407,7 +407,7 @@ public class PatientServiceTest {
         when(patientRepository.findByHealthId("hid-100")).thenReturn(existingPatient);
         patientService.processPendingApprovals(patient, catchment, false);
 
-        verify(patientRepository).processPendingApprovals(patient, existingPatient, catchment, false);
+        verify(patientRepository).processPendingApprovals(patient, existingPatient, false);
     }
 
     private PendingApproval buildPendingApproval(String fieldName, Object value) {

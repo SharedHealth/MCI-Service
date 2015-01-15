@@ -180,13 +180,7 @@ public class PatientMapper {
         patient.setBirthRegistrationNumber(data.getBirthRegistrationNumber());
         patient.setFullNameBangla(StringUtils.trim(data.getNameBangla()));
         patient.setGivenName(StringUtils.trim(data.getGivenName()));
-        if (data.getGivenName() != null) {
-            patient.setLowerGivenName(StringUtils.trim(data.getGivenName()).toLowerCase());
-        }
         patient.setSurName(StringUtils.trim(data.getSurName()));
-        if (data.getSurName() != null) {
-            patient.setLowerSurName(StringUtils.trim(data.getSurName()).toLowerCase());
-        }
         patient.setDateOfBirth(data.getDateOfBirth());
         patient.setGender(data.getGender());
         patient.setOccupation(data.getOccupation());
@@ -224,7 +218,7 @@ public class PatientMapper {
         }
 
         patient.setPrimaryContact(StringUtils.trim(data.getPrimaryContact()));
-        patient.setPendingApprovals(existing.getPendingApprovals());
+        patient.setPendingApprovals(data.getPendingApprovals());
 
         return patient;
     }

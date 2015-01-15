@@ -162,11 +162,11 @@ public class PatientService {
         return pendingApprovals;
     }
 
-    public String processPendingApprovals(PatientData patient, Catchment catchment, boolean shouldAccept) {
-        PatientData existingPatient = this.findByHealthId(patient.getHealthId());
+    public String processPendingApprovals(PatientData requestData, Catchment catchment, boolean shouldAccept) {
+        PatientData existingPatient = this.findByHealthId(requestData.getHealthId());
         verifyCatchment(existingPatient, catchment);
-        verifyPendingApprovalDetails(patient, existingPatient);
-        return patientRepository.processPendingApprovals(patient, existingPatient, catchment, shouldAccept);
+        verifyPendingApprovalDetails(requestData, existingPatient);
+        return patientRepository.processPendingApprovals(requestData, existingPatient, shouldAccept);
     }
 
     public List<PatientUpdateLog> findPatientsUpdatedSince(Date after) {

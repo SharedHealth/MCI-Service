@@ -627,11 +627,11 @@ public class PatientRepositoryIT {
         patientData.setHealthId(healthId);
         patientData.setGender("F");
         PatientData existingPatientData = patientRepository.findByHealthId(healthId);
-        return patientRepository.processPendingApprovals(patientData, existingPatientData, catchment, shouldAccept);
+        return patientRepository.processPendingApprovals(patientData, existingPatientData, shouldAccept);
     }
 
     @Test
-    public void shouldBeAbleToAcceptPendingApprovalsWhenPatientHasOnePendingApprovalEachForMultipleFields() {
+    public void     shouldBeAbleToAcceptPendingApprovalsWhenPatientHasOnePendingApprovalEachForMultipleFields() {
         String healthId = processPendingApprovalsWhenPatientHasOnePendingApprovalEachForMultipleFields(true);
 
         Patient patient = cassandraOps.selectOneById(Patient.class, healthId);
@@ -701,7 +701,7 @@ public class PatientRepositoryIT {
         patientData.setGender("F");
         patientData.setPhoneNumber(phoneNumber);
         PatientData existingPatientData = patientRepository.findByHealthId(healthId);
-        return patientRepository.processPendingApprovals(patientData, existingPatientData, catchment, shouldAccept);
+        return patientRepository.processPendingApprovals(patientData, existingPatientData, shouldAccept);
     }
 
     @Test
@@ -792,7 +792,7 @@ public class PatientRepositoryIT {
         patientData.setHealthId(healthId);
         patientData.setGender("F");
         PatientData existingPatientData = patientRepository.findByHealthId(healthId);
-        return patientRepository.processPendingApprovals(patientData, existingPatientData, catchment, shouldAccept);
+        return patientRepository.processPendingApprovals(patientData, existingPatientData, shouldAccept);
     }
 
     @Test
@@ -853,7 +853,7 @@ public class PatientRepositoryIT {
         patientData.setHealthId(healthId);
         patientData.setPhoneNumber(phoneNumber);
         PatientData existingPatientData = patientRepository.findByHealthId(healthId);
-        return patientRepository.processPendingApprovals(patientData, existingPatientData, catchment, shouldAccept);
+        return patientRepository.processPendingApprovals(patientData, existingPatientData, shouldAccept);
     }
 
     @After
