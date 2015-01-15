@@ -23,8 +23,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.FieldError;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
@@ -45,15 +43,16 @@ public class PatientRepository extends BaseRepository {
 
     protected static final Logger logger = LoggerFactory.getLogger(PatientRepository.class);
     private UidGenerator uidGenerator;
+    private PendingApprovalFilter pendingApprovalFilter;
     private PatientMapper mapper;
 
     @Autowired
     public PatientRepository(@Qualifier("MCICassandraTemplate") CassandraOperations cassandraOperations,
-                             PatientMapper mapper,
-                             UidGenerator uidGenerator) {
+                             PatientMapper mapper, UidGenerator uidGenerator, PendingApprovalFilter pendingApprovalFilter) {
         super(cassandraOperations);
         this.mapper = mapper;
         this.uidGenerator = uidGenerator;
+        this.pendingApprovalFilter = pendingApprovalFilter;
     }
 
     public MCIResponse create(PatientData patientData) {
@@ -83,33 +82,22 @@ public class PatientRepository extends BaseRepository {
         updateRequest.setHealthId(healthId);
         PatientData existingPatientData = this.findByHealthId(healthId);
 
-        PendingApprovalFilter pendingApprovalFilter = new PendingApprovalFilter(getApprovalProperties());
-        PatientData newPatientData = pendingApprovalFilter.filter(existingPatientData, updateRequest);
+        PatientData newPatientData = this.pendingApprovalFilter.filter(existingPatientData, updateRequest);
 
         Patient newPatient = mapper.map(newPatientData, existingPatientData);
         newPatient.setHealthId(healthId);
         newPatient.setUpdatedAt(new Date());
 
-        final Batch batch = buildUpdateBatch(newPatient, existingPatientData);
+        final Batch batch = batch();
+        buildUpdatePendingApprovalsBatch(newPatient, existingPatientData, batch);
+        buildUpdateBatch(newPatient, existingPatientData, batch);
         buildCreateUpdateLogStmt(newPatientData, existingPatientData, batch);
-
         cassandraOps.execute(batch);
+
         return new MCIResponse(newPatient.getHealthId(), HttpStatus.ACCEPTED);
     }
 
-    private Properties getApprovalProperties() {
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("approvalFeilds.properties");
-        Properties properties = new Properties();
-        try {
-            properties.load(inputStream);
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to read approval property file.", e);
-        }
-        return properties;
-    }
-
-    private Batch buildUpdateBatch(Patient newPatient, PatientData existingPatientData) {
-        Batch batch = batch();
+    private Batch buildUpdatePendingApprovalsBatch(Patient newPatient, PatientData existingPatientData, Batch batch) {
         TreeSet<PendingApproval> newPendingApprovals = newPatient.getPendingApprovals();
 
         if (isNotEmpty(newPendingApprovals)) {
@@ -123,7 +111,10 @@ public class PatientRepository extends BaseRepository {
             UUID uuid = findLatestUuid(newPatient.getPendingApprovals());
             buildCreatePendingApprovalMappingStmt(newPatient.getCatchment(), healthId, uuid, batch);
         }
+        return batch;
+    }
 
+    private Batch buildUpdateBatch(Patient newPatient, PatientData existingPatientData, Batch batch) {
         buildUpdateCatchmentMappingsStmt(newPatient, existingPatientData, batch);
         batch.add(buildUpdateStmt(newPatient, cassandraOps.getConverter()));
         return batch;
@@ -344,27 +335,28 @@ public class PatientRepository extends BaseRepository {
 
     public String processPendingApprovals(PatientData requestData, PatientData existingPatientData, boolean shouldAccept) {
         Batch batch = batch();
-        Patient patient;
+        Patient newPatient;
         if (shouldAccept) {
-            patient = mapper.map(requestData, existingPatientData);
+            newPatient = mapper.map(requestData, existingPatientData);
         } else {
-            patient = new Patient();
-            patient.setHealthId(requestData.getHealthId());
+            newPatient = new Patient();
+            newPatient.setHealthId(requestData.getHealthId());
         }
-        patient.setPendingApprovals(existingPatientData.getPendingApprovals());
+        newPatient.setUpdatedAt(new Date());
+        newPatient.setPendingApprovals(existingPatientData.getPendingApprovals());
 
         String healthId = requestData.getHealthId();
-        UUID lastUpdated = findLatestUuid(patient.getPendingApprovals());
+        UUID lastUpdated = findLatestUuid(newPatient.getPendingApprovals());
 
-        TreeSet<PendingApproval> pendingApprovals = updatePendingApprovals(patient.getPendingApprovals(), requestData, shouldAccept);
-        patient.setPendingApprovals(pendingApprovals);
-        batch.add(buildUpdateStmt(patient, cassandraOps.getConverter()));
+        TreeSet<PendingApproval> pendingApprovals = updatePendingApprovals(newPatient.getPendingApprovals(), requestData, shouldAccept);
+        newPatient.setPendingApprovals(pendingApprovals);
+        buildUpdateBatch(newPatient, existingPatientData, batch);
 
         if (isNotEmpty(pendingApprovals)) {
             UUID toBeUpdated = findLatestUuid(pendingApprovals);
             if (!toBeUpdated.equals(lastUpdated)) {
                 buildDeletePendingApprovalMappingStmt(healthId, batch);
-                Catchment catchment = patient.getCatchment() != null ? patient.getCatchment() : existingPatientData.getCatchment();
+                Catchment catchment = newPatient.getCatchment() != null ? newPatient.getCatchment() : existingPatientData.getCatchment();
                 buildCreatePendingApprovalMappingStmt(catchment, healthId, toBeUpdated, batch);
             }
         } else {
@@ -408,5 +400,9 @@ public class PatientRepository extends BaseRepository {
     public List<PatientUpdateLog> findPatientsUpdatedSince(Date after, int limit) {
         return cassandraOps.select(buildFindUpdateLogStmt(after, limit),
                 PatientUpdateLog.class);
+    }
+
+    public void setPendingApprovalFilter(PendingApprovalFilter pendingApprovalFilter) {
+        this.pendingApprovalFilter = pendingApprovalFilter;
     }
 }

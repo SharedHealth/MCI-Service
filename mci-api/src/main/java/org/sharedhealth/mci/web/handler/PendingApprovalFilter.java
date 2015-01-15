@@ -1,7 +1,10 @@
 package org.sharedhealth.mci.web.handler;
 
 import org.sharedhealth.mci.web.mapper.*;
+import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.Properties;
 import java.util.TreeMap;
@@ -11,6 +14,7 @@ import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static java.lang.String.valueOf;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
+@Component
 public class PendingApprovalFilter {
 
     private static final String NEEDS_APPROVAL = "NA";
@@ -20,8 +24,15 @@ public class PendingApprovalFilter {
     private Properties properties;
     private PatientData newPatient;
 
-    public PendingApprovalFilter(Properties properties) {
-        this.properties = properties;
+    public PendingApprovalFilter() {
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("approvalFeilds.properties");
+        Properties properties = new Properties();
+        try {
+            properties.load(inputStream);
+            this.properties = properties;
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to read approval property file.", e);
+        }
     }
 
     public PatientData filter(PatientData existingPatient, PatientData updateRequest) {
@@ -87,7 +98,7 @@ public class PendingApprovalFilter {
             return oldValue;
         }
         String property = properties.getProperty(key);
-        if (property != null && newValue != null) {
+        if (property != null) {
             if (property.equals(NON_UPDATEABLE)) {
                 return oldValue;
             }
@@ -111,5 +122,9 @@ public class PendingApprovalFilter {
         pendingApproval.setFieldDetails(fieldDetailsMap);
 
         return pendingApproval;
+    }
+
+    public void setProperties(Properties properties) {
+        this.properties = properties;
     }
 }

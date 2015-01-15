@@ -22,7 +22,7 @@ public class PatientRepositoryTest {
 
     @Before
     public void setUp() throws Exception {
-        patientRepository = new PatientRepository(null, null, null);
+        patientRepository = new PatientRepository(null, null, null, null);
     }
 
     @Test

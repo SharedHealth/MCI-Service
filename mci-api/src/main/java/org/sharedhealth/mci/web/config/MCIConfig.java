@@ -27,6 +27,7 @@ import java.util.Arrays;
         "org.sharedhealth.mci.web.model",
         "org.sharedhealth.mci.web.service",
         "org.sharedhealth.mci.utils",
+        "org.sharedhealth.mci.web.handler",
         "org.sharedhealth.mci.validation"})
 public class MCIConfig {
 

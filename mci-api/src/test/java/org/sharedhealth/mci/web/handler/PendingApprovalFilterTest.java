@@ -25,7 +25,8 @@ public class PendingApprovalFilterTest {
         PatientData existingPatient = buildPatientData();
         existingPatient.setGender("M");
 
-        PendingApprovalFilter pendingApprovalFilter = new PendingApprovalFilter(properties);
+        PendingApprovalFilter pendingApprovalFilter = new PendingApprovalFilter();
+        pendingApprovalFilter.setProperties(properties);
         PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
 
         assertPendingApprovals(existingPatient, newPatient, 1);
@@ -42,13 +43,16 @@ public class PendingApprovalFilterTest {
         PatientData existingPatient = buildPatientData();
         existingPatient.setGender("M");
 
-        PatientData newPatient = new PendingApprovalFilter(properties).filter(existingPatient, updateRequest);
+        PendingApprovalFilter pendingApprovalFilter = new PendingApprovalFilter();
+        pendingApprovalFilter.setProperties(properties);
+
+        PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
         assertPendingApprovals(existingPatient, newPatient, 1);
 
         updateRequest = buildPatientData();
         updateRequest.setGender("O");
 
-        newPatient = new PendingApprovalFilter(properties).filter(newPatient, updateRequest);
+        newPatient = pendingApprovalFilter.filter(newPatient, updateRequest);
         TreeSet<PendingApproval> pendingApprovals = newPatient.getPendingApprovals();
         assertNotNull(pendingApprovals);
         assertEquals(1, pendingApprovals.size());
@@ -91,7 +95,8 @@ public class PendingApprovalFilterTest {
         Address permanentAddress = new Address("11", "22", "33");
         updateRequest.setPermanentAddress(permanentAddress);
 
-        PendingApprovalFilter pendingApprovalFilter = new PendingApprovalFilter(properties);
+        PendingApprovalFilter pendingApprovalFilter = new PendingApprovalFilter();
+        pendingApprovalFilter.setProperties(properties);
         PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
 
         assertPendingApprovals(existingPatient, newPatient, 4);
@@ -132,7 +137,8 @@ public class PendingApprovalFilterTest {
         updateRequest.setAddress(new Address("10", "20", "30"));
         updateRequest.setPermanentAddress(new Address("11", "22", "33"));
 
-        PendingApprovalFilter pendingApprovalFilter = new PendingApprovalFilter(properties);
+        PendingApprovalFilter pendingApprovalFilter = new PendingApprovalFilter();
+        pendingApprovalFilter.setProperties(properties);
         PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
 
         assertTrue(isEmpty(newPatient.getPendingApprovals()));
@@ -152,7 +158,8 @@ public class PendingApprovalFilterTest {
         PatientData updateRequest = buildPatientData();
         updateRequest.setDateOfBirth("2000-02-10");
 
-        PendingApprovalFilter pendingApprovalFilter = new PendingApprovalFilter(properties);
+        PendingApprovalFilter pendingApprovalFilter = new PendingApprovalFilter();
+        pendingApprovalFilter.setProperties(properties);
         PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
 
         assertTrue(isEmpty(newPatient.getPendingApprovals()));
@@ -169,7 +176,8 @@ public class PendingApprovalFilterTest {
         PatientData updateRequest = buildPatientData();
         updateRequest.setDateOfBirth("2001-02-10");
 
-        PendingApprovalFilter pendingApprovalFilter = new PendingApprovalFilter(properties);
+        PendingApprovalFilter pendingApprovalFilter = new PendingApprovalFilter();
+        pendingApprovalFilter.setProperties(properties);
         PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
 
         assertTrue(isEmpty(newPatient.getPendingApprovals()));
