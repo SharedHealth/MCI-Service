@@ -1,0 +1,26 @@
+{
+    "gender":"F",
+    "occupation":"03",
+    "phone_number":{
+        "country_code":"088",
+        "area_code":"03",
+        "number":"9678990",
+        "extension":"0974"
+    },
+    "present_address":{
+        "address_line":"abc",
+        "division_id":"20",
+        "district_id":"13",
+        "upazila_id":"49",
+        "city_corporation_id":"42",
+        "union_or_urban_ward_id":"01",
+        "rural_ward_id":null,
+        "area_mouja":"Bannani",
+        "village":"Chittagong",
+        "holding_number":"Level2",
+        "street":"27",
+        "post_office":"Mohammadpuri",
+        "post_code":"1213",
+        "country_code":"050"
+    }
+}

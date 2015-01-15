@@ -1,9 +1,5 @@
 package org.sharedhealth.mci.web.controller;
 
-import java.text.ParseException;
-import java.util.Collections;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
@@ -13,14 +9,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
-import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.handler.ErrorHandler;
 import org.sharedhealth.mci.web.handler.MCIError;
 import org.sharedhealth.mci.web.handler.MCIResponse;
+import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
 import org.sharedhealth.mci.web.mapper.Relation;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -29,16 +26,18 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.text.ParseException;
+import java.util.Collections;
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
+import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -384,22 +383,35 @@ public class PatientControllerIT extends BaseControllerTest {
     @Test
     public void shouldRemoveAddressBlockOptionalFieldsIfNotGiven() throws Exception {
 
-        String fullPayloadJson = asString("jsons/patient/full_payload.json");
+        String createJson = asString("jsons/patient/full_payload.json");
+        MvcResult createdResult = createPatient(createJson);
+        String healthId = getMciResponse(createdResult).getId();
 
-        MvcResult createdResult = createPatient(fullPayloadJson);
+        String updateJson = asString("jsons/patient/payload_with_address.json");
 
-        final MCIResponse createdResponse = getMciResponse(createdResult);
-        String healthId = createdResponse.getId();
-        String addressJson = asString("jsons/patient/payload_with_address.json");
-        PatientData patientData1 = getPatientObjectFromString(addressJson);
 
-        MvcResult updatedResult = mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(addressJson).contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
+        MvcResult mvcResult = mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON)
+                .content(updateJson).contentType(APPLICATION_JSON))
+                .andExpect(request().asyncStarted())
                 .andReturn();
+        mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isAccepted());
 
-        PatientData patient = getPatientMapperObjectByHealthId(healthId);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(DIVISION_ID, "55");
+        headers.add(DISTRICT_ID, "73");
+        headers.add(UPAZILA_ID, "64");
 
-        assertEquals(patientData1.getAddress(), patient.getAddress());
+        mvcResult = mockMvc.perform(put(API_END_POINT + "/pendingapprovals/" + healthId).accept(APPLICATION_JSON)
+                .content(asString("jsons/patient/pending_approval_address_accept.json")).contentType(APPLICATION_JSON)
+                .headers(headers))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+        mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isAccepted());
+
+        PatientData patientInDb = getPatientMapperObjectByHealthId(healthId);
+        PatientData updateRequest = getPatientObjectFromString(updateJson);
+
+        assertEquals(updateRequest.getAddress(), patientInDb.getAddress());
 
     }
 
@@ -550,18 +562,33 @@ public class PatientControllerIT extends BaseControllerTest {
 
     @Test
     public void shouldUpdateAllUpdatablePatientDataSuccessfullyForValidData() throws Exception {
-        String json = asString("jsons/patient/full_payload.json");
-        String updatedJson = asString("jsons/patient/full_payload_with_updated_data.json");
+        String createJson = asString("jsons/patient/full_payload.json");
+        String healthId = getMciResponse(createPatient(createJson)).getId();
 
-        PatientData updatedPatient = getPatientObjectFromString(updatedJson);
-        MvcResult createdResult = createPatient(json);
-
-        final MCIResponse createdResponse = getMciResponse(createdResult);
-        String healthId = createdResponse.getId();
-
-        mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(updatedJson).contentType(APPLICATION_JSON))
+        String updateJson = asString("jsons/patient/full_payload_with_updated_data.json");
+        mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(updateJson).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
+
+
+        MvcResult mvcResult = mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON)
+                .content(updateJson).contentType(APPLICATION_JSON))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+        mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isAccepted());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(DIVISION_ID, "55");
+        headers.add(DISTRICT_ID, "73");
+        headers.add(UPAZILA_ID, "64");
+
+        mvcResult = mockMvc.perform(put(API_END_POINT + "/pendingapprovals/" + healthId).accept(APPLICATION_JSON)
+                .content(asString("jsons/patient/pending_approvals_accept.json")).contentType(APPLICATION_JSON).headers(headers))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+        mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isAccepted());
+
+        PatientData updatedPatient = getPatientObjectFromString(updateJson);
 
         PatientData patient = getPatientMapperObjectByHealthId(healthId);
         patient.setHealthId(patient.getHealthId());

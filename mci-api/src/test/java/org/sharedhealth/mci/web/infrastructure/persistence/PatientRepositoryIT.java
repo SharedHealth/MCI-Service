@@ -9,7 +9,6 @@ import org.sharedhealth.mci.web.config.EnvironmentMock;
 import org.sharedhealth.mci.web.exception.HealthIDExistException;
 import org.sharedhealth.mci.web.exception.PatientNotFoundException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
-import org.sharedhealth.mci.web.handler.PendingApprovalFilter;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.model.CatchmentMapping;
@@ -37,7 +36,6 @@ import static org.junit.Assert.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.PHONE_NUMBER;
-import static org.sharedhealth.mci.web.utils.JsonConstants.PRESENT_ADDRESS;
 import static org.sharedhealth.mci.web.utils.PatientDataConstants.PATIENT_STATUS_ALIVE;
 import static org.sharedhealth.mci.web.utils.PatientDataConstants.STRING_NO;
 
@@ -880,46 +878,9 @@ public class PatientRepositoryIT {
     }
 
     @Test
-    public void shouldUpdateCatchmentMappingWhenPresentAddressIsNotMarkedForApprovalAndUpdated() {
-        PatientRepository patientRepo = patientRepository;
-        PendingApprovalFilter pendingApprovalFilter = new PendingApprovalFilter();
-        Properties properties = new Properties();
-        properties.remove(PRESENT_ADDRESS);
-        pendingApprovalFilter.setProperties(properties);
-        patientRepo.setPendingApprovalFilter(pendingApprovalFilter);
-
-        String healthId = patientRepo.create(data).getId();
-        List<PatientData> patients = patientRepo.findAllByCatchment(data.getCatchment(), null, 100);
-        assertTrue(isNotEmpty(patients));
-        assertEquals(1, patients.size());
-        assertEquals(healthId, patients.get(0).getHealthId());
-
-        PatientData patientData = new PatientData();
-        Address newAddress = new Address("10", "20", "30");
-        patientData.setAddress(newAddress);
-        patientRepo.update(patientData, healthId);
-
-        assertTrue(isEmpty(patientRepo.findAllByCatchment(data.getCatchment(), null, 100)));
-
-        PatientData updatedPatient = patientRepo.findByHealthId(healthId);
-        List<CatchmentMapping> catchmentMappings = cassandraOps.select(buildFindCatchmentMappingsStmt(updatedPatient), CatchmentMapping.class);
-        assertTrue(isNotEmpty(catchmentMappings));
-        assertEquals(2, catchmentMappings.size());
-        assertEquals(healthId, catchmentMappings.iterator().next().getHealthId());
-    }
-
-    @Test
     public void shouldUpdateCatchmentMappingWhenPresentAddressIsMarkedForApprovalAndUpdatedAfterApproval() {
-        PatientRepository patientRepo = patientRepository;
-        PendingApprovalFilter pendingApprovalFilter = new PendingApprovalFilter();
-        Properties properties = new Properties();
-        properties.setProperty(PRESENT_ADDRESS, "NA");
-        properties.setProperty(GENDER, "NA");
-        pendingApprovalFilter.setProperties(properties);
-        patientRepo.setPendingApprovalFilter(pendingApprovalFilter);
-
-        String healthId = patientRepo.create(data).getId();
-        List<PatientData> patients = patientRepo.findAllByCatchment(data.getCatchment(), null, 100);
+        String healthId = patientRepository.create(data).getId();
+        List<PatientData> patients = patientRepository.findAllByCatchment(data.getCatchment(), null, 100);
         assertTrue(isNotEmpty(patients));
         assertEquals(1, patients.size());
         assertEquals(healthId, patients.get(0).getHealthId());
@@ -928,18 +889,18 @@ public class PatientRepositoryIT {
         Address newAddress = new Address("10", "20", "30");
         updateRequest.setAddress(newAddress);
         updateRequest.setGender("O");
-        patientRepo.update(updateRequest, healthId);
+        patientRepository.update(updateRequest, healthId);
 
-        assertTrue(isNotEmpty(patientRepo.findAllByCatchment(data.getCatchment(), null, 100)));
-        assertTrue(isEmpty(patientRepo.findAllByCatchment(updateRequest.getCatchment(), null, 100)));
+        assertTrue(isNotEmpty(patientRepository.findAllByCatchment(data.getCatchment(), null, 100)));
+        assertTrue(isEmpty(patientRepository.findAllByCatchment(updateRequest.getCatchment(), null, 100)));
 
-        PatientData updatedPatient = patientRepo.findByHealthId(healthId);
-        patientRepo.processPendingApprovals(updateRequest, updatedPatient, true);
+        PatientData updatedPatient = patientRepository.findByHealthId(healthId);
+        patientRepository.processPendingApprovals(updateRequest, updatedPatient, true);
 
-        assertTrue(isEmpty(patientRepo.findAllByCatchment(data.getCatchment(), null, 100)));
+        assertTrue(isEmpty(patientRepository.findAllByCatchment(data.getCatchment(), null, 100)));
 
         List<CatchmentMapping> catchmentMappings = cassandraOps.select
-                (buildFindCatchmentMappingsStmt(patientRepo.findByHealthId(healthId)), CatchmentMapping.class);
+                (buildFindCatchmentMappingsStmt(patientRepository.findByHealthId(healthId)), CatchmentMapping.class);
         assertTrue(isNotEmpty(catchmentMappings));
         assertEquals(2, catchmentMappings.size());
         assertEquals(healthId, catchmentMappings.iterator().next().getHealthId());

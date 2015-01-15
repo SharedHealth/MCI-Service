@@ -401,8 +401,4 @@ public class PatientRepository extends BaseRepository {
         return cassandraOps.select(buildFindUpdateLogStmt(after, limit),
                 PatientUpdateLog.class);
     }
-
-    public void setPendingApprovalFilter(PendingApprovalFilter pendingApprovalFilter) {
-        this.pendingApprovalFilter = pendingApprovalFilter;
-    }
 }
