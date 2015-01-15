@@ -38,6 +38,7 @@ public class PatientData {
     private static final String INVALID_CATCHMENT = "invalid.catchment";
 
     @JsonProperty(HID)
+    @JsonInclude(NON_EMPTY)
     private String healthId;
 
     @JsonProperty(NID)
@@ -56,22 +57,26 @@ public class PatientData {
     private String nameBangla;
 
     @JsonProperty(GIVEN_NAME)
+    @JsonInclude(NON_EMPTY)
     @NotNull(message = ERROR_CODE_REQUIRED, groups = RequiredGroup.class)
     @Length(max = 100, min = 1, message = ERROR_CODE_PATTERN)
     private String givenName;
 
     @JsonProperty(SUR_NAME)
+    @JsonInclude(NON_EMPTY)
     @NotNull(message = ERROR_CODE_REQUIRED, groups = RequiredGroup.class)
     @Pattern(regexp = "^(\\s*)([A-Za-z0-9]{1,25})(\\b\\s*$)", message = ERROR_CODE_PATTERN)
     private String surName;
 
     @JsonProperty(DATE_OF_BIRTH)
+    @JsonInclude(NON_EMPTY)
     @NotNull(message = ERROR_CODE_REQUIRED, groups = RequiredGroup.class)
     @Date(format = "yyyy-MM-dd", message = ERROR_CODE_PATTERN)
     @Length(min = 1, max = 10, message = ERROR_CODE_PATTERN)
     private String dateOfBirth;
 
     @JsonProperty(GENDER)
+    @JsonInclude(NON_EMPTY)
     @NotBlank(message = ERROR_CODE_REQUIRED, groups = RequiredGroup.class)
     @Code(type = GENDER, regexp = "[A-Z]{1}", message = ERROR_CODE_INVALID)
     private String gender;
@@ -127,6 +132,7 @@ public class PatientData {
     private String ethnicity;
 
     @JsonProperty(PRESENT_ADDRESS)
+    @JsonInclude(NON_EMPTY)
     @NotNull(message = ERROR_CODE_REQUIRED, groups = RequiredGroup.class)
     @Valid
     @Location(message = ERROR_CODE_INVALID, country_code = COUNTRY_CODE_BANGLADESH)

@@ -13,6 +13,7 @@ import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.model.CatchmentMapping;
 import org.sharedhealth.mci.web.model.Patient;
+import org.sharedhealth.mci.web.model.PatientUpdateLog;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -221,6 +222,32 @@ public class PatientRepositoryIT {
         patientRepository.update(patient, patient.getHealthId());
 
         assertCatchmentMappings(patientRepository.findByHealthId(healthId));
+    }
+
+    @Test
+    public void shouldCreateUpdateLogsWhenPatientIsUpdated() {
+        PatientData patient = createPatient();
+        String healthId = patientRepository.create(patient).getId();
+        Date since = new Date();
+
+        assertUpdateLogEntry(healthId, since, false);
+
+        patient.setHealthId(healthId);
+        patient.setGivenName("Harry");
+        patient.setAddress(new Address("99", "88", "77"));
+        patientRepository.update(patient, patient.getHealthId());
+
+        assertUpdateLogEntry(healthId, since, true);
+    }
+
+    private void assertUpdateLogEntry(String healthId, Date since, boolean shouldfind) {
+        List<PatientUpdateLog> patientUpdateLogs = cassandraOps.select(buildFindUpdateLogStmt(since, 1),
+                PatientUpdateLog.class);
+        if (shouldfind) {
+            assertTrue(healthId.equals(patientUpdateLogs.get(0).getHealthId()));
+        } else {
+            assertEquals(0, patientUpdateLogs.size());
+        }
     }
 
     @Test

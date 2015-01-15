@@ -3,11 +3,13 @@ package org.sharedhealth.mci.web.infrastructure.persistence;
 import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Update;
+import org.sharedhealth.mci.utils.DateUtil;
 import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.model.*;
 import org.springframework.data.cassandra.convert.CassandraConverter;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -145,5 +147,28 @@ public class PatientQueryBuilder {
                 .where(in(CATCHMENT_ID, catchmentIds.toArray(new String[catchmentIds.size()])))
                 .and(eq(LAST_UPDATED, patient.getUpdatedAt()))
                 .and(eq(HEALTH_ID, patient.getHealthId())).toString();
+    }
+
+    public static String buildFindUpdateLogStmt(Date after, int limit) {
+        Where where = select().from(CF_PATIENT_UPDATE_LOG)
+                .where(in(YEAR, getYearsSince(after).toArray()));
+
+        if (after != null) {
+            where = where.and(gt(EVENT_TIME, after));
+        }
+
+        return where.limit(limit).toString();
+    }
+
+    private static List<Integer> getYearsSince(Date after)
+    {
+        List<Integer> years = new ArrayList<>();
+        int end = DateUtil.getYear(new Date());
+
+        for (int i = DateUtil.getYear(after); i <= end; i++) {
+            years.add(i);
+        }
+
+        return years;
     }
 }

@@ -8,6 +8,7 @@ import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.infrastructure.fr.FacilityRegistryWrapper;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
 import org.sharedhealth.mci.web.mapper.*;
+import org.sharedhealth.mci.web.model.PatientUpdateLog;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -166,6 +167,10 @@ public class PatientService {
         verifyCatchment(existingPatient, catchment);
         verifyPendingApprovalDetails(patient, existingPatient);
         return patientRepository.processPendingApprovals(patient, existingPatient, catchment, shouldAccept);
+    }
+
+    public List<PatientUpdateLog> findPatientsUpdatedSince(Date after) {
+        return patientRepository.findPatientsUpdatedSince(after, getPerPageMaximumLimit());
     }
 
     private void verifyCatchment(String facilityId, Catchment catchment) {

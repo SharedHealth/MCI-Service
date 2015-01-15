@@ -3,6 +3,7 @@ package org.sharedhealth.mci.utils;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 import static java.util.TimeZone.getTimeZone;
@@ -42,6 +43,13 @@ public class DateUtil {
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static int getYear(Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+
+        return cal.get(Calendar.YEAR);
     }
 
     private static DateFormat buildIsoDateFormat() {
