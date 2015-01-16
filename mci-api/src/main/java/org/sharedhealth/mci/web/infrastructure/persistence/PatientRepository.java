@@ -90,7 +90,7 @@ public class PatientRepository extends BaseRepository {
 
         final Batch batch = batch();
         buildUpdatePendingApprovalsBatch(newPatient, existingPatientData, batch);
-        buildUpdateBatch(newPatient, existingPatientData, batch);
+        buildUpdateBatch(newPatient, existingPatientData, cassandraOps.getConverter(), batch);
         buildCreateUpdateLogStmt(newPatientData, existingPatientData, batch);
         cassandraOps.execute(batch);
 
@@ -111,27 +111,6 @@ public class PatientRepository extends BaseRepository {
             UUID uuid = findLatestUuid(newPatient.getPendingApprovals());
             buildCreatePendingApprovalMappingStmt(newPatient.getCatchment(), healthId, uuid, batch);
         }
-        return batch;
-    }
-
-    private Batch buildUpdateBatch(Patient newPatient, PatientData existingPatientData, Batch batch) {
-        String healthId = newPatient.getHealthId();
-
-        buildUpdateNidMappingStmt(healthId, newPatient.getNationalId(),
-                existingPatientData.getNationalId(), cassandraOps.getConverter(), batch);
-
-        buildUpdateBrnMappingsStmt(healthId, newPatient.getBirthRegistrationNumber(),
-                existingPatientData.getBirthRegistrationNumber(), cassandraOps.getConverter(), batch);
-
-        buildUpdateUidMappingsStmt(healthId, newPatient.getUid(), existingPatientData.getUid(),
-                cassandraOps.getConverter(), batch);
-
-        buildUpdatePhoneNumberMappingsStmt(healthId, newPatient.getCellNo(), existingPatientData.getPhoneNumber(),
-                cassandraOps.getConverter(), batch);
-
-        buildUpdateCatchmentMappingsStmt(newPatient, existingPatientData, cassandraOps.getConverter(), batch);
-
-        batch.add(buildUpdateStmt(newPatient, cassandraOps.getConverter()));
         return batch;
     }
 
@@ -363,7 +342,7 @@ public class PatientRepository extends BaseRepository {
 
         TreeSet<PendingApproval> pendingApprovals = updatePendingApprovals(newPatient.getPendingApprovals(), requestData, shouldAccept);
         newPatient.setPendingApprovals(pendingApprovals);
-        buildUpdateBatch(newPatient, existingPatientData, batch);
+        buildUpdateBatch(newPatient, existingPatientData, cassandraOps.getConverter(), batch);
 
         if (isNotEmpty(pendingApprovals)) {
             UUID toBeUpdated = findLatestUuid(pendingApprovals);

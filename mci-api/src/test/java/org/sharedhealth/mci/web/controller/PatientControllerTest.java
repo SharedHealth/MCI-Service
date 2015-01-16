@@ -172,13 +172,6 @@ public class PatientControllerTest {
     }
 
     @Test
-    public void shouldFindPatientsByName() throws Exception {
-        searchQuery.setFull_name(fullname);
-        stringBuilder.append("full_name=" + fullname);
-        assertFindAllBy(searchQuery, stringBuilder.toString());
-    }
-
-    @Test
     public void shouldFindPatientsByAddress() throws Exception {
         String address = location.getDivisionId() + location.getDistrictId() + location.getUpazilaId();
         searchQuery.setPresent_address(address);

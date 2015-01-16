@@ -16,9 +16,6 @@ import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_SEARCH_PA
 @JsonIgnoreProperties(ignoreUnknown = true)
 @SearchQueryConstraint(message = ERROR_CODE_SEARCH_PARAMETER)
 public class SearchQuery extends PaginationQuery {
-    @JsonProperty("full_name")
-    private String full_name;
-
     @JsonProperty("nid")
     @Pattern(regexp = "[\\d]{13}|[\\d]{17}", message = ERROR_CODE_PATTERN)
     private String nid;
@@ -61,18 +58,6 @@ public class SearchQuery extends PaginationQuery {
     @JsonProperty("extension")
     @Pattern(regexp = "[0-9]*$", message = ERROR_CODE_PATTERN)
     private String extension;
-
-
-    public SearchQuery() {
-    }
-
-    public String getFull_name() {
-        return full_name;
-    }
-
-    public void setFull_name(String full_name) {
-        this.full_name = full_name;
-    }
 
     public String getNid() {
         return nid;
@@ -219,7 +204,6 @@ public class SearchQuery extends PaginationQuery {
         if (districtId != null ? !districtId.equals(that.districtId) : that.districtId != null) return false;
         if (divisionId != null ? !divisionId.equals(that.divisionId) : that.divisionId != null) return false;
         if (extension != null ? !extension.equals(that.extension) : that.extension != null) return false;
-        if (full_name != null ? !full_name.equals(that.full_name) : that.full_name != null) return false;
         if (given_name != null ? !given_name.equals(that.given_name) : that.given_name != null) return false;
         if (nid != null ? !nid.equals(that.nid) : that.nid != null) return false;
         if (phone_no != null ? !phone_no.equals(that.phone_no) : that.phone_no != null) return false;
@@ -235,7 +219,6 @@ public class SearchQuery extends PaginationQuery {
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + (full_name != null ? full_name.hashCode() : 0);
         result = 31 * result + (nid != null ? nid.hashCode() : 0);
         result = 31 * result + (bin_brn != null ? bin_brn.hashCode() : 0);
         result = 31 * result + (uid != null ? uid.hashCode() : 0);

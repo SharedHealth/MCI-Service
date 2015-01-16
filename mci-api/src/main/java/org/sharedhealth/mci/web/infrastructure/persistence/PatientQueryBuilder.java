@@ -4,6 +4,7 @@ import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Update;
 import org.sharedhealth.mci.utils.DateUtil;
+import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
@@ -23,79 +24,35 @@ import static org.springframework.data.cassandra.core.CassandraTemplate.*;
 
 public class PatientQueryBuilder {
 
-    public static String buildFindByHidStmt(String[] values) {
-        return select().from(CF_PATIENT).where(in(HEALTH_ID, values)).toString();
-    }
-
-    public static String buildFindByNidStmt(String nid) {
-        return select(HEALTH_ID).from(CF_NID_MAPPING).where(eq(NATIONAL_ID, nid)).toString();
-    }
-
-    public static String buildFindByBrnStmt(String brn) {
-        return select(HEALTH_ID).from(CF_BRN_MAPPING).where(eq(BIN_BRN, brn)).toString();
-    }
-
-    public static String buildFindByUidStmt(String uid) {
-        return select(HEALTH_ID).from(CF_UID_MAPPING).where(eq(UID, uid)).toString();
-    }
-
-    public static String buildFindByPhoneNumberStmt(String phoneNumber) {
-        return select(HEALTH_ID).from(CF_PHONE_NUMBER_MAPPING).where(eq(PHONE_NO, phoneNumber)).toString();
-    }
-
-    public static String buildFindPendingApprovalMappingStmt(Catchment catchment, UUID after, UUID before, int limit) {
-        Where where = select(HEALTH_ID, LAST_UPDATED).from(CF_PENDING_APPROVAL_MAPPING)
-                .where(eq(CATCHMENT_ID, catchment.getId()));
-
-        if (after != null) {
-            where = where.and(gt(LAST_UPDATED, after));
-        }
-        if (before != null) {
-            where = where.and(lt(LAST_UPDATED, before));
-        }
-        return where.limit(limit).toString();
-    }
-
-    public static String buildFindByNameStmt(String divisionId, String districtId, String upazilaId, String givenName, String surname) {
-        Where where = select(HEALTH_ID).from(CF_NAME_MAPPING)
-                .where(eq(DIVISION_ID, divisionId))
-                .and(eq(DISTRICT_ID, districtId))
-                .and(eq(UPAZILA_ID, upazilaId))
-                .and(eq(GIVEN_NAME, givenName.toLowerCase()));
-
-        if (isNotEmpty(surname)) {
-            where = where.and(eq(SUR_NAME, surname.toLowerCase()));
-        }
-        return where.toString();
-    }
-
-    public static Batch buildSaveBatch(Patient patient, CassandraConverter converter) {
+    static Batch buildSaveBatch(Patient patient, CassandraConverter converter) {
         String healthId = patient.getHealthId();
         Batch batch = QueryBuilder.batch();
 
         batch.add(createInsertQuery(CF_PATIENT, patient, null, converter));
 
-        buildCreateNIdMappingsStmt(healthId, patient.getNationalId(), converter, batch);
-        buildCreateBrnMappingsStmt(healthId, patient.getBirthRegistrationNumber(), converter, batch);
-        buildCreateUIdMappingsStmt(healthId, patient.getUid(), converter, batch);
+        buildCreateNIdMappingStmt(healthId, patient.getNationalId(), converter, batch);
+        buildCreateBrnMappingStmt(healthId, patient.getBirthRegistrationNumber(), converter, batch);
+        buildCreateUIdMappingStmt(healthId, patient.getUid(), converter, batch);
         buildCreatePhoneNumberMappingsStmt(healthId, patient.getCellNo(), converter, batch);
-
-        String divisionId = patient.getDivisionId();
-        String districtId = patient.getDistrictId();
-        String upazilaId = patient.getUpazilaId();
-        String givenName = patient.getGivenName();
-        String surname = patient.getSurName();
-
-        if (isNotBlank(divisionId) && isNotBlank(districtId) && isNotBlank(upazilaId) && isNotBlank(givenName) && isNotBlank(surname)) {
-            NameMapping mapping = new NameMapping(divisionId, districtId, upazilaId, givenName.toLowerCase(), surname.toLowerCase(), healthId);
-            batch.add(createInsertQuery(CF_NAME_MAPPING, mapping, null, converter));
-        }
-
+        buildCreateNameMappingStmt(patient, converter, batch);
         buildCreateCatchmentMappingsStmt(patient.getCatchment(), patient.getUpdatedAt(), patient.getHealthId(), converter, batch);
         return batch;
     }
 
-    private static void buildCreateNIdMappingsStmt(String healthId, String nationalId, CassandraConverter converter, Batch batch) {
+    static Batch buildUpdateBatch(Patient newPatient, PatientData existingPatientData, CassandraConverter converter, Batch batch) {
+        String healthId = newPatient.getHealthId();
+
+        buildUpdateNidMappingStmt(healthId, newPatient.getNationalId(), existingPatientData.getNationalId(), converter, batch);
+        buildUpdateBrnMappingsStmt(healthId, newPatient.getBirthRegistrationNumber(), existingPatientData.getBirthRegistrationNumber(), converter, batch);
+        buildUpdateUidMappingsStmt(healthId, newPatient.getUid(), existingPatientData.getUid(), converter, batch);
+        buildUpdatePhoneNumberMappingsStmt(healthId, newPatient.getCellNo(), existingPatientData.getPhoneNumber(), converter, batch);
+        buildUpdateNameMappingStmt(newPatient, existingPatientData, converter, batch);
+        buildUpdateCatchmentMappingsStmt(newPatient, existingPatientData, converter, batch);
+        batch.add(buildUpdateStmt(newPatient, converter));
+        return batch;
+    }
+
+    private static void buildCreateNIdMappingStmt(String healthId, String nationalId, CassandraConverter converter, Batch batch) {
         if (isNotBlank(nationalId)) {
             batch.add(createInsertQuery(CF_NID_MAPPING, new NidMapping(nationalId, healthId), null, converter));
         }
@@ -112,11 +69,11 @@ public class PatientQueryBuilder {
             return;
         }
         buildDeleteNIdMappingsStmt(healthId, existingNationalId, converter, batch);
-        buildCreateNIdMappingsStmt(healthId, newNationalId, converter, batch);
+        buildCreateNIdMappingStmt(healthId, newNationalId, converter, batch);
 
     }
 
-    private static void buildCreateBrnMappingsStmt(String healthId, String brn, CassandraConverter converter, Batch batch) {
+    private static void buildCreateBrnMappingStmt(String healthId, String brn, CassandraConverter converter, Batch batch) {
         if (isNotBlank(brn)) {
             batch.add(createInsertQuery(CF_BRN_MAPPING, new BrnMapping(brn, healthId), null, converter));
         }
@@ -133,11 +90,11 @@ public class PatientQueryBuilder {
             return;
         }
         buildDeleteBrnMappingsStmt(healthId, existingBrn, converter, batch);
-        buildCreateBrnMappingsStmt(healthId, newBrn, converter, batch);
+        buildCreateBrnMappingStmt(healthId, newBrn, converter, batch);
 
     }
 
-    private static void buildCreateUIdMappingsStmt(String healthId, String uid, CassandraConverter converter, Batch batch) {
+    private static void buildCreateUIdMappingStmt(String healthId, String uid, CassandraConverter converter, Batch batch) {
         if (isNotBlank(uid)) {
             batch.add(createInsertQuery(CF_UID_MAPPING, new UidMapping(uid, healthId), null, converter));
         }
@@ -154,7 +111,7 @@ public class PatientQueryBuilder {
             return;
         }
         buildDeleteUIdMappingsStmt(healthId, existingUid, converter, batch);
-        buildCreateUIdMappingsStmt(healthId, newUid, converter, batch);
+        buildCreateUIdMappingStmt(healthId, newUid, converter, batch);
 
     }
 
@@ -178,6 +135,45 @@ public class PatientQueryBuilder {
         }
         buildDeletePhoneNumberMappingsStmt(healthId, existingPhoneNumber, converter, batch);
         buildCreatePhoneNumberMappingsStmt(healthId, newPhoneNumber, converter, batch);
+    }
+
+    private static void buildCreateNameMappingStmt(Patient patient, CassandraConverter converter, Batch batch) {
+        String healthId = patient.getHealthId();
+        String divisionId = patient.getDivisionId();
+        String districtId = patient.getDistrictId();
+        String upazilaId = patient.getUpazilaId();
+        String givenName = patient.getGivenName();
+        String surname = patient.getSurName();
+
+        if (isNotBlank(healthId) && isNotBlank(divisionId) && isNotBlank(districtId) && isNotBlank(upazilaId)
+                && isNotBlank(givenName) && isNotBlank(surname)) {
+            NameMapping mapping = new NameMapping(divisionId, districtId, upazilaId, givenName.toLowerCase(),
+                    surname.toLowerCase(), patient.getHealthId());
+            batch.add(createInsertQuery(CF_NAME_MAPPING, mapping, null, converter));
+        }
+
+    }
+
+    private static void buildDeleteNameMappingStmt(PatientData patient, CassandraConverter converter, Batch batch) {
+        String healthId = patient.getHealthId();
+        Address address = patient.getAddress();
+        String divisionId = address.getDivisionId();
+        String districtId = address.getDistrictId();
+        String upazilaId = address.getUpazilaId();
+        String givenName = patient.getGivenName();
+        String surname = patient.getSurName();
+
+        if (isNotBlank(healthId) && isNotBlank(divisionId) && isNotBlank(districtId) && isNotBlank(upazilaId)
+                && isNotBlank(givenName) && isNotBlank(surname)) {
+            NameMapping mapping = new NameMapping(divisionId, districtId, upazilaId, givenName.toLowerCase(),
+                    surname.toLowerCase(), patient.getHealthId());
+            batch.add(createDeleteQuery(CF_NAME_MAPPING, mapping, null, converter));
+        }
+    }
+
+    static void buildUpdateNameMappingStmt(Patient newPatient, PatientData existingPatient, CassandraConverter converter, Batch batch) {
+        buildDeleteNameMappingStmt(existingPatient, converter, batch);
+        buildCreateNameMappingStmt(newPatient, converter, batch);
     }
 
     private static void buildCreateCatchmentMappingsStmt(Catchment catchment, Date lastUpdated, String healthId,
@@ -241,5 +237,51 @@ public class PatientQueryBuilder {
         }
 
         return years;
+    }
+
+    public static String buildFindByHidStmt(String[] values) {
+        return select().from(CF_PATIENT).where(in(HEALTH_ID, values)).toString();
+    }
+
+    public static String buildFindByNidStmt(String nid) {
+        return select(HEALTH_ID).from(CF_NID_MAPPING).where(eq(NATIONAL_ID, nid)).toString();
+    }
+
+    public static String buildFindByBrnStmt(String brn) {
+        return select(HEALTH_ID).from(CF_BRN_MAPPING).where(eq(BIN_BRN, brn)).toString();
+    }
+
+    public static String buildFindByUidStmt(String uid) {
+        return select(HEALTH_ID).from(CF_UID_MAPPING).where(eq(UID, uid)).toString();
+    }
+
+    public static String buildFindByPhoneNumberStmt(String phoneNumber) {
+        return select(HEALTH_ID).from(CF_PHONE_NUMBER_MAPPING).where(eq(PHONE_NO, phoneNumber)).toString();
+    }
+
+    public static String buildFindPendingApprovalMappingStmt(Catchment catchment, UUID after, UUID before, int limit) {
+        Where where = select(HEALTH_ID, LAST_UPDATED).from(CF_PENDING_APPROVAL_MAPPING)
+                .where(eq(CATCHMENT_ID, catchment.getId()));
+
+        if (after != null) {
+            where = where.and(gt(LAST_UPDATED, after));
+        }
+        if (before != null) {
+            where = where.and(lt(LAST_UPDATED, before));
+        }
+        return where.limit(limit).toString();
+    }
+
+    public static String buildFindByNameStmt(String divisionId, String districtId, String upazilaId, String givenName, String surname) {
+        Where where = select(HEALTH_ID).from(CF_NAME_MAPPING)
+                .where(eq(DIVISION_ID, divisionId))
+                .and(eq(DISTRICT_ID, districtId))
+                .and(eq(UPAZILA_ID, upazilaId))
+                .and(eq(GIVEN_NAME, givenName.toLowerCase()));
+
+        if (isNotEmpty(surname)) {
+            where = where.and(eq(SUR_NAME, surname.toLowerCase()));
+        }
+        return where.toString();
     }
 }
