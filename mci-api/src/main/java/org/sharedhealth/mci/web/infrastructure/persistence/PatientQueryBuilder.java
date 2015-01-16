@@ -5,6 +5,7 @@ import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Update;
 import org.sharedhealth.mci.utils.DateUtil;
 import org.sharedhealth.mci.web.mapper.Catchment;
+import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.model.*;
 import org.springframework.data.cassandra.convert.CassandraConverter;
 
@@ -15,8 +16,7 @@ import java.util.UUID;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
 import static com.datastax.driver.core.querybuilder.Select.Where;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.*;
 import static org.springframework.data.cassandra.core.CassandraTemplate.*;
 
@@ -74,20 +74,9 @@ public class PatientQueryBuilder {
 
         batch.add(createInsertQuery(CF_PATIENT, patient, null, converter));
 
-        String nationalId = patient.getNationalId();
-        if (isNotBlank(nationalId)) {
-            batch.add(createInsertQuery(CF_NID_MAPPING, new NidMapping(nationalId, healthId), null, converter));
-        }
-
-        String brn = patient.getBirthRegistrationNumber();
-        if (isNotBlank(brn)) {
-            batch.add(createInsertQuery(CF_BRN_MAPPING, new BrnMapping(brn, healthId), null, converter));
-        }
-
-        String uid = patient.getUid();
-        if (isNotBlank(uid)) {
-            batch.add(createInsertQuery(CF_UID_MAPPING, new UidMapping(uid, healthId), null, converter));
-        }
+        buildCreateNIdMappingsStmt(healthId, patient.getNationalId(), converter, batch);
+        buildCreateBrnMappingsStmt(healthId, patient.getBirthRegistrationNumber(), converter, batch);
+        buildCreateUIdMappingsStmt(healthId, patient.getUid(), converter, batch);
 
         String phoneNumber = patient.getCellNo();
         if (isNotBlank(phoneNumber)) {
@@ -110,18 +99,94 @@ public class PatientQueryBuilder {
         return batch;
     }
 
-    static void buildCreateCatchmentMappingsStmt(Catchment catchment, Date lastUpdated, String healthId, CassandraConverter converter, Batch batch) {
+    private static void buildCreateNIdMappingsStmt(String healthId, String nationalId, CassandraConverter converter, Batch batch) {
+        if (isNotBlank(nationalId)) {
+            batch.add(createInsertQuery(CF_NID_MAPPING, new NidMapping(nationalId, healthId), null, converter));
+        }
+    }
+
+    private static void buildDeleteNIdMappingsStmt(String healthId, String nationalId, CassandraConverter converter, Batch batch) {
+        if (isNotBlank(nationalId)) {
+            batch.add(createDeleteQuery(CF_NID_MAPPING, new NidMapping(nationalId, healthId), null, converter));
+        }
+    }
+
+    static void buildUpdateNidMappingStmt(String healthId, String newNationalId, String existingNationalId, CassandraConverter converter, Batch batch) {
+        if (defaultString(newNationalId).equals(defaultString(existingNationalId))) {
+            return;
+        }
+        buildDeleteNIdMappingsStmt(healthId, existingNationalId, converter, batch);
+        buildCreateNIdMappingsStmt(healthId, newNationalId, converter, batch);
+
+    }
+
+    private static void buildCreateBrnMappingsStmt(String healthId, String brn, CassandraConverter converter, Batch batch) {
+        if (isNotBlank(brn)) {
+            batch.add(createInsertQuery(CF_BRN_MAPPING, new BrnMapping(brn, healthId), null, converter));
+        }
+    }
+
+    private static void buildDeleteBrnMappingsStmt(String healthId, String brn, CassandraConverter converter, Batch batch) {
+        if (isNotBlank(brn)) {
+            batch.add(createDeleteQuery(CF_BRN_MAPPING, new BrnMapping(brn, healthId), null, converter));
+        }
+    }
+
+    static void buildUpdateBrnMappingsStmt(String healthId, String newBrn, String existingBrn, CassandraConverter converter, Batch batch) {
+        if (defaultString(newBrn).equals(defaultString(existingBrn))) {
+            return;
+        }
+        buildDeleteBrnMappingsStmt(healthId, existingBrn, converter, batch);
+        buildCreateBrnMappingsStmt(healthId, newBrn, converter, batch);
+
+    }
+
+    private static void buildCreateUIdMappingsStmt(String healthId, String uid, CassandraConverter converter, Batch batch) {
+        if (isNotBlank(uid)) {
+            batch.add(createInsertQuery(CF_UID_MAPPING, new UidMapping(uid, healthId), null, converter));
+        }
+    }
+
+    private static void buildDeleteUIdMappingsStmt(String healthId, String uid, CassandraConverter converter, Batch batch) {
+        if (isNotBlank(uid)) {
+            batch.add(createDeleteQuery(CF_UID_MAPPING, new UidMapping(uid, healthId), null, converter));
+        }
+    }
+
+    static void buildUpdateUidMappingsStmt(String healthId, String newUid, String existingUid, CassandraConverter converter, Batch batch) {
+        if (defaultString(newUid).equals(defaultString(existingUid))) {
+            return;
+        }
+        buildDeleteUIdMappingsStmt(healthId, existingUid, converter, batch);
+        buildCreateUIdMappingsStmt(healthId, newUid, converter, batch);
+
+    }
+
+    private static void buildCreateCatchmentMappingsStmt(Catchment catchment, Date lastUpdated, String healthId,
+                                                         CassandraConverter converter, Batch batch) {
         for (String catchmentId : catchment.getAllIds()) {
             CatchmentMapping mapping = new CatchmentMapping(catchmentId, lastUpdated, healthId);
             batch.add(createInsertQuery(CF_CATCHMENT_MAPPING, mapping, null, converter));
         }
     }
 
-    static void buildDeleteCatchmentMappingsStmt(Catchment catchment, Date lastUpdated, String healthId, CassandraConverter converter, Batch batch) {
+    private static void buildDeleteCatchmentMappingsStmt(Catchment catchment, Date lastUpdated, String healthId,
+                                                         CassandraConverter converter, Batch batch) {
         for (String catchmentId : catchment.getAllIds()) {
             CatchmentMapping mapping = new CatchmentMapping(catchmentId, lastUpdated, healthId);
             batch.add(createDeleteQuery(CF_CATCHMENT_MAPPING, mapping, null, converter));
         }
+    }
+
+    static void buildUpdateCatchmentMappingsStmt(Patient newPatient, PatientData existingPatient, CassandraConverter converter,
+                                                 Batch batch) {
+        buildDeleteCatchmentMappingsStmt(existingPatient.getCatchment(), existingPatient.getUpdatedAt(),
+                existingPatient.getHealthId(), converter, batch);
+
+        Catchment catchment = newPatient.getCatchment() != null ? newPatient.getCatchment() : existingPatient.getCatchment();
+
+        buildCreateCatchmentMappingsStmt(catchment, newPatient.getUpdatedAt(), newPatient.getHealthId(),
+                converter, batch);
     }
 
     public static Update buildUpdateStmt(Patient patient, CassandraConverter converter) {

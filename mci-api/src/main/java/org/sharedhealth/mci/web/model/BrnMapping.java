@@ -14,10 +14,10 @@ public class BrnMapping {
     private String bin_brn;
 
     @PrimaryKeyColumn(name = HEALTH_ID, ordinal = 1, type = CLUSTERED)
-    private String healthId;
+    private String health_Id;
 
-    public BrnMapping(String bin_brn, String healthId) {
-        this.bin_brn = bin_brn;
-        this.healthId = healthId;
+    public BrnMapping(String brn, String healthId) {
+        this.bin_brn = brn;
+        this.health_Id = healthId;
     }
 }

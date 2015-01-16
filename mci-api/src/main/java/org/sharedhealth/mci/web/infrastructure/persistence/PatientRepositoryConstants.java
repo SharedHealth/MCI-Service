@@ -1,8 +1,5 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
-/**
- * Created by soham on 1/14/15.
- */
 public class PatientRepositoryConstants {
     public static final String CF_PATIENT = "patient";
     public static final String CF_NID_MAPPING = "nid_mapping";
