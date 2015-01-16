@@ -126,6 +126,9 @@ public class PatientRepository extends BaseRepository {
         buildUpdateUidMappingsStmt(healthId, newPatient.getUid(), existingPatientData.getUid(),
                 cassandraOps.getConverter(), batch);
 
+        buildUpdatePhoneNumberMappingsStmt(healthId, newPatient.getCellNo(), existingPatientData.getPhoneNumber(),
+                cassandraOps.getConverter(), batch);
+
         buildUpdateCatchmentMappingsStmt(newPatient, existingPatientData, cassandraOps.getConverter(), batch);
 
         batch.add(buildUpdateStmt(newPatient, cassandraOps.getConverter()));

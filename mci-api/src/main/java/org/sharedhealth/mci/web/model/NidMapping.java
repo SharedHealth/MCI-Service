@@ -11,13 +11,13 @@ import static org.springframework.cassandra.core.PrimaryKeyType.PARTITIONED;
 public class NidMapping {
 
     @PrimaryKeyColumn(name = NATIONAL_ID, ordinal = 0, type = PARTITIONED)
-    private String national_Id;
+    private String national_id;
 
     @PrimaryKeyColumn(name = HEALTH_ID, ordinal = 1, type = CLUSTERED)
-    private String health_Id;
+    private String health_id;
 
     public NidMapping(String nationalId, String healthId) {
-        this.national_Id = nationalId;
-        this.health_Id = healthId;
+        this.national_id = nationalId;
+        this.health_id = healthId;
     }
 }

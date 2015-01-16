@@ -11,13 +11,13 @@ import static org.springframework.cassandra.core.PrimaryKeyType.PARTITIONED;
 public class PhoneNumberMapping {
 
     @PrimaryKeyColumn(name = PHONE_NO, ordinal = 0, type = PARTITIONED)
-    private String phoneNumber;
+    private String phone_no;
 
     @PrimaryKeyColumn(name = HEALTH_ID, ordinal = 1, type = CLUSTERED)
-    private String healthId;
+    private String health_id;
 
     public PhoneNumberMapping(String phoneNumber, String healthId) {
-        this.phoneNumber = phoneNumber;
-        this.healthId = healthId;
+        this.phone_no = phoneNumber;
+        this.health_id = healthId;
     }
 }

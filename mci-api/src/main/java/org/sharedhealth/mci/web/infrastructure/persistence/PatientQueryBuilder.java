@@ -6,6 +6,7 @@ import com.datastax.driver.core.querybuilder.Update;
 import org.sharedhealth.mci.utils.DateUtil;
 import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.PatientData;
+import org.sharedhealth.mci.web.mapper.PhoneNumber;
 import org.sharedhealth.mci.web.model.*;
 import org.springframework.data.cassandra.convert.CassandraConverter;
 
@@ -77,12 +78,7 @@ public class PatientQueryBuilder {
         buildCreateNIdMappingsStmt(healthId, patient.getNationalId(), converter, batch);
         buildCreateBrnMappingsStmt(healthId, patient.getBirthRegistrationNumber(), converter, batch);
         buildCreateUIdMappingsStmt(healthId, patient.getUid(), converter, batch);
-
-        String phoneNumber = patient.getCellNo();
-        if (isNotBlank(phoneNumber)) {
-            batch.add(createInsertQuery(CF_PHONE_NUMBER_MAPPING,
-                    new PhoneNumberMapping(phoneNumber, healthId), null, converter));
-        }
+        buildCreatePhoneNumberMappingsStmt(healthId, patient.getCellNo(), converter, batch);
 
         String divisionId = patient.getDivisionId();
         String districtId = patient.getDistrictId();
@@ -160,6 +156,28 @@ public class PatientQueryBuilder {
         buildDeleteUIdMappingsStmt(healthId, existingUid, converter, batch);
         buildCreateUIdMappingsStmt(healthId, newUid, converter, batch);
 
+    }
+
+    private static void buildCreatePhoneNumberMappingsStmt(String healthId, String phoneNumber, CassandraConverter converter, Batch batch) {
+        if (isNotBlank(phoneNumber)) {
+            batch.add(createInsertQuery(CF_PHONE_NUMBER_MAPPING, new PhoneNumberMapping(phoneNumber, healthId), null, converter));
+        }
+    }
+
+    private static void buildDeletePhoneNumberMappingsStmt(String healthId, String phoneNumber, CassandraConverter converter, Batch batch) {
+        if (isNotBlank(phoneNumber)) {
+            batch.add(createDeleteQuery(CF_PHONE_NUMBER_MAPPING, new PhoneNumberMapping(phoneNumber, healthId), null, converter));
+        }
+    }
+
+    static void buildUpdatePhoneNumberMappingsStmt(String healthId, String newPhoneNumber, PhoneNumber existingPhone,
+                                                   CassandraConverter converter, Batch batch) {
+        String existingPhoneNumber = existingPhone != null ? existingPhone.getNumber() : null;
+        if (defaultString(newPhoneNumber).equals(defaultString(existingPhoneNumber))) {
+            return;
+        }
+        buildDeletePhoneNumberMappingsStmt(healthId, existingPhoneNumber, converter, batch);
+        buildCreatePhoneNumberMappingsStmt(healthId, newPhoneNumber, converter, batch);
     }
 
     private static void buildCreateCatchmentMappingsStmt(Catchment catchment, Date lastUpdated, String healthId,

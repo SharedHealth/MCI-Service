@@ -14,10 +14,10 @@ public class UidMapping {
     private String uid;
 
     @PrimaryKeyColumn(name = HEALTH_ID, ordinal = 1, type = CLUSTERED)
-    private String health_Id;
+    private String health_id;
 
     public UidMapping(String uid, String healthId) {
         this.uid = uid;
-        this.health_Id = healthId;
+        this.health_id = healthId;
     }
 }

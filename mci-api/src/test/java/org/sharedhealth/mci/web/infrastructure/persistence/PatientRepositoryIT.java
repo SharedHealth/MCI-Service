@@ -30,7 +30,6 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.PHONE_NUMBER;
@@ -169,6 +168,18 @@ public class PatientRepositoryIT {
 
         String cql = select().from(CF_UID_MAPPING).toString();
         assertTrue(isEmpty(cassandraOps.select(cql, UidMapping.class)));
+    }
+
+    @Test
+    public void shouldNotCreatePhoneNumberMappingWhenPatientIsCreatedWithoutPhoneNumber() {
+        PatientData patient = new PatientData();
+        patient.setGivenName("John");
+        patient.setSurName("Doe");
+        patient.setAddress(new Address("1", "2", "3"));
+        assertNotNull(patientRepository.create(patient).getId());
+
+        String cql = select().from(CF_PHONE_NUMBER_MAPPING).toString();
+        assertTrue(isEmpty(cassandraOps.select(cql, PhoneNumber.class)));
     }
 
     private void assertCatchmentMappings(PatientData patient) {
@@ -444,6 +455,86 @@ public class PatientRepositoryIT {
     private void assertSearchByUid(String uid, String healthId) {
         SearchQuery query = new SearchQuery();
         query.setUid(uid);
+        List<PatientData> patients = patientRepository.findAllByQuery(query);
+        assertTrue(isNotEmpty(patients));
+        assertEquals(1, patients.size());
+        assertEquals(healthId, patients.get(0).getHealthId());
+    }
+
+    @Test
+    public void shouldUpdatePhoneNumberMappingWhenPhoneNumberIsUpdated() {
+        PatientData patient = new PatientData();
+        patient.setGivenName("John");
+        patient.setSurName("Doe");
+        PhoneNumber phoneNumber1 = new PhoneNumber();
+        phoneNumber1.setNumber("100000000");
+        patient.setPhoneNumber(phoneNumber1);
+        patient.setAddress(new Address("1", "2", "3"));
+        String healthId = patientRepository.create(patient).getId();
+        assertNotNull(healthId);
+
+        PhoneNumber phoneNumber2 = new PhoneNumber();
+        phoneNumber2.setNumber("200000000");
+        patient.setPhoneNumber(phoneNumber2);
+        patientRepository.update(patient, healthId);
+
+        PatientData requestData = new PatientData();
+        requestData.setHealthId(healthId);
+        requestData.setPhoneNumber(phoneNumber2);
+        PatientData existingPatient = patientRepository.findByHealthId(healthId);
+        patientRepository.processPendingApprovals(requestData, existingPatient, true);
+
+        PatientData updatedPatient = patientRepository.findByHealthId(healthId);
+        assertNotNull(updatedPatient);
+        assertNotNull(updatedPatient.getPhoneNumber());
+        assertEquals(phoneNumber2, updatedPatient.getPhoneNumber());
+
+        SearchQuery query = new SearchQuery();
+        query.setPhone_no(phoneNumber1.getNumber());
+        assertTrue(isEmpty(patientRepository.findAllByQuery(query)));
+
+        assertSearchByPhoneNumber(phoneNumber2, healthId);
+    }
+
+    @Test
+    public void shouldUpdateAppropriatePhoneNumberWhenMultiplePatientsWithSamePhoneNumberExist() {
+        PatientData patient = new PatientData();
+        patient.setGivenName("John");
+        patient.setSurName("Doe");
+        PhoneNumber phoneNumber1 = new PhoneNumber();
+        phoneNumber1.setNumber("100000000");
+        patient.setPhoneNumber(phoneNumber1);
+        patient.setAddress(new Address("1", "2", "3"));
+        String healthId1 = patientRepository.create(patient).getId();
+        assertNotNull(healthId1);
+
+        patient.setGivenName("Jane");
+        String healthId2 = patientRepository.create(patient).getId();
+        assertNotNull(healthId2);
+
+        PhoneNumber phoneNumber2 = new PhoneNumber();
+        phoneNumber2.setNumber("200000000");
+        patient.setPhoneNumber(phoneNumber2);
+        patientRepository.update(patient, healthId2);
+
+        PatientData requestData = new PatientData();
+        requestData.setHealthId(healthId2);
+        requestData.setPhoneNumber(phoneNumber2);
+        PatientData existingPatient = patientRepository.findByHealthId(healthId2);
+        patientRepository.processPendingApprovals(requestData, existingPatient, true);
+
+        PatientData patient2 = patientRepository.findByHealthId(healthId2);
+        assertNotNull(patient2);
+        assertEquals(phoneNumber2, patient2.getPhoneNumber());
+
+        assertSearchByPhoneNumber(phoneNumber1, healthId1);
+        assertSearchByPhoneNumber(phoneNumber2, healthId2);
+    }
+
+    private void assertSearchByPhoneNumber(PhoneNumber phoneNumber, String healthId) {
+        assertNotNull(phoneNumber);
+        SearchQuery query = new SearchQuery();
+        query.setPhone_no(phoneNumber.getNumber());
         List<PatientData> patients = patientRepository.findAllByQuery(query);
         assertTrue(isNotEmpty(patients));
         assertEquals(1, patients.size());
