@@ -3,6 +3,7 @@ package org.sharedhealth.mci.web.mapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
+import org.sharedhealth.mci.utils.DateUtil;
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.model.Patient;
 import org.sharedhealth.mci.web.utils.PatientDataConstants;
@@ -82,7 +83,7 @@ public class PatientMapper {
         data.setEthnicity(patient.getEthnicity());
         data.setStatus(patient.getStatus());
 
-        if (patient.getDateOfDeath() != null) {
+        if (isPatientDeadAndHasDateOfDeath(patient)) {
             data.setDateOfDeath(ISO_DATE_FORMAT.format(patient.getDateOfDeath()));
         }
 
@@ -155,6 +156,10 @@ public class PatientMapper {
         data.setCreatedAt(patient.getCreatedAt());
         data.setUpdatedAt(patient.getUpdatedAt());
         return data;
+    }
+
+    private boolean isPatientDeadAndHasDateOfDeath(Patient patient) {
+        return patient.getDateOfDeath() != null && PatientDataConstants.PATIENT_STATUS_DEAD.equals(patient.getStatus()) && DateUtil.getYear(patient.getDateOfDeath()) > 1;
     }
 
     private void mapConfidentiality(Patient patient, PatientData data) {

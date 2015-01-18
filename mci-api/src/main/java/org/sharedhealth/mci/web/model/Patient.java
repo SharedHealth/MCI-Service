@@ -26,6 +26,7 @@ import static org.sharedhealth.mci.web.utils.PatientDataConstants.COUNTRY_CODE_B
 @Table(value = "patient")
 public class Patient {
 
+    public static final String EMPTY_DATE_VALUE = "0001-01-01";
     @PrimaryKey(HEALTH_ID)
     private String healthId;
 
@@ -1155,6 +1156,11 @@ public class Patient {
     }
 
     public void setDateOfDeath(String dateOfDeath) {
+
+        if("".equals(dateOfDeath)) {
+            dateOfDeath = EMPTY_DATE_VALUE;
+        }
+
         this.dateOfDeath = string2Date(dateOfDeath, DEFAULT_DATE_FORMAT);
     }
 
