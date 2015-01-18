@@ -170,7 +170,7 @@ public class PatientRepository extends BaseRepository {
         patient.setConfidential(getChangedValueIgnoreCase(newData.getConfidential(), oldData.getConfidential()));
         patient.setAddress(getChangedValue(newData.getAddress(), oldData.getAddress()));
 
-        if (patient.getSurName() != null || patient.getGivenName() != null) {
+        if (someLoggableDataChanged(patient)) {
             ObjectMapper oMapper = new ObjectMapper();
             try {
                 return oMapper.writeValueAsString(patient);
@@ -180,6 +180,13 @@ public class PatientRepository extends BaseRepository {
         }
 
         return null;
+    }
+
+    private boolean someLoggableDataChanged(PatientData patient) {
+        return patient.getSurName() != null
+                || patient.getGivenName() != null
+                || patient.getConfidential() != null
+                || patient.getAddress() != null;
     }
 
     private Address getChangedValue(Address newValue, Address old) {
@@ -343,6 +350,7 @@ public class PatientRepository extends BaseRepository {
         Patient newPatient;
         if (shouldAccept) {
             newPatient = mapper.map(requestData, existingPatientData);
+            buildCreateUpdateLogStmt(requestData, existingPatientData, batch);
         } else {
             newPatient = new Patient();
             newPatient.setHealthId(requestData.getHealthId());
