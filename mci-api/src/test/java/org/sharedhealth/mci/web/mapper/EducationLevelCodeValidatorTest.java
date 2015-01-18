@@ -21,7 +21,7 @@ public class EducationLevelCodeValidatorTest extends BaseCodeValidatorTest<Patie
 
     @Test
     public void shouldFailForInvalidValues() throws Exception {
-        String[] inValidRelations = {"", "some_invalid_code", "4", "20"};
+        String[] inValidRelations = {"some_invalid_code", "4", "20"};
         assertInvalidValues(inValidRelations, "educationLevel", PatientData.class);
     }
 }

@@ -4,9 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.constraints.NotBlank;
 import org.sharedhealth.mci.utils.DateUtil;
+import org.sharedhealth.mci.utils.WhiteSpaceRemovalDeserializer;
 import org.sharedhealth.mci.validation.constraints.*;
 import org.sharedhealth.mci.validation.group.RequiredGroup;
 
@@ -41,12 +43,12 @@ public class PatientData {
 
     @JsonProperty(NID)
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[\\d]{13}|[\\d]{17}", message = ERROR_CODE_PATTERN)
+    @Pattern(regexp = "^|[\\d]{13}|[\\d]{17}", message = ERROR_CODE_PATTERN)
     private String nationalId;
 
     @JsonProperty(BIN_BRN)
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[\\d]{17}", message = ERROR_CODE_PATTERN)
+    @Pattern(regexp = "^|[\\d]{17}", message = ERROR_CODE_PATTERN)
     private String birthRegistrationNumber;
 
     @JsonProperty(NAME_BANGLA)
@@ -63,7 +65,8 @@ public class PatientData {
     @JsonProperty(SUR_NAME)
     @JsonInclude(NON_EMPTY)
     @NotNull(message = ERROR_CODE_REQUIRED, groups = RequiredGroup.class)
-    @Pattern(regexp = "^(\\s*)([A-Za-z0-9]{1,25})(\\b\\s*$)", message = ERROR_CODE_PATTERN)
+    @Length(max = 25, min = 1, message = ERROR_CODE_PATTERN)
+    @JsonDeserialize(using = WhiteSpaceRemovalDeserializer.class)
     private String surName;
 
     @JsonProperty(DATE_OF_BIRTH)
@@ -81,12 +84,12 @@ public class PatientData {
 
     @JsonProperty(OCCUPATION)
     @JsonInclude(NON_EMPTY)
-    @Code(type = OCCUPATION, regexp = "[\\d]{2}", message = ERROR_CODE_INVALID)
+    @Code(type = OCCUPATION, allowBlank=true, regexp = "[\\d]{2}", message = ERROR_CODE_INVALID)
     private String occupation;
 
     @JsonProperty(EDU_LEVEL)
     @JsonInclude(NON_EMPTY)
-    @Code(type = EDUCATION_LEVEL, regexp = "[\\d]{2}", message = ERROR_CODE_INVALID)
+    @Code(type = EDUCATION_LEVEL, allowBlank=true, regexp = "[\\d]{2}", message = ERROR_CODE_INVALID)
     private String educationLevel;
 
     @JsonProperty(RELATIONS)
@@ -96,7 +99,7 @@ public class PatientData {
 
     @JsonProperty(UID)
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[a-zA-Z0-9]{11}", message = ERROR_CODE_PATTERN)
+    @Pattern(regexp = "^|[a-zA-Z0-9]{11}", message = ERROR_CODE_PATTERN)
     private String uid;
 
     @JsonInclude(NON_EMPTY)
@@ -126,7 +129,7 @@ public class PatientData {
 
     @JsonProperty(ETHNICITY)
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[0-9]{2}", message = ERROR_CODE_INVALID)
+    @Pattern(regexp = "|[0-9]{2}", message = ERROR_CODE_INVALID)
     private String ethnicity;
 
     @JsonProperty(PRESENT_ADDRESS)

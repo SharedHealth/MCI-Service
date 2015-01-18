@@ -25,4 +25,6 @@ public @interface Code {
     Class<? extends Payload>[] payload() default {};
 
     String regexp() default "";
+
+    boolean allowBlank() default false;
 }

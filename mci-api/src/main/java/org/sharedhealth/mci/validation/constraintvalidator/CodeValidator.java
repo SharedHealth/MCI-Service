@@ -41,7 +41,7 @@ public class CodeValidator implements ConstraintValidator<Code, String> {
 
         if (value == null) return true;
 
-        if (StringUtils.isBlank(value)) return false;
+        if (StringUtils.isBlank(value)) return this.code.allowBlank();
 
         if (this.pattern != null && !this.pattern.matcher(value).matches()) {
             return false;

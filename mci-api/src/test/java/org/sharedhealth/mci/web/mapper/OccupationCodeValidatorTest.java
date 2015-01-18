@@ -21,7 +21,7 @@ public class OccupationCodeValidatorTest extends BaseCodeValidatorTest<PatientDa
 
     @Test
     public void shouldFailForInvalidValues() throws Exception {
-        String[] inValidRelations = {"", "some_invalid_code", "4", "93"};
+        String[] inValidRelations = {"some_invalid_code", "4", "93"};
         assertInvalidValues(inValidRelations, "occupation", PatientData.class);
     }
 }
