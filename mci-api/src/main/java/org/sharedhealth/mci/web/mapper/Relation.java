@@ -77,7 +77,7 @@ public class Relation {
 
     @JsonProperty(RELATIONAL_STATUS)
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[3|4|5]", message = ERROR_CODE_INVALID)
+    @Pattern(regexp = "[2|3|4|5]", message = ERROR_CODE_INVALID)
     private String relationalStatus;
 
     @JsonProperty("id")
