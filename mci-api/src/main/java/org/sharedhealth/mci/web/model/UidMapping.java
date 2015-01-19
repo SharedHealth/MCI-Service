@@ -16,6 +16,9 @@ public class UidMapping {
     @PrimaryKeyColumn(name = HEALTH_ID, ordinal = 1, type = CLUSTERED)
     private String health_id;
 
+    public UidMapping() {
+    }
+
     public UidMapping(String uid, String healthId) {
         this.uid = uid;
         this.health_id = healthId;

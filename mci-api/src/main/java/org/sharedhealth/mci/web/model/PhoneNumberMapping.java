@@ -16,6 +16,9 @@ public class PhoneNumberMapping {
     @PrimaryKeyColumn(name = HEALTH_ID, ordinal = 1, type = CLUSTERED)
     private String health_id;
 
+    public PhoneNumberMapping() {
+    }
+
     public PhoneNumberMapping(String phoneNumber, String healthId) {
         this.phone_no = phoneNumber;
         this.health_id = healthId;

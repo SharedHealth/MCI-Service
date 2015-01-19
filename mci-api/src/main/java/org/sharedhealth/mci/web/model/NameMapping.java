@@ -28,6 +28,9 @@ public class NameMapping {
     @PrimaryKeyColumn(name = HEALTH_ID, ordinal = 5, type = CLUSTERED)
     private String health_id;
 
+    public NameMapping() {
+    }
+
     public NameMapping(String divisionId, String districtId, String upazilaId, String givenName, String surname, String healthId) {
         this.division_id = divisionId;
         this.district_id = districtId;

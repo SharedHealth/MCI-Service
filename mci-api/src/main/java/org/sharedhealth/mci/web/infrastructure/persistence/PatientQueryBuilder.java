@@ -30,10 +30,11 @@ public class PatientQueryBuilder {
 
         batch.add(createInsertQuery(CF_PATIENT, patient, null, converter));
 
-        buildCreateNIdMappingStmt(healthId, patient.getNationalId(), converter, batch);
-        buildCreateBrnMappingStmt(healthId, patient.getBirthRegistrationNumber(), converter, batch);
-        buildCreateUIdMappingStmt(healthId, patient.getUid(), converter, batch);
-        buildCreatePhoneNumberMappingsStmt(healthId, patient.getCellNo(), converter, batch);
+        buildCreateMappingStmt(healthId, patient.getNationalId(), CF_NID_MAPPING, converter, batch);
+        buildCreateMappingStmt(healthId, patient.getBirthRegistrationNumber(), CF_BRN_MAPPING, converter, batch);
+        buildCreateMappingStmt(healthId, patient.getUid(), CF_UID_MAPPING, converter, batch);
+        buildCreateMappingStmt(healthId, patient.getCellNo(), CF_PHONE_NUMBER_MAPPING, converter, batch);
+
         buildCreateNameMappingStmt(patient, converter, batch);
         buildCreateCatchmentMappingsStmt(patient.getCatchment(), patient.getUpdatedAt(), patient.getHealthId(), converter, batch);
         return batch;
@@ -42,99 +43,60 @@ public class PatientQueryBuilder {
     static Batch buildUpdateBatch(Patient newPatient, PatientData existingPatientData, CassandraConverter converter, Batch batch) {
         String healthId = newPatient.getHealthId();
 
-        buildUpdateNidMappingStmt(healthId, newPatient.getNationalId(), existingPatientData.getNationalId(), converter, batch);
-        buildUpdateBrnMappingsStmt(healthId, newPatient.getBirthRegistrationNumber(), existingPatientData.getBirthRegistrationNumber(), converter, batch);
-        buildUpdateUidMappingsStmt(healthId, newPatient.getUid(), existingPatientData.getUid(), converter, batch);
-        buildUpdatePhoneNumberMappingsStmt(healthId, newPatient.getCellNo(), existingPatientData.getPhoneNumber(), converter, batch);
+        buildUpdateMappingStmt(healthId, newPatient.getNationalId(), existingPatientData.getNationalId(), CF_NID_MAPPING, converter, batch);
+        buildUpdateMappingStmt(healthId, newPatient.getBirthRegistrationNumber(), existingPatientData.getBirthRegistrationNumber(), CF_BRN_MAPPING, converter, batch);
+        buildUpdateMappingStmt(healthId, newPatient.getUid(), existingPatientData.getUid(), CF_UID_MAPPING, converter, batch);
+
+        PhoneNumber existingPhone = existingPatientData.getPhoneNumber();
+        String existingPhoneNumber = existingPhone == null ? null : existingPhone.getNumber();
+        buildUpdateMappingStmt(healthId, newPatient.getCellNo(), existingPhoneNumber, CF_PHONE_NUMBER_MAPPING, converter, batch);
+
         buildUpdateNameMappingStmt(newPatient, existingPatientData, converter, batch);
         buildUpdateCatchmentMappingsStmt(newPatient, existingPatientData, converter, batch);
+
         batch.add(buildUpdateStmt(newPatient, converter));
         return batch;
     }
 
-    private static void buildCreateNIdMappingStmt(String healthId, String nationalId, CassandraConverter converter, Batch batch) {
-        if (isNotBlank(nationalId)) {
-            batch.add(createInsertQuery(CF_NID_MAPPING, new NidMapping(nationalId, healthId), null, converter));
+    private static void buildCreateMappingStmt(String healthId, String id, String columnFamily, CassandraConverter converter, Batch batch) {
+        if (isNotBlank(id)) {
+            Object objectToSave = buildObjectToSave(id, healthId, columnFamily);
+            batch.add(createInsertQuery(columnFamily, objectToSave, null, converter));
         }
     }
 
-    private static void buildDeleteNIdMappingsStmt(String healthId, String nationalId, CassandraConverter converter, Batch batch) {
-        if (isNotBlank(nationalId)) {
-            batch.add(createDeleteQuery(CF_NID_MAPPING, new NidMapping(nationalId, healthId), null, converter));
+    private static void buildDeleteMappingsStmt(String healthId, String id, String columnFamily, CassandraConverter converter, Batch batch) {
+        if (isNotBlank(id)) {
+            Object objectToSave = buildObjectToSave(id, healthId, columnFamily);
+            batch.add(createDeleteQuery(columnFamily, objectToSave, null, converter));
         }
     }
 
-    static void buildUpdateNidMappingStmt(String healthId, String newNationalId, String existingNationalId, CassandraConverter converter, Batch batch) {
-        if (defaultString(newNationalId).equals(defaultString(existingNationalId))) {
+    static void buildUpdateMappingStmt(String healthId, String newId, String existingId, String columnFamily, CassandraConverter converter, Batch batch) {
+        if (defaultString(newId).equals(defaultString(existingId)) || newId == null) {
             return;
         }
-        buildDeleteNIdMappingsStmt(healthId, existingNationalId, converter, batch);
-        buildCreateNIdMappingStmt(healthId, newNationalId, converter, batch);
-
+        buildDeleteMappingsStmt(healthId, existingId, columnFamily, converter, batch);
+        buildCreateMappingStmt(healthId, newId, columnFamily, converter, batch);
     }
 
-    private static void buildCreateBrnMappingStmt(String healthId, String brn, CassandraConverter converter, Batch batch) {
-        if (isNotBlank(brn)) {
-            batch.add(createInsertQuery(CF_BRN_MAPPING, new BrnMapping(brn, healthId), null, converter));
+    private static Object buildObjectToSave(String id, String healthId, String columnFamily) {
+        Object objectToSave = null;
+        switch (columnFamily) {
+            case CF_NID_MAPPING:
+                objectToSave = new NidMapping(id, healthId);
+                break;
+            case CF_BRN_MAPPING:
+                objectToSave = new BrnMapping(id, healthId);
+                break;
+            case CF_UID_MAPPING:
+                objectToSave = new UidMapping(id, healthId);
+                break;
+            case CF_PHONE_NUMBER_MAPPING:
+                objectToSave = new PhoneNumberMapping(id, healthId);
+                break;
         }
-    }
-
-    private static void buildDeleteBrnMappingsStmt(String healthId, String brn, CassandraConverter converter, Batch batch) {
-        if (isNotBlank(brn)) {
-            batch.add(createDeleteQuery(CF_BRN_MAPPING, new BrnMapping(brn, healthId), null, converter));
-        }
-    }
-
-    static void buildUpdateBrnMappingsStmt(String healthId, String newBrn, String existingBrn, CassandraConverter converter, Batch batch) {
-        if (defaultString(newBrn).equals(defaultString(existingBrn))) {
-            return;
-        }
-        buildDeleteBrnMappingsStmt(healthId, existingBrn, converter, batch);
-        buildCreateBrnMappingStmt(healthId, newBrn, converter, batch);
-
-    }
-
-    private static void buildCreateUIdMappingStmt(String healthId, String uid, CassandraConverter converter, Batch batch) {
-        if (isNotBlank(uid)) {
-            batch.add(createInsertQuery(CF_UID_MAPPING, new UidMapping(uid, healthId), null, converter));
-        }
-    }
-
-    private static void buildDeleteUIdMappingsStmt(String healthId, String uid, CassandraConverter converter, Batch batch) {
-        if (isNotBlank(uid)) {
-            batch.add(createDeleteQuery(CF_UID_MAPPING, new UidMapping(uid, healthId), null, converter));
-        }
-    }
-
-    static void buildUpdateUidMappingsStmt(String healthId, String newUid, String existingUid, CassandraConverter converter, Batch batch) {
-        if (defaultString(newUid).equals(defaultString(existingUid))) {
-            return;
-        }
-        buildDeleteUIdMappingsStmt(healthId, existingUid, converter, batch);
-        buildCreateUIdMappingStmt(healthId, newUid, converter, batch);
-
-    }
-
-    private static void buildCreatePhoneNumberMappingsStmt(String healthId, String phoneNumber, CassandraConverter converter, Batch batch) {
-        if (isNotBlank(phoneNumber)) {
-            batch.add(createInsertQuery(CF_PHONE_NUMBER_MAPPING, new PhoneNumberMapping(phoneNumber, healthId), null, converter));
-        }
-    }
-
-    private static void buildDeletePhoneNumberMappingsStmt(String healthId, String phoneNumber, CassandraConverter converter, Batch batch) {
-        if (isNotBlank(phoneNumber)) {
-            batch.add(createDeleteQuery(CF_PHONE_NUMBER_MAPPING, new PhoneNumberMapping(phoneNumber, healthId), null, converter));
-        }
-    }
-
-    static void buildUpdatePhoneNumberMappingsStmt(String healthId, String newPhoneNumber, PhoneNumber existingPhone,
-                                                   CassandraConverter converter, Batch batch) {
-        String existingPhoneNumber = existingPhone != null ? existingPhone.getNumber() : null;
-        if (defaultString(newPhoneNumber).equals(defaultString(existingPhoneNumber))) {
-            return;
-        }
-        buildDeletePhoneNumberMappingsStmt(healthId, existingPhoneNumber, converter, batch);
-        buildCreatePhoneNumberMappingsStmt(healthId, newPhoneNumber, converter, batch);
+        return objectToSave;
     }
 
     private static void buildCreateNameMappingStmt(Patient patient, CassandraConverter converter, Batch batch) {
@@ -172,8 +134,37 @@ public class PatientQueryBuilder {
     }
 
     static void buildUpdateNameMappingStmt(Patient newPatient, PatientData existingPatient, CassandraConverter converter, Batch batch) {
+        Address existingAddress = existingPatient.getAddress();
+        String existingGivenName = existingPatient.getGivenName();
+        String existingSurname = existingPatient.getSurName();
+        String existingDivisionId = existingAddress.getDivisionId();
+        String existingDistrictId = existingAddress.getDistrictId();
+        String existingUpazilaId = existingAddress.getUpazilaId();
+
+        String newGivenName = newPatient.getGivenName() == null ? existingGivenName : newPatient.getGivenName();
+        String newSurname = newPatient.getSurName() == null ? existingSurname : newPatient.getSurName();
+        String newDivisionId = newPatient.getDivisionId() == null ? existingDivisionId : newPatient.getDivisionId();
+        String newDistrictId = newPatient.getDistrictId() == null ? existingDistrictId : newPatient.getDistrictId();
+        String newUpazilaId = newPatient.getUpazilaId() == null ? existingUpazilaId : newPatient.getUpazilaId();
+
+        if (defaultString(newGivenName).equals(defaultString(existingGivenName))
+                && defaultString(newSurname).equals(defaultString(existingSurname))
+                && defaultString(newDivisionId).equals(defaultString(existingDivisionId))
+                && defaultString(newDistrictId).equals(defaultString(existingDistrictId))
+                && defaultString(newUpazilaId).equals(defaultString(existingUpazilaId))) {
+            return;
+        }
+
         buildDeleteNameMappingStmt(existingPatient, converter, batch);
-        buildCreateNameMappingStmt(newPatient, converter, batch);
+
+        Patient patient = new Patient();
+        patient.setHealthId(newPatient.getHealthId());
+        patient.setGivenName(newGivenName);
+        patient.setSurName(newSurname);
+        patient.setDivisionId(newDivisionId);
+        patient.setDistrictId(newDistrictId);
+        patient.setUpazilaId(newUpazilaId);
+        buildCreateNameMappingStmt(patient, converter, batch);
     }
 
     private static void buildCreateCatchmentMappingsStmt(Catchment catchment, Date lastUpdated, String healthId,

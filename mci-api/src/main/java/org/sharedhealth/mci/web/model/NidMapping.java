@@ -16,6 +16,9 @@ public class NidMapping {
     @PrimaryKeyColumn(name = HEALTH_ID, ordinal = 1, type = CLUSTERED)
     private String health_id;
 
+    public NidMapping() {
+    }
+
     public NidMapping(String nationalId, String healthId) {
         this.national_id = nationalId;
         this.health_id = healthId;
