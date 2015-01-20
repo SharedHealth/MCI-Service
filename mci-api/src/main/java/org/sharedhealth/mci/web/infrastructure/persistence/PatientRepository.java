@@ -1,8 +1,6 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
 import com.datastax.driver.core.querybuilder.Batch;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.sharedhealth.mci.utils.UidGenerator;
 import org.sharedhealth.mci.web.exception.HealthIDExistException;
 import org.sharedhealth.mci.web.exception.PatientNotFoundException;
@@ -33,7 +31,8 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.*;
+import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.CF_PENDING_APPROVAL_MAPPING;
+import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.HEALTH_ID;
 import static org.sharedhealth.mci.web.utils.PatientDataConstants.PATIENT_STATUS_ALIVE;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createDeleteQuery;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
@@ -91,7 +90,7 @@ public class PatientRepository extends BaseRepository {
         final Batch batch = batch();
         buildUpdatePendingApprovalsBatch(newPatient, existingPatientData, batch);
         buildUpdateBatch(newPatient, existingPatientData, cassandraOps.getConverter(), batch);
-        buildCreateUpdateLogStmt(newPatientData, existingPatientData, batch);
+        buildCreateUpdateLogStmt(newPatientData, existingPatientData, cassandraOps.getConverter(), batch);
         cassandraOps.execute(batch);
 
         return new MCIResponse(newPatient.getHealthId(), HttpStatus.ACCEPTED);
@@ -128,58 +127,6 @@ public class PatientRepository extends BaseRepository {
             batch.add(createInsertQuery(CF_PENDING_APPROVAL_MAPPING, mapping, null, cassandraOps.getConverter()));
         }
     }
-
-    private void buildCreateUpdateLogStmt(PatientData patientDataToSave, PatientData existingPatientData, Batch batch) {
-        PatientUpdateLog patientUpdateLog = new PatientUpdateLog();
-        String changeSet = getChangeSet(patientDataToSave, existingPatientData);
-
-        if (changeSet != null) {
-            patientUpdateLog.setHealthId(existingPatientData.getHealthId());
-            patientUpdateLog.setEventTime(new Date());
-            patientUpdateLog.setChangeSet(changeSet);
-            batch.add(createInsertQuery(CF_PATIENT_UPDATE_LOG, patientUpdateLog, null, cassandraOps.getConverter()));
-        }
-    }
-
-    private String getChangeSet(PatientData newData, PatientData oldData) {
-        PatientData patient = new PatientData();
-
-        patient.setSurName(getChangedValue(newData.getSurName(), oldData.getSurName()));
-        patient.setGivenName(getChangedValue(newData.getGivenName(), oldData.getGivenName()));
-        patient.setConfidential(getChangedValueIgnoreCase(newData.getConfidential(), oldData.getConfidential()));
-        patient.setAddress(getChangedValue(newData.getAddress(), oldData.getAddress()));
-
-        if (someLoggableDataChanged(patient)) {
-            ObjectMapper oMapper = new ObjectMapper();
-            try {
-                return oMapper.writeValueAsString(patient);
-            } catch (JsonProcessingException e) {
-                return null;
-            }
-        }
-
-        return null;
-    }
-
-    private boolean someLoggableDataChanged(PatientData patient) {
-        return patient.getSurName() != null
-                || patient.getGivenName() != null
-                || patient.getConfidential() != null
-                || patient.getAddress() != null;
-    }
-
-    private Address getChangedValue(Address newValue, Address old) {
-        return newValue != null && !newValue.equals(old) ? newValue : null;
-    }
-
-    private String getChangedValue(String newValue, String old) {
-        return newValue != null && !newValue.equals(old) ? newValue : null;
-    }
-
-    private String getChangedValueIgnoreCase(String newValue, String old) {
-        return newValue != null && !newValue.equalsIgnoreCase(old) ? newValue : null;
-    }
-
 
     UUID findLatestUuid(TreeSet<PendingApproval> pendingApprovals) {
         UUID latest = null;
@@ -329,7 +276,7 @@ public class PatientRepository extends BaseRepository {
         Patient newPatient;
         if (shouldAccept) {
             newPatient = mapper.map(requestData, existingPatientData);
-            buildCreateUpdateLogStmt(requestData, existingPatientData, batch);
+            buildCreateUpdateLogStmt(requestData, existingPatientData, cassandraOps.getConverter(), batch);
         } else {
             newPatient = new Patient();
             newPatient.setHealthId(requestData.getHealthId());
@@ -346,7 +293,9 @@ public class PatientRepository extends BaseRepository {
 
         if (isNotEmpty(pendingApprovals)) {
             UUID toBeUpdated = findLatestUuid(pendingApprovals);
-            if (!toBeUpdated.equals(lastUpdated)) {
+            boolean hasLastUpdatedChanged = !toBeUpdated.equals(lastUpdated);
+            boolean hasCatchmentChanged = newPatient.getCatchment() != null && !newPatient.getCatchment().equals(existingPatientData.getCatchment());
+            if (hasLastUpdatedChanged || hasCatchmentChanged) {
                 buildDeletePendingApprovalMappingStmt(healthId, batch);
                 Catchment catchment = newPatient.getCatchment() != null ? newPatient.getCatchment() : existingPatientData.getCatchment();
                 buildCreatePendingApprovalMappingStmt(catchment, healthId, toBeUpdated, batch);

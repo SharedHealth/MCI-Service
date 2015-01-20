@@ -30,6 +30,7 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.PHONE_NUMBER;
@@ -1781,5 +1782,74 @@ public class PatientRepositoryIT {
         assertTrue(isNotEmpty(catchmentMappings));
         assertEquals(2, catchmentMappings.size());
         assertEquals(healthId, catchmentMappings.iterator().next().getHealthId());
+    }
+
+    @Test
+    public void shouldUpdatePendingApprovalMappingWhenUpdateAddressRequestIsApproved() throws Exception {
+        Address existingAddress = new Address("10", "20", "30");
+        existingAddress.setCityCorporationId("40");
+        PatientData existingPatient = new PatientData();
+        existingPatient.setGivenName("John");
+        existingPatient.setSurName("Doe");
+        existingPatient.setOccupation("01");
+        existingPatient.setAddress(existingAddress);
+        String healthId = patientRepository.create(existingPatient).getId();
+        assertNotNull(healthId);
+
+        Address newAddress = new Address("11", "22", "33");
+        PatientData updateRequest = new PatientData();
+        updateRequest.setOccupation("02");
+        updateRequest.setAddress(newAddress);
+        patientRepository.update(updateRequest, healthId);
+        assertPendingApprovalMappings(existingPatient.getCatchment().getAllIds());
+
+        PatientData approvalRequest = new PatientData();
+        approvalRequest.setHealthId(healthId);
+        approvalRequest.setAddress(newAddress);
+        patientRepository.processPendingApprovals(approvalRequest, patientRepository.findByHealthId(healthId), true);
+
+        PatientData updatedPatient = patientRepository.findByHealthId(healthId);
+        assertNotNull(updatedPatient);
+        assertEquals(newAddress, updatedPatient.getAddress());
+        assertPendingApprovalMappings(updatedPatient.getCatchment().getAllIds());
+    }
+
+    @Test
+    public void shouldNotUpdatePendingApprovalMappingWhenUpdateAddressRequestIsRejected() throws Exception {
+        Address existingAddress = new Address("10", "20", "30");
+        existingAddress.setCityCorporationId("40");
+        PatientData existingPatient = new PatientData();
+        existingPatient.setGivenName("John");
+        existingPatient.setSurName("Doe");
+        existingPatient.setOccupation("01");
+        existingPatient.setAddress(existingAddress);
+        String healthId = patientRepository.create(existingPatient).getId();
+        assertNotNull(healthId);
+
+        Address newAddress = new Address("11", "22", "33");
+        PatientData updateRequest = new PatientData();
+        updateRequest.setGivenName("Jane");
+        updateRequest.setOccupation("02");
+        updateRequest.setAddress(newAddress);
+        patientRepository.update(updateRequest, healthId);
+        assertPendingApprovalMappings(existingPatient.getCatchment().getAllIds());
+
+        PatientData approvalRequest = new PatientData();
+        approvalRequest.setHealthId(healthId);
+        approvalRequest.setAddress(newAddress);
+        patientRepository.processPendingApprovals(approvalRequest, patientRepository.findByHealthId(healthId), false);
+
+        PatientData updatedPatient = patientRepository.findByHealthId(healthId);
+        assertNotNull(updatedPatient);
+        assertEquals(existingAddress, updatedPatient.getAddress());
+        assertPendingApprovalMappings(existingPatient.getCatchment().getAllIds());
+    }
+
+    private void assertPendingApprovalMappings(List<String> catchmentIds) {
+        List<PendingApprovalMapping> mappings = findAllPendingApprovalMappings();
+        assertEquals(catchmentIds.size(), mappings.size());
+        for (PendingApprovalMapping mapping : mappings) {
+            assertTrue(catchmentIds.contains(mapping.getCatchmentId()));
+        }
     }
 }

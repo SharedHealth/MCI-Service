@@ -3,6 +3,8 @@ package org.sharedhealth.mci.web.infrastructure.persistence;
 import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Update;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.sharedhealth.mci.utils.DateUtil;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.Catchment;
@@ -192,6 +194,58 @@ public class PatientQueryBuilder {
 
         buildCreateCatchmentMappingsStmt(catchment, newPatient.getUpdatedAt(), newPatient.getHealthId(),
                 converter, batch);
+    }
+
+    static void buildCreateUpdateLogStmt(PatientData patientDataToSave, PatientData existingPatientData,
+                                          CassandraConverter converter, Batch batch) {
+        PatientUpdateLog patientUpdateLog = new PatientUpdateLog();
+        String changeSet = getChangeSet(patientDataToSave, existingPatientData);
+
+        if (changeSet != null) {
+            patientUpdateLog.setHealthId(existingPatientData.getHealthId());
+            patientUpdateLog.setEventTime(new Date());
+            patientUpdateLog.setChangeSet(changeSet);
+            batch.add(createInsertQuery(CF_PATIENT_UPDATE_LOG, patientUpdateLog, null, converter));
+        }
+    }
+
+    private static String getChangeSet(PatientData newData, PatientData oldData) {
+        PatientData patient = new PatientData();
+
+        patient.setSurName(getChangedValue(newData.getSurName(), oldData.getSurName()));
+        patient.setGivenName(getChangedValue(newData.getGivenName(), oldData.getGivenName()));
+        patient.setConfidential(getChangedValueIgnoreCase(newData.getConfidential(), oldData.getConfidential()));
+        patient.setAddress(getChangedValue(newData.getAddress(), oldData.getAddress()));
+
+        if (someLoggableDataChanged(patient)) {
+            ObjectMapper oMapper = new ObjectMapper();
+            try {
+                return oMapper.writeValueAsString(patient);
+            } catch (JsonProcessingException e) {
+                return null;
+            }
+        }
+
+        return null;
+    }
+
+    private static boolean someLoggableDataChanged(PatientData patient) {
+        return patient.getSurName() != null
+                || patient.getGivenName() != null
+                || patient.getConfidential() != null
+                || patient.getAddress() != null;
+    }
+
+    private static Address getChangedValue(Address newValue, Address old) {
+        return newValue != null && !newValue.equals(old) ? newValue : null;
+    }
+
+    private static String getChangedValue(String newValue, String old) {
+        return newValue != null && !newValue.equals(old) ? newValue : null;
+    }
+
+    private static String getChangedValueIgnoreCase(String newValue, String old) {
+        return newValue != null && !newValue.equalsIgnoreCase(old) ? newValue : null;
     }
 
     public static Update buildUpdateStmt(Patient patient, CassandraConverter converter) {
