@@ -5,7 +5,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.web.exception.InsufficientPrivilegeException;
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
-import org.sharedhealth.mci.web.infrastructure.fr.FacilityRegistryWrapper;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
 import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.model.PatientUpdateLog;
@@ -34,15 +33,15 @@ public class PatientService {
     public static final String MESSAGE_PENDING_APPROVALS_MISMATCH = "pending.approvals.mismatch";
 
     private PatientRepository patientRepository;
-    private FacilityRegistryWrapper facilityRegistryWrapper;
+    private FacilityService facilityService;
     private SettingService settingService;
 
     @Autowired
     public PatientService(PatientRepository patientRepository,
-                          FacilityRegistryWrapper facilityRegistryWrapper,
+                          FacilityService facilityService,
                           SettingService settingService) {
         this.patientRepository = patientRepository;
-        this.facilityRegistryWrapper = facilityRegistryWrapper;
+        this.facilityService = facilityService;
         this.settingService = settingService;
     }
 
@@ -175,7 +174,7 @@ public class PatientService {
     }
 
     private void verifyCatchment(String facilityId, Catchment catchment) {
-        List<Catchment> catchments = facilityRegistryWrapper.getCatchmentAreasByFacility(facilityId);
+        List<Catchment> catchments = facilityService.getCatchmentAreasByFacility(facilityId);
         if (!catchments.contains(catchment)) {
             throw new InsufficientPrivilegeException(MESSAGE_INSUFFICIENT_PRIVILEGE);
         }

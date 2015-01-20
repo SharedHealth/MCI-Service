@@ -1,12 +1,9 @@
 package org.sharedhealth.mci.web.infrastructure.fr;
 
 import org.sharedhealth.mci.web.config.MCIProperties;
-import org.sharedhealth.mci.web.exception.FacilityNotFoundException;
-import org.sharedhealth.mci.web.mapper.Catchment;
-import org.sharedhealth.mci.web.mapper.Facility;
+import org.sharedhealth.mci.web.mapper.FacilityResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -16,8 +13,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureAdapter;
 import org.springframework.web.client.AsyncRestTemplate;
-
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 
@@ -41,15 +36,15 @@ public class FacilityRegistryWrapper {
         return new HttpEntity(header);
     }
 
-    public ListenableFuture<Facility> getFacility(String facilityId) {
+    public ListenableFuture<FacilityResponse> getFacility(String facilityId) {
 
-        return new ListenableFutureAdapter<Facility, ResponseEntity<Facility>>(mciRestTemplate.exchange(
+        return new ListenableFutureAdapter<FacilityResponse, ResponseEntity<FacilityResponse>>(mciRestTemplate.exchange(
                 mciProperties.getFacilityRegistryUrl() + "/" + facilityId + ".json",
                 HttpMethod.GET,
                 getHttpEntityWithAuthenticationHeader(),
-                Facility.class)) {
+                FacilityResponse.class)) {
             @Override
-            protected Facility adapt(ResponseEntity<Facility> result) throws ExecutionException {
+            protected FacilityResponse adapt(ResponseEntity<FacilityResponse> result) throws ExecutionException {
                 if (result.getStatusCode().is2xxSuccessful()) {
                     return result.getBody();
                 } else {
@@ -59,17 +54,33 @@ public class FacilityRegistryWrapper {
         };
     }
 
-    @Cacheable({"facilities"})
-    public List<Catchment> getCatchmentAreasByFacility(String facilityId) throws FacilityNotFoundException {
-        Facility facility;
-        ListenableFuture<Facility> facilityResponse = getFacility(facilityId);
+    public org.sharedhealth.mci.web.model.Facility find(String facilityId) {
+        FacilityResponse facility;
+        ListenableFuture<FacilityResponse> facilityResponse = getFacility(facilityId);
 
         try {
             facility = facilityResponse.get();
         } catch (Exception e) {
-            throw new FacilityNotFoundException();
+            return null;
         }
 
-        return facility.getCatchments();
+        return this.map(facility);
+    }
+
+    private org.sharedhealth.mci.web.model.Facility map(FacilityResponse facility) {
+
+        if(facility == null) {
+            return null;
+        }
+
+        org.sharedhealth.mci.web.model.Facility facilityEntity = new org.sharedhealth.mci.web.model.Facility();
+        facilityEntity.setId(facility.getId());
+        facilityEntity.setName(facility.getName());
+        facilityEntity.setType(facility.getType());
+        facilityEntity.setCatchments(facility.getCatchments());
+        facilityEntity.setLocation(facility.getGeoCode());
+
+        return facilityEntity;
+
     }
 }

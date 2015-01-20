@@ -6,8 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
-import org.sharedhealth.mci.web.mapper.Catchment;
-import org.sharedhealth.mci.web.mapper.Facility;
+import org.sharedhealth.mci.web.mapper.FacilityResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -40,13 +39,13 @@ public class FacilityRegistryWrapperTest {
                         .withHeader("Content-Type", "application/json")
                         .withBody(asString("jsons/facility.json"))));
 
-        Facility facility = fr.getFacility(facilityId).get();
+        FacilityResponse facility = fr.getFacility(facilityId).get();
 
         assertThat(facility, is(notNullValue()));
         assertThat(facility.getId(), is(facilityId));
         assertThat(facility.getCatchments(), is(notNullValue()));
         assertThat(facility.getCatchments().size(), is(1));
-        assertThat(facility.getCatchments().get(0), is(new Catchment("302614")));
+        assertThat(facility.getCatchments().get(0), is("302614"));
     }
 
     @Test
@@ -59,14 +58,14 @@ public class FacilityRegistryWrapperTest {
                         .withHeader("Content-Type", "application/json")
                         .withBody(asString("jsons/facility-multiple-catchments.json"))));
 
-        Facility facility = fr.getFacility(facilityId).get();
+        FacilityResponse facility = fr.getFacility(facilityId).get();
 
         assertThat(facility, is(notNullValue()));
         assertThat(facility.getId(), is(facilityId));
         assertThat(facility.getCatchments(), is(notNullValue()));
         assertThat(facility.getCatchments().size(), is(3));
-        assertThat(facility.getCatchments().get(0), is(new Catchment("302614")));
-        assertThat(facility.getCatchments().get(1), is(new Catchment("302615")));
-        assertThat(facility.getCatchments().get(2), is(new Catchment("302616")));
+        assertThat(facility.getCatchments().get(0), is("302614"));
+        assertThat(facility.getCatchments().get(1), is("302615"));
+        assertThat(facility.getCatchments().get(2), is("302616"));
     }
 }

@@ -6,7 +6,6 @@ import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.sharedhealth.mci.web.exception.InsufficientPrivilegeException;
-import org.sharedhealth.mci.web.infrastructure.fr.FacilityRegistryWrapper;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
 import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
@@ -27,7 +26,7 @@ public class PatientServiceTest {
     @Mock
     private PatientRepository patientRepository;
     @Mock
-    FacilityRegistryWrapper facilityRegistryWrapper;
+    FacilityService facilityService;
     @Mock
     SettingService settingService;
 
@@ -36,7 +35,7 @@ public class PatientServiceTest {
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-        patientService = new PatientService(patientRepository, facilityRegistryWrapper, settingService);
+        patientService = new PatientService(patientRepository, facilityService, settingService);
     }
 
     @Test
@@ -74,12 +73,12 @@ public class PatientServiceTest {
         patient.setHealthId(healthId);
 
         when(settingService.getSettingAsIntegerByKey("PER_PAGE_MAXIMUM_LIMIT")).thenReturn(limit);
-        when(facilityRegistryWrapper.getCatchmentAreasByFacility(facilityId)).thenReturn(asList(catchment));
+        when(facilityService.getCatchmentAreasByFacility(facilityId)).thenReturn(asList(catchment));
         when(patientRepository.findAllByCatchment(catchment, after, limit)).thenReturn(asList(patient));
 
         List<PatientData> patients = patientService.findAllByCatchment(catchment, after, facilityId);
 
-        verify(facilityRegistryWrapper).getCatchmentAreasByFacility(facilityId);
+        verify(facilityService).getCatchmentAreasByFacility(facilityId);
         verify(settingService).getSettingAsIntegerByKey("PER_PAGE_MAXIMUM_LIMIT");
         verify(patientRepository).findAllByCatchment(catchment, after, limit);
 
@@ -91,7 +90,7 @@ public class PatientServiceTest {
     @Test(expected = InsufficientPrivilegeException.class)
     public void shouldThrowExceptionWhenCatchmentInPatientSearchDoesNotBelongToGivenFacility() {
         String facilityId = "123456";
-        when(facilityRegistryWrapper.getCatchmentAreasByFacility(facilityId)).thenReturn(asList(new Catchment("11", "22")));
+        when(facilityService.getCatchmentAreasByFacility(facilityId)).thenReturn(asList(new Catchment("11", "22")));
 
         patientService.findAllByCatchment(new Catchment("10", "20"), new Date(), facilityId);
     }

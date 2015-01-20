@@ -33,7 +33,8 @@ import java.util.concurrent.TimeUnit;
         "org.sharedhealth.mci.validation"})
 public class MCIConfig {
 
-    public static final int FACILITY_CACHE_TTL_IN_MINUTES = 15;
+    public static final int CACHE_TTL_IN_MINUTES = 15;
+    public static final int MASTER_DATA_CACHE_TTL_IN_DAYS = 1;
 
     @Autowired
     private MCIProperties mciProperties;
@@ -56,19 +57,18 @@ public class MCIConfig {
         SimpleCacheManager cacheManager = new SimpleCacheManager();
 
         cacheManager.setCaches(Arrays.asList(
-                createConcurrentMapCache("facilities", FACILITY_CACHE_TTL_IN_MINUTES, 100),
-                new ConcurrentMapCache("masterData"),
-                new ConcurrentMapCache("mciSettings")
+                createConcurrentMapCache("mciSettings", CACHE_TTL_IN_MINUTES, TimeUnit.MINUTES, 10),
+                createConcurrentMapCache("masterData", MASTER_DATA_CACHE_TTL_IN_DAYS, TimeUnit.DAYS, 500)
         ));
 
         return cacheManager;
     }
 
-    private ConcurrentMapCache createConcurrentMapCache(String name, int facilityCacheTtlInMinutes, int size) {
+    private ConcurrentMapCache createConcurrentMapCache(String name, int facilityCacheTtlInMinutes, TimeUnit timeUnit, int size) {
         return new ConcurrentMapCache(name,
                 CacheBuilder
                         .newBuilder()
-                        .expireAfterWrite(facilityCacheTtlInMinutes, TimeUnit.MINUTES)
+                        .expireAfterWrite(facilityCacheTtlInMinutes, timeUnit)
                         .maximumSize(size).build().asMap(),
                 true
         );

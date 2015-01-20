@@ -6,6 +6,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class MCIProperties {
 
+    public static final int ONE_DAY = 86400;
+
     @Value("${CASSANDRA_KEYSPACE}")
     private String cassandraKeySpace;
     @Value("${CASSANDRA_HOST}")
