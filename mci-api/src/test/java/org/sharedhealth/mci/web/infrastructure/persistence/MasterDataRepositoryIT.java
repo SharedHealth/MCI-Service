@@ -17,6 +17,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -41,14 +42,14 @@ public class MasterDataRepositoryIT {
         masterData = new MasterData(type, key, value);
     }
 
-    @Test(expected = ExecutionException.class)
-    public void shouldThrowException_IfDataDoesNotExistForGivenKeyForValidType() throws ExecutionException, InterruptedException {
-        masterDataRepository.findDataListenableFutureByKey(type, "random string").get();
+    @Test
+    public void shouldReturnNull_IfDataDoesNotExistForGivenKeyForValidType() throws ExecutionException, InterruptedException {
+        assertNull(masterDataRepository.findDataByKey(type, "random string"));
     }
 
     @Test
     public void shouldFindDataWithMatchingKeyType() throws ExecutionException, InterruptedException {
-        final MasterData m = masterDataRepository.findDataListenableFutureByKey(type, key).get();
+        final MasterData m = masterDataRepository.findDataByKey(type, key);
 
         assertNotNull(m);
         assertEquals(masterData, m);
