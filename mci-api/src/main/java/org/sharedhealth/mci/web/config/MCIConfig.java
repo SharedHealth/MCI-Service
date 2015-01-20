@@ -1,5 +1,6 @@
 package org.sharedhealth.mci.web.config;
 
+import com.google.common.cache.CacheBuilder;
 import org.sharedhealth.mci.web.security.WebSecurityConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
@@ -15,6 +16,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.AsyncRestTemplate;
 
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 @Configuration
 @EnableCaching
@@ -30,6 +32,8 @@ import java.util.Arrays;
         "org.sharedhealth.mci.web.handler",
         "org.sharedhealth.mci.validation"})
 public class MCIConfig {
+
+    public static final int FACILITY_CACHE_TTL_IN_MINUTES = 15;
 
     @Autowired
     private MCIProperties mciProperties;
@@ -50,12 +54,23 @@ public class MCIConfig {
     @Bean
     public CacheManager cacheManager() {
         SimpleCacheManager cacheManager = new SimpleCacheManager();
+
         cacheManager.setCaches(Arrays.asList(
-                new ConcurrentMapCache("facilities"),
-                new ConcurrentMapCache("mciSettingsHash"),
+                createConcurrentMapCache("facilities", FACILITY_CACHE_TTL_IN_MINUTES, 100),
                 new ConcurrentMapCache("masterData"),
                 new ConcurrentMapCache("mciSettings")
         ));
+
         return cacheManager;
+    }
+
+    private ConcurrentMapCache createConcurrentMapCache(String name, int facilityCacheTtlInMinutes, int size) {
+        return new ConcurrentMapCache(name,
+                CacheBuilder
+                        .newBuilder()
+                        .expireAfterWrite(facilityCacheTtlInMinutes, TimeUnit.MINUTES)
+                        .maximumSize(size).build().asMap(),
+                true
+        );
     }
 }
