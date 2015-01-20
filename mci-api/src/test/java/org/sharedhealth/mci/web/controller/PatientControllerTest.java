@@ -492,9 +492,16 @@ public class PatientControllerTest {
 
         TreeSet<PendingApproval> pendingApprovals = new TreeSet<>();
         pendingApprovals.add(pendingApproval);
-        when(patientService.findPendingApprovalDetails(healthId)).thenReturn(pendingApprovals);
 
-        MvcResult mvcResult = mockMvc.perform(get(PENDING_APPROVALS_API + "/" + healthId))
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(DIVISION_ID, "10");
+        headers.add(DISTRICT_ID, "20");
+        headers.add(UPAZILA_ID, "30");
+        Catchment catchment = new PatientController(patientService).buildCatchment(headers);
+
+        when(patientService.findPendingApprovalDetails(healthId, catchment)).thenReturn(pendingApprovals);
+
+        MvcResult mvcResult = mockMvc.perform(get(PENDING_APPROVALS_API + "/" + healthId).headers(headers))
                 .andExpect(request().asyncStarted())
                 .andReturn();
 
@@ -506,7 +513,7 @@ public class PatientControllerTest {
                 .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".value", is("some value")))
                 .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".created_at", is(toIsoFormat(unixTimestamp(timeuuid)))));
 
-        verify(patientService).findPendingApprovalDetails(healthId);
+        verify(patientService).findPendingApprovalDetails(healthId, catchment);
     }
 
     @Test

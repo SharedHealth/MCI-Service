@@ -148,11 +148,12 @@ public class PatientService {
         return pendingApproval;
     }
 
-    public TreeSet<PendingApproval> findPendingApprovalDetails(String healthId) {
+    public TreeSet<PendingApproval> findPendingApprovalDetails(String healthId, Catchment catchment) {
         PatientData patient = this.findByHealthId(healthId);
         if (patient == null) {
             return null;
         }
+        verifyCatchment(patient, catchment);
         TreeSet<PendingApproval> pendingApprovals = patient.getPendingApprovals();
         if (isNotEmpty(pendingApprovals)) {
             for (PendingApproval pendingApproval : pendingApprovals) {

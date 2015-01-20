@@ -149,6 +149,22 @@ public class PatientServiceTest {
         return patient;
     }
 
+    @Test(expected = InsufficientPrivilegeException.class)
+    public void shouldNotFindPendingApprovalDetailsThatDoesNotBelongToGivenCatchment() {
+        String healthId = "healthId-100";
+        PatientData patient = new PatientData();
+        patient.setGivenName("John");
+        patient.setSurName("Doe");
+        Address address = new Address();
+        address.setDivisionId("10");
+        address.setDistrictId("20");
+        patient.setAddress(address);
+
+        when(patientRepository.findByHealthId(healthId)).thenReturn(patient);
+        Catchment catchment = new Catchment("11", "22", "33");
+        patientService.findPendingApprovalDetails(healthId, catchment);
+    }
+
     @Test
     public void shouldFindPendingApprovalsByHealthId() throws Exception {
         String healthId = "healthId-100";
@@ -175,7 +191,8 @@ public class PatientServiceTest {
         patient.setPendingApprovals(pendingApprovals);
 
         when(patientRepository.findByHealthId(healthId)).thenReturn(patient);
-        TreeSet<PendingApproval> actualResponse = patientService.findPendingApprovalDetails(healthId);
+        Catchment catchment = new Catchment("10", "20");
+        TreeSet<PendingApproval> actualResponse = patientService.findPendingApprovalDetails(healthId, catchment);
         verify(patientRepository).findByHealthId(healthId);
 
         assertEquals(6, actualResponse.size());
@@ -313,7 +330,7 @@ public class PatientServiceTest {
     }
 
     @Test(expected = InsufficientPrivilegeException.class)
-    public void shouldNotAcceptPendingApprovalFromDifferentCatchment() {
+    public void shouldNotProcessPendingApprovalsThatDoesNotBelongToGivenCatchment() {
         PatientData patient = new PatientData();
         patient.setHealthId("hid-100");
         Address address = new Address("10", "20", "30");

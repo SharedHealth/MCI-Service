@@ -226,11 +226,15 @@ public class PatientController {
     }
 
     @RequestMapping(value = "/pendingapprovals/{healthId}", method = GET, produces = APPLICATION_JSON_VALUE)
-    public DeferredResult<ResponseEntity<MCIMultiResponse>> findPendingApprovalDetails(@PathVariable String healthId) {
+    public DeferredResult<ResponseEntity<MCIMultiResponse>> findPendingApprovalDetails(
+            @RequestHeader HttpHeaders headers,
+            @PathVariable String healthId) {
+
         logger.debug("Find list of pending approval details. Health ID : " + healthId);
         final DeferredResult<ResponseEntity<MCIMultiResponse>> deferredResult = new DeferredResult<>();
 
-        TreeSet<PendingApproval> response = patientService.findPendingApprovalDetails(healthId);
+        Catchment catchment = buildCatchment(headers);
+        TreeSet<PendingApproval> response = patientService.findPendingApprovalDetails(healthId, catchment);
 
         MCIMultiResponse mciMultiResponse;
         if (response != null) {
