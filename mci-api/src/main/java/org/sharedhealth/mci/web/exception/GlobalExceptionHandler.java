@@ -36,6 +36,8 @@ public class GlobalExceptionHandler {
     private static final String MESSAGE_PATIENT_ALREADY_EXIST_WITH_HEALTH_ID = "Patient already exist with health id: %s";
     private static final String MESSAGE_PERMISSION_ERROR = "permission.error";
     private static final String MESSAGE_HID_FIELD_IS_NOT_PERMITTED = "hid field is not permitted";
+    private static final String MESSAGE_INSUFFICIENT_PRIVILEGE = "insufficient.privilege";
+    private static final String MESSAGE_INVALID_PAYLOAD = "invalid.payload";
     private static final String MESSAGE_INTERNAL_SERVER_ERROR = "internal.server.error";
 
     @ResponseStatus(value = BAD_REQUEST)
@@ -92,6 +94,22 @@ public class GlobalExceptionHandler {
         logger.error("Handling FacilityNotFoundException. ", e);
 
         return new ErrorHandler(NOT_FOUND.value(), MESSAGE_FACILITY_NOT_FOUND);
+    }
+
+    @ResponseStatus(value = BAD_REQUEST)
+    @ExceptionHandler(InsufficientPrivilegeException.class)
+    @ResponseBody
+    public ErrorHandler handleInsufficientPrivilegeException(InsufficientPrivilegeException e) {
+        logger.error("Handling InsufficientPrivilegeException. ", e);
+        return new ErrorHandler(BAD_REQUEST.value(), MESSAGE_INSUFFICIENT_PRIVILEGE);
+    }
+
+    @ResponseStatus(value = BAD_REQUEST)
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseBody
+    public ErrorHandler handleIllegalArgumentException(IllegalArgumentException e) {
+        logger.error("Handling IllegalArgumentException. ", e);
+        return new ErrorHandler(BAD_REQUEST.value(), MESSAGE_INVALID_PAYLOAD);
     }
 
     @ResponseStatus(value = CONFLICT)
