@@ -30,6 +30,7 @@ import java.text.ParseException;
 import java.util.Collections;
 import java.util.List;
 
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
@@ -206,10 +207,14 @@ public class PatientControllerIT extends BaseControllerTest {
     public void shouldReturnBadRequestForInvalidDataProperty() throws Exception {
         String json = mapper.writeValueAsString(new InvalidPatient());
 
-        MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+        mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
-                .andReturn();
-        assertEquals("{\"error_code\":2000,\"http_status\":400,\"message\":\"invalid.request\",\"errors\":[{\"code\":2002,\"field\":\"invalid_property\",\"message\":\"Unrecognized field: 'invalid_property'\"}]}", result.getResponse().getContentAsString());
+                .andExpect(jsonPath("$.http_status", is(400)))
+                .andExpect(jsonPath("$.error_code", is(2000)))
+                .andExpect(jsonPath("$.message", is("invalid.request")))
+                .andExpect(jsonPath("$.errors[0].code", is(2002)))
+                .andExpect(jsonPath("$.errors[0].field", is("invalid_property")))
+                .andExpect(jsonPath("$.errors[0].message", is("Unrecognized field: 'invalid_property'")));
     }
 
     @Test
