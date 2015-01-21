@@ -16,8 +16,7 @@ import org.springframework.validation.FieldError;
 
 import java.util.*;
 
-import static org.apache.commons.collections4.CollectionUtils.isEmpty;
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static org.apache.commons.collections4.CollectionUtils.*;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_INVALID;
 import static org.sharedhealth.mci.web.utils.JsonConstants.HID;
@@ -53,17 +52,35 @@ public class PatientService {
         return patientRepository.create(patient);
     }
 
-    private PatientData findPatientByMultipleIds(PatientData patient) {
+    PatientData findPatientByMultipleIds(PatientData patient) {
         if (!this.containsMultipleIds(patient)) {
             return null;
         }
-        SearchQuery searchQuery = new SearchQuery();
-        searchQuery.setNid(patient.getNationalId());
-        searchQuery.setBin_brn(patient.getBirthRegistrationNumber());
-        searchQuery.setUid(patient.getUid());
-        List<PatientData> patients = this.findAllByQuery(searchQuery);
-        if (isNotEmpty(patients)) {
-            return patients.get(0);
+
+        SearchQuery query = new SearchQuery();
+        query.setNid(patient.getNationalId());
+        List<PatientData> patientsByNid = findAllByQuery(query);
+
+        query = new SearchQuery();
+        query.setBin_brn(patient.getBirthRegistrationNumber());
+        List<PatientData> patientsByBrn = findAllByQuery(query);
+        if (isEmpty(patientsByNid) && isEmpty(patientsByBrn)) {
+            return null;
+        }
+
+        List<PatientData> matchingPatients = (List<PatientData>) intersection(patientsByNid, patientsByBrn);
+        if (isNotEmpty(matchingPatients)) {
+            return matchingPatients.get(0);
+        }
+        matchingPatients = (List<PatientData>) union(patientsByNid, patientsByBrn);
+
+        query = new SearchQuery();
+        query.setUid(patient.getUid());
+        List<PatientData> patientsByUid = findAllByQuery(query);
+
+        matchingPatients = (List<PatientData>) intersection(matchingPatients, patientsByUid);
+        if (isNotEmpty(matchingPatients)) {
+            return matchingPatients.get(0);
         }
         return null;
     }

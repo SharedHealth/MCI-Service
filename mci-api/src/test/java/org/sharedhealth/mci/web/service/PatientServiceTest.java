@@ -40,25 +40,28 @@ public class PatientServiceTest {
 
     @Test
     public void shouldUpdateInsteadofCreatingWhenMatchingPatientExists() throws Exception {
-        PatientData patientData = new PatientData();
-        patientData.setNationalId("nid-100");
-        patientData.setBirthRegistrationNumber("brn-100");
+        PatientData existingPatient = new PatientData();
+        existingPatient.setHealthId("hid-100");
+        existingPatient.setNationalId("nid-100");
+        existingPatient.setBirthRegistrationNumber("brn-100");
 
-        SearchQuery searchQuery = new SearchQuery();
-        searchQuery.setNid("nid-100");
-        searchQuery.setBin_brn("brn-100");
+        SearchQuery searchByNidQuery = new SearchQuery();
+        searchByNidQuery.setNid("nid-100");
+        when(patientRepository.findAllByQuery(searchByNidQuery)).thenReturn(asList(existingPatient));
 
-        PatientData patientDataFromDb = new PatientData();
-        patientDataFromDb.setHealthId("hid-100");
-        patientDataFromDb.setNationalId("nid-100");
-        patientDataFromDb.setBirthRegistrationNumber("brn-100");
+        SearchQuery searchByBrnQuery = new SearchQuery();
+        searchByBrnQuery.setBin_brn("brn-100");
+        when(patientRepository.findAllByQuery(searchByBrnQuery)).thenReturn(asList(existingPatient));
 
-        when(patientRepository.findAllByQuery(searchQuery)).thenReturn(asList(patientDataFromDb));
+        PatientData requestData = new PatientData();
+        requestData.setNationalId("nid-100");
+        requestData.setBirthRegistrationNumber("brn-100");
 
-        patientService.create(patientData);
+        patientService.create(requestData);
         InOrder inOrder = inOrder(patientRepository);
-        inOrder.verify(patientRepository).findAllByQuery(searchQuery);
-        inOrder.verify(patientRepository).update(patientData, "hid-100");
+        inOrder.verify(patientRepository).findAllByQuery(searchByNidQuery);
+        inOrder.verify(patientRepository).findAllByQuery(searchByBrnQuery);
+        inOrder.verify(patientRepository).update(requestData, "hid-100");
         inOrder.verify(patientRepository, never()).create(any(PatientData.class));
     }
 
@@ -471,5 +474,160 @@ public class PatientServiceTest {
         patient.setBirthRegistrationNumber("200");
         patient.setUid("300");
         assertTrue(patientService.containsMultipleIds(patient));
+    }
+
+    @Test
+    public void shouldFindPatientMatchingMultipleIdsWhenPatientExistWithNidAndBrn() {
+        String healthId = "h100";
+        String nid = "n100";
+        String brn = "b100";
+        String uid = "u100";
+        PatientData requestData = new PatientData();
+        requestData.setHealthId(healthId);
+        requestData.setNationalId(nid);
+        requestData.setBirthRegistrationNumber(brn);
+        requestData.setUid(uid);
+
+        SearchQuery query = new SearchQuery();
+        query.setNid(nid);
+        when(patientRepository.findAllByQuery(query)).thenReturn(asList(buildPatient("h101"), buildPatient("h102"), buildPatient("h103")));
+
+        query = new SearchQuery();
+        query.setBin_brn(brn);
+        when(patientRepository.findAllByQuery(query)).thenReturn(asList(buildPatient("h101"), buildPatient("h104"), buildPatient("h105")));
+
+        query = new SearchQuery();
+        query.setUid(uid);
+        when(patientRepository.findAllByQuery(query)).thenReturn(asList(buildPatient("h106"), buildPatient("h107"), buildPatient("h108")));
+
+        PatientData patient = patientService.findPatientByMultipleIds(requestData);
+        assertNotNull(patient);
+        assertEquals("h101", patient.getHealthId());
+    }
+
+    @Test
+    public void shouldFindPatientMatchingMultipleIdsWhenPatientExistWithBrnAndUid() {
+        String healthId = "h100";
+        String nid = "n100";
+        String brn = "b100";
+        String uid = "u100";
+        PatientData requestData = new PatientData();
+        requestData.setHealthId(healthId);
+        requestData.setNationalId(nid);
+        requestData.setBirthRegistrationNumber(brn);
+        requestData.setUid(uid);
+
+        SearchQuery query = new SearchQuery();
+        query.setNid(nid);
+        when(patientRepository.findAllByQuery(query)).thenReturn(asList(buildPatient("h101"), buildPatient("h102"), buildPatient("h103")));
+
+        query = new SearchQuery();
+        query.setBin_brn(brn);
+        when(patientRepository.findAllByQuery(query)).thenReturn(asList(buildPatient("h104"), buildPatient("h105"), buildPatient("h106")));
+
+        query = new SearchQuery();
+        query.setUid(uid);
+        when(patientRepository.findAllByQuery(query)).thenReturn(asList(buildPatient("h106"), buildPatient("h107"), buildPatient("h108")));
+
+        PatientData patient = patientService.findPatientByMultipleIds(requestData);
+        assertNotNull(patient);
+        assertEquals("h106", patient.getHealthId());
+    }
+
+    @Test
+    public void shouldFindPatientMatchingMultipleIdsWhenPatientExistWithNidAndUid() {
+        String healthId = "h100";
+        String nid = "n100";
+        String brn = "b100";
+        String uid = "u100";
+        PatientData requestData = new PatientData();
+        requestData.setHealthId(healthId);
+        requestData.setNationalId(nid);
+        requestData.setBirthRegistrationNumber(brn);
+        requestData.setUid(uid);
+
+        SearchQuery query = new SearchQuery();
+        query.setNid(nid);
+        when(patientRepository.findAllByQuery(query)).thenReturn(asList(buildPatient("h101"), buildPatient("h102"), buildPatient("h103")));
+
+        query = new SearchQuery();
+        query.setBin_brn(brn);
+        when(patientRepository.findAllByQuery(query)).thenReturn(asList(buildPatient("h104"), buildPatient("h105"), buildPatient("h106")));
+
+        query = new SearchQuery();
+        query.setUid(uid);
+        when(patientRepository.findAllByQuery(query)).thenReturn(asList(buildPatient("h101"), buildPatient("h107"), buildPatient("h108")));
+
+        PatientData patient = patientService.findPatientByMultipleIds(requestData);
+        assertNotNull(patient);
+        assertEquals("h101", patient.getHealthId());
+    }
+
+    @Test
+    public void shouldNotFindPatientMatchingMultipleIdsWhenMultipleIdsDoNotExist() {
+        String healthId = "h100";
+        String nid = "n100";
+        PatientData requestData = new PatientData();
+        requestData.setHealthId(healthId);
+        requestData.setNationalId(nid);
+
+        PatientData patient = patientService.findPatientByMultipleIds(requestData);
+        assertNull(patient);
+    }
+
+    @Test
+    public void shouldNotFindPatientMatchingMultipleIdsWhenNoPatientExistWithAnyNidAndBrn() {
+        String healthId = "h100";
+        String nid = "n100";
+        String brn = "b100";
+        String uid = "u100";
+        PatientData requestData = new PatientData();
+        requestData.setHealthId(healthId);
+        requestData.setNationalId(nid);
+        requestData.setBirthRegistrationNumber(brn);
+        requestData.setUid(uid);
+
+        SearchQuery query = new SearchQuery();
+        query.setNid(nid);
+        when(patientRepository.findAllByQuery(query)).thenReturn(new ArrayList<PatientData>());
+
+        query = new SearchQuery();
+        query.setBin_brn(brn);
+        when(patientRepository.findAllByQuery(query)).thenReturn(null);
+
+        query = new SearchQuery();
+        query.setUid(uid);
+        when(patientRepository.findAllByQuery(query)).thenReturn(asList(buildPatient("h107"), buildPatient("h108"), buildPatient("h109")));
+
+        PatientData patient = patientService.findPatientByMultipleIds(requestData);
+        assertNull(patient);
+    }
+
+    @Test
+    public void shouldNotFindPatientMatchingMultipleIdsWhenNoPatientExistWithAnyId() {
+        String healthId = "h100";
+        String nid = "n100";
+        String brn = "b100";
+        String uid = "u100";
+        PatientData requestData = new PatientData();
+        requestData.setHealthId(healthId);
+        requestData.setNationalId(nid);
+        requestData.setBirthRegistrationNumber(brn);
+        requestData.setUid(uid);
+
+        SearchQuery query = new SearchQuery();
+        query.setNid(nid);
+        when(patientRepository.findAllByQuery(query)).thenReturn(asList(buildPatient("h101"), buildPatient("h102"), buildPatient("h103")));
+
+        query = new SearchQuery();
+        query.setBin_brn(brn);
+        when(patientRepository.findAllByQuery(query)).thenReturn(asList(buildPatient("h104"), buildPatient("h105"), buildPatient("h106")));
+
+        query = new SearchQuery();
+        query.setUid(uid);
+        when(patientRepository.findAllByQuery(query)).thenReturn(asList(buildPatient("h107"), buildPatient("h108"), buildPatient("h109")));
+
+        PatientData patient = patientService.findPatientByMultipleIds(requestData);
+        assertNull(patient);
     }
 }
