@@ -5,14 +5,25 @@ apply plugin: 'rpm'
 apply plugin: 'cobertura'
 apply plugin: 'idea'
 
+idea{
+    project{
+        jdkName = '1.7'
+    }
+}
+
 dependencies {
     compile('org.springframework.boot:spring-boot-starter-web:1.1.8.RELEASE') {
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+        exclude group: 'ch.qos.logback', module: "logback-classic"
     }
     compile('org.springframework.boot:spring-boot-starter-security:1.1.8.RELEASE') {
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
     }
-    compile libraries.snappy, libraries.spring_boot_logging, libraries.spring_data_cassandra, libraries.hibernate_validator, libraries.apache_collections, libraries.apache_lang, libraries.apache_bean_utils
+    compile libraries.snappy, libraries.spring_boot_logging,
+            libraries.spring_data_cassandra, libraries.hibernate_validator,
+            libraries.apache_collections, libraries.apache_lang,
+            libraries.apache_bean_utils,
+            libraries.spring_boot_security, libraries.spring_security
 
     compile('io.netty:netty:3.9.0.Final') {
         force = 'true'
@@ -20,6 +31,7 @@ dependencies {
     compile('com.toddfast.mutagen:mutagen-cassandra:0.4.0') {
         exclude group: 'org.slf4j', module: 'slf4j-log4j12'
     }
+
     testCompile('org.cassandraunit:cassandra-unit-spring:2.0.2.2') {
         exclude group: 'com.datastax.cassandra', module: 'cassandra-driver-core'
     }

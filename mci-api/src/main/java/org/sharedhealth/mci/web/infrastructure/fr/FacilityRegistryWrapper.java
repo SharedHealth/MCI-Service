@@ -26,8 +26,8 @@ public class FacilityRegistryWrapper {
 
 
     @Autowired
-    public FacilityRegistryWrapper(@Qualifier("MCIRestTemplate") AsyncRestTemplate shrRestTemplate, MCIProperties mciProperties) {
-        this.mciRestTemplate = shrRestTemplate;
+    public FacilityRegistryWrapper(@Qualifier("MCIRestTemplate") AsyncRestTemplate mciRestTemplate, MCIProperties mciProperties) {
+        this.mciRestTemplate = mciRestTemplate;
         this.mciProperties = mciProperties;
     }
 

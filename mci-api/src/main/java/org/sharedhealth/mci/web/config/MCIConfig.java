@@ -1,7 +1,6 @@
 package org.sharedhealth.mci.web.config;
 
 import com.google.common.cache.CacheBuilder;
-import org.sharedhealth.mci.web.security.WebSecurityConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
@@ -20,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 @Configuration
 @EnableCaching
-@Import({WebSecurityConfig.class, MCICassandraConfig.class})
+@Import({MCISecurityConfig.class, MCICassandraConfig.class})
 @ComponentScan(basePackages = {"org.sharedhealth.mci.web.config",
         "org.sharedhealth.mci.web.controller",
         "org.sharedhealth.mci.web.exception",
@@ -28,6 +27,7 @@ import java.util.concurrent.TimeUnit;
         "org.sharedhealth.mci.web.mapper",
         "org.sharedhealth.mci.web.model",
         "org.sharedhealth.mci.web.service",
+        "org.sharedhealth.mci.web.security",
         "org.sharedhealth.mci.utils",
         "org.sharedhealth.mci.web.handler",
         "org.sharedhealth.mci.validation"})
