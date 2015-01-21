@@ -23,7 +23,7 @@ dependencies {
             libraries.spring_data_cassandra, libraries.hibernate_validator,
             libraries.apache_collections, libraries.apache_lang,
             libraries.apache_bean_utils,
-            libraries.spring_boot_security, libraries.spring_security
+            libraries.spring_security
 
     compile('io.netty:netty:3.9.0.Final') {
         force = 'true'

@@ -1,16 +1,16 @@
-package org.sharedhealth.mci.web.security;
+package org.sharedhealth.mci.web.infrastructure.security;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.sharedhealth.mci.web.config.MCIProperties;
+import org.sharedhealth.mci.web.utils.concurrent.PreResolvedListenableFuture;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.client.AsyncRestTemplate;
 
 import java.util.Arrays;
@@ -56,13 +56,11 @@ public class IdentityServiceClientTest {
     }
 
     private ListenableFuture<ResponseEntity<UserInfo>> createResponse(String token, HttpStatus statusCode) {
-        SettableListenableFuture<ResponseEntity<UserInfo>> response = new
-                SettableListenableFuture<>();
-        response.set(new ResponseEntity<>(userInfo(token), statusCode));
-        return response;
+        return new
+                PreResolvedListenableFuture<>(new ResponseEntity<>(userInfo(token), statusCode));
     }
 
     private UserInfo userInfo(String token) {
-        return new UserInfo("bar", Arrays.asList("MCI_ADMIN", "SHR_USER"));
+        return new UserInfo("bar", Arrays.asList("MCI_USER", "SHR_USER"));
     }
 }

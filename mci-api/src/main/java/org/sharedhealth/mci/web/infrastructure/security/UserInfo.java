@@ -1,4 +1,4 @@
-package org.sharedhealth.mci.web.security;
+package org.sharedhealth.mci.web.infrastructure.security;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

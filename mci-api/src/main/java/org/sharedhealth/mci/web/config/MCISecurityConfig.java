@@ -1,7 +1,7 @@
 package org.sharedhealth.mci.web.config;
 
-import org.sharedhealth.mci.web.security.TokenAuthenticationFilter;
-import org.sharedhealth.mci.web.security.TokenAuthenticationProvider;
+import org.sharedhealth.mci.web.infrastructure.security.TokenAuthenticationFilter;
+import org.sharedhealth.mci.web.infrastructure.security.TokenAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,7 +23,6 @@ import java.io.IOException;
 
 @Configuration
 @EnableWebSecurity
-@Order(1)
 public class MCISecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     TokenAuthenticationProvider tokenAuthenticationProvider;

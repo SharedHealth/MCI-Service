@@ -1,4 +1,4 @@
-package org.sharedhealth.mci.web.security;
+package org.sharedhealth.mci.web.infrastructure.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;

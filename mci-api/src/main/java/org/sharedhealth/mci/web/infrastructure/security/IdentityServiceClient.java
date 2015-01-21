@@ -1,4 +1,4 @@
-package org.sharedhealth.mci.web.security;
+package org.sharedhealth.mci.web.infrastructure.security;
 
 import org.sharedhealth.mci.web.config.MCIProperties;
 import org.springframework.beans.factory.annotation.Autowired;
