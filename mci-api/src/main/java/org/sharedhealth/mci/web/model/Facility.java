@@ -31,6 +31,16 @@ public class Facility {
     @Column("location")
     private String location;
 
+    public Facility(){}
+
+    public Facility(String id, String name, String type, String catchments, String location) {
+        this.id = id;
+        this.name = name;
+        this.type = type;
+        this.catchments = catchments;
+        this.location = location;
+    }
+
     public String getType() {
         return type;
     }
@@ -39,8 +49,6 @@ public class Facility {
         this.type = type;
     }
 
-    public Facility() {
-    }
 
     public void setId(String id) {
         this.id = id;

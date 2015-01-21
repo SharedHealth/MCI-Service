@@ -2,6 +2,7 @@ package org.sharedhealth.mci.web.infrastructure.fr;
 
 import org.sharedhealth.mci.web.config.MCIProperties;
 import org.sharedhealth.mci.web.mapper.FacilityResponse;
+import org.sharedhealth.mci.web.model.Facility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
@@ -54,7 +55,7 @@ public class FacilityRegistryWrapper {
         };
     }
 
-    public org.sharedhealth.mci.web.model.Facility find(String facilityId) {
+    public Facility find(String facilityId) {
         FacilityResponse facility;
         ListenableFuture<FacilityResponse> facilityResponse = getFacility(facilityId);
 
@@ -67,13 +68,13 @@ public class FacilityRegistryWrapper {
         return this.map(facility);
     }
 
-    private org.sharedhealth.mci.web.model.Facility map(FacilityResponse facility) {
+    private Facility map(FacilityResponse facility) {
 
         if(facility == null) {
             return null;
         }
 
-        org.sharedhealth.mci.web.model.Facility facilityEntity = new org.sharedhealth.mci.web.model.Facility();
+        Facility facilityEntity = new Facility();
         facilityEntity.setId(facility.getId());
         facilityEntity.setName(facility.getName());
         facilityEntity.setType(facility.getType());
