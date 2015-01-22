@@ -11,6 +11,8 @@ public class UserInfo {
     private String name;
     @JsonProperty("roles")
     private HashSet<String> roles;
+    @JsonProperty("locationCode")
+    private String locationCode;
 
     public UserInfo() {
     }
@@ -32,4 +34,12 @@ public class UserInfo {
         return new ArrayList<>(roles);
     }
 
+
+    public String getLocationCode() {
+        return locationCode;
+    }
+
+    public void setLocationCode(String locationCode) {
+        this.locationCode = locationCode;
+    }
 }
