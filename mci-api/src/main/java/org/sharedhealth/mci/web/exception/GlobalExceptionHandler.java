@@ -8,6 +8,7 @@ import org.sharedhealth.mci.web.handler.ErrorHandler;
 import org.sharedhealth.mci.web.utils.JsonConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -158,6 +159,13 @@ public class GlobalExceptionHandler {
     public ErrorInfo handleException(Exception e) {
         logger.error("Handling generic exception. ", e);
         return new ErrorInfo(INTERNAL_SERVER_ERROR.value(), MESSAGE_INTERNAL_SERVER_ERROR);
+    }
+
+    @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
+    @ResponseBody
+    @ExceptionHandler(Unauthorized.class)
+    public ErrorInfo unauthorized(Unauthorized unauthorized) {
+        return new ErrorInfo(HttpStatus.UNAUTHORIZED.value(), unauthorized.getErrorMessage());
     }
 
     @JsonRootName(value = "error")
