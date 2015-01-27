@@ -29,7 +29,8 @@ import java.util.concurrent.TimeUnit;
         "org.sharedhealth.mci.web.service",
         "org.sharedhealth.mci.utils",
         "org.sharedhealth.mci.web.handler",
-        "org.sharedhealth.mci.validation"})
+        "org.sharedhealth.mci.validation",
+        "org.sharedhealth.mci.web.tasks"})
 public class MCIConfig {
 
     public static final int CACHE_TTL_IN_MINUTES = 15;

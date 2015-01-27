@@ -1,0 +1,82 @@
+[
+    {
+        "code": "100409991301",
+        "id": "100409991301",
+        "name": "Ward No-01",
+        "type": "ward",
+        "active": 1,
+        "updatedAt": "-0001-11-30 00:00:00",
+        "hierarchy": [
+            {
+                "code": "10",
+                "name": "Barisal",
+                "type": "division"
+            },
+            {
+                "code": "04",
+                "name": "Barguna",
+                "type": "district"
+            },
+            {
+                "code": "09",
+                "name": "Amtali",
+                "type": "upazila"
+            },
+            {
+                "code": "99",
+                "name": "Unions Of Amtali Upazila",
+                "type": "paurasava"
+            },
+            {
+                "code": "13",
+                "name": "Amtali",
+                "type": "union"
+            },
+            {
+                "code": "01",
+                "name": "Ward No-01",
+                "type": "ward"
+            }
+        ]
+    },
+    {
+        "code": "100409991302",
+        "id": "100409991302",
+        "name": "Ward No-02",
+        "type": "ward",
+        "active": 1,
+        "updatedAt": "-0001-11-30 00:00:00",
+        "hierarchy": [
+            {
+                "code": "10",
+                "name": "Barisal",
+                "type": "division"
+            },
+            {
+                "code": "04",
+                "name": "Barguna",
+                "type": "district"
+            },
+            {
+                "code": "09",
+                "name": "Amtali",
+                "type": "upazila"
+            },
+            {
+                "code": "99",
+                "name": "Unions Of Amtali Upazila",
+                "type": "paurasava"
+            },
+            {
+                "code": "13",
+                "name": "Amtali",
+                "type": "union"
+            },
+            {
+                "code": "02",
+                "name": "Ward No-02",
+                "type": "ward"
+            }
+        ]
+    }
+]

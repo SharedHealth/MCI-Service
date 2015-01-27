@@ -1,6 +1,7 @@
 package org.sharedhealth.mci.web.mapper;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class LocationData {
@@ -34,6 +35,27 @@ public class LocationData {
 
     @JsonIgnore
     private String geoCode;
+
+    @JsonIgnore
+    @JsonProperty("id")
+    private String id;
+
+
+    @JsonIgnore
+    @JsonProperty("type")
+    private String type;
+
+    @JsonIgnore
+    @JsonProperty("active")
+    private String active;
+
+    @JsonIgnore
+    @JsonProperty("updatedAt")
+    private String updatedAt;
+
+    @JsonIgnore
+    @JsonProperty("hierarchy")
+    private LocationDataHierarchy hierarchy;
 
     @Override
     public boolean equals(Object o) {
@@ -156,5 +178,78 @@ public class LocationData {
         this.setCode(code);
         this.setParent(parent);
 
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getActive() {
+        return active;
+    }
+
+    public void setActive(String active) {
+        this.active = active;
+    }
+
+    public String getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(String updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public LocationDataHierarchy getHierarchy() {
+        return hierarchy;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private class LocationDataHierarchy {
+
+        @JsonProperty("code")
+        private String code;
+
+        @JsonProperty("name")
+        private String name;
+
+        @JsonProperty("type")
+        private String type;
+
+        public String getCode() {
+            return code;
+        }
+
+        public void setCode(String code) {
+            this.code = code;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
     }
 }

@@ -1,0 +1,107 @@
+[
+    {
+        "code": "30",
+        "id": "30",
+        "name": "Dhaka",
+        "type": "division",
+        "active": 1,
+        "updatedAt": "2014-11-19 17:45:38",
+        "hierarchy": [
+            {
+                "code": "30",
+                "name": "Dhaka",
+                "type": "division"
+            }
+        ]
+    },
+    {
+        "code": "20",
+        "id": "20",
+        "name": "Chittagong",
+        "type": "division",
+        "active": 1,
+        "updatedAt": "2014-11-19 17:45:38",
+        "hierarchy": [
+            {
+                "code": "20",
+                "name": "Chittagong",
+                "type": "division"
+            }
+        ]
+    },
+    {
+        "code": "50",
+        "id": "50",
+        "name": "Rajshahi",
+        "type": "division",
+        "active": 1,
+        "updatedAt": "2014-11-19 17:45:39",
+        "hierarchy": [
+            {
+                "code": "50",
+                "name": "Rajshahi",
+                "type": "division"
+            }
+        ]
+    },
+    {
+        "code": "55",
+        "id": "55",
+        "name": "Rangpur",
+        "type": "division",
+        "active": 1,
+        "updatedAt": "2014-12-14 10:53:05",
+        "hierarchy": [
+            {
+                "code": "55",
+                "name": "Rangpur",
+                "type": "division"
+            }
+        ]
+    },
+    {
+        "code": "40",
+        "id": "40",
+        "name": "Khulna",
+        "type": "division",
+        "active": 1,
+        "updatedAt": "2014-11-19 17:45:39",
+        "hierarchy": [
+            {
+                "code": "40",
+                "name": "Khulna",
+                "type": "division"
+            }
+        ]
+    },
+    {
+        "code": "10",
+        "id": "10",
+        "name": "Barisal",
+        "type": "division",
+        "active": 1,
+        "updatedAt": "2014-11-19 17:45:40",
+        "hierarchy": [
+            {
+                "code": "10",
+                "name": "Barisal",
+                "type": "division"
+            }
+        ]
+    },
+    {
+        "code": "60",
+        "id": "60",
+        "name": "Sylhet",
+        "type": "division",
+        "active": 1,
+        "updatedAt": "2014-11-19 17:45:40",
+        "hierarchy": [
+            {
+                "code": "60",
+                "name": "Sylhet",
+                "type": "division"
+            }
+        ]
+    }
+]

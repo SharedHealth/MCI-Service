@@ -1,0 +1,63 @@
+[
+    {
+        "code": "10040920",
+        "id": "10040920",
+        "name": "Amtali Paurasava",
+        "type": "paurasava",
+        "active": 1,
+        "updatedAt": "-0001-11-30 00:00:00",
+        "hierarchy": [
+            {
+                "code": "10",
+                "name": "Barisal",
+                "type": "division"
+            },
+            {
+                "code": "04",
+                "name": "Barguna",
+                "type": "district"
+            },
+            {
+                "code": "09",
+                "name": "Amtali",
+                "type": "upazila"
+            },
+            {
+                "code": "20",
+                "name": "Amtali Paurasava",
+                "type": "paurasava"
+            }
+        ]
+    },
+    {
+        "code": "10042840",
+        "id": "10042840",
+        "name": "Barguna Paurasava",
+        "type": "paurasava",
+        "active": 1,
+        "updatedAt": "-0001-11-30 00:00:00",
+        "hierarchy": [
+            {
+                "code": "10",
+                "name": "Barisal",
+                "type": "division"
+            },
+            {
+                "code": "04",
+                "name": "Barguna",
+                "type": "district"
+            },
+            {
+                "code": "28",
+                "name": "Barguna Sadar",
+                "type": "upazila"
+            },
+            {
+                "code": "40",
+                "name": "Barguna Paurasava",
+                "type": "paurasava"
+            }
+        ]
+    }
+
+]

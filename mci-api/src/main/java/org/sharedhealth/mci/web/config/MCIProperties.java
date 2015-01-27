@@ -62,4 +62,12 @@ public class MCIProperties {
         return identityServerBaseUrl;
     }
 
+    public String getLocaitonRegistryToken() {
+        return LrToken;
+    }
+
+    public String getLocaitonRegistryUrl() {
+        return LrUrl;
+    }
+
 }

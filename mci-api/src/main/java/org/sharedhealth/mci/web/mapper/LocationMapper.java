@@ -11,6 +11,7 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 @Component
 public class LocationMapper {
 
+    public static final String DEFAULT_PARENT_CODE_FOR_DIVISION = "00";
 
     public List<LocationData> map(List<Location> locations) {
 
@@ -33,5 +34,21 @@ public class LocationMapper {
         data.setParent(location.getParent());
 
         return data;
+    }
+
+    public Location mapHRMData(LocationData data) {
+        Location location = new Location();
+        String geoCode = data.getCode();
+        String code = geoCode.substring(geoCode.length() - 2, geoCode.length());
+        String parent = geoCode.substring(0, geoCode.length() - 2);
+        if (parent.isEmpty()) {
+            parent = DEFAULT_PARENT_CODE_FOR_DIVISION;
+        }
+        location.setCode(code);
+        location.setName(data.getName());
+        location.setParent(parent);
+        location.setActive(data.getActive());
+
+        return location;
     }
 }

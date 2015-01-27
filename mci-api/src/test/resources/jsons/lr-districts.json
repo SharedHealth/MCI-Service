@@ -1,0 +1,82 @@
+[
+    {
+        "code": "3026",
+        "id": "3026",
+        "name": "Dhaka",
+        "type": "district",
+        "active": 1,
+        "updatedAt": "-0001-11-30 00:00:00",
+        "hierarchy": [
+            {
+                "code": "30",
+                "name": "Dhaka",
+                "type": "division"
+            },
+            {
+                "code": "26",
+                "name": "Dhaka",
+                "type": "district"
+            }
+        ]
+    },
+    {
+        "code": "3029",
+        "id": "3029",
+        "name": "Faridpur",
+        "type": "district",
+        "active": 1,
+        "updatedAt": "-0001-11-30 00:00:00",
+        "hierarchy": [
+            {
+                "code": "30",
+                "name": "Dhaka",
+                "type": "division"
+            },
+            {
+                "code": "29",
+                "name": "Faridpur",
+                "type": "district"
+            }
+        ]
+    },
+    {
+        "code": "3033",
+        "id": "3033",
+        "name": "Gazipur",
+        "type": "district",
+        "active": 1,
+        "updatedAt": "-0001-11-30 00:00:00",
+        "hierarchy": [
+            {
+                "code": "30",
+                "name": "Dhaka",
+                "type": "division"
+            },
+            {
+                "code": "33",
+                "name": "Gazipur",
+                "type": "district"
+            }
+        ]
+    },
+    {
+        "code": "3035",
+        "id": "3035",
+        "name": "Gopalganj",
+        "type": "district",
+        "active": 1,
+        "updatedAt": "-0001-11-30 00:00:00",
+        "hierarchy": [
+            {
+                "code": "30",
+                "name": "Dhaka",
+                "type": "division"
+            },
+            {
+                "code": "35",
+                "name": "Gopalganj",
+                "type": "district"
+            }
+        ]
+    }
+]
