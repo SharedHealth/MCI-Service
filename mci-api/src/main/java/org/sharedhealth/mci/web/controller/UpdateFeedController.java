@@ -109,7 +109,7 @@ public class UpdateFeedController {
         List<FeedEntry> entries = new ArrayList<>();
         for (PatientUpdateLog patient : patients) {
             FeedEntry entry = new FeedEntry();
-            entry.setId(patient.getEventId().toString());
+            entry.setId(patient.getEventId());
             entry.setPublishedDate(patient.getEventTimeAsString());
             entry.setTitle(ENTRY_TITLE + patient.getHealthId());
             entry.setLink(buildPatientLink(patient.getHealthId(), request));

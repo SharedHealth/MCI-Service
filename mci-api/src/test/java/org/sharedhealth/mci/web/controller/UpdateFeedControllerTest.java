@@ -213,7 +213,7 @@ public class UpdateFeedControllerTest {
     private void assertFeedEntry(FeedEntry entry, PatientUpdateLog patient) {
         assertNotNull(entry);
         String healthId = patient.getHealthId();
-        assertEquals(patient.getEventId().toString(), entry.getId());
+        assertEquals(patient.getEventId(), entry.getId());
         assertEquals(patient.getEventTimeAsString(), entry.getPublishedDate());
         assertEquals("Patient updates: " + healthId, entry.getTitle());
         assertEquals("http://www.mci.com:8081/api/v1/patients/" + healthId, entry.getLink());

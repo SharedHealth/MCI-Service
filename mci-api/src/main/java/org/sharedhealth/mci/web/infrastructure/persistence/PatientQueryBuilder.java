@@ -254,11 +254,13 @@ public class PatientQueryBuilder {
         return toUpdateQuery(CF_PATIENT, patient, null, converter);
     }
 
-    public static String buildFindByCatchmentStmt(Catchment catchment, Date since, int limit) {
+    public static String buildFindByCatchmentStmt(Catchment catchment, Date since, UUID lastMarker, int limit) {
         Where where = select(HEALTH_ID, LAST_UPDATED).from(CF_CATCHMENT_MAPPING)
                 .where(eq(CATCHMENT_ID, catchment.getId()));
 
-        if (since != null) {
+        if (lastMarker != null) {
+            where = where.and(gt(LAST_UPDATED, lastMarker));
+        } else if (since != null) {
             where = where.and(gte(LAST_UPDATED, UUIDs.startOf(since.getTime())));
         }
         return where.limit(limit).toString();

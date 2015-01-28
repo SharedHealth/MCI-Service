@@ -1,6 +1,5 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
-import com.datastax.driver.core.utils.UUIDs;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,6 +23,7 @@ import java.util.concurrent.ExecutionException;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
+import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static java.util.Arrays.asList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
@@ -1168,7 +1168,7 @@ public class PatientRepositoryIT {
     }
 
     @Test
-    public void shouldFindAllPatientsByCatchment() throws Exception {
+    public void shouldFindAllPatientsByCatchmentWithSinceParam() throws Exception {
         List<String> healthIds = new ArrayList<>();
         PatientData patient = createPatient();
         Address address = new Address("10", "20", "30");
@@ -1188,7 +1188,7 @@ public class PatientRepositoryIT {
         UUID updatedAt = cassandraOps.selectOneById(Patient.class, healthIds.get(0)).getUpdatedAt();
         assertNotNull(updatedAt);
         int limit = 3;
-        Date since = new Date(UUIDs.unixTimestamp(updatedAt));
+        Date since = new Date(unixTimestamp(updatedAt));
         List<PatientData> patients = patientRepository.findAllByCatchment(catchment, since, null, limit);
 
         assertTrue(isNotEmpty(patients));
@@ -1196,6 +1196,36 @@ public class PatientRepositoryIT {
         assertEquals(healthIds.get(0), patients.get(0).getHealthId());
         assertEquals(healthIds.get(1), patients.get(1).getHealthId());
         assertEquals(healthIds.get(2), patients.get(2).getHealthId());
+    }
+
+    @Test
+    public void shouldFindAllPatientsByCatchmentWithLastMarkerParam() throws Exception {
+        List<String> healthIds = new ArrayList<>();
+        PatientData patient = createPatient();
+        Address address = new Address("10", "20", "30");
+        address.setCityCorporationId("40");
+
+        for (int i = 1; i <= 5; i++) {
+            address.setUnionOrUrbanWardId("5" + i);
+            address.setRuralWardId("6" + i);
+            patient.setAddress(address);
+            healthIds.add(patientRepository.create(patient).getId());
+            Thread.sleep(0, 10);
+        }
+
+
+        Catchment catchment = new Catchment("10", "20", "30");
+        catchment.setCityCorpId("40");
+        UUID updatedAt = cassandraOps.selectOneById(Patient.class, healthIds.get(0)).getUpdatedAt();
+        assertNotNull(updatedAt);
+        int limit = 3;
+        List<PatientData> patients = patientRepository.findAllByCatchment(catchment, null, updatedAt, limit);
+
+        assertTrue(isNotEmpty(patients));
+        assertEquals(limit, patients.size());
+        assertEquals(healthIds.get(1), patients.get(0).getHealthId());
+        assertEquals(healthIds.get(2), patients.get(1).getHealthId());
+        assertEquals(healthIds.get(3), patients.get(2).getHealthId());
     }
 
     @Test
@@ -1291,9 +1321,9 @@ public class PatientRepositoryIT {
         assertEquals("h103", mapping2.getHealthId());
         assertEquals("h105", mapping3.getHealthId());
 
-        Date date1 = new Date(UUIDs.unixTimestamp(mapping1.getLastUpdated()));
-        Date date2 = new Date(UUIDs.unixTimestamp(mapping2.getLastUpdated()));
-        Date date3 = new Date(UUIDs.unixTimestamp(mapping3.getLastUpdated()));
+        Date date1 = new Date(unixTimestamp(mapping1.getLastUpdated()));
+        Date date2 = new Date(unixTimestamp(mapping2.getLastUpdated()));
+        Date date3 = new Date(unixTimestamp(mapping3.getLastUpdated()));
 
         assertTrue(date1.before(date2));
         assertTrue(date2.before(date3));
