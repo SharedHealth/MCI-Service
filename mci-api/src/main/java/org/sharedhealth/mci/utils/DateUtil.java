@@ -5,7 +5,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.UUID;
 
+import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static java.util.TimeZone.getTimeZone;
 
 public class DateUtil {
@@ -37,6 +39,10 @@ public class DateUtil {
         return buildIsoDateFormat().format(date);
     }
 
+    public static String toIsoFormat(UUID uuid) {
+        return toIsoFormat(unixTimestamp(uuid));
+    }
+
     public static Date fromIsoFormat(String date) {
         try {
             return buildIsoDateFormat().parse(date);
@@ -48,6 +54,13 @@ public class DateUtil {
     public static int getYear(Date date) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
+
+        return cal.get(Calendar.YEAR);
+    }
+
+    public static int getYear(UUID uuid) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(unixTimestamp(uuid));
 
         return cal.get(Calendar.YEAR);
     }

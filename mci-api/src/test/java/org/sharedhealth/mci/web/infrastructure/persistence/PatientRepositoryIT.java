@@ -1139,7 +1139,7 @@ public class PatientRepositoryIT {
     }
 
     private void assertUpdateLogEntry(String healthId, Date since, boolean shouldfind) {
-        List<PatientUpdateLog> patientUpdateLogs = cassandraOps.select(buildFindUpdateLogStmt(since, 1),
+        List<PatientUpdateLog> patientUpdateLogs = cassandraOps.select(buildFindUpdateLogStmt(since, 1, null),
                 PatientUpdateLog.class);
         if (shouldfind) {
             assertTrue(healthId.equals(patientUpdateLogs.get(0).getHealthId()));

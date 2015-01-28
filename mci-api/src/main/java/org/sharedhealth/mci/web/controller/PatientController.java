@@ -7,7 +7,6 @@ import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.mapper.*;
-import org.sharedhealth.mci.web.model.PatientUpdateLog;
 import org.sharedhealth.mci.web.service.PatientService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +24,6 @@ import java.util.*;
 
 import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.sharedhealth.mci.utils.DateUtil.fromIsoFormat;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 import static org.springframework.http.HttpStatus.ACCEPTED;
 import static org.springframework.http.HttpStatus.OK;
@@ -93,22 +91,6 @@ public class PatientController {
             additionalInfo.put("note", note);
         }
         MCIMultiResponse mciMultiResponse = new MCIMultiResponse<>(results, additionalInfo, OK);
-        deferredResult.setResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject));
-
-        return deferredResult;
-    }
-
-    @RequestMapping(method = GET, value = "/updated-after/{after}", produces = APPLICATION_JSON_VALUE)
-    public DeferredResult<ResponseEntity<MCIMultiResponse>> findPatients(@PathVariable String after) {
-
-        Date date = isNotBlank(after) ? fromIsoFormat(after) : null;
-
-        logger.debug("Find all patients  updated after [" + after + "] ");
-        final DeferredResult<ResponseEntity<MCIMultiResponse>> deferredResult = new DeferredResult<>();
-
-        List<PatientUpdateLog> results = patientService.findPatientsUpdatedSince(date);
-
-        MCIMultiResponse mciMultiResponse = new MCIMultiResponse<>(results, null, OK);
         deferredResult.setResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject));
 
         return deferredResult;

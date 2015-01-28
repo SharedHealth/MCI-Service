@@ -102,4 +102,5 @@ public class PatientRepositoryConstants {
     public static final String EVENT_TIME = "event_time";
     public static final String CHANGE_SET = "change_set";
     public static final String YEAR = "year";
+    public static final String EVENT_ID = "event_id";
 }

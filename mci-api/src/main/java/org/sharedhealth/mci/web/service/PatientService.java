@@ -186,8 +186,8 @@ public class PatientService {
         return patientRepository.processPendingApprovals(requestData, existingPatient, shouldAccept);
     }
 
-    public List<PatientUpdateLog> findPatientsUpdatedSince(Date after) {
-        return patientRepository.findPatientsUpdatedSince(after, getPerPageMaximumLimit());
+    public List<PatientUpdateLog> findPatientsUpdatedSince(Date after, UUID lastMarker) {
+        return patientRepository.findPatientsUpdatedSince(after, getPerPageMaximumLimit(), lastMarker);
     }
 
     private void verifyCatchment(String facilityId, Catchment catchment) {

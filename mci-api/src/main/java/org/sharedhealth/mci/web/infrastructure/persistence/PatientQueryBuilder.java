@@ -3,6 +3,7 @@ package org.sharedhealth.mci.web.infrastructure.persistence;
 import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Update;
+import com.datastax.driver.core.utils.UUIDs;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.sharedhealth.mci.utils.DateUtil;
@@ -20,6 +21,7 @@ import java.util.UUID;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
 import static com.datastax.driver.core.querybuilder.Select.Where;
+import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static org.apache.commons.lang3.StringUtils.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.*;
 import static org.springframework.data.cassandra.core.CassandraTemplate.*;
@@ -202,8 +204,8 @@ public class PatientQueryBuilder {
         String changeSet = getChangeSet(patientDataToSave, existingPatientData);
 
         if (changeSet != null) {
+            patientUpdateLog.setEventId(timeBased());
             patientUpdateLog.setHealthId(existingPatientData.getHealthId());
-            patientUpdateLog.setEventTime(new Date());
             patientUpdateLog.setChangeSet(changeSet);
             batch.add(createInsertQuery(CF_PATIENT_UPDATE_LOG, patientUpdateLog, null, converter));
         }
@@ -262,22 +264,44 @@ public class PatientQueryBuilder {
         return where.limit(limit).toString();
     }
 
-    public static String buildFindUpdateLogStmt(Date after, int limit) {
-        Where where = select().from(CF_PATIENT_UPDATE_LOG)
-                .where(in(YEAR, getYearsSince(after).toArray()));
+    public static String buildFindUpdateLogStmt(Date after, int limit, UUID lastMarker) {
 
-        if (after != null) {
-            where = where.and(gt(EVENT_TIME, after));
+        int year = getLastYearMarker(after, lastMarker);
+
+        Where where = select().from(CF_PATIENT_UPDATE_LOG)
+                .where(in(YEAR, getYearsSince(year).toArray()));
+
+        if (lastMarker != null) {
+            where = where.and(gt(EVENT_ID, lastMarker));
+        }else if (after != null) {
+            where = where.and(gte(EVENT_ID, UUIDs.startOf(after.getTime())));
         }
 
         return where.limit(limit).toString();
     }
 
-    private static List<Integer> getYearsSince(Date after) {
-        List<Integer> years = new ArrayList<>();
-        int end = DateUtil.getYear(new Date());
+    private static int getLastYearMarker(Date after, UUID lastMarker) {
 
-        for (int i = DateUtil.getYear(after); i <= end; i++) {
+        if(lastMarker !=null) {
+            return DateUtil.getYear(lastMarker);
+        }
+
+        if(after != null) {
+            return DateUtil.getYear(after);
+        }
+
+        return DateUtil.getYear(new Date());
+    }
+
+    private static List<Integer> getYearsSince(Date after) {
+        return getYearsSince(DateUtil.getYear(after));
+    }
+
+    private static List<Integer> getYearsSince(int year) {
+        int end = DateUtil.getYear(new Date());
+        List<Integer> years = new ArrayList<>();
+
+        for (int i = year; i <= end; i++) {
             years.add(i);
         }
 
