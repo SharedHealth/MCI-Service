@@ -17,6 +17,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import static java.lang.String.format;
 import static java.net.URLEncoder.encode;
@@ -50,16 +51,17 @@ public class CatchmentController {
     @RequestMapping(value = "/{catchmentId}/patients", method = GET, produces = APPLICATION_JSON_VALUE)
     public DeferredResult<Feed> findAllPatients(
             @PathVariable String catchmentId,
-            @RequestParam(value = AFTER, required = false) String after,
+            @RequestParam(value = SINCE, required = false) String since,
+            @RequestParam(value = LAST_MARKER, required = false) UUID lastMarker,
             @RequestHeader(FACILITY_ID) String facilityId,
             HttpServletRequest request) {
 
         Catchment catchment = new Catchment(catchmentId);
-        logger.debug(format("Find all patients  for %s, after %s", catchment, after));
+        logger.debug(format("Find all patients by catchment. Catchment ID: %s, since: %s, last marker: %s", catchment, since, lastMarker));
         final DeferredResult<Feed> deferredResult = new DeferredResult<>();
 
-        Date date = isNotBlank(after) ? fromIsoFormat(after) : null;
-        List<PatientData> patients = patientService.findAllByCatchment(catchment, date, facilityId);
+        Date date = isNotBlank(since) ? fromIsoFormat(since) : null;
+        List<PatientData> patients = patientService.findAllByCatchment(catchment, date, lastMarker, facilityId);
 
         deferredResult.setResult(buildFeedResponse(patients, request));
         return deferredResult;
@@ -96,7 +98,7 @@ public class CatchmentController {
         String lastModifiedDate = encode(lastPatient.getUpdatedAtAsString(), "UTF-8");
 
         return fromUriString(request.getRequestURL().toString())
-                .queryParam(AFTER, lastModifiedDate)
+                .queryParam(SINCE, lastModifiedDate)
                 .queryParam(LAST_MARKER, lastPatient.getHealthId())
                 .build().toString();
     }

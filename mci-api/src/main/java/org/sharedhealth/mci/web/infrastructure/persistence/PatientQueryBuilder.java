@@ -259,7 +259,7 @@ public class PatientQueryBuilder {
                 .where(eq(CATCHMENT_ID, catchment.getId()));
 
         if (after != null) {
-            where = where.and(gt(LAST_UPDATED, after));
+            where = where.and(gte(LAST_UPDATED, after));
         }
         return where.limit(limit).toString();
     }

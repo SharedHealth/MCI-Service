@@ -1,6 +1,5 @@
 package org.sharedhealth.mci.web.service;
 
-import com.datastax.driver.core.utils.UUIDs;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -12,6 +11,7 @@ import org.sharedhealth.mci.web.model.PendingApprovalMapping;
 
 import java.util.*;
 
+import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
@@ -66,9 +66,10 @@ public class PatientServiceTest {
     }
 
     @Test
-    public void shouldFindPatientsByCatchment() {
+    public void shouldFindPatientsByCatchmentWithoutDateAndLastMarker() {
         Catchment catchment = new Catchment("10", "20", "30");
-        Date after = new Date();
+        Date since = null;
+        UUID lastMarker = null;
         String facilityId = "123456";
         int limit = 25;
         PatientData patient = new PatientData();
@@ -77,13 +78,39 @@ public class PatientServiceTest {
 
         when(settingService.getSettingAsIntegerByKey("PER_PAGE_MAXIMUM_LIMIT")).thenReturn(limit);
         when(facilityService.getCatchmentAreasByFacility(facilityId)).thenReturn(asList(catchment));
-        when(patientRepository.findAllByCatchment(catchment, after, limit)).thenReturn(asList(patient));
+        when(patientRepository.findAllByCatchment(catchment, since, lastMarker, limit)).thenReturn(asList(patient));
 
-        List<PatientData> patients = patientService.findAllByCatchment(catchment, after, facilityId);
+        List<PatientData> patients = patientService.findAllByCatchment(catchment, since, lastMarker, facilityId);
 
         verify(facilityService).getCatchmentAreasByFacility(facilityId);
         verify(settingService).getSettingAsIntegerByKey("PER_PAGE_MAXIMUM_LIMIT");
-        verify(patientRepository).findAllByCatchment(catchment, after, limit);
+        verify(patientRepository).findAllByCatchment(catchment, since, lastMarker, limit);
+
+        assertNotNull(patients);
+        assertEquals(1, patients.size());
+        assertEquals(healthId, patient.getHealthId());
+    }
+
+    @Test
+    public void shouldFindPatientsByCatchment() {
+        Catchment catchment = new Catchment("10", "20", "30");
+        Date since = new Date();
+        UUID lastMarker = timeBased();
+        String facilityId = "123456";
+        int limit = 25;
+        PatientData patient = new PatientData();
+        String healthId = "h101";
+        patient.setHealthId(healthId);
+
+        when(settingService.getSettingAsIntegerByKey("PER_PAGE_MAXIMUM_LIMIT")).thenReturn(limit);
+        when(facilityService.getCatchmentAreasByFacility(facilityId)).thenReturn(asList(catchment));
+        when(patientRepository.findAllByCatchment(catchment, since, lastMarker, limit)).thenReturn(asList(patient));
+
+        List<PatientData> patients = patientService.findAllByCatchment(catchment, since, lastMarker, facilityId);
+
+        verify(facilityService).getCatchmentAreasByFacility(facilityId);
+        verify(settingService).getSettingAsIntegerByKey("PER_PAGE_MAXIMUM_LIMIT");
+        verify(patientRepository).findAllByCatchment(catchment, since, lastMarker, limit);
 
         assertNotNull(patients);
         assertEquals(1, patients.size());
@@ -95,13 +122,13 @@ public class PatientServiceTest {
         String facilityId = "123456";
         when(facilityService.getCatchmentAreasByFacility(facilityId)).thenReturn(asList(new Catchment("11", "22")));
 
-        patientService.findAllByCatchment(new Catchment("10", "20"), new Date(), facilityId);
+        patientService.findAllByCatchment(new Catchment("10", "20"), null, null, facilityId);
     }
 
     @Test
     public void shouldFindPendingApprovalListByCatchment() throws Exception {
         Catchment catchment = new Catchment("10", "20", "30");
-        UUID after = UUIDs.timeBased();
+        UUID after = timeBased();
 
         List<PendingApprovalMapping> mappings = asList(buildPendingApprovalMapping("hid-100"),
                 buildPendingApprovalMapping("hid-200"),
@@ -138,7 +165,7 @@ public class PatientServiceTest {
         Catchment catchment = new Catchment("10", "20");
         catchment.setUpazilaId("30");
         mapping.setCatchmentId(catchment.getId());
-        mapping.setLastUpdated(UUIDs.timeBased());
+        mapping.setLastUpdated(timeBased());
         Thread.sleep(0, 10);
         return mapping;
     }
@@ -229,7 +256,7 @@ public class PatientServiceTest {
     private List<UUID> generateUUIDs() throws Exception {
         List<UUID> uuids = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
-            uuids.add(UUIDs.timeBased());
+            uuids.add(timeBased());
             Thread.sleep(0, 10);
         }
         return uuids;
@@ -435,7 +462,7 @@ public class PatientServiceTest {
         TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap = new TreeMap<>();
         PendingApprovalFieldDetails fieldDetails = new PendingApprovalFieldDetails();
         fieldDetails.setValue(value);
-        fieldDetailsMap.put(UUIDs.timeBased(), fieldDetails);
+        fieldDetailsMap.put(timeBased(), fieldDetails);
         pendingApproval.setFieldDetails(fieldDetailsMap);
         return pendingApproval;
     }

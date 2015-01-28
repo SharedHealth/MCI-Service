@@ -21,7 +21,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.text.ParseException;
 import java.util.List;
+import java.util.UUID;
 
+import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static java.lang.String.format;
 import static java.net.URLEncoder.encode;
 import static java.util.Arrays.asList;
@@ -66,7 +68,7 @@ public class CatchmentControllerTest {
         String catchmentId = "102030405060";
         Catchment catchment = new Catchment(catchmentId);
 
-        when(patientService.findAllByCatchment(catchment, null, facilityId)).thenReturn(
+        when(patientService.findAllByCatchment(catchment, null, null, facilityId)).thenReturn(
                 asList(buildPatient("h100", "2010-01-01T10:20:30Z"),
                         buildPatient("h200", "2015-01-01T10:20:30Z"),
                         buildPatient("h300", "2020-01-01T10:20:30Z")));
@@ -77,7 +79,7 @@ public class CatchmentControllerTest {
         String url = format("http://localhost/%s/%s/patients", API_END_POINT, catchmentId);
 
         String nextUrl = fromUriString(url)
-                .queryParam(AFTER, encode("2020-01-01T10:20:30Z", "UTF-8"))
+                .queryParam(SINCE, encode("2020-01-01T10:20:30Z", "UTF-8"))
                 .queryParam(LAST_MARKER, encode("h300", "UTF-8")).build().toString();
 
 
@@ -103,7 +105,7 @@ public class CatchmentControllerTest {
                 .andExpect(jsonPath("$.entries.[1].id", is("h200")))
                 .andExpect(jsonPath("$.entries.[2].id", is("h300")));
 
-        verify(patientService).findAllByCatchment(catchment, null, facilityId);
+        verify(patientService).findAllByCatchment(catchment, null, null, facilityId);
     }
 
     @Test
@@ -112,7 +114,7 @@ public class CatchmentControllerTest {
         String catchmentId = "102030405060";
         Catchment catchment = new Catchment(catchmentId);
 
-        when(patientService.findAllByCatchment(catchment, null, facilityId)).thenReturn(null);
+        when(patientService.findAllByCatchment(catchment, null, null, facilityId)).thenReturn(null);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(FACILITY_ID, facilityId);
@@ -132,17 +134,17 @@ public class CatchmentControllerTest {
                 .andExpect(jsonPath("$.nextUrl", is(nullValue())))
                 .andExpect(jsonPath("$.entries", is(emptyList())));
 
-        verify(patientService).findAllByCatchment(catchment, null, facilityId);
+        verify(patientService).findAllByCatchment(catchment, null, null, facilityId);
     }
 
     @Test
-    public void shouldFindPatientByCatchmentUpdatedAfterADate() throws Exception {
+    public void shouldFindPatientByCatchmentWithSinceQueryParam() throws Exception {
         String facilityId = "123456";
         String catchmentId = "102030405060";
         Catchment catchment = new Catchment(catchmentId);
-        String after = "2015-01-01T10:20:30Z";
+        String since = "2015-01-01T10:20:30Z";
 
-        when(patientService.findAllByCatchment(catchment, fromIsoFormat(after), facilityId)).thenReturn(
+        when(patientService.findAllByCatchment(catchment, fromIsoFormat(since), null, facilityId)).thenReturn(
                 asList(buildPatient("h100", "2010-01-01T10:20:30Z"),
                         buildPatient("h200", "2015-01-01T10:20:30Z"),
                         buildPatient("h300", "2020-01-01T10:20:30Z")));
@@ -153,11 +155,11 @@ public class CatchmentControllerTest {
         String requestUrl = format("http://localhost/%s/%s/patients", API_END_POINT, catchmentId);
 
         String url = fromUriString(requestUrl)
-                .queryParam(AFTER, after)
+                .queryParam(SINCE, since)
                 .build().toString();
 
         String nextUrl = fromUriString(requestUrl)
-                .queryParam(AFTER, encode("2020-01-01T10:20:30Z", "UTF-8"))
+                .queryParam(SINCE, encode("2020-01-01T10:20:30Z", "UTF-8"))
                 .queryParam(LAST_MARKER, encode("h300", "UTF-8")).build().toString();
 
         MvcResult mvcResult = mockMvc.perform(get(url).contentType(APPLICATION_JSON).headers(headers))
@@ -176,17 +178,63 @@ public class CatchmentControllerTest {
                 .andExpect(jsonPath("$.entries.[1].id", is("h200")))
                 .andExpect(jsonPath("$.entries.[2].id", is("h300")));
 
-        verify(patientService).findAllByCatchment(catchment, fromIsoFormat(after), facilityId);
+        verify(patientService).findAllByCatchment(catchment, fromIsoFormat(since), null, facilityId);
     }
 
     @Test
-    public void shouldFindPatientByCatchmentWithDivisionAndDistrictUpdatedAfterADate() throws Exception {
+    public void shouldFindPatientByCatchmentWithSinceAndLastMarkerQueryParams() throws Exception {
+        String facilityId = "123456";
+        String catchmentId = "102030405060";
+        Catchment catchment = new Catchment(catchmentId);
+        String since = "2015-01-01T10:20:30Z";
+        UUID lastMarker = timeBased();
+
+        when(patientService.findAllByCatchment(catchment, fromIsoFormat(since), lastMarker, facilityId)).thenReturn(
+                asList(buildPatient("h100", "2010-01-01T10:20:30Z"),
+                        buildPatient("h200", "2015-01-01T10:20:30Z"),
+                        buildPatient("h300", "2020-01-01T10:20:30Z")));
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(FACILITY_ID, facilityId);
+
+        String requestUrl = format("http://localhost/%s/%s/patients", API_END_POINT, catchmentId);
+
+        String url = fromUriString(requestUrl)
+                .queryParam(SINCE, since)
+                .queryParam(LAST_MARKER, lastMarker)
+                .build().toString();
+
+        String nextUrl = fromUriString(requestUrl)
+                .queryParam(SINCE, encode("2020-01-01T10:20:30Z", "UTF-8"))
+                .queryParam(LAST_MARKER, encode("h300", "UTF-8")).build().toString();
+
+        MvcResult mvcResult = mockMvc.perform(get(url).contentType(APPLICATION_JSON).headers(headers))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.author", is("MCI")))
+                .andExpect(jsonPath("$.title", is("Patients")))
+                .andExpect(jsonPath("$.feedUrl", is(url)))
+                .andExpect(jsonPath("$.prevUrl", is(nullValue())))
+                .andExpect(jsonPath("$.nextUrl", is(nextUrl)))
+
+                .andExpect(jsonPath("$.entries.[0].id", is("h100")))
+                .andExpect(jsonPath("$.entries.[1].id", is("h200")))
+                .andExpect(jsonPath("$.entries.[2].id", is("h300")));
+
+        verify(patientService).findAllByCatchment(catchment, fromIsoFormat(since), lastMarker, facilityId);
+    }
+
+    @Test
+    public void shouldFindPatientByCatchmentWithDivisionAndDistrict() throws Exception {
         String facilityId = "123456";
         String catchmentId = "1020";
         Catchment catchment = new Catchment(catchmentId);
-        String after = "2015-01-01T10:20:30Z";
+        String since = "2015-01-01T10:20:30Z";
 
-        when(patientService.findAllByCatchment(catchment, fromIsoFormat(after), facilityId)).thenReturn(
+        when(patientService.findAllByCatchment(catchment, fromIsoFormat(since), null, facilityId)).thenReturn(
                 asList(buildPatient("h100", "2010-01-01T10:20:30Z"),
                         buildPatient("h200", "2015-01-01T10:20:30Z"),
                         buildPatient("h300", "2020-01-01T10:20:30Z")));
@@ -197,11 +245,11 @@ public class CatchmentControllerTest {
         String requestUrl = format("http://localhost/%s/%s/patients", API_END_POINT, catchmentId);
 
         String url = fromUriString(requestUrl)
-                .queryParam(AFTER, after)
+                .queryParam(SINCE, since)
                 .build().toString();
 
         String nextUrl = fromUriString(requestUrl)
-                .queryParam(AFTER, encode("2020-01-01T10:20:30Z", "UTF-8"))
+                .queryParam(SINCE, encode("2020-01-01T10:20:30Z", "UTF-8"))
                 .queryParam(LAST_MARKER, encode("h300", "UTF-8")).build().toString();
 
         MvcResult mvcResult = mockMvc.perform(get(url).contentType(APPLICATION_JSON).headers(headers))
@@ -220,17 +268,17 @@ public class CatchmentControllerTest {
                 .andExpect(jsonPath("$.entries.[1].id", is("h200")))
                 .andExpect(jsonPath("$.entries.[2].id", is("h300")));
 
-        verify(patientService).findAllByCatchment(catchment, fromIsoFormat(after), facilityId);
+        verify(patientService).findAllByCatchment(catchment, fromIsoFormat(since), null, facilityId);
     }
 
     @Test
-    public void shouldFindPatientByCatchmentWithDivisionDistrictAndUpazilaUpdatedAfterADate() throws Exception {
+    public void shouldFindPatientByCatchmentWithDivisionDistrictAndUpazila() throws Exception {
         String facilityId = "123456";
         String catchmentId = "102030";
         Catchment catchment = new Catchment(catchmentId);
-        String after = "2015-01-01T10:20:30Z";
+        String since = "2015-01-01T10:20:30Z";
 
-        when(patientService.findAllByCatchment(catchment, fromIsoFormat(after), facilityId)).thenReturn(
+        when(patientService.findAllByCatchment(catchment, fromIsoFormat(since), null, facilityId)).thenReturn(
                 asList(buildPatient("h100", "2010-01-01T10:20:30Z"),
                         buildPatient("h200", "2015-01-01T10:20:30Z"),
                         buildPatient("h300", "2020-01-01T10:20:30Z")));
@@ -241,11 +289,11 @@ public class CatchmentControllerTest {
         String requestUrl = format("http://localhost/%s/%s/patients", API_END_POINT, catchmentId);
 
         String url = fromUriString(requestUrl)
-                .queryParam(AFTER, after)
+                .queryParam(SINCE, since)
                 .build().toString();
 
         String nextUrl = fromUriString(requestUrl)
-                .queryParam(AFTER, encode("2020-01-01T10:20:30Z", "UTF-8"))
+                .queryParam(SINCE, encode("2020-01-01T10:20:30Z", "UTF-8"))
                 .queryParam(LAST_MARKER, encode("h300", "UTF-8")).build().toString();
 
         MvcResult mvcResult = mockMvc.perform(get(url).contentType(APPLICATION_JSON).headers(headers))
@@ -264,17 +312,17 @@ public class CatchmentControllerTest {
                 .andExpect(jsonPath("$.entries.[1].id", is("h200")))
                 .andExpect(jsonPath("$.entries.[2].id", is("h300")));
 
-        verify(patientService).findAllByCatchment(catchment, fromIsoFormat(after), facilityId);
+        verify(patientService).findAllByCatchment(catchment, fromIsoFormat(since), null, facilityId);
     }
 
     @Test
-    public void shouldFindPatientByCatchmentWithDivisionDistrictUpazilaAndCityCorpUpdatedAfterADate() throws Exception {
+    public void shouldFindPatientByCatchmentWithDivisionDistrictUpazilaAndCityCorpUpdated() throws Exception {
         String facilityId = "123456";
         String catchmentId = "10203040";
         Catchment catchment = new Catchment(catchmentId);
-        String after = "2015-01-01T10:20:30Z";
+        String since = "2015-01-01T10:20:30Z";
 
-        when(patientService.findAllByCatchment(catchment, fromIsoFormat(after), facilityId)).thenReturn(
+        when(patientService.findAllByCatchment(catchment, fromIsoFormat(since), null, facilityId)).thenReturn(
                 asList(buildPatient("h100", "2010-01-01T10:20:30Z"),
                         buildPatient("h200", "2015-01-01T10:20:30Z"),
                         buildPatient("h300", "2020-01-01T10:20:30Z")));
@@ -285,11 +333,11 @@ public class CatchmentControllerTest {
         String requestUrl = format("http://localhost/%s/%s/patients", API_END_POINT, catchmentId);
 
         String url = fromUriString(requestUrl)
-                .queryParam(AFTER, after)
+                .queryParam(SINCE, since)
                 .build().toString();
 
         String nextUrl = fromUriString(requestUrl)
-                .queryParam(AFTER, encode("2020-01-01T10:20:30Z", "UTF-8"))
+                .queryParam(SINCE, encode("2020-01-01T10:20:30Z", "UTF-8"))
                 .queryParam(LAST_MARKER, encode("h300", "UTF-8")).build().toString();
 
         MvcResult mvcResult = mockMvc.perform(get(url).contentType(APPLICATION_JSON).headers(headers))
@@ -308,17 +356,17 @@ public class CatchmentControllerTest {
                 .andExpect(jsonPath("$.entries.[1].id", is("h200")))
                 .andExpect(jsonPath("$.entries.[2].id", is("h300")));
 
-        verify(patientService).findAllByCatchment(catchment, fromIsoFormat(after), facilityId);
+        verify(patientService).findAllByCatchment(catchment, fromIsoFormat(since), null, facilityId);
     }
 
     @Test
-    public void shouldFindPatientByCatchmentWithDivisionDistrictUpazilaCityCorpAndUnionUpdatedAfterADate() throws Exception {
+    public void shouldFindPatientByCatchmentWithDivisionDistrictUpazilaCityCorpAndUnionUpdated() throws Exception {
         String facilityId = "123456";
         String catchmentId = "1020304050";
         Catchment catchment = new Catchment(catchmentId);
-        String after = "2015-01-01T10:20:30Z";
+        String since = "2015-01-01T10:20:30Z";
 
-        when(patientService.findAllByCatchment(catchment, fromIsoFormat(after), facilityId)).thenReturn(
+        when(patientService.findAllByCatchment(catchment, fromIsoFormat(since), null, facilityId)).thenReturn(
                 asList(buildPatient("h100", "2010-01-01T10:20:30Z"),
                         buildPatient("h200", "2015-01-01T10:20:30Z"),
                         buildPatient("h300", "2020-01-01T10:20:30Z")));
@@ -329,11 +377,11 @@ public class CatchmentControllerTest {
         String requestUrl = format("http://localhost/%s/%s/patients", API_END_POINT, catchmentId);
 
         String url = fromUriString(requestUrl)
-                .queryParam(AFTER, after)
+                .queryParam(SINCE, since)
                 .build().toString();
 
         String nextUrl = fromUriString(requestUrl)
-                .queryParam(AFTER, encode("2020-01-01T10:20:30Z", "UTF-8"))
+                .queryParam(SINCE, encode("2020-01-01T10:20:30Z", "UTF-8"))
                 .queryParam(LAST_MARKER, encode("h300", "UTF-8")).build().toString();
 
         MvcResult mvcResult = mockMvc.perform(get(url).contentType(APPLICATION_JSON).headers(headers))
@@ -377,7 +425,7 @@ public class CatchmentControllerTest {
 
         List<NameValuePair> params = URLEncodedUtils.parse(new URI(nextUrl), "UTF-8");
         assertEquals(2, params.size());
-        assertEquals(AFTER, params.get(0).getName());
+        assertEquals(SINCE, params.get(0).getName());
         assertEquals("2020-01-01T10:20:30Z", params.get(0).getValue());
         assertEquals(LAST_MARKER, params.get(1).getName());
         assertEquals("h300", params.get(1).getValue());
@@ -406,7 +454,7 @@ public class CatchmentControllerTest {
 
         String requestUrl = request.getRequestURL().toString();
         String feedUrl = fromUriString(requestUrl)
-                .queryParam(AFTER, encode("2010-01-01T10:20:30Z", "UTF-8"))
+                .queryParam(SINCE, encode("2010-01-01T10:20:30Z", "UTF-8"))
                 .queryParam(LAST_MARKER, encode("h000", "UTF-8")).build().toString();
         assertEquals(feedUrl, feed.getFeedUrl());
 
@@ -418,7 +466,7 @@ public class CatchmentControllerTest {
 
         List<NameValuePair> params = URLEncodedUtils.parse(new URI(nextUrl), "UTF-8");
         assertEquals(2, params.size());
-        assertEquals(AFTER, params.get(0).getName());
+        assertEquals(SINCE, params.get(0).getName());
         assertEquals("2020-01-01T10:20:30Z", params.get(0).getValue());
         assertEquals(LAST_MARKER, params.get(1).getName());
         assertEquals("h300", params.get(1).getValue());
@@ -439,7 +487,7 @@ public class CatchmentControllerTest {
         return patient;
     }
 
-    private MockHttpServletRequest buildHttpRequest(String after, String lastMarker) throws UnsupportedEncodingException {
+    private MockHttpServletRequest buildHttpRequest(String since, String lastMarker) throws UnsupportedEncodingException {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setServerName("www.mci.com");
         request.setServerPort(8081);
@@ -447,8 +495,8 @@ public class CatchmentControllerTest {
         request.setRequestURI("/api/v1/catchments/102030/patients");
 
         StringBuilder queryString = new StringBuilder();
-        if (isNotEmpty(after)) {
-            queryString.append(AFTER).append("=").append(encode(after, "UTF-8"));
+        if (isNotEmpty(since)) {
+            queryString.append(SINCE).append("=").append(encode(since, "UTF-8"));
         }
         if (isNotEmpty(lastMarker)) {
             queryString.append("&").append(LAST_MARKER).append("=").append(encode(lastMarker, "UTF-8"));

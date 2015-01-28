@@ -1186,22 +1186,22 @@ public class PatientRepositoryIT {
 
         Catchment catchment = new Catchment("10", "20", "30");
         catchment.setCityCorpId("40");
-        Date after = cassandraOps.selectOneById(Patient.class, healthIds.get(0)).getUpdatedAt();
+        Date since = cassandraOps.selectOneById(Patient.class, healthIds.get(0)).getUpdatedAt();
         int limit = 3;
-        List<PatientData> patients = patientRepository.findAllByCatchment(catchment, after, limit);
+        List<PatientData> patients = patientRepository.findAllByCatchment(catchment, since, null, limit);
 
         assertTrue(isNotEmpty(patients));
         assertEquals(limit, patients.size());
-        assertEquals(healthIds.get(1), patients.get(0).getHealthId());
-        assertEquals(healthIds.get(2), patients.get(1).getHealthId());
-        assertEquals(healthIds.get(3), patients.get(2).getHealthId());
+        assertEquals(healthIds.get(0), patients.get(0).getHealthId());
+        assertEquals(healthIds.get(1), patients.get(1).getHealthId());
+        assertEquals(healthIds.get(2), patients.get(2).getHealthId());
     }
 
     @Test
     public void shouldReturnEmptyCollectionIfNoPatientFoundInCatchment() {
         Catchment catchment = new Catchment("10", "20", "30");
         catchment.setCityCorpId("40");
-        List<PatientData> patients = patientRepository.findAllByCatchment(catchment, new Date(), 100);
+        List<PatientData> patients = patientRepository.findAllByCatchment(catchment, new Date(), null, 100);
         assertNotNull(patients);
         assertTrue(isEmpty(patients));
     }
@@ -1758,7 +1758,7 @@ public class PatientRepositoryIT {
     @Test
     public void shouldUpdateCatchmentMappingWhenPresentAddressIsMarkedForApprovalAndUpdatedAfterApproval() {
         String healthId = patientRepository.create(data).getId();
-        List<PatientData> patients = patientRepository.findAllByCatchment(data.getCatchment(), null, 100);
+        List<PatientData> patients = patientRepository.findAllByCatchment(data.getCatchment(), null, null, 100);
         assertTrue(isNotEmpty(patients));
         assertEquals(1, patients.size());
         assertEquals(healthId, patients.get(0).getHealthId());
@@ -1769,13 +1769,13 @@ public class PatientRepositoryIT {
         updateRequest.setGender("O");
         patientRepository.update(updateRequest, healthId);
 
-        assertTrue(isNotEmpty(patientRepository.findAllByCatchment(data.getCatchment(), null, 100)));
-        assertTrue(isEmpty(patientRepository.findAllByCatchment(updateRequest.getCatchment(), null, 100)));
+        assertTrue(isNotEmpty(patientRepository.findAllByCatchment(data.getCatchment(), null, null, 100)));
+        assertTrue(isEmpty(patientRepository.findAllByCatchment(updateRequest.getCatchment(), null, null, 100)));
 
         PatientData updatedPatient = patientRepository.findByHealthId(healthId);
         patientRepository.processPendingApprovals(updateRequest, updatedPatient, true);
 
-        assertTrue(isEmpty(patientRepository.findAllByCatchment(data.getCatchment(), null, 100)));
+        assertTrue(isEmpty(patientRepository.findAllByCatchment(data.getCatchment(), null, null, 100)));
 
         List<CatchmentMapping> catchmentMappings = cassandraOps.select
                 (buildFindCatchmentMappingsStmt(patientRepository.findByHealthId(healthId)), CatchmentMapping.class);

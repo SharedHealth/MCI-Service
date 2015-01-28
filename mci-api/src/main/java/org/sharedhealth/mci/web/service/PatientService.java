@@ -120,9 +120,9 @@ public class PatientService {
         return patientRepository.findAllSummaryByQuery(searchQuery);
     }
 
-    public List<PatientData> findAllByCatchment(Catchment catchment, Date after, String facilityId) {
+    public List<PatientData> findAllByCatchment(Catchment catchment, Date since, UUID lastMarker, String facilityId) {
         verifyCatchment(facilityId, catchment);
-        return patientRepository.findAllByCatchment(catchment, after, getPerPageMaximumLimit());
+        return patientRepository.findAllByCatchment(catchment, since, lastMarker, getPerPageMaximumLimit());
     }
 
     public int getPerPageMaximumLimit() {

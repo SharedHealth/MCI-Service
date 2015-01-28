@@ -255,8 +255,8 @@ public class PatientRepository extends BaseRepository {
         return true;
     }
 
-    public List<PatientData> findAllByCatchment(Catchment catchment, Date after, int limit) {
-        List<CatchmentMapping> mappings = cassandraOps.select(buildFindByCatchmentStmt(catchment, after, limit), CatchmentMapping.class);
+    public List<PatientData> findAllByCatchment(Catchment catchment, Date since, UUID lastMarker, int limit) {
+        List<CatchmentMapping> mappings = cassandraOps.select(buildFindByCatchmentStmt(catchment, since, limit), CatchmentMapping.class);
         if (isEmpty(mappings)) {
             return emptyList();
         }
