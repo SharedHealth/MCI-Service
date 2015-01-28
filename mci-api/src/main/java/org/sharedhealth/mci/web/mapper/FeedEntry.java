@@ -3,11 +3,12 @@ package org.sharedhealth.mci.web.mapper;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Arrays;
+import java.util.UUID;
 
 public class FeedEntry {
 
     @JsonProperty
-    private String id;
+    private UUID id;
     @JsonProperty
     private String publishedDate;
     @JsonProperty
@@ -19,11 +20,11 @@ public class FeedEntry {
     @JsonProperty
     private Object content;
 
-    public String getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Date;
 import java.util.Properties;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -63,8 +62,8 @@ public class PendingApprovalFilter {
         newPatient.setStatus(processString(PATIENT_STATUS, existingPatient.getStatus(), updateRequest.getStatus()));
         newPatient.setDateOfDeath(processString(DATE_OF_DEATH, existingPatient.getDateOfDeath(), updateRequest.getDateOfDeath()));
         newPatient.setConfidential(processString(CONFIDENTIAL, existingPatient.getConfidential(), updateRequest.getConfidential()));
-        newPatient.setCreatedAt(processDate(CREATED, existingPatient.getCreatedAt(), updateRequest.getCreatedAt()));
-        newPatient.setUpdatedAt(processDate(MODIFIED, existingPatient.getUpdatedAt(), updateRequest.getUpdatedAt()));
+        newPatient.setCreatedAt(processUuid(CREATED, existingPatient.getCreatedAt(), updateRequest.getCreatedAt()));
+        newPatient.setUpdatedAt(processUuid(MODIFIED, existingPatient.getUpdatedAt(), updateRequest.getUpdatedAt()));
         newPatient.setPhoneNumber(processPhoneNumber(PHONE_NUMBER, existingPatient.getPhoneNumber(), updateRequest.getPhoneNumber()));
         newPatient.setPrimaryContactNumber(processPhoneNumber(PRIMARY_CONTACT_NUMBER, existingPatient.getPrimaryContactNumber(), updateRequest.getPrimaryContactNumber()));
         newPatient.setAddress(processAddress(PRESENT_ADDRESS, existingPatient.getAddress(), updateRequest.getAddress()));
@@ -83,9 +82,9 @@ public class PendingApprovalFilter {
         return address == null ? null : (Address) address;
     }
 
-    private Date processDate(String key, Date oldValue, Date newValue) {
+    private UUID processUuid(String key, UUID oldValue, UUID newValue) {
         Object value = process(key, oldValue, newValue);
-        return value == null ? null : (Date) value;
+        return value == null ? null : (UUID) value;
     }
 
     private String processString(String key, String oldValue, String newValue) {

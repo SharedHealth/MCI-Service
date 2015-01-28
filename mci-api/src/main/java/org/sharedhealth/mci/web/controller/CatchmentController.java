@@ -95,11 +95,12 @@ public class CatchmentController {
             return null;
         }
         PatientData lastPatient = patients.get(patients.size() - 1);
-        String lastModifiedDate = encode(lastPatient.getUpdatedAtAsString(), "UTF-8");
+        String since = encode(lastPatient.getUpdatedAtAsString(), "UTF-8");
+        String lastMarker = encode(lastPatient.getUpdatedAt().toString(), "UTF-8");
 
         return fromUriString(request.getRequestURL().toString())
-                .queryParam(SINCE, lastModifiedDate)
-                .queryParam(LAST_MARKER, lastPatient.getHealthId())
+                .queryParam(SINCE, since)
+                .queryParam(LAST_MARKER, lastMarker)
                 .build().toString();
     }
 
@@ -111,7 +112,7 @@ public class CatchmentController {
         for (PatientData patient : patients) {
             FeedEntry entry = new FeedEntry();
             String healthId = patient.getHealthId();
-            entry.setId(healthId);
+            entry.setId(patient.getUpdatedAt());
             entry.setPublishedDate(patient.getUpdatedAtAsString());
             entry.setTitle(ENTRY_TITLE + patient.getHealthId());
             entry.setLink(buildPatientLink(healthId, request));

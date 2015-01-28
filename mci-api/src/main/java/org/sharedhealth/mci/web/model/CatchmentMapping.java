@@ -4,7 +4,7 @@ import org.springframework.data.cassandra.mapping.Column;
 import org.springframework.data.cassandra.mapping.PrimaryKeyColumn;
 import org.springframework.data.cassandra.mapping.Table;
 
-import java.util.Date;
+import java.util.UUID;
 
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.CATCHMENT_ID;
@@ -18,7 +18,7 @@ public class CatchmentMapping {
     private String catchment_id;
 
     @PrimaryKeyColumn(name = LAST_UPDATED, ordinal = 2, type = CLUSTERED)
-    private Date last_updated;
+    private UUID last_updated;
 
     @Column(HEALTH_ID)
     private String health_id;
@@ -26,7 +26,7 @@ public class CatchmentMapping {
     public CatchmentMapping() {
     }
 
-    public CatchmentMapping(String catchmentId, Date lastUpdated, String healthId) {
+    public CatchmentMapping(String catchmentId, UUID lastUpdated, String healthId) {
         this.catchment_id = catchmentId;
         this.last_updated = lastUpdated;
         this.health_id = healthId;
@@ -40,11 +40,11 @@ public class CatchmentMapping {
         this.catchment_id = catchmentId;
     }
 
-    public Date getLastUpdated() {
+    public UUID getLastUpdated() {
         return last_updated;
     }
 
-    public void setLastUpdated(Date lastUpdated) {
+    public void setLastUpdated(UUID lastUpdated) {
         this.last_updated = lastUpdated;
     }
 

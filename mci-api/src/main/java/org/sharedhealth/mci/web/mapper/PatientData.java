@@ -20,11 +20,13 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
+import java.util.UUID;
 
+import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static java.lang.String.valueOf;
-import static org.apache.commons.lang3.StringUtils.*;
-import static org.sharedhealth.mci.utils.DateUtil.fromIsoFormat;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
@@ -84,12 +86,12 @@ public class PatientData {
 
     @JsonProperty(OCCUPATION)
     @JsonInclude(NON_EMPTY)
-    @Code(type = OCCUPATION, allowBlank=true, regexp = "[\\d]{2}", message = ERROR_CODE_INVALID)
+    @Code(type = OCCUPATION, allowBlank = true, regexp = "[\\d]{2}", message = ERROR_CODE_INVALID)
     private String occupation;
 
     @JsonProperty(EDU_LEVEL)
     @JsonInclude(NON_EMPTY)
-    @Code(type = EDUCATION_LEVEL, allowBlank=true, regexp = "[\\d]{2}", message = ERROR_CODE_INVALID)
+    @Code(type = EDUCATION_LEVEL, allowBlank = true, regexp = "[\\d]{2}", message = ERROR_CODE_INVALID)
     private String educationLevel;
 
     @JsonProperty(RELATIONS)
@@ -184,9 +186,9 @@ public class PatientData {
     @Date(format = DateUtil.DEFAULT_DATE_FORMAT, message = ERROR_CODE_PATTERN)
     private String dateOfDeath;
 
-    private java.util.Date createdAt;
+    private UUID createdAt;
 
-    private java.util.Date updatedAt;
+    private UUID updatedAt;
 
     @JsonIgnore
     private TreeSet<PendingApproval> pendingApprovals;
@@ -419,44 +421,42 @@ public class PatientData {
     @JsonProperty(CREATED)
     @JsonInclude(NON_EMPTY)
     public String getCreatedAtAsString() {
-        return this.createdAt != null ? toIsoFormat(this.createdAt.getTime()) : null;
+        return this.createdAt != null ? toIsoFormat(unixTimestamp(this.createdAt)) : null;
     }
 
     @JsonProperty(CREATED)
     @JsonInclude(NON_EMPTY)
     public void setCreatedAtAsString(String createdAt) {
-        this.createdAt = isNotBlank(createdAt) ? fromIsoFormat(createdAt) : null;
     }
 
     @JsonIgnore
-    public java.util.Date getCreatedAt() {
+    public UUID getCreatedAt() {
         return this.createdAt;
     }
 
     @JsonIgnore
-    public void setCreatedAt(java.util.Date createdAt) {
+    public void setCreatedAt(UUID createdAt) {
         this.createdAt = createdAt;
     }
 
     @JsonProperty(MODIFIED)
     @JsonInclude(NON_EMPTY)
     public String getUpdatedAtAsString() {
-        return this.updatedAt != null ? toIsoFormat(this.updatedAt.getTime()) : null;
+        return this.updatedAt != null ? toIsoFormat(unixTimestamp(this.updatedAt)) : null;
     }
 
     @JsonProperty(MODIFIED)
     @JsonInclude(NON_EMPTY)
     public void setUpdatedAtAsString(String updatedAt) {
-        this.updatedAt = isNotBlank(updatedAt) ? fromIsoFormat(updatedAt) : null;
     }
 
     @JsonIgnore
-    public java.util.Date getUpdatedAt() {
+    public UUID getUpdatedAt() {
         return this.updatedAt;
     }
 
     @JsonIgnore
-    public void setUpdatedAt(java.util.Date updatedAt) {
+    public void setUpdatedAt(UUID updatedAt) {
         this.updatedAt = updatedAt;
     }
 

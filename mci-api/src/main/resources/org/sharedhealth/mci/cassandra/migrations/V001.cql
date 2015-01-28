@@ -87,9 +87,9 @@ CREATE TABLE IF NOT EXISTS patient (
   location_level4 varchar,
   location_level5 varchar,
   location_level6 varchar,
-  created_at timestamp,
+  created_at timeuuid,
   created_by varchar,
-  updated_at timestamp,
+  updated_at timeuuid,
   updated_by varchar,
   full_name varchar,
   PRIMARY KEY (health_id)

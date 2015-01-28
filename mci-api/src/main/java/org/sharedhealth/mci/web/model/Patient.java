@@ -12,6 +12,7 @@ import org.springframework.data.cassandra.mapping.Table;
 
 import java.util.Date;
 import java.util.TreeSet;
+import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -256,10 +257,10 @@ public class Patient {
     private String primaryContactNumberExtension;
 
     @Column(CREATED_AT)
-    private Date createdAt;
+    private UUID createdAt;
 
     @Column(UPDATED_AT)
-    private Date updatedAt;
+    private UUID updatedAt;
 
     @Column(CREATED_BY)
     private String createdBy;
@@ -999,19 +1000,19 @@ public class Patient {
         this.permanentCountryCode = defaultString(permanentCountryCode, COUNTRY_CODE_BANGLADESH);
     }
 
-    public Date getCreatedAt() {
+    public UUID getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
+    public void setCreatedAt(UUID createdAt) {
         this.createdAt = createdAt;
     }
 
-    public Date getUpdatedAt() {
+    public UUID getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(Date updatedAt) {
+    public void setUpdatedAt(UUID updatedAt) {
         this.updatedAt = updatedAt;
     }
 

@@ -171,7 +171,7 @@ public class PatientQueryBuilder {
         buildCreateNameMappingStmt(patient, converter, batch);
     }
 
-    private static void buildCreateCatchmentMappingsStmt(Catchment catchment, Date lastUpdated, String healthId,
+    private static void buildCreateCatchmentMappingsStmt(Catchment catchment, UUID lastUpdated, String healthId,
                                                          CassandraConverter converter, Batch batch) {
         for (String catchmentId : catchment.getAllIds()) {
             CatchmentMapping mapping = new CatchmentMapping(catchmentId, lastUpdated, healthId);
@@ -179,7 +179,7 @@ public class PatientQueryBuilder {
         }
     }
 
-    private static void buildDeleteCatchmentMappingsStmt(Catchment catchment, Date lastUpdated, String healthId,
+    private static void buildDeleteCatchmentMappingsStmt(Catchment catchment, UUID lastUpdated, String healthId,
                                                          CassandraConverter converter, Batch batch) {
         for (String catchmentId : catchment.getAllIds()) {
             CatchmentMapping mapping = new CatchmentMapping(catchmentId, lastUpdated, healthId);
@@ -199,7 +199,7 @@ public class PatientQueryBuilder {
     }
 
     static void buildCreateUpdateLogStmt(PatientData patientDataToSave, PatientData existingPatientData,
-                                          CassandraConverter converter, Batch batch) {
+                                         CassandraConverter converter, Batch batch) {
         PatientUpdateLog patientUpdateLog = new PatientUpdateLog();
         String changeSet = getChangeSet(patientDataToSave, existingPatientData);
 
@@ -254,12 +254,12 @@ public class PatientQueryBuilder {
         return toUpdateQuery(CF_PATIENT, patient, null, converter);
     }
 
-    public static String buildFindByCatchmentStmt(Catchment catchment, Date after, int limit) {
+    public static String buildFindByCatchmentStmt(Catchment catchment, Date since, int limit) {
         Where where = select(HEALTH_ID, LAST_UPDATED).from(CF_CATCHMENT_MAPPING)
                 .where(eq(CATCHMENT_ID, catchment.getId()));
 
-        if (after != null) {
-            where = where.and(gte(LAST_UPDATED, after));
+        if (since != null) {
+            where = where.and(gte(LAST_UPDATED, UUIDs.startOf(since.getTime())));
         }
         return where.limit(limit).toString();
     }

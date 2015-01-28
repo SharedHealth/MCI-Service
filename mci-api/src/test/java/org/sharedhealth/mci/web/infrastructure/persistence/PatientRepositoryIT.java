@@ -30,7 +30,6 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.PHONE_NUMBER;
@@ -1186,8 +1185,10 @@ public class PatientRepositoryIT {
 
         Catchment catchment = new Catchment("10", "20", "30");
         catchment.setCityCorpId("40");
-        Date since = cassandraOps.selectOneById(Patient.class, healthIds.get(0)).getUpdatedAt();
+        UUID updatedAt = cassandraOps.selectOneById(Patient.class, healthIds.get(0)).getUpdatedAt();
+        assertNotNull(updatedAt);
         int limit = 3;
+        Date since = new Date(UUIDs.unixTimestamp(updatedAt));
         List<PatientData> patients = patientRepository.findAllByCatchment(catchment, since, null, limit);
 
         assertTrue(isNotEmpty(patients));

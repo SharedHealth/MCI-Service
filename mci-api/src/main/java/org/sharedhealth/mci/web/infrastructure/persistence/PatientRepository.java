@@ -24,6 +24,7 @@ import org.springframework.validation.FieldError;
 import java.util.*;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
+import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static java.util.Collections.emptyList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
@@ -62,8 +63,8 @@ public class PatientRepository extends BaseRepository {
         }
         Patient patient = mapper.map(patientData, new PatientData());
         patient.setHealthId(uidGenerator.getId());
-        patient.setCreatedAt(new Date());
-        patient.setUpdatedAt(new Date());
+        patient.setCreatedAt(timeBased());
+        patient.setUpdatedAt(timeBased());
 
         if (isBlank(patient.getStatus())) {
             patient.setStatus(PATIENT_STATUS_ALIVE);
@@ -85,7 +86,7 @@ public class PatientRepository extends BaseRepository {
 
         Patient newPatient = mapper.map(newPatientData, existingPatientData);
         newPatient.setHealthId(healthId);
-        newPatient.setUpdatedAt(new Date());
+        newPatient.setUpdatedAt(timeBased());
 
         final Batch batch = batch();
         buildUpdatePendingApprovalsBatch(newPatient, existingPatientData, batch);
@@ -281,7 +282,7 @@ public class PatientRepository extends BaseRepository {
             newPatient = new Patient();
             newPatient.setHealthId(requestData.getHealthId());
         }
-        newPatient.setUpdatedAt(new Date());
+        newPatient.setUpdatedAt(timeBased());
         newPatient.setPendingApprovals(existingPatientData.getPendingApprovals());
 
         String healthId = requestData.getHealthId();
