@@ -7,7 +7,7 @@ DROP INDEX location_level6_key;
 
 CREATE TABLE IF NOT EXISTS catchment_mapping (
     catchment_id varchar,
-    last_updated timeuuid,
+    last_updated timestamp,
     health_id varchar,
     PRIMARY KEY (catchment_id, last_updated, health_id)
 )WITH CLUSTERING ORDER BY (last_updated ASC);
