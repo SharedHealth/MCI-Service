@@ -38,8 +38,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.sharedhealth.mci.web.utils.JsonConstants.AFTER;
 import static org.sharedhealth.mci.web.utils.JsonConstants.LAST_MARKER;
+import static org.sharedhealth.mci.web.utils.JsonConstants.SINCE;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -86,7 +86,7 @@ public class UpdateFeedControllerTest {
         String nextUrl = fromUriString(url)
                 .queryParam(LAST_MARKER, encode(uuid3.toString(), "UTF-8")).build().toString();
 
-        url = url + "?after=2010-01-01T10:20:30Z";
+        url = url + "?since=2010-01-01T10:20:30Z";
 
         MvcResult mvcResult = mockMvc.perform(get(url).contentType(APPLICATION_JSON))
                 .andExpect(request().asyncStarted())
@@ -119,7 +119,7 @@ public class UpdateFeedControllerTest {
 
         when(patientService.findPatientsUpdatedSince(startDate, null)).thenReturn(null);
 
-        String url = format("http://localhost/%s/patients?after=2010-01-01T10:20:30Z", API_END_POINT);
+        String url = format("http://localhost/%s/patients?since=2010-01-01T10:20:30Z", API_END_POINT);
 
         MvcResult mvcResult = mockMvc.perform(get(url).contentType(APPLICATION_JSON))
                 .andExpect(request().asyncStarted())
@@ -159,7 +159,7 @@ public class UpdateFeedControllerTest {
 
         String requestUrl = request.getRequestURL().toString();
         String feedUrl = fromUriString(requestUrl)
-                .queryParam(AFTER, encode(dateString, "UTF-8"))
+                .queryParam(SINCE, encode(dateString, "UTF-8"))
                 .queryParam(LAST_MARKER, encode(uuid1.toString(), "UTF-8")).build().toString();
         assertEquals(feedUrl, feed.getFeedUrl());
 
@@ -191,7 +191,7 @@ public class UpdateFeedControllerTest {
         return patient;
     }
 
-    private MockHttpServletRequest buildHttpRequest(String after, String lastMarker) throws UnsupportedEncodingException {
+    private MockHttpServletRequest buildHttpRequest(String since, String lastMarker) throws UnsupportedEncodingException {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setServerName("www.mci.com");
         request.setServerPort(8081);
@@ -199,8 +199,8 @@ public class UpdateFeedControllerTest {
         request.setRequestURI("/api/v1/feed/patients");
 
         StringBuilder queryString = new StringBuilder();
-        if (isNotEmpty(after)) {
-            queryString.append(AFTER).append("=").append(encode(after, "UTF-8"));
+        if (isNotEmpty(since)) {
+            queryString.append(SINCE).append("=").append(encode(since, "UTF-8"));
         }
         if (isNotEmpty(lastMarker)) {
             queryString.append("&").append(LAST_MARKER).append("=").append(encode(lastMarker, "UTF-8"));

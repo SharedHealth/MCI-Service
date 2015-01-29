@@ -266,17 +266,17 @@ public class PatientQueryBuilder {
         return where.limit(limit).toString();
     }
 
-    public static String buildFindUpdateLogStmt(Date after, int limit, UUID lastMarker) {
+    public static String buildFindUpdateLogStmt(Date since, int limit, UUID lastMarker) {
 
-        int year = getLastYearMarker(after, lastMarker);
+        int year = getLastYearMarker(since, lastMarker);
 
         Where where = select().from(CF_PATIENT_UPDATE_LOG)
                 .where(in(YEAR, getYearsSince(year).toArray()));
 
         if (lastMarker != null) {
             where = where.and(gt(EVENT_ID, lastMarker));
-        }else if (after != null) {
-            where = where.and(gte(EVENT_ID, UUIDs.startOf(after.getTime())));
+        }else if (since != null) {
+            where = where.and(gte(EVENT_ID, UUIDs.startOf(since.getTime())));
         }
 
         return where.limit(limit).toString();

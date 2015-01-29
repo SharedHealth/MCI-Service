@@ -22,8 +22,8 @@ import static java.util.Collections.emptyList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.utils.DateUtil.fromIsoFormat;
-import static org.sharedhealth.mci.web.utils.JsonConstants.AFTER;
 import static org.sharedhealth.mci.web.utils.JsonConstants.LAST_MARKER;
+import static org.sharedhealth.mci.web.utils.JsonConstants.SINCE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
@@ -48,15 +48,15 @@ public class UpdateFeedController {
 
     @RequestMapping(value = "/patients", method = GET, produces = APPLICATION_JSON_VALUE)
     public DeferredResult<Feed> findAllPatients(
-            @RequestParam(value = AFTER, required = false) String after,
+            @RequestParam(value = SINCE, required = false) String since,
             @RequestParam(value = LAST_MARKER, required = false) String last,
             HttpServletRequest request) {
 
         final DeferredResult<Feed> deferredResult = new DeferredResult<>();
 
-        Date date = isNotBlank(after) ? fromIsoFormat(after) : null;
+        Date date = isNotBlank(since) ? fromIsoFormat(since) : null;
 
-        logger.debug("Find all patients  updated after [" + after + "] ");
+        logger.debug("Find all patients  updated since [" + since + "] ");
 
         UUID lastMarker = StringUtils.isBlank(last) ? null : UUID.fromString(last);
 

@@ -340,8 +340,8 @@ public class PatientRepository extends BaseRepository {
         }
     }
 
-    public List<PatientUpdateLog> findPatientsUpdatedSince(Date after, int limit, UUID lastMarker) {
-        return cassandraOps.select(buildFindUpdateLogStmt(after, limit, lastMarker),
+    public List<PatientUpdateLog> findPatientsUpdatedSince(Date since, int limit, UUID lastMarker) {
+        return cassandraOps.select(buildFindUpdateLogStmt(since, limit, lastMarker),
                 PatientUpdateLog.class);
     }
 }
