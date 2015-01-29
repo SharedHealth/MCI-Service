@@ -106,7 +106,7 @@ public class UpdateFeedControllerTest {
                 .andExpect(jsonPath("$.entries.[0].link", is("http://localhost:80/api/v1/patients/h100")))
                 .andExpect(jsonPath("$.entries.[0].categories[0]", is("patient")))
                 .andExpect(jsonPath("$.entries.[0].content.health_id", is("h100")))
-
+                .andExpect(jsonPath("$.entries.[0].content.change_set.sur_name", is("updated")))
                 .andExpect(jsonPath("$.entries.[1].id", is(uuid2.toString())))
                 .andExpect(jsonPath("$.entries.[2].id", is(uuid3.toString())));
 
