@@ -158,6 +158,13 @@ public class PatientDataTest extends ValidationAwareMapper {
     }
 
     @Test
+    public void shouldFailIfSurNameContainMultipleWord() {
+        Set<ConstraintViolation<PatientData>> constraintViolations = validator.validateValue(PatientData.class, "surName", "part1 part2");
+        assertEquals(1, constraintViolations.size());
+        assertEquals("1002", constraintViolations.iterator().next().getMessage());
+    }
+
+    @Test
     public void shouldFailIfPlaceOfBirthIsMoreThan_20_AlphabeticCharacters() {
         assertLengthViolation("placeOfBirth", 20);
     }

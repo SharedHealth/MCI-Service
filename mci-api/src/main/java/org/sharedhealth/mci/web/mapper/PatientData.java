@@ -67,7 +67,7 @@ public class PatientData {
     @JsonProperty(SUR_NAME)
     @JsonInclude(NON_EMPTY)
     @NotNull(message = ERROR_CODE_REQUIRED, groups = RequiredGroup.class)
-    @Length(max = 25, min = 1, message = ERROR_CODE_PATTERN)
+    @Pattern(regexp = "^([A-Za-z0-9]{1,25})$", message = ERROR_CODE_PATTERN)
     @JsonDeserialize(using = WhiteSpaceRemovalDeserializer.class)
     private String surName;
 

@@ -49,6 +49,13 @@ public class RelationTest extends ValidationAwareMapper{
     }
 
     @Test
+    public void shouldFailIfSurNameContainMultipleWord() {
+        Set<ConstraintViolation<Relation>> constraintViolations = validator.validateValue(Relation.class, "surName", "part1 part2");
+        assertEquals(1, constraintViolations.size());
+        assertEquals("1002", constraintViolations.iterator().next().getMessage());
+    }
+
+    @Test
     public void shouldFailIfSurNameIsMoreThan_25_Characters() {
         Set<ConstraintViolation<Relation>> constraintViolations = validator.validateValue(Relation.class, "surName", "janagiralamkabirkhanjahanaliahmadpuri");
         assertEquals("1002", constraintViolations.iterator().next().getMessage());
