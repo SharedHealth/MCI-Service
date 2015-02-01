@@ -75,6 +75,7 @@ public class PatientRepositoryIT {
         cassandraOps.execute("truncate " + CF_NAME_MAPPING);
         cassandraOps.execute("truncate " + CF_PENDING_APPROVAL_MAPPING);
         cassandraOps.execute("truncate " + CF_CATCHMENT_MAPPING);
+        cassandraOps.execute("truncate " + CF_PATIENT_UPDATE_LOG);
     }
 
     private PatientData createPatient() {
@@ -1122,8 +1123,7 @@ public class PatientRepositoryIT {
 
     @Test
     public void shouldCreateUpdateLogsWhenPatientIsUpdated() {
-        PatientData patient = createPatient();
-        String healthId = patientRepository.create(patient).getId();
+        String healthId = patientRepository.create(data).getId();
         Date since = new Date();
 
         assertUpdateLogEntry(healthId, since, false);
@@ -1137,14 +1137,77 @@ public class PatientRepositoryIT {
         assertUpdateLogEntry(healthId, since, true);
     }
 
-    private void assertUpdateLogEntry(String healthId, Date since, boolean shouldfind) {
-        List<PatientUpdateLog> patientUpdateLogs = cassandraOps.select(buildFindUpdateLogStmt(since, 1, null),
-                PatientUpdateLog.class);
-        if (shouldfind) {
-            assertTrue(healthId.equals(patientUpdateLogs.get(0).getHealthId()));
-        } else {
-            assertEquals(0, patientUpdateLogs.size());
-        }
+    @Test
+    public void shouldCreateUpdateLogWhenPresentAddressIsMarkedForApprovalAndUpdatedAfterApproval() {
+        String healthId = patientRepository.create(data).getId();
+        Date since = new Date();
+
+        assertUpdateLogEntry(healthId, since, false);
+
+        PatientData updateRequest = new PatientData();
+        Address newAddress = new Address("99", "88", "77");
+        updateRequest.setAddress(newAddress);
+        patientRepository.update(updateRequest, healthId);
+
+        assertUpdateLogEntry(healthId, since, false);
+
+        PatientData updatedPatient = patientRepository.findByHealthId(healthId);
+        patientRepository.processPendingApprovals(updateRequest, updatedPatient, true);
+
+        assertUpdateLogEntry(healthId, since, true);
+    }
+
+    @Test
+    public void shouldFindUpdateLogsUpdatedSince() {
+        String healthId = patientRepository.create(data).getId();
+        Date since = new Date();
+        final int limit = 20;
+
+        List<PatientUpdateLog> patientUpdateLogs = patientRepository.findPatientsUpdatedSince(since, limit, null);
+        assertEquals(0, patientUpdateLogs.size());
+
+        PatientData updateRequest = new PatientData();
+        updateRequest.setHealthId(healthId);
+        updateRequest.setGivenName("Update1");
+        patientRepository.update(updateRequest, healthId);
+        updateRequest.setGivenName("Update2");
+        patientRepository.update(updateRequest, healthId);
+
+        patientUpdateLogs = patientRepository.findPatientsUpdatedSince(since, limit, null);
+        assertEquals(2, patientUpdateLogs.size());
+        assertTrue(healthId.equals(patientUpdateLogs.get(0).getHealthId()));
+    }
+
+    @Test
+    public void shouldFindUpdateLogsUpdatedAfterLastMarker() {
+        String healthId = patientRepository.create(data).getId();
+        Date since = new Date();
+        final int limit = 20;
+
+        List<PatientUpdateLog> patientUpdateLogs = patientRepository.findPatientsUpdatedSince(since, limit, null);
+        assertEquals(0, patientUpdateLogs.size());
+
+        PatientData updateRequest = new PatientData();
+        updateRequest.setHealthId(healthId);
+        updateRequest.setGivenName("Update1");
+        patientRepository.update(updateRequest, healthId);
+
+        patientUpdateLogs = patientRepository.findPatientsUpdatedSince(since, limit, null);
+        assertEquals(1, patientUpdateLogs.size());
+        assertTrue(healthId.equals(patientUpdateLogs.get(0).getHealthId()));
+
+        final UUID marker = patientUpdateLogs.get(0).getEventId();
+
+        updateRequest.setGivenName("Update2");
+        patientRepository.update(updateRequest, healthId);
+        updateRequest.setGivenName("Update3");
+        patientRepository.update(updateRequest, healthId);
+
+        patientUpdateLogs = patientRepository.findPatientsUpdatedSince(since, limit, null);
+        assertEquals(3, patientUpdateLogs.size());
+
+        patientUpdateLogs = patientRepository.findPatientsUpdatedSince(since, limit, marker);
+        assertEquals(2, patientUpdateLogs.size());
     }
 
     @Test
@@ -1881,6 +1944,17 @@ public class PatientRepositoryIT {
         assertEquals(catchmentIds.size(), mappings.size());
         for (PendingApprovalMapping mapping : mappings) {
             assertTrue(catchmentIds.contains(mapping.getCatchmentId()));
+        }
+    }
+
+    private void assertUpdateLogEntry(String healthId, Date since, boolean shouldFind) {
+
+        List<PatientUpdateLog> patientUpdateLogs = patientRepository.findPatientsUpdatedSince(since, 1, null);
+
+        if (shouldFind) {
+            assertTrue(healthId.equals(patientUpdateLogs.get(0).getHealthId()));
+        } else {
+            assertEquals(0, patientUpdateLogs.size());
         }
     }
 }

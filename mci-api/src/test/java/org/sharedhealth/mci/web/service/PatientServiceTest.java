@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.sharedhealth.mci.web.exception.InsufficientPrivilegeException;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
 import org.sharedhealth.mci.web.mapper.*;
+import org.sharedhealth.mci.web.model.PatientUpdateLog;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
 
 import java.util.*;
@@ -656,5 +657,48 @@ public class PatientServiceTest {
 
         PatientData patient = patientService.findPatientByMultipleIds(requestData);
         assertNull(patient);
+    }
+
+    @Test
+    public void shouldFindUpdateLogsUpdatedSince() {
+        UUID eventId = timeBased();
+        Date since = new Date(unixTimestamp(eventId));
+        int limit = 25;
+        PatientUpdateLog patientLog = new PatientUpdateLog();
+        patientLog.setHealthId("h101");
+        patientLog.setEventId(eventId);
+
+        when(settingService.getSettingAsIntegerByKey("PER_PAGE_MAXIMUM_LIMIT")).thenReturn(limit);
+        when(patientRepository.findPatientsUpdatedSince(since, limit, null)).thenReturn(asList(patientLog));
+
+        List<PatientUpdateLog> patientLogs = patientService.findPatientsUpdatedSince(since, null);
+
+        verify(settingService).getSettingAsIntegerByKey("PER_PAGE_MAXIMUM_LIMIT");
+        verify(patientRepository).findPatientsUpdatedSince(since, limit, null);
+
+        assertNotNull(patientLogs);
+        assertEquals(1, patientLogs.size());
+        assertEquals(eventId, patientLog.getEventId());
+    }
+
+    @Test
+    public void shouldFindUpdateLogsUpdatedAfterLastMarker() {
+        UUID eventId = timeBased();
+        int limit = 25;
+        PatientUpdateLog patientLog = new PatientUpdateLog();
+        patientLog.setHealthId("h101");
+        patientLog.setEventId(eventId);
+
+        when(settingService.getSettingAsIntegerByKey("PER_PAGE_MAXIMUM_LIMIT")).thenReturn(limit);
+        when(patientRepository.findPatientsUpdatedSince(null, limit, eventId)).thenReturn(asList(patientLog));
+
+        List<PatientUpdateLog> patientLogs = patientService.findPatientsUpdatedSince(null, eventId);
+
+        verify(settingService).getSettingAsIntegerByKey("PER_PAGE_MAXIMUM_LIMIT");
+        verify(patientRepository).findPatientsUpdatedSince(null, limit, eventId);
+
+        assertNotNull(patientLogs);
+        assertEquals(1, patientLogs.size());
+        assertEquals(eventId, patientLog.getEventId());
     }
 }
