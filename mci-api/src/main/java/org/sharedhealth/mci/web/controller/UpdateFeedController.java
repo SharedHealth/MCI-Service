@@ -58,7 +58,13 @@ public class UpdateFeedController {
 
         logger.debug("Find all patients  updated since [" + since + "] ");
 
-        UUID lastMarker = StringUtils.isBlank(last) ? null : UUID.fromString(last);
+        UUID lastMarker;
+
+        try {
+            lastMarker = StringUtils.isBlank(last) ? null : UUID.fromString(last);
+        } catch (Exception e) {
+            lastMarker = null;
+        }
 
         List<PatientUpdateLog> patients = patientService.findPatientsUpdatedSince(date, lastMarker);
 

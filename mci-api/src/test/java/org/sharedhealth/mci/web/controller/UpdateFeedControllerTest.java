@@ -114,6 +114,48 @@ public class UpdateFeedControllerTest {
     }
 
     @Test
+    public void shouldFindPatientUpdatedAfterLastMarker() throws Exception {
+        UUID uuid1 = timeBased();
+        UUID uuid2 = timeBased();
+        UUID uuid3 = timeBased();
+
+        when(patientService.findPatientsUpdatedSince(null, uuid1)).thenReturn(
+                asList(buildPatientLog("h200", uuid2),
+                        buildPatientLog("h300", uuid3)));
+
+
+        String url = format("http://localhost/%s/patients", API_END_POINT);
+
+        String nextUrl = fromUriString(url)
+                .queryParam(LAST_MARKER, encode(uuid3.toString(), "UTF-8")).build().toString();
+
+        url = url + "?" + LAST_MARKER + "=" + uuid1.toString();
+
+        MvcResult mvcResult = mockMvc.perform(get(url).contentType(APPLICATION_JSON))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.author", is("MCI")))
+                .andExpect(jsonPath("$.title", is("Patients")))
+                .andExpect(jsonPath("$.feedUrl", is(url)))
+                .andExpect(jsonPath("$.prevUrl", is(nullValue())))
+                .andExpect(jsonPath("$.nextUrl", is(nextUrl)))
+
+                .andExpect(jsonPath("$.entries.[0].id", is(uuid2.toString())))
+                .andExpect(jsonPath("$.entries.[0].publishedDate", is(DateUtil.toIsoFormat(uuid2))))
+                .andExpect(jsonPath("$.entries.[0].title", is("Patient updates: h200")))
+                .andExpect(jsonPath("$.entries.[0].link", is("http://localhost:80/api/v1/patients/h200")))
+                .andExpect(jsonPath("$.entries.[0].categories[0]", is("patient")))
+                .andExpect(jsonPath("$.entries.[0].content.health_id", is("h200")))
+                .andExpect(jsonPath("$.entries.[0].content.change_set.sur_name", is("updated")))
+                .andExpect(jsonPath("$.entries.[1].id", is(uuid3.toString())));
+
+        verify(patientService).findPatientsUpdatedSince(null, uuid1);
+    }
+
+    @Test
     public void shouldReturnEmptyListIfNoPatientFound() throws Exception {
         Date startDate = DateUtil.fromIsoFormat("2010-01-01T10:20:30Z");
 
@@ -135,6 +177,29 @@ public class UpdateFeedControllerTest {
                 .andExpect(jsonPath("$.entries", is(emptyList())));
 
         verify(patientService).findPatientsUpdatedSince(startDate, null);
+    }
+
+    @Test
+    public void shouldWorkForInvalidLastMarker() throws Exception {
+
+        when(patientService.findPatientsUpdatedSince(null, null)).thenReturn(null);
+
+        String url = format("http://localhost/%s/patients?" + LAST_MARKER + "=123", API_END_POINT);
+
+        MvcResult mvcResult = mockMvc.perform(get(url).contentType(APPLICATION_JSON))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.author", is("MCI")))
+                .andExpect(jsonPath("$.title", is("Patients")))
+                .andExpect(jsonPath("$.feedUrl", is(url)))
+                .andExpect(jsonPath("$.prevUrl", is(nullValue())))
+                .andExpect(jsonPath("$.nextUrl", is(nullValue())))
+                .andExpect(jsonPath("$.entries", is(emptyList())));
+
+        verify(patientService).findPatientsUpdatedSince(null, null);
     }
 
     @Test
