@@ -18,6 +18,8 @@ import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -50,17 +52,22 @@ public class LocationSyncDataTest {
 
         String type = "DIVISION";
         String uri = "/list/division";
-        int offset = 0;
-        String updatedSince = "0000-00-00%2000:00:00";
-        LocationData[] locationDataArr = getAddressHierarchyEntries("lr-divisions.json");
-        givenThat(get(urlEqualTo("/api/1.0/locations" + uri + locationDataSync.getExtraFilter(offset, updatedSince)))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(asString("jsons/lr-divisions.json"))));
+        String dataFileName = "jsons/lr/lr-divisions.json";
+        String updatedSince = getCurrentDateTime();
+
+        String url = "/api/1.0/locations" + uri +
+                locationDataSync.getExtraFilter(updatedSince.replace(" ", "%20"), 100);
+        String body = asString(dataFileName);
+
+        LocationData[] locationDataArr = getAddressHierarchyEntries(dataFileName);
+        mockApiCall(url, body);
+
+        locationDataSync.setUpdatedSince(updatedSince);
         List<LocationData> divisions = locationDataSync.syncLRData(uri, type);
 
         assertEquals(locationDataArr.length, divisions.size());
+        assertEquals(locationDataArr[0].getName(), divisions.get(0).getName());
+        assertEquals(locationDataArr[6].getActive(), divisions.get(divisions.size() - 2).getActive());
     }
 
     @Test
@@ -68,17 +75,22 @@ public class LocationSyncDataTest {
 
         String type = "DISTRICT";
         String uri = "/list/district";
-        int offset = 0;
-        String updatedSince = "0000-00-00%2000:00:00";
-        LocationData[] locationDataArr = getAddressHierarchyEntries("lr-districts.json");
-        givenThat(get(urlEqualTo("/api/1.0/locations" + uri + locationDataSync.getExtraFilter(offset, updatedSince)))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(asString("jsons/lr-districts.json"))));
+        String dataFileName = "jsons/lr/lr-districts.json";
+        String updatedSince = getCurrentDateTime();
+
+        String url = "/api/1.0/locations" + uri +
+                locationDataSync.getExtraFilter(updatedSince.replace(" ", "%20"), 100);
+        String body = asString(dataFileName);
+
+        LocationData[] locationDataArr = getAddressHierarchyEntries(dataFileName);
+        mockApiCall(url, body);
+
+        locationDataSync.setUpdatedSince(updatedSince);
         List<LocationData> districts = locationDataSync.syncLRData(uri, type);
 
         assertEquals(locationDataArr.length, districts.size());
+        assertEquals(locationDataArr[0].getName(), districts.get(0).getName());
+        assertEquals(locationDataArr[0].getParent(), districts.get(0).getParent());
     }
 
     @Test
@@ -86,17 +98,21 @@ public class LocationSyncDataTest {
 
         String type = "UPAZILA";
         String uri = "/list/upazila";
-        int offset = 0;
-        String updatedSince = "0000-00-00%2000:00:00";
-        LocationData[] locationDataArr = getAddressHierarchyEntries("lr-upazilas.json");
-        givenThat(get(urlEqualTo("/api/1.0/locations" + uri + locationDataSync.getExtraFilter(offset, updatedSince)))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(asString("jsons/lr-upazilas.json"))));
+        String dataFileName = "jsons/lr/lr-upazilas.json";
+        String updatedSince = getCurrentDateTime();
+
+        String url = "/api/1.0/locations" + uri +
+                locationDataSync.getExtraFilter(updatedSince.replace(" ", "%20"), 100);
+        String body = asString(dataFileName);
+
+        LocationData[] locationDataArr = getAddressHierarchyEntries(dataFileName);
+        mockApiCall(url, body);
+        locationDataSync.setUpdatedSince(updatedSince);
         List<LocationData> upazilas = locationDataSync.syncLRData(uri, type);
 
         assertEquals(locationDataArr.length, upazilas.size());
+        assertEquals(locationDataArr[0].getName(), upazilas.get(0).getName());
+        assertEquals(locationDataArr[0].getParent(), upazilas.get(0).getParent());
     }
 
     @Test
@@ -104,17 +120,21 @@ public class LocationSyncDataTest {
 
         String type = "PAURASAVA";
         String uri = "/list/paurasava";
-        int offset = 0;
-        String updatedSince = "0000-00-00%2000:00:00";
-        LocationData[] locationDataArr = getAddressHierarchyEntries("lr-paurasavas.json");
-        givenThat(get(urlEqualTo("/api/1.0/locations" + uri + locationDataSync.getExtraFilter(offset, updatedSince)))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(asString("jsons/lr-paurasavas.json"))));
+        String dataFileName = "jsons/lr/lr-paurasavas.json";
+        String updatedSince = getCurrentDateTime();
+
+        String url = "/api/1.0/locations" + uri +
+                locationDataSync.getExtraFilter(updatedSince.replace(" ", "%20"), 100);
+        String body = asString(dataFileName);
+
+        LocationData[] locationDataArr = getAddressHierarchyEntries(dataFileName);
+        mockApiCall(url, body);
+        locationDataSync.setUpdatedSince(updatedSince);
         List<LocationData> paurasavas = locationDataSync.syncLRData(uri, type);
 
         assertEquals(locationDataArr.length, paurasavas.size());
+        assertEquals(locationDataArr[0].getName(), paurasavas.get(0).getName());
+        assertEquals(locationDataArr[0].getParent(), paurasavas.get(0).getParent());
     }
 
     @Test
@@ -122,17 +142,21 @@ public class LocationSyncDataTest {
 
         String type = "UNION";
         String uri = "/list/union";
-        int offset = 0;
-        String updatedSince = "0000-00-00%2000:00:00";
-        LocationData[] locationDataArr = getAddressHierarchyEntries("lr-unions.json");
-        givenThat(get(urlEqualTo("/api/1.0/locations" + uri + locationDataSync.getExtraFilter(offset, updatedSince)))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(asString("jsons/lr-unions.json"))));
+        String dataFileName = "jsons/lr/lr-unions.json";
+        String updatedSince = getCurrentDateTime();
+
+        String url = "/api/1.0/locations" + uri +
+                locationDataSync.getExtraFilter(updatedSince.replace(" ", "%20"), 100);
+        String body = asString(dataFileName);
+
+        LocationData[] locationDataArr = getAddressHierarchyEntries(dataFileName);
+        mockApiCall(url, body);
+        locationDataSync.setUpdatedSince(updatedSince);
         List<LocationData> unions = locationDataSync.syncLRData(uri, type);
 
         assertEquals(locationDataArr.length, unions.size());
+        assertEquals(locationDataArr[0].getName(), unions.get(0).getName());
+        assertEquals(locationDataArr[0].getParent(), unions.get(0).getParent());
     }
 
     @Test
@@ -140,23 +164,39 @@ public class LocationSyncDataTest {
 
         String type = "WARD";
         String uri = "/list/ward";
-        int offset = 0;
-        String updatedSince = "0000-00-00%2000:00:00";
-        LocationData[] locationDataArr = getAddressHierarchyEntries("lr-wards.json");
-        givenThat(get(urlEqualTo("/api/1.0/locations" + uri + locationDataSync.getExtraFilter(offset, updatedSince)))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(asString("jsons/lr-wards.json"))));
+        String dataFileName = "jsons/lr/lr-wards.json";
+        String updatedSince = getCurrentDateTime();
+
+        String url = "/api/1.0/locations" + uri +
+                locationDataSync.getExtraFilter(updatedSince.replace(" ", "%20"), 100);
+        String body = asString(dataFileName);
+
+        LocationData[] locationDataArr = getAddressHierarchyEntries(dataFileName);
+        mockApiCall(url, body);
+        locationDataSync.setUpdatedSince(updatedSince);
         List<LocationData> wards = locationDataSync.syncLRData(uri, type);
 
         assertEquals(locationDataArr.length, wards.size());
+        assertEquals(locationDataArr[0].getName(), wards.get(0).getName());
+        assertEquals(locationDataArr[0].getParent(), wards.get(0).getParent());
+    }
+
+    private void mockApiCall(String url, String body) {
+        givenThat(get(urlEqualTo(url))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(body)));
     }
 
     public LocationData[] getAddressHierarchyEntries(String responseFileName) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        String json = asString("jsons/" + responseFileName);
+        String json = asString(responseFileName);
         return mapper.readValue(json, LocationData[].class);
+    }
+
+    protected String getCurrentDateTime() {
+        return new SimpleDateFormat("YYYY-MM-dd HH:mm:ss").format(new Date());
     }
 
 }

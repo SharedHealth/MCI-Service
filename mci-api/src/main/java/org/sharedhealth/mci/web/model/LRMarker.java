@@ -14,13 +14,9 @@ public class LRMarker {
     @Column("last_sync")
     private String lastSync;
 
-    @Column("offset")
-    private int offset;
-
-    public LRMarker(String type, String lastSync, int offset) {
+    public LRMarker(String type, String lastSync) {
         this.type = type;
         this.lastSync = lastSync;
-        this.offset = offset;
     }
 
     public LRMarker() {
@@ -43,11 +39,4 @@ public class LRMarker {
         this.lastSync = lastSync;
     }
 
-    public int getOffset() {
-        return offset;
-    }
-
-    public void setOffset(int offset) {
-        this.offset = offset;
-    }
 }

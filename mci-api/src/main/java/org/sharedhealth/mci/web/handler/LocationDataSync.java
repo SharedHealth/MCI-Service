@@ -15,12 +15,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureAdapter;
 import org.springframework.web.client.AsyncRestTemplate;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -31,7 +31,7 @@ public class LocationDataSync {
     private final Logger logger = Logger.getLogger(LocationDataSync.class);
     public static final String AUTH_KEY = "X-Auth-Token";
 
-    private AsyncRestTemplate mciAsyncRestTemplate;
+    private AsyncRestTemplate mciRestTemplate;
     private MCIProperties mciProperties;
 
     public static final String LR_DIVISION_URI_PATH = "/list/division";
@@ -48,24 +48,22 @@ public class LocationDataSync {
     public static final String UNION_TYPE = "UNION";
     public static final String WARD_TYPE = "WARD";
 
-    public static final int INITIAL_OFFSET = 0;
     private static final int DEFAULT_LIMIT = 100;
-    public static final int MAX_SYNC_DATA_SIZE = 1000;
-    private static final String EXTRA_FILTER_PATTERN = "?offset=%s&limit=%s&updatedSince=%s";
-    private static final String INITIAL_DATETIME = "0000-00-00 00:00:00";
+    private static final String EXTRA_FILTER_PATTERN = "?limit=%s&updatedSince=%s";
     private List<String> failedDuringSaveOrUpdateOperation;
-    private int noOfEntriesSynchronizedSoFar;
 
     private LocationService locationService;
 
+    private String updatedSince;
+    private int limit = 0;
+
 
     @Autowired
-    public LocationDataSync(@Qualifier("MCIRestTemplate") AsyncRestTemplate mciAsyncRestTemplate, MCIProperties mciProperties, LocationService locationService) {
-        this.mciAsyncRestTemplate = mciAsyncRestTemplate;
+    public LocationDataSync(@Qualifier("MCIRestTemplate") AsyncRestTemplate mciRestTemplate, MCIProperties mciProperties, LocationService locationService) {
+        this.mciRestTemplate = mciRestTemplate;
         this.mciProperties = mciProperties;
         this.locationService = locationService;
         this.failedDuringSaveOrUpdateOperation = new ArrayList<>();
-        this.noOfEntriesSynchronizedSoFar = 0;
     }
 
     private HttpEntity getHttpEntityWithAuthenticationHeader() {
@@ -75,66 +73,52 @@ public class LocationDataSync {
     }
 
     public void sync() throws IOException {
+        initParam();
         List<LocationData> divisions = syncLRData(LR_DIVISION_URI_PATH, DIVISION_TYPE);
         logger.info(divisions.size() + " divisions entries synchronized");
+
+        initParam();
         List<LocationData> districts = syncLRData(LR_DISTRICT_URI_PATH, DISTRICT_TYPE);
-        logger.info(districts.size() + " divisions entries synchronized");
+        logger.info(districts.size() + " districts entries synchronized");
+
+        initParam();
         List<LocationData> upazilas = syncLRData(LR_UPAZILA_URI_PATH, UPAZILA_TYPE);
-        logger.info(upazilas.size() + " divisions entries synchronized");
+        logger.info(upazilas.size() + " upazilas entries synchronized");
+
+        initParam();
         List<LocationData> paurasavas = syncLRData(LR_PAURASAVA_PATH, PAURASAVA_TYPE);
-        logger.info(paurasavas.size() + " divisions entries synchronized");
+        logger.info(paurasavas.size() + " paurasavas entries synchronized");
+
+        initParam();
         List<LocationData> unions = syncLRData(LR_UNION_URI_PATH, UNION_TYPE);
-        logger.info(unions.size() + " divisions entries synchronized");
+        logger.info(unions.size() + " unions entries synchronized");
+
+        initParam();
         List<LocationData> wards = syncLRData(LR_WARD_URI_PATH, WARD_TYPE);
-        logger.info(wards.size() + " divisions entries synchronized");
+        logger.info(wards.size() + " wards entries synchronized");
     }
 
     public List<LocationData> syncLRData(String uri, String type) {
 
         List<LocationData> totalRetrieveList = new ArrayList<>();
-        List<LocationData> lastRetrieveList = new ArrayList<>();
+        List<LocationData> lastRetrieveList;
 
-        if (noOfEntriesSynchronizedSoFar >= MAX_SYNC_DATA_SIZE) {
-            return lastRetrieveList;
-        }
+        updatedSince = getUpdatedSince(type);
+        limit = getLimit();
 
-        int offset = INITIAL_OFFSET;
-        String updatedSince = INITIAL_DATETIME;
-        LRMarker lrMarker = locationService.getLRMarkerData(type);
-
-        if (lrMarker != null) {
-            updatedSince = lrMarker.getLastSync();
-            offset = lrMarker.getOffset();
-        }
-
-        String url = getCompleteUrl(uri, offset,updatedSince);
-        ListenableFuture<LocationData[]> lrResponse;
+        String url = getCompleteUrl(uri, updatedSince, limit);
         try {
             do {
-                lastRetrieveList = new ArrayList<>();
-                lrResponse = getNextChunkOfDataFromLR(url);
-                LocationData[] locationDataArr = lrResponse.get();
-                if (locationDataArr != null) {
-                    for (LocationData locationData : locationDataArr) {
-                        lastRetrieveList.add(locationData);
-                    }
+                lastRetrieveList = getNextChunkOfDataFromLR(url);
+                if (lastRetrieveList != null && lastRetrieveList.size() > 0) {
+                    saveOrUpdateLRData(lastRetrieveList, type);
+                    totalRetrieveList.addAll(lastRetrieveList);
+                    updatedSince = lastRetrieveList.get(lastRetrieveList.size() - 1).getUpdatedAt();
                 }
-                saveOrUpdateLRData(lastRetrieveList);
-                totalRetrieveList.addAll(lastRetrieveList);
-                offset = offset + DEFAULT_LIMIT;
-                this.noOfEntriesSynchronizedSoFar += lastRetrieveList.size();
-            } while (lastRetrieveList.size() == DEFAULT_LIMIT && noOfEntriesSynchronizedSoFar < MAX_SYNC_DATA_SIZE);
+            } while (lastRetrieveList != null && lastRetrieveList.size() == limit);
         } catch (Exception e) {
             logger.info(e.getMessage());
             throw new RuntimeException(e);
-        }
-
-        if (lastRetrieveList != null) {
-            if (lastRetrieveList.size() == DEFAULT_LIMIT) {
-                locationService.saveOrUpdateLRMarkerData(type, INITIAL_DATETIME, offset);
-            } else {
-                locationService.saveOrUpdateLRMarkerData(type, getCurrentDateAndTime(), INITIAL_OFFSET);
-            }
         }
 
         logger.info(totalRetrieveList.size() + " " + type + " entries synchronized");
@@ -142,54 +126,95 @@ public class LocationDataSync {
         logger.info("Synchronization Failed for the following LR");
         logger.info(failedDuringSaveOrUpdateOperation.toString());
 
+        if (totalRetrieveList.size() == 0) {
+            locationService.saveOrUpdateLRMarkerData(type, getCurrentDateTime());
+        }
         return totalRetrieveList;
 
     }
 
-    private void saveOrUpdateLRData(List<LocationData> lastRetrieveList) {
+    private void saveOrUpdateLRData(List<LocationData> lastRetrieveList, String type) {
 
-        if(lastRetrieveList != null) {
+        if (lastRetrieveList != null) {
 
             for (LocationData locationData : lastRetrieveList) {
                 try {
                     Location location = locationService.saveOrUpdateLocationData(locationData);
 
                 } catch (Exception e) {
-                    logger.info("Failed to sync with Local DB "+ e.getMessage());
+                    logger.info("Failed to sync with Local DB " + e.getMessage());
                     failedDuringSaveOrUpdateOperation.add(locationData.toString());
+                    locationService.saveOrUpdateLRMarkerData(type, locationData.getUpdatedAt());
+                    throw e;
                 }
             }
+            updatedSince = lastRetrieveList.get(lastRetrieveList.size() - 1).getUpdatedAt();
+            locationService.saveOrUpdateLRMarkerData(type, updatedSince);
         }
     }
 
 
-    public ListenableFuture<LocationData[]> getNextChunkOfDataFromLR(String url) {
+    public List<LocationData> getNextChunkOfDataFromLR(String url) throws ExecutionException, InterruptedException {
 
-        return new ListenableFutureAdapter<LocationData[], ResponseEntity<LocationData[]>>(mciAsyncRestTemplate.exchange(
+        ListenableFuture<ResponseEntity<LocationData[]>> listenableFuture = mciRestTemplate.exchange(
                 url,
                 HttpMethod.GET,
                 getHttpEntityWithAuthenticationHeader(),
-                LocationData[].class)) {
-            @Override
-            protected LocationData[] adapt(ResponseEntity<LocationData[]> result) throws ExecutionException {
-                if (result.getStatusCode().is2xxSuccessful()) {
-                    return result.getBody();
-                } else {
-                    return null;
-                }
-            }
-        };
+                LocationData[].class);
+
+        ResponseEntity<LocationData[]> responseEntity = listenableFuture.get();
+        if (responseEntity.getStatusCode().is2xxSuccessful()) {
+            return Arrays.asList(responseEntity.getBody());
+        }
+
+        return null;
     }
 
-    public String getCompleteUrl(String uri, int offset, String updatedSince) {
-        return mciProperties.getLocaitonRegistryUrl() + uri + getExtraFilter(offset,updatedSince);
+    public String getCompleteUrl(String uri, String updatedSince, int limit) {
+        return mciProperties.getLocaitonRegistryUrl() + uri + getExtraFilter(updatedSince, limit);
     }
 
-    public String getExtraFilter(int offset, String updatedSince) {
-        return String.format(EXTRA_FILTER_PATTERN, offset, DEFAULT_LIMIT, updatedSince);
+    public String getExtraFilter(String updatedSince, int limit) {
+        return String.format(EXTRA_FILTER_PATTERN, limit, updatedSince);
     }
 
-    public String getCurrentDateAndTime() {
+    public String getUpdatedSince(String type) {
+
+        if (updatedSince != null) {
+            return updatedSince;
+        }
+
+        LRMarker lrMarker = locationService.getLRMarkerData(type);
+
+        if (lrMarker != null) {
+            updatedSince = lrMarker.getLastSync();
+            return updatedSince;
+        }
+
+        return new SimpleDateFormat("YYYY-MM-dd HH:mm:ss").format(new Date());
+    }
+
+    public void setUpdatedSince(String updatedSince) {
+        this.updatedSince = updatedSince;
+    }
+
+    public int getLimit() {
+        if (limit <= 0) {
+            limit = DEFAULT_LIMIT;
+        }
+        return limit;
+    }
+
+    public void setLimit(int limit) {
+        this.limit = limit;
+    }
+
+    private void initParam() {
+        updatedSince = null;
+        limit = 0;
+    }
+
+    private String getCurrentDateTime() {
         return new SimpleDateFormat("YYYY-MM-dd HH:mm:ss").format(new Date());
     }
 

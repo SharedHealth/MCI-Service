@@ -37,7 +37,7 @@ public class LocationService {
         return locationRepository.getLRMarkerData(type);
     }
 
-    public boolean saveOrUpdateLRMarkerData(String type, String lastSync, int offset) {
-        return locationRepository.saveOrUpdateLRMarkerData(type, lastSync, offset);
+    public boolean saveOrUpdateLRMarkerData(String type, String lastSync) {
+        return locationRepository.saveOrUpdateLRMarkerData(type, lastSync);
     }
 }

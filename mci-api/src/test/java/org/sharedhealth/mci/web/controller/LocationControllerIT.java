@@ -58,7 +58,7 @@ public class LocationControllerIT extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
         final MCIMultiResponse body = getMciMultiResponse(result);
-        Assert.assertEquals(7, body.getResults().toArray().length);
+        Assert.assertNotSame("[]", body.getResults());
         Assert.assertEquals(200, body.getHttpStatus());
     }
 

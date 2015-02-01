@@ -2,7 +2,7 @@
     {
         "code": "30",
         "id": "30",
-        "name": "Dhaka",
+        "name": "Division Updated",
         "type": "division",
         "active": 1,
         "updatedAt": "2014-11-19 17:45:38",
@@ -94,12 +94,27 @@
         "id": "60",
         "name": "Sylhet",
         "type": "division",
-        "active": 1,
+        "active": 0,
         "updatedAt": "2014-11-19 17:45:40",
         "hierarchy": [
             {
                 "code": "60",
                 "name": "Sylhet",
+                "type": "division"
+            }
+        ]
+    },
+    {
+        "code": "80",
+        "id": "80",
+        "name": "New Division",
+        "type": "division",
+        "active": 1,
+        "updatedAt": "2014-11-19 17:45:40",
+        "hierarchy": [
+            {
+                "code": "80",
+                "name": "New Division",
                 "type": "division"
             }
         ]

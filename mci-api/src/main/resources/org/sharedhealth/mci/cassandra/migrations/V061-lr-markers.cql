@@ -1,0 +1,1 @@
+ALTER TABLE lr_markers DROP offset;

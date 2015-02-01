@@ -85,7 +85,7 @@ public class LocationRepository extends BaseRepository {
                 cassandraOps.update(location);
             } else {
                 location = new Location(existingLocationData.getCode(),
-                        existingLocationData.getName(), existingLocationData.getParent(), existingLocationData.getActive());
+                        locationData.getName(), existingLocationData.getParent(), existingLocationData.getActive());
                 cassandraOps.update(location);
             }
         } catch (Exception e) {
@@ -112,14 +112,13 @@ public class LocationRepository extends BaseRepository {
         return null;
     }
 
-    public boolean saveOrUpdateLRMarkerData(String type, String lastSync, int offset) {
+    public boolean saveOrUpdateLRMarkerData(String type, String lastSync) {
         LRMarker oldLrMarker = getLRMarkerData(type);
         if (oldLrMarker != null) {
             oldLrMarker.setLastSync(lastSync);
-            oldLrMarker.setOffset(offset);
             cassandraOps.update(oldLrMarker);
         } else {
-            LRMarker lrMapper = new LRMarker(type, lastSync, offset);
+            LRMarker lrMapper = new LRMarker(type, lastSync);
             cassandraOps.insert(lrMapper);
         }
         return true;
