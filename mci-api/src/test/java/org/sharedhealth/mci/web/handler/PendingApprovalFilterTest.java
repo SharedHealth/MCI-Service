@@ -4,12 +4,16 @@ import org.junit.Test;
 import org.sharedhealth.mci.web.mapper.*;
 
 import java.text.ParseException;
-import java.util.*;
+import java.util.Properties;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.UUID;
 
+import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static java.util.Arrays.asList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
+import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
 public class PendingApprovalFilterTest {
@@ -219,6 +223,9 @@ public class PendingApprovalFilterTest {
         assertEquals(1, fieldDetailsMap.size());
         PendingApprovalFieldDetails fieldDetails = fieldDetailsMap.values().iterator().next();
         assertEquals(value, fieldDetails.getValue());
+        assertNotNull(fieldDetails.getFacilityId());
+        long expectedCreatedAt = unixTimestamp(fieldDetailsMap.keySet().iterator().next());
+        assertEquals(toIsoFormat(expectedCreatedAt), fieldDetails.getCreatedAt());
     }
 
     private PatientData buildPatientData() throws ParseException {

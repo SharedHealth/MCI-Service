@@ -10,6 +10,7 @@ import java.util.TreeMap;
 import java.util.UUID;
 
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
+import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static java.lang.String.valueOf;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
@@ -115,9 +116,11 @@ public class PendingApprovalFilter {
 
         TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap = new TreeMap<>();
         PendingApprovalFieldDetails fieldDetails = new PendingApprovalFieldDetails();
-        fieldDetails.setFacilityId(DUMMY_FACILITY);
         fieldDetails.setValue(newValue);
-        fieldDetailsMap.put(timeBased(), fieldDetails);
+        fieldDetails.setFacilityId(DUMMY_FACILITY);
+        UUID uuid = timeBased();
+        fieldDetails.setCreatedAt(unixTimestamp(uuid));
+        fieldDetailsMap.put(uuid, fieldDetails);
         pendingApproval.setFieldDetails(fieldDetailsMap);
 
         return pendingApproval;

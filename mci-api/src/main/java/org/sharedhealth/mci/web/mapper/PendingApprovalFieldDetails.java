@@ -1,8 +1,8 @@
 package org.sharedhealth.mci.web.mapper;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.sharedhealth.mci.utils.DateUtil;
 
+import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.web.utils.JsonConstants.CREATED_AT;
 import static org.sharedhealth.mci.web.utils.JsonConstants.FACILITY_ID;
 
@@ -42,7 +42,7 @@ public class PendingApprovalFieldDetails {
     }
 
     public void setCreatedAt(long createdAt) {
-        this.createdAt = DateUtil.toIsoFormat(createdAt);
+        this.createdAt = toIsoFormat(createdAt);
     }
 
     @Override
