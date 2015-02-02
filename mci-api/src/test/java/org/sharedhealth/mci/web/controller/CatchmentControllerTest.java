@@ -1,14 +1,12 @@
 package org.sharedhealth.mci.web.controller;
 
+import com.datastax.driver.core.utils.UUIDs;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.sharedhealth.mci.web.mapper.Catchment;
-import org.sharedhealth.mci.web.mapper.Feed;
-import org.sharedhealth.mci.web.mapper.FeedEntry;
-import org.sharedhealth.mci.web.mapper.PatientData;
+import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.service.PatientService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -20,10 +18,10 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.text.ParseException;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
+import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static java.lang.String.format;
 import static java.net.URLEncoder.encode;
 import static java.util.Arrays.asList;
@@ -36,16 +34,19 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.utils.DateUtil.fromIsoFormat;
+import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
+import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 public class CatchmentControllerTest {
 
     private static final String API_END_POINT = "api/v1/catchments";
+
     @Mock
     private PatientService patientService;
     @Mock
@@ -63,16 +64,199 @@ public class CatchmentControllerTest {
     }
 
     @Test
-    public void shouldFindPatientByCatchment() throws Exception {
-        shouldFindPatientByCatchment("1020");
-        shouldFindPatientByCatchment("102030");
-        shouldFindPatientByCatchment("10203040");
-        shouldFindPatientByCatchment("1020304050");
-        shouldFindPatientByCatchment("102030405060");
+    public void shouldFindPendingApprovalsWithoutGivenTime() throws Exception {
+        Catchment catchment = new Catchment("10", "20", "30");
+        List<PendingApprovalListResponse> pendingApprovals = new ArrayList<>();
+        pendingApprovals.add(buildPendingApprovalListResponse(1));
+        pendingApprovals.add(buildPendingApprovalListResponse(2));
+        pendingApprovals.add(buildPendingApprovalListResponse(3));
+
+        when(patientService.findPendingApprovalList(catchment, null, null)).thenReturn(pendingApprovals);
+
+        String url = buildPendingApprovalUrl("102030");
+        MvcResult mvcResult = mockMvc.perform(get(url))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.results[0].hid", is("hid-1")))
+                .andExpect(jsonPath("$.results[0].given_name", is("Scott-1")))
+                .andExpect(jsonPath("$.results[0].sur_name", is("Tiger-1")))
+                .andExpect(jsonPath("$.results[0].last_updated", is(pendingApprovals.get(0).getLastUpdated().toString())))
+
+                .andExpect(jsonPath("$.results[1].hid", is("hid-2")))
+                .andExpect(jsonPath("$.results[1].given_name", is("Scott-2")))
+                .andExpect(jsonPath("$.results[1].sur_name", is("Tiger-2")))
+                .andExpect(jsonPath("$.results[1].last_updated", is(pendingApprovals.get(1).getLastUpdated().toString())))
+
+                .andExpect(jsonPath("$.results[2].hid", is("hid-3")))
+                .andExpect(jsonPath("$.results[2].given_name", is("Scott-3")))
+                .andExpect(jsonPath("$.results[2].sur_name", is("Tiger-3")))
+                .andExpect(jsonPath("$.results[2].last_updated", is(pendingApprovals.get(2).getLastUpdated().toString())));
+
+        verify(patientService).findPendingApprovalList(catchment, null, null);
     }
 
-    private void shouldFindPatientByCatchment(String catchmentId) throws Exception {
+    private PendingApprovalListResponse buildPendingApprovalListResponse(int suffix) {
+        PendingApprovalListResponse pendingApproval = new PendingApprovalListResponse();
+        pendingApproval.setHealthId("hid-" + suffix);
+        pendingApproval.setGivenName("Scott-" + suffix);
+        pendingApproval.setSurname("Tiger-" + suffix);
+        pendingApproval.setLastUpdated(UUID.randomUUID());
+        return pendingApproval;
+    }
+
+    @Test
+    public void shouldFindPendingApprovalsAfterGivenTime() throws Exception {
+        Catchment catchment = new Catchment("10", "20", "30");
+        UUID after = UUIDs.timeBased();
+        when(patientService.findPendingApprovalList(catchment, after, null)).thenReturn(new ArrayList<PendingApprovalListResponse>());
+
+        String url = buildPendingApprovalUrl("102030");
+        MvcResult mvcResult = mockMvc.perform(get(url + "?" + AFTER + "=" + after))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isOk());
+
+        verify(patientService).findPendingApprovalList(catchment, after, null);
+    }
+
+    @Test
+    public void shouldFindPendingApprovalsABeforeGivenTime() throws Exception {
+        Catchment catchment = new Catchment("10", "20", "30");
+        UUID before = UUIDs.timeBased();
+        when(patientService.findPendingApprovalList(catchment, null, before)).thenReturn(new ArrayList<PendingApprovalListResponse>());
+
+        String url = buildPendingApprovalUrl("102030");
+        MvcResult mvcResult = mockMvc.perform(get(url + "?" + BEFORE + "=" + before))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isOk());
+
+        verify(patientService).findPendingApprovalList(catchment, null, before);
+    }
+
+    @Test
+    public void shouldFindPendingApprovalsABetweenGivenTimes() throws Exception {
+        Catchment catchment = new Catchment("10", "20", "30");
+        UUID after = UUIDs.timeBased();
+        UUID before = UUIDs.timeBased();
+        when(patientService.findPendingApprovalList(catchment, after, before)).thenReturn(new ArrayList<PendingApprovalListResponse>());
+
+        String url = buildPendingApprovalUrl("102030");
+        MvcResult mvcResult = mockMvc.perform(get(url + "?" + AFTER + "=" + after + "&" + BEFORE + "=" + before))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isOk());
+
+        verify(patientService).findPendingApprovalList(catchment, after, before);
+    }
+
+    @Test
+    public void shouldFindPendingApprovalDetailsForGivenHealthId() throws Exception {
+        String healthId = "health-100";
+        PendingApproval pendingApproval = new PendingApproval();
+        pendingApproval.setName(OCCUPATION);
+        pendingApproval.setCurrentValue("curr val");
+
+        TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap = new TreeMap<>();
+        UUID timeuuid = UUIDs.timeBased();
+        PendingApprovalFieldDetails approvalFieldDetails = new PendingApprovalFieldDetails();
+        approvalFieldDetails.setFacilityId("facility-100");
+        approvalFieldDetails.setValue("some value");
+        approvalFieldDetails.setCreatedAt(unixTimestamp(timeuuid));
+        fieldDetailsMap.put(timeuuid, approvalFieldDetails);
+        pendingApproval.setFieldDetails(fieldDetailsMap);
+
+        TreeSet<PendingApproval> pendingApprovals = new TreeSet<>();
+        pendingApprovals.add(pendingApproval);
+
+        String catchmentId = "102030";
+        Catchment catchment = new Catchment(catchmentId);
+        when(patientService.findPendingApprovalDetails(healthId, catchment)).thenReturn(pendingApprovals);
+
+        String url = buildPendingApprovalUrl(catchmentId, healthId);
+        MvcResult mvcResult = mockMvc.perform(get(url))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.results[0].field_name", is(OCCUPATION)))
+                .andExpect(jsonPath("$.results[0].current_value", is("curr val")))
+                .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".facility_id", is("facility-100")))
+                .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".value", is("some value")))
+                .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".created_at", is(toIsoFormat(unixTimestamp(timeuuid)))));
+
+        verify(patientService).findPendingApprovalDetails(healthId, catchment);
+    }
+
+    @Test
+    public void shouldAcceptPendingApprovalsForGivenHealthId() throws Exception {
+        String healthId = "health-100";
+        PatientData patient = new PatientData();
+        patient.setHealthId(healthId);
+
+        String catchmentId = "102030";
+        Catchment catchment = new Catchment(catchmentId);
+        when(patientService.processPendingApprovals(patient, catchment, true)).thenReturn(healthId);
+
+        String url = buildPendingApprovalUrl(catchmentId, healthId);
+        String content = writeValueAsString(patient);
+        MvcResult mvcResult = mockMvc.perform(put(url).content(content).contentType(APPLICATION_JSON))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.id", is(healthId)));
+
+        verify(patientService).processPendingApprovals(patient, catchment, true);
+    }
+
+    @Test
+    public void shouldRejectPendingApprovalsForGivenHealthId() throws Exception {
+        String healthId = "health-100";
+        PatientData patient = new PatientData();
+        patient.setHealthId(healthId);
+
+        String catchmentId = "102030";
+        Catchment catchment = new Catchment(catchmentId);
+
+        when(patientService.processPendingApprovals(patient, catchment, false)).thenReturn(healthId);
+
+        String content = writeValueAsString(patient);
+        String url = buildPendingApprovalUrl(catchmentId, healthId);
+        MvcResult mvcResult = mockMvc.perform(delete(url).content(content).contentType(APPLICATION_JSON))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.id", is(healthId)));
+
+        verify(patientService).processPendingApprovals(patient, catchment, false);
+    }
+
+    private String buildPendingApprovalUrl(String catchmentId) {
+        return format("/%s/%s/approvals", API_END_POINT, catchmentId);
+    }
+
+    private String buildPendingApprovalUrl(String catchmentId, String healthId) {
+        return format("/%s/%s/approvals/%s", API_END_POINT, catchmentId, healthId);
+    }
+
+    @Test
+    public void shouldFindPatientByCatchment() throws Exception {
         String facilityId = "123456";
+        String catchmentId = "102030405060";
         Catchment catchment = new Catchment(catchmentId);
 
         List<PatientData> patients = asList(buildPatient("h100"), buildPatient("h200"), buildPatient("h300"));

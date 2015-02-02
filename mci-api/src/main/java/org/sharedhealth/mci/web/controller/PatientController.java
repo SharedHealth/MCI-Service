@@ -6,26 +6,27 @@ import org.sharedhealth.mci.web.exception.SearchQueryParameterException;
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.handler.MCIResponse;
-import org.sharedhealth.mci.web.mapper.*;
+import org.sharedhealth.mci.web.mapper.PatientData;
+import org.sharedhealth.mci.web.mapper.PatientSummaryData;
+import org.sharedhealth.mci.web.mapper.SearchQuery;
 import org.sharedhealth.mci.web.service.PatientService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.validation.Valid;
 import javax.validation.groups.Default;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
 
-import static java.util.Collections.emptyList;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.sharedhealth.mci.web.utils.JsonConstants.*;
-import static org.springframework.http.HttpStatus.ACCEPTED;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.*;
@@ -113,114 +114,4 @@ public class PatientController {
         deferredResult.setResult(new ResponseEntity<>(mciResponse, mciResponse.httpStatusObject));
         return deferredResult;
     }
-
-    @RequestMapping(value = "/pendingapprovals", method = GET, produces = APPLICATION_JSON_VALUE)
-    public DeferredResult<ResponseEntity<MCIMultiResponse>> findPendingApprovalList(
-            @RequestHeader HttpHeaders headers,
-            @RequestParam(value = AFTER, required = false) UUID after,
-            @RequestParam(value = BEFORE, required = false) UUID before) {
-
-        logger.debug("Find list of pending approvals.");
-        final DeferredResult<ResponseEntity<MCIMultiResponse>> deferredResult = new DeferredResult<>();
-
-        Catchment catchment = buildCatchment(headers);
-        List<PendingApprovalListResponse> response = patientService.findPendingApprovalList(catchment, after, before);
-
-        MCIMultiResponse mciMultiResponse;
-        if (response != null) {
-            mciMultiResponse = new MCIMultiResponse(response, null, OK);
-        } else {
-            mciMultiResponse = new MCIMultiResponse(emptyList(), null, OK);
-        }
-        deferredResult.setResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject));
-        return deferredResult;
-    }
-
-    @RequestMapping(value = "/pendingapprovals/{healthId}", method = GET, produces = APPLICATION_JSON_VALUE)
-    public DeferredResult<ResponseEntity<MCIMultiResponse>> findPendingApprovalDetails(
-            @RequestHeader HttpHeaders headers,
-            @PathVariable String healthId) {
-
-        logger.debug("Find list of pending approval details. Health ID : " + healthId);
-        final DeferredResult<ResponseEntity<MCIMultiResponse>> deferredResult = new DeferredResult<>();
-
-        Catchment catchment = buildCatchment(headers);
-        TreeSet<PendingApproval> response = patientService.findPendingApprovalDetails(healthId, catchment);
-
-        MCIMultiResponse mciMultiResponse;
-        if (response != null) {
-            mciMultiResponse = new MCIMultiResponse(response, null, OK);
-        } else {
-            mciMultiResponse = new MCIMultiResponse(emptyList(), null, OK);
-        }
-        deferredResult.setResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject));
-
-        return deferredResult;
-    }
-
-    @RequestMapping(value = "/pendingapprovals/{healthId}", method = PUT, produces = APPLICATION_JSON_VALUE)
-    public DeferredResult<ResponseEntity<MCIResponse>> acceptPendingApprovals(
-            @RequestHeader HttpHeaders headers,
-            @PathVariable String healthId,
-            @Validated({RequiredOnUpdateGroup.class, Default.class}) @RequestBody PatientData patient,
-            BindingResult bindingResult) {
-
-        logger.debug("Accepting pending approvals. Health ID : " + healthId);
-        return processPendingApprovals(headers, healthId, patient, bindingResult, true);
-    }
-
-    @RequestMapping(value = "/pendingapprovals/{healthId}", method = DELETE, produces = APPLICATION_JSON_VALUE)
-    public DeferredResult<ResponseEntity<MCIResponse>> rejectPendingApprovals(
-            @RequestHeader HttpHeaders headers,
-            @PathVariable String healthId,
-            @Validated({RequiredOnUpdateGroup.class, Default.class}) @RequestBody PatientData patient,
-            BindingResult bindingResult) {
-
-        logger.debug("Accepting pending approvals. Health ID : " + healthId);
-        return processPendingApprovals(headers, healthId, patient, bindingResult, false);
-    }
-
-    private DeferredResult<ResponseEntity<MCIResponse>> processPendingApprovals(
-            HttpHeaders headers, String healthId, PatientData patient, BindingResult bindingResult, boolean shouldAccept) {
-
-        if (bindingResult.hasErrors()) {
-            throw new ValidationException(bindingResult);
-        }
-
-        final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
-
-        patient.setHealthId(healthId);
-        String hid = patientService.processPendingApprovals(patient, buildCatchment(headers), shouldAccept);
-
-        MCIResponse mciResponse = new MCIResponse(hid, ACCEPTED);
-        deferredResult.setResult(new ResponseEntity<>(mciResponse, mciResponse.httpStatusObject));
-        return deferredResult;
-    }
-
-    Catchment buildCatchment(HttpHeaders headers) {
-        Catchment catchment = new Catchment(headers.getFirst(DIVISION_ID), headers.getFirst(DISTRICT_ID));
-        String upazilaId = headers.getFirst(UPAZILA_ID);
-
-        if (isNotBlank(upazilaId)) {
-            catchment.setUpazilaId(upazilaId);
-            String cityCorpId = headers.getFirst(CITY_CORPORATION_ID);
-
-            if (isNotBlank(cityCorpId)) {
-                catchment.setCityCorpId(cityCorpId);
-                String unionOrUrbanWardId = headers.getFirst(UNION_OR_URBAN_WARD_ID);
-
-                if (isNotBlank(unionOrUrbanWardId)) {
-                    catchment.setUnionOrUrbanWardId(unionOrUrbanWardId);
-                    String ruralWardId = headers.getFirst(RURAL_WARD_ID);
-
-                    if (isNotBlank(ruralWardId)) {
-                        catchment.setRuralWardId(ruralWardId);
-                    }
-                }
-            }
-        }
-        return catchment;
-    }
-
-
 }

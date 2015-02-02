@@ -17,7 +17,6 @@ import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
 import org.sharedhealth.mci.web.mapper.Relation;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -34,7 +33,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
-import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -401,14 +399,10 @@ public class PatientControllerIT extends BaseControllerTest {
                 .andReturn();
         mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isAccepted());
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(DIVISION_ID, "55");
-        headers.add(DISTRICT_ID, "73");
-        headers.add(UPAZILA_ID, "64");
-
-        mvcResult = mockMvc.perform(put(API_END_POINT + "/pendingapprovals/" + healthId).accept(APPLICATION_JSON)
-                .content(asString("jsons/patient/pending_approval_address_accept.json")).contentType(APPLICATION_JSON)
-                .headers(headers))
+        String url = "/api/v1/catchments/557364/approvals/" + healthId;
+        String content = asString("jsons/patient/pending_approval_address_accept.json");
+        mvcResult = mockMvc.perform(put(url).accept(APPLICATION_JSON)
+                .content(content).contentType(APPLICATION_JSON))
                 .andExpect(request().asyncStarted())
                 .andReturn();
         mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isAccepted());
@@ -582,13 +576,9 @@ public class PatientControllerIT extends BaseControllerTest {
                 .andReturn();
         mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isAccepted());
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(DIVISION_ID, "55");
-        headers.add(DISTRICT_ID, "73");
-        headers.add(UPAZILA_ID, "64");
-
-        mvcResult = mockMvc.perform(put(API_END_POINT + "/pendingapprovals/" + healthId).accept(APPLICATION_JSON)
-                .content(asString("jsons/patient/pending_approvals_accept.json")).contentType(APPLICATION_JSON).headers(headers))
+        String url = "/api/v1/catchments/557364/approvals/" + healthId;
+        String content = asString("jsons/patient/pending_approvals_accept.json");
+        mvcResult = mockMvc.perform(put(url).accept(APPLICATION_JSON).content(content).contentType(APPLICATION_JSON))
                 .andExpect(request().asyncStarted())
                 .andReturn();
         mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isAccepted());
