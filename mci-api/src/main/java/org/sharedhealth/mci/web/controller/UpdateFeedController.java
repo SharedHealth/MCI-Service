@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.utils.TimeUid;
 import org.sharedhealth.mci.web.mapper.Feed;
 import org.sharedhealth.mci.web.mapper.FeedEntry;
@@ -94,17 +95,29 @@ public class UpdateFeedController extends FeedController {
         if (isEmpty(patients)) {
             return emptyList();
         }
+
         List<FeedEntry> entries = new ArrayList<>();
+
         for (PatientUpdateLog patient : patients) {
+
+            if(StringUtils.isBlank(patient.getChangeSet())) {
+                continue;
+            }
+
             FeedEntry entry = new FeedEntry();
             entry.setId(patient.getEventId());
             entry.setPublishedDate(patient.getEventTimeAsString());
             entry.setTitle(ENTRY_TITLE + patient.getHealthId());
             entry.setLink(buildPatientLink(patient.getHealthId(), request));
-            entry.setCategories(new String[]{ENTRY_CATEGORY});
+            entry.setCategories(new String[]{ENTRY_CATEGORY, buildUpdateCategoryString(patient)});
             entry.setContent(patient);
             entries.add(entry);
         }
+
         return entries;
+    }
+
+    private String buildUpdateCategoryString(PatientUpdateLog patient) {
+        return "update:" + StringUtils.join(patient.getChangeSetMap().keySet().toArray(), ",");
     }
 }

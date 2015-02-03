@@ -283,8 +283,9 @@ public class UpdateFeedControllerTest {
         assertEquals("Patient updates: " + healthId, entry.getTitle());
         assertEquals("http://www.mci.com:8081/api/v1/patients/" + healthId, entry.getLink());
         assertNotNull(entry.getCategories());
-        assertEquals(1, entry.getCategories().length);
+        assertEquals(2, entry.getCategories().length);
         assertEquals("patient", entry.getCategories()[0]);
+        assertEquals("update:sur_name", entry.getCategories()[1]);
         assertEquals(patient, entry.getContent());
     }
 }
