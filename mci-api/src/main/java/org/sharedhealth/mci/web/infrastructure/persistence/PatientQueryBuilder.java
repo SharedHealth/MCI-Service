@@ -285,22 +285,18 @@ public class PatientQueryBuilder {
     private static int getLastYearMarker(Date after, UUID lastMarker) {
 
         if(lastMarker !=null) {
-            return DateUtil.getYear(lastMarker);
+            return DateUtil.getYearOf(lastMarker);
         }
 
         if(after != null) {
-            return DateUtil.getYear(after);
+            return DateUtil.getYearOf(after);
         }
 
-        return DateUtil.getYear(new Date());
-    }
-
-    private static List<Integer> getYearsSince(Date after) {
-        return getYearsSince(DateUtil.getYear(after));
+        return DateUtil.getCurrentYear();
     }
 
     private static List<Integer> getYearsSince(int year) {
-        int end = DateUtil.getYear(new Date());
+        int end = DateUtil.getCurrentYear();
         List<Integer> years = new ArrayList<>();
 
         for (int i = year; i <= end; i++) {

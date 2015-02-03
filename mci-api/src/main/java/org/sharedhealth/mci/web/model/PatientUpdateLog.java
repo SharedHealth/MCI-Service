@@ -80,6 +80,6 @@ public class PatientUpdateLog {
 
     public void setEventId(UUID eventId) {
         this.eventId = eventId;
-        this.year = DateUtil.getYear(eventId);
+        this.year = DateUtil.getYearOf(eventId);
     }
 }

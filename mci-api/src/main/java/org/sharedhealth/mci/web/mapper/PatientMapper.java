@@ -159,7 +159,7 @@ public class PatientMapper {
     }
 
     private boolean isPatientDeadAndHasDateOfDeath(Patient patient) {
-        return patient.getDateOfDeath() != null && PatientDataConstants.PATIENT_STATUS_DEAD.equals(patient.getStatus()) && DateUtil.getYear(patient.getDateOfDeath()) > 1;
+        return patient.getDateOfDeath() != null && PatientDataConstants.PATIENT_STATUS_DEAD.equals(patient.getStatus()) && DateUtil.getYearOf(patient.getDateOfDeath()) > 1;
     }
 
     private void mapConfidentiality(Patient patient, PatientData data) {
