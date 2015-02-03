@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.commons.lang3.StringUtils;
+import org.sharedhealth.mci.utils.TimeUid;
 import org.sharedhealth.mci.web.mapper.Feed;
 import org.sharedhealth.mci.web.mapper.FeedEntry;
 import org.sharedhealth.mci.web.model.PatientUpdateLog;
@@ -30,7 +30,7 @@ import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 @RestController
 @RequestMapping("/api/v1/feed")
-public class UpdateFeedController {
+public class UpdateFeedController extends FeedController {
 
     private static final Logger logger = LoggerFactory.getLogger(UpdateFeedController.class);
 
@@ -38,12 +38,9 @@ public class UpdateFeedController {
     private static final String ENTRY_TITLE = "Patient updates: ";
     private static final String ENTRY_CATEGORY = "patient";
 
-    private PatientService patientService;
-
-
     @Autowired
     public UpdateFeedController(PatientService patientService) {
-        this.patientService = patientService;
+        super(patientService);
     }
 
     @RequestMapping(value = "/patients", method = GET, produces = APPLICATION_JSON_VALUE)
@@ -58,13 +55,7 @@ public class UpdateFeedController {
 
         logger.debug("Find all patients  updated since [" + since + "] ");
 
-        UUID lastMarker;
-
-        try {
-            lastMarker = StringUtils.isBlank(last) ? null : UUID.fromString(last);
-        } catch (Exception e) {
-            lastMarker = null;
-        }
+        UUID lastMarker = TimeUid.fromString(last);
 
         List<PatientUpdateLog> patients = patientService.findPatientsUpdatedSince(date, lastMarker);
 
@@ -85,15 +76,6 @@ public class UpdateFeedController {
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private String buildFeedUrl(HttpServletRequest request) {
-        StringBuffer feedUrl = request.getRequestURL();
-        String queryString = request.getQueryString();
-        if (StringUtils.isNotBlank(queryString)) {
-            feedUrl.append("?").append(queryString);
-        }
-        return feedUrl.toString();
     }
 
     private String buildNextUrl(List<PatientUpdateLog> patients, HttpServletRequest request) throws UnsupportedEncodingException {
@@ -124,10 +106,5 @@ public class UpdateFeedController {
             entries.add(entry);
         }
         return entries;
-    }
-
-    private String buildPatientLink(String healthId, HttpServletRequest request) {
-        return String.format("%s://%s:%s/%s/%s", request.getScheme(), request.getServerName(), request.getServerPort(),
-                "api/v1/patients", healthId);
     }
 }

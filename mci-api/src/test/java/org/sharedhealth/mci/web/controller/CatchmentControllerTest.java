@@ -245,6 +245,36 @@ public class CatchmentControllerTest {
         verify(patientService).processPendingApprovals(patient, catchment, false);
     }
 
+    @Test
+    public void shouldReturnEmptyListForInvalidLastMarker() throws Exception {
+
+        String facilityId = "123456";
+        String catchmentId = "102030405060";
+        Catchment catchment = new Catchment(catchmentId);
+
+        when(patientService.findAllByCatchment(catchment, null, null, facilityId)).thenReturn(null);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(FACILITY_ID, facilityId);
+
+        String url = format("http://localhost/%s/%s/patients?" + LAST_MARKER + "=123", API_END_POINT, catchmentId);
+
+        MvcResult mvcResult = mockMvc.perform(get(url).contentType(APPLICATION_JSON).headers(headers))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.author", is("MCI")))
+                .andExpect(jsonPath("$.title", is("Patients")))
+                .andExpect(jsonPath("$.feedUrl", is(url)))
+                .andExpect(jsonPath("$.prevUrl", is(nullValue())))
+                .andExpect(jsonPath("$.nextUrl", is(nullValue())))
+                .andExpect(jsonPath("$.entries", is(emptyList())));
+
+        verify(patientService).findAllByCatchment(catchment, null, null, facilityId);
+    }
+
     private String buildPendingApprovalUrl(String catchmentId) {
         return format("/%s/%s/approvals", API_END_POINT, catchmentId);
     }

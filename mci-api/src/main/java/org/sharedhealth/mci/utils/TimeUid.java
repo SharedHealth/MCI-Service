@@ -1,27 +1,16 @@
 package org.sharedhealth.mci.utils;
 
-import java.util.StringTokenizer;
 import java.util.UUID;
+
+import org.apache.commons.lang3.StringUtils;
 
 public class TimeUid {
 
-    public static String reorderTimeUUId(String originalTimeUUID) {
-        StringTokenizer tokens = new StringTokenizer(originalTimeUUID, "-");
-        if (tokens.countTokens() == 5) {
-            String time_low = tokens.nextToken();
-            String time_mid = tokens.nextToken();
-            String time_high_and_version = tokens.nextToken();
-            String variant_and_sequence = tokens.nextToken();
-            String node = tokens.nextToken();
-
-            return time_high_and_version + '-' + time_mid + '-' + time_low + '-' + variant_and_sequence + '-' + node;
-
+    public static UUID fromString(String uid) {
+        try {
+            return StringUtils.isBlank(uid) ? null : UUID.fromString(uid);
+        } catch (Exception e) {
+            return null;
         }
-
-        return originalTimeUUID;
-    }
-
-    public static String getId() {
-        return reorderTimeUUId(UUID.randomUUID().toString());
     }
 }

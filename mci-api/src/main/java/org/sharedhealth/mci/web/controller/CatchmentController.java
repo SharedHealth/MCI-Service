@@ -1,6 +1,6 @@
 package org.sharedhealth.mci.web.controller;
 
-import org.apache.commons.lang3.StringUtils;
+import org.sharedhealth.mci.utils.TimeUid;
 import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
@@ -36,7 +36,7 @@ import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 @RestController
 @RequestMapping("/api/v1/catchments")
-public class CatchmentController {
+public class CatchmentController extends FeedController {
 
     private static final Logger logger = LoggerFactory.getLogger(PatientController.class);
 
@@ -44,12 +44,9 @@ public class CatchmentController {
     private static final String ENTRY_TITLE = "Patient in Catchment: ";
     private static final String ENTRY_CATEGORY = "patient";
 
-    private PatientService patientService;
-
-
     @Autowired
     public CatchmentController(PatientService patientService) {
-        this.patientService = patientService;
+        super(patientService);
     }
 
     @RequestMapping(value = "/{catchmentId}/approvals", method = GET, produces = APPLICATION_JSON_VALUE)
@@ -139,9 +136,11 @@ public class CatchmentController {
     public DeferredResult<Feed> findAllPatients(
             @PathVariable String catchmentId,
             @RequestParam(value = SINCE, required = false) String since,
-            @RequestParam(value = LAST_MARKER, required = false) UUID lastMarker,
+            @RequestParam(value = LAST_MARKER, required = false) String last,
             @RequestHeader(FACILITY_ID) String facilityId,
             HttpServletRequest request) {
+
+        UUID lastMarker = TimeUid.fromString(last);
 
         Catchment catchment = new Catchment(catchmentId);
         logger.debug(format("Find all patients by catchment. Catchment ID: %s, since: %s, last marker: %s", catchment, since, lastMarker));
@@ -166,15 +165,6 @@ public class CatchmentController {
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private String buildFeedUrl(HttpServletRequest request) {
-        StringBuffer feedUrl = request.getRequestURL();
-        String queryString = request.getQueryString();
-        if (StringUtils.isNotBlank(queryString)) {
-            feedUrl.append("?").append(queryString);
-        }
-        return feedUrl.toString();
     }
 
     private String buildNextUrl(List<PatientData> patients, HttpServletRequest request) throws UnsupportedEncodingException {
@@ -208,10 +198,5 @@ public class CatchmentController {
             entries.add(entry);
         }
         return entries;
-    }
-
-    private String buildPatientLink(String healthId, HttpServletRequest request) {
-        return String.format("%s://%s:%s/%s/%s", request.getScheme(), request.getServerName(), request.getServerPort(),
-                "api/v1/patients", healthId);
     }
 }
