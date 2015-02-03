@@ -72,6 +72,21 @@ public class DateUtilTest {
         assertThat(isoDate.length(), is(28));
     }
 
+    @Test
+    public void shouldReturnNullForInvalidDateOrFormat() {
+        assertNull(DateUtil.string2Date("", ""));
+        assertNull(DateUtil.string2Date("2015-01-29", "dd-MM"));
+        assertNull(DateUtil.string2Date("2015-01-29", "Invalid"));
+        assertNull(DateUtil.string2Date("invalid", "dd-MM-yyyy"));
+    }
+
+    @Test
+    public void shouldReturnNullForInvalidDate() {
+        assertNull(DateUtil.string2Date(""));
+        assertNull(DateUtil.string2Date("invalid"));
+        assertNull(DateUtil.string2Date("20150129"));
+    }
+
     private void assertDateEquality(Date date, String format) {
         DateTime datetime = new DateTime(date);
         DateTime parsedDate = new DateTime(DateUtil.parseDate(toDateString(date, format)));

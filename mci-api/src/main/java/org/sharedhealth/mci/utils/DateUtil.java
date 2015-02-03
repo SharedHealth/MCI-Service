@@ -73,7 +73,15 @@ public class DateUtil {
     }
 
     public static Date string2Date(String value) {
-        return string2Date(value, DEFAULT_DATE_FORMAT);
+        if (value == null || value.trim().equals("")) {
+            return null;
+        }
+
+        try {
+            return parseDate(value);
+        } catch (RuntimeException e) {
+            return null;
+        }
     }
 
     public static String toIsoFormat(long date) {
