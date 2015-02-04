@@ -59,6 +59,11 @@ public class PatientUpdateLog {
 
     @JsonProperty(CHANGE_SET)
     public Map getChangeSetMap() {
+
+        if(this.changeSet == null) {
+            return null;
+        }
+
         ObjectMapper mapper = new ObjectMapper();
         try {
             return mapper.readValue(this.changeSet, Map.class);

@@ -248,12 +248,51 @@ public class UpdateFeedControllerTest {
         assertFeedEntry(entries.get(2), patients.get(2));
     }
 
-    private PatientUpdateLog buildPatientLog(String healthId, UUID eventId) {
+    @Test
+    public void shouldCreateCategoryArrayWithOnlyPatientIfChangeSetIsNull() throws Exception {
+        UUID uuid1 = timeBased();
+        UUID uuid2 = timeBased();
+
+        when(patientService.findPatientsUpdatedSince(null, null)).thenReturn(
+                asList(buildPatientLog("h100", uuid1, null), buildPatientLog("h200", uuid2))
+        );
+
+        String url = format("http://localhost/%s/patients", API_END_POINT);
+
+        MvcResult mvcResult = mockMvc.perform(get(url).contentType(APPLICATION_JSON))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.author", is("MCI")))
+                .andExpect(jsonPath("$.title", is("Patients")))
+                .andExpect(jsonPath("$.feedUrl", is(url)))
+                .andExpect(jsonPath("$.prevUrl", is(nullValue())))
+
+                .andExpect(jsonPath("$.entries.[0].id", is(uuid1.toString())))
+                .andExpect(jsonPath("$.entries.[0].publishedDate", is(DateUtil.toIsoFormat(uuid1))))
+                .andExpect(jsonPath("$.entries.[0].title", is("Patient updates: h100")))
+                .andExpect(jsonPath("$.entries.[0].link", is("http://localhost:80/api/v1/patients/h100")))
+                .andExpect(jsonPath("$.entries.[0].categories", is(asList("patient"))))
+                .andExpect(jsonPath("$.entries.[0].content.health_id", is("h100")))
+                .andExpect(jsonPath("$.entries.[0].content.change_set", is(nullValue())))
+                .andExpect(jsonPath("$.entries.[1].categories", is(asList("patient", "update:sur_name"))))
+        ;
+
+        verify(patientService).findPatientsUpdatedSince(null, null);
+    }
+
+    private PatientUpdateLog buildPatientLog(String healthId, UUID eventId, String changeSet) {
         PatientUpdateLog patient = new PatientUpdateLog();
         patient.setHealthId(healthId);
         patient.setEventId(eventId);
-        patient.setChangeSet("{\"sur_name\":\"updated\"}");
+        patient.setChangeSet(changeSet);
         return patient;
+    }
+
+    private PatientUpdateLog buildPatientLog(String healthId, UUID eventId) {
+        return buildPatientLog(healthId, eventId, "{\"sur_name\":\"updated\"}");
     }
 
     private MockHttpServletRequest buildHttpRequest(String since, String lastMarker) throws UnsupportedEncodingException {

@@ -37,7 +37,7 @@ public class UpdateFeedController extends FeedController {
 
     private static final String FEED_TITLE = "Patients";
     private static final String ENTRY_TITLE = "Patient updates: ";
-    private static final String ENTRY_CATEGORY = "patient";
+    private static final String CATEGORY_PATIENT = "patient";
 
     @Autowired
     public UpdateFeedController(PatientService patientService) {
@@ -100,16 +100,12 @@ public class UpdateFeedController extends FeedController {
 
         for (PatientUpdateLog patient : patients) {
 
-            if(StringUtils.isBlank(patient.getChangeSet())) {
-                continue;
-            }
-
             FeedEntry entry = new FeedEntry();
             entry.setId(patient.getEventId());
             entry.setPublishedDate(patient.getEventTimeAsString());
             entry.setTitle(ENTRY_TITLE + patient.getHealthId());
             entry.setLink(buildPatientLink(patient.getHealthId(), request));
-            entry.setCategories(new String[]{ENTRY_CATEGORY, buildUpdateCategoryString(patient)});
+            entry.setCategories(buildCategoryArray(patient));
             entry.setContent(patient);
             entries.add(entry);
         }
@@ -117,7 +113,14 @@ public class UpdateFeedController extends FeedController {
         return entries;
     }
 
-    private String buildUpdateCategoryString(PatientUpdateLog patient) {
-        return "update:" + StringUtils.join(patient.getChangeSetMap().keySet().toArray(), ",");
+    private String[] buildCategoryArray(PatientUpdateLog patient) {
+
+        if(StringUtils.isBlank(patient.getChangeSet())) {
+            return new String[]{CATEGORY_PATIENT};
+        }
+
+        String updateCategory = "update:" + StringUtils.join(patient.getChangeSetMap().keySet().toArray(), ",");
+
+        return new String[]{CATEGORY_PATIENT, updateCategory};
     }
 }
