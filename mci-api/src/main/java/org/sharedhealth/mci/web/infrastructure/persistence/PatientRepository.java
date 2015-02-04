@@ -43,7 +43,10 @@ import static org.springframework.data.cassandra.core.CassandraTemplate.createIn
 @Component
 public class PatientRepository extends BaseRepository {
 
-    protected static final Logger logger = LoggerFactory.getLogger(PatientRepository.class);
+    private static final Logger logger = LoggerFactory.getLogger(PatientRepository.class);
+
+    private static final long QUERY_EXEC_DELAY = 1;
+
     private UidGenerator uidGenerator;
     private PendingApprovalFilter pendingApprovalFilter;
     private PatientMapper mapper;
@@ -112,7 +115,7 @@ public class PatientRepository extends BaseRepository {
             }
 
             UUID uuid = findLatestUuid(newPatient.getPendingApprovals());
-            buildCreatePendingApprovalMappingStmt(newPatient.getCatchment(), healthId, uuid, batch, timestamp + 100);
+            buildCreatePendingApprovalMappingStmt(newPatient.getCatchment(), healthId, uuid, batch, timestamp + QUERY_EXEC_DELAY);
         }
         return batch;
     }
@@ -308,7 +311,7 @@ public class PatientRepository extends BaseRepository {
                 long timestamp = new Date().getTime();
                 buildDeletePendingApprovalMappingStmt(healthId, batch, timestamp);
                 Catchment catchment = newPatient.getCatchment() != null ? newPatient.getCatchment() : existingPatientData.getCatchment();
-                buildCreatePendingApprovalMappingStmt(catchment, healthId, toBeUpdated, batch, timestamp + 100);
+                buildCreatePendingApprovalMappingStmt(catchment, healthId, toBeUpdated, batch, timestamp + QUERY_EXEC_DELAY);
             }
         } else {
             buildDeletePendingApprovalMappingStmt(healthId, batch, new Date().getTime());
