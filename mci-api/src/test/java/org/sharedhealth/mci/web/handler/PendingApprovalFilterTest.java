@@ -1,6 +1,7 @@
 package org.sharedhealth.mci.web.handler;
 
 import org.junit.Test;
+import org.sharedhealth.mci.web.exception.NonUpdatableFieldUpdateException;
 import org.sharedhealth.mci.web.mapper.*;
 
 import java.text.ParseException;
@@ -151,8 +152,24 @@ public class PendingApprovalFilterTest {
         assertEquals(existingPatient.getPermanentAddress(), newPatient.getPermanentAddress());
     }
 
+    @Test(expected = NonUpdatableFieldUpdateException.class)
+    public void shouldThrowExceptionWhenTryingToUpdateNonUpdatableField() throws ParseException {
+        Properties properties = new Properties();
+        properties.setProperty(DATE_OF_BIRTH, "NU");
+
+        PatientData existingPatient = buildPatientData();
+        existingPatient.setDateOfBirth("2000-02-10");
+
+        PatientData updateRequest = buildPatientData();
+        updateRequest.setDateOfBirth("2000-02-11");
+
+        PendingApprovalFilter pendingApprovalFilter = new PendingApprovalFilter();
+        pendingApprovalFilter.setProperties(properties);
+        pendingApprovalFilter.filter(existingPatient, updateRequest);
+    }
+
     @Test
-    public void shouldNotAddFieldsToPendingApprovalsWhenNotMarkedNonUpdateable() throws ParseException {
+    public void shouldNotAddFieldsToPendingApprovalsWhenNotMarkedNonUpdatable() throws ParseException {
         Properties properties = new Properties();
         properties.setProperty(DATE_OF_BIRTH, "NU");
 
@@ -171,7 +188,7 @@ public class PendingApprovalFilterTest {
     }
 
     @Test
-    public void shouldUpdateFieldsThatAreNeitherMarkedForApprovalNorMarkedAsNonUpdateable() throws ParseException {
+    public void shouldUpdateFieldsThatAreNeitherMarkedForApprovalNorMarkedAsNonUpdatable() throws ParseException {
         Properties properties = new Properties();
 
         PatientData existingPatient = buildPatientData();

@@ -1,5 +1,6 @@
 package org.sharedhealth.mci.web.handler;
 
+import org.sharedhealth.mci.web.exception.NonUpdatableFieldUpdateException;
 import org.sharedhealth.mci.web.mapper.*;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +19,7 @@ import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 public class PendingApprovalFilter {
 
     private static final String NEEDS_APPROVAL = "NA";
-    private static final String NON_UPDATEABLE = "NU";
+    private static final String NON_UPDATABLE = "NU";
     private static final String DUMMY_FACILITY = "10000059";
 
     private Properties properties;
@@ -99,7 +100,10 @@ public class PendingApprovalFilter {
         }
         String property = properties.getProperty(key);
         if (property != null) {
-            if (property.equals(NON_UPDATEABLE)) {
+            if (property.equals(NON_UPDATABLE)) {
+                if (!newValue.equals(oldValue)) {
+                    throw new NonUpdatableFieldUpdateException("Cannot update non-updatable field: " + key);
+                }
                 return oldValue;
             }
             if (property.equals(NEEDS_APPROVAL) && !newValue.equals(oldValue)) {

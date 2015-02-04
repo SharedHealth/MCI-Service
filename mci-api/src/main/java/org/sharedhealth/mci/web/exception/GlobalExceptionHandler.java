@@ -39,6 +39,7 @@ public class GlobalExceptionHandler {
     private static final String MESSAGE_HID_FIELD_IS_NOT_PERMITTED = "hid field is not permitted";
     private static final String MESSAGE_INSUFFICIENT_PRIVILEGE = "insufficient.privilege";
     private static final String MESSAGE_INVALID_PAYLOAD = "invalid.payload";
+    private static final String MESSAGE_NONUPDATABLE_FIELD = "nonupdatable.field";
     private static final String MESSAGE_INTERNAL_SERVER_ERROR = "internal.server.error";
 
     @ResponseStatus(value = BAD_REQUEST)
@@ -103,6 +104,14 @@ public class GlobalExceptionHandler {
     public ErrorHandler handleInsufficientPrivilegeException(InsufficientPrivilegeException e) {
         logger.error("Handling InsufficientPrivilegeException. ", e);
         return new ErrorHandler(BAD_REQUEST.value(), MESSAGE_INSUFFICIENT_PRIVILEGE);
+    }
+
+    @ResponseStatus(value = BAD_REQUEST)
+    @ExceptionHandler(NonUpdatableFieldUpdateException.class)
+    @ResponseBody
+    public ErrorHandler handleNonUpdatableFieldUpdateException(NonUpdatableFieldUpdateException e) {
+        logger.error("Handling NonUpdatableFieldUpdateException. ", e);
+        return new ErrorHandler(BAD_REQUEST.value(), MESSAGE_NONUPDATABLE_FIELD);
     }
 
     @ResponseStatus(value = BAD_REQUEST)

@@ -1,6 +1,8 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
 import com.datastax.driver.core.querybuilder.Batch;
+import com.datastax.driver.core.querybuilder.Delete;
+import com.datastax.driver.core.querybuilder.Insert;
 import org.sharedhealth.mci.utils.UidGenerator;
 import org.sharedhealth.mci.web.exception.HealthIDExistException;
 import org.sharedhealth.mci.web.exception.PatientNotFoundException;
@@ -104,28 +106,33 @@ public class PatientRepository extends BaseRepository {
             TreeSet<PendingApproval> existingPendingApprovals = existingPatientData.getPendingApprovals();
             String healthId = newPatient.getHealthId();
 
+            long timestamp = new Date().getTime();
             if (existingPendingApprovals != null && existingPendingApprovals.size() > 0) {
-                buildDeletePendingApprovalMappingStmt(healthId, batch);
+                buildDeletePendingApprovalMappingStmt(healthId, batch, timestamp);
             }
 
             UUID uuid = findLatestUuid(newPatient.getPendingApprovals());
-            buildCreatePendingApprovalMappingStmt(newPatient.getCatchment(), healthId, uuid, batch);
+            buildCreatePendingApprovalMappingStmt(newPatient.getCatchment(), healthId, uuid, batch, timestamp + 100);
         }
         return batch;
     }
 
-    private void buildDeletePendingApprovalMappingStmt(String healthId, Batch batch) {
+    private void buildDeletePendingApprovalMappingStmt(String healthId, Batch batch, long timestamp) {
         String cql = select().from(CF_PENDING_APPROVAL_MAPPING).where(eq(HEALTH_ID, healthId)).toString();
         List<PendingApprovalMapping> mappings = cassandraOps.select(cql, PendingApprovalMapping.class);
         for (PendingApprovalMapping mapping : mappings) {
-            batch.add(createDeleteQuery(CF_PENDING_APPROVAL_MAPPING, mapping, null, cassandraOps.getConverter()));
+            Delete deleteQuery = createDeleteQuery(CF_PENDING_APPROVAL_MAPPING, mapping, null, cassandraOps.getConverter());
+            deleteQuery.using(timestamp(timestamp));
+            batch.add(deleteQuery);
         }
     }
 
-    private void buildCreatePendingApprovalMappingStmt(Catchment catchment, String healthId, UUID uuid, Batch batch) {
+    private void buildCreatePendingApprovalMappingStmt(Catchment catchment, String healthId, UUID uuid, Batch batch, long timestamp) {
         List<PendingApprovalMapping> mappings = buildPendingApprovalMappings(catchment, healthId, uuid);
         for (PendingApprovalMapping mapping : mappings) {
-            batch.add(createInsertQuery(CF_PENDING_APPROVAL_MAPPING, mapping, null, cassandraOps.getConverter()));
+            Insert insertQuery = createInsertQuery(CF_PENDING_APPROVAL_MAPPING, mapping, null, cassandraOps.getConverter());
+            insertQuery.using(timestamp(timestamp));
+            batch.add(insertQuery);
         }
     }
 
@@ -298,12 +305,13 @@ public class PatientRepository extends BaseRepository {
             boolean hasLastUpdatedChanged = !toBeUpdated.equals(lastUpdated);
             boolean hasCatchmentChanged = newPatient.getCatchment() != null && !newPatient.getCatchment().equals(existingPatientData.getCatchment());
             if (hasLastUpdatedChanged || hasCatchmentChanged) {
-                buildDeletePendingApprovalMappingStmt(healthId, batch);
+                long timestamp = new Date().getTime();
+                buildDeletePendingApprovalMappingStmt(healthId, batch, timestamp);
                 Catchment catchment = newPatient.getCatchment() != null ? newPatient.getCatchment() : existingPatientData.getCatchment();
-                buildCreatePendingApprovalMappingStmt(catchment, healthId, toBeUpdated, batch);
+                buildCreatePendingApprovalMappingStmt(catchment, healthId, toBeUpdated, batch, timestamp + 100);
             }
         } else {
-            buildDeletePendingApprovalMappingStmt(healthId, batch);
+            buildDeletePendingApprovalMappingStmt(healthId, batch, new Date().getTime());
         }
 
         cassandraOps.execute(batch);
