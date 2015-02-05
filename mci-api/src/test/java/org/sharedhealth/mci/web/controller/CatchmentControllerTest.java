@@ -33,7 +33,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.sharedhealth.mci.utils.DateUtil.fromIsoFormat;
+import static org.sharedhealth.mci.utils.DateUtil.parseDate;
 import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
@@ -364,7 +364,7 @@ public class CatchmentControllerTest {
         String since = "2000-01-01T10:20:30Z";
 
         List<PatientData> patients = asList(buildPatient("h100"), buildPatient("h200"), buildPatient("h300"));
-        when(patientService.findAllByCatchment(catchment, fromIsoFormat(since), null, facilityId)).thenReturn(patients);
+        when(patientService.findAllByCatchment(catchment, parseDate(since), null, facilityId)).thenReturn(patients);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(FACILITY_ID, facilityId);
@@ -395,7 +395,7 @@ public class CatchmentControllerTest {
                 .andExpect(jsonPath("$.entries.[1].id", is(patients.get(1).getUpdatedAt().toString())))
                 .andExpect(jsonPath("$.entries.[2].id", is(patients.get(2).getUpdatedAt().toString())));
 
-        verify(patientService).findAllByCatchment(catchment, fromIsoFormat(since), null, facilityId);
+        verify(patientService).findAllByCatchment(catchment, parseDate(since), null, facilityId);
     }
 
     @Test
@@ -407,7 +407,7 @@ public class CatchmentControllerTest {
         UUID lastMarker = timeBased();
 
         List<PatientData> patients = asList(buildPatient("h100"), buildPatient("h200"), buildPatient("h300"));
-        when(patientService.findAllByCatchment(catchment, fromIsoFormat(since), lastMarker, facilityId)).thenReturn(patients);
+        when(patientService.findAllByCatchment(catchment, parseDate(since), lastMarker, facilityId)).thenReturn(patients);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(FACILITY_ID, facilityId);
@@ -439,7 +439,7 @@ public class CatchmentControllerTest {
                 .andExpect(jsonPath("$.entries.[1].id", is(patients.get(1).getUpdatedAt().toString())))
                 .andExpect(jsonPath("$.entries.[2].id", is(patients.get(2).getUpdatedAt().toString())));
 
-        verify(patientService).findAllByCatchment(catchment, fromIsoFormat(since), lastMarker, facilityId);
+        verify(patientService).findAllByCatchment(catchment, parseDate(since), lastMarker, facilityId);
     }
 
     @Test

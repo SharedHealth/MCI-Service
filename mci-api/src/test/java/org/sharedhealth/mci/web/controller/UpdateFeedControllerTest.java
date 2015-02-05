@@ -38,6 +38,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.sharedhealth.mci.utils.DateUtil.parseDate;
 import static org.sharedhealth.mci.web.utils.JsonConstants.LAST_MARKER;
 import static org.sharedhealth.mci.web.utils.JsonConstants.SINCE;
 import static org.springframework.http.MediaType.APPLICATION_ATOM_XML_VALUE;
@@ -74,7 +75,7 @@ public class UpdateFeedControllerTest {
         UUID uuid2 = timeBased();
         UUID uuid3 = timeBased();
 
-        Date startDate = DateUtil.fromIsoFormat("2010-01-01T10:20:30Z");
+        Date startDate = parseDate("2010-01-01T10:20:30Z");
 
         when(patientService.findPatientsUpdatedSince(startDate, null)).thenReturn(
                 asList(buildPatientLog("h100", uuid1),
@@ -150,7 +151,7 @@ public class UpdateFeedControllerTest {
 
     @Test
     public void shouldReturnEmptyListIfNoPatientFound() throws Exception {
-        Date startDate = DateUtil.fromIsoFormat("2010-01-01T10:20:30Z");
+        Date startDate = parseDate("2010-01-01T10:20:30Z");
 
         when(patientService.findPatientsUpdatedSince(startDate, null)).thenReturn(null);
 

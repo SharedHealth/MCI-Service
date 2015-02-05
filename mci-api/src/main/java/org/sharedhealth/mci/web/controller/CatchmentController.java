@@ -26,7 +26,7 @@ import static java.net.URLEncoder.encode;
 import static java.util.Collections.emptyList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.sharedhealth.mci.utils.DateUtil.fromIsoFormat;
+import static org.sharedhealth.mci.utils.DateUtil.parseDate;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 import static org.springframework.http.HttpStatus.ACCEPTED;
 import static org.springframework.http.HttpStatus.OK;
@@ -146,7 +146,7 @@ public class CatchmentController extends FeedController {
         logger.debug(format("Find all patients by catchment. Catchment ID: %s, since: %s, last marker: %s", catchment, since, lastMarker));
         final DeferredResult<Feed> deferredResult = new DeferredResult<>();
 
-        Date date = isNotBlank(since) ? fromIsoFormat(since) : null;
+        Date date = isNotBlank(since) ? parseDate(since) : null;
         List<PatientData> patients = patientService.findAllByCatchment(catchment, date, lastMarker, facilityId);
 
         deferredResult.setResult(buildFeedResponse(patients, request));

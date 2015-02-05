@@ -16,8 +16,8 @@ import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.sharedhealth.mci.utils.DateUtil.DEFAULT_DATE_FORMAT;
-import static org.sharedhealth.mci.utils.DateUtil.string2Date;
+import static org.sharedhealth.mci.utils.DateUtil.SIMPLE_DATE_FORMAT;
+import static org.sharedhealth.mci.utils.DateUtil.parseDate;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.PENDING_APPROVALS;
 import static org.sharedhealth.mci.web.utils.JsonMapper.readValue;
@@ -556,7 +556,7 @@ public class Patient {
     }
 
     public void setDateOfBirth(String dateOfBirth) {
-        this.dateOfBirth = string2Date(dateOfBirth, "yyyy-MM-dd");
+        this.dateOfBirth = parseDate(dateOfBirth, SIMPLE_DATE_FORMAT);
     }
 
     public String getGender() {
@@ -1158,11 +1158,11 @@ public class Patient {
 
     public void setDateOfDeath(String dateOfDeath) {
 
-        if("".equals(dateOfDeath)) {
+        if ("".equals(dateOfDeath)) {
             dateOfDeath = EMPTY_DATE_VALUE;
         }
 
-        this.dateOfDeath = string2Date(dateOfDeath, DEFAULT_DATE_FORMAT);
+        this.dateOfDeath = parseDate(dateOfDeath, SIMPLE_DATE_FORMAT);
     }
 
     public Boolean getConfidential() {

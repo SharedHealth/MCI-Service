@@ -23,7 +23,7 @@ import java.util.UUID;
 import static java.util.Collections.emptyList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.sharedhealth.mci.utils.DateUtil.fromIsoFormat;
+import static org.sharedhealth.mci.utils.DateUtil.parseDate;
 import static org.sharedhealth.mci.web.utils.JsonConstants.LAST_MARKER;
 import static org.sharedhealth.mci.web.utils.JsonConstants.SINCE;
 import static org.springframework.http.MediaType.APPLICATION_ATOM_XML_VALUE;
@@ -52,7 +52,7 @@ public class UpdateFeedController extends FeedController {
             @RequestParam(value = SINCE, required = false) String since,
             @RequestParam(value = LAST_MARKER, required = false) String last,
             HttpServletRequest request) {
-        Date date = isNotBlank(since) ? fromIsoFormat(since) : null;
+        Date date = isNotBlank(since) ? parseDate(since) : null;
         logger.debug("Find all patients  updated since [" + since + "] ");
         UUID lastMarker = TimeUid.fromString(last);
         List<PatientUpdateLog> patients = patientService.findPatientsUpdatedSince(date, lastMarker);
@@ -110,7 +110,7 @@ public class UpdateFeedController extends FeedController {
 
     private String[] buildCategoryArray(PatientUpdateLog patient) {
 
-        if(StringUtils.isBlank(patient.getChangeSet())) {
+        if (StringUtils.isBlank(patient.getChangeSet())) {
             return new String[]{CATEGORY_PATIENT};
         }
 

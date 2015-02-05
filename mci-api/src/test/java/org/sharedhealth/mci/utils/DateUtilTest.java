@@ -1,103 +1,70 @@
 package org.sharedhealth.mci.utils;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.UUID;
-
 import org.joda.time.DateTime;
 import org.junit.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
+import java.util.Date;
+import java.util.UUID;
+
 import static org.junit.Assert.*;
+import static org.sharedhealth.mci.utils.DateUtil.parseDate;
+import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
+import static org.sharedhealth.mci.utils.TimeUid.fromString;
 
 public class DateUtilTest {
 
-    private static final int UNIX_TIME_VALUE = 1325376000;
+    @Test
+    public void shouldAbleToParseSupportedDateFormats() throws Exception {
+        long utcTime1 = 1451557200000L;
+        long utcTime2 = 1451557230000L;
+        long utcTime3 = 1451557230444L;
 
-    private static final String UTC_DATE_TILL_MILLIS_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
-    private static final String UTC_DATE_TILL_SECS_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
-    private static final String ISO_DATE_TILL_MILLIS_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
-    private static final String ISO_DATE_TILL_SECS_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
-    private static final String ISO_DATE_TILL_MINS_FORMAT = "yyyy-MM-dd'T'HH:mmZ";
-    private static final String RFC_DATE_TILL_MILLIS_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
-    private static final String RFC_DATE_TILL_SECS_FORMAT = "yyyy-MM-dd'T'HH:mm:ssXXX";
-    private static final String RFC_DATE_TILL_MINS_FORMAT = "yyyy-MM-dd'T'HH:mmXXX";
-    private static final String SIMPLE_DATE_WITH_SECS_FORMAT = "yyyy-MM-dd HH:mm:ss";
-    private static final String SIMPLE_DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
-    private static final String SIMPLE_DATE_FORMAT = "yyyy-MM-dd";
+        //assertDate(parseDate("2015-12-31T10:20:30Z"), utcTime2);
+        //assertDate(parseDate("2015-12-31T10:20:30.444Z"), utcTime3);
 
-    private static final String[] DATE_FORMATS = new String[]{
-            ISO_DATE_TILL_MILLIS_FORMAT, ISO_DATE_TILL_SECS_FORMAT,
-            ISO_DATE_TILL_MINS_FORMAT, UTC_DATE_TILL_MILLIS_FORMAT,
-            UTC_DATE_TILL_SECS_FORMAT, SIMPLE_DATE_WITH_SECS_FORMAT,
-            SIMPLE_DATE_FORMAT, SIMPLE_DATE_TIME_FORMAT,
-            RFC_DATE_TILL_MINS_FORMAT, RFC_DATE_TILL_SECS_FORMAT,
-            RFC_DATE_TILL_MILLIS_FORMAT};
+        assertDate(parseDate("2015-12-31T10:20+0000"), utcTime1);
+        assertDate(parseDate("2015-12-31T10:20:30+0000"), utcTime2);
+        assertDate(parseDate("2015-12-31T10:20:30.444+0000"), utcTime3);
+
+        assertDate(parseDate("2015-12-31T10:20+00:00"), utcTime1);
+        assertDate(parseDate("2015-12-31T10:20:30+00:00"), utcTime2);
+        assertDate(parseDate("2015-12-31T10:20:30.444+00:00"), utcTime3);
+
+        //assertDate(parseDate("2015-12-31"), 0);
+        //assertDate(parseDate("2015-12-31 10:20:30"), 0);
+    }
+
+    private void assertDate(Date date, long time) {
+        assertNotNull(date);
+        assertEquals(time, date.getTime());
+    }
+
+    @Test
+    public void shouldFormatTimeUuidToIsoDateString() throws Exception {
+        UUID uuid = fromString("6d713100-a7a3-11e4-8319-5fcb9978cb86");
+        String isoDate = toIsoFormat(uuid);
+        assertEquals("2015-01-29T10:41:48.560Z", isoDate);
+    }
+
+    @Test
+    public void shouldReturnNullForInvalidDateOrFormat() {
+        assertNull(parseDate(null));
+        assertNull(parseDate(""));
+        assertNull(parseDate("2015-01-29", "dd-MM"));
+        assertNull(parseDate("2015-01-29", "Invalid"));
+        assertNull(parseDate("invalid", "dd-MM-yyyy"));
+    }
+
+    @Test
+    public void shouldReturnNullForInvalidDate() {
+        assertNull(parseDate(""));
+        assertNull(parseDate("invalid"));
+        assertNull(parseDate("20150129"));
+    }
 
     @Test
     public void shouldReturnCurrentYear() throws Exception {
         DateTime date = new DateTime(new Date());
         assertEquals(DateUtil.getCurrentYear(), date.getYear());
-    }
-
-    @Test
-    public void shouldAbleToParseSupportedDateFormats() throws Exception {
-        Date date = new Date(UNIX_TIME_VALUE);
-
-        for (String format : DATE_FORMATS) {
-            assertDateEquality(date, format);
-
-        }
-    }
-
-    @Test
-    public void shouldReturnAsFormattedDateString() throws Exception {
-        final Date date = new Date(UNIX_TIME_VALUE);
-        DateTime dateTime = new DateTime(date);
-
-        String formatStart = String.format("%d-%02d-%02d", dateTime.getYear(), dateTime.getMonthOfYear(), dateTime.getDayOfMonth());
-
-        for (String format : DATE_FORMATS) {
-            assertTrue(DateUtil.toDateString(date, format).startsWith(formatStart));
-        }
-    }
-
-    @Test
-    public void shouldGetDateFromUUID() throws Exception {
-        final UUID uuid = TimeUid.fromString("6d713100-a7a3-11e4-8319-5fcb9978cb86");
-        final String isoDate = DateUtil.toIsoFormat(uuid);
-
-        assertTrue(isoDate.startsWith("2015-01-29T"));
-        assertThat(isoDate.length(), is(28));
-    }
-
-    @Test
-    public void shouldReturnNullForInvalidDateOrFormat() {
-        assertNull(DateUtil.string2Date("", ""));
-        assertNull(DateUtil.string2Date("2015-01-29", "dd-MM"));
-        assertNull(DateUtil.string2Date("2015-01-29", "Invalid"));
-        assertNull(DateUtil.string2Date("invalid", "dd-MM-yyyy"));
-    }
-
-    @Test
-    public void shouldReturnNullForInvalidDate() {
-        assertNull(DateUtil.string2Date(""));
-        assertNull(DateUtil.string2Date("invalid"));
-        assertNull(DateUtil.string2Date("20150129"));
-    }
-
-    private void assertDateEquality(Date date, String format) {
-        DateTime datetime = new DateTime(date);
-        DateTime parsedDate = new DateTime(DateUtil.parseDate(toDateString(date, format)));
-
-        assertEquals(datetime.getYear(), parsedDate.getYear());
-        assertEquals(datetime.getMonthOfYear(), parsedDate.getMonthOfYear());
-        assertEquals(datetime.getDayOfMonth(), parsedDate.getDayOfMonth());
-    }
-
-    private static String toDateString(Date date, String format) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat(format);
-        return dateFormat.format(date);
     }
 }

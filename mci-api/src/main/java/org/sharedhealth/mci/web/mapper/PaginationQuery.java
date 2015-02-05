@@ -5,7 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Date;
 
-import static org.sharedhealth.mci.utils.DateUtil.string2Date;
+import static org.sharedhealth.mci.utils.DateUtil.parseDate;
+
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PaginationQuery {
@@ -61,7 +62,7 @@ public class PaginationQuery {
     }
 
     public Date getDateSince() {
-        return string2Date(since);
+        return parseDate(since);
     }
 
     public void setSince(String since) {
