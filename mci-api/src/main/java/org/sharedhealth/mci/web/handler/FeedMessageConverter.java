@@ -4,6 +4,7 @@ import com.sun.syndication.feed.atom.*;
 import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.WireFeedOutput;
 import org.apache.commons.lang3.StringUtils;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.sharedhealth.mci.utils.DateUtil;
 import org.sharedhealth.mci.web.mapper.Feed;
 import org.sharedhealth.mci.web.mapper.FeedEntry;
@@ -177,7 +178,14 @@ public class FeedMessageConverter extends AbstractHttpMessageConverter<Feed> {
     private List<Content> generateContents(FeedEntry feedEntry) {
         Content content = new Content();
         content.setType(ATOMFEED_MEDIA_TYPE);
-        content.setValue(wrapInCDATA(feedEntry.getContent().toString()));
+        String contents;
+        try {
+             contents = new ObjectMapper().writeValueAsString(feedEntry.getContent());
+        } catch (IOException e) {
+            e.printStackTrace();
+            contents = null;
+        }
+        content.setValue(wrapInCDATA(contents));
         return Arrays.asList(content);
     }
 

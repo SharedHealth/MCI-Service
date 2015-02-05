@@ -6,12 +6,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.sharedhealth.mci.utils.DateUtil;
+import org.sharedhealth.mci.web.handler.FeedMessageConverter;
 import org.sharedhealth.mci.web.mapper.Feed;
 import org.sharedhealth.mci.web.mapper.FeedEntry;
 import org.sharedhealth.mci.web.model.PatientUpdateLog;
 import org.sharedhealth.mci.web.service.PatientService;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultHandler;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
@@ -36,6 +40,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.web.utils.JsonConstants.LAST_MARKER;
 import static org.sharedhealth.mci.web.utils.JsonConstants.SINCE;
+import static org.springframework.http.MediaType.APPLICATION_ATOM_XML_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -57,6 +62,8 @@ public class UpdateFeedControllerTest {
 
         mockMvc = MockMvcBuilders
                 .standaloneSetup(new UpdateFeedController(patientService))
+                .setMessageConverters(new FeedMessageConverter(), new MappingJackson2HttpMessageConverter())
+
                 .setValidator(validatorFactory)
                 .build();
     }
@@ -302,4 +309,28 @@ public class UpdateFeedControllerTest {
         assertEquals("update:sur_name", entry.getCategories()[1]);
         assertEquals(patient, entry.getContent());
     }
+
+    @Test
+    public void shouldGiveFeedInAtomXMLFormat() throws Exception {
+        UUID uuid1 = timeBased();
+        UUID uuid2 = timeBased();
+        List<PatientUpdateLog> patients = asList(buildPatientLog("h100", uuid1),
+                buildPatientLog("h200", uuid2));
+
+        when(patientService.findPatientsUpdatedSince(null, null)).thenReturn(patients);
+
+        String url = format("http://localhost/%s/patients", API_END_POINT);
+
+        mockMvc.perform(get(url).accept(APPLICATION_ATOM_XML_VALUE))
+                .andExpect(status().isOk())
+                .andDo(new ResultHandler() {
+                    @Override
+                    public void handle(MvcResult result) throws Exception {
+                        System.out.println(result);
+                    }
+                });
+
+        verify(patientService).findPatientsUpdatedSince(null, null);
+    }
+
 }
