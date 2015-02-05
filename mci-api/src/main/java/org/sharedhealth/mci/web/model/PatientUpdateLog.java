@@ -78,6 +78,11 @@ public class PatientUpdateLog {
         return DateUtil.toIsoFormat(eventId);
     }
 
+    public String getEventTime() {
+        if(this.eventId == null) return null;
+        return DateUtil.toIsoFormat(eventId);
+    }
+
 
     public UUID getEventId() {
         return eventId;

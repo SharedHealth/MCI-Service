@@ -50,7 +50,8 @@ ext.libraries = [
         apache_bean_utils   : "commons-beanutils:commons-beanutils:1.9.2",
         apache_lang: "org.apache.commons:commons-lang3:3.3.2",
         spring_security      : "org.springframework.security:spring-security-web:3.2.5.RELEASE",
-        spring_boot_security : "org.springframework.boot:spring-boot-starter-security:1.2.0.RELEASE"
+        spring_boot_security : "org.springframework.boot:spring-boot-starter-security:1.2.0.RELEASE",
+        rome                 : "rome:rome:1.0"
 ]
 
 ext.testLibraries = [

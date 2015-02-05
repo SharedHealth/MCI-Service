@@ -23,7 +23,7 @@ dependencies {
             libraries.spring_data_cassandra, libraries.hibernate_validator,
             libraries.apache_collections, libraries.apache_lang,
             libraries.apache_bean_utils,
-            libraries.spring_security
+            libraries.spring_security, libraries.rome
 
     compile('io.netty:netty:3.9.0.Final') {
         force = 'true'
@@ -142,6 +142,13 @@ task runMCI(type: JavaExec) {
     main "org.sharedhealth.mci.web.launch.Main"
     classpath sourceSets.main.runtimeClasspath
     environment(loadConfig())
+}
+
+task debugMCI(type: JavaExec) {
+    main "org.sharedhealth.mci.web.launch.Main"
+    classpath sourceSets.main.runtimeClasspath
+    environment(loadConfig())
+    debug = true
 }
 
 buildscript {

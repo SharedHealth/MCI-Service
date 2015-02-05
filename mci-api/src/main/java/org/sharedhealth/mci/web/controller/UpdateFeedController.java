@@ -1,12 +1,5 @@
 package org.sharedhealth.mci.web.controller;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.utils.TimeUid;
 import org.sharedhealth.mci.web.mapper.Feed;
@@ -16,8 +9,16 @@ import org.sharedhealth.mci.web.service.PatientService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.async.DeferredResult;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 import static java.util.Collections.emptyList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
@@ -25,6 +26,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.utils.DateUtil.fromIsoFormat;
 import static org.sharedhealth.mci.web.utils.JsonConstants.LAST_MARKER;
 import static org.sharedhealth.mci.web.utils.JsonConstants.SINCE;
+import static org.springframework.http.MediaType.APPLICATION_ATOM_XML_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
@@ -44,25 +46,17 @@ public class UpdateFeedController extends FeedController {
         super(patientService);
     }
 
-    @RequestMapping(value = "/patients", method = GET, produces = APPLICATION_JSON_VALUE)
-    public DeferredResult<Feed> findAllPatients(
+    @RequestMapping(value = "/patients", method = GET,
+            produces = {APPLICATION_JSON_VALUE, APPLICATION_ATOM_XML_VALUE})
+    public Feed findAllPatients(
             @RequestParam(value = SINCE, required = false) String since,
             @RequestParam(value = LAST_MARKER, required = false) String last,
             HttpServletRequest request) {
-
-        final DeferredResult<Feed> deferredResult = new DeferredResult<>();
-
         Date date = isNotBlank(since) ? fromIsoFormat(since) : null;
-
         logger.debug("Find all patients  updated since [" + since + "] ");
-
         UUID lastMarker = TimeUid.fromString(last);
-
         List<PatientUpdateLog> patients = patientService.findPatientsUpdatedSince(date, lastMarker);
-
-        deferredResult.setResult(buildFeedResponse(patients, request));
-
-        return deferredResult;
+        return buildFeedResponse(patients, request);
     }
 
     Feed buildFeedResponse(List<PatientUpdateLog> patients, HttpServletRequest request) {
@@ -79,7 +73,8 @@ public class UpdateFeedController extends FeedController {
         }
     }
 
-    private String buildNextUrl(List<PatientUpdateLog> patients, HttpServletRequest request) throws UnsupportedEncodingException {
+    private String buildNextUrl(List<PatientUpdateLog> patients, HttpServletRequest request) throws
+            UnsupportedEncodingException {
         if (isEmpty(patients)) {
             return null;
         }

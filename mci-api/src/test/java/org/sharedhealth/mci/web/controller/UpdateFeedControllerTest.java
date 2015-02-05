@@ -1,12 +1,5 @@
 package org.sharedhealth.mci.web.controller;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.text.ParseException;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.junit.Before;
@@ -19,9 +12,15 @@ import org.sharedhealth.mci.web.model.PatientUpdateLog;
 import org.sharedhealth.mci.web.service.PatientService;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.text.ParseException;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static java.lang.String.format;
@@ -31,20 +30,15 @@ import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.web.utils.JsonConstants.LAST_MARKER;
 import static org.sharedhealth.mci.web.utils.JsonConstants.SINCE;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
@@ -88,11 +82,7 @@ public class UpdateFeedControllerTest {
 
         url = url + "?since=2010-01-01T10:20:30Z";
 
-        MvcResult mvcResult = mockMvc.perform(get(url).contentType(APPLICATION_JSON))
-                .andExpect(request().asyncStarted())
-                .andReturn();
-
-        mockMvc.perform(asyncDispatch(mvcResult))
+        mockMvc.perform(get(url).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.author", is("MCI")))
                 .andExpect(jsonPath("$.title", is("Patients")))
@@ -131,11 +121,7 @@ public class UpdateFeedControllerTest {
 
         url = url + "?" + LAST_MARKER + "=" + uuid1.toString();
 
-        MvcResult mvcResult = mockMvc.perform(get(url).contentType(APPLICATION_JSON))
-                .andExpect(request().asyncStarted())
-                .andReturn();
-
-        mockMvc.perform(asyncDispatch(mvcResult))
+        mockMvc.perform(get(url).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.author", is("MCI")))
                 .andExpect(jsonPath("$.title", is("Patients")))
@@ -163,11 +149,7 @@ public class UpdateFeedControllerTest {
 
         String url = format("http://localhost/%s/patients?since=2010-01-01T10:20:30Z", API_END_POINT);
 
-        MvcResult mvcResult = mockMvc.perform(get(url).contentType(APPLICATION_JSON))
-                .andExpect(request().asyncStarted())
-                .andReturn();
-
-        mockMvc.perform(asyncDispatch(mvcResult))
+        mockMvc.perform(get(url).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.author", is("MCI")))
                 .andExpect(jsonPath("$.title", is("Patients")))
@@ -186,11 +168,7 @@ public class UpdateFeedControllerTest {
 
         String url = format("http://localhost/%s/patients?" + LAST_MARKER + "=123", API_END_POINT);
 
-        MvcResult mvcResult = mockMvc.perform(get(url).contentType(APPLICATION_JSON))
-                .andExpect(request().asyncStarted())
-                .andReturn();
-
-        mockMvc.perform(asyncDispatch(mvcResult))
+        mockMvc.perform(get(url).accept(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.author", is("MCI")))
                 .andExpect(jsonPath("$.title", is("Patients")))
@@ -259,11 +237,7 @@ public class UpdateFeedControllerTest {
 
         String url = format("http://localhost/%s/patients", API_END_POINT);
 
-        MvcResult mvcResult = mockMvc.perform(get(url).contentType(APPLICATION_JSON))
-                .andExpect(request().asyncStarted())
-                .andReturn();
-
-        mockMvc.perform(asyncDispatch(mvcResult))
+        mockMvc.perform(get(url).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.author", is("MCI")))
                 .andExpect(jsonPath("$.title", is("Patients")))
@@ -295,7 +269,8 @@ public class UpdateFeedControllerTest {
         return buildPatientLog(healthId, eventId, "{\"sur_name\":\"updated\"}");
     }
 
-    private MockHttpServletRequest buildHttpRequest(String since, String lastMarker) throws UnsupportedEncodingException {
+    private MockHttpServletRequest buildHttpRequest(String since, String lastMarker) throws
+            UnsupportedEncodingException {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setServerName("www.mci.com");
         request.setServerPort(8081);
