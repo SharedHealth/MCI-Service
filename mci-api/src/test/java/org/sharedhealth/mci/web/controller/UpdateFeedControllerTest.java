@@ -44,8 +44,7 @@ import static org.sharedhealth.mci.web.utils.JsonConstants.SINCE;
 import static org.springframework.http.MediaType.APPLICATION_ATOM_XML_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 public class UpdateFeedControllerTest {
@@ -315,23 +314,33 @@ public class UpdateFeedControllerTest {
     public void shouldGiveFeedInAtomXMLFormat() throws Exception {
         UUID uuid1 = timeBased();
         UUID uuid2 = timeBased();
+
+
         List<PatientUpdateLog> patients = asList(buildPatientLog("h100", uuid1),
                 buildPatientLog("h200", uuid2));
 
         when(patientService.findPatientsUpdatedSince(null, null)).thenReturn(patients);
 
         String url = format("http://localhost/%s/patients", API_END_POINT);
-
         mockMvc.perform(get(url).accept(APPLICATION_ATOM_XML_VALUE))
                 .andExpect(status().isOk())
+                .andExpect(xpath("feed/title").string("Patients"))
+                .andExpect(xpath("feed/entry/title").string("Patient updates: h100"))
+                .andExpect(xpath("feed/entry/category[@term='patient']").exists())
+                .andExpect(xpath("feed/entry/category[@term='update:sur_name']").exists())
+                .andExpect(xpath("feed/entry/link[@href='http://localhost:80/api/v1/patients/h100']").exists())
                 .andDo(new ResultHandler() {
                     @Override
                     public void handle(MvcResult result) throws Exception {
-                        System.out.println(result);
+                        String content = result.getResponse().getContentAsString();
+                        assertTrue(content.contains("\"healthId\":\"h100\""));
+                        assertTrue(content.contains("\"changeSet\":\"{\\\"sur_name\\\":\\\"updated\\\"}\""));
                     }
                 });
 
+
         verify(patientService).findPatientsUpdatedSince(null, null);
     }
+
 
 }
