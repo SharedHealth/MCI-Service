@@ -216,6 +216,7 @@ public class PatientQueryBuilder {
 
         patient.setSurName(getChangedValue(newData.getSurName(), oldData.getSurName()));
         patient.setGivenName(getChangedValue(newData.getGivenName(), oldData.getGivenName()));
+        patient.setGender(getChangedValue(newData.getGender(), oldData.getGender()));
         patient.setConfidential(getChangedValueIgnoreCase(newData.getConfidential(), oldData.getConfidential()));
         patient.setAddress(getChangedValue(newData.getAddress(), oldData.getAddress()));
 

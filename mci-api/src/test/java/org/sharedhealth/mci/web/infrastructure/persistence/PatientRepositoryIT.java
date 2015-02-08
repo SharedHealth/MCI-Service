@@ -1138,6 +1138,41 @@ public class PatientRepositoryIT {
     }
 
     @Test
+    public void shouldCreateUpdateLogsWhenOnlyListedFieldUpdatedOrApproved() {
+        String healthId = patientRepository.create(data).getId();
+        Date since = new Date();
+
+        assertUpdateLogEntry(healthId, since, false);
+
+        PatientData updateRequest = new PatientData();
+        updateRequest.setHealthId(healthId);
+        updateRequest.setEducationLevel("02");
+        patientRepository.update(updateRequest, healthId);
+        assertUpdateLogEntry(healthId, since, false);
+
+        updateRequest.setSurName("UpdSur");
+        updateRequest.setGivenName("UpdGiv");
+        updateRequest.setGender("F");
+        updateRequest.setConfidential("Yes");
+        Address newAddress = new Address("99", "88", "77");
+        updateRequest.setAddress(newAddress);
+        patientRepository.update(updateRequest, healthId);
+
+        PatientData updatedPatient = patientRepository.findByHealthId(healthId);
+        patientRepository.processPendingApprovals(updateRequest, updatedPatient, true);
+        List<PatientUpdateLog> patientUpdateLogs = patientRepository.findPatientsUpdatedSince(null, 25, null);
+
+        assertEquals(2, patientUpdateLogs.size());
+
+        final String fieldUpdatedDirectly = "{\"given_name\":\"UpdGiv\",\"sur_name\":\"UpdSur\",\"confidential\":\"Yes\"}";
+        final String fieldUpdateAfterApproval = "{\"gender\":\"F\",\"present_address\":{\"address_line\":null," +
+                "\"division_id\":\"99\",\"district_id\":\"88\",\"upazila_id\":\"77\",\"country_code\":\"050\"}}";
+
+        assertEquals(fieldUpdatedDirectly, patientUpdateLogs.get(0).getChangeSet());
+        assertEquals(fieldUpdateAfterApproval, patientUpdateLogs.get(1).getChangeSet());
+    }
+
+    @Test
     public void shouldCreateUpdateLogWhenPresentAddressIsMarkedForApprovalAndUpdatedAfterApproval() {
         String healthId = patientRepository.create(data).getId();
         Date since = new Date();
