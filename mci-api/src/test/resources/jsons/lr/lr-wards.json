@@ -40,9 +40,9 @@
         ]
     },
     {
-        "code": "100409991302",
-        "id": "100409991302",
-        "name": "Ward No-02",
+        "code": "100409991380",
+        "id": "100409991380",
+        "name": "New Ward No-02",
         "type": "ward",
         "active": 1,
         "updatedAt": "-0001-11-30 00:00:00",
@@ -73,8 +73,8 @@
                 "type": "union"
             },
             {
-                "code": "02",
-                "name": "Ward No-02",
+                "code": "80",
+                "name": "New Ward No-02",
                 "type": "ward"
             }
         ]

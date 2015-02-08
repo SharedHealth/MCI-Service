@@ -5,7 +5,6 @@ import org.sharedhealth.mci.web.infrastructure.persistence.LocationRepository;
 import org.sharedhealth.mci.web.mapper.LocationCriteria;
 import org.sharedhealth.mci.web.mapper.LocationData;
 import org.sharedhealth.mci.web.model.LRMarker;
-import org.sharedhealth.mci.web.model.Location;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,8 +28,8 @@ public class LocationService {
         return locationRepository.findLocationsByParent(locationCriteria);
     }
 
-    public Location saveOrUpdateLocationData(LocationData locationData) {
-        return locationRepository.saveOrUpdateLocationData(locationData);
+    public void saveOrUpdateLocationData(List<LocationData> locationDataList) {
+        locationRepository.saveOrUpdateLocationData(locationDataList);
     }
 
     public LRMarker getLRMarkerData(String type) {

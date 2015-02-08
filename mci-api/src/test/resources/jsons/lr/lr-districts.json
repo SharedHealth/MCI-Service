@@ -44,7 +44,7 @@
         "id": "3033",
         "name": "Gazipur",
         "type": "district",
-        "active": 1,
+        "active": 0,
         "updatedAt": "-0001-11-30 00:00:00",
         "hierarchy": [
             {
@@ -60,9 +60,9 @@
         ]
     },
     {
-        "code": "3035",
-        "id": "3035",
-        "name": "Gopalganj",
+        "code": "3080",
+        "id": "3080",
+        "name": "New Gopalganj",
         "type": "district",
         "active": 1,
         "updatedAt": "-0001-11-30 00:00:00",
@@ -73,8 +73,8 @@
                 "type": "division"
             },
             {
-                "code": "35",
-                "name": "Gopalganj",
+                "code": "80",
+                "name": "New Gopalganj",
                 "type": "district"
             }
         ]

@@ -35,9 +35,9 @@
         ]
     },
     {
-        "code": "1004092002",
-        "id": "1004092002",
-        "name": "Urban Ward No-02",
+        "code": "1004092080",
+        "id": "1004092080",
+        "name": "New Urban Ward No-02",
         "type": "union",
         "active": 1,
         "updatedAt": "-0001-11-30 00:00:00",
@@ -63,8 +63,8 @@
                 "type": "paurasava"
             },
             {
-                "code": "02",
-                "name": "Urban Ward No-02",
+                "code": "80",
+                "name": "New Urban Ward No-02",
                 "type": "union"
             }
         ]

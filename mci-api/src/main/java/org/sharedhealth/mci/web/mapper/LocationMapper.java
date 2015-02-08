@@ -32,6 +32,7 @@ public class LocationMapper {
         data.setCode(location.getCode());
         data.setName(location.getName());
         data.setParent(location.getParent());
+        data.setActive(location.getActive());
 
         return data;
     }

@@ -8,13 +8,12 @@ import org.sharedhealth.mci.web.mapper.LocationData;
 import org.sharedhealth.mci.web.mapper.LocationMapper;
 import org.sharedhealth.mci.web.model.LRMarker;
 import org.sharedhealth.mci.web.model.Location;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
@@ -22,7 +21,6 @@ import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
 @Component
 public class LocationRepository extends BaseRepository {
 
-    private static final Logger logger = LoggerFactory.getLogger(LocationRepository.class);
     public static final String DEFAULT_PARENT_CODE_FOR_DIVISION = "00";
     public static final String INVALID_CITY_CORPORATION = "99";
     public static final String ACTIVE_STATUS = "1";
@@ -70,30 +68,35 @@ public class LocationRepository extends BaseRepository {
         return mapper.map(locations);
     }
 
-    public Location saveOrUpdateLocationData(LocationData locationData) {
+    public void saveOrUpdateLocationData(List<LocationData> locationDataList) {
 
         LocationData existingLocationData;
+        List<Location> insertLocations = new ArrayList<>();
+        List<Location> updatedLocations = new ArrayList<>();
         Location location;
-        try {
+        String status;
+
+        for (LocationData locationData : locationDataList) {
             existingLocationData = findByGeoCode(locationData.getCode());
             if (existingLocationData == null) {
                 location = mapper.mapHRMData(locationData);
-                cassandraOps.insert(location);
-            } else if (!locationData.getActive().equals(ACTIVE_STATUS)) {
-                location = new Location(existingLocationData.getCode(),
-                        existingLocationData.getName(), existingLocationData.getParent(), INACTIVE_STATUS);
-                cassandraOps.update(location);
+                insertLocations.add(location);
             } else {
+                status = locationData.getActive().equals(ACTIVE_STATUS) ? ACTIVE_STATUS : INACTIVE_STATUS;
                 location = new Location(existingLocationData.getCode(),
-                        locationData.getName(), existingLocationData.getParent(), existingLocationData.getActive());
-                cassandraOps.update(location);
+                        locationData.getName(), existingLocationData.getParent(), status);
+                updatedLocations.add(location);
             }
-        } catch (Exception e) {
-            logger.info("Failed to insert or update into Local DB " + e.getMessage());
-            throw e;
         }
 
-        return location;
+        if(insertLocations.size() > 0) {
+            cassandraOps.insert(insertLocations);
+        }
+
+        if(updatedLocations.size() > 0) {
+            cassandraOps.update(updatedLocations);
+        }
+
     }
 
 

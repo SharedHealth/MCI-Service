@@ -30,9 +30,9 @@
         ]
     },
     {
-        "code": "10042840",
-        "id": "10042840",
-        "name": "Barguna Paurasava",
+        "code": "10042880",
+        "id": "10042880",
+        "name": "New Barguna Paurasava",
         "type": "paurasava",
         "active": 1,
         "updatedAt": "-0001-11-30 00:00:00",
@@ -53,8 +53,8 @@
                 "type": "upazila"
             },
             {
-                "code": "40",
-                "name": "Barguna Paurasava",
+                "code": "80",
+                "name": "New Barguna Paurasava",
                 "type": "paurasava"
             }
         ]

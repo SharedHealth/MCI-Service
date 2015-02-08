@@ -25,9 +25,9 @@
         ]
     },
     {
-        "code": "100419",
-        "id": "100419",
-        "name": "Bamna",
+        "code": "100480",
+        "id": "100480",
+        "name": "New Bamna",
         "type": "upazila",
         "active": 1,
         "updatedAt": "2014-11-27 19:10:07",
@@ -43,8 +43,8 @@
                 "type": "district"
             },
             {
-                "code": "19",
-                "name": "Bamna",
+                "code": "80",
+                "name": "New Bamna",
                 "type": "upazila"
             }
         ]
