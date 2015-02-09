@@ -70,9 +70,8 @@ public class CatchmentControllerTest {
         pendingApprovals.add(buildPendingApprovalListResponse(1));
         pendingApprovals.add(buildPendingApprovalListResponse(2));
         pendingApprovals.add(buildPendingApprovalListResponse(3));
-
-        when(patientService.findPendingApprovalList(catchment, null, null)).thenReturn(pendingApprovals);
-
+        when(patientService.getPerPageMaximumLimitPlusOne()).thenReturn(getPerpageMaximumLimitPlusOne());
+        when(patientService.findPendingApprovalList(catchment, null, null, getPerpageMaximumLimitPlusOne())).thenReturn(pendingApprovals);
         String url = buildPendingApprovalUrl("102030");
         MvcResult mvcResult = mockMvc.perform(get(url))
                 .andExpect(request().asyncStarted())
@@ -95,7 +94,47 @@ public class CatchmentControllerTest {
                 .andExpect(jsonPath("$.results[2].sur_name", is("Tiger-3")))
                 .andExpect(jsonPath("$.results[2].last_updated", is(pendingApprovals.get(2).getLastUpdated().toString())));
 
-        verify(patientService).findPendingApprovalList(catchment, null, null);
+        verify(patientService).findPendingApprovalList(catchment, null, null, getPerpageMaximumLimitPlusOne());
+    }
+
+    @Test
+    public void shouldFindPendingApprovalsWithAdditionalInfoIfExceedMaximumLimit() throws Exception {
+        Catchment catchment = new Catchment("10", "20", "30");
+        List<PendingApprovalListResponse> pendingApprovals = new ArrayList<>();
+        for (int x = 1; x <= getPerpageMaximumLimitPlusOne(); x++) {
+            pendingApprovals.add(buildPendingApprovalListResponse(x));
+        }
+
+        String nextUrl = fromUriString(format("http://localhost/%s/%s/approvals", API_END_POINT,"102030"))
+                .queryParam("after", pendingApprovals.get(24).getLastUpdated()).build().toString();
+
+        when(patientService.getPerPageMaximumLimitPlusOne()).thenReturn(getPerpageMaximumLimitPlusOne());
+        when(patientService.findPendingApprovalList(catchment, null, null, getPerpageMaximumLimitPlusOne())).thenReturn(pendingApprovals);
+        String url = buildPendingApprovalUrl("102030");
+        MvcResult mvcResult = mockMvc.perform(get(url))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.results[0].hid", is("hid-1")))
+                .andExpect(jsonPath("$.results[0].given_name", is("Scott-1")))
+                .andExpect(jsonPath("$.results[0].sur_name", is("Tiger-1")))
+                .andExpect(jsonPath("$.results[0].last_updated", is(pendingApprovals.get(0).getLastUpdated().toString())))
+
+                .andExpect(jsonPath("$.results[1].hid", is("hid-2")))
+                .andExpect(jsonPath("$.results[1].given_name", is("Scott-2")))
+                .andExpect(jsonPath("$.results[1].sur_name", is("Tiger-2")))
+                .andExpect(jsonPath("$.results[1].last_updated", is(pendingApprovals.get(1).getLastUpdated().toString())))
+
+                .andExpect(jsonPath("$.results[2].hid", is("hid-3")))
+                .andExpect(jsonPath("$.results[2].given_name", is("Scott-3")))
+                .andExpect(jsonPath("$.results[2].sur_name", is("Tiger-3")))
+                .andExpect(jsonPath("$.results[2].last_updated", is(pendingApprovals.get(2).getLastUpdated().toString())))
+                .andExpect(jsonPath("$.additional_info.next", is(nextUrl)));
+
+
+        verify(patientService).findPendingApprovalList(catchment, null, null, getPerpageMaximumLimitPlusOne());
     }
 
     private PendingApprovalListResponse buildPendingApprovalListResponse(int suffix) {
@@ -111,7 +150,8 @@ public class CatchmentControllerTest {
     public void shouldFindPendingApprovalsAfterGivenTime() throws Exception {
         Catchment catchment = new Catchment("10", "20", "30");
         UUID after = UUIDs.timeBased();
-        when(patientService.findPendingApprovalList(catchment, after, null)).thenReturn(new ArrayList<PendingApprovalListResponse>());
+        when(patientService.getPerPageMaximumLimitPlusOne()).thenReturn(getPerpageMaximumLimitPlusOne());
+        when(patientService.findPendingApprovalList(catchment, after, null, getPerpageMaximumLimitPlusOne())).thenReturn(new ArrayList<PendingApprovalListResponse>());
 
         String url = buildPendingApprovalUrl("102030");
         MvcResult mvcResult = mockMvc.perform(get(url + "?" + AFTER + "=" + after))
@@ -121,14 +161,15 @@ public class CatchmentControllerTest {
         mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk());
 
-        verify(patientService).findPendingApprovalList(catchment, after, null);
+        verify(patientService).findPendingApprovalList(catchment, after, null, getPerpageMaximumLimitPlusOne());
     }
 
     @Test
     public void shouldFindPendingApprovalsABeforeGivenTime() throws Exception {
         Catchment catchment = new Catchment("10", "20", "30");
         UUID before = UUIDs.timeBased();
-        when(patientService.findPendingApprovalList(catchment, null, before)).thenReturn(new ArrayList<PendingApprovalListResponse>());
+        when(patientService.getPerPageMaximumLimitPlusOne()).thenReturn(getPerpageMaximumLimitPlusOne());
+        when(patientService.findPendingApprovalList(catchment, null, before, getPerpageMaximumLimitPlusOne())).thenReturn(new ArrayList<PendingApprovalListResponse>());
 
         String url = buildPendingApprovalUrl("102030");
         MvcResult mvcResult = mockMvc.perform(get(url + "?" + BEFORE + "=" + before))
@@ -138,7 +179,7 @@ public class CatchmentControllerTest {
         mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk());
 
-        verify(patientService).findPendingApprovalList(catchment, null, before);
+        verify(patientService).findPendingApprovalList(catchment, null, before, getPerpageMaximumLimitPlusOne());
     }
 
     @Test
@@ -146,7 +187,8 @@ public class CatchmentControllerTest {
         Catchment catchment = new Catchment("10", "20", "30");
         UUID after = UUIDs.timeBased();
         UUID before = UUIDs.timeBased();
-        when(patientService.findPendingApprovalList(catchment, after, before)).thenReturn(new ArrayList<PendingApprovalListResponse>());
+        when(patientService.getPerPageMaximumLimitPlusOne()).thenReturn(getPerpageMaximumLimitPlusOne());
+        when(patientService.findPendingApprovalList(catchment, after, before, getPerpageMaximumLimitPlusOne())).thenReturn(new ArrayList<PendingApprovalListResponse>());
 
         String url = buildPendingApprovalUrl("102030");
         MvcResult mvcResult = mockMvc.perform(get(url + "?" + AFTER + "=" + after + "&" + BEFORE + "=" + before))
@@ -156,7 +198,7 @@ public class CatchmentControllerTest {
         mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk());
 
-        verify(patientService).findPendingApprovalList(catchment, after, before);
+        verify(patientService).findPendingApprovalList(catchment, after, before, getPerpageMaximumLimitPlusOne());
     }
 
     @Test
@@ -180,6 +222,7 @@ public class CatchmentControllerTest {
 
         String catchmentId = "102030";
         Catchment catchment = new Catchment(catchmentId);
+        when(patientService.getPerPageMaximumLimitPlusOne()).thenReturn(getPerpageMaximumLimitPlusOne());
         when(patientService.findPendingApprovalDetails(healthId, catchment)).thenReturn(pendingApprovals);
 
         String url = buildPendingApprovalUrl(catchmentId, healthId);
@@ -555,5 +598,9 @@ public class CatchmentControllerTest {
         assertEquals(1, entry.getCategories().length);
         assertEquals("patient", entry.getCategories()[0]);
         assertEquals(patient, entry.getContent());
+    }
+
+    private int getPerpageMaximumLimitPlusOne() {
+        return 26;
     }
 }

@@ -89,7 +89,6 @@ public class LocationRepositoryIT {
         locationCriteria.setParent("00");
         List<LocationData> locationDataList1 = locationRepository.findLocationsByParent(locationCriteria);
 
-        Assert.assertEquals(8, locationDataList1.size());
         Assert.assertEquals("90", locationDataList1.get(7).getCode());
 
     }

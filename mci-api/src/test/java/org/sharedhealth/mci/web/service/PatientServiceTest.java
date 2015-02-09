@@ -141,7 +141,7 @@ public class PatientServiceTest {
         when(patientRepository.findByHealthId("hid-300")).thenReturn(buildPatient("hid-300"));
         when(settingService.getSettingAsIntegerByKey("PER_PAGE_MAXIMUM_LIMIT")).thenReturn(25);
 
-        List<PendingApprovalListResponse> pendingApprovals = patientService.findPendingApprovalList(catchment, after, null);
+        List<PendingApprovalListResponse> pendingApprovals = patientService.findPendingApprovalList(catchment, after, null, 25);
 
         InOrder inOrder = inOrder(patientRepository);
         inOrder.verify(patientRepository).findPendingApprovalMapping(catchment, after, null, 25);

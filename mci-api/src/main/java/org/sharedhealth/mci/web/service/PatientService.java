@@ -134,6 +134,15 @@ public class PatientService {
         return limit;
     }
 
+    public int getPerPageMaximumLimitPlusOne() {
+        Integer limit = settingService.getSettingAsIntegerByKey("PER_PAGE_MAXIMUM_LIMIT");
+
+        if (limit == null) {
+            return PER_PAGE_MAXIMUM_LIMIT + 1;
+        }
+        return limit + 1;
+    }
+
     public String getPerPageMaximumLimitNote() {
         String note = settingService.getSettingAsStringByKey("PER_PAGE_MAXIMUM_LIMIT_NOTE");
 
@@ -143,9 +152,9 @@ public class PatientService {
         return note;
     }
 
-    public List<PendingApprovalListResponse> findPendingApprovalList(Catchment catchment, UUID after, UUID before) {
+    public List<PendingApprovalListResponse> findPendingApprovalList(Catchment catchment, UUID after, UUID before, int limit) {
         List<PendingApprovalListResponse> pendingApprovals = new ArrayList<>();
-        List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(catchment, after, before, getPerPageMaximumLimit());
+        List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(catchment, after, before, limit);
         if (isNotEmpty(mappings)) {
             for (PendingApprovalMapping mapping : mappings) {
                 PatientData patient = patientRepository.findByHealthId(mapping.getHealthId());

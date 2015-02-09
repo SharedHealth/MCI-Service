@@ -53,17 +53,19 @@ public class CatchmentController extends FeedController {
     public DeferredResult<ResponseEntity<MCIMultiResponse>> findPendingApprovalList(
             @PathVariable String catchmentId,
             @RequestParam(value = AFTER, required = false) UUID after,
-            @RequestParam(value = BEFORE, required = false) UUID before) {
+            @RequestParam(value = BEFORE, required = false) UUID before,
+            HttpServletRequest request) {
 
         logger.debug("Find list of pending approvals.");
         final DeferredResult<ResponseEntity<MCIMultiResponse>> deferredResult = new DeferredResult<>();
 
         Catchment catchment = new Catchment(catchmentId);
-        List<PendingApprovalListResponse> response = patientService.findPendingApprovalList(catchment, after, before);
+        int limit = patientService.getPerPageMaximumLimitPlusOne();
+        List<PendingApprovalListResponse> response = patientService.findPendingApprovalList(catchment, after, before, limit);
 
         MCIMultiResponse mciMultiResponse;
         if (response != null) {
-            mciMultiResponse = new MCIMultiResponse(response, null, OK);
+            mciMultiResponse = buildPendingApprovalResponse(request, response);
         } else {
             mciMultiResponse = new MCIMultiResponse(emptyList(), null, OK);
         }
@@ -198,5 +200,26 @@ public class CatchmentController extends FeedController {
             entries.add(entry);
         }
         return entries;
+    }
+
+    private MCIMultiResponse buildPendingApprovalResponse(HttpServletRequest request, List<PendingApprovalListResponse> response)
+    {
+        MCIMultiResponse mciMultiResponse;
+        HashMap<String, String> additionalInfo = new HashMap<>();
+        if (response.size() == patientService.getPerPageMaximumLimitPlusOne()) {
+            response.remove(response.size() - 1);
+            additionalInfo.put("next", buildPendingApprovalNextUrl(request, response.get(response.size() - 1)));
+        }
+
+        mciMultiResponse = new MCIMultiResponse(response, additionalInfo, OK);
+
+        return mciMultiResponse;
+    }
+
+    private String buildPendingApprovalNextUrl(HttpServletRequest request, PendingApprovalListResponse pendingApprovalListResponse)
+    {
+        return fromUriString(request.getRequestURL().toString())
+                .queryParam("after", pendingApprovalListResponse.getLastUpdated())
+                .build().toString();
     }
 }
