@@ -232,10 +232,11 @@ public class PatientQueryBuilder {
         return null;
     }
 
-    private static boolean someLoggableDataChanged(PatientData patient) {
+    static boolean someLoggableDataChanged(PatientData patient) {
         return patient.getSurName() != null
                 || patient.getGivenName() != null
                 || patient.getConfidential() != null
+                || patient.getGender() != null
                 || patient.getAddress() != null;
     }
 
