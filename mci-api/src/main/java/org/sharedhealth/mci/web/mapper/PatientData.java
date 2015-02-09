@@ -26,7 +26,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static java.lang.String.valueOf;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.sharedhealth.mci.utils.DateUtil.SIMPLE_DATE_FORMAT;
+import static org.sharedhealth.mci.utils.DateUtil.ISO_DATE_FORMAT;
 import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
@@ -183,7 +183,7 @@ public class PatientData {
 
     @JsonProperty(DATE_OF_DEATH)
     @JsonInclude(NON_EMPTY)
-    @Date(format = SIMPLE_DATE_FORMAT, message = ERROR_CODE_PATTERN)
+    @Date(format = ISO_DATE_FORMAT, message = ERROR_CODE_PATTERN)
     private String dateOfDeath;
 
     private UUID createdAt;

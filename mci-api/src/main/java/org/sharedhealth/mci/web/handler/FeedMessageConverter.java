@@ -5,7 +5,6 @@ import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.WireFeedOutput;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.sharedhealth.mci.utils.DateUtil;
 import org.sharedhealth.mci.web.mapper.Feed;
 import org.sharedhealth.mci.web.mapper.FeedEntry;
 import org.springframework.http.HttpInputMessage;
@@ -22,6 +21,8 @@ import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static org.sharedhealth.mci.utils.DateUtil.ISO_DATE_TIME_TILL_MILLIS_FORMAT1;
 
 public class FeedMessageConverter extends AbstractHttpMessageConverter<Feed> {
     private static final String ATOM_MEDIA_TYPE = "application/atom+xml";
@@ -84,7 +85,7 @@ public class FeedMessageConverter extends AbstractHttpMessageConverter<Feed> {
         try {
             if (feed.getEntries().isEmpty())
                 return null;
-            return new SimpleDateFormat(DateUtil.ISO_DATE_TILL_MILLIS_FORMAT).parse(feed.getEntries().get(0)
+            return new SimpleDateFormat(ISO_DATE_TIME_TILL_MILLIS_FORMAT1).parse(feed.getEntries().get(0)
                     .getPublishedDate());
         } catch (ParseException e) {
             e.printStackTrace();
@@ -143,7 +144,7 @@ public class FeedMessageConverter extends AbstractHttpMessageConverter<Feed> {
 
             Date publishedDate = null;
             try {
-                publishedDate = new SimpleDateFormat(DateUtil.ISO_DATE_TILL_MILLIS_FORMAT).parse(feedEntry
+                publishedDate = new SimpleDateFormat(ISO_DATE_TIME_TILL_MILLIS_FORMAT1).parse(feedEntry
                         .getPublishedDate());
             } catch (ParseException e) {
                 e.printStackTrace();
@@ -180,7 +181,7 @@ public class FeedMessageConverter extends AbstractHttpMessageConverter<Feed> {
         content.setType(ATOMFEED_MEDIA_TYPE);
         String contents;
         try {
-             contents = new ObjectMapper().writeValueAsString(feedEntry.getContent());
+            contents = new ObjectMapper().writeValueAsString(feedEntry.getContent());
         } catch (IOException e) {
             e.printStackTrace();
             contents = null;

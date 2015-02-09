@@ -18,36 +18,36 @@ public class DateUtil {
 
     private static final Logger logger = getLogger(DateUtil.class);
 
-    private static final String UTC = "UTC";
+    private static final String UTC_TIMEZONE = "UTC";
 
-    public static final String UTC_DATE_TILL_SECS_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
-    public static final String UTC_DATE_TILL_MILLIS_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+    public static final String ISO_DATE_FORMAT = "yyyy-MM-dd";
 
-    public static final String ISO_DATE_TILL_MINS_FORMAT = "yyyy-MM-dd'T'HH:mmZ";
-    public static final String ISO_DATE_TILL_SECS_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
-    public static final String ISO_DATE_TILL_MILLIS_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
+    public static final String ISO_DATE_TIME_TILL_MINS_FORMAT1 = "yyyy-MM-dd'T'HH:mmX"; // Z for UTC
+    public static final String ISO_DATE_TIME_TILL_MINS_FORMAT2 = "yyyy-MM-dd'T'HH:mmXX"; // +0530
+    public static final String ISO_DATE_TIME_TILL_MINS_FORMAT3 = "yyyy-MM-dd'T'HH:mmXXX"; // +05:30
 
-    public static final String RFC_DATE_TILL_MINS_FORMAT = "yyyy-MM-dd'T'HH:mmXXX";
-    public static final String RFC_DATE_TILL_SECS_FORMAT = "yyyy-MM-dd'T'HH:mm:ssXXX";
-    public static final String RFC_DATE_TILL_MILLIS_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
-
-    public static final String SIMPLE_DATE_FORMAT = "yyyy-MM-dd";
-    public static final String SIMPLE_DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    public static final String ISO_DATE_TIME_TILL_SECS_FORMAT1 = "yyyy-MM-dd'T'HH:mm:ssX";
+    public static final String ISO_DATE_TIME_TILL_SECS_FORMAT2 = "yyyy-MM-dd'T'HH:mm:ssXX";
+    public static final String ISO_DATE_TIME_TILL_SECS_FORMAT3 = "yyyy-MM-dd'T'HH:mm:ssXXX";
+    
+    public static final String ISO_DATE_TIME_TILL_MILLIS_FORMAT1 = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
+    public static final String ISO_DATE_TIME_TILL_MILLIS_FORMAT2 = "yyyy-MM-dd'T'HH:mm:ss.SSSXX";
+    public static final String ISO_DATE_TIME_TILL_MILLIS_FORMAT3 = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
 
     public static final String[] DATE_FORMATS = new String[]{
-            UTC_DATE_TILL_MILLIS_FORMAT,
-            UTC_DATE_TILL_SECS_FORMAT,
+            ISO_DATE_FORMAT,
 
-            ISO_DATE_TILL_MILLIS_FORMAT,
-            ISO_DATE_TILL_SECS_FORMAT,
-            ISO_DATE_TILL_MINS_FORMAT,
+            ISO_DATE_TIME_TILL_MINS_FORMAT1,
+            ISO_DATE_TIME_TILL_MINS_FORMAT2,
+            ISO_DATE_TIME_TILL_MINS_FORMAT3,
 
-            RFC_DATE_TILL_MILLIS_FORMAT,
-            RFC_DATE_TILL_SECS_FORMAT,
-            RFC_DATE_TILL_MINS_FORMAT,
+            ISO_DATE_TIME_TILL_SECS_FORMAT1,
+            ISO_DATE_TIME_TILL_SECS_FORMAT2,
+            ISO_DATE_TIME_TILL_SECS_FORMAT3,
 
-            SIMPLE_DATE_FORMAT,
-            SIMPLE_DATE_TIME_FORMAT
+            ISO_DATE_TIME_TILL_MILLIS_FORMAT1,
+            ISO_DATE_TIME_TILL_MILLIS_FORMAT2,
+            ISO_DATE_TIME_TILL_MILLIS_FORMAT3
     };
 
     public static Date parseDate(String date, String... formats) {
@@ -69,8 +69,8 @@ public class DateUtil {
     }
 
     public static String toIsoFormat(Date date) {
-        DateFormat dateFormat = new SimpleDateFormat(UTC_DATE_TILL_MILLIS_FORMAT);
-        dateFormat.setTimeZone(getTimeZone(UTC));
+        DateFormat dateFormat = new SimpleDateFormat(ISO_DATE_TIME_TILL_MILLIS_FORMAT1);
+        dateFormat.setTimeZone(getTimeZone(UTC_TIMEZONE));
         return dateFormat.format(date);
     }
 
