@@ -17,7 +17,7 @@ public class LRSyncTask {
     @Autowired
     LocationDataSync locationDataSync;
 
-    @Scheduled(fixedDelayString = "${LR_SYNC_FIXED_DELAY}")
+    @Scheduled(cron = "* * 1 * * ?")
     public void execute() {
         try {
             logger.info("Syncing start....");
