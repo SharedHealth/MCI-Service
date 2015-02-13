@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.TreeMap;
 import java.util.UUID;
 
+import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonMapper.convertValue;
 
@@ -23,8 +24,15 @@ public class PendingApproval implements Comparable<PendingApproval> {
     public PendingApproval() {
         fieldDetails = new TreeMap<>(new Comparator<UUID>() {
             @Override
-            public int compare(UUID o1, UUID o2) {
-                return o2.compareTo(o1);
+            public int compare(UUID u1, UUID u2) {
+                Long t1 = unixTimestamp(u1);
+                Long t2 = unixTimestamp(u2);
+                int result = t2.compareTo(t1);
+                if (result == 0) {
+                    return u2.compareTo(u1);
+                }
+                return result;
+
             }
         });
     }

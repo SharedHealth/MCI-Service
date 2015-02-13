@@ -66,4 +66,14 @@ public class PendingApprovalFieldDetails {
         result = 31 * result + createdAt.hashCode();
         return result;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("PendingApprovalFieldDetails{");
+        sb.append("facilityId='").append(facilityId).append('\'');
+        sb.append(", value=").append(value);
+        sb.append(", createdAt='").append(createdAt).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
 }
