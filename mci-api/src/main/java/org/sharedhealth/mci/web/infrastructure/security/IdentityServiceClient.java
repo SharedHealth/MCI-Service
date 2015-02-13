@@ -12,7 +12,6 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.client.AsyncRestTemplate;
 
 import javax.naming.AuthenticationException;
-import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
 @Component
@@ -30,10 +29,6 @@ public class IdentityServiceClient {
     public TokenAuthentication authenticate(String token) throws AuthenticationException, ExecutionException,
             InterruptedException {
 
-        //temporarily ignored - till MCI Admin begins sending the token
-        if(TokenAuthenticationFilter.TEMPORARY_TOKEN.equals(token))
-            return new TokenAuthentication(buildTemporaryUserInfo(), token);
-
         String userInfoUrl = mciProperties.getIdentityServerBaseUrl() + token;
         ListenableFuture<ResponseEntity<UserInfo>> listenableFuture = mciRestTemplate.exchange(userInfoUrl,
                 HttpMethod.GET,
@@ -46,8 +41,4 @@ public class IdentityServiceClient {
         return new TokenAuthentication(userInfo, token);
     }
 
-    private UserInfo buildTemporaryUserInfo() {
-        ArrayList<String> roles = new ArrayList<>();
-        roles.add("ROLE_MCI_USER");
-        return new UserInfo("TEMPORARY", roles);}
 }

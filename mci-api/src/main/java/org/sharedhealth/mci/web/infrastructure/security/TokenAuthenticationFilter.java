@@ -23,7 +23,6 @@ import static org.springframework.util.StringUtils.isEmpty;
 
 
 public class TokenAuthenticationFilter extends GenericFilterBean {
-    public static final String TEMPORARY_TOKEN = "TEMPORARY_TOKEN";
     private AuthenticationManager authenticationManager;
     private final static Logger logger = LoggerFactory.getLogger(TokenAuthenticationFilter.class);
 
@@ -38,12 +37,9 @@ public class TokenAuthenticationFilter extends GenericFilterBean {
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         String token = httpRequest.getHeader(MCIProperties.SECURITY_TOKEN_HEADER);
 
-        //temporarily ignored - till MCI Admin begins sending the token
         if (isEmpty(token)) {
-            token = TEMPORARY_TOKEN;
-            //uncomment following when MCI Admin begins sending the token
-//            httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token not provided");
-//            return;
+            httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token not provided");
+            return;
         }
 
         logger.debug("Authenticating token: {}", token);
