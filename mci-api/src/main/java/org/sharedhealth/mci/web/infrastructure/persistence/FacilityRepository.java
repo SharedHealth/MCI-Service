@@ -3,7 +3,6 @@ package org.sharedhealth.mci.web.infrastructure.persistence;
 import com.datastax.driver.core.querybuilder.Insert;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
-import org.sharedhealth.mci.web.config.MCIProperties;
 import org.sharedhealth.mci.web.model.Facility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -18,14 +17,14 @@ public class FacilityRepository extends BaseRepository {
         super(cassandraOps);
     }
 
-    public void save(Facility facility) {
-        cassandraOps.execute(buildInsertStatement(facility));
+    public void save(Facility facility, int ttl) {
+        cassandraOps.execute(buildInsertStatement(facility, ttl));
     }
 
-    private Insert buildInsertStatement(Facility facility) {
+    private Insert buildInsertStatement(Facility facility, int ttl) {
         return QueryBuilder
                 .insertInto("facilities")
-                .using(QueryBuilder.ttl(MCIProperties.ONE_DAY))
+                .using(QueryBuilder.ttl(ttl))
                 .value("id", facility.getId())
                 .value("name", facility.getName())
                 .value("type", facility.getType())

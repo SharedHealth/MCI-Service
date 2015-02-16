@@ -58,7 +58,7 @@ public class FacilityRepositoryIT {
     @Test
     public void returnFacilityByFacilityId() throws ExecutionException, InterruptedException {
 
-        facilityRepository.save(facility);
+        facilityRepository.save(facility, 86400);
         Facility savedFacility = facilityRepository.find(facilityId);
 
         assertThat(savedFacility, is(facility));

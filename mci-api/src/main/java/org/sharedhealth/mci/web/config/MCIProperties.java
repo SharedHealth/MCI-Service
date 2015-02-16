@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class MCIProperties {
 
-    public static final int ONE_DAY = 86400;
     public static final String SECURITY_TOKEN_HEADER = "X-Auth-Token";
 
     @Value("${CASSANDRA_KEYSPACE}")
@@ -29,6 +28,8 @@ public class MCIProperties {
     private String LrUrl;
     @Value("${IDENTITY_SERVER_BASE_URL}")
     private String identityServerBaseUrl;
+    @Value("${FR_CACHE_TTL}")
+    private int frCacheTtl;
 
     public String getCassandraKeySpace() {
         return cassandraKeySpace;
@@ -70,4 +71,7 @@ public class MCIProperties {
         return LrUrl;
     }
 
+    public int getFrCacheTtl() {
+        return frCacheTtl;
+    }
 }

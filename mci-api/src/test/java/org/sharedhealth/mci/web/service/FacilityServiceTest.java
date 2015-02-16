@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.sharedhealth.mci.web.config.MCIProperties;
 import org.sharedhealth.mci.web.exception.FacilityNotFoundException;
 import org.sharedhealth.mci.web.infrastructure.fr.FacilityRegistryWrapper;
 import org.sharedhealth.mci.web.infrastructure.persistence.FacilityRepository;
@@ -30,12 +31,15 @@ public class FacilityServiceTest {
     @Mock
     private FacilityRegistryWrapper facilityRegistryWrapper;
 
+    @Mock
+    private MCIProperties mciProperties;
+
     private FacilityService facilityService;
 
     @Before
     public void setUp() {
         initMocks(this);
-        facilityService = new FacilityService(facilityRepository, facilityRegistryWrapper);
+        facilityService = new FacilityService(facilityRepository, facilityRegistryWrapper, mciProperties);
     }
 
     @Test
@@ -51,11 +55,14 @@ public class FacilityServiceTest {
     public void shouldQueryFacilityRegistryWrapperIfFacilityNotFoundInLocalDatabase() throws ExecutionException,
             InterruptedException {
         Facility facility = new Facility("1", "foo", "bar", "101010", "101010");
+        final int ttl = 1000;
 
         Mockito.when(facilityRepository.find(facility.getId())).thenReturn(null);
         Mockito.when(facilityRegistryWrapper.find(facility.getId())).thenReturn(facility);
+        Mockito.when(mciProperties.getFrCacheTtl()).thenReturn(ttl);
         assertNotNull(facilityService.ensurePresent(facility.getId()));
         Mockito.verify(facilityRepository).find(facility.getId());
+        Mockito.verify(facilityRepository).save(facility, ttl);
         Mockito.verify(facilityRegistryWrapper).find(facility.getId());
     }
 
