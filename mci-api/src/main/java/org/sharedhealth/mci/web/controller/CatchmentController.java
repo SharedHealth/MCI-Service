@@ -60,7 +60,7 @@ public class CatchmentController extends FeedController {
         final DeferredResult<ResponseEntity<MCIMultiResponse>> deferredResult = new DeferredResult<>();
 
         Catchment catchment = new Catchment(catchmentId);
-        int limit = patientService.getPerPageMaximumLimitPlusOne();
+        int limit = patientService.getPerPageMaximumLimit() + 1;
         List<PendingApprovalListResponse> response = patientService.findPendingApprovalList(catchment, after, before, limit);
 
         MCIMultiResponse mciMultiResponse;
@@ -202,24 +202,19 @@ public class CatchmentController extends FeedController {
         return entries;
     }
 
-    private MCIMultiResponse buildPendingApprovalResponse(HttpServletRequest request, List<PendingApprovalListResponse> response)
-    {
-        MCIMultiResponse mciMultiResponse;
+    MCIMultiResponse buildPendingApprovalResponse(HttpServletRequest request, List<PendingApprovalListResponse> response) {
         HashMap<String, String> additionalInfo = new HashMap<>();
-        if (response.size() == patientService.getPerPageMaximumLimitPlusOne()) {
-            response.remove(response.size() - 1);
-            additionalInfo.put("next", buildPendingApprovalNextUrl(request, response.get(response.size() - 1)));
+
+        if (response.size() == patientService.getPerPageMaximumLimit() + 1) {
+            response = response.subList(0, response.size() - 1);
+            additionalInfo.put(NEXT, buildPendingApprovalNextUrl(request, response.get(response.size() - 1)));
         }
-
-        mciMultiResponse = new MCIMultiResponse(response, additionalInfo, OK);
-
-        return mciMultiResponse;
+        return new MCIMultiResponse(response, additionalInfo, OK);
     }
 
-    private String buildPendingApprovalNextUrl(HttpServletRequest request, PendingApprovalListResponse pendingApprovalListResponse)
-    {
-        return fromUriString(request.getRequestURL().toString())
-                .queryParam("after", pendingApprovalListResponse.getLastUpdated())
+    private String buildPendingApprovalNextUrl(HttpServletRequest httpRequest, PendingApprovalListResponse response) {
+        return fromUriString(httpRequest.getRequestURL().toString())
+                .queryParam(AFTER, response.getLastUpdated())
                 .build().toString();
     }
 }

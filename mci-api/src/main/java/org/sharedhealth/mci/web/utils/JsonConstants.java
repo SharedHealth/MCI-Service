@@ -49,6 +49,8 @@ public class JsonConstants {
 
     public static final String PENDING_APPROVALS = "pending_approvals";
     public static final String AFTER = "after";
+    public static final String NEXT = "next";
+    public static final String PREVIOUS = "previous";
     public static final String SINCE = "since";
     public static final String LAST_MARKER = "last_marker";
     public static final String BEFORE = "before";

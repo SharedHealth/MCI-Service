@@ -134,15 +134,6 @@ public class PatientService {
         return limit;
     }
 
-    public int getPerPageMaximumLimitPlusOne() {
-        Integer limit = settingService.getSettingAsIntegerByKey("PER_PAGE_MAXIMUM_LIMIT");
-
-        if (limit == null) {
-            return PER_PAGE_MAXIMUM_LIMIT + 1;
-        }
-        return limit + 1;
-    }
-
     public String getPerPageMaximumLimitNote() {
         String note = settingService.getSettingAsStringByKey("PER_PAGE_MAXIMUM_LIMIT_NOTE");
 
