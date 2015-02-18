@@ -166,6 +166,32 @@ public class CatchmentControllerTest {
     }
 
     @Test
+    public void shouldFindPendingApprovalsAfterGivenTimeWithPreviousUrlSet() throws Exception {
+        Catchment catchment = new Catchment("10", "20", "30");
+        UUID after = timeBased();
+        List<PendingApprovalListResponse> pendingApprovals = new ArrayList<>();
+        for (int x = 1; x <= MAX_PAGE_SIZE + 1; x++) {
+            pendingApprovals.add(buildPendingApprovalListResponse(x));
+        }
+
+        String previousUrl = fromUriString(format("http://localhost/%s/%s/approvals", API_END_POINT, "102030"))
+                .queryParam("before", pendingApprovals.get(0).getLastUpdated()).build().toString();
+
+        when(patientService.findPendingApprovalList(catchment, after, null, MAX_PAGE_SIZE + 1)).thenReturn(pendingApprovals);
+
+        String url = buildPendingApprovalUrl("102030");
+        MvcResult mvcResult = mockMvc.perform(get(url + "?" + AFTER + "=" + after))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.additional_info.previous", is(previousUrl)));
+
+        verify(patientService).findPendingApprovalList(catchment, after, null, MAX_PAGE_SIZE + 1);
+    }
+
+    @Test
     public void shouldFindPendingApprovalsABeforeGivenTime() throws Exception {
         Catchment catchment = new Catchment("10", "20", "30");
         UUID before = timeBased();
@@ -178,6 +204,31 @@ public class CatchmentControllerTest {
 
         mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk());
+
+        verify(patientService).findPendingApprovalList(catchment, null, before, MAX_PAGE_SIZE + 1);
+    }
+
+    @Test
+    public void shouldFindPendingApprovalsABeforeGivenTimeWithNextUrlSet() throws Exception {
+        Catchment catchment = new Catchment("10", "20", "30");
+        UUID before = timeBased();
+        List<PendingApprovalListResponse> pendingApprovals = new ArrayList<>();
+        for (int x = 1; x <= MAX_PAGE_SIZE + 1; x++) {
+            pendingApprovals.add(buildPendingApprovalListResponse(x));
+        }
+        when(patientService.findPendingApprovalList(catchment, null, before, MAX_PAGE_SIZE + 1)).thenReturn(pendingApprovals);
+
+        String nextUrl = fromUriString(format("http://localhost/%s/%s/approvals", API_END_POINT, "102030"))
+                .queryParam("after", pendingApprovals.get(3).getLastUpdated()).build().toString();
+
+        String url = buildPendingApprovalUrl("102030");
+        MvcResult mvcResult = mockMvc.perform(get(url + "?" + BEFORE + "=" + before))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.additional_info.next", is(nextUrl)));
 
         verify(patientService).findPendingApprovalList(catchment, null, before, MAX_PAGE_SIZE + 1);
     }
@@ -604,11 +655,46 @@ public class CatchmentControllerTest {
         List<PendingApprovalListResponse> approvalListResponse = asList(buildPendingApprovalListResponse(1),
                 buildPendingApprovalListResponse(2), buildPendingApprovalListResponse(3), buildPendingApprovalListResponse(4));
 
-        MCIMultiResponse response = catchmentController.buildPendingApprovalResponse(httpRequest, approvalListResponse);
+        MCIMultiResponse response = catchmentController.buildPendingApprovalResponse(httpRequest, approvalListResponse, null,null);
 
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();
         assertTrue(additionalInfo != null && additionalInfo.size() == 1);
+        assertEquals("http://www.mci.com:8081/api/v1/catchments/201915/approvals?after=" + approvalListResponse.get(2).getLastUpdated(),
+                additionalInfo.get(NEXT));
+    }
+
+    @Test
+    public void shouldBuildPendingApprovalPreviousUrl() throws Exception {
+        MockHttpServletRequest httpRequest = buildPendingApprovalHttpRequest();
+        List<PendingApprovalListResponse> approvalListResponse = asList(buildPendingApprovalListResponse(1),
+                buildPendingApprovalListResponse(2));
+
+        MCIMultiResponse response = catchmentController.buildPendingApprovalResponse(httpRequest, approvalListResponse,
+                approvalListResponse.get(1).getLastUpdated(),null);
+
+        assertEquals(response.getHttpStatus(), 200);
+        HashMap additionalInfo = response.getAdditionalInfo();
+        assertTrue(additionalInfo != null && additionalInfo.size() == 1);
+        assertEquals("http://www.mci.com:8081/api/v1/catchments/201915/approvals?before=" + approvalListResponse.get(0).getLastUpdated(),
+                additionalInfo.get(PREVIOUS));
+
+    }
+
+    @Test
+    public void shouldBuildPendingApprovalNextAndPreviousUrl() throws Exception {
+        MockHttpServletRequest httpRequest = buildPendingApprovalHttpRequest();
+        List<PendingApprovalListResponse> approvalListResponse = asList(buildPendingApprovalListResponse(1),
+                buildPendingApprovalListResponse(2), buildPendingApprovalListResponse(3), buildPendingApprovalListResponse(4));
+
+        MCIMultiResponse response = catchmentController.buildPendingApprovalResponse(httpRequest, approvalListResponse,
+                approvalListResponse.get(2).getLastUpdated(),null);
+
+        assertEquals(response.getHttpStatus(), 200);
+        HashMap additionalInfo = response.getAdditionalInfo();
+        assertTrue(additionalInfo != null && additionalInfo.size() == 2);
+        assertEquals("http://www.mci.com:8081/api/v1/catchments/201915/approvals?before=" + approvalListResponse.get(0).getLastUpdated(),
+                additionalInfo.get(PREVIOUS));
         assertEquals("http://www.mci.com:8081/api/v1/catchments/201915/approvals?after=" + approvalListResponse.get(2).getLastUpdated(),
                 additionalInfo.get(NEXT));
     }
@@ -619,11 +705,55 @@ public class CatchmentControllerTest {
         List<PendingApprovalListResponse> approvalListResponse = asList(buildPendingApprovalListResponse(1),
                 buildPendingApprovalListResponse(2), buildPendingApprovalListResponse(3));
 
-        MCIMultiResponse response = catchmentController.buildPendingApprovalResponse(httpRequest, approvalListResponse);
+        MCIMultiResponse response = catchmentController.buildPendingApprovalResponse(httpRequest, approvalListResponse,null,null);
 
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();
         assertTrue(additionalInfo == null || additionalInfo.size() == 0);
+    }
+
+    @Test
+    public void shouldNotBuildPreviousUrl() throws Exception {
+        MockHttpServletRequest httpRequest = buildPendingApprovalHttpRequest();
+        List<PendingApprovalListResponse> approvalListResponse = asList(buildPendingApprovalListResponse(1),
+                buildPendingApprovalListResponse(2), buildPendingApprovalListResponse(3));
+
+        MCIMultiResponse response = catchmentController.buildPendingApprovalResponse(httpRequest, approvalListResponse,null,approvalListResponse.get(0).getLastUpdated());
+
+        assertEquals(response.getHttpStatus(), 200);
+        HashMap additionalInfo = response.getAdditionalInfo();
+        assertTrue(additionalInfo != null && additionalInfo.size() == 1);
+        assertEquals("http://www.mci.com:8081/api/v1/catchments/201915/approvals?after=" + approvalListResponse.get(2).getLastUpdated(),
+                additionalInfo.get(NEXT));
+    }
+
+    @Test
+    public void shouldNotBuildNextAndPreviousUrlIFAfterAndBeforeGiven() throws Exception {
+        MockHttpServletRequest httpRequest = buildPendingApprovalHttpRequest();
+        List<PendingApprovalListResponse> approvalListResponse = asList(buildPendingApprovalListResponse(1),
+                buildPendingApprovalListResponse(2), buildPendingApprovalListResponse(3));
+
+        MCIMultiResponse response = catchmentController.buildPendingApprovalResponse(httpRequest,
+                approvalListResponse,approvalListResponse.get(0).getLastUpdated(),approvalListResponse.get(2).getLastUpdated());
+
+        assertEquals(response.getHttpStatus(), 200);
+        HashMap additionalInfo = response.getAdditionalInfo();
+        assertTrue(additionalInfo == null || additionalInfo.size() == 0);
+    }
+
+    @Test
+    public void shouldBuildPendingApprovalNextUrlIFBeforeGiven() throws Exception {
+        MockHttpServletRequest httpRequest = buildPendingApprovalHttpRequest();
+        List<PendingApprovalListResponse> approvalListResponse = asList(buildPendingApprovalListResponse(1),
+                buildPendingApprovalListResponse(2), buildPendingApprovalListResponse(3));
+
+        MCIMultiResponse response = catchmentController.buildPendingApprovalResponse(httpRequest, approvalListResponse, null,approvalListResponse.get(2).getLastUpdated());
+
+        assertEquals(response.getHttpStatus(), 200);
+        HashMap additionalInfo = response.getAdditionalInfo();
+        assertTrue(additionalInfo != null && additionalInfo.size() == 1);
+        assertEquals("http://www.mci.com:8081/api/v1/catchments/201915/approvals?after=" + approvalListResponse.get(2).getLastUpdated(),
+                additionalInfo.get(NEXT));
     }
 
     private MockHttpServletRequest buildPendingApprovalHttpRequest() throws UnsupportedEncodingException {

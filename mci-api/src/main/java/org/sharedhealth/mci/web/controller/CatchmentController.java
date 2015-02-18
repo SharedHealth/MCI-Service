@@ -65,7 +65,7 @@ public class CatchmentController extends FeedController {
 
         MCIMultiResponse mciMultiResponse;
         if (response != null) {
-            mciMultiResponse = buildPendingApprovalResponse(request, response);
+            mciMultiResponse = buildPendingApprovalResponse(request, response, after, before);
         } else {
             mciMultiResponse = new MCIMultiResponse(emptyList(), null, OK);
         }
@@ -202,19 +202,49 @@ public class CatchmentController extends FeedController {
         return entries;
     }
 
-    MCIMultiResponse buildPendingApprovalResponse(HttpServletRequest request, List<PendingApprovalListResponse> response) {
-        HashMap<String, String> additionalInfo = new HashMap<>();
+    MCIMultiResponse buildPendingApprovalResponse(HttpServletRequest request,
+                                                  List<PendingApprovalListResponse> response,
+                                                  UUID after, UUID before) {
 
-        if (response.size() == patientService.getPerPageMaximumLimit() + 1) {
-            response = response.subList(0, response.size() - 1);
-            additionalInfo.put(NEXT, buildPendingApprovalNextUrl(request, response.get(response.size() - 1)));
+        HashMap<String, String> additionalInfo = new HashMap<>();
+        int limit = patientService.getPerPageMaximumLimit();
+
+        if (response.size() > 0) {
+            if (after == null && before == null && response.size() > limit) {
+                response = response.subList(0, response.size() - 1);
+                additionalInfo.put(NEXT, buildPendingApprovalNextUrl(request, response.get(response.size() - 1).getLastUpdated()));
+            } else if (after != null && before == null && response.size() > 0) {
+                if (response.size() > limit) {
+                    response = response.subList(0, response.size() - 1);
+                    additionalInfo.put(NEXT, buildPendingApprovalNextUrl(request, response.get(response.size() - 1).getLastUpdated()));
+                    additionalInfo.put(PREVIOUS, buildPendingApprovalPreviousUrl(request, response.get(0).getLastUpdated()));
+                } else {
+                    additionalInfo.put(PREVIOUS, buildPendingApprovalPreviousUrl(request, response.get(0).getLastUpdated()));
+                }
+            } else if (before != null && after == null) {
+
+                if (response.size() > limit) {
+                    response = response.subList(1, response.size());
+                    additionalInfo.put(PREVIOUS, buildPendingApprovalPreviousUrl(request, response.get(0).getLastUpdated()));
+                    additionalInfo.put(NEXT, buildPendingApprovalNextUrl(request, response.get(response.size() - 1).getLastUpdated()));
+                } else {
+                    additionalInfo.put(NEXT, buildPendingApprovalNextUrl(request, response.get(response.size() - 1).getLastUpdated()));
+                }
+            }
         }
+
         return new MCIMultiResponse(response, additionalInfo, OK);
     }
 
-    private String buildPendingApprovalNextUrl(HttpServletRequest httpRequest, PendingApprovalListResponse response) {
+    private String buildPendingApprovalNextUrl(HttpServletRequest httpRequest, UUID lastUUID) {
         return fromUriString(httpRequest.getRequestURL().toString())
-                .queryParam(AFTER, response.getLastUpdated())
+                .queryParam(AFTER, lastUUID)
+                .build().toString();
+    }
+
+    private String buildPendingApprovalPreviousUrl(HttpServletRequest httpRequest, UUID lastUUID) {
+        return fromUriString(httpRequest.getRequestURL().toString())
+                .queryParam(BEFORE, lastUUID)
                 .build().toString();
     }
 }
