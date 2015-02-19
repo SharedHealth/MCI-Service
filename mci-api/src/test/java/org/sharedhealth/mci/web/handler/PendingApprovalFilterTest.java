@@ -14,6 +14,7 @@ import java.util.*;
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static java.util.Arrays.asList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.junit.Assert.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
@@ -170,7 +171,6 @@ public class PendingApprovalFilterTest {
         assertEquals(existingPatient.getPermanentAddress(), newPatient.getPermanentAddress());
     }
 
-
     @Test(expected = NonUpdatableFieldUpdateException.class)
     public void shouldThrowExceptionWhenTryingToUpdateNonUpdatableField() throws ParseException {
         setUpApprovalFieldServiceFor(DATE_OF_BIRTH, "NU");
@@ -305,4 +305,31 @@ public class PendingApprovalFilterTest {
         return patient;
     }
 
+    @Test
+    public void shouldNotAddEmptyDateOfDeathToPendingApprovalList() throws Exception {
+        setUpApprovalFieldServiceFor(DATE_OF_DEATH, "NA");
+
+        PatientData existingPatient = buildPatientData();
+        existingPatient.setDateOfDeath(null);
+
+        PatientData updateRequest = buildPatientData();
+        updateRequest.setDateOfDeath("");
+
+        PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
+        assertTrue(isEmpty(newPatient.getPendingApprovals()));
+    }
+
+    @Test
+    public void shouldAddDateOfDeathToPendingApprovalList() throws Exception {
+        setUpApprovalFieldServiceFor(DATE_OF_DEATH, "NA");
+
+        PatientData existingPatient = buildPatientData();
+        existingPatient.setDateOfDeath(null);
+
+        PatientData updateRequest = buildPatientData();
+        updateRequest.setDateOfDeath("2011-01-01");
+
+        PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
+        assertTrue(isNotEmpty(newPatient.getPendingApprovals()));
+    }
 }

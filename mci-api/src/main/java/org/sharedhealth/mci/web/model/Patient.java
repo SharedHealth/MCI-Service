@@ -1157,11 +1157,14 @@ public class Patient {
     }
 
     public void setDateOfDeath(String dateOfDeath) {
+        if (dateOfDeath == null) {
+            this.dateOfDeath = null;
+            return;
+        }
 
         if ("".equals(dateOfDeath)) {
             dateOfDeath = EMPTY_DATE_VALUE;
         }
-
         this.dateOfDeath = parseDate(dateOfDeath, ISO_DATE_FORMAT);
     }
 
