@@ -2,11 +2,10 @@ package org.sharedhealth.mci.web.handler;
 
 import org.sharedhealth.mci.web.exception.NonUpdatableFieldUpdateException;
 import org.sharedhealth.mci.web.mapper.*;
+import org.sharedhealth.mci.web.service.ApprovalFieldService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
 import java.util.TreeMap;
 import java.util.UUID;
 
@@ -22,18 +21,12 @@ public class PendingApprovalFilter {
     private static final String NON_UPDATABLE = "NU";
     private static final String DUMMY_FACILITY = "10000059";
 
-    private Properties properties;
     private PatientData newPatient;
+    private ApprovalFieldService properties;
 
-    public PendingApprovalFilter() {
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("approvalFeilds.properties");
-        Properties properties = new Properties();
-        try {
-            properties.load(inputStream);
-            this.properties = properties;
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to read approval property file.", e);
-        }
+    @Autowired
+    public PendingApprovalFilter(ApprovalFieldService approvalFieldService) {
+        this.properties = approvalFieldService;
     }
 
     public PatientData filter(PatientData existingPatient, PatientData updateRequest) {
@@ -128,9 +121,5 @@ public class PendingApprovalFilter {
         pendingApproval.setFieldDetails(fieldDetailsMap);
 
         return pendingApproval;
-    }
-
-    public void setProperties(Properties properties) {
-        this.properties = properties;
     }
 }

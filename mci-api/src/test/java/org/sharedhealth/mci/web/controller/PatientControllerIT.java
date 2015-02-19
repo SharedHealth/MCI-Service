@@ -42,6 +42,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebAppConfiguration
 @ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
 public class PatientControllerIT extends BaseControllerTest {
+
+    private boolean approvalConfigUpdated = false;
+
     @Before
     public void setup() throws ParseException {
         MockitoAnnotations.initMocks(this);
@@ -90,6 +93,21 @@ public class PatientControllerIT extends BaseControllerTest {
         permanentAddress.setCountryCode("050");
 
         patientData.setPermanentAddress(permanentAddress);
+
+        if(!approvalConfigUpdated) {
+            updateApprovalFieldConfigs();
+        }
+    }
+
+    private void updateApprovalFieldConfigs() {
+        cqlTemplate.execute("truncate approval_fields");
+        cqlTemplate.execute("INSERT INTO approval_fields (\"field\", \"option\") VALUES ('gender', 'NA')");
+        cqlTemplate.execute("INSERT INTO approval_fields (\"field\", \"option\") VALUES ('occupation', 'NA')");
+        cqlTemplate.execute("INSERT INTO approval_fields (\"field\", \"option\") VALUES ('date_of_birth', 'NU')");
+        cqlTemplate.execute("INSERT INTO approval_fields (\"field\", \"option\") VALUES ('phone_number', 'NA')");
+        cqlTemplate.execute("INSERT INTO approval_fields (\"field\", \"option\") VALUES ('present_address', 'NA')");
+
+        approvalConfigUpdated = true;
     }
 
     @Test

@@ -1,28 +1,45 @@
 package org.sharedhealth.mci.web.handler;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.sharedhealth.mci.web.exception.NonUpdatableFieldUpdateException;
 import org.sharedhealth.mci.web.mapper.*;
+import org.sharedhealth.mci.web.service.ApprovalFieldService;
 
 import java.text.ParseException;
-import java.util.Properties;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.UUID;
+import java.util.*;
 
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static java.util.Arrays.asList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.junit.Assert.*;
+import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
 public class PendingApprovalFilterTest {
 
+    @Mock
+    private ApprovalFieldService approvalFieldService;
+
+    private PendingApprovalFilter pendingApprovalFilter;
+
+    @Before
+    public void setUp() {
+        initMocks(this);
+        pendingApprovalFilter = new PendingApprovalFilter(approvalFieldService);
+    }
+
+    private void setUpApprovalFieldServiceFor(String key, String value) {
+        Mockito.when(approvalFieldService.getProperty(key)).thenReturn(value);
+    }
+
     @Test
     public void shouldAddFieldsToPendingApprovalsWhenMarkedForApproval() throws ParseException {
-        Properties properties = new Properties();
-        properties.setProperty(GENDER, "NA");
+
+        setUpApprovalFieldServiceFor(GENDER, "NA");
 
         PatientData updateRequest = buildPatientData();
         updateRequest.setGender("F");
@@ -30,17 +47,16 @@ public class PendingApprovalFilterTest {
         PatientData existingPatient = buildPatientData();
         existingPatient.setGender("M");
 
-        PendingApprovalFilter pendingApprovalFilter = new PendingApprovalFilter();
-        pendingApprovalFilter.setProperties(properties);
         PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
+
+        Mockito.verify(approvalFieldService, Mockito.atLeastOnce()).getProperty(GENDER);
 
         assertPendingApprovals(existingPatient, newPatient, 1);
     }
 
     @Test
     public void shouldAddFieldsToExistingPendingApprovalsWhenMarkedForApproval() throws ParseException {
-        Properties properties = new Properties();
-        properties.setProperty(GENDER, "NA");
+        setUpApprovalFieldServiceFor(GENDER, "NA");
 
         PatientData updateRequest = buildPatientData();
         updateRequest.setGender("F");
@@ -48,8 +64,6 @@ public class PendingApprovalFilterTest {
         PatientData existingPatient = buildPatientData();
         existingPatient.setGender("M");
 
-        PendingApprovalFilter pendingApprovalFilter = new PendingApprovalFilter();
-        pendingApprovalFilter.setProperties(properties);
 
         PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
         assertPendingApprovals(existingPatient, newPatient, 1);
@@ -72,17 +86,17 @@ public class PendingApprovalFilterTest {
         for (PendingApprovalFieldDetails fieldDetails : fieldDetailsMap.values()) {
             assertTrue(asList("F", "O").contains(fieldDetails.getValue()));
         }
-
         assertEquals(existingPatient.getGender(), newPatient.getGender());
+
+        Mockito.verify(approvalFieldService, Mockito.times(2)).getProperty(GENDER);
     }
 
     @Test
     public void shouldAddFieldsToPendingApprovalsWhenMarkedForApprovalAndExistingValueIsNull() throws ParseException {
-        Properties properties = new Properties();
-        properties.setProperty(GENDER, "NA");
-        properties.setProperty(PHONE_NUMBER, "NA");
-        properties.setProperty(PRESENT_ADDRESS, "NA");
-        properties.setProperty(PERMANENT_ADDRESS, "NA");
+        setUpApprovalFieldServiceFor(GENDER, "NA");
+        setUpApprovalFieldServiceFor(PHONE_NUMBER, "NA");
+        setUpApprovalFieldServiceFor(PRESENT_ADDRESS, "NA");
+        setUpApprovalFieldServiceFor(PERMANENT_ADDRESS, "NA");
 
         PatientData existingPatient = buildPatientData();
         existingPatient.setGender(null);
@@ -100,19 +114,21 @@ public class PendingApprovalFilterTest {
         Address permanentAddress = new Address("11", "22", "33");
         updateRequest.setPermanentAddress(permanentAddress);
 
-        PendingApprovalFilter pendingApprovalFilter = new PendingApprovalFilter();
-        pendingApprovalFilter.setProperties(properties);
         PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
+
+        Mockito.verify(approvalFieldService).getProperty(GENDER);
+        Mockito.verify(approvalFieldService).getProperty(PHONE_NUMBER);
+        Mockito.verify(approvalFieldService).getProperty(PRESENT_ADDRESS);
+        Mockito.verify(approvalFieldService).getProperty(PERMANENT_ADDRESS);
 
         assertPendingApprovals(existingPatient, newPatient, 4);
     }
 
     @Test
     public void shouldAddFieldsToPendingApprovalsWhenMarkedForApprovalButValueSameAsExisting() throws Exception {
-        Properties properties = new Properties();
-        properties.setProperty(PHONE_NUMBER, "NA");
-        properties.setProperty(PRESENT_ADDRESS, "NA");
-        properties.setProperty(PERMANENT_ADDRESS, "NA");
+        setUpApprovalFieldServiceFor(PHONE_NUMBER, "NA");
+        setUpApprovalFieldServiceFor(PRESENT_ADDRESS, "NA");
+        setUpApprovalFieldServiceFor(PERMANENT_ADDRESS, "NA");
 
         PatientData existingPatient = buildPatientData();
 
@@ -142,9 +158,11 @@ public class PendingApprovalFilterTest {
         updateRequest.setAddress(new Address("10", "20", "30"));
         updateRequest.setPermanentAddress(new Address("11", "22", "33"));
 
-        PendingApprovalFilter pendingApprovalFilter = new PendingApprovalFilter();
-        pendingApprovalFilter.setProperties(properties);
         PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
+
+        Mockito.verify(approvalFieldService).getProperty(PHONE_NUMBER);
+        Mockito.verify(approvalFieldService).getProperty(PRESENT_ADDRESS);
+        Mockito.verify(approvalFieldService).getProperty(PERMANENT_ADDRESS);
 
         assertTrue(isEmpty(newPatient.getPendingApprovals()));
         assertEquals(existingPatient.getPhoneNumber(), newPatient.getPhoneNumber());
@@ -152,10 +170,10 @@ public class PendingApprovalFilterTest {
         assertEquals(existingPatient.getPermanentAddress(), newPatient.getPermanentAddress());
     }
 
+
     @Test(expected = NonUpdatableFieldUpdateException.class)
     public void shouldThrowExceptionWhenTryingToUpdateNonUpdatableField() throws ParseException {
-        Properties properties = new Properties();
-        properties.setProperty(DATE_OF_BIRTH, "NU");
+        setUpApprovalFieldServiceFor(DATE_OF_BIRTH, "NU");
 
         PatientData existingPatient = buildPatientData();
         existingPatient.setDateOfBirth("2000-02-10");
@@ -163,15 +181,14 @@ public class PendingApprovalFilterTest {
         PatientData updateRequest = buildPatientData();
         updateRequest.setDateOfBirth("2000-02-11");
 
-        PendingApprovalFilter pendingApprovalFilter = new PendingApprovalFilter();
-        pendingApprovalFilter.setProperties(properties);
         pendingApprovalFilter.filter(existingPatient, updateRequest);
+
+        Mockito.verify(approvalFieldService).getProperty(DATE_OF_BIRTH);
     }
 
     @Test
     public void shouldNotAddFieldsToPendingApprovalsWhenNotMarkedNonUpdatable() throws ParseException {
-        Properties properties = new Properties();
-        properties.setProperty(DATE_OF_BIRTH, "NU");
+        setUpApprovalFieldServiceFor(DATE_OF_BIRTH, "NU");
 
         PatientData existingPatient = buildPatientData();
         existingPatient.setDateOfBirth("2000-02-10");
@@ -179,9 +196,9 @@ public class PendingApprovalFilterTest {
         PatientData updateRequest = buildPatientData();
         updateRequest.setDateOfBirth("2000-02-10");
 
-        PendingApprovalFilter pendingApprovalFilter = new PendingApprovalFilter();
-        pendingApprovalFilter.setProperties(properties);
         PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
+
+        Mockito.verify(approvalFieldService).getProperty(DATE_OF_BIRTH);
 
         assertTrue(isEmpty(newPatient.getPendingApprovals()));
         assertEquals(existingPatient.getDateOfBirth(), newPatient.getDateOfBirth());
@@ -189,7 +206,6 @@ public class PendingApprovalFilterTest {
 
     @Test
     public void shouldUpdateFieldsThatAreNeitherMarkedForApprovalNorMarkedAsNonUpdatable() throws ParseException {
-        Properties properties = new Properties();
 
         PatientData existingPatient = buildPatientData();
         existingPatient.setDateOfBirth("2000-02-10");
@@ -197,12 +213,12 @@ public class PendingApprovalFilterTest {
         PatientData updateRequest = buildPatientData();
         updateRequest.setDateOfBirth("2001-02-10");
 
-        PendingApprovalFilter pendingApprovalFilter = new PendingApprovalFilter();
-        pendingApprovalFilter.setProperties(properties);
         PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
 
         assertTrue(isEmpty(newPatient.getPendingApprovals()));
         assertEquals("2001-02-10", newPatient.getDateOfBirth());
+
+        Mockito.verify(approvalFieldService, Mockito.atLeastOnce()).getProperty(Mockito.anyString());
     }
 
     private void assertPendingApprovals(PatientData existingPatient, PatientData newPatient, int pendingApprovalsCount) {

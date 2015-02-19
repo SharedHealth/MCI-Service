@@ -58,6 +58,7 @@ public class MCIConfig {
 
         cacheManager.setCaches(Arrays.asList(
                 createConcurrentMapCache("mciSettings", CACHE_TTL_IN_MINUTES, TimeUnit.MINUTES, 10),
+                createConcurrentMapCache("mciApprovalFields", CACHE_TTL_IN_MINUTES, TimeUnit.MINUTES, 50),
                 createConcurrentMapCache("masterData", MASTER_DATA_CACHE_TTL_IN_DAYS, TimeUnit.DAYS, 500)
         ));
 

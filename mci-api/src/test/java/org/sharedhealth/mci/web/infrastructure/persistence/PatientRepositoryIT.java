@@ -59,10 +59,15 @@ public class PatientRepositoryIT {
     public String divisionId = "10";
     public String districtId = "04";
     public String upazilaId = "09";
+    private boolean approvalConfigUpdated = false;
 
     @Before
     public void setup() throws ExecutionException, InterruptedException {
         data = createPatient();
+
+        if(!approvalConfigUpdated) {
+            updateApprovalFieldConfigs();
+        }
     }
 
     @After
@@ -1991,5 +1996,16 @@ public class PatientRepositoryIT {
         } else {
             assertEquals(0, patientUpdateLogs.size());
         }
+    }
+
+    private void updateApprovalFieldConfigs() {
+        cassandraOps.execute("truncate approval_fields");
+        cassandraOps.execute("INSERT INTO approval_fields (\"field\", \"option\") VALUES ('gender', 'NA')");
+        cassandraOps.execute("INSERT INTO approval_fields (\"field\", \"option\") VALUES ('occupation', 'NA')");
+        cassandraOps.execute("INSERT INTO approval_fields (\"field\", \"option\") VALUES ('date_of_birth', 'NU')");
+        cassandraOps.execute("INSERT INTO approval_fields (\"field\", \"option\") VALUES ('phone_number', 'NA')");
+        cassandraOps.execute("INSERT INTO approval_fields (\"field\", \"option\") VALUES ('present_address', 'NA')");
+
+        approvalConfigUpdated = true;
     }
 }
