@@ -9,13 +9,15 @@ import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.service.ApprovalFieldService;
 
 import java.text.ParseException;
-import java.util.*;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.UUID;
 
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static java.util.Arrays.asList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
@@ -39,20 +41,23 @@ public class PendingApprovalFilterTest {
 
     @Test
     public void shouldAddFieldsToPendingApprovalsWhenMarkedForApproval() throws ParseException {
-
         setUpApprovalFieldServiceFor(GENDER, "NA");
-
-        PatientData updateRequest = buildPatientData();
-        updateRequest.setGender("F");
+        setUpApprovalFieldServiceFor(DATE_OF_DEATH, "NA");
+        setUpApprovalFieldServiceFor(OCCUPATION, "NA");
+        setUpApprovalFieldServiceFor(RELIGION, "NA");
 
         PatientData existingPatient = buildPatientData();
         existingPatient.setGender("M");
+        existingPatient.setReligion("1");
+
+        PatientData updateRequest = buildPatientData();
+        updateRequest.setGender("F");
+        updateRequest.setDateOfDeath("");
+        updateRequest.setReligion("2");
 
         PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
-
-        Mockito.verify(approvalFieldService, Mockito.atLeastOnce()).getProperty(GENDER);
-
-        assertPendingApprovals(existingPatient, newPatient, 1);
+        verify(approvalFieldService, Mockito.atLeastOnce()).getProperty(GENDER);
+        assertPendingApprovals(existingPatient, newPatient, 2);
     }
 
     @Test
@@ -89,7 +94,7 @@ public class PendingApprovalFilterTest {
         }
         assertEquals(existingPatient.getGender(), newPatient.getGender());
 
-        Mockito.verify(approvalFieldService, Mockito.times(2)).getProperty(GENDER);
+        verify(approvalFieldService, Mockito.times(2)).getProperty(GENDER);
     }
 
     @Test
@@ -117,10 +122,10 @@ public class PendingApprovalFilterTest {
 
         PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
 
-        Mockito.verify(approvalFieldService).getProperty(GENDER);
-        Mockito.verify(approvalFieldService).getProperty(PHONE_NUMBER);
-        Mockito.verify(approvalFieldService).getProperty(PRESENT_ADDRESS);
-        Mockito.verify(approvalFieldService).getProperty(PERMANENT_ADDRESS);
+        verify(approvalFieldService).getProperty(GENDER);
+        verify(approvalFieldService).getProperty(PHONE_NUMBER);
+        verify(approvalFieldService).getProperty(PRESENT_ADDRESS);
+        verify(approvalFieldService).getProperty(PERMANENT_ADDRESS);
 
         assertPendingApprovals(existingPatient, newPatient, 4);
     }
@@ -161,9 +166,9 @@ public class PendingApprovalFilterTest {
 
         PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
 
-        Mockito.verify(approvalFieldService).getProperty(PHONE_NUMBER);
-        Mockito.verify(approvalFieldService).getProperty(PRESENT_ADDRESS);
-        Mockito.verify(approvalFieldService).getProperty(PERMANENT_ADDRESS);
+        verify(approvalFieldService).getProperty(PHONE_NUMBER);
+        verify(approvalFieldService).getProperty(PRESENT_ADDRESS);
+        verify(approvalFieldService).getProperty(PERMANENT_ADDRESS);
 
         assertTrue(isEmpty(newPatient.getPendingApprovals()));
         assertEquals(existingPatient.getPhoneNumber(), newPatient.getPhoneNumber());
@@ -183,7 +188,7 @@ public class PendingApprovalFilterTest {
 
         pendingApprovalFilter.filter(existingPatient, updateRequest);
 
-        Mockito.verify(approvalFieldService).getProperty(DATE_OF_BIRTH);
+        verify(approvalFieldService).getProperty(DATE_OF_BIRTH);
     }
 
     @Test
@@ -198,7 +203,7 @@ public class PendingApprovalFilterTest {
 
         PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
 
-        Mockito.verify(approvalFieldService).getProperty(DATE_OF_BIRTH);
+        verify(approvalFieldService).getProperty(DATE_OF_BIRTH);
 
         assertTrue(isEmpty(newPatient.getPendingApprovals()));
         assertEquals(existingPatient.getDateOfBirth(), newPatient.getDateOfBirth());
@@ -218,7 +223,7 @@ public class PendingApprovalFilterTest {
         assertTrue(isEmpty(newPatient.getPendingApprovals()));
         assertEquals("2001-02-10", newPatient.getDateOfBirth());
 
-        Mockito.verify(approvalFieldService, Mockito.atLeastOnce()).getProperty(Mockito.anyString());
+        verify(approvalFieldService, Mockito.atLeastOnce()).getProperty(Mockito.anyString());
     }
 
     private void assertPendingApprovals(PatientData existingPatient, PatientData newPatient, int pendingApprovalsCount) {
@@ -244,6 +249,10 @@ public class PendingApprovalFilterTest {
             } else if (PERMANENT_ADDRESS.equals(pendingApproval.getName())) {
                 assertFieldDetails(pendingApproval.getFieldDetails(), new Address("11", "22", "33"));
                 assertEquals(existingPatient.getPermanentAddress(), newPatient.getPermanentAddress());
+
+            } else if (RELIGION.equals(pendingApproval.getName())) {
+                assertFieldDetails(pendingApproval.getFieldDetails(), "2");
+                assertEquals(existingPatient.getReligion(), newPatient.getReligion());
 
             } else {
                 fail("Invalid pending approval.");
@@ -303,33 +312,5 @@ public class PendingApprovalFilterTest {
         location.setCityCorporationId("20");
         location.setUnionOrUrbanWardId("01");
         return patient;
-    }
-
-    @Test
-    public void shouldNotAddEmptyDateOfDeathToPendingApprovalList() throws Exception {
-        setUpApprovalFieldServiceFor(DATE_OF_DEATH, "NA");
-
-        PatientData existingPatient = buildPatientData();
-        existingPatient.setDateOfDeath(null);
-
-        PatientData updateRequest = buildPatientData();
-        updateRequest.setDateOfDeath("");
-
-        PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
-        assertTrue(isEmpty(newPatient.getPendingApprovals()));
-    }
-
-    @Test
-    public void shouldAddDateOfDeathToPendingApprovalList() throws Exception {
-        setUpApprovalFieldServiceFor(DATE_OF_DEATH, "NA");
-
-        PatientData existingPatient = buildPatientData();
-        existingPatient.setDateOfDeath(null);
-
-        PatientData updateRequest = buildPatientData();
-        updateRequest.setDateOfDeath("2011-01-01");
-
-        PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
-        assertTrue(isNotEmpty(newPatient.getPendingApprovals()));
     }
 }

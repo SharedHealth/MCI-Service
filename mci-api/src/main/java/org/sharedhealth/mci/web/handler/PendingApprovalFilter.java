@@ -1,6 +1,5 @@
 package org.sharedhealth.mci.web.handler;
 
-import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.web.exception.NonUpdatableFieldUpdateException;
 import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.service.ApprovalFieldService;
@@ -14,6 +13,7 @@ import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static java.lang.String.valueOf;
 import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.trim;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
 @Component
@@ -57,7 +57,7 @@ public class PendingApprovalFilter {
         newPatient.setMaritalStatus(processString(MARITAL_STATUS, existingPatient.getMaritalStatus(), updateRequest.getMaritalStatus()));
         newPatient.setFullName(processString(FULL_NAME, existingPatient.getFullName(), updateRequest.getFullName()));
         newPatient.setStatus(processString(PATIENT_STATUS, existingPatient.getStatus(), updateRequest.getStatus()));
-        newPatient.setDateOfDeath(processString(DATE_OF_DEATH, defaultString(existingPatient.getDateOfDeath()), defaultString(updateRequest.getDateOfDeath())));
+        newPatient.setDateOfDeath(processString(DATE_OF_DEATH, existingPatient.getDateOfDeath(), updateRequest.getDateOfDeath()));
         newPatient.setConfidential(processString(CONFIDENTIAL, existingPatient.getConfidential(), updateRequest.getConfidential()));
         newPatient.setCreatedAt(processUuid(CREATED, existingPatient.getCreatedAt(), updateRequest.getCreatedAt()));
         newPatient.setUpdatedAt(processUuid(MODIFIED, existingPatient.getUpdatedAt(), updateRequest.getUpdatedAt()));
@@ -85,6 +85,10 @@ public class PendingApprovalFilter {
     }
 
     private String processString(String key, String oldValue, String newValue) {
+        if ("".equals(trim(newValue))) {
+            oldValue = defaultString(oldValue);
+            newValue = defaultString(newValue);
+        }
         Object value = process(key, oldValue, newValue);
         return value == null ? null : valueOf(value);
     }
