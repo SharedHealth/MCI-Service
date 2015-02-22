@@ -17,13 +17,17 @@ dependencies {
         exclude group: 'ch.qos.logback', module: "logback-classic"
     }
     compile('org.springframework.boot:spring-boot-starter-security:1.1.8.RELEASE') {
-        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+        exclude group: 'ch.qos.logback', module: "logback-classic"
     }
     compile libraries.snappy, libraries.spring_boot_logging,
             libraries.spring_data_cassandra, libraries.hibernate_validator,
             libraries.apache_collections, libraries.apache_lang,
             libraries.apache_bean_utils,
             libraries.spring_security, libraries.rome
+
+    compile(libraries.spring_boot_actuator){
+        exclude group: 'ch.qos.logback', module: "logback-classic"
+    }
 
     compile('io.netty:netty:3.9.0.Final') {
         force = 'true'

@@ -30,9 +30,11 @@ public class MCISecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .csrf().disable()
-                .anonymous().disable()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and().authorizeRequests().anyRequest().hasRole("MCI_USER")
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        http
+                .authorizeRequests()
+                .antMatchers("/diagnostics/**").anonymous()
+                .anyRequest().hasRole("MCI_USER")
                 .and().addFilterBefore(new TokenAuthenticationFilter(authenticationManager()),
                 BasicAuthenticationFilter.class)
                 .exceptionHandling().authenticationEntryPoint(unauthorizedEntryPoint());

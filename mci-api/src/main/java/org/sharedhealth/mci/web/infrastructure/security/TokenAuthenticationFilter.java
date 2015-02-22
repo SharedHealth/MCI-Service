@@ -33,24 +33,32 @@ public class TokenAuthenticationFilter extends GenericFilterBean {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
             ServletException {
+        boolean shouldAuthenticateToken = true;
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
+        shouldAuthenticateToken = shouldAuthenticateToken(httpRequest);
+
         String token = httpRequest.getHeader(MCIProperties.SECURITY_TOKEN_HEADER);
 
-        if (isEmpty(token)) {
+        if (isEmpty(token) && shouldAuthenticateToken) {
             httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token not provided");
             return;
         }
 
         logger.debug("Authenticating token: {}", token);
         try {
-            processTokenAuthentication(token);
+            if(shouldAuthenticateToken) processTokenAuthentication(token);
             chain.doFilter(request, response);
 
         } catch (AuthenticationException ex) {
             SecurityContextHolder.clearContext();
             httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage());
         }
+    }
+
+    private boolean shouldAuthenticateToken(HttpServletRequest httpRequest) {
+        String servletPath = httpRequest.getServletPath();
+        return isEmpty(servletPath) || !servletPath.contains(MCIProperties.DIAGNOSTICS_SERVLET_PATH);
     }
 
     private void processTokenAuthentication(String token) throws AuthenticationException {

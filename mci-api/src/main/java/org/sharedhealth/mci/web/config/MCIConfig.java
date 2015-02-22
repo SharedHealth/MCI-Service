@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 @Configuration
 @EnableCaching
-@Import({MCISecurityConfig.class, MCICassandraConfig.class, MCIWebConfig.class})
+@Import({MCISecurityConfig.class, MCICassandraConfig.class, MCIWebConfig.class, ActuatorConfig.class})
 @ComponentScan(basePackages = {"org.sharedhealth.mci.web.config",
         "org.sharedhealth.mci.web.controller",
         "org.sharedhealth.mci.web.exception",

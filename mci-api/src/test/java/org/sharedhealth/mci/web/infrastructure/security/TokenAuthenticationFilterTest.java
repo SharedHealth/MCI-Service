@@ -1,7 +1,6 @@
 package org.sharedhealth.mci.web.infrastructure.security;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.sharedhealth.mci.web.config.MCIProperties;
@@ -39,7 +38,6 @@ public class TokenAuthenticationFilterTest {
     }
 
     @Test
-    @Ignore("IGNORED - WAITING FOR MCI ADMIN SECURITY IMPLEMENTATION")
     public void shouldFilterOutRequestsWithoutToken() throws Exception {
         when(request.getHeader(MCIProperties.SECURITY_TOKEN_HEADER)).thenReturn("");
         TokenAuthenticationFilter tokenAuthenticationFilter = new TokenAuthenticationFilter(authenticationManager);
