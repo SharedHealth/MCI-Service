@@ -17,6 +17,8 @@ import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
 import org.sharedhealth.mci.web.mapper.Relation;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -94,7 +96,7 @@ public class PatientControllerIT extends BaseControllerTest {
 
         patientData.setPermanentAddress(permanentAddress);
 
-        if(!approvalConfigUpdated) {
+        if (!approvalConfigUpdated) {
             updateApprovalFieldConfigs();
         }
     }
@@ -139,12 +141,14 @@ public class PatientControllerIT extends BaseControllerTest {
     }
 
     @Test
-    public void shouldReturnBadRequestForInvalidPostCodeWithPermanentAddressWhenCountryCodeIsBangladesh() throws Exception {
+    public void shouldReturnBadRequestForInvalidPostCodeWithPermanentAddressWhenCountryCodeIsBangladesh() throws
+            Exception {
         patientData.getPermanentAddress().setCountryCode("050");
         patientData.getPermanentAddress().setPostCode("12345");
         String json = mapper.writeValueAsString(patientData);
 
-        mockMvc.perform(MockMvcRequestBuilders.post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+        mockMvc.perform(MockMvcRequestBuilders.post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType
+                (APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
@@ -154,10 +158,13 @@ public class PatientControllerIT extends BaseControllerTest {
     public void shouldReturnBadRequestForInvalidRequestData() throws Exception {
         patientData.getAddress().setAddressLine("h");
         String json = mapper.writeValueAsString(patientData);
-        MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+        MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType
+                (APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
-        assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1002,\"field\":\"present_address.address_line\",\"message\":\"invalid present_address.address_line\"}]}", result.getResponse().getContentAsString());
+        JSONAssert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\"," +
+                "\"errors\":[{\"code\":1002,\"field\":\"present_address.address_line\",\"message\":\"invalid " +
+                "present_address.address_line\"}]}", result.getResponse().getContentAsString(), JSONCompareMode.STRICT);
     }
 
     @Test
@@ -166,7 +173,8 @@ public class PatientControllerIT extends BaseControllerTest {
         patientData.setGender("0");
         String json = mapper.writeValueAsString(patientData);
 
-        MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+        MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType
+                (APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
@@ -184,10 +192,13 @@ public class PatientControllerIT extends BaseControllerTest {
     public void shouldReturnBadRequestForInvalidJson() throws Exception {
         String json = mapper.writeValueAsString(patientData);
 
-        MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content("invalidate" + json).contentType(APPLICATION_JSON))
+        MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content("invalidate" + json)
+                .contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
-        assertEquals("{\"error_code\":2000,\"http_status\":400,\"message\":\"invalid.request\",\"errors\":[{\"code\":2001,\"message\":\"invalid.json\"}]}", result.getResponse().getContentAsString());
+        JSONAssert.assertEquals("{\"error_code\":2000,\"http_status\":400,\"message\":\"invalid.request\"," +
+                "\"errors\":[{\"code\":2001,\"message\":\"invalid.json\"}]}", result.getResponse().getContentAsString
+                (), JSONCompareMode.STRICT);
     }
 
     @Test
@@ -195,10 +206,13 @@ public class PatientControllerIT extends BaseControllerTest {
         patientData.setAddress(null);
         String json = mapper.writeValueAsString(patientData);
 
-        MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+        MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType
+                (APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
-        assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1001,\"field\":\"present_address\",\"message\":\"invalid present_address\"}]}", result.getResponse().getContentAsString());
+        JSONAssert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\"," +
+                "\"errors\":[{\"code\":1001,\"field\":\"present_address\",\"message\":\"invalid " +
+                "present_address\"}]}", result.getResponse().getContentAsString(), JSONCompareMode.STRICT);
     }
 
     @Test
@@ -213,10 +227,13 @@ public class PatientControllerIT extends BaseControllerTest {
 
         String json = mapper.writeValueAsString(patientData);
 
-        MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+        MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType
+                (APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
-        assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1004,\"field\":\"present_address\",\"message\":\"invalid present_address\"}]}", result.getResponse().getContentAsString());
+        JSONAssert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\"," +
+                "\"errors\":[{\"code\":1004,\"field\":\"present_address\",\"message\":\"invalid " +
+                "present_address\"}]}", result.getResponse().getContentAsString(), JSONCompareMode.STRICT);
     }
 
     @Test
@@ -253,29 +270,37 @@ public class PatientControllerIT extends BaseControllerTest {
                 .andExpect(status().isNotFound())
                 .andReturn();
 
-        mockMvc.perform(asyncDispatch(result))
-                .andExpect(content().contentType(APPLICATION_JSON_UTF8))
-                .andExpect(content().string(asString("jsons/response/error_404.json")));
+        MvcResult mvcResult = mockMvc.perform(asyncDispatch(result))
+                .andExpect(content().contentType(APPLICATION_JSON_UTF8)).andReturn();
+
+        String content = mvcResult.getResponse().getContentAsString();
+        JSONAssert.assertEquals(asString("jsons/response/error_404.json"), content, JSONCompareMode.STRICT);
     }
 
     @Test
     public void shouldReturnNotFoundResponseIfPatientNotExistForUpdate() throws Exception {
         String json = mapper.writeValueAsString(patientData);
 
-        mockMvc.perform(put(API_END_POINT + "/health-1000").accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+        MvcResult mvcResult = mockMvc.perform(put(API_END_POINT + "/health-1000").accept(APPLICATION_JSON).content
+                (json).contentType
+                (APPLICATION_JSON))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string(asString("jsons/response/error_404.json")))
                 .andReturn();
+        String content = mvcResult.getResponse().getContentAsString();
+        JSONAssert.assertEquals(asString("jsons/response/error_404.json"), content, JSONCompareMode.STRICT);
     }
 
     @Test
     public void shouldReturnErrorResponseIfHealthIdGivenWhileCreateApiCall() throws Exception {
         String json = asString("jsons/patient/payload_with_hid.json");
 
-        mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+        MvcResult mvcResult = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType
+                (APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string(asString("jsons/response/error_hid.json")))
                 .andReturn();
+        String content = mvcResult.getResponse().getContentAsString();
+        JSONAssert.assertEquals(asString("jsons/response/error_hid.json"), content, JSONCompareMode.STRICT);
+
     }
 
     @Test
@@ -283,10 +308,13 @@ public class PatientControllerIT extends BaseControllerTest {
         patientData.setHealthId("health-100");
         String json = mapper.writeValueAsString(patientData);
 
-        MvcResult result = mockMvc.perform(put(API_END_POINT + "/health-1001").accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+        MvcResult result = mockMvc.perform(put(API_END_POINT + "/health-1001").accept(APPLICATION_JSON).content(json)
+                .contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
-        Assert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1004,\"field\":\"hid\",\"message\":\"invalid hid\"}]}", result.getResponse().getContentAsString());
+        JSONAssert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\"," +
+                "\"errors\":[{\"code\":1004,\"field\":\"hid\",\"message\":\"invalid hid\"}]}", result.getResponse()
+                .getContentAsString(), JSONCompareMode.STRICT);
     }
 
     @Test
@@ -300,7 +328,8 @@ public class PatientControllerIT extends BaseControllerTest {
         final MCIResponse body = getMciResponse(result);
         String healthId = body.getId();
 
-        MvcResult getResult = mockMvc.perform(get(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
+        MvcResult getResult = mockMvc.perform(get(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON)
+                .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -330,7 +359,8 @@ public class PatientControllerIT extends BaseControllerTest {
 
         Assert.assertEquals(202, body.getHttpStatus());
 
-        MvcResult getResult = mockMvc.perform(get(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
+        MvcResult getResult = mockMvc.perform(get(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON)
+                .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -367,7 +397,8 @@ public class PatientControllerIT extends BaseControllerTest {
         final MCIResponse createdResponse = getMciResponse(createdResult);
         String healthId = createdResponse.getId();
 
-        mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+        mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(json).contentType
+                (APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -391,7 +422,8 @@ public class PatientControllerIT extends BaseControllerTest {
         String healthId = createdResponse.getId();
         String nidJson = "{\"nid\": \"" + nid + "\"}";
 
-        MvcResult updatedResult = mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(nidJson).contentType(APPLICATION_JSON))
+        MvcResult updatedResult = mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON)
+                .content(nidJson).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -445,7 +477,8 @@ public class PatientControllerIT extends BaseControllerTest {
         String phoneJson = asString("jsons/patient/payload_with_phone.json");
         PatientData patientData1 = getPatientObjectFromString(phoneJson);
 
-        MvcResult updatedResult = mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(phoneJson).contentType(APPLICATION_JSON))
+        MvcResult updatedResult = mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON)
+                .content(phoneJson).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -472,9 +505,11 @@ public class PatientControllerIT extends BaseControllerTest {
         relationJson = relationJson.replace("__RELATION_ID__", fth.getId());
 
         PatientData updateRequestPatientData = getPatientObjectFromString(relationJson);
-        original.getRelations().set(original.getRelations().indexOf(fth), updateRequestPatientData.getRelations().get(0));
+        original.getRelations().set(original.getRelations().indexOf(fth), updateRequestPatientData.getRelations().get
+                (0));
 
-        mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(relationJson).contentType(APPLICATION_JSON))
+        mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(relationJson)
+                .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -501,7 +536,8 @@ public class PatientControllerIT extends BaseControllerTest {
 
         original.getRelations().remove(fth);
 
-        mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(relationJson).contentType(APPLICATION_JSON))
+        mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(relationJson)
+                .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -527,7 +563,8 @@ public class PatientControllerIT extends BaseControllerTest {
 
         original.getRelations().add(newPatientData.getRelations().get(0));
 
-        mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(relationJson).contentType(APPLICATION_JSON))
+        mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(relationJson)
+                .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -569,11 +606,14 @@ public class PatientControllerIT extends BaseControllerTest {
 
         original.getRelations().remove(fth);
 
-        MvcResult result = mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(relationJson).contentType(APPLICATION_JSON))
+        MvcResult result = mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content
+                (relationJson).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1004,\"field\":\"relations\",\"message\":\"invalid relations\"}]}", result.getResponse().getContentAsString());
+        JSONAssert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\"," +
+                "\"errors\":[{\"code\":1004,\"field\":\"relations\",\"message\":\"invalid relations\"}]}", result
+                .getResponse().getContentAsString(), JSONCompareMode.STRICT);
 
     }
 
@@ -583,7 +623,8 @@ public class PatientControllerIT extends BaseControllerTest {
         String healthId = getMciResponse(createPatient(createJson)).getId();
 
         String updateJson = asString("jsons/patient/full_payload_with_updated_data.json");
-        mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(updateJson).contentType(APPLICATION_JSON))
+        mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(updateJson).contentType
+                (APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 

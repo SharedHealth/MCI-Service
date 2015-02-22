@@ -8,13 +8,15 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
-import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
+import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PatientSummaryData;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
 import org.sharedhealth.mci.web.service.LocationService;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -39,7 +41,8 @@ public class SearchRestApiTest extends BaseControllerTest {
     @Mock
     private LocationService locationService;
 
-    private static final String PER_PAGE_MAXIMUM_LIMIT_NOTE = "There are more record for this search criteria. Please narrow down your search";
+    private static final String PER_PAGE_MAXIMUM_LIMIT_NOTE = "There are more record for this search criteria. Please" +
+            " narrow down your search";
     private static final int PER_PAGE_MAXIMUM_LIMIT = 25;
 
     @Before
@@ -80,19 +83,26 @@ public class SearchRestApiTest extends BaseControllerTest {
     @Test
     public void shouldReturnBadRequestIfOnlySurNameGiven() throws Exception {
 
-        MvcResult result = mockMvc.perform(get(API_END_POINT + "?sur_name=Mazumder").accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
+        MvcResult result = mockMvc.perform(get(API_END_POINT + "?sur_name=Mazumder").accept(APPLICATION_JSON)
+                .contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
-        Assert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1001,\"field\":\"given_name\",\"message\":\"invalid given_name\"}]}", result.getResponse().getContentAsString());
+        JSONAssert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\"," +
+                "\"errors\":[{\"code\":1001,\"field\":\"given_name\",\"message\":\"invalid given_name\"}]}", result
+                .getResponse().getContentAsString(), JSONCompareMode.STRICT);
     }
 
     @Test
     public void shouldReturnBadRequestIfOnlyGivenNameGiven() throws Exception {
 
-        MvcResult result = mockMvc.perform(get(API_END_POINT + "?given_name=Mazumder").accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
+        MvcResult result = mockMvc.perform(get(API_END_POINT + "?given_name=Mazumder").accept(APPLICATION_JSON)
+                .contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
-        Assert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1006,\"message\":\"Please provide a valid ID, Address or Phone number\"}]}", result.getResponse().getContentAsString());
+        String expected = "{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\"," +
+                "\"errors\":[{\"code\":1006,\"message\":\"Please provide a valid ID, Address or Phone number\"}]}";
+        JSONAssert.assertEquals(expected, result.getResponse().getContentAsString(), JSONCompareMode.STRICT);
+
     }
 
     @Test
@@ -100,7 +110,8 @@ public class SearchRestApiTest extends BaseControllerTest {
         String present_address = patientData.getAddress().getDivisionId() +
                 patientData.getAddress().getDistrictId() + patientData.getAddress().getUpazilaId();
         String givenName = "Rajus";
-        MvcResult result = mockMvc.perform(get(API_END_POINT + "?given_name=" + givenName + "&present_address=" + present_address).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
+        MvcResult result = mockMvc.perform(get(API_END_POINT + "?given_name=" + givenName + "&present_address=" +
+                present_address).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
         final MCIMultiResponse body = getMciMultiResponse(result);
@@ -119,11 +130,13 @@ public class SearchRestApiTest extends BaseControllerTest {
                 original.getAddress().getDistrictId() + original.getAddress().getUpazilaId();
         String givenName = "Zaman";
 
-        MvcResult searchResult = mockMvc.perform(get(API_END_POINT + "?given_name=" + givenName + "&present_address=" + present_address).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
+        MvcResult searchResult = mockMvc.perform(get(API_END_POINT + "?given_name=" + givenName + "&present_address="
+                + present_address).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
         final MCIMultiResponse body = getMciMultiResponse(searchResult);
-        PatientSummaryData patient = getPatientSummaryObjectFromString(mapper.writeValueAsString(body.getResults().iterator().next()));
+        PatientSummaryData patient = getPatientSummaryObjectFromString(mapper.writeValueAsString(body.getResults()
+                .iterator().next()));
 
         original.setHealthId(patient.getHealthId());
         Assert.assertEquals(original, patient);
@@ -142,12 +155,14 @@ public class SearchRestApiTest extends BaseControllerTest {
         String givenName = "zaman";
         String surName = "aymaan";
         MvcResult searchResult = mockMvc.perform(get(API_END_POINT + "?given_name=" + givenName +
-                "&sur_name=" + surName + "&present_address=" + present_address).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
+                "&sur_name=" + surName + "&present_address=" + present_address).accept(APPLICATION_JSON).contentType
+                (APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
         final MCIMultiResponse body = getMciMultiResponse(searchResult);
 
-        PatientSummaryData patient = getPatientSummaryObjectFromString(mapper.writeValueAsString(body.getResults().iterator().next()));
+        PatientSummaryData patient = getPatientSummaryObjectFromString(mapper.writeValueAsString(body.getResults()
+                .iterator().next()));
 
         original.setHealthId(patient.getHealthId());
     }
@@ -164,7 +179,8 @@ public class SearchRestApiTest extends BaseControllerTest {
         String givenName = "raju";
         String surName = "mazumder";
         MvcResult result = mockMvc.perform(get(API_END_POINT + "?given_name=" + givenName +
-                "&sur_name=" + surName + "&present_address=" + present_address).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
+                "&sur_name=" + surName + "&present_address=" + present_address).accept(APPLICATION_JSON).contentType
+                (APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
         final MCIMultiResponse body = getMciMultiResponse(result);
@@ -180,7 +196,9 @@ public class SearchRestApiTest extends BaseControllerTest {
                 "?country_code=880&area_code=02&extension=122").accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
-        Assert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1001,\"field\":\"phone_no\",\"message\":\"invalid phone_no\"}]}", result.getResponse().getContentAsString());
+        JSONAssert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\"," +
+                "\"errors\":[{\"code\":1001,\"field\":\"phone_no\",\"message\":\"invalid phone_no\"}]}", result
+                .getResponse().getContentAsString(), JSONCompareMode.STRICT);
     }
 
     @Test
@@ -190,7 +208,9 @@ public class SearchRestApiTest extends BaseControllerTest {
                 "?country_code=880").accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
-        Assert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\",\"errors\":[{\"code\":1001,\"field\":\"phone_no\",\"message\":\"invalid phone_no\"}]}", result.getResponse().getContentAsString());
+        JSONAssert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\"," +
+                "\"errors\":[{\"code\":1001,\"field\":\"phone_no\",\"message\":\"invalid phone_no\"}]}", result
+                .getResponse().getContentAsString(), JSONCompareMode.STRICT);
     }
 
     @Test
@@ -199,7 +219,8 @@ public class SearchRestApiTest extends BaseControllerTest {
         String present_address = patientData.getAddress().getDivisionId() +
                 patientData.getAddress().getDistrictId() + patientData.getAddress().getUpazilaId();
         MvcResult result = mockMvc.perform(get(API_END_POINT +
-                "?phone_no=123456&country_code=880&present_address=" + present_address).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
+                "?phone_no=123456&country_code=880&present_address=" + present_address).accept(APPLICATION_JSON)
+                .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
         final MCIMultiResponse body = getMciMultiResponse(result);
@@ -217,7 +238,8 @@ public class SearchRestApiTest extends BaseControllerTest {
         createPatient(json);
 
         MvcResult result = mockMvc.perform(get(API_END_POINT +
-                "?phone_no=1716528608&country_code=880&present_address=" + present_address).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
+                "?phone_no=1716528608&country_code=880&present_address=" + present_address).accept(APPLICATION_JSON)
+                .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 
