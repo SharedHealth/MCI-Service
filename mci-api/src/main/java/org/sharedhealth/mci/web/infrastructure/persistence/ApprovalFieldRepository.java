@@ -26,8 +26,14 @@ public class ApprovalFieldRepository extends BaseRepository {
         return cassandraOps.selectOne(select, ApprovalField.class);
     }
 
-    @CacheEvict("mciApprovalFields")
+    @CacheEvict(value = { "mciApprovalFields" }, allEntries = true)
+    public void resetAllCache() {}
+
+    @CacheEvict(value = { "mciApprovalFields" }, key = "#field")
+    public void resetCacheByKey(String field) {}
+
     public void save(ApprovalField approvalField) {
+        resetCacheByKey(approvalField.getField());
         cassandraOps.insert(approvalField);
     }
 

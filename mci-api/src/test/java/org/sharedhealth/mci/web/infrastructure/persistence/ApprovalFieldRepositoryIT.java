@@ -56,8 +56,23 @@ public class ApprovalFieldRepositoryIT {
         assertEquals(approvalField, fieldData);
     }
 
+    @Test
+    public void shouldCacheData() throws ExecutionException, InterruptedException {
+        approvalFieldRepository.save(approvalField);
+        ApprovalField fieldData = approvalFieldRepository.findByField(field);
+        assertEquals(approvalField, fieldData);
+        cqlTemplate.execute("INSERT INTO approval_fields (\"field\", \"option\") VALUES ('gender', 'NU')");
+        fieldData = approvalFieldRepository.findByField(field);
+        assertEquals(approvalField, fieldData);
+
+        approvalFieldRepository.resetCacheByKey(field);
+        fieldData = approvalFieldRepository.findByField(field);
+        assertEquals(new ApprovalField(field, "NU"), fieldData);
+    }
+
     @After
     public void tearDown() throws ExecutionException, InterruptedException {
         cqlTemplate.execute("truncate approval_fields");
+        approvalFieldRepository.resetAllCache();
     }
 }
