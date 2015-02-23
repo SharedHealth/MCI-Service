@@ -378,10 +378,9 @@ public class PatientMapper {
     }
 
     private void populateRelationId(List<Relation> r) {
-        int y = r.size();
-        for (int x = 0; x < y; x = x + 1) {
-            if (StringUtils.isBlank(r.get(x).getId())) {
-                r.get(x).setId(UUID.randomUUID().toString());
+        for (Relation aR : r) {
+            if (StringUtils.isBlank(aR.getId())) {
+                aR.setId(UUID.randomUUID().toString());
             }
         }
     }
