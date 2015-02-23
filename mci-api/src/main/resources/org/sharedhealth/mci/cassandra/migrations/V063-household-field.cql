@@ -1,0 +1,1 @@
+ALTER TABLE patient ADD household_code varchar;

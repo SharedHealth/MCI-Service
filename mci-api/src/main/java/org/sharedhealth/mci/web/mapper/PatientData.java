@@ -181,6 +181,11 @@ public class PatientData {
     @Pattern(regexp = "^(yes|no)$", message = ERROR_CODE_INVALID, flags = Flag.CASE_INSENSITIVE)
     private String confidential;
 
+    @JsonProperty(HOUSEHOLD_CODE)
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "^([\\d]*)$", message = ERROR_CODE_INVALID)
+    private String householdCode;
+
     @JsonProperty(DATE_OF_DEATH)
     @JsonInclude(NON_EMPTY)
     @Date(format = ISO_DATE_FORMAT, message = ERROR_CODE_PATTERN)
@@ -604,6 +609,7 @@ public class PatientData {
         if (surName != null ? !surName.equals(that.surName) : that.surName != null) return false;
         if (uid != null ? !uid.equals(that.uid) : that.uid != null) return false;
         if (updatedAt != null ? !updatedAt.equals(that.updatedAt) : that.updatedAt != null) return false;
+        if (householdCode != null ? !householdCode.equals(that.householdCode) : that.householdCode != null) return false;
 
         return true;
     }
@@ -641,6 +647,7 @@ public class PatientData {
         result = 31 * result + (createdAt != null ? createdAt.hashCode() : 0);
         result = 31 * result + (updatedAt != null ? updatedAt.hashCode() : 0);
         result = 31 * result + (pendingApprovals != null ? pendingApprovals.hashCode() : 0);
+        result = 31 * result + (householdCode != null ? householdCode.hashCode() : 0);
         return result;
     }
 
@@ -676,6 +683,7 @@ public class PatientData {
                 ", dateOfDeath='" + dateOfDeath + '\'' +
                 ", createdAt='" + createdAt + '\'' +
                 ", updatedAt='" + updatedAt + '\'' +
+                ", householdCode='" + householdCode + '\'' +
                 ", pendingApprovals=" + pendingApprovals +
                 '}';
     }
@@ -706,5 +714,13 @@ public class PatientData {
         }
         return new Catchment(divisionId, districtId, address.getUpazilaId(),
                 address.getCityCorporationId(), address.getUnionOrUrbanWardId(), address.getRuralWardId());
+    }
+
+    public String getHouseholdCode() {
+        return householdCode;
+    }
+
+    public void setHouseholdCode(String householdCode) {
+        this.householdCode = householdCode;
     }
 }

@@ -229,6 +229,27 @@ public class PatientDataTest extends ValidationAwareMapper {
         }
     }
 
+    @Test
+    public void shouldPassIfPatientHouseholdCodeIsValid() {
+        String[] validStatus = {"", "1", "22", "333", "4444"};
+
+        for (String status : validStatus) {
+            Set<ConstraintViolation<PatientData>> constraintViolations = validator.validateValue(PatientData.class, "householdCode", status);
+            assertEquals(0, constraintViolations.size());
+        }
+    }
+
+    @Test
+    public void shouldFailIfPatientHouseholdCodeIsInvalid() {
+        String[] inValidStatus = {"alphabet", "numberinend1", "1a2", "a2i", "1number"};
+
+        for (String status : inValidStatus) {
+            Set<ConstraintViolation<PatientData>> constraintViolations = validator.validateValue(PatientData.class, "householdCode", status);
+            assertEquals(1, constraintViolations.size());
+            assertEquals("1004", constraintViolations.iterator().next().getMessage());
+        }
+    }
+
 
     @Test
     public void shouldRetrieveFieldValueFromJsonKey() {

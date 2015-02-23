@@ -63,5 +63,6 @@
     },
     "status":"2",
     "date_of_death": "2014-01-01",
-    "confidential": "Yes"
+    "confidential": "Yes",
+    "household_code": "5678"
 }

@@ -55,7 +55,8 @@ public class JsonConstants {
     public static final String LAST_MARKER = "last_marker";
     public static final String BEFORE = "before";
     public static final String FACILITY_ID = "facility_id";
-    public static final String FIELDS = "fields";
+    public static final String FIELD = "field";
+    public static final String OPTION = "option";
     public static final String CREATED_AT = "created_at";
     public static final String LAST_UPDATED = "last_updated";
     public static final String FIELD_NAME = "field_name";
@@ -71,4 +72,5 @@ public class JsonConstants {
     public static final String RELATIONAL_STATUS = "relational_status";
     public static final String MARRIAGE_ID = "marriage_id";
     public static final String CONFIDENTIAL = "confidential";
+    public static final String HOUSEHOLD_CODE = "household_code";
 }

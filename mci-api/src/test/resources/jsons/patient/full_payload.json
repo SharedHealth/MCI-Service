@@ -77,5 +77,6 @@
   },
   "status":"1",
   "date_of_death": null,
-  "confidential": "No"
+  "confidential": "No",
+  "household_code": "1234"
 }

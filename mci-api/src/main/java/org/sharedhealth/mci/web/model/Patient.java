@@ -4,7 +4,6 @@ package org.sharedhealth.mci.web.model;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.PendingApproval;
-import org.sharedhealth.mci.web.utils.JsonConstants;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.cassandra.mapping.Column;
 import org.springframework.data.cassandra.mapping.PrimaryKey;
@@ -19,6 +18,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.sharedhealth.mci.utils.DateUtil.ISO_DATE_FORMAT;
 import static org.sharedhealth.mci.utils.DateUtil.parseDate;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.*;
+import static org.sharedhealth.mci.web.utils.JsonConstants.CONFIDENTIAL;
+import static org.sharedhealth.mci.web.utils.JsonConstants.HOUSEHOLD_CODE;
 import static org.sharedhealth.mci.web.utils.JsonConstants.PENDING_APPROVALS;
 import static org.sharedhealth.mci.web.utils.JsonMapper.readValue;
 import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
@@ -280,7 +281,10 @@ public class Patient {
     @Column(PENDING_APPROVALS)
     private String pendingApprovals;
 
-    @Column(JsonConstants.CONFIDENTIAL)
+    @Column(HOUSEHOLD_CODE)
+    private String householdCode;
+
+    @Column(CONFIDENTIAL)
     private Boolean confidential;
 
     @Override
@@ -421,6 +425,7 @@ public class Patient {
         if (updatedAt != null ? !updatedAt.equals(patient.updatedAt) : patient.updatedAt != null) return false;
         if (updatedBy != null ? !updatedBy.equals(patient.updatedBy) : patient.updatedBy != null) return false;
         if (village != null ? !village.equals(patient.village) : patient.village != null) return false;
+        if (householdCode != null ? !householdCode.equals(patient.householdCode) : patient.householdCode != null) return false;
 
         return true;
     }
@@ -512,6 +517,7 @@ public class Patient {
         result = 31 * result + (lowerGivenName != null ? lowerGivenName.hashCode() : 0);
         result = 31 * result + (pendingApprovals != null ? pendingApprovals.hashCode() : 0);
         result = 31 * result + (confidential != null ? confidential.hashCode() : 0);
+        result = 31 * result + (householdCode != null ? householdCode.hashCode() : 0);
         return result;
     }
 
@@ -1185,5 +1191,13 @@ public class Patient {
         }
         return new Catchment(divisionId, districtId, this.getUpazilaId(),
                 this.getCityCorporationId(), this.getUnionOrUrbanWardId(), this.getRuralWardId());
+    }
+
+    public String getHouseholdCode() {
+        return householdCode;
+    }
+
+    public void setHouseholdCode(String householdCode) {
+        this.householdCode = householdCode;
     }
 }
