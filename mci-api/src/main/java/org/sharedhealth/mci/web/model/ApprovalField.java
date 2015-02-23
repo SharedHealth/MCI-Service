@@ -4,13 +4,17 @@ import org.springframework.data.cassandra.mapping.Column;
 import org.springframework.data.cassandra.mapping.PrimaryKey;
 import org.springframework.data.cassandra.mapping.Table;
 
-@Table(value = "approval_fields")
+import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.CF_APPROVAL_FIELDS;
+import static org.sharedhealth.mci.web.utils.JsonConstants.FIELD;
+import static org.sharedhealth.mci.web.utils.JsonConstants.OPTION;
+
+@Table(value = CF_APPROVAL_FIELDS)
 public class ApprovalField {
 
-    @PrimaryKey("field")
+    @PrimaryKey(FIELD)
     private String field;
 
-    @Column("option")
+    @Column(OPTION)
     private String option;
 
     public ApprovalField(){}

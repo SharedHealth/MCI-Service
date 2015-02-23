@@ -10,6 +10,7 @@ public class PatientRepositoryConstants {
     public static final String CF_PENDING_APPROVAL_MAPPING = "pending_approval_mapping";
     public static final String CF_CATCHMENT_MAPPING = "catchment_mapping";
     public static final String CF_PATIENT_UPDATE_LOG = "patient_update_log";
+    public static final String CF_APPROVAL_FIELDS = "approval_fields";
     public static final String HEALTH_ID = "health_id";
     public static final String LAST_UPDATED = "last_updated";
     public static final String NATIONAL_ID = "national_id";
