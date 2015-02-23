@@ -14,11 +14,16 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AndRequestMatcher;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 
 @Configuration
 @EnableWebSecurity
@@ -30,14 +35,22 @@ public class MCISecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .csrf().disable()
+                .anonymous().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
         http
+                .requestMatcher(new AndRequestMatcher(new ArrayList<RequestMatcher>(){{
+                    add(new NegatedRequestMatcher(new AntPathRequestMatcher(MCIProperties.DIAGNOSTICS_SERVLET_PATH)));
+                    add(new AntPathRequestMatcher("/**"));
+                }
+                }))
                 .authorizeRequests()
-                .antMatchers("/diagnostics/**").anonymous()
                 .anyRequest().hasRole("MCI_USER")
-                .and().addFilterBefore(new TokenAuthenticationFilter(authenticationManager()),
-                BasicAuthenticationFilter.class)
+                .and()
+                .addFilterBefore(new TokenAuthenticationFilter(authenticationManager()), BasicAuthenticationFilter
+                        .class)
                 .exceptionHandling().authenticationEntryPoint(unauthorizedEntryPoint());
+
     }
 
     @Bean
