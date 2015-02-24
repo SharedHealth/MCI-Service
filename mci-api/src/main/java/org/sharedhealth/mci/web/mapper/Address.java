@@ -6,6 +6,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.validation.constraints.Code;
 import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
+import org.sharedhealth.mci.web.builder.DiffBuilder;
+import org.sharedhealth.mci.web.builder.DiffResult;
+import org.sharedhealth.mci.web.builder.Diffable;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -18,7 +21,7 @@ import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_PATTERN;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
 @JsonIgnoreProperties({"geoCode"})
-public class Address {
+public class Address implements Diffable<Address> {
 
     @JsonProperty(ADDRESS_LINE)
     @NotNull(message = "1001", groups = RequiredOnUpdateGroup.class)
@@ -303,5 +306,26 @@ public class Address {
         }
 
         return gCode;
+    }
+
+    @Override
+    public DiffResult diff(Address that) {
+        return new DiffBuilder(this, that)
+                .append(DIVISION_ID, this.divisionId, that.divisionId)
+                .append(DISTRICT_ID, this.districtId, that.districtId)
+                .append(UPAZILA_ID, this.upazilaId, that.upazilaId)
+                .append(CITY_CORPORATION_ID, this.cityCorporationId, that.cityCorporationId)
+                .append(UNION_OR_URBAN_WARD_ID, this.unionOrUrbanWardId, that.unionOrUrbanWardId)
+                .append(RURAL_WARD_ID, this.ruralWardId, that.ruralWardId)
+
+                .append(ADDRESS_LINE, this.addressLine, that.addressLine)
+                .append(HOLDING_NUMBER, this.holdingNumber, that.holdingNumber)
+                .append(STREET, this.street, that.street)
+                .append(AREA_MOUJA, this.areaMouja, that.areaMouja)
+                .append(VILLAGE, this.village, that.village)
+                .append(POST_OFFICE, this.postOffice, that.postOffice)
+                .append(POST_CODE, this.postCode, that.postCode)
+                .append(COUNTRY_CODE, this.countryCode, that.countryCode)
+                .build();
     }
 }

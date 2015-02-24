@@ -3,6 +3,9 @@ package org.sharedhealth.mci.web.mapper;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
+import org.sharedhealth.mci.web.builder.DiffBuilder;
+import org.sharedhealth.mci.web.builder.DiffResult;
+import org.sharedhealth.mci.web.builder.Diffable;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -11,26 +14,27 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_PATTERN;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_REQUIRED;
+import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
-public class PhoneNumber {
+public class PhoneNumber implements Diffable<PhoneNumber> {
 
-    @JsonProperty("country_code")
+    @JsonProperty(COUNTRY_CODE)
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "[0-9]*$", message = ERROR_CODE_PATTERN)
     private String countryCode;
 
-    @JsonProperty("area_code")
+    @JsonProperty(AREA_CODE)
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "[0-9]*$", message = ERROR_CODE_PATTERN)
     private String areaCode;
 
-    @JsonProperty("number")
+    @JsonProperty(NUMBER)
     @JsonInclude(NON_EMPTY)
     @NotNull(message = ERROR_CODE_REQUIRED, groups = RequiredOnUpdateGroup.class)
     @Pattern(regexp = "[0-9]{1,12}$", message = ERROR_CODE_PATTERN)
     private String number;
 
-    @JsonProperty("extension")
+    @JsonProperty(EXTENSION)
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "[0-9]*$", message = ERROR_CODE_PATTERN)
     private String extension;
@@ -99,5 +103,15 @@ public class PhoneNumber {
                 ", number='" + number + '\'' +
                 ", extension='" + extension + '\'' +
                 '}';
+    }
+
+    @Override
+    public DiffResult diff(PhoneNumber that) {
+        return new DiffBuilder(this, that)
+                .append(COUNTRY_CODE, this.countryCode, that.countryCode)
+                .append(AREA_CODE, this.areaCode, that.areaCode)
+                .append(NUMBER, this.number, that.number)
+                .append(EXTENSION, this.extension, that.extension)
+                .build();
     }
 }

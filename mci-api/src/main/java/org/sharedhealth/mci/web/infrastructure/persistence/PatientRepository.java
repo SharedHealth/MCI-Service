@@ -96,7 +96,7 @@ public class PatientRepository extends BaseRepository {
         final Batch batch = batch();
         buildUpdatePendingApprovalsBatch(newPatient, existingPatientData, batch);
         buildUpdateBatch(newPatient, existingPatientData, cassandraOps.getConverter(), batch);
-        buildCreateUpdateLogStmt(newPatientData, existingPatientData, cassandraOps.getConverter(), batch);
+        PatientUpdateLogQueryBuilder.buildCreateUpdateLogStmt(newPatientData, existingPatientData, cassandraOps.getConverter(), batch);
         cassandraOps.execute(batch);
 
         return new MCIResponse(newPatient.getHealthId(), HttpStatus.ACCEPTED);
@@ -288,7 +288,7 @@ public class PatientRepository extends BaseRepository {
         Patient newPatient;
         if (shouldAccept) {
             newPatient = mapper.map(requestData, existingPatientData);
-            buildCreateUpdateLogStmt(requestData, existingPatientData, cassandraOps.getConverter(), batch);
+            PatientUpdateLogQueryBuilder.buildCreateUpdateLogStmt(requestData, existingPatientData, cassandraOps.getConverter(), batch);
         } else {
             newPatient = new Patient();
             newPatient.setHealthId(requestData.getHealthId());

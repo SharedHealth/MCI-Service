@@ -10,6 +10,9 @@ import org.hibernate.validator.constraints.NotBlank;
 import org.sharedhealth.mci.utils.WhiteSpaceRemovalDeserializer;
 import org.sharedhealth.mci.validation.constraints.*;
 import org.sharedhealth.mci.validation.group.RequiredGroup;
+import org.sharedhealth.mci.web.builder.DiffBuilder;
+import org.sharedhealth.mci.web.builder.DiffResult;
+import org.sharedhealth.mci.web.builder.Diffable;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -35,7 +38,7 @@ import static org.sharedhealth.mci.web.utils.PatientDataConstants.COUNTRY_CODE_B
 @MaritalRelation(message = ERROR_CODE_DEPENDENT, field = "maritalStatus")
 @PatientStatus(message = ERROR_CODE_DEPENDENT)
 @JsonIgnoreProperties({"created_at"})
-public class PatientData {
+public class PatientData implements Diffable<PatientData> {
 
     private static final String INVALID_CATCHMENT = "invalid.catchment";
 
@@ -166,10 +169,6 @@ public class PatientData {
     @JsonInclude(NON_EMPTY)
     @Code(type = MARITAL_STATUS, regexp = "[\\d]{1}", message = ERROR_CODE_INVALID)
     private String maritalStatus;
-
-    @JsonProperty(FULL_NAME)
-    @JsonInclude(NON_EMPTY)
-    private String fullName;
 
     @JsonProperty(PATIENT_STATUS)
     @JsonInclude(NON_EMPTY)
@@ -345,14 +344,6 @@ public class PatientData {
 
     public Address getPermanentAddress() {
         return permanentAddress;
-    }
-
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
     }
 
     public void setPermanentAddress(Address permanentAddress) {
@@ -583,7 +574,6 @@ public class PatientData {
         if (educationLevel != null ? !educationLevel.equals(that.educationLevel) : that.educationLevel != null)
             return false;
         if (ethnicity != null ? !ethnicity.equals(that.ethnicity) : that.ethnicity != null) return false;
-        if (fullName != null ? !fullName.equals(that.fullName) : that.fullName != null) return false;
         if (gender != null ? !gender.equals(that.gender) : that.gender != null) return false;
         if (givenName != null ? !givenName.equals(that.givenName) : that.givenName != null) return false;
         if (healthId != null ? !healthId.equals(that.healthId) : that.healthId != null) return false;
@@ -609,7 +599,8 @@ public class PatientData {
         if (surName != null ? !surName.equals(that.surName) : that.surName != null) return false;
         if (uid != null ? !uid.equals(that.uid) : that.uid != null) return false;
         if (updatedAt != null ? !updatedAt.equals(that.updatedAt) : that.updatedAt != null) return false;
-        if (householdCode != null ? !householdCode.equals(that.householdCode) : that.householdCode != null) return false;
+        if (householdCode != null ? !householdCode.equals(that.householdCode) : that.householdCode != null)
+            return false;
 
         return true;
     }
@@ -640,7 +631,6 @@ public class PatientData {
         result = 31 * result + (primaryContactNumber != null ? primaryContactNumber.hashCode() : 0);
         result = 31 * result + (permanentAddress != null ? permanentAddress.hashCode() : 0);
         result = 31 * result + (maritalStatus != null ? maritalStatus.hashCode() : 0);
-        result = 31 * result + (fullName != null ? fullName.hashCode() : 0);
         result = 31 * result + (status != null ? status.hashCode() : 0);
         result = 31 * result + (confidential != null ? confidential.hashCode() : 0);
         result = 31 * result + (dateOfDeath != null ? dateOfDeath.hashCode() : 0);
@@ -678,7 +668,6 @@ public class PatientData {
                 ", primaryContactNumber=" + primaryContactNumber +
                 ", permanentAddress=" + permanentAddress +
                 ", maritalStatus='" + maritalStatus + '\'' +
-                ", fullName='" + fullName + '\'' +
                 ", status='" + status + '\'' +
                 ", dateOfDeath='" + dateOfDeath + '\'' +
                 ", createdAt='" + createdAt + '\'' +
@@ -722,5 +711,37 @@ public class PatientData {
 
     public void setHouseholdCode(String householdCode) {
         this.householdCode = householdCode;
+    }
+
+    @Override
+    public DiffResult diff(PatientData that) {
+        return new DiffBuilder(this, that)
+                .append(HID, this.healthId, that.healthId)
+                .append(NID, this.nationalId, that.nationalId)
+                .append(BIN_BRN, this.birthRegistrationNumber, that.birthRegistrationNumber)
+                .append(UID, this.uid, that.uid)
+
+                .append(NAME_BANGLA, this.nameBangla, that.nameBangla)
+                .append(GIVEN_NAME, this.givenName, that.givenName)
+                .append(SUR_NAME, this.surName, that.surName)
+                .append(DATE_OF_BIRTH, this.dateOfBirth, that.dateOfBirth)
+                .append(GENDER, this.gender, that.gender)
+                .append(OCCUPATION, this.occupation, that.occupation)
+                .append(EDU_LEVEL, this.educationLevel, that.educationLevel)
+
+                .append(PLACE_OF_BIRTH, this.placeOfBirth, that.placeOfBirth)
+                .append(RELIGION, this.religion, that.religion)
+                .append(BLOOD_GROUP, this.bloodGroup, that.bloodGroup)
+                .append(NATIONALITY, this.nationality, that.nationality)
+                .append(DISABILITY, this.disability, that.disability)
+                .append(ETHNICITY, this.ethnicity, that.ethnicity)
+
+                .append(PRIMARY_CONTACT, this.primaryContact, that.primaryContact)
+                .append(MARITAL_STATUS, this.maritalStatus, that.maritalStatus)
+                .append(PATIENT_STATUS, this.status, that.status)
+                .append(CONFIDENTIAL, this.confidential, that.confidential)
+                .append(HOUSEHOLD_CODE, this.householdCode, that.householdCode)
+                .append(DATE_OF_DEATH, this.dateOfDeath, that.dateOfDeath)
+                .build();
     }
 }

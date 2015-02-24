@@ -7,32 +7,33 @@ import org.sharedhealth.mci.web.mapper.PatientData;
 
 import static org.junit.Assert.*;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
+import static org.sharedhealth.mci.web.infrastructure.persistence.PatientUpdateLogQueryBuilder.someLoggableDataChanged;
 
-public class PatientQueryBuilderTest {
+public class PatientUpdateLogQueryBuilderTest {
 
     @Test
     public void shouldReturnTrueIfSomeLoggableDataChanged() throws Exception {
 
         PatientData p = new PatientData();
         p.setSurName("S");
-        assertTrue(PatientQueryBuilder.someLoggableDataChanged(p));
+        assertTrue(someLoggableDataChanged(p));
 
         p = new PatientData();
         p.setGivenName("G");
-        assertTrue(PatientQueryBuilder.someLoggableDataChanged(p));
+        assertTrue(someLoggableDataChanged(p));
 
         p = new PatientData();
         p.setConfidential("Yes");
-        assertTrue(PatientQueryBuilder.someLoggableDataChanged(p));
+        assertTrue(someLoggableDataChanged(p));
 
         p = new PatientData();
         p.setGender("M");
-        assertTrue(PatientQueryBuilder.someLoggableDataChanged(p));
+        assertTrue(someLoggableDataChanged(p));
 
         p = new PatientData();
         Address newAddress = new Address("99", "88", "77");
         p.setAddress(newAddress);
-        assertTrue(PatientQueryBuilder.someLoggableDataChanged(p));
+        assertTrue(someLoggableDataChanged(p));
     }
 
     @Test
@@ -45,7 +46,7 @@ public class PatientQueryBuilderTest {
         p.setGender(null);
         p.setConfidential(null);
         p.setAddress(null);
-        assertFalse(PatientQueryBuilder.someLoggableDataChanged(p));
+        assertFalse(someLoggableDataChanged(p));
     }
 
     protected PatientData getPatientObjectFromString(String json) throws Exception {

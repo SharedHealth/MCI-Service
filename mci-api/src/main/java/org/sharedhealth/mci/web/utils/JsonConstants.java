@@ -25,7 +25,6 @@ public class JsonConstants {
     public static final String PRIMARY_CONTACT_NUMBER = "primary_contact_number";
     public static final String PERMANENT_ADDRESS = "permanent_address";
     public static final String MARITAL_STATUS = "marital_status";
-    public static final String FULL_NAME = "full_name";
     public static final String PATIENT_STATUS = "status";
     public static final String DATE_OF_DEATH = "date_of_death";
     public static final String CREATED = "created";
@@ -45,7 +44,11 @@ public class JsonConstants {
     public static final String POST_CODE = "post_code";
     public static final String RURAL_WARD_ID = "rural_ward_id";
     public static final String CITY_CORPORATION_ID = "city_corporation_id";
+
     public static final String COUNTRY_CODE = "country_code";
+    public static final String AREA_CODE = "area_code";
+    public static final String NUMBER = "number";
+    public static final String EXTENSION = "extension";
 
     public static final String PENDING_APPROVALS = "pending_approvals";
     public static final String AFTER = "after";

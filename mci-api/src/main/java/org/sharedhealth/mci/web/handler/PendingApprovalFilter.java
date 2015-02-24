@@ -55,7 +55,6 @@ public class PendingApprovalFilter {
         newPatient.setEthnicity(processString(ETHNICITY, existingPatient.getEthnicity(), updateRequest.getEthnicity()));
         newPatient.setPrimaryContact(processString(PRIMARY_CONTACT, existingPatient.getPrimaryContact(), updateRequest.getPrimaryContact()));
         newPatient.setMaritalStatus(processString(MARITAL_STATUS, existingPatient.getMaritalStatus(), updateRequest.getMaritalStatus()));
-        newPatient.setFullName(processString(FULL_NAME, existingPatient.getFullName(), updateRequest.getFullName()));
         newPatient.setStatus(processString(PATIENT_STATUS, existingPatient.getStatus(), updateRequest.getStatus()));
         newPatient.setDateOfDeath(processString(DATE_OF_DEATH, existingPatient.getDateOfDeath(), updateRequest.getDateOfDeath()));
         newPatient.setConfidential(processString(CONFIDENTIAL, existingPatient.getConfidential(), updateRequest.getConfidential()));

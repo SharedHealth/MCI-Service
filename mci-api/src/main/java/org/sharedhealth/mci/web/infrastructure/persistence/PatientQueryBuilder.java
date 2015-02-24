@@ -4,8 +4,6 @@ import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Update;
 import com.datastax.driver.core.utils.UUIDs;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.sharedhealth.mci.utils.DateUtil;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.Catchment;
@@ -21,7 +19,6 @@ import java.util.UUID;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
 import static com.datastax.driver.core.querybuilder.Select.Where;
-import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static org.apache.commons.lang3.StringUtils.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.*;
 import static org.springframework.data.cassandra.core.CassandraTemplate.*;
@@ -198,60 +195,6 @@ public class PatientQueryBuilder {
                 converter, batch);
     }
 
-    static void buildCreateUpdateLogStmt(PatientData patientDataToSave, PatientData existingPatientData,
-                                         CassandraConverter converter, Batch batch) {
-        PatientUpdateLog patientUpdateLog = new PatientUpdateLog();
-        String changeSet = getChangeSet(patientDataToSave, existingPatientData);
-
-        if (changeSet != null) {
-            patientUpdateLog.setEventId(timeBased());
-            patientUpdateLog.setHealthId(existingPatientData.getHealthId());
-            patientUpdateLog.setChangeSet(changeSet);
-            batch.add(createInsertQuery(CF_PATIENT_UPDATE_LOG, patientUpdateLog, null, converter));
-        }
-    }
-
-    private static String getChangeSet(PatientData newData, PatientData oldData) {
-        PatientData patient = new PatientData();
-
-        patient.setSurName(getChangedValue(newData.getSurName(), oldData.getSurName()));
-        patient.setGivenName(getChangedValue(newData.getGivenName(), oldData.getGivenName()));
-        patient.setGender(getChangedValue(newData.getGender(), oldData.getGender()));
-        patient.setConfidential(getChangedValueIgnoreCase(newData.getConfidential(), oldData.getConfidential()));
-        patient.setAddress(getChangedValue(newData.getAddress(), oldData.getAddress()));
-
-        if (someLoggableDataChanged(patient)) {
-            ObjectMapper oMapper = new ObjectMapper();
-            try {
-                return oMapper.writeValueAsString(patient);
-            } catch (JsonProcessingException e) {
-                return null;
-            }
-        }
-
-        return null;
-    }
-
-    static boolean someLoggableDataChanged(PatientData patient) {
-        return patient.getSurName() != null
-                || patient.getGivenName() != null
-                || patient.getConfidential() != null
-                || patient.getGender() != null
-                || patient.getAddress() != null;
-    }
-
-    private static Address getChangedValue(Address newValue, Address old) {
-        return newValue != null && !newValue.equals(old) ? newValue : null;
-    }
-
-    private static String getChangedValue(String newValue, String old) {
-        return newValue != null && !newValue.equals(old) ? newValue : null;
-    }
-
-    private static String getChangedValueIgnoreCase(String newValue, String old) {
-        return newValue != null && !newValue.equalsIgnoreCase(old) ? newValue : null;
-    }
-
     public static Update buildUpdateStmt(Patient patient, CassandraConverter converter) {
         return toUpdateQuery(CF_PATIENT, patient, null, converter);
     }
@@ -277,7 +220,7 @@ public class PatientQueryBuilder {
 
         if (lastMarker != null) {
             where = where.and(gt(EVENT_ID, lastMarker));
-        }else if (since != null) {
+        } else if (since != null) {
             where = where.and(gte(EVENT_ID, UUIDs.startOf(since.getTime())));
         }
 
@@ -286,11 +229,11 @@ public class PatientQueryBuilder {
 
     private static int getLastYearMarker(Date after, UUID lastMarker) {
 
-        if(lastMarker !=null) {
+        if (lastMarker != null) {
             return DateUtil.getYearOf(lastMarker);
         }
 
-        if(after != null) {
+        if (after != null) {
             return DateUtil.getYearOf(after);
         }
 
