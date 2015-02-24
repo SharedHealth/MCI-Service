@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
-public class ChangeSet {
+public class PatientAuditChangeSetData {
 
     @JsonProperty(FIELD_NAME)
     private String fieldName;

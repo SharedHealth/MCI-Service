@@ -3,7 +3,7 @@ package org.sharedhealth.mci.web.controller;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.sharedhealth.mci.web.mapper.ChangeSet;
+import org.sharedhealth.mci.web.mapper.PatientAuditChangeSetData;
 import org.sharedhealth.mci.web.mapper.PatientAuditLogData;
 import org.sharedhealth.mci.web.service.PatientAuditService;
 import org.springframework.test.web.servlet.MockMvc;
@@ -92,10 +92,10 @@ public class PatientAuditControllerTest {
         return logs;
     }
 
-    private List<ChangeSet> buildChangeSet() {
-        List<ChangeSet> changeSets = new ArrayList<>();
+    private List<PatientAuditChangeSetData> buildChangeSet() {
+        List<PatientAuditChangeSetData> changeSets = new ArrayList<>();
 
-        ChangeSet changeSet1 = new ChangeSet();
+        PatientAuditChangeSetData changeSet1 = new PatientAuditChangeSetData();
         changeSet1.setFieldName(GIVEN_NAME);
         changeSet1.setOldValue("Harry");
         changeSet1.setNewValue("Potter");
@@ -103,7 +103,7 @@ public class PatientAuditControllerTest {
         changeSet1.setApprovedBy("y");
         changeSets.add(changeSet1);
 
-        ChangeSet changeSet2 = new ChangeSet();
+        PatientAuditChangeSetData changeSet2 = new PatientAuditChangeSetData();
         changeSet2.setFieldName(OCCUPATION);
         changeSet2.setOldValue("Wizard");
         changeSet2.setNewValue("Jobless");
@@ -111,7 +111,7 @@ public class PatientAuditControllerTest {
         changeSet2.setApprovedBy(null);
         changeSets.add(changeSet2);
 
-        ChangeSet changeSet3 = new ChangeSet();
+        PatientAuditChangeSetData changeSet3 = new PatientAuditChangeSetData();
         changeSet3.setFieldName(EDU_LEVEL);
         changeSet3.setOldValue("Std 12");
         changeSet3.setNewValue("Std 10");

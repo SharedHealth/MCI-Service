@@ -4,7 +4,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
-import org.sharedhealth.mci.web.mapper.ChangeSet;
+import org.sharedhealth.mci.web.mapper.PatientAuditChangeSetData;
 import org.sharedhealth.mci.web.mapper.PatientAuditLogData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -30,18 +30,18 @@ public class PatientAuditRepositoryIT {
         assertNotNull(logs);
         assertEquals(3, logs.size());
 
-        List<ChangeSet> changeSet1 = logs.get(0).getChangeSet();
+        List<PatientAuditChangeSetData> changeSet1 = logs.get(0).getChangeSet();
         assertNotNull(changeSet1);
         assertEquals(3, changeSet1.size());
         assertEquals("given_name", changeSet1.get(0).getFieldName());
         assertEquals("edu_level", changeSet1.get(1).getFieldName());
         assertEquals("occupation", changeSet1.get(2).getFieldName());
 
-        List<ChangeSet> changeSet2 = logs.get(1).getChangeSet();
+        List<PatientAuditChangeSetData> changeSet2 = logs.get(1).getChangeSet();
         assertNotNull(changeSet2);
         assertEquals(1, changeSet2.size());
 
-        List<ChangeSet> changeSet3 = logs.get(2).getChangeSet();
+        List<PatientAuditChangeSetData> changeSet3 = logs.get(2).getChangeSet();
         assertNotNull(changeSet3);
         assertEquals(2, changeSet3.size());
     }

@@ -12,7 +12,7 @@ public class PatientAuditLogData {
     private String eventTime;
 
     @JsonProperty(CHANGE_SET)
-    private List<ChangeSet> changeSet;
+    private List<PatientAuditChangeSetData> changeSet;
 
     public String getEventTime() {
         return eventTime;
@@ -22,11 +22,11 @@ public class PatientAuditLogData {
         this.eventTime = eventTime;
     }
 
-    public List<ChangeSet> getChangeSet() {
+    public List<PatientAuditChangeSetData> getChangeSet() {
         return changeSet;
     }
 
-    public void setChangeSet(List<ChangeSet> changeSet) {
+    public void setChangeSet(List<PatientAuditChangeSetData> changeSet) {
         this.changeSet = changeSet;
     }
 }

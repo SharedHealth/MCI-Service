@@ -28,8 +28,8 @@ public class PatientAuditLogMapper {
         return data;
     }
 
-    private List<ChangeSet> buildChangeSet(PatientAuditLog log) {
-        return readValue(log.getChangeSet(), new TypeReference<List<ChangeSet>>() {
+    private List<PatientAuditChangeSetData> buildChangeSet(PatientAuditLog log) {
+        return readValue(log.getChangeSet(), new TypeReference<List<PatientAuditChangeSetData>>() {
         });
     }
 }
