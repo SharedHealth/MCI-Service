@@ -1,5 +1,6 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -11,6 +12,7 @@ import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.model.*;
+import org.sharedhealth.mci.web.utils.JsonConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.cassandra.core.CassandraOperations;
@@ -31,8 +33,14 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.junit.Assert.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
+import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.CATCHMENT_ID;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.*;
-import static org.sharedhealth.mci.web.utils.JsonConstants.PHONE_NUMBER;
+import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.GENDER;
+import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.LAST_UPDATED;
+import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.OCCUPATION;
+import static org.sharedhealth.mci.web.utils.JsonConstants.*;
+import static org.sharedhealth.mci.web.utils.JsonMapper.readValue;
+import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
 import static org.sharedhealth.mci.web.utils.PatientDataConstants.PATIENT_STATUS_ALIVE;
 import static org.sharedhealth.mci.web.utils.PatientDataConstants.STRING_NO;
 
@@ -1324,38 +1332,68 @@ public class PatientRepositoryIT {
     }
 
     @Test
-    public void shouldCreateUpdateLogsWhenOnlyListedFieldUpdatedOrApproved() {
+    public void shouldCreateUpdateLogsWhenAnyFieldIsUpdated() {
         String healthId = patientRepository.create(data).getId();
         Date since = new Date();
-
         assertUpdateLogEntry(healthId, since, false);
 
-        PatientData updateRequest = new PatientData();
-        updateRequest.setHealthId(healthId);
-        updateRequest.setEducationLevel("02");
-        patientRepository.update(updateRequest, healthId);
-        assertUpdateLogEntry(healthId, since, false);
+        PatientData updateRequest1 = new PatientData();
+        updateRequest1.setHealthId(healthId);
+        updateRequest1.setEducationLevel("02");
+        patientRepository.update(updateRequest1, healthId);
+        assertUpdateLogEntry(healthId, since, true);
 
-        updateRequest.setSurName("UpdSur");
-        updateRequest.setGivenName("UpdGiv");
-        updateRequest.setGender("F");
-        updateRequest.setConfidential("Yes");
+        PatientData updateRequest2 = new PatientData();
+        updateRequest2.setGivenName("UpdGiv");
+        updateRequest2.setSurName("UpdSur");
+        updateRequest2.setConfidential("Yes");
+        updateRequest2.setGender("F");
         Address newAddress = new Address("99", "88", "77");
-        updateRequest.setAddress(newAddress);
-        patientRepository.update(updateRequest, healthId);
+        updateRequest2.setAddress(newAddress);
+        patientRepository.update(updateRequest2, healthId);
 
-        PatientData updatedPatient = patientRepository.findByHealthId(healthId);
-        patientRepository.processPendingApprovals(updateRequest, updatedPatient, true);
+        PatientData acceptRequest = new PatientData();
+        acceptRequest.setHealthId(healthId);
+        acceptRequest.setGender("F");
+        acceptRequest.setAddress(newAddress);
+        PatientData existingPatient = patientRepository.findByHealthId(healthId);
+        patientRepository.processPendingApprovals(acceptRequest, existingPatient, true);
+
         List<PatientUpdateLog> patientUpdateLogs = patientRepository.findPatientsUpdatedSince(null, 25, null);
+        assertEquals(3, patientUpdateLogs.size());
 
-        assertEquals(2, patientUpdateLogs.size());
+        Map<String, Map<String, Object>> changeSet1 = getChangeSet(patientUpdateLogs.get(0));
+        assertNotNull(changeSet1);
+        assertEquals(1, changeSet1.size());
+        assertChangeSet(changeSet1, JsonConstants.EDU_LEVEL, data.getEducationLevel(), "02");
 
-        final String fieldUpdatedDirectly = "{\"given_name\":\"UpdGiv\",\"sur_name\":\"UpdSur\",\"confidential\":\"Yes\"}";
-        final String fieldUpdateAfterApproval = "{\"gender\":\"F\",\"present_address\":{\"address_line\":null," +
-                "\"division_id\":\"99\",\"district_id\":\"88\",\"upazila_id\":\"77\",\"country_code\":\"050\"}}";
+        Map<String, Map<String, Object>> changeSet2 = getChangeSet(patientUpdateLogs.get(1));
+        assertNotNull(changeSet2);
+        assertEquals(3, changeSet2.size());
+        assertChangeSet(changeSet2, JsonConstants.GIVEN_NAME, data.getGivenName(), "UpdGiv");
+        assertChangeSet(changeSet2, JsonConstants.SUR_NAME, data.getSurName(), "UpdSur");
+        assertChangeSet(changeSet2, JsonConstants.CONFIDENTIAL, "No", "Yes");
 
-        assertEquals(fieldUpdatedDirectly, patientUpdateLogs.get(0).getChangeSet());
-        assertEquals(fieldUpdateAfterApproval, patientUpdateLogs.get(1).getChangeSet());
+        Map<String, Map<String, Object>> changeSet3 = getChangeSet(patientUpdateLogs.get(2));
+        assertNotNull(changeSet3);
+        assertEquals(2, changeSet3.size());
+        assertChangeSet(changeSet3, JsonConstants.GENDER, data.getGender(), "F");
+        assertChangeSet(changeSet3, JsonConstants.PRESENT_ADDRESS, data.getAddress(), newAddress);
+    }
+
+    private Map<String, Map<String, Object>> getChangeSet(PatientUpdateLog log) {
+        return readValue(log.getChangeSet(), new TypeReference<Map<String, Map<String, Object>>>() {
+        });
+    }
+
+    private void assertChangeSet(Map<String, Map<String, Object>> changeSet, String fieldName, String oldValue, String newValue) {
+        assertEquals(oldValue, changeSet.get(fieldName).get(OLD_VALUE));
+        assertEquals(newValue, changeSet.get(fieldName).get(NEW_VALUE));
+    }
+
+    private void assertChangeSet(Map<String, Map<String, Object>> changeSet, String fieldName, Address oldValue, Address newValue) {
+        assertEquals(writeValueAsString(oldValue), writeValueAsString(changeSet.get(fieldName).get(OLD_VALUE)));
+        assertEquals(writeValueAsString(newValue), writeValueAsString(changeSet.get(fieldName).get(NEW_VALUE)));
     }
 
     @Test
@@ -1376,6 +1414,16 @@ public class PatientRepositoryIT {
         patientRepository.processPendingApprovals(updateRequest, updatedPatient, true);
 
         assertUpdateLogEntry(healthId, since, true);
+    }
+
+    private void assertUpdateLogEntry(String healthId, Date since, boolean shouldFind) {
+        List<PatientUpdateLog> patientUpdateLogs = patientRepository.findPatientsUpdatedSince(since, 1, null);
+
+        if (shouldFind) {
+            assertTrue(healthId.equals(patientUpdateLogs.get(0).getHealthId()));
+        } else {
+            assertEquals(0, patientUpdateLogs.size());
+        }
     }
 
     @Test
@@ -2165,17 +2213,6 @@ public class PatientRepositoryIT {
         assertEquals(catchmentIds.size(), mappings.size());
         for (PendingApprovalMapping mapping : mappings) {
             assertTrue(catchmentIds.contains(mapping.getCatchmentId()));
-        }
-    }
-
-    private void assertUpdateLogEntry(String healthId, Date since, boolean shouldFind) {
-
-        List<PatientUpdateLog> patientUpdateLogs = patientRepository.findPatientsUpdatedSince(since, 1, null);
-
-        if (shouldFind) {
-            assertTrue(healthId.equals(patientUpdateLogs.get(0).getHealthId()));
-        } else {
-            assertEquals(0, patientUpdateLogs.size());
         }
     }
 

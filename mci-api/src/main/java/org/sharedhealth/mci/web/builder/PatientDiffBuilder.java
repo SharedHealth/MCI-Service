@@ -15,7 +15,7 @@ import static org.sharedhealth.mci.web.utils.JsonConstants.OLD_VALUE;
 
 public class PatientDiffBuilder {
 
-    static final String EMPTY_VALUE = "EMPTY";
+    static final String EMPTY_VALUE = "";
 
     private final PatientData lhs;
     private final PatientData rhs;

@@ -27,27 +27,20 @@ public class DiffBuilder implements Builder<DiffResult> {
     }
 
     public DiffBuilder append(final String fieldName, final Object lhs, final Object rhs) {
-
         if (objectsTriviallyEqual) {
             return this;
         }
-        if (lhs == null && rhs == null) {
+        if (rhs == null) {
             return this;
         }
 
-        Class lhsClass = null;
-        Class rhsClass = null;
-        if (lhs != null) {
-            lhsClass = lhs.getClass();
-        }
-        if (rhs != null) {
-            rhsClass = rhs.getClass();
-        }
+        Class lhsClass = lhs != null ? lhs.getClass() : null;
+        Class rhsClass = rhs.getClass();
         if (lhsClass != null && rhsClass != null && !lhsClass.equals(rhsClass)) {
             throw new IllegalArgumentException("Cannot compare objects of different types.");
         }
 
-        if (lhs instanceof String || rhs instanceof String) {
+        if (rhs instanceof String) {
             String lhsString = defaultString((String) lhs);
             String rhsString = defaultString((String) rhs);
             if (lhsString.equals(rhsString)) {
@@ -55,16 +48,16 @@ public class DiffBuilder implements Builder<DiffResult> {
             }
         }
 
-        if (lhs != null && rhs != null) {
-            if (lhs instanceof List || rhs instanceof List) {
-                List lhsList = (List) lhs;
-                List rhsList = (List) rhs;
-                if (lhsList.size() == rhsList.size() && lhsList.containsAll(rhsList)) {
-                    return this;
-                }
-            } else if (lhs.equals(rhs)) {
+        if (rhs instanceof List) {
+            List lhsList = (List) lhs;
+            List rhsList = (List) rhs;
+            if (lhsList != null && lhsList.size() == rhsList.size() && lhsList.containsAll(rhsList)) {
                 return this;
             }
+        }
+
+        if (rhs.equals(lhs)) {
+            return this;
         }
 
         diffs.add(new Diff<Object>(fieldName) {

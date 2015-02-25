@@ -36,6 +36,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.CF_PENDING_APPROVAL_MAPPING;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.HEALTH_ID;
+import static org.sharedhealth.mci.web.infrastructure.persistence.PatientUpdateLogQueryBuilder.buildCreateUpdateLogStmt;
 import static org.sharedhealth.mci.web.utils.PatientDataConstants.PATIENT_STATUS_ALIVE;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createDeleteQuery;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
@@ -96,7 +97,7 @@ public class PatientRepository extends BaseRepository {
         final Batch batch = batch();
         buildUpdatePendingApprovalsBatch(newPatient, existingPatientData, batch);
         buildUpdateBatch(newPatient, existingPatientData, cassandraOps.getConverter(), batch);
-        PatientUpdateLogQueryBuilder.buildCreateUpdateLogStmt(newPatientData, existingPatientData, cassandraOps.getConverter(), batch);
+        buildCreateUpdateLogStmt(newPatientData, existingPatientData, cassandraOps.getConverter(), batch);
         cassandraOps.execute(batch);
 
         return new MCIResponse(newPatient.getHealthId(), HttpStatus.ACCEPTED);
@@ -294,7 +295,7 @@ public class PatientRepository extends BaseRepository {
         Patient newPatient;
         if (shouldAccept) {
             newPatient = mapper.map(requestData, existingPatientData);
-            PatientUpdateLogQueryBuilder.buildCreateUpdateLogStmt(requestData, existingPatientData, cassandraOps.getConverter(), batch);
+            buildCreateUpdateLogStmt(requestData, existingPatientData, cassandraOps.getConverter(), batch);
         } else {
             newPatient = new Patient();
             newPatient.setHealthId(requestData.getHealthId());
