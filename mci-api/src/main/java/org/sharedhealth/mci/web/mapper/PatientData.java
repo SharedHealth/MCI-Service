@@ -728,20 +728,27 @@ public class PatientData implements Diffable<PatientData> {
                 .append(GENDER, this.gender, that.gender)
                 .append(OCCUPATION, this.occupation, that.occupation)
                 .append(EDU_LEVEL, this.educationLevel, that.educationLevel)
-
                 .append(PLACE_OF_BIRTH, this.placeOfBirth, that.placeOfBirth)
                 .append(RELIGION, this.religion, that.religion)
                 .append(BLOOD_GROUP, this.bloodGroup, that.bloodGroup)
                 .append(NATIONALITY, this.nationality, that.nationality)
                 .append(DISABILITY, this.disability, that.disability)
                 .append(ETHNICITY, this.ethnicity, that.ethnicity)
-
-                .append(PRIMARY_CONTACT, this.primaryContact, that.primaryContact)
                 .append(MARITAL_STATUS, this.maritalStatus, that.maritalStatus)
                 .append(PATIENT_STATUS, this.status, that.status)
                 .append(CONFIDENTIAL, this.confidential, that.confidential)
                 .append(HOUSEHOLD_CODE, this.householdCode, that.householdCode)
                 .append(DATE_OF_DEATH, this.dateOfDeath, that.dateOfDeath)
+
+                .append(PHONE_NUMBER, this.phoneNumber, that.phoneNumber)
+                .append(PRIMARY_CONTACT_NUMBER, this.primaryContactNumber, that.primaryContactNumber)
+                .append(PRIMARY_CONTACT, this.primaryContact, that.primaryContact)
+
+                .append(PRESENT_ADDRESS, this.address, that.address)
+                .append(PERMANENT_ADDRESS, this.permanentAddress, that.permanentAddress)
+
+                .append(RELATIONS, this.relations, that.relations)
+
                 .build();
     }
 }

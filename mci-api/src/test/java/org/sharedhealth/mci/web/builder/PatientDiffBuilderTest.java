@@ -106,7 +106,8 @@ public class PatientDiffBuilderTest {
         PatientData patient1 = new PatientData();
         patient1.setGivenName("Harry");
         patient1.setReligion("00");
-        patient1.setPermanentAddress(new Address("10", "20", "30"));
+        Address permanentAddress1 = new Address("10", "20", "30");
+        patient1.setPermanentAddress(permanentAddress1);
 
         PhoneNumber phoneNumber1 = new PhoneNumber();
         phoneNumber1.setNumber("100200300");
@@ -121,7 +122,8 @@ public class PatientDiffBuilderTest {
         patient2.setGivenName("Potter");
         patient2.setSurName("");
         patient2.setReligion("00");
-        patient2.setAddress(new Address("10", "20", "30"));
+        Address presentAddress2 = new Address("10", "20", "30");
+        patient2.setAddress(presentAddress2);
 
         PhoneNumber phoneNumber2 = new PhoneNumber();
         phoneNumber2.setNumber("111222333");
@@ -134,24 +136,16 @@ public class PatientDiffBuilderTest {
 
         Map<String, Map<String, Object>> diff = new PatientDiffBuilder(patient1, patient2).build();
         assertNotNull(diff);
-        assertEquals(10, diff.size());
+        assertEquals(5, diff.size());
 
         assertChangeSet(diff, GIVEN_NAME, "Harry", "Potter");
-
-        assertChangeSet(diff, PHONE_NUMBER + "." + NUMBER, "100200300", "111222333");
-        assertChangeSet(diff, PHONE_NUMBER + "." + EXTENSION, "123", "456");
-        assertChangeSet(diff, PRIMARY_CONTACT_NUMBER + "." + COUNTRY_CODE, "91", "01");
-
-        assertChangeSet(diff, PERMANENT_ADDRESS + "." + DIVISION_ID, "10", EMPTY_VALUE);
-        assertChangeSet(diff, PERMANENT_ADDRESS + "." + DISTRICT_ID, "20", EMPTY_VALUE);
-        assertChangeSet(diff, PERMANENT_ADDRESS + "." + UPAZILA_ID, "30", EMPTY_VALUE);
-
-        assertChangeSet(diff, PRESENT_ADDRESS + "." + DIVISION_ID, EMPTY_VALUE, "10");
-        assertChangeSet(diff, PRESENT_ADDRESS + "." + DISTRICT_ID, EMPTY_VALUE, "20");
-        assertChangeSet(diff, PRESENT_ADDRESS + "." + UPAZILA_ID, EMPTY_VALUE, "30");
+        assertChangeSet(diff, PHONE_NUMBER, phoneNumber1, phoneNumber2);
+        assertChangeSet(diff, PRIMARY_CONTACT_NUMBER, primaryContactNumber1, primaryContactNumber2);
+        assertChangeSet(diff, PERMANENT_ADDRESS, permanentAddress1, EMPTY_VALUE);
+        assertChangeSet(diff, PRESENT_ADDRESS, EMPTY_VALUE, presentAddress2);
     }
 
-    private void assertChangeSet(Map<String, Map<String, Object>> diff, String key, String oldValue, String newValue) {
+    private void assertChangeSet(Map<String, Map<String, Object>> diff, String key, Object oldValue, Object newValue) {
         Map<String, Object> changeSet = diff.get(key);
         assertNotNull(changeSet);
         assertEquals(oldValue, changeSet.get(OLD_VALUE));
