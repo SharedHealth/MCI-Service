@@ -133,6 +133,7 @@ public class SearchQueryValidator implements ConstraintValidator<SearchQueryCons
         return searchQuery.getNid() != null ||
                 searchQuery.getBin_brn() != null ||
                 searchQuery.getUid() != null ||
+                searchQuery.getHousehold_code() != null ||
                 searchQuery.getPhone_no() != null;
 
     }

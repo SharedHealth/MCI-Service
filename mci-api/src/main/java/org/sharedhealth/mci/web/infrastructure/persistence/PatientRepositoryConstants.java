@@ -5,6 +5,7 @@ public class PatientRepositoryConstants {
     public static final String CF_NID_MAPPING = "nid_mapping";
     public static final String CF_BRN_MAPPING = "brn_mapping";
     public static final String CF_UID_MAPPING = "uid_mapping";
+    public static final String CF_HOUSEHOLD_CODE_MAPPING = "household_code_mapping";
     public static final String CF_PHONE_NUMBER_MAPPING = "phone_number_mapping";
     public static final String CF_NAME_MAPPING = "name_mapping";
     public static final String CF_PENDING_APPROVAL_MAPPING = "pending_approval_mapping";

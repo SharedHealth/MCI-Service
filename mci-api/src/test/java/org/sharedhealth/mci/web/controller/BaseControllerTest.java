@@ -101,6 +101,7 @@ public class BaseControllerTest {
         cqlTemplate.execute("truncate " + CF_PHONE_NUMBER_MAPPING);
         cqlTemplate.execute("truncate " + CF_NAME_MAPPING);
         cqlTemplate.execute("truncate " + CF_PENDING_APPROVAL_MAPPING);
+        cqlTemplate.execute("truncate " + CF_HOUSEHOLD_CODE_MAPPING);
     }
 
     protected PatientData getPatientMapperObjectByHealthId(String healthId) throws Exception {

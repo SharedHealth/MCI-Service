@@ -40,32 +40,39 @@ import static org.sharedhealth.mci.web.utils.PatientDataConstants.STRING_NO;
 @WebAppConfiguration
 @ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
 public class PatientRepositoryIT {
-    @SuppressWarnings("SpringJavaAutowiringInspection")
-
-    @Autowired
-    @Qualifier("MCICassandraTemplate")
-    private CassandraOperations cassandraOps;
-
-    @Autowired
-    private PatientRepository patientRepository;
-
-    private PatientData data;
-    private String nationalId = "1234567890123";
-    private String birthRegistrationNumber = "12345678901234567";
-    private String uid = "12345678901";
-    private String givenName = "Scott";
     public String surname = "Tiger";
     public String phoneNumber = "999900000";
     public String divisionId = "10";
     public String districtId = "04";
     public String upazilaId = "09";
+    @SuppressWarnings("SpringJavaAutowiringInspection")
+
+    @Autowired
+    @Qualifier("MCICassandraTemplate")
+    private CassandraOperations cassandraOps;
+    @Autowired
+    private PatientRepository patientRepository;
+    private PatientData data;
+    private String nationalId = "1234567890123";
+    private String birthRegistrationNumber = "12345678901234567";
+    private String uid = "12345678901";
+    private String givenName = "Scott";
     private boolean approvalConfigUpdated = false;
+    private String householdCode = "12345";
+
+    private static String buildFindCatchmentMappingsStmt(PatientData patient) {
+        List<String> catchmentIds = patient.getCatchment().getAllIds();
+        return select().from(CF_CATCHMENT_MAPPING)
+                .where(in(CATCHMENT_ID, catchmentIds.toArray(new String[catchmentIds.size()])))
+                .and(eq(LAST_UPDATED, patient.getUpdatedAt()))
+                .and(eq(HEALTH_ID, patient.getHealthId())).toString();
+    }
 
     @Before
     public void setup() throws ExecutionException, InterruptedException {
         data = createPatient();
 
-        if(!approvalConfigUpdated) {
+        if (!approvalConfigUpdated) {
             updateApprovalFieldConfigs();
         }
     }
@@ -80,6 +87,7 @@ public class PatientRepositoryIT {
         cassandraOps.execute("truncate " + CF_NAME_MAPPING);
         cassandraOps.execute("truncate " + CF_PENDING_APPROVAL_MAPPING);
         cassandraOps.execute("truncate " + CF_CATCHMENT_MAPPING);
+        cassandraOps.execute("truncate " + CF_HOUSEHOLD_CODE_MAPPING);
         cassandraOps.execute("truncate " + CF_PATIENT_UPDATE_LOG);
     }
 
@@ -97,6 +105,7 @@ public class PatientRepositoryIT {
         PhoneNumber phone = new PhoneNumber();
         phone.setNumber(phoneNumber);
         data.setPhoneNumber(phone);
+        data.setHouseholdCode(householdCode);
 
         Address address = createAddress(divisionId, districtId, upazilaId, "20", "01");
         data.setAddress(address);
@@ -130,6 +139,9 @@ public class PatientRepositoryIT {
         healthId = cassandraOps.queryForObject(buildFindByUidStmt(uid), String.class);
         assertEquals(id, healthId);
 
+        healthId = cassandraOps.queryForObject(buildFindByHouseholdStmt(householdCode), String.class);
+        assertEquals(id, healthId);
+
         healthId = cassandraOps.queryForObject(buildFindByPhoneNumberStmt(phoneNumber), String.class);
         assertEquals(id, healthId);
 
@@ -155,14 +167,6 @@ public class PatientRepositoryIT {
         }
     }
 
-    private static String buildFindCatchmentMappingsStmt(PatientData patient) {
-        List<String> catchmentIds = patient.getCatchment().getAllIds();
-        return select().from(CF_CATCHMENT_MAPPING)
-                .where(in(CATCHMENT_ID, catchmentIds.toArray(new String[catchmentIds.size()])))
-                .and(eq(LAST_UPDATED, patient.getUpdatedAt()))
-                .and(eq(HEALTH_ID, patient.getHealthId())).toString();
-    }
-
     @Test
     public void shouldNotCreateIdMappingsWhenPatientIsCreatedWithoutIds() {
         PatientData patient = new PatientData();
@@ -172,6 +176,17 @@ public class PatientRepositoryIT {
 
         assertNotNull(patientRepository.create(patient).getId());
         assertIdAndPhoneNumberMappingsEmpty();
+    }
+
+    @Test
+    public void shouldNotCreateHouseholdCodeMappingsWhenPatientIsCreatedWithoutHouseholdCode() {
+        PatientData patient = new PatientData();
+        patient.setGivenName("John");
+        patient.setSurName("Doe");
+        patient.setAddress(new Address("10", "20", "30"));
+
+        assertNotNull(patientRepository.create(patient).getId());
+        assertHouseholdCodeMappingEmpty();
     }
 
     @Test
@@ -304,6 +319,158 @@ public class PatientRepositoryIT {
         assertTrue(isEmpty(cassandraOps.select(select().from(CF_PENDING_APPROVAL_MAPPING).toString(), PendingApprovalMapping.class)));
 
         assertIdAndPhoneNumberMappingsEmpty();
+    }
+
+    @Test
+    public void shouldNotUpdateHouseholdCodeMappingsWhenExistingValueIsNullAndNewValueIsNull() {
+        String existingHouseholdCode = null;
+
+        PatientData patient = new PatientData();
+        patient.setGivenName("John");
+        patient.setSurName("Doe");
+        patient.setHouseholdCode(existingHouseholdCode);
+        patient.setAddress(new Address("10", "20", "30"));
+        String healthId = patientRepository.create(patient).getId();
+        assertNotNull(healthId);
+
+        assertIdAndPhoneNumberMappingsEmpty();
+
+        String newHouseholdCode = null;
+        final String newReligion = "02";
+
+        PatientData updateRequest = new PatientData();
+        updateRequest.setReligion(newReligion);
+        updateRequest.setHouseholdCode(newHouseholdCode);
+        patientRepository.update(updateRequest, healthId);
+
+        PatientData updatedPatient = patientRepository.findByHealthId(healthId);
+        assertNotNull(updatedPatient);
+        assertEquals(newReligion, updatedPatient.getReligion());
+        assertEquals(newHouseholdCode, updatedPatient.getHouseholdCode());
+
+
+        assertHouseholdCodeMappingEmpty();
+    }
+
+    @Test
+    public void shouldNotUpdateHouseholdCodeMappingsWhenExistingValueIsNullAndNewValueIsEmpty() {
+        String existingHouseholdCode = null;
+
+        PatientData patient = new PatientData();
+        patient.setGivenName("John");
+        patient.setSurName("Doe");
+        patient.setHouseholdCode(existingHouseholdCode);
+        patient.setAddress(new Address("10", "20", "30"));
+        String healthId = patientRepository.create(patient).getId();
+        assertNotNull(healthId);
+
+        assertIdAndPhoneNumberMappingsEmpty();
+
+        String newHouseholdCode = "";
+        final String newReligion = "02";
+
+        PatientData updateRequest = new PatientData();
+        updateRequest.setReligion(newReligion);
+        updateRequest.setHouseholdCode(newHouseholdCode);
+        patientRepository.update(updateRequest, healthId);
+
+        PatientData updatedPatient = patientRepository.findByHealthId(healthId);
+        assertNotNull(updatedPatient);
+        assertEquals(newReligion, updatedPatient.getReligion());
+        assertEquals(newHouseholdCode, updatedPatient.getHouseholdCode());
+
+        assertHouseholdCodeMappingEmpty();
+    }
+
+    @Test
+    public void shouldUpdateHouseholdCodeMappingsWhenExistingValueIsNullAndNewValueIsNotEmpty() {
+        String existingHouseholdCode = null;
+
+        PatientData patient = new PatientData();
+        patient.setGivenName("John");
+        patient.setSurName("Doe");
+        patient.setHouseholdCode(existingHouseholdCode);
+        patient.setAddress(new Address("10", "20", "30"));
+        String healthId = patientRepository.create(patient).getId();
+        assertNotNull(healthId);
+
+        assertIdAndPhoneNumberMappingsEmpty();
+
+        String newHouseholdCode = "1234";
+        final String newReligion = "02";
+
+        PatientData updateRequest = new PatientData();
+        updateRequest.setReligion(newReligion);
+        updateRequest.setHouseholdCode(newHouseholdCode);
+        patientRepository.update(updateRequest, healthId);
+
+        PatientData updatedPatient = patientRepository.findByHealthId(healthId);
+        assertNotNull(updatedPatient);
+        assertEquals(newReligion, updatedPatient.getReligion());
+        assertEquals(newHouseholdCode, updatedPatient.getHouseholdCode());
+
+        assertSearchByHouseholdCode(newHouseholdCode, healthId);
+    }
+
+    @Test
+    public void shouldUpdateHouseholdCodeMappingsWhenExistingValueIsNotEmptyAndNewValueIsEmpty() {
+        String existingHouseholdCode = "12345";
+
+        PatientData patient = new PatientData();
+        patient.setGivenName("John");
+        patient.setSurName("Doe");
+        patient.setHouseholdCode(existingHouseholdCode);
+        patient.setAddress(new Address("10", "20", "30"));
+        String healthId = patientRepository.create(patient).getId();
+        assertNotNull(healthId);
+
+        assertSearchByHouseholdCode(existingHouseholdCode, healthId);
+
+        String newHouseholdCode = "";
+        final String newReligion = "02";
+
+        PatientData updateRequest = new PatientData();
+        updateRequest.setReligion(newReligion);
+        updateRequest.setHouseholdCode(newHouseholdCode);
+        patientRepository.update(updateRequest, healthId);
+
+        PatientData updatedPatient = patientRepository.findByHealthId(healthId);
+        assertNotNull(updatedPatient);
+        assertEquals(newReligion, updatedPatient.getReligion());
+        assertEquals(newHouseholdCode, updatedPatient.getHouseholdCode());
+
+        assertHouseholdCodeMappingEmpty();
+    }
+
+    @Test
+    public void shouldUpdateHouseholdCodeMappingsWhenExistingValueIsNotEmptyAndNewValueIsNotEmptyAndBothValuesAreDifferent() {
+        String existingHouseholdCode = "12345";
+
+        PatientData patient = new PatientData();
+        patient.setGivenName("John");
+        patient.setSurName("Doe");
+        patient.setHouseholdCode(existingHouseholdCode);
+        patient.setAddress(new Address("10", "20", "30"));
+        String healthId = patientRepository.create(patient).getId();
+        assertNotNull(healthId);
+
+        assertSearchByHouseholdCode(existingHouseholdCode, healthId);
+
+        String newHouseholdCode = "5678";
+        final String newReligion = "02";
+
+        PatientData updateRequest = new PatientData();
+        updateRequest.setReligion(newReligion);
+        updateRequest.setHouseholdCode(newHouseholdCode);
+        patientRepository.update(updateRequest, healthId);
+
+        PatientData updatedPatient = patientRepository.findByHealthId(healthId);
+        assertNotNull(updatedPatient);
+        assertEquals(newReligion, updatedPatient.getReligion());
+        assertEquals(newHouseholdCode, updatedPatient.getHouseholdCode());
+
+        assertSearchByHouseholdCode(newHouseholdCode, healthId);
+        assertTrue(isEmpty(getPatientDatasByHousehold(existingHouseholdCode)));
     }
 
     @Test
@@ -909,6 +1076,20 @@ public class PatientRepositoryIT {
         assertTrue(isNotEmpty(patients));
         assertEquals(1, patients.size());
         assertEquals(healthId, patients.get(0).getHealthId());
+    }
+
+    private void assertSearchByHouseholdCode(String householdCode, String healthId) {
+        assertNotNull(householdCode);
+        List<PatientData> patients = getPatientDatasByHousehold(householdCode);
+        assertTrue(isNotEmpty(patients));
+        assertEquals(1, patients.size());
+        assertEquals(healthId, patients.get(0).getHealthId());
+    }
+
+    private List<PatientData> getPatientDatasByHousehold(String householdCode) {
+        SearchQuery query = new SearchQuery();
+        query.setHousehold_code(householdCode);
+        return patientRepository.findAllByQuery(query);
     }
 
     @Test
@@ -1996,6 +2177,10 @@ public class PatientRepositoryIT {
         } else {
             assertEquals(0, patientUpdateLogs.size());
         }
+    }
+
+    private void assertHouseholdCodeMappingEmpty() {
+        assertTrue(isEmpty(cassandraOps.select(select().from(CF_HOUSEHOLD_CODE_MAPPING).toString(), HouseholdCodeMapping.class)));
     }
 
     private void updateApprovalFieldConfigs() {

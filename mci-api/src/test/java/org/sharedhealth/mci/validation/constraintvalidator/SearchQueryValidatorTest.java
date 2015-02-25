@@ -39,6 +39,13 @@ public class SearchQueryValidatorTest extends ValidationAwareMapper {
     }
 
     @Test
+    public void shouldPassIfOnlyHouseholdCodeGiven() throws Exception {
+        SearchQuery searchQuery = getEmptySearchQuery();
+        searchQuery.setHousehold_code("1234");
+        assertValidSearchQuery(searchQuery);
+    }
+
+    @Test
     public void shouldPassIfOnlyPhoneNoGiven() throws Exception {
         SearchQuery searchQuery = getEmptySearchQuery();
         searchQuery.setPhone_no("12345678912");
@@ -154,6 +161,7 @@ public class SearchQueryValidatorTest extends ValidationAwareMapper {
         searchQuery.setPhone_no("1234567890");
         searchQuery.setExtension("101");
         searchQuery.setPresent_address("111111");
+        searchQuery.setHousehold_code("12345");
 
         return searchQuery;
     }

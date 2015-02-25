@@ -207,6 +207,9 @@ public class PatientRepository extends BaseRepository {
         } else if (isNotBlank(searchQuery.getPhone_no())) {
             query = buildFindByPhoneNumberStmt(searchQuery.getPhone_no());
 
+        } else if (isNotBlank(searchQuery.getHousehold_code())) {
+            query = buildFindByHouseholdStmt(searchQuery.getHousehold_code());
+
         } else if (isNotBlank(searchQuery.getPresent_address()) && isNotBlank(searchQuery.getGiven_name())) {
             query = buildFindByNameStmt(searchQuery.getDivisionId(), searchQuery.getDistrictId(),
                     searchQuery.getUpazilaId(), searchQuery.getGiven_name(), searchQuery.getSur_name());
@@ -245,6 +248,9 @@ public class PatientRepository extends BaseRepository {
             return false;
         }
         if (isNotBlank(searchQuery.getPhone_no()) && !searchQuery.getPhone_no().equals(p.getPhoneNumber().getNumber())) {
+            return false;
+        }
+        if (isNotBlank(searchQuery.getHousehold_code()) && !searchQuery.getHousehold_code().equals(p.getHouseholdCode())) {
             return false;
         }
         Address address = p.getAddress();

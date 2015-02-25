@@ -21,6 +21,7 @@ import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
 import static com.datastax.driver.core.querybuilder.Select.Where;
 import static org.apache.commons.lang3.StringUtils.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.*;
+import static org.sharedhealth.mci.web.utils.JsonConstants.HOUSEHOLD_CODE;
 import static org.springframework.data.cassandra.core.CassandraTemplate.*;
 
 public class PatientQueryBuilder {
@@ -35,6 +36,7 @@ public class PatientQueryBuilder {
         buildCreateMappingStmt(healthId, patient.getBirthRegistrationNumber(), CF_BRN_MAPPING, converter, batch);
         buildCreateMappingStmt(healthId, patient.getUid(), CF_UID_MAPPING, converter, batch);
         buildCreateMappingStmt(healthId, patient.getCellNo(), CF_PHONE_NUMBER_MAPPING, converter, batch);
+        buildCreateMappingStmt(healthId, patient.getHouseholdCode(), CF_HOUSEHOLD_CODE_MAPPING, converter, batch);
 
         buildCreateNameMappingStmt(patient, converter, batch);
         buildCreateCatchmentMappingsStmt(patient.getCatchment(), patient.getUpdatedAt(), patient.getHealthId(), converter, batch);
@@ -47,6 +49,7 @@ public class PatientQueryBuilder {
         buildUpdateMappingStmt(healthId, newPatient.getNationalId(), existingPatientData.getNationalId(), CF_NID_MAPPING, converter, batch);
         buildUpdateMappingStmt(healthId, newPatient.getBirthRegistrationNumber(), existingPatientData.getBirthRegistrationNumber(), CF_BRN_MAPPING, converter, batch);
         buildUpdateMappingStmt(healthId, newPatient.getUid(), existingPatientData.getUid(), CF_UID_MAPPING, converter, batch);
+        buildUpdateMappingStmt(healthId, newPatient.getHouseholdCode(), existingPatientData.getHouseholdCode(), CF_HOUSEHOLD_CODE_MAPPING, converter, batch);
 
         PhoneNumber existingPhone = existingPatientData.getPhoneNumber();
         String existingPhoneNumber = existingPhone == null ? null : existingPhone.getNumber();
@@ -95,6 +98,9 @@ public class PatientQueryBuilder {
                 break;
             case CF_PHONE_NUMBER_MAPPING:
                 objectToSave = new PhoneNumberMapping(id, healthId);
+                break;
+            case CF_HOUSEHOLD_CODE_MAPPING:
+                objectToSave = new HouseholdCodeMapping(id, healthId);
                 break;
         }
         return objectToSave;
@@ -265,6 +271,10 @@ public class PatientQueryBuilder {
 
     public static String buildFindByUidStmt(String uid) {
         return select(HEALTH_ID).from(CF_UID_MAPPING).where(eq(UID, uid)).toString();
+    }
+
+    public static String buildFindByHouseholdStmt(String householdCode) {
+        return select(HEALTH_ID).from(CF_HOUSEHOLD_CODE_MAPPING).where(eq(HOUSEHOLD_CODE, householdCode)).toString();
     }
 
     public static String buildFindByPhoneNumberStmt(String phoneNumber) {

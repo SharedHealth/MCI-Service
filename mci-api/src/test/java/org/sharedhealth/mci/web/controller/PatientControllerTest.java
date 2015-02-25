@@ -62,6 +62,7 @@ public class PatientControllerTest {
     private String nationalId = "1234567890123";
     private String birthRegistrationNumber = "12345678901234567";
     private String uid = "11111111111";
+    private static final String householdCode = "1234";
     public static final String API_END_POINT = "/api/v1/patients";
     public static final String PUT_API_END_POINT = "/api/v1/patients/{healthId}";
     public static final String GEO_CODE = "1004092001";
@@ -85,6 +86,8 @@ public class PatientControllerTest {
         patient1.setSurName("Tiger");
         patient1.setGender("M");
         patient1.setDateOfBirth("2014-12-01");
+        patient1.setDateOfBirth("2014-12-01");
+        patient1.setHouseholdCode(householdCode);
 
         Address address = new Address();
         address.setAddressLine("house-10");
@@ -155,6 +158,13 @@ public class PatientControllerTest {
     public void shouldFindPatientsByUid() throws Exception {
         searchQuery.setUid(uid);
         stringBuilder.append("uid=" + uid);
+        assertFindAllBy(searchQuery, stringBuilder.toString());
+    }
+
+    @Test
+    public void shouldFindPatientsByHouseholdCode() throws Exception {
+        searchQuery.setHousehold_code(householdCode);
+        stringBuilder.append("household_code=" + householdCode);
         assertFindAllBy(searchQuery, stringBuilder.toString());
     }
 

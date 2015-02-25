@@ -59,6 +59,10 @@ public class SearchQuery extends PaginationQuery {
     @Pattern(regexp = "[0-9]*$", message = ERROR_CODE_PATTERN)
     private String extension;
 
+    @JsonProperty("household_code")
+    @Pattern(regexp = "[0-9]*$", message = ERROR_CODE_PATTERN)
+    private String household_code;
+
     public String getNid() {
         return nid;
     }
@@ -100,6 +104,7 @@ public class SearchQuery extends PaginationQuery {
                 "nid='" + nid + '\'' +
                 ", bin_brn='" + bin_brn + '\'' +
                 ", uid='" + uid + '\'' +
+                ", household_code='" + household_code + '\'' +
                 ", present_address='" + present_address + '\'' +
                 ", sur_name='" + sur_name + '\'' +
                 ", given_name='" + given_name + '\'' +
@@ -170,6 +175,14 @@ public class SearchQuery extends PaginationQuery {
         this.extension = extension;
     }
 
+    public String getHousehold_code() {
+        return household_code;
+    }
+
+    public void setHousehold_code(String household_code) {
+        this.household_code = household_code;
+    }
+
     @JsonIgnore
     public boolean isEmpty() {
 
@@ -186,6 +199,7 @@ public class SearchQuery extends PaginationQuery {
         if (StringUtils.isNotBlank(divisionId)) return false;
         if (StringUtils.isNotBlank(districtId)) return false;
         if (StringUtils.isNotBlank(upazilaId)) return false;
+        if (StringUtils.isNotBlank(household_code)) return false;
 
         return true;
     }
@@ -212,6 +226,7 @@ public class SearchQuery extends PaginationQuery {
         if (sur_name != null ? !sur_name.equals(that.sur_name) : that.sur_name != null) return false;
         if (uid != null ? !uid.equals(that.uid) : that.uid != null) return false;
         if (upazilaId != null ? !upazilaId.equals(that.upazilaId) : that.upazilaId != null) return false;
+        if (household_code != null ? !household_code.equals(that.household_code) : that.household_code != null) return false;
 
         return true;
     }
@@ -232,6 +247,7 @@ public class SearchQuery extends PaginationQuery {
         result = 31 * result + (country_code != null ? country_code.hashCode() : 0);
         result = 31 * result + (area_code != null ? area_code.hashCode() : 0);
         result = 31 * result + (extension != null ? extension.hashCode() : 0);
+        result = 31 * result + (household_code != null ? household_code.hashCode() : 0);
         return result;
     }
 }
