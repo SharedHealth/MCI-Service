@@ -22,8 +22,8 @@ public class SearchQueryValidator implements ConstraintValidator<SearchQueryCons
     private static final String ERROR_EMPTY_SEARCH_QUERY = "No valid search parameter given";
     private static final String ERROR_INCOMPLETE_SEARCH_CRITERIA = "Incomplete search criteria!";
     private static final String ERROR_GIVEN_NAME_REQUIRED = "Please enter a valid name";
-    private static final String ERROR_ID_ADDRESS_OR_PHONE_NUMBER_REQUIRED = "Please provide a valid ID, Address or Phone number";
-    private static final String ERROR_ID_NAME_OR_PHONE_NUMBER_REQUIRED = "Please provide a valid ID, Name or Phone number";
+    private static final String ERROR_ID_ADDRESS_OR_PHONE_NUMBER_REQUIRED = "Please provide a valid ID, Household code, Address or Phone number";
+    private static final String ERROR_ID_NAME_OR_PHONE_NUMBER_REQUIRED = "Please provide a valid ID, Household code, Name or Phone number";
 
     @Override
     public void initialize(SearchQueryConstraint constraintAnnotation) {

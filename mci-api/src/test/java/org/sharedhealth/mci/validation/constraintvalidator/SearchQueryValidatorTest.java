@@ -115,6 +115,12 @@ public class SearchQueryValidatorTest extends ValidationAwareMapper {
         assertSearchQueryWithValidAddress(searchQuery);
     }
 
+    @Test
+    public void shouldPassForValidSearchQuery() throws Exception {
+        SearchQuery searchQuery = getFullSearchQuery();
+        assertValidSearchQuery(searchQuery);
+    }
+
     private void assertSearchQueryWithInvalidAddress(SearchQuery searchQuery) {
 
         String[] inValidAddress = {"", "somevalue", "12", "1234", "12345", "1234567", "123456789", "12345678901", "1234567890121"};
@@ -141,12 +147,6 @@ public class SearchQueryValidatorTest extends ValidationAwareMapper {
     private void assertValidSearchQuery(SearchQuery searchQuery) {
         Set<ConstraintViolation<SearchQuery>> constraintViolations = validator.validate(searchQuery);
         assertEquals(0, constraintViolations.size());
-    }
-
-    @Test
-    public void shouldPassForValidSearchQuery() throws Exception {
-        SearchQuery searchQuery = getFullSearchQuery();
-        assertValidSearchQuery(searchQuery);
     }
 
     private SearchQuery getFullSearchQuery() {

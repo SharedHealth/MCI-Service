@@ -100,9 +100,23 @@ public class SearchRestApiTest extends BaseControllerTest {
                 .andExpect(status().isBadRequest())
                 .andReturn();
         String expected = "{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\"," +
-                "\"errors\":[{\"code\":1006,\"message\":\"Please provide a valid ID, Address or Phone number\"}]}";
+                "\"errors\":[{\"code\":1006,\"message\":\"Please provide a valid ID, Household code, Address or Phone number\"}]}";
         JSONAssert.assertEquals(expected, result.getResponse().getContentAsString(), JSONCompareMode.STRICT);
+    }
 
+    @Test
+    public void shouldReturnBadRequestIfOnlyAddressGiven() throws Exception {
+
+        String present_address = patientData.getAddress().getDivisionId() +
+                patientData.getAddress().getDistrictId() + patientData.getAddress().getUpazilaId();
+
+        MvcResult result = mockMvc.perform(get(API_END_POINT + "?present_address=" + present_address).accept(APPLICATION_JSON)
+                .contentType(APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+        String expected = "{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\"," +
+                "\"errors\":[{\"code\":1006,\"message\":\"Please provide a valid ID, Household code, Name or Phone number\"}]}";
+        JSONAssert.assertEquals(expected, result.getResponse().getContentAsString(), JSONCompareMode.STRICT);
     }
 
     @Test
