@@ -1,5 +1,6 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
@@ -24,6 +25,7 @@ public class PatientAuditRepositoryIT {
     @Autowired
     private PatientAuditRepository auditRepository;
 
+    @Ignore
     @Test
     public void shouldFindByHealthId() throws Exception {
         List<PatientAuditLogData> logs = auditRepository.findByHealthId("h100");
