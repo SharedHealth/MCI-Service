@@ -4,7 +4,6 @@ import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Update;
 import com.datastax.driver.core.utils.UUIDs;
-import org.sharedhealth.mci.utils.DateUtil;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.PatientData;
@@ -12,9 +11,7 @@ import org.sharedhealth.mci.web.mapper.PhoneNumber;
 import org.sharedhealth.mci.web.model.*;
 import org.springframework.data.cassandra.convert.CassandraConverter;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
@@ -215,46 +212,6 @@ public class PatientQueryBuilder {
             where = where.and(gte(LAST_UPDATED, UUIDs.startOf(since.getTime())));
         }
         return where.limit(limit).toString();
-    }
-
-    public static String buildFindUpdateLogStmt(Date since, int limit, UUID lastMarker) {
-
-        int year = getLastYearMarker(since, lastMarker);
-
-        Where where = select().from(CF_PATIENT_UPDATE_LOG)
-                .where(in(YEAR, getYearsSince(year).toArray()));
-
-        if (lastMarker != null) {
-            where = where.and(gt(EVENT_ID, lastMarker));
-        } else if (since != null) {
-            where = where.and(gte(EVENT_ID, UUIDs.startOf(since.getTime())));
-        }
-
-        return where.limit(limit).toString();
-    }
-
-    private static int getLastYearMarker(Date after, UUID lastMarker) {
-
-        if (lastMarker != null) {
-            return DateUtil.getYearOf(lastMarker);
-        }
-
-        if (after != null) {
-            return DateUtil.getYearOf(after);
-        }
-
-        return DateUtil.getCurrentYear();
-    }
-
-    private static List<Integer> getYearsSince(int year) {
-        int end = DateUtil.getCurrentYear();
-        List<Integer> years = new ArrayList<>();
-
-        for (int i = year; i <= end; i++) {
-            years.add(i);
-        }
-
-        return years;
     }
 
     public static String buildFindByHidStmt(String[] values) {

@@ -1,7 +1,9 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
+import com.datastax.driver.core.querybuilder.Batch;
 import org.sharedhealth.mci.web.mapper.PatientAuditLogData;
 import org.sharedhealth.mci.web.mapper.PatientAuditLogMapper;
+import org.sharedhealth.mci.web.model.Marker;
 import org.sharedhealth.mci.web.model.PatientAuditLog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,10 +13,13 @@ import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.UUID;
 
 import static java.util.Collections.emptyList;
+import static java.util.UUID.fromString;
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientAuditLogQueryBuilder.buildFindByHidStmt;
+import static org.sharedhealth.mci.web.infrastructure.persistence.PatientAuditLogQueryBuilder.*;
 
 @Component
 public class PatientAuditRepository extends BaseRepository {
@@ -35,5 +40,18 @@ public class PatientAuditRepository extends BaseRepository {
             return this.auditLogMapper.map(logs);
         }
         return emptyList();
+    }
+
+    public UUID findLatestMarker() {
+        List<Marker> markers = cassandraOps.select(buildFindLatestMarkerStmt(), Marker.class);
+        if (isEmpty(markers)) {
+            return null;
+        }
+        return fromString(markers.get(0).getMarker());
+    }
+
+    public void saveOrUpdate(List<PatientAuditLog> logs) {
+        Batch batch = buildSaveOrUpdateBatch(logs, cassandraOps.getConverter());
+        cassandraOps.execute(batch);
     }
 }

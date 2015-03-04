@@ -1,7 +1,5 @@
 package org.sharedhealth.mci.web.service;
 
-import java.util.List;
-
 import org.sharedhealth.mci.web.config.MCIProperties;
 import org.sharedhealth.mci.web.exception.FacilityNotFoundException;
 import org.sharedhealth.mci.web.infrastructure.fr.FacilityRegistryWrapper;
@@ -10,6 +8,8 @@ import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.model.Facility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class FacilityService {

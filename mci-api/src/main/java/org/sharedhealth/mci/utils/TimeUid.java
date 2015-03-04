@@ -1,8 +1,8 @@
 package org.sharedhealth.mci.utils;
 
-import java.util.UUID;
-
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.UUID;
 
 public class TimeUid {
 

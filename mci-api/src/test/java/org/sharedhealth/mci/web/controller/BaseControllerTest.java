@@ -6,6 +6,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.handler.MCIResponse;
+import org.sharedhealth.mci.web.infrastructure.persistence.TestUtil;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PatientSummaryData;
@@ -20,7 +21,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.util.List;
 
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -35,7 +35,7 @@ public class BaseControllerTest {
 
     @Autowired
     @Qualifier("MCICassandraTemplate")
-    protected CassandraOperations cqlTemplate;
+    protected CassandraOperations cassandraOps;
 
     protected MockMvc mockMvc;
     protected PatientData patientData;
@@ -94,14 +94,7 @@ public class BaseControllerTest {
 
     @After
     public void teardown() {
-        cqlTemplate.execute("truncate " + CF_PATIENT);
-        cqlTemplate.execute("truncate " + CF_NID_MAPPING);
-        cqlTemplate.execute("truncate " + CF_BRN_MAPPING);
-        cqlTemplate.execute("truncate " + CF_UID_MAPPING);
-        cqlTemplate.execute("truncate " + CF_PHONE_NUMBER_MAPPING);
-        cqlTemplate.execute("truncate " + CF_NAME_MAPPING);
-        cqlTemplate.execute("truncate " + CF_PENDING_APPROVAL_MAPPING);
-        cqlTemplate.execute("truncate " + CF_HOUSEHOLD_CODE_MAPPING);
+        TestUtil.truncateAllColumnFamilies(cassandraOps);
     }
 
     protected PatientData getPatientMapperObjectByHealthId(String healthId) throws Exception {

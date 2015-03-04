@@ -13,6 +13,8 @@ public class PatientRepositoryConstants {
     public static final String CF_PATIENT_UPDATE_LOG = "patient_update_log";
     public static final String CF_APPROVAL_FIELDS = "approval_fields";
     public static final String CF_PATIENT_AUDIT_LOG = "patient_audit_log";
+    public static final String CF_MARKER = "marker";
+
     public static final String HEALTH_ID = "health_id";
     public static final String LAST_UPDATED = "last_updated";
     public static final String NATIONAL_ID = "national_id";
@@ -102,7 +104,8 @@ public class PatientRepositoryConstants {
     public static final String UPDATED_BY = "updated_by";
     public static final String LOWER_SUR_NAME = "lower_sur_name";
     public static final String LOWER_GIVEN_NAME = "lower_given_name";
-    public static final String EVENT_TIME = "event_time";
+    public static final String TYPE = "type";
+    public static final String MARKER = "marker";
     public static final String CHANGE_SET = "change_set";
     public static final String YEAR = "year";
     public static final String EVENT_ID = "event_id";

@@ -5,9 +5,7 @@ import org.slf4j.Logger;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.UUID;
+import java.util.*;
 
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static java.util.Calendar.YEAR;
@@ -29,7 +27,7 @@ public class DateUtil {
     public static final String ISO_DATE_TIME_TILL_SECS_FORMAT1 = "yyyy-MM-dd'T'HH:mm:ssX";
     public static final String ISO_DATE_TIME_TILL_SECS_FORMAT2 = "yyyy-MM-dd'T'HH:mm:ssXX";
     public static final String ISO_DATE_TIME_TILL_SECS_FORMAT3 = "yyyy-MM-dd'T'HH:mm:ssXXX";
-    
+
     public static final String ISO_DATE_TIME_TILL_MILLIS_FORMAT1 = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
     public static final String ISO_DATE_TIME_TILL_MILLIS_FORMAT2 = "yyyy-MM-dd'T'HH:mm:ss.SSSXX";
     public static final String ISO_DATE_TIME_TILL_MILLIS_FORMAT3 = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
@@ -88,5 +86,14 @@ public class DateUtil {
         Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(unixTimestamp(uuid));
         return cal.get(YEAR);
+    }
+
+    public static List<Integer> getYearsSince(int year) {
+        List<Integer> years = new ArrayList<>();
+
+        for (int i = year; i <= getCurrentYear(); i++) {
+            years.add(i);
+        }
+        return years;
     }
 }

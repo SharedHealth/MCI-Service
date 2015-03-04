@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.sharedhealth.mci.web.exception.InsufficientPrivilegeException;
+import org.sharedhealth.mci.web.infrastructure.persistence.PatientFeedRepository;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
 import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.model.PatientUpdateLog;
@@ -27,6 +28,8 @@ public class PatientServiceTest {
     @Mock
     private PatientRepository patientRepository;
     @Mock
+    private PatientFeedRepository feedRepository;
+    @Mock
     FacilityService facilityService;
     @Mock
     SettingService settingService;
@@ -36,7 +39,7 @@ public class PatientServiceTest {
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-        patientService = new PatientService(patientRepository, facilityService, settingService);
+        patientService = new PatientService(patientRepository, feedRepository, facilityService, settingService);
     }
 
     @Test
@@ -669,12 +672,12 @@ public class PatientServiceTest {
         patientLog.setEventId(eventId);
 
         when(settingService.getSettingAsIntegerByKey("PER_PAGE_MAXIMUM_LIMIT")).thenReturn(limit);
-        when(patientRepository.findPatientsUpdatedSince(since, limit, null)).thenReturn(asList(patientLog));
+        when(feedRepository.findPatientsUpdatedSince(since, limit, null)).thenReturn(asList(patientLog));
 
         List<PatientUpdateLog> patientLogs = patientService.findPatientsUpdatedSince(since, null);
 
         verify(settingService).getSettingAsIntegerByKey("PER_PAGE_MAXIMUM_LIMIT");
-        verify(patientRepository).findPatientsUpdatedSince(since, limit, null);
+        verify(feedRepository).findPatientsUpdatedSince(since, limit, null);
 
         assertNotNull(patientLogs);
         assertEquals(1, patientLogs.size());
@@ -690,12 +693,12 @@ public class PatientServiceTest {
         patientLog.setEventId(eventId);
 
         when(settingService.getSettingAsIntegerByKey("PER_PAGE_MAXIMUM_LIMIT")).thenReturn(limit);
-        when(patientRepository.findPatientsUpdatedSince(null, limit, eventId)).thenReturn(asList(patientLog));
+        when(feedRepository.findPatientsUpdatedSince(null, limit, eventId)).thenReturn(asList(patientLog));
 
         List<PatientUpdateLog> patientLogs = patientService.findPatientsUpdatedSince(null, eventId);
 
         verify(settingService).getSettingAsIntegerByKey("PER_PAGE_MAXIMUM_LIMIT");
-        verify(patientRepository).findPatientsUpdatedSince(null, limit, eventId);
+        verify(feedRepository).findPatientsUpdatedSince(null, limit, eventId);
 
         assertNotNull(patientLogs);
         assertEquals(1, patientLogs.size());

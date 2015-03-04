@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.web.exception.InsufficientPrivilegeException;
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
+import org.sharedhealth.mci.web.infrastructure.persistence.PatientFeedRepository;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
 import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.model.PatientUpdateLog;
@@ -32,14 +33,17 @@ public class PatientService {
     public static final String MESSAGE_PENDING_APPROVALS_MISMATCH = "pending.approvals.mismatch";
 
     private PatientRepository patientRepository;
+    private PatientFeedRepository feedRepository;
     private FacilityService facilityService;
     private SettingService settingService;
 
     @Autowired
     public PatientService(PatientRepository patientRepository,
+                          PatientFeedRepository feedRepository,
                           FacilityService facilityService,
                           SettingService settingService) {
         this.patientRepository = patientRepository;
+        this.feedRepository = feedRepository;
         this.facilityService = facilityService;
         this.settingService = settingService;
     }
@@ -187,7 +191,7 @@ public class PatientService {
     }
 
     public List<PatientUpdateLog> findPatientsUpdatedSince(Date since, UUID lastMarker) {
-        return patientRepository.findPatientsUpdatedSince(since, getPerPageMaximumLimit(), lastMarker);
+        return feedRepository.findPatientsUpdatedSince(since, getPerPageMaximumLimit(), lastMarker);
     }
 
     private void verifyCatchment(String facilityId, Catchment catchment) {

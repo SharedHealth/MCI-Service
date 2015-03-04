@@ -1,6 +1,5 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,7 +11,6 @@ import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.model.*;
-import org.sharedhealth.mci.web.utils.JsonConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.cassandra.core.CassandraOperations;
@@ -33,14 +31,10 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.junit.Assert.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.CATCHMENT_ID;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.*;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.GENDER;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.LAST_UPDATED;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.OCCUPATION;
-import static org.sharedhealth.mci.web.utils.JsonConstants.*;
-import static org.sharedhealth.mci.web.utils.JsonMapper.readValue;
-import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
+import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.setupApprovalsConfig;
+import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.truncateAllColumnFamilies;
+import static org.sharedhealth.mci.web.utils.JsonConstants.PHONE_NUMBER;
 import static org.sharedhealth.mci.web.utils.PatientDataConstants.PATIENT_STATUS_ALIVE;
 import static org.sharedhealth.mci.web.utils.PatientDataConstants.STRING_NO;
 
@@ -48,6 +42,17 @@ import static org.sharedhealth.mci.web.utils.PatientDataConstants.STRING_NO;
 @WebAppConfiguration
 @ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
 public class PatientRepositoryIT {
+    public String surname = "Tiger";
+    public String phoneNumber = "999900000";
+    public String divisionId = "10";
+    public String districtId = "04";
+    public String upazilaId = "09";
+    private String nationalId = "1234567890123";
+    private String birthRegistrationNumber = "12345678901234567";
+    private String uid = "12345678901";
+    private String givenName = "Scott";
+    private String householdCode = "12345";
+    private PatientData data;
 
     @SuppressWarnings("SpringJavaAutowiringInspection")
     @Autowired
@@ -56,19 +61,6 @@ public class PatientRepositoryIT {
 
     @Autowired
     private PatientRepository patientRepository;
-
-    public String surname = "Tiger";
-    public String phoneNumber = "999900000";
-    public String divisionId = "10";
-    public String districtId = "04";
-    public String upazilaId = "09";
-    private PatientData data;
-    private String nationalId = "1234567890123";
-    private String birthRegistrationNumber = "12345678901234567";
-    private String uid = "12345678901";
-    private String givenName = "Scott";
-    private boolean approvalConfigUpdated = false;
-    private String householdCode = "12345";
 
     private static String buildFindCatchmentMappingsStmt(PatientData patient) {
         List<String> catchmentIds = patient.getCatchment().getAllIds();
@@ -80,28 +72,11 @@ public class PatientRepositoryIT {
 
     @Before
     public void setup() throws ExecutionException, InterruptedException {
-        data = createPatient();
-
-        if (!approvalConfigUpdated) {
-            updateApprovalFieldConfigs();
-        }
+        data = buildPatient();
+        setupApprovalsConfig(cassandraOps);
     }
 
-    @After
-    public void tearDown() {
-        cassandraOps.execute("truncate " + CF_PATIENT);
-        cassandraOps.execute("truncate " + CF_NID_MAPPING);
-        cassandraOps.execute("truncate " + CF_BRN_MAPPING);
-        cassandraOps.execute("truncate " + CF_UID_MAPPING);
-        cassandraOps.execute("truncate " + CF_PHONE_NUMBER_MAPPING);
-        cassandraOps.execute("truncate " + CF_NAME_MAPPING);
-        cassandraOps.execute("truncate " + CF_PENDING_APPROVAL_MAPPING);
-        cassandraOps.execute("truncate " + CF_CATCHMENT_MAPPING);
-        cassandraOps.execute("truncate " + CF_HOUSEHOLD_CODE_MAPPING);
-        cassandraOps.execute("truncate " + CF_PATIENT_UPDATE_LOG);
-    }
-
-    private PatientData createPatient() {
+    private PatientData buildPatient() {
         PatientData data = new PatientData();
         data.setNationalId(nationalId);
         data.setBirthRegistrationNumber(birthRegistrationNumber);
@@ -259,7 +234,7 @@ public class PatientRepositoryIT {
 
     @Test
     public void shouldUpdatePatient() throws Exception {
-        PatientData data = createPatient();
+        PatientData data = buildPatient();
         MCIResponse mciResponseForCreate = patientRepository.create(data);
         assertEquals(201, mciResponseForCreate.getHttpStatus());
         String healthId = mciResponseForCreate.getId();
@@ -1317,172 +1292,8 @@ public class PatientRepositoryIT {
     }
 
     @Test
-    public void shouldCreateUpdateLogsWhenPatientIsUpdated() {
-        String healthId = patientRepository.create(data).getId();
-        Date since = new Date();
-
-        assertUpdateLogEntry(healthId, since, false);
-
-        PatientData updateRequest = new PatientData();
-        updateRequest.setHealthId(healthId);
-        updateRequest.setGivenName("Harry");
-        updateRequest.setAddress(new Address("99", "88", "77"));
-        patientRepository.update(updateRequest, healthId);
-
-        assertUpdateLogEntry(healthId, since, true);
-    }
-
-    @Test
-    public void shouldCreateUpdateLogsWhenAnyFieldIsUpdated() {
-        String healthId = patientRepository.create(data).getId();
-        Date since = new Date();
-        assertUpdateLogEntry(healthId, since, false);
-
-        PatientData updateRequest1 = new PatientData();
-        updateRequest1.setHealthId(healthId);
-        updateRequest1.setEducationLevel("02");
-        patientRepository.update(updateRequest1, healthId);
-        assertUpdateLogEntry(healthId, since, true);
-
-        PatientData updateRequest2 = new PatientData();
-        updateRequest2.setGivenName("UpdGiv");
-        updateRequest2.setSurName("UpdSur");
-        updateRequest2.setConfidential("Yes");
-        updateRequest2.setGender("F");
-        Address newAddress = new Address("99", "88", "77");
-        updateRequest2.setAddress(newAddress);
-        patientRepository.update(updateRequest2, healthId);
-
-        PatientData acceptRequest = new PatientData();
-        acceptRequest.setHealthId(healthId);
-        acceptRequest.setGender("F");
-        acceptRequest.setAddress(newAddress);
-        PatientData existingPatient = patientRepository.findByHealthId(healthId);
-        patientRepository.processPendingApprovals(acceptRequest, existingPatient, true);
-
-        List<PatientUpdateLog> patientUpdateLogs = patientRepository.findPatientsUpdatedSince(null, 25, null);
-        assertEquals(3, patientUpdateLogs.size());
-
-        Map<String, Map<String, Object>> changeSet1 = getChangeSet(patientUpdateLogs.get(0));
-        assertNotNull(changeSet1);
-        assertEquals(1, changeSet1.size());
-        assertChangeSet(changeSet1, JsonConstants.EDU_LEVEL, data.getEducationLevel(), "02");
-
-        Map<String, Map<String, Object>> changeSet2 = getChangeSet(patientUpdateLogs.get(1));
-        assertNotNull(changeSet2);
-        assertEquals(3, changeSet2.size());
-        assertChangeSet(changeSet2, JsonConstants.GIVEN_NAME, data.getGivenName(), "UpdGiv");
-        assertChangeSet(changeSet2, JsonConstants.SUR_NAME, data.getSurName(), "UpdSur");
-        assertChangeSet(changeSet2, JsonConstants.CONFIDENTIAL, "No", "Yes");
-
-        Map<String, Map<String, Object>> changeSet3 = getChangeSet(patientUpdateLogs.get(2));
-        assertNotNull(changeSet3);
-        assertEquals(2, changeSet3.size());
-        assertChangeSet(changeSet3, JsonConstants.GENDER, data.getGender(), "F");
-        assertChangeSet(changeSet3, JsonConstants.PRESENT_ADDRESS, data.getAddress(), newAddress);
-    }
-
-    private Map<String, Map<String, Object>> getChangeSet(PatientUpdateLog log) {
-        return readValue(log.getChangeSet(), new TypeReference<Map<String, Map<String, Object>>>() {
-        });
-    }
-
-    private void assertChangeSet(Map<String, Map<String, Object>> changeSet, String fieldName, String oldValue, String newValue) {
-        assertEquals(oldValue, changeSet.get(fieldName).get(OLD_VALUE));
-        assertEquals(newValue, changeSet.get(fieldName).get(NEW_VALUE));
-    }
-
-    private void assertChangeSet(Map<String, Map<String, Object>> changeSet, String fieldName, Address oldValue, Address newValue) {
-        assertEquals(writeValueAsString(oldValue), writeValueAsString(changeSet.get(fieldName).get(OLD_VALUE)));
-        assertEquals(writeValueAsString(newValue), writeValueAsString(changeSet.get(fieldName).get(NEW_VALUE)));
-    }
-
-    @Test
-    public void shouldCreateUpdateLogWhenPresentAddressIsMarkedForApprovalAndUpdatedAfterApproval() {
-        String healthId = patientRepository.create(data).getId();
-        Date since = new Date();
-
-        assertUpdateLogEntry(healthId, since, false);
-
-        PatientData updateRequest = new PatientData();
-        Address newAddress = new Address("99", "88", "77");
-        updateRequest.setAddress(newAddress);
-        patientRepository.update(updateRequest, healthId);
-
-        assertUpdateLogEntry(healthId, since, false);
-
-        PatientData updatedPatient = patientRepository.findByHealthId(healthId);
-        patientRepository.processPendingApprovals(updateRequest, updatedPatient, true);
-
-        assertUpdateLogEntry(healthId, since, true);
-    }
-
-    private void assertUpdateLogEntry(String healthId, Date since, boolean shouldFind) {
-        List<PatientUpdateLog> patientUpdateLogs = patientRepository.findPatientsUpdatedSince(since, 1, null);
-
-        if (shouldFind) {
-            assertTrue(healthId.equals(patientUpdateLogs.get(0).getHealthId()));
-        } else {
-            assertEquals(0, patientUpdateLogs.size());
-        }
-    }
-
-    @Test
-    public void shouldFindUpdateLogsUpdatedSince() {
-        String healthId = patientRepository.create(data).getId();
-        Date since = new Date();
-        final int limit = 20;
-
-        List<PatientUpdateLog> patientUpdateLogs = patientRepository.findPatientsUpdatedSince(since, limit, null);
-        assertEquals(0, patientUpdateLogs.size());
-
-        PatientData updateRequest = new PatientData();
-        updateRequest.setHealthId(healthId);
-        updateRequest.setGivenName("Update1");
-        patientRepository.update(updateRequest, healthId);
-        updateRequest.setGivenName("Update2");
-        patientRepository.update(updateRequest, healthId);
-
-        patientUpdateLogs = patientRepository.findPatientsUpdatedSince(since, limit, null);
-        assertEquals(2, patientUpdateLogs.size());
-        assertTrue(healthId.equals(patientUpdateLogs.get(0).getHealthId()));
-    }
-
-    @Test
-    public void shouldFindUpdateLogsUpdatedAfterLastMarker() {
-        String healthId = patientRepository.create(data).getId();
-        Date since = new Date();
-        final int limit = 20;
-
-        List<PatientUpdateLog> patientUpdateLogs = patientRepository.findPatientsUpdatedSince(since, limit, null);
-        assertEquals(0, patientUpdateLogs.size());
-
-        PatientData updateRequest = new PatientData();
-        updateRequest.setHealthId(healthId);
-        updateRequest.setGivenName("Update1");
-        patientRepository.update(updateRequest, healthId);
-
-        patientUpdateLogs = patientRepository.findPatientsUpdatedSince(since, limit, null);
-        assertEquals(1, patientUpdateLogs.size());
-        assertTrue(healthId.equals(patientUpdateLogs.get(0).getHealthId()));
-
-        final UUID marker = patientUpdateLogs.get(0).getEventId();
-
-        updateRequest.setGivenName("Update2");
-        patientRepository.update(updateRequest, healthId);
-        updateRequest.setGivenName("Update3");
-        patientRepository.update(updateRequest, healthId);
-
-        patientUpdateLogs = patientRepository.findPatientsUpdatedSince(since, limit, null);
-        assertEquals(3, patientUpdateLogs.size());
-
-        patientUpdateLogs = patientRepository.findPatientsUpdatedSince(since, limit, marker);
-        assertEquals(2, patientUpdateLogs.size());
-    }
-
-    @Test
     public void shouldFindByHealthIdsInTheOrderIdsArePassed() {
-        PatientData patient = createPatient();
+        PatientData patient = buildPatient();
         patient.setNationalId(null);
         patient.setBirthRegistrationNumber(null);
         patient.setUid(null);
@@ -1503,7 +1314,7 @@ public class PatientRepositoryIT {
     @Test
     public void shouldFindAllPatientsByCatchmentWithSinceParam() throws Exception {
         List<String> healthIds = new ArrayList<>();
-        PatientData patient = createPatient();
+        PatientData patient = buildPatient();
         Address address = new Address("10", "20", "30");
         address.setCityCorporationId("40");
 
@@ -1534,7 +1345,7 @@ public class PatientRepositoryIT {
     @Test
     public void shouldFindAllPatientsByCatchmentWithLastMarkerParam() throws Exception {
         List<String> healthIds = new ArrayList<>();
-        PatientData patient = createPatient();
+        PatientData patient = buildPatient();
         Address address = new Address("10", "20", "30");
         address.setCityCorporationId("40");
 
@@ -2221,14 +2032,8 @@ public class PatientRepositoryIT {
         assertTrue(isEmpty(cassandraOps.select(select().from(CF_HOUSEHOLD_CODE_MAPPING).toString(), HouseholdCodeMapping.class)));
     }
 
-    private void updateApprovalFieldConfigs() {
-        cassandraOps.execute("truncate approval_fields");
-        cassandraOps.execute("INSERT INTO approval_fields (\"field\", \"option\") VALUES ('gender', 'NA')");
-        cassandraOps.execute("INSERT INTO approval_fields (\"field\", \"option\") VALUES ('occupation', 'NA')");
-        cassandraOps.execute("INSERT INTO approval_fields (\"field\", \"option\") VALUES ('date_of_birth', 'NU')");
-        cassandraOps.execute("INSERT INTO approval_fields (\"field\", \"option\") VALUES ('phone_number', 'NA')");
-        cassandraOps.execute("INSERT INTO approval_fields (\"field\", \"option\") VALUES ('present_address', 'NA')");
-
-        approvalConfigUpdated = true;
+    @After
+    public void tearDown() {
+        truncateAllColumnFamilies(cassandraOps);
     }
 }

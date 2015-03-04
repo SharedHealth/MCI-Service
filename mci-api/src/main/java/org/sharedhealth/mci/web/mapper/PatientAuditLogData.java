@@ -2,9 +2,10 @@ package org.sharedhealth.mci.web.mapper;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.List;
+import java.util.Map;
 
-import static org.sharedhealth.mci.web.utils.JsonConstants.*;
+import static org.sharedhealth.mci.web.utils.JsonConstants.CHANGE_SET;
+import static org.sharedhealth.mci.web.utils.JsonConstants.EVENT_TIME;
 
 public class PatientAuditLogData {
 
@@ -12,7 +13,7 @@ public class PatientAuditLogData {
     private String eventTime;
 
     @JsonProperty(CHANGE_SET)
-    private List<PatientAuditChangeSetData> changeSet;
+    private Map<String, Map<String, Object>> changeSet;
 
     public String getEventTime() {
         return eventTime;
@@ -22,11 +23,11 @@ public class PatientAuditLogData {
         this.eventTime = eventTime;
     }
 
-    public List<PatientAuditChangeSetData> getChangeSet() {
+    public Map<String, Map<String, Object>> getChangeSet() {
         return changeSet;
     }
 
-    public void setChangeSet(List<PatientAuditChangeSetData> changeSet) {
+    public void setChangeSet(Map<String, Map<String, Object>> changeSet) {
         this.changeSet = changeSet;
     }
 }

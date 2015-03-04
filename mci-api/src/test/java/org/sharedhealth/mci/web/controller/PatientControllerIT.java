@@ -35,6 +35,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
+import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.setupApprovalsConfig;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -44,8 +45,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebAppConfiguration
 @ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
 public class PatientControllerIT extends BaseControllerTest {
-
-    private boolean approvalConfigUpdated = false;
 
     @Before
     public void setup() throws ParseException {
@@ -96,20 +95,8 @@ public class PatientControllerIT extends BaseControllerTest {
 
         patientData.setPermanentAddress(permanentAddress);
 
-        if (!approvalConfigUpdated) {
-            updateApprovalFieldConfigs();
-        }
-    }
+        setupApprovalsConfig(cassandraOps);
 
-    private void updateApprovalFieldConfigs() {
-        cqlTemplate.execute("truncate approval_fields");
-        cqlTemplate.execute("INSERT INTO approval_fields (\"field\", \"option\") VALUES ('gender', 'NA')");
-        cqlTemplate.execute("INSERT INTO approval_fields (\"field\", \"option\") VALUES ('occupation', 'NA')");
-        cqlTemplate.execute("INSERT INTO approval_fields (\"field\", \"option\") VALUES ('date_of_birth', 'NU')");
-        cqlTemplate.execute("INSERT INTO approval_fields (\"field\", \"option\") VALUES ('phone_number', 'NA')");
-        cqlTemplate.execute("INSERT INTO approval_fields (\"field\", \"option\") VALUES ('present_address', 'NA')");
-
-        approvalConfigUpdated = true;
     }
 
     @Test

@@ -3,7 +3,6 @@ package org.sharedhealth.mci.web.controller;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.sharedhealth.mci.web.mapper.PatientAuditChangeSetData;
 import org.sharedhealth.mci.web.mapper.PatientAuditLogData;
 import org.sharedhealth.mci.web.service.PatientAuditService;
 import org.springframework.test.web.servlet.MockMvc;
@@ -13,10 +12,12 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -55,70 +56,47 @@ public class PatientAuditControllerTest {
         MvcResult mvcResult = mockMvc.perform(get(API_END_POINT, healthId).contentType(APPLICATION_JSON))
                 .andExpect(request().asyncStarted())
                 .andReturn();
+
         mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0].event_time", is(eventTime)))
 
-                .andExpect(jsonPath("$.[0].change_set[0].field_name", is(GIVEN_NAME)))
-                .andExpect(jsonPath("$.[0].change_set[0].old_value", is("Harry")))
-                .andExpect(jsonPath("$.[0].change_set[0].new_value", is("Potter")))
-                .andExpect(jsonPath("$.[0].change_set[0].proposed_by", is("x")))
-                .andExpect(jsonPath("$.[0].change_set[0].approved_by", is("y")))
+                .andExpect(jsonPath("$.[0].change_set.given_name", is(notNullValue())))
+                .andExpect(jsonPath("$.[0].change_set.given_name.old_value", is("Harry")))
+                .andExpect(jsonPath("$.[0].change_set.given_name.new_value", is("Potter")))
 
-                .andExpect(jsonPath("$.[0].change_set[1].field_name", is(OCCUPATION)))
-                .andExpect(jsonPath("$.[0].change_set[1].old_value", is("Wizard")))
-                .andExpect(jsonPath("$.[0].change_set[1].new_value", is("Jobless")))
-                .andExpect(jsonPath("$.[0].change_set[1].proposed_by", is("admin")))
-                .andExpect(jsonPath("$.[0].change_set[1].approved_by", is(nullValue())))
+                .andExpect(jsonPath("$.[0].change_set.occupation", is(notNullValue())))
+                .andExpect(jsonPath("$.[0].change_set.occupation.old_value", is("Wizard")))
+                .andExpect(jsonPath("$.[0].change_set.occupation.new_value", is("Jobless")))
 
-                .andExpect(jsonPath("$.[0].change_set[2].field_name", is(EDU_LEVEL)))
-                .andExpect(jsonPath("$.[0].change_set[2].old_value", is("Std 12")))
-                .andExpect(jsonPath("$.[0].change_set[2].new_value", is("Std 10")))
-                .andExpect(jsonPath("$.[0].change_set[2].proposed_by", is("p")))
-                .andExpect(jsonPath("$.[0].change_set[2].approved_by", is("q")));
-
+                .andExpect(jsonPath("$.[0].change_set.edu_level", is(notNullValue())))
+                .andExpect(jsonPath("$.[0].change_set.edu_level.old_value", is("Std 12")))
+                .andExpect(jsonPath("$.[0].change_set.edu_level.new_value", is("Std 10")));
 
         verify(auditService).findByHealthId(healthId);
     }
 
     private List<PatientAuditLogData> buildAuditLogs(String eventTime) {
         List<PatientAuditLogData> logs = new ArrayList<>();
-
         PatientAuditLogData log = new PatientAuditLogData();
         log.setEventTime(eventTime);
-        log.setChangeSet(buildChangeSet());
+        log.setChangeSet(buildChangeSets());
         logs.add(log);
-
         return logs;
     }
 
-    private List<PatientAuditChangeSetData> buildChangeSet() {
-        List<PatientAuditChangeSetData> changeSets = new ArrayList<>();
-
-        PatientAuditChangeSetData changeSet1 = new PatientAuditChangeSetData();
-        changeSet1.setFieldName(GIVEN_NAME);
-        changeSet1.setOldValue("Harry");
-        changeSet1.setNewValue("Potter");
-        changeSet1.setProposedBy("x");
-        changeSet1.setApprovedBy("y");
-        changeSets.add(changeSet1);
-
-        PatientAuditChangeSetData changeSet2 = new PatientAuditChangeSetData();
-        changeSet2.setFieldName(OCCUPATION);
-        changeSet2.setOldValue("Wizard");
-        changeSet2.setNewValue("Jobless");
-        changeSet2.setProposedBy("admin");
-        changeSet2.setApprovedBy(null);
-        changeSets.add(changeSet2);
-
-        PatientAuditChangeSetData changeSet3 = new PatientAuditChangeSetData();
-        changeSet3.setFieldName(EDU_LEVEL);
-        changeSet3.setOldValue("Std 12");
-        changeSet3.setNewValue("Std 10");
-        changeSet3.setProposedBy("p");
-        changeSet3.setApprovedBy("q");
-        changeSets.add(changeSet3);
-
+    private Map<String, Map<String, Object>> buildChangeSets() {
+        Map<String, Map<String, Object>> changeSets = new HashMap<>();
+        changeSets.put(GIVEN_NAME, buildChangeSet("Harry", "Potter"));
+        changeSets.put(OCCUPATION, buildChangeSet("Wizard", "Jobless"));
+        changeSets.put(EDU_LEVEL, buildChangeSet("Std 12", "Std 10"));
         return changeSets;
+    }
+
+    private Map<String, Object> buildChangeSet(Object oldValue, Object newValue) {
+        Map<String, Object> changeSet = new HashMap<>();
+        changeSet.put(OLD_VALUE, oldValue);
+        changeSet.put(NEW_VALUE, newValue);
+        return changeSet;
     }
 }

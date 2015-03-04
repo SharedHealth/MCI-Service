@@ -1,50 +1,167 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
-import org.junit.Ignore;
+
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
-import org.sharedhealth.mci.web.mapper.PatientAuditChangeSetData;
+import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientAuditLogData;
+import org.sharedhealth.mci.web.mapper.PatientData;
+import org.sharedhealth.mci.web.mapper.PhoneNumber;
+import org.sharedhealth.mci.web.model.PatientAuditLog;
+import org.sharedhealth.mci.web.model.PatientUpdateLog;
+import org.sharedhealth.mci.web.service.PatientAuditService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
+import static com.datastax.driver.core.utils.UUIDs.timeBased;
+import static java.util.Arrays.asList;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
+import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.setupApprovalsConfig;
+import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.truncateAllColumnFamilies;
+import static org.sharedhealth.mci.web.utils.JsonConstants.*;
+import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 @ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
 public class PatientAuditRepositoryIT {
 
+
+    @Autowired
+    @Qualifier("MCICassandraTemplate")
+    private CassandraOperations cassandraOps;
+
+    @Autowired
+    private PatientRepository patientRepository;
+
+    @Autowired
+    private PatientAuditService auditService;
+
     @Autowired
     private PatientAuditRepository auditRepository;
 
-    @Ignore
+    @Autowired
+    private PatientFeedRepository feedRepository;
+
+    @Before
+    public void setUp() throws Exception {
+        setupApprovalsConfig(cassandraOps);
+    }
+
     @Test
-    public void shouldFindByHealthId() throws Exception {
-        List<PatientAuditLogData> logs = auditRepository.findByHealthId("h100");
+    public void shouldFindByHealthId() {
+        PatientData patientCreateData = buildPatient();
+        String healthId = patientRepository.create(patientCreateData).getId();
+
+        PatientData updateRequest = new PatientData();
+        updateRequest.setGivenName("John");
+        patientRepository.update(updateRequest, healthId);
+
+        updateRequest = new PatientData();
+        updateRequest.setEducationLevel("02");
+        patientRepository.update(updateRequest, healthId);
+
+        updateRequest = new PatientData();
+        Address address = new Address("10", "20", "31");
+        updateRequest.setPermanentAddress(address);
+        patientRepository.update(updateRequest, healthId);
+
+        auditService.sync();
+
+        List<PatientAuditLogData> logs = auditRepository.findByHealthId(healthId);
         assertNotNull(logs);
         assertEquals(3, logs.size());
 
-        List<PatientAuditChangeSetData> changeSet1 = logs.get(0).getChangeSet();
-        assertNotNull(changeSet1);
-        assertEquals(3, changeSet1.size());
-        assertEquals("given_name", changeSet1.get(0).getFieldName());
-        assertEquals("edu_level", changeSet1.get(1).getFieldName());
-        assertEquals("occupation", changeSet1.get(2).getFieldName());
+        assertChangeSet(GIVEN_NAME, patientCreateData.getGivenName(), "John", logs.get(0).getChangeSet());
+        assertChangeSet(EDU_LEVEL, patientCreateData.getOccupation(), "02", logs.get(1).getChangeSet());
+        assertChangeSet(PERMANENT_ADDRESS, patientCreateData.getAddress(), address, logs.get(2).getChangeSet());
+    }
 
-        List<PatientAuditChangeSetData> changeSet2 = logs.get(1).getChangeSet();
-        assertNotNull(changeSet2);
-        assertEquals(1, changeSet2.size());
+    private void assertChangeSet(String fieldName, Object oldValue, Object newValue, Map<String, Map<String, Object>> changeSet) {
+        assertNotNull(changeSet);
+        assertEquals(1, changeSet.size());
+        assertNotNull(changeSet.get(fieldName));
+        assertEquals(writeValueAsString(oldValue), writeValueAsString(changeSet.get(fieldName).get(OLD_VALUE)));
+        assertEquals(writeValueAsString(newValue), writeValueAsString(changeSet.get(fieldName).get(NEW_VALUE)));
+    }
 
-        List<PatientAuditChangeSetData> changeSet3 = logs.get(2).getChangeSet();
-        assertNotNull(changeSet3);
-        assertEquals(2, changeSet3.size());
+    private PatientData buildPatient() {
+        PatientData patient = new PatientData();
+        patient.setNationalId("1234567890123");
+        patient.setBirthRegistrationNumber("12345678901234567");
+        patient.setUid("12345678901");
+        patient.setGivenName("Happy");
+        patient.setSurName("Rotter");
+        patient.setDateOfBirth("2014-12-01");
+        patient.setGender("M");
+        patient.setOccupation("01");
+        patient.setEducationLevel("01");
+        PhoneNumber phone = new PhoneNumber();
+        phone.setNumber("22334455");
+        patient.setPhoneNumber(phone);
+        patient.setHouseholdCode("12345");
+        patient.setAddress(new Address("10", "20", "30"));
+        patient.setPermanentAddress(new Address("10", "20", "30"));
+        return patient;
+    }
+
+    @Test
+    public void shouldFindLatestMarker() {
+        PatientData patientCreateData = buildPatient();
+        String healthId = patientRepository.create(patientCreateData).getId();
+
+        PatientData updateRequest = new PatientData();
+        updateRequest.setGivenName("John");
+        updateRequest.setSurName("Doe");
+        patientRepository.update(updateRequest, healthId);
+
+        auditService.sync();
+
+        List<PatientUpdateLog> feeds = feedRepository.findPatientsUpdatedSince(null, 1);
+        assertNotNull(feeds);
+        assertEquals(1, feeds.size());
+
+        UUID marker = auditRepository.findLatestMarker();
+        assertNotNull(marker);
+        assertEquals(feeds.get(0).getEventId(), marker);
+    }
+
+    @Test
+    public void shouldUpdateAuditLogsIfPrimaryKeyExists() {
+        PatientAuditLog log1 = new PatientAuditLog();
+        log1.setHealthId("h100");
+        log1.setEventId(timeBased());
+        auditRepository.saveOrUpdate(asList(log1));
+
+        List<PatientAuditLogData> logs = auditRepository.findByHealthId(log1.getHealthId());
+        assertNotNull(logs);
+        assertEquals(1, logs.size());
+
+        PatientAuditLog log2 = new PatientAuditLog();
+        log2.setHealthId(log1.getHealthId());
+        log2.setEventId(log1.getEventId());
+        auditRepository.saveOrUpdate(asList(log2));
+
+        logs = auditRepository.findByHealthId(log1.getHealthId());
+        assertNotNull(logs);
+        assertEquals(1, logs.size());
+    }
+
+    @After
+    public void tearDown() {
+        truncateAllColumnFamilies(cassandraOps);
     }
 }

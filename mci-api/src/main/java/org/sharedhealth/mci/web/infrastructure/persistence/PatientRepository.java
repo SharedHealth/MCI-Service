@@ -11,7 +11,6 @@ import org.sharedhealth.mci.web.handler.PendingApprovalFilter;
 import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.model.CatchmentMapping;
 import org.sharedhealth.mci.web.model.Patient;
-import org.sharedhealth.mci.web.model.PatientUpdateLog;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -368,10 +367,5 @@ public class PatientRepository extends BaseRepository {
                 it.remove();
             }
         }
-    }
-
-    public List<PatientUpdateLog> findPatientsUpdatedSince(Date since, int limit, UUID lastMarker) {
-        return cassandraOps.select(buildFindUpdateLogStmt(since, limit, lastMarker),
-                PatientUpdateLog.class);
     }
 }

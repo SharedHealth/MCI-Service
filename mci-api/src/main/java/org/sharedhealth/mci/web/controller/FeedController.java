@@ -1,9 +1,9 @@
 package org.sharedhealth.mci.web.controller;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.web.service.PatientService;
+
+import javax.servlet.http.HttpServletRequest;
 
 public class FeedController {
 
