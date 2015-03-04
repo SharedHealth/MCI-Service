@@ -102,6 +102,8 @@ public class PatientRepositoryConstants {
     public static final String UPDATED_AT = "updated_at";
     public static final String CREATED_BY = "created_by";
     public static final String UPDATED_BY = "updated_by";
+    public static final String REQUESTED_BY = "requested_by";
+    public static final String APPROVED_BY = "approved_by";
     public static final String LOWER_SUR_NAME = "lower_sur_name";
     public static final String LOWER_GIVEN_NAME = "lower_given_name";
     public static final String TYPE = "type";

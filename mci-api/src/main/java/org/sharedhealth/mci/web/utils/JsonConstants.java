@@ -79,7 +79,7 @@ public class JsonConstants {
 
     public static final String EVENT_TIME = "event_time";
     public static final String CHANGE_SET = "change_set";
-    public static final String PROPOSED_BY = "proposed_by";
+    public static final String REQUESTED_BY = "requested_by";
     public static final String APPROVED_BY = "approved_by";
     public static final String OLD_VALUE = "old_value";
     public static final String NEW_VALUE = "new_value";

@@ -44,6 +44,8 @@ public class CatchmentController extends FeedController {
     private static final String ENTRY_TITLE = "Patient in Catchment: ";
     private static final String ENTRY_CATEGORY = "patient";
 
+    static final String REQUESTED_BY = "MCI Admin";
+
     @Autowired
     public CatchmentController(PatientService patientService) {
         super(patientService);
@@ -103,6 +105,7 @@ public class CatchmentController extends FeedController {
             BindingResult bindingResult) {
 
         logger.debug("Accepting pending approvals. Health ID : " + healthId);
+        patient.setRequestedBy(REQUESTED_BY);
         return processPendingApprovals(new Catchment(catchmentId), healthId, patient, bindingResult, true);
     }
 
@@ -114,6 +117,7 @@ public class CatchmentController extends FeedController {
             BindingResult bindingResult) {
 
         logger.debug("Accepting pending approvals. Health ID : " + healthId);
+        patient.setRequestedBy(REQUESTED_BY);
         return processPendingApprovals(new Catchment(catchmentId), healthId, patient, bindingResult, false);
     }
 

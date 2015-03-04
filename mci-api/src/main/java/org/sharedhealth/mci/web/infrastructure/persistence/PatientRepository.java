@@ -70,6 +70,8 @@ public class PatientRepository extends BaseRepository {
         patient.setHealthId(uidGenerator.getId());
         patient.setCreatedAt(timeBased());
         patient.setUpdatedAt(timeBased());
+        patient.setCreatedBy(patientData.getRequestedBy());
+        patient.setUpdatedBy(patientData.getRequestedBy());
 
         if (isBlank(patient.getStatus())) {
             patient.setStatus(PATIENT_STATUS_ALIVE);
@@ -88,15 +90,17 @@ public class PatientRepository extends BaseRepository {
         PatientData existingPatientData = this.findByHealthId(healthId);
 
         PatientData newPatientData = this.pendingApprovalFilter.filter(existingPatientData, updateRequest);
+        newPatientData.setRequestedBy(updateRequest.getRequestedBy());
 
         Patient newPatient = mapper.map(newPatientData, existingPatientData);
         newPatient.setHealthId(healthId);
         newPatient.setUpdatedAt(timeBased());
+        newPatient.setUpdatedBy(updateRequest.getRequestedBy());
 
         final Batch batch = batch();
         buildUpdatePendingApprovalsBatch(newPatient, existingPatientData, batch);
         buildUpdateBatch(newPatient, existingPatientData, cassandraOps.getConverter(), batch);
-        buildCreateUpdateLogStmt(newPatientData, existingPatientData, cassandraOps.getConverter(), batch);
+        buildCreateUpdateLogStmt(newPatientData, existingPatientData, cassandraOps.getConverter(), batch, false);
         cassandraOps.execute(batch);
 
         return new MCIResponse(newPatient.getHealthId(), HttpStatus.ACCEPTED);
@@ -306,12 +310,14 @@ public class PatientRepository extends BaseRepository {
         Patient newPatient;
         if (shouldAccept) {
             newPatient = mapper.map(requestData, existingPatientData);
-            buildCreateUpdateLogStmt(requestData, existingPatientData, cassandraOps.getConverter(), batch);
+            buildCreateUpdateLogStmt(requestData, existingPatientData, cassandraOps.getConverter(), batch, true);
+
         } else {
             newPatient = new Patient();
             newPatient.setHealthId(requestData.getHealthId());
         }
         newPatient.setUpdatedAt(timeBased());
+        newPatient.setUpdatedBy(requestData.getRequestedBy());
         newPatient.setPendingApprovals(existingPatientData.getPendingApprovals());
 
         String healthId = requestData.getHealthId();

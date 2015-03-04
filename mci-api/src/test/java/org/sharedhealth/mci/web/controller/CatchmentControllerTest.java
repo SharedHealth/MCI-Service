@@ -4,6 +4,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.mapper.*;
@@ -26,6 +27,7 @@ import static java.lang.String.format;
 import static java.net.URLEncoder.encode;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static junit.framework.Assert.assertEquals;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
@@ -655,7 +657,7 @@ public class CatchmentControllerTest {
         List<PendingApprovalListResponse> approvalListResponse = asList(buildPendingApprovalListResponse(1),
                 buildPendingApprovalListResponse(2), buildPendingApprovalListResponse(3), buildPendingApprovalListResponse(4));
 
-        MCIMultiResponse response = catchmentController.buildPendingApprovalResponse(httpRequest, approvalListResponse, null,null);
+        MCIMultiResponse response = catchmentController.buildPendingApprovalResponse(httpRequest, approvalListResponse, null, null);
 
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();
@@ -671,7 +673,7 @@ public class CatchmentControllerTest {
                 buildPendingApprovalListResponse(2));
 
         MCIMultiResponse response = catchmentController.buildPendingApprovalResponse(httpRequest, approvalListResponse,
-                approvalListResponse.get(1).getLastUpdated(),null);
+                approvalListResponse.get(1).getLastUpdated(), null);
 
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();
@@ -688,7 +690,7 @@ public class CatchmentControllerTest {
                 buildPendingApprovalListResponse(2), buildPendingApprovalListResponse(3), buildPendingApprovalListResponse(4));
 
         MCIMultiResponse response = catchmentController.buildPendingApprovalResponse(httpRequest, approvalListResponse,
-                approvalListResponse.get(2).getLastUpdated(),null);
+                approvalListResponse.get(2).getLastUpdated(), null);
 
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();
@@ -705,7 +707,7 @@ public class CatchmentControllerTest {
         List<PendingApprovalListResponse> approvalListResponse = asList(buildPendingApprovalListResponse(1),
                 buildPendingApprovalListResponse(2), buildPendingApprovalListResponse(3));
 
-        MCIMultiResponse response = catchmentController.buildPendingApprovalResponse(httpRequest, approvalListResponse,null,null);
+        MCIMultiResponse response = catchmentController.buildPendingApprovalResponse(httpRequest, approvalListResponse, null, null);
 
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();
@@ -718,7 +720,7 @@ public class CatchmentControllerTest {
         List<PendingApprovalListResponse> approvalListResponse = asList(buildPendingApprovalListResponse(1),
                 buildPendingApprovalListResponse(2), buildPendingApprovalListResponse(3));
 
-        MCIMultiResponse response = catchmentController.buildPendingApprovalResponse(httpRequest, approvalListResponse,null,approvalListResponse.get(0).getLastUpdated());
+        MCIMultiResponse response = catchmentController.buildPendingApprovalResponse(httpRequest, approvalListResponse, null, approvalListResponse.get(0).getLastUpdated());
 
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();
@@ -734,7 +736,7 @@ public class CatchmentControllerTest {
                 buildPendingApprovalListResponse(2), buildPendingApprovalListResponse(3));
 
         MCIMultiResponse response = catchmentController.buildPendingApprovalResponse(httpRequest,
-                approvalListResponse,approvalListResponse.get(0).getLastUpdated(),approvalListResponse.get(2).getLastUpdated());
+                approvalListResponse, approvalListResponse.get(0).getLastUpdated(), approvalListResponse.get(2).getLastUpdated());
 
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();
@@ -747,13 +749,71 @@ public class CatchmentControllerTest {
         List<PendingApprovalListResponse> approvalListResponse = asList(buildPendingApprovalListResponse(1),
                 buildPendingApprovalListResponse(2), buildPendingApprovalListResponse(3));
 
-        MCIMultiResponse response = catchmentController.buildPendingApprovalResponse(httpRequest, approvalListResponse, null,approvalListResponse.get(2).getLastUpdated());
+        MCIMultiResponse response = catchmentController.buildPendingApprovalResponse(httpRequest, approvalListResponse, null, approvalListResponse.get(2).getLastUpdated());
 
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();
         assertTrue(additionalInfo != null && additionalInfo.size() == 1);
         assertEquals("http://www.mci.com:8081/api/v1/catchments/201915/approvals?after=" + approvalListResponse.get(2).getLastUpdated(),
                 additionalInfo.get(NEXT));
+    }
+
+    @Test
+    public void shouldAddRequestedByWhenPatientIsApproved() throws Exception {
+        String healthId = "health-100";
+        PatientData patient = new PatientData();
+        patient.setHealthId(healthId);
+
+        String catchmentId = "102030";
+        Catchment catchment = new Catchment(catchmentId);
+        when(patientService.processPendingApprovals(patient, catchment, true)).thenReturn(healthId);
+
+        String url = buildPendingApprovalUrl(catchmentId, healthId);
+        String content = writeValueAsString(patient);
+        MvcResult mvcResult = mockMvc.perform(put(url).content(content).contentType(APPLICATION_JSON))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.id", is(healthId)));
+
+        verify(patientService).processPendingApprovals(patient, catchment, true);
+
+        ArgumentCaptor<PatientData> argument1 = ArgumentCaptor.forClass(PatientData.class);
+        ArgumentCaptor<Catchment> argument2 = ArgumentCaptor.forClass(Catchment.class);
+        ArgumentCaptor<Boolean> argument3 = ArgumentCaptor.forClass(Boolean.class);
+        verify(patientService).processPendingApprovals(argument1.capture(), argument2.capture(), argument3.capture());
+        assertEquals(CatchmentController.REQUESTED_BY, argument1.getValue().getRequestedBy());
+    }
+
+    @Test
+    public void shouldAddRequestedByWhenPatientIsRejected() throws Exception {
+        String healthId = "health-100";
+        PatientData patient = new PatientData();
+        patient.setHealthId(healthId);
+
+        String catchmentId = "102030";
+        Catchment catchment = new Catchment(catchmentId);
+        when(patientService.processPendingApprovals(patient, catchment, false)).thenReturn(healthId);
+
+        String url = buildPendingApprovalUrl(catchmentId, healthId);
+        String content = writeValueAsString(patient);
+        MvcResult mvcResult = mockMvc.perform(delete(url).content(content).contentType(APPLICATION_JSON))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.id", is(healthId)));
+
+        verify(patientService).processPendingApprovals(patient, catchment, false);
+
+        ArgumentCaptor<PatientData> argument1 = ArgumentCaptor.forClass(PatientData.class);
+        ArgumentCaptor<Catchment> argument2 = ArgumentCaptor.forClass(Catchment.class);
+        ArgumentCaptor<Boolean> argument3 = ArgumentCaptor.forClass(Boolean.class);
+        verify(patientService).processPendingApprovals(argument1.capture(), argument2.capture(), argument3.capture());
+        assertEquals(CatchmentController.REQUESTED_BY, argument1.getValue().getRequestedBy());
     }
 
     private MockHttpServletRequest buildPendingApprovalHttpRequest() throws UnsupportedEncodingException {

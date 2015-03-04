@@ -36,8 +36,9 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
 public class PatientController {
     private static final Logger logger = LoggerFactory.getLogger(PatientController.class);
 
-    private PatientService patientService;
+    static final String REQUESTED_BY = "Bahmni";
 
+    private PatientService patientService;
 
     @Autowired
     public PatientController(PatientService patientService) {
@@ -50,6 +51,7 @@ public class PatientController {
             BindingResult bindingResult) {
 
         logger.debug("Trying to create patient.");
+        patient.setRequestedBy(REQUESTED_BY);
         final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
 
         if (bindingResult.hasErrors()) {
@@ -104,6 +106,7 @@ public class PatientController {
             BindingResult bindingResult) {
 
         logger.debug(" Health id [" + healthId + "]");
+        patient.setRequestedBy(REQUESTED_BY);
         final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
 
         if (bindingResult.hasErrors()) {

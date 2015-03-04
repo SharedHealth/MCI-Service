@@ -24,7 +24,7 @@ import static org.springframework.data.cassandra.core.CassandraTemplate.createIn
 public class PatientUpdateLogQueryBuilder {
 
     static void buildCreateUpdateLogStmt(PatientData patientDataToSave, PatientData existingPatientData,
-                                         CassandraConverter converter, Batch batch) {
+                                         CassandraConverter converter, Batch batch, boolean isApprovalFlow) {
         PatientUpdateLog patientUpdateLog = new PatientUpdateLog();
         String changeSet = getChangeSet(patientDataToSave, existingPatientData);
 
@@ -32,6 +32,13 @@ public class PatientUpdateLogQueryBuilder {
             patientUpdateLog.setEventId(timeBased());
             patientUpdateLog.setHealthId(existingPatientData.getHealthId());
             patientUpdateLog.setChangeSet(changeSet);
+
+            if (isApprovalFlow) {
+                patientUpdateLog.setApprovedBy(patientDataToSave.getRequestedBy());
+            } else {
+                patientUpdateLog.setRequestedBy(patientDataToSave.getRequestedBy());
+            }
+
             batch.add(createInsertQuery(CF_PATIENT_UPDATE_LOG, patientUpdateLog, null, converter));
         }
     }

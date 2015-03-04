@@ -197,6 +197,9 @@ public class PatientData implements Diffable<PatientData> {
     @JsonIgnore
     private TreeSet<PendingApproval> pendingApprovals;
 
+    @JsonIgnore
+    private String requestedBy;
+
     public String getNationalId() {
         return nationalId;
     }
@@ -643,38 +646,41 @@ public class PatientData implements Diffable<PatientData> {
 
     @Override
     public String toString() {
-        return "PatientData{" +
-                "healthId='" + healthId + '\'' +
-                ", nationalId='" + nationalId + '\'' +
-                ", birthRegistrationNumber='" + birthRegistrationNumber + '\'' +
-                ", nameBangla='" + nameBangla + '\'' +
-                ", givenName='" + givenName + '\'' +
-                ", surName='" + surName + '\'' +
-                ", dateOfBirth='" + dateOfBirth + '\'' +
-                ", gender='" + gender + '\'' +
-                ", occupation='" + occupation + '\'' +
-                ", educationLevel='" + educationLevel + '\'' +
-                ", relations=" + relations +
-                ", uid='" + uid + '\'' +
-                ", placeOfBirth='" + placeOfBirth + '\'' +
-                ", religion='" + religion + '\'' +
-                ", bloodGroup='" + bloodGroup + '\'' +
-                ", nationality='" + nationality + '\'' +
-                ", disability='" + disability + '\'' +
-                ", ethnicity='" + ethnicity + '\'' +
-                ", address=" + address +
-                ", primaryContact='" + primaryContact + '\'' +
-                ", phoneNumber=" + phoneNumber +
-                ", primaryContactNumber=" + primaryContactNumber +
-                ", permanentAddress=" + permanentAddress +
-                ", maritalStatus='" + maritalStatus + '\'' +
-                ", status='" + status + '\'' +
-                ", dateOfDeath='" + dateOfDeath + '\'' +
-                ", createdAt='" + createdAt + '\'' +
-                ", updatedAt='" + updatedAt + '\'' +
-                ", householdCode='" + householdCode + '\'' +
-                ", pendingApprovals=" + pendingApprovals +
-                '}';
+        final StringBuilder sb = new StringBuilder("PatientData{");
+        sb.append("healthId='").append(healthId).append('\'');
+        sb.append(", nationalId='").append(nationalId).append('\'');
+        sb.append(", birthRegistrationNumber='").append(birthRegistrationNumber).append('\'');
+        sb.append(", nameBangla='").append(nameBangla).append('\'');
+        sb.append(", givenName='").append(givenName).append('\'');
+        sb.append(", surName='").append(surName).append('\'');
+        sb.append(", dateOfBirth='").append(dateOfBirth).append('\'');
+        sb.append(", gender='").append(gender).append('\'');
+        sb.append(", occupation='").append(occupation).append('\'');
+        sb.append(", educationLevel='").append(educationLevel).append('\'');
+        sb.append(", relations=").append(relations);
+        sb.append(", uid='").append(uid).append('\'');
+        sb.append(", placeOfBirth='").append(placeOfBirth).append('\'');
+        sb.append(", religion='").append(religion).append('\'');
+        sb.append(", bloodGroup='").append(bloodGroup).append('\'');
+        sb.append(", nationality='").append(nationality).append('\'');
+        sb.append(", disability='").append(disability).append('\'');
+        sb.append(", ethnicity='").append(ethnicity).append('\'');
+        sb.append(", address=").append(address);
+        sb.append(", primaryContact='").append(primaryContact).append('\'');
+        sb.append(", phoneNumber=").append(phoneNumber);
+        sb.append(", primaryContactNumber=").append(primaryContactNumber);
+        sb.append(", permanentAddress=").append(permanentAddress);
+        sb.append(", maritalStatus='").append(maritalStatus).append('\'');
+        sb.append(", status='").append(status).append('\'');
+        sb.append(", confidential='").append(confidential).append('\'');
+        sb.append(", householdCode='").append(householdCode).append('\'');
+        sb.append(", dateOfDeath='").append(dateOfDeath).append('\'');
+        sb.append(", createdAt=").append(createdAt);
+        sb.append(", updatedAt=").append(updatedAt);
+        sb.append(", pendingApprovals=").append(pendingApprovals);
+        sb.append(", requestedBy='").append(requestedBy).append('\'');
+        sb.append('}');
+        return sb.toString();
     }
 
     public String getDateOfDeath() {
@@ -711,6 +717,14 @@ public class PatientData implements Diffable<PatientData> {
 
     public void setHouseholdCode(String householdCode) {
         this.householdCode = householdCode;
+    }
+
+    public String getRequestedBy() {
+        return requestedBy;
+    }
+
+    public void setRequestedBy(String requestedBy) {
+        this.requestedBy = requestedBy;
     }
 
     @Override

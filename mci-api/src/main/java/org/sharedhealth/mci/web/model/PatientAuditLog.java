@@ -10,7 +10,7 @@ import static org.sharedhealth.mci.web.infrastructure.persistence.PatientReposit
 import static org.springframework.cassandra.core.PrimaryKeyType.CLUSTERED;
 import static org.springframework.cassandra.core.PrimaryKeyType.PARTITIONED;
 
-@Table(value = "patient_audit_log")
+@Table(value = CF_PATIENT_AUDIT_LOG)
 public class PatientAuditLog {
 
     @PrimaryKeyColumn(name = HEALTH_ID, ordinal = 0, type = PARTITIONED)
@@ -21,6 +21,12 @@ public class PatientAuditLog {
 
     @Column(CHANGE_SET)
     private String changeSet;
+
+    @Column(REQUESTED_BY)
+    private String requestedBy;
+
+    @Column(APPROVED_BY)
+    private String approvedBy;
 
     public String getHealthId() {
         return healthId;
@@ -44,5 +50,21 @@ public class PatientAuditLog {
 
     public void setChangeSet(String changeSet) {
         this.changeSet = changeSet;
+    }
+
+    public String getRequestedBy() {
+        return requestedBy;
+    }
+
+    public void setRequestedBy(String requestedBy) {
+        this.requestedBy = requestedBy;
+    }
+
+    public String getApprovedBy() {
+        return approvedBy;
+    }
+
+    public void setApprovedBy(String approvedBy) {
+        this.approvedBy = approvedBy;
     }
 }

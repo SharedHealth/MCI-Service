@@ -50,6 +50,8 @@ public class PatientAuditService {
             log.setHealthId(feed.getHealthId());
             log.setEventId(feed.getEventId());
             log.setChangeSet(feed.getChangeSet());
+            log.setRequestedBy(feed.getRequestedBy());
+            log.setApprovedBy(feed.getApprovedBy());
             logs.add(log);
         }
         return logs;

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.sharedhealth.mci.utils.DateUtil;
+import org.sharedhealth.mci.web.utils.JsonConstants;
 import org.springframework.data.cassandra.mapping.Column;
 import org.springframework.data.cassandra.mapping.PrimaryKeyColumn;
 import org.springframework.data.cassandra.mapping.Table;
@@ -37,6 +38,14 @@ public class PatientUpdateLog {
     @Column(CHANGE_SET)
     private String changeSet;
 
+    @Column(REQUESTED_BY)
+    @JsonProperty(JsonConstants.REQUESTED_BY)
+    private String requestedBy;
+
+    @Column(APPROVED_BY)
+    @JsonProperty(JsonConstants.APPROVED_BY)
+    private String approvedBy;
+
     public String getHealthId() {
         return healthId;
     }
@@ -60,7 +69,7 @@ public class PatientUpdateLog {
     @JsonProperty(CHANGE_SET)
     public Map getChangeSetMap() {
 
-        if(this.changeSet == null) {
+        if (this.changeSet == null) {
             return null;
         }
 
@@ -74,12 +83,12 @@ public class PatientUpdateLog {
 
     @JsonProperty(UPDATED_AT)
     public String getEventTimeAsString() {
-        if(this.eventId == null) return null;
+        if (this.eventId == null) return null;
         return DateUtil.toIsoFormat(eventId);
     }
 
     public String getEventTime() {
-        if(this.eventId == null) return null;
+        if (this.eventId == null) return null;
         return DateUtil.toIsoFormat(eventId);
     }
 
@@ -91,5 +100,21 @@ public class PatientUpdateLog {
     public void setEventId(UUID eventId) {
         this.eventId = eventId;
         this.year = DateUtil.getYearOf(eventId);
+    }
+
+    public String getRequestedBy() {
+        return requestedBy;
+    }
+
+    public void setRequestedBy(String requestedBy) {
+        this.requestedBy = requestedBy;
+    }
+
+    public String getApprovedBy() {
+        return approvedBy;
+    }
+
+    public void setApprovedBy(String approvedBy) {
+        this.approvedBy = approvedBy;
     }
 }

@@ -38,6 +38,7 @@ import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
 @ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
 public class PatientFeedRepositoryIT {
 
+    public static final String REQUESTED_BY = "Bahmni";
     @Autowired
     @Qualifier("MCICassandraTemplate")
     private CassandraOperations cassandraOps;
@@ -80,6 +81,8 @@ public class PatientFeedRepositoryIT {
         address.setUnionOrUrbanWardId("01");
         data.setAddress(address);
 
+        data.setRequestedBy(REQUESTED_BY);
+
         return data;
     }
 
@@ -94,6 +97,7 @@ public class PatientFeedRepositoryIT {
         updateRequest.setHealthId(healthId);
         updateRequest.setGivenName("Harry");
         updateRequest.setAddress(new Address("99", "88", "77"));
+        updateRequest.setRequestedBy(REQUESTED_BY);
         patientRepository.update(updateRequest, healthId);
 
         assertUpdateLogEntry(healthId, since, true);
@@ -108,6 +112,7 @@ public class PatientFeedRepositoryIT {
         PatientData updateRequest1 = new PatientData();
         updateRequest1.setHealthId(healthId);
         updateRequest1.setEducationLevel("02");
+        updateRequest1.setRequestedBy(REQUESTED_BY);
         patientRepository.update(updateRequest1, healthId);
         assertUpdateLogEntry(healthId, since, true);
 
@@ -179,16 +184,20 @@ public class PatientFeedRepositoryIT {
         assertUpdateLogEntry(healthId, since, false);
 
         PatientData updatedPatient = patientRepository.findByHealthId(healthId);
+        updateRequest.setRequestedBy(REQUESTED_BY);
         patientRepository.processPendingApprovals(updateRequest, updatedPatient, true);
 
-        assertUpdateLogEntry(healthId, since, true);
+        List<PatientUpdateLog> patientUpdateLogs = feedRepository.findPatientsUpdatedSince(since, 1, null);
+        assertEquals(healthId, patientUpdateLogs.get(0).getHealthId());
+        assertEquals(REQUESTED_BY, patientUpdateLogs.get(0).getApprovedBy());
     }
 
     private void assertUpdateLogEntry(String healthId, Date since, boolean shouldFind) {
         List<PatientUpdateLog> patientUpdateLogs = feedRepository.findPatientsUpdatedSince(since, 1, null);
 
         if (shouldFind) {
-            assertTrue(healthId.equals(patientUpdateLogs.get(0).getHealthId()));
+            assertEquals(healthId, patientUpdateLogs.get(0).getHealthId());
+            assertEquals(REQUESTED_BY, patientUpdateLogs.get(0).getRequestedBy());
         } else {
             assertEquals(0, patientUpdateLogs.size());
         }

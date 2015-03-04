@@ -26,6 +26,8 @@ public class PatientAuditLogMapper {
         PatientAuditLogData data = new PatientAuditLogData();
         data.setEventTime(toIsoFormat(log.getEventId()));
         data.setChangeSet(buildChangeSet(log.getChangeSet()));
+        data.setRequestedBy(log.getRequestedBy());
+        data.setApprovedBy(log.getApprovedBy());
         return data;
     }
 
