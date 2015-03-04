@@ -18,7 +18,7 @@ public class PatientAuditLogTask {
     @Autowired
     PatientAuditService auditService;
 
-    @Scheduled(cron = "${AUDIT_LOG_SYNC_CRON_EXP}")
+    @Scheduled(fixedDelayString = "${AUDIT_LOG_SYNC_DELAY}")
     public void execute() {
         try {
             logger.info("Syncing audit log.");
