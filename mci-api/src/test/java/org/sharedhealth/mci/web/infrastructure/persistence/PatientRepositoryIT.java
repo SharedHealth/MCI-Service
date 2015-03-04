@@ -189,14 +189,18 @@ public class PatientRepositoryIT {
 
     @Test
     public void shouldFindPatientWithMatchingGeneratedHealthId() throws ExecutionException, InterruptedException {
-        MCIResponse mciResponse = patientRepository.create(data);
+        PatientData createData = data;
+        createData.setRequestedBy("Bahmni");
+
+        MCIResponse mciResponse = patientRepository.create(createData);
         PatientData p = patientRepository.findByHealthId(mciResponse.id);
+
         assertNotNull(p);
-        data.setHealthId(mciResponse.id);
-        data.setCreatedAt(p.getCreatedAt());
-        data.setUpdatedAt(p.getUpdatedAt());
-        data.setStatus(PATIENT_STATUS_ALIVE);
-        data.setConfidential(STRING_NO);
+        createData.setHealthId(mciResponse.id);
+        createData.setCreatedAt(p.getCreatedAt());
+        createData.setUpdatedAt(p.getUpdatedAt());
+        createData.setStatus(PATIENT_STATUS_ALIVE);
+        createData.setConfidential(STRING_NO);
 
         Address address = p.getAddress();
         address.setHoldingNumber(null);
@@ -213,7 +217,11 @@ public class PatientRepositoryIT {
         phoneNumber.setCountryCode(null);
         p.setPhoneNumber(phoneNumber);
 
-        assertEquals(data, p);
+        assertEquals(createData, p);
+        assertNotNull(p.getCreatedBy());
+        assertEquals(createData.getRequestedBy(), p.getCreatedBy());
+        assertNotNull(p.getCreatedAt());
+        assertNotNull(p.getCreatedAt());
     }
 
     @Test(expected = PatientNotFoundException.class)

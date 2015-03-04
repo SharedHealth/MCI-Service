@@ -2,6 +2,7 @@ package org.sharedhealth.mci.web.model;
 
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants;
 import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.PendingApproval;
 import org.springframework.data.annotation.Transient;
@@ -294,7 +295,7 @@ public class Patient {
     @Column(UPDATED_AT)
     private UUID updatedAt;
 
-    @Column(CREATED_BY)
+    @Column(PatientRepositoryConstants.CREATED_BY)
     private String createdBy;
 
     @Column(UPDATED_BY)
@@ -456,7 +457,8 @@ public class Patient {
         if (updatedAt != null ? !updatedAt.equals(patient.updatedAt) : patient.updatedAt != null) return false;
         if (updatedBy != null ? !updatedBy.equals(patient.updatedBy) : patient.updatedBy != null) return false;
         if (village != null ? !village.equals(patient.village) : patient.village != null) return false;
-        if (householdCode != null ? !householdCode.equals(patient.householdCode) : patient.householdCode != null) return false;
+        if (householdCode != null ? !householdCode.equals(patient.householdCode) : patient.householdCode != null)
+            return false;
 
         return true;
     }

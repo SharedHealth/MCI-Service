@@ -4,7 +4,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.sharedhealth.mci.web.mapper.PatientAuditLogData;
+import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.service.PatientAuditService;
+import org.sharedhealth.mci.web.service.PatientService;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -16,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.verify;
@@ -32,6 +35,8 @@ public class PatientAuditControllerTest {
     private static final String API_END_POINT = "/api/v1/audit/patients/{healthId}";
 
     @Mock
+    private PatientService patientService;
+    @Mock
     private PatientAuditService auditService;
     @Mock
     private LocalValidatorFactoryBean localValidatorFactoryBean;
@@ -42,7 +47,7 @@ public class PatientAuditControllerTest {
     public void setup() throws ParseException {
         initMocks(this);
         mockMvc = MockMvcBuilders
-                .standaloneSetup(new PatientAuditController(auditService))
+                .standaloneSetup(new PatientAuditController(patientService, auditService))
                 .setValidator(localValidatorFactoryBean)
                 .build();
     }
@@ -50,6 +55,11 @@ public class PatientAuditControllerTest {
     @Test
     public void shouldFindByHealthId() throws Exception {
         String healthId = "h100";
+        PatientData patient = new PatientData();
+        patient.setCreatedBy("Bahmni");
+        patient.setCreatedAt(timeBased());
+        when(patientService.findByHealthId(healthId)).thenReturn(patient);
+
         String eventTime = "2015-01-02T10:20:30Z";
         when(auditService.findByHealthId(healthId)).thenReturn(buildAuditLogs(eventTime));
 
@@ -59,20 +69,27 @@ public class PatientAuditControllerTest {
 
         mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.[0].event_time", is(eventTime)))
 
-                .andExpect(jsonPath("$.[0].change_set.given_name", is(notNullValue())))
-                .andExpect(jsonPath("$.[0].change_set.given_name.old_value", is("Harry")))
-                .andExpect(jsonPath("$.[0].change_set.given_name.new_value", is("Potter")))
+                .andExpect(jsonPath("$.created_by", is(patient.getCreatedBy())))
+                .andExpect(jsonPath("$.created_at", is(patient.getCreatedAtAsString())))
 
-                .andExpect(jsonPath("$.[0].change_set.occupation", is(notNullValue())))
-                .andExpect(jsonPath("$.[0].change_set.occupation.old_value", is("Wizard")))
-                .andExpect(jsonPath("$.[0].change_set.occupation.new_value", is("Jobless")))
+                .andExpect(jsonPath("$.updates.[0].event_time", is(eventTime)))
+                .andExpect(jsonPath("$.updates.[0].requested_by", is("bahmni")))
+                .andExpect(jsonPath("$.updates.[0].approved_by", is("admin")))
 
-                .andExpect(jsonPath("$.[0].change_set.edu_level", is(notNullValue())))
-                .andExpect(jsonPath("$.[0].change_set.edu_level.old_value", is("Std 12")))
-                .andExpect(jsonPath("$.[0].change_set.edu_level.new_value", is("Std 10")));
+                .andExpect(jsonPath("$.updates.[0].change_set.given_name", is(notNullValue())))
+                .andExpect(jsonPath("$.updates.[0].change_set.given_name.old_value", is("Harry")))
+                .andExpect(jsonPath("$.updates.[0].change_set.given_name.new_value", is("Potter")))
 
+                .andExpect(jsonPath("$.updates.[0].change_set.occupation", is(notNullValue())))
+                .andExpect(jsonPath("$.updates.[0].change_set.occupation.old_value", is("Wizard")))
+                .andExpect(jsonPath("$.updates.[0].change_set.occupation.new_value", is("Jobless")))
+
+                .andExpect(jsonPath("$.updates.[0].change_set.edu_level", is(notNullValue())))
+                .andExpect(jsonPath("$.updates.[0].change_set.edu_level.old_value", is("Std 12")))
+                .andExpect(jsonPath("$.updates.[0].change_set.edu_level.new_value", is("Std 10")));
+
+        verify(patientService).findByHealthId(healthId);
         verify(auditService).findByHealthId(healthId);
     }
 
@@ -81,6 +98,8 @@ public class PatientAuditControllerTest {
         PatientAuditLogData log = new PatientAuditLogData();
         log.setEventTime(eventTime);
         log.setChangeSet(buildChangeSets());
+        log.setRequestedBy("bahmni");
+        log.setApprovedBy("admin");
         logs.add(log);
         return logs;
     }

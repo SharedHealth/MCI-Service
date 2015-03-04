@@ -192,6 +192,10 @@ public class PatientData implements Diffable<PatientData> {
 
     private UUID createdAt;
 
+    @JsonProperty(CREATED_BY)
+    @JsonInclude(NON_EMPTY)
+    private String createdBy;
+
     private UUID updatedAt;
 
     @JsonIgnore
@@ -725,6 +729,14 @@ public class PatientData implements Diffable<PatientData> {
 
     public void setRequestedBy(String requestedBy) {
         this.requestedBy = requestedBy;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
     }
 
     @Override

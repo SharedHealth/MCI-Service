@@ -154,6 +154,7 @@ public class PatientMapper {
         }
         data.setPendingApprovals(patient.getPendingApprovals());
         data.setCreatedAt(patient.getCreatedAt());
+        data.setCreatedBy(patient.getCreatedBy());
         data.setUpdatedAt(patient.getUpdatedAt());
         data.setHouseholdCode(patient.getHouseholdCode());
         return data;
