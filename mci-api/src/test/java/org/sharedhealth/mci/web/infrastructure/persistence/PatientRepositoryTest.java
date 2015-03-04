@@ -2,10 +2,11 @@ package org.sharedhealth.mci.web.infrastructure.persistence;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.sharedhealth.mci.web.mapper.PatientData;
-import org.sharedhealth.mci.web.mapper.PendingApproval;
-import org.sharedhealth.mci.web.mapper.PendingApprovalFieldDetails;
+import org.sharedhealth.mci.web.mapper.*;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.List;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -104,6 +105,175 @@ public class PatientRepositoryTest {
         TreeSet<PendingApproval> result = patientRepository.updatePendingApprovals(pendingApprovals, patient, false);
         assertNotNull(result);
         assertEquals(0, result.size());
+    }
+
+    @Test
+    public void shouldFilterWithSearchableFieldsInMemory() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        final SearchQuery searchQuery = createSearchQuery("1");
+        searchQuery.setPresent_address("100409990101");
+        List<PatientData> patientDataList = getFilteredPatientsListBySearchQuery(searchQuery);
+
+        assertNotNull(patientDataList);
+        assertEquals(1, patientDataList.size());
+        assertEquals("hid1", patientDataList.get(0).getHealthId());
+    }
+
+    @Test
+    public void shouldFilterReturnEmptyIfNidDoesNotMatched() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        final SearchQuery searchQuery = createSearchQuery("1");
+        searchQuery.setNid("nid2");
+        assertEmptyResultForUnmatchedSearchQuery(searchQuery);
+    }
+
+    @Test
+    public void shouldFilterReturnEmptyIfUidDoesNotMatched() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        final SearchQuery searchQuery = createSearchQuery("1");
+        searchQuery.setUid("uid2");
+        assertEmptyResultForUnmatchedSearchQuery(searchQuery);
+    }
+
+    @Test
+    public void shouldFilterReturnEmptyIfBrnDoesNotMatched() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        final SearchQuery searchQuery = createSearchQuery("1");
+        searchQuery.setBin_brn("brn2");
+        assertEmptyResultForUnmatchedSearchQuery(searchQuery);
+    }
+
+    @Test
+    public void shouldFilterReturnEmptyIfHouseholdDoesNotMatched() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        final SearchQuery searchQuery = createSearchQuery("1");
+        searchQuery.setHousehold_code("householdCode2");
+        assertEmptyResultForUnmatchedSearchQuery(searchQuery);
+    }
+
+    @Test
+    public void shouldFilterReturnEmptyIfGivenNameDoesNotMatched() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        final SearchQuery searchQuery = createSearchQuery("1");
+        searchQuery.setGiven_name("givenName2");
+        assertEmptyResultForUnmatchedSearchQuery(searchQuery);
+    }
+
+    @Test
+    public void shouldFilterReturnEmptyIfSurnameDoesNotMatched() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        final SearchQuery searchQuery = createSearchQuery("1");
+        searchQuery.setSur_name("surname2");
+        assertEmptyResultForUnmatchedSearchQuery(searchQuery);
+    }
+
+    @Test
+    public void shouldFilterReturnEmptyIfPhoneDoesNotMatched() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        final SearchQuery searchQuery = createSearchQuery("1");
+        searchQuery.setPhone_no("0172");
+        assertEmptyResultForUnmatchedSearchQuery(searchQuery);
+    }
+
+    @Test
+    public void shouldFilterReturnEmptyIfAreaCodeDoesNotMatched() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        final SearchQuery searchQuery = createSearchQuery("1");
+        searchQuery.setArea_code("082");
+        assertEmptyResultForUnmatchedSearchQuery(searchQuery);
+    }
+
+    @Test
+    public void shouldFilterReturnEmptyIfAddressDoesNotMatched() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        final SearchQuery searchQuery = createSearchQuery("1");
+
+        searchQuery.setPresent_address("11");
+        assertEmptyResultForUnmatchedSearchQuery(searchQuery);
+
+        searchQuery.setPresent_address("1002");
+        assertEmptyResultForUnmatchedSearchQuery(searchQuery);
+
+        searchQuery.setPresent_address("100402");
+        assertEmptyResultForUnmatchedSearchQuery(searchQuery);
+
+        searchQuery.setPresent_address("10040992");
+        assertEmptyResultForUnmatchedSearchQuery(searchQuery);
+
+        searchQuery.setPresent_address("1004099902");
+        assertEmptyResultForUnmatchedSearchQuery(searchQuery);
+
+        searchQuery.setPresent_address("100409990102");
+        assertEmptyResultForUnmatchedSearchQuery(searchQuery);
+    }
+
+    private void assertEmptyResultForUnmatchedSearchQuery(SearchQuery searchQuery) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        List<PatientData> patientDataList = getFilteredPatientsListBySearchQuery(searchQuery);
+
+        assertNotNull(patientDataList);
+        assertEquals(0, patientDataList.size());
+    }
+
+    private List<PatientData> getFilteredPatientsListBySearchQuery(SearchQuery searchQuery) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        Method method = PatientRepository.class.getDeclaredMethod("filterPatients", List.class, SearchQuery.class);
+        method.setAccessible(true);
+        return (List<PatientData>)method.invoke(patientRepository, createPatientLists(), searchQuery);
+    }
+
+    private SearchQuery createSearchQuery(String index) {
+        return createSearchQuery(index,index,index,index,index,index,index);
+    }
+
+    private SearchQuery createSearchQuery(String nid, String uid, String brn, String household, String givenname, String surname, String phn) {
+        SearchQuery searchQuery = new SearchQuery();
+        searchQuery.setNid("nid" + nid);
+        searchQuery.setUid("uid" + uid);
+        searchQuery.setBin_brn("brn" + brn);
+        searchQuery.setHousehold_code("householdCode" + household);
+        searchQuery.setGiven_name("givenName" + givenname);
+        searchQuery.setSur_name("surname" + surname);
+        searchQuery.setPhone_no("017" + phn);
+        searchQuery.setArea_code("08" + phn);
+        return searchQuery;
+    }
+
+    private List<PatientData> createPatientLists() {
+        return asList(
+             createPatient("1"),
+             createPatient("2"),
+             createPatient("3"),
+             createPatient("4"),
+             createPatient("6")
+        );
+    }
+
+    private PatientData createPatient(String index) {
+        PatientData data = new PatientData();
+        data.setHealthId("hid" + index);
+        data.setNationalId("nid" + index);
+        data.setBirthRegistrationNumber("brn" + index);
+        data.setUid("uid" + index);
+        data.setGivenName("givenName" + index);
+        data.setSurName("surname" + index);
+        PhoneNumber phone = new PhoneNumber();
+        phone.setNumber("017" + index);
+        phone.setAreaCode("08" + index);
+        data.setPhoneNumber(phone);
+        data.setHouseholdCode("householdCode" + index);
+        data.setAddress(createAddress("100409990" + index + "0" + index));
+        return data;
+    }
+
+    private Address createAddress(String geoCode) {
+        String division, district, upazila, cityCorp, union, ruralWard;
+        division = district = upazila = cityCorp = union = ruralWard = null;
+
+        if (geoCode.length() > 1) division = geoCode.substring(0, 2);
+        if (geoCode.length() > 3) district = geoCode.substring(2, 4);
+        if (geoCode.length() > 5) upazila= geoCode.substring(4, 6);
+        if (geoCode.length() > 7) cityCorp = geoCode.substring(6, 8);
+        if (geoCode.length() > 9) union = geoCode.substring(8, 10);
+        if (geoCode.length() > 11) ruralWard = geoCode.substring(10, 12);
+
+        Address address = new Address();
+        address.setDivisionId(division);
+        address.setDistrictId(district);
+        address.setUpazilaId(upazila);
+        address.setCityCorporationId(cityCorp);
+        address.setUnionOrUrbanWardId(union);
+        address.setRuralWardId(ruralWard);
+
+        return address;
     }
 
     private PendingApproval buildPendingApprovalForOccupation() {
