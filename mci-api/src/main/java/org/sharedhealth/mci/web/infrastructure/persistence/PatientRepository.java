@@ -264,12 +264,24 @@ public class PatientRepository extends BaseRepository {
         if (isNotBlank(searchQuery.getUpazilaId()) && !searchQuery.getUpazilaId().equals(address.getUpazilaId())) {
             return false;
         }
+        if (isNotBlank(searchQuery.getCityCorporationId()) && !searchQuery.getCityCorporationId().equals(address.getCityCorporationId())) {
+            return false;
+        }
+        if (isNotBlank(searchQuery.getUnionOrUrbanWardId()) && !searchQuery.getUnionOrUrbanWardId().equals(address.getUnionOrUrbanWardId())) {
+            return false;
+        }
+        if (isNotBlank(searchQuery.getRuralWardId()) && !searchQuery.getRuralWardId().equals(address.getRuralWardId())) {
+            return false;
+        }
+
         if (isNotBlank(searchQuery.getGiven_name()) && !searchQuery.getGiven_name().equalsIgnoreCase(p.getGivenName())) {
             return false;
         }
+
         if (isNotBlank(searchQuery.getSur_name()) && !searchQuery.getSur_name().equalsIgnoreCase(p.getSurName())) {
             return false;
         }
+
         return true;
     }
 

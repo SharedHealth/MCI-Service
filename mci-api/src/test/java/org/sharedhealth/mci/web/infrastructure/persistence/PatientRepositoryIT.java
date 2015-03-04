@@ -48,18 +48,20 @@ import static org.sharedhealth.mci.web.utils.PatientDataConstants.STRING_NO;
 @WebAppConfiguration
 @ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
 public class PatientRepositoryIT {
+
+    @SuppressWarnings("SpringJavaAutowiringInspection")
+    @Autowired
+    @Qualifier("MCICassandraTemplate")
+    private CassandraOperations cassandraOps;
+
+    @Autowired
+    private PatientRepository patientRepository;
+
     public String surname = "Tiger";
     public String phoneNumber = "999900000";
     public String divisionId = "10";
     public String districtId = "04";
     public String upazilaId = "09";
-    @SuppressWarnings("SpringJavaAutowiringInspection")
-
-    @Autowired
-    @Qualifier("MCICassandraTemplate")
-    private CassandraOperations cassandraOps;
-    @Autowired
-    private PatientRepository patientRepository;
     private PatientData data;
     private String nationalId = "1234567890123";
     private String birthRegistrationNumber = "12345678901234567";
@@ -115,20 +117,21 @@ public class PatientRepositoryIT {
         data.setPhoneNumber(phone);
         data.setHouseholdCode(householdCode);
 
-        Address address = createAddress(divisionId, districtId, upazilaId, "20", "01");
+        Address address = createAddress(divisionId, districtId, upazilaId, "99", "01", "02");
         data.setAddress(address);
 
         return data;
     }
 
-    private Address createAddress(String division, String district, String upazila, String cityCorp, String ward) {
+    private Address createAddress(String division, String district, String upazila, String cityCorp, String union, String ruralWard) {
         Address address = new Address();
         address.setAddressLine("house-10");
         address.setDivisionId(division);
         address.setDistrictId(district);
         address.setUpazilaId(upazila);
         address.setCityCorporationId(cityCorp);
-        address.setUnionOrUrbanWardId(ward);
+        address.setUnionOrUrbanWardId(union);
+        address.setRuralWardId(ruralWard);
 
         return address;
     }
@@ -221,7 +224,6 @@ public class PatientRepositoryIT {
         data.setConfidential(STRING_NO);
 
         Address address = p.getAddress();
-        address.setRuralWardId(null);
         address.setHoldingNumber(null);
         address.setStreet(null);
         address.setVillage(null);
@@ -268,7 +270,6 @@ public class PatientRepositoryIT {
         PatientData savedPatient = patientRepository.findByHealthId(healthId);
 
         Address address = savedPatient.getAddress();
-        address.setRuralWardId(null);
         address.setHoldingNumber(null);
         address.setStreet(null);
         address.setVillage(null);

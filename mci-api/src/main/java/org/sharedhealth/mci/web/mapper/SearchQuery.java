@@ -34,6 +34,9 @@ public class SearchQuery extends PaginationQuery {
     private String divisionId;
     private String districtId;
     private String upazilaId;
+    private String cityCorporationId;
+    private String unionOrUrbanWardId;
+    private String ruralWardId;
 
     @JsonProperty("sur_name")
     @Pattern(regexp = "^(\\s*)([A-Za-z0-9]{1,25})(\\b\\s*$)", message = ERROR_CODE_PATTERN)
@@ -93,9 +96,14 @@ public class SearchQuery extends PaginationQuery {
 
     public void setPresent_address(String present_address) {
         this.present_address = present_address;
+        divisionId = districtId = upazilaId = cityCorporationId = unionOrUrbanWardId = ruralWardId = null;
+
         if (present_address.length() > 1) this.divisionId = present_address.substring(0, 2);
         if (present_address.length() > 3) this.districtId = present_address.substring(2, 4);
         if (present_address.length() > 5) this.upazilaId = present_address.substring(4, 6);
+        if (present_address.length() > 7) this.cityCorporationId = present_address.substring(6, 8);
+        if (present_address.length() > 9) this.unionOrUrbanWardId = present_address.substring(8, 10);
+        if (present_address.length() > 11) this.ruralWardId = present_address.substring(10, 12);
     }
 
     @Override
@@ -125,6 +133,18 @@ public class SearchQuery extends PaginationQuery {
 
     public String getUpazilaId() {
         return upazilaId;
+    }
+
+    public String getCityCorporationId() {
+        return cityCorporationId;
+    }
+
+    public String getUnionOrUrbanWardId() {
+        return unionOrUrbanWardId;
+    }
+
+    public String getRuralWardId() {
+        return ruralWardId;
     }
 
     public String getSur_name() {
@@ -196,9 +216,6 @@ public class SearchQuery extends PaginationQuery {
         if (StringUtils.isNotBlank(country_code)) return false;
         if (StringUtils.isNotBlank(area_code)) return false;
         if (StringUtils.isNotBlank(extension)) return false;
-        if (StringUtils.isNotBlank(divisionId)) return false;
-        if (StringUtils.isNotBlank(districtId)) return false;
-        if (StringUtils.isNotBlank(upazilaId)) return false;
         if (StringUtils.isNotBlank(household_code)) return false;
 
         return true;
@@ -215,8 +232,6 @@ public class SearchQuery extends PaginationQuery {
         if (area_code != null ? !area_code.equals(that.area_code) : that.area_code != null) return false;
         if (bin_brn != null ? !bin_brn.equals(that.bin_brn) : that.bin_brn != null) return false;
         if (country_code != null ? !country_code.equals(that.country_code) : that.country_code != null) return false;
-        if (districtId != null ? !districtId.equals(that.districtId) : that.districtId != null) return false;
-        if (divisionId != null ? !divisionId.equals(that.divisionId) : that.divisionId != null) return false;
         if (extension != null ? !extension.equals(that.extension) : that.extension != null) return false;
         if (given_name != null ? !given_name.equals(that.given_name) : that.given_name != null) return false;
         if (nid != null ? !nid.equals(that.nid) : that.nid != null) return false;
@@ -225,7 +240,6 @@ public class SearchQuery extends PaginationQuery {
             return false;
         if (sur_name != null ? !sur_name.equals(that.sur_name) : that.sur_name != null) return false;
         if (uid != null ? !uid.equals(that.uid) : that.uid != null) return false;
-        if (upazilaId != null ? !upazilaId.equals(that.upazilaId) : that.upazilaId != null) return false;
         if (household_code != null ? !household_code.equals(that.household_code) : that.household_code != null) return false;
 
         return true;
@@ -238,9 +252,6 @@ public class SearchQuery extends PaginationQuery {
         result = 31 * result + (bin_brn != null ? bin_brn.hashCode() : 0);
         result = 31 * result + (uid != null ? uid.hashCode() : 0);
         result = 31 * result + (present_address != null ? present_address.hashCode() : 0);
-        result = 31 * result + (divisionId != null ? divisionId.hashCode() : 0);
-        result = 31 * result + (districtId != null ? districtId.hashCode() : 0);
-        result = 31 * result + (upazilaId != null ? upazilaId.hashCode() : 0);
         result = 31 * result + (sur_name != null ? sur_name.hashCode() : 0);
         result = 31 * result + (given_name != null ? given_name.hashCode() : 0);
         result = 31 * result + (phone_no != null ? phone_no.hashCode() : 0);
