@@ -6,16 +6,12 @@ import org.sharedhealth.mci.web.mapper.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.List;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.UUID;
+import java.util.*;
 
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
-import static org.sharedhealth.mci.web.utils.JsonConstants.GENDER;
-import static org.sharedhealth.mci.web.utils.JsonConstants.OCCUPATION;
+import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
 public class PatientRepositoryTest {
 
@@ -105,6 +101,75 @@ public class PatientRepositoryTest {
         TreeSet<PendingApproval> result = patientRepository.updatePendingApprovals(pendingApprovals, patient, false);
         assertNotNull(result);
         assertEquals(0, result.size());
+    }
+
+    @Test
+    public void shouldFindRequestedBy() {
+        PatientData requestData = new PatientData();
+        requestData.setGivenName("John");
+        requestData.setAddress(new Address("10", "20", "30"));
+
+        TreeSet<PendingApproval> pendingApprovals = new TreeSet<>();
+        pendingApprovals.add(buildPendingApprovalForGivenName());
+        pendingApprovals.add(buildPendingApprovalForAddress());
+
+        Map<String, Set<String>> requesters = patientRepository.findRequestedBy(pendingApprovals, requestData);
+
+        assertNotNull(requesters);
+        assertEquals(2, requesters.size());
+
+        assertNotNull(requesters.get(GIVEN_NAME));
+        assertEquals(3, requesters.get(GIVEN_NAME).size());
+        assertTrue(requesters.get(GIVEN_NAME).containsAll(asList("Bahmni1", "Bahmni2", "Bahmni3")));
+
+        assertNotNull(requesters.get(PRESENT_ADDRESS));
+        assertEquals(3, requesters.get(PRESENT_ADDRESS).size());
+        assertTrue(requesters.get(PRESENT_ADDRESS).containsAll(asList("CHW1", "CHW2", "CHW3")));
+    }
+
+    public PendingApproval buildPendingApprovalForGivenName() {
+        PendingApproval pendingApproval = new PendingApproval();
+        pendingApproval.setName(GIVEN_NAME);
+        pendingApproval.setCurrentValue("Harry");
+        TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap = new TreeMap<>();
+        for (int i = 1; i <= 3; i++) {
+            PendingApprovalFieldDetails fieldDetails = new PendingApprovalFieldDetails();
+            fieldDetails.setValue("John");
+            fieldDetails.setRequestedBy("Bahmni" + i);
+            fieldDetailsMap.put(timeBased(), fieldDetails);
+        }
+        PendingApprovalFieldDetails fieldDetails = new PendingApprovalFieldDetails();
+        fieldDetails.setValue("Joe");
+        fieldDetails.setRequestedBy("Bahmni");
+        fieldDetailsMap.put(timeBased(), fieldDetails);
+
+        pendingApproval.setFieldDetails(fieldDetailsMap);
+        return pendingApproval;
+    }
+
+    public PendingApproval buildPendingApprovalForAddress() {
+        PendingApproval pendingApproval = new PendingApproval();
+        pendingApproval.setName(PRESENT_ADDRESS);
+        pendingApproval.setCurrentValue("Harry");
+        TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap = new TreeMap<>();
+        for (int i = 1; i <= 3; i++) {
+            PendingApprovalFieldDetails fieldDetails = new PendingApprovalFieldDetails();
+            fieldDetails.setValue(new Address("10", "20", "30"));
+            fieldDetails.setRequestedBy("CHW" + i);
+            fieldDetailsMap.put(timeBased(), fieldDetails);
+        }
+        PendingApprovalFieldDetails fieldDetails1 = new PendingApprovalFieldDetails();
+        fieldDetails1.setValue(new Address("10", "20", "30"));
+        fieldDetails1.setRequestedBy("CHW1");
+        fieldDetailsMap.put(timeBased(), fieldDetails1);
+
+        PendingApprovalFieldDetails fieldDetails2 = new PendingApprovalFieldDetails();
+        fieldDetails2.setValue(new Address("10", "20", "31"));
+        fieldDetails2.setRequestedBy("CHW");
+        fieldDetailsMap.put(timeBased(), fieldDetails2);
+
+        pendingApproval.setFieldDetails(fieldDetailsMap);
+        return pendingApproval;
     }
 
     @Test
@@ -207,11 +272,11 @@ public class PatientRepositoryTest {
     private List<PatientData> getFilteredPatientsListBySearchQuery(SearchQuery searchQuery) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         Method method = PatientRepository.class.getDeclaredMethod("filterPatients", List.class, SearchQuery.class);
         method.setAccessible(true);
-        return (List<PatientData>)method.invoke(patientRepository, createPatientLists(), searchQuery);
+        return (List<PatientData>) method.invoke(patientRepository, createPatientLists(), searchQuery);
     }
 
     private SearchQuery createSearchQuery(String index) {
-        return createSearchQuery(index,index,index,index,index,index,index);
+        return createSearchQuery(index, index, index, index, index, index, index);
     }
 
     private SearchQuery createSearchQuery(String nid, String uid, String brn, String household, String givenname, String surname, String phn) {
@@ -229,11 +294,11 @@ public class PatientRepositoryTest {
 
     private List<PatientData> createPatientLists() {
         return asList(
-             createPatient("1"),
-             createPatient("2"),
-             createPatient("3"),
-             createPatient("4"),
-             createPatient("6")
+                createPatient("1"),
+                createPatient("2"),
+                createPatient("3"),
+                createPatient("4"),
+                createPatient("6")
         );
     }
 
@@ -260,7 +325,7 @@ public class PatientRepositoryTest {
 
         if (geoCode.length() > 1) division = geoCode.substring(0, 2);
         if (geoCode.length() > 3) district = geoCode.substring(2, 4);
-        if (geoCode.length() > 5) upazila= geoCode.substring(4, 6);
+        if (geoCode.length() > 5) upazila = geoCode.substring(4, 6);
         if (geoCode.length() > 7) cityCorp = geoCode.substring(6, 8);
         if (geoCode.length() > 9) union = geoCode.substring(8, 10);
         if (geoCode.length() > 11) ruralWard = geoCode.substring(10, 12);
@@ -284,6 +349,7 @@ public class PatientRepositoryTest {
         for (int i = 1; i <= 3; i++) {
             PendingApprovalFieldDetails fieldDetails = new PendingApprovalFieldDetails();
             fieldDetails.setValue("0" + i);
+            fieldDetails.setRequestedBy("Bahmni" + i);
             fieldDetailsMap.put(timeBased(), fieldDetails);
         }
         pendingApproval.setFieldDetails(fieldDetailsMap);
@@ -297,6 +363,7 @@ public class PatientRepositoryTest {
         TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap = new TreeMap<>();
         PendingApprovalFieldDetails fieldDetails = new PendingApprovalFieldDetails();
         fieldDetails.setValue("F");
+        fieldDetails.setRequestedBy("Bahmni");
         fieldDetailsMap.put(timeBased(), fieldDetails);
         pendingApproval.setFieldDetails(fieldDetailsMap);
         return pendingApproval;

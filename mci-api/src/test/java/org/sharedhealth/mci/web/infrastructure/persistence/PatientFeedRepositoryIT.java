@@ -19,10 +19,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.*;
@@ -123,12 +120,14 @@ public class PatientFeedRepositoryIT {
         updateRequest2.setGender("F");
         Address newAddress = new Address("99", "88", "77");
         updateRequest2.setAddress(newAddress);
+        updateRequest2.setRequestedBy(REQUESTED_BY);
         patientRepository.update(updateRequest2, healthId);
 
         PatientData acceptRequest = new PatientData();
         acceptRequest.setHealthId(healthId);
         acceptRequest.setGender("F");
         acceptRequest.setAddress(newAddress);
+        acceptRequest.setRequestedBy(REQUESTED_BY);
         PatientData existingPatient = patientRepository.findByHealthId(healthId);
         patientRepository.processPendingApprovals(acceptRequest, existingPatient, true);
 
@@ -179,6 +178,7 @@ public class PatientFeedRepositoryIT {
         PatientData updateRequest = new PatientData();
         Address newAddress = new Address("99", "88", "77");
         updateRequest.setAddress(newAddress);
+        updateRequest.setRequestedBy(REQUESTED_BY);
         patientRepository.update(updateRequest, healthId);
 
         assertUpdateLogEntry(healthId, since, false);
@@ -197,10 +197,18 @@ public class PatientFeedRepositoryIT {
 
         if (shouldFind) {
             assertEquals(healthId, patientUpdateLogs.get(0).getHealthId());
-            assertEquals(REQUESTED_BY, patientUpdateLogs.get(0).getRequestedBy());
+            assertEquals(buildRequestedBy(), patientUpdateLogs.get(0).getRequestedBy());
         } else {
             assertEquals(0, patientUpdateLogs.size());
         }
+    }
+
+    private String buildRequestedBy() {
+        Map<String, Set<String>> requestedBy = new HashMap<>();
+        Set<String> requester = new HashSet<>();
+        requester.add(REQUESTED_BY);
+        requestedBy.put("ALL_FIELDS", requester);
+        return writeValueAsString(requestedBy);
     }
 
     @Test
@@ -215,6 +223,7 @@ public class PatientFeedRepositoryIT {
         PatientData updateRequest = new PatientData();
         updateRequest.setHealthId(healthId);
         updateRequest.setGivenName("Update1");
+        updateRequest.setRequestedBy(REQUESTED_BY);
         patientRepository.update(updateRequest, healthId);
         updateRequest.setGivenName("Update2");
         patientRepository.update(updateRequest, healthId);
@@ -236,6 +245,7 @@ public class PatientFeedRepositoryIT {
         PatientData updateRequest = new PatientData();
         updateRequest.setHealthId(healthId);
         updateRequest.setGivenName("Update1");
+        updateRequest.setRequestedBy(REQUESTED_BY);
         patientRepository.update(updateRequest, healthId);
 
         patientUpdateLogs = feedRepository.findPatientsUpdatedSince(since, limit, null);

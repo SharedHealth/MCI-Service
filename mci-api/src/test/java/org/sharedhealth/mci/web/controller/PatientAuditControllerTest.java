@@ -13,12 +13,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
+import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.verify;
@@ -74,7 +72,9 @@ public class PatientAuditControllerTest {
                 .andExpect(jsonPath("$.created_at", is(patient.getCreatedAtAsString())))
 
                 .andExpect(jsonPath("$.updates.[0].event_time", is(eventTime)))
-                .andExpect(jsonPath("$.updates.[0].requested_by", is("bahmni")))
+                .andExpect(jsonPath("$.updates.[0].requested_by.given_name", is(asList("Bahmni1"))))
+                .andExpect(jsonPath("$.updates.[0].requested_by.occupation", is(asList("Bahmni2"))))
+                .andExpect(jsonPath("$.updates.[0].requested_by.edu_level", is(asList("Bahmni3"))))
                 .andExpect(jsonPath("$.updates.[0].approved_by", is("admin")))
 
                 .andExpect(jsonPath("$.updates.[0].change_set.given_name", is(notNullValue())))
@@ -98,10 +98,18 @@ public class PatientAuditControllerTest {
         PatientAuditLogData log = new PatientAuditLogData();
         log.setEventTime(eventTime);
         log.setChangeSet(buildChangeSets());
-        log.setRequestedBy("bahmni");
         log.setApprovedBy("admin");
+        log.addRequestedBy(GIVEN_NAME, buildRequesters("Bahmni1"));
+        log.addRequestedBy(OCCUPATION, buildRequesters("Bahmni2"));
+        log.addRequestedBy(EDU_LEVEL, buildRequesters("Bahmni3"));
         logs.add(log);
         return logs;
+    }
+
+    private Set<String> buildRequesters(String requester) {
+        Set<String> requesters = new HashSet<>();
+        requesters.add(requester);
+        return requesters;
     }
 
     private Map<String, Map<String, Object>> buildChangeSets() {

@@ -46,6 +46,7 @@ public class PatientRepository extends BaseRepository {
     private static final Logger logger = LoggerFactory.getLogger(PatientRepository.class);
 
     private static final long QUERY_EXEC_DELAY = 1;
+    private static final String ALL_FIELDS = "ALL_FIELDS";
 
     private UidGenerator uidGenerator;
     private PendingApprovalFilter pendingApprovalFilter;
@@ -87,20 +88,24 @@ public class PatientRepository extends BaseRepository {
 
     public MCIResponse update(PatientData updateRequest, String healthId) {
         updateRequest.setHealthId(healthId);
-        PatientData existingPatientData = this.findByHealthId(healthId);
+        String requester = updateRequest.getRequestedBy();
 
+        PatientData existingPatientData = this.findByHealthId(healthId);
         PatientData newPatientData = this.pendingApprovalFilter.filter(existingPatientData, updateRequest);
-        newPatientData.setRequestedBy(updateRequest.getRequestedBy());
 
         Patient newPatient = mapper.map(newPatientData, existingPatientData);
         newPatient.setHealthId(healthId);
         newPatient.setUpdatedAt(timeBased());
-        newPatient.setUpdatedBy(updateRequest.getRequestedBy());
+        newPatient.setUpdatedBy(requester);
 
         final Batch batch = batch();
         buildUpdatePendingApprovalsBatch(newPatient, existingPatientData, batch);
         buildUpdateBatch(newPatient, existingPatientData, cassandraOps.getConverter(), batch);
-        buildCreateUpdateLogStmt(newPatientData, existingPatientData, cassandraOps.getConverter(), batch, false);
+
+        Map<String, Set<String>> requestedBy = new HashMap<>();
+        buildRequestedBy(requestedBy, ALL_FIELDS, requester);
+        buildCreateUpdateLogStmt(newPatientData, existingPatientData, requestedBy, null, cassandraOps.getConverter(), batch);
+
         cassandraOps.execute(batch);
 
         return new MCIResponse(newPatient.getHealthId(), HttpStatus.ACCEPTED);
@@ -308,17 +313,22 @@ public class PatientRepository extends BaseRepository {
     public String processPendingApprovals(PatientData requestData, PatientData existingPatientData, boolean shouldAccept) {
         Batch batch = batch();
         Patient newPatient;
+        String approvedBy = requestData.getRequestedBy();
+        TreeSet<PendingApproval> existingPendingApprovals = existingPatientData.getPendingApprovals();
+
         if (shouldAccept) {
             newPatient = mapper.map(requestData, existingPatientData);
-            buildCreateUpdateLogStmt(requestData, existingPatientData, cassandraOps.getConverter(), batch, true);
+            Map<String, Set<String>> requestedBy = findRequestedBy(existingPendingApprovals, requestData);
+            buildCreateUpdateLogStmt(requestData, existingPatientData, requestedBy, approvedBy, cassandraOps.getConverter(), batch);
 
         } else {
             newPatient = new Patient();
             newPatient.setHealthId(requestData.getHealthId());
         }
+
         newPatient.setUpdatedAt(timeBased());
-        newPatient.setUpdatedBy(requestData.getRequestedBy());
-        newPatient.setPendingApprovals(existingPatientData.getPendingApprovals());
+        newPatient.setUpdatedBy(approvedBy);
+        newPatient.setPendingApprovals(existingPendingApprovals);
 
         String healthId = requestData.getHealthId();
         UUID lastUpdated = findLatestUuid(newPatient.getPendingApprovals());
@@ -373,5 +383,34 @@ public class PatientRepository extends BaseRepository {
                 it.remove();
             }
         }
+    }
+
+    Map<String, Set<String>> findRequestedBy(TreeSet<PendingApproval> pendingApprovals, PatientData requestData) {
+        Map<String, Set<String>> requestedBy = new HashMap<>();
+        for (PendingApproval pendingApproval : pendingApprovals) {
+            String fieldName = pendingApproval.getName();
+            Object value = requestData.getValue(fieldName);
+
+            if (value != null) {
+                for (PendingApprovalFieldDetails fieldDetails : pendingApproval.getFieldDetails().values()) {
+                    if (value.equals(fieldDetails.getValue())) {
+                        buildRequestedBy(requestedBy, fieldName, fieldDetails.getRequestedBy());
+                    }
+                }
+            }
+        }
+        return requestedBy;
+    }
+
+    private void buildRequestedBy(Map<String, Set<String>> map, String key, String value) {
+        if (value == null) {
+            return;
+        }
+        Set<String> valueList = map.get(key);
+        if (isEmpty(valueList)) {
+            valueList = new TreeSet<>();
+            map.put(key, valueList);
+        }
+        valueList.add(value);
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.web.utils.JsonMapper.readValue;
@@ -26,7 +27,8 @@ public class PatientAuditLogMapper {
         PatientAuditLogData data = new PatientAuditLogData();
         data.setEventTime(toIsoFormat(log.getEventId()));
         data.setChangeSet(buildChangeSet(log.getChangeSet()));
-        data.setRequestedBy(log.getRequestedBy());
+        data.setRequestedBy(readValue(log.getRequestedBy(), new TypeReference<Map<String, Set<String>>>() {
+        }));
         data.setApprovedBy(log.getApprovedBy());
         return data;
     }

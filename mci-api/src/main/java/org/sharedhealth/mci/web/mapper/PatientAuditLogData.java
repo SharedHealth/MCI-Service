@@ -2,7 +2,9 @@ package org.sharedhealth.mci.web.mapper;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
@@ -15,7 +17,7 @@ public class PatientAuditLogData {
     private Map<String, Map<String, Object>> changeSet;
 
     @JsonProperty(REQUESTED_BY)
-    private String requestedBy;
+    private Map<String, Set<String>> requestedBy;
 
     @JsonProperty(APPROVED_BY)
     private String approvedBy;
@@ -36,12 +38,19 @@ public class PatientAuditLogData {
         this.changeSet = changeSet;
     }
 
-    public String getRequestedBy() {
+    public Map<String, Set<String>> getRequestedBy() {
         return requestedBy;
     }
 
-    public void setRequestedBy(String requestedBy) {
+    public void setRequestedBy(Map<String, Set<String>> requestedBy) {
         this.requestedBy = requestedBy;
+    }
+
+    public void addRequestedBy(String fieldName, Set<String> requesters) {
+        if (this.requestedBy == null) {
+            this.requestedBy = new HashMap<>();
+        }
+        this.requestedBy.put(fieldName, requesters);
     }
 
     public String getApprovedBy() {

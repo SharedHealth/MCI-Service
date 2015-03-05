@@ -21,9 +21,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static java.util.Arrays.asList;
@@ -68,15 +66,18 @@ public class PatientAuditRepositoryIT {
 
         PatientData updateRequest = new PatientData();
         updateRequest.setGivenName("John");
+        updateRequest.setRequestedBy("CHW");
         patientRepository.update(updateRequest, healthId);
 
         updateRequest = new PatientData();
         updateRequest.setEducationLevel("02");
+        updateRequest.setRequestedBy("CHW");
         patientRepository.update(updateRequest, healthId);
 
         updateRequest = new PatientData();
         Address address = new Address("10", "20", "31");
         updateRequest.setPermanentAddress(address);
+        updateRequest.setRequestedBy("CHW");
         patientRepository.update(updateRequest, healthId);
 
         auditService.sync();
@@ -126,6 +127,7 @@ public class PatientAuditRepositoryIT {
         PatientData updateRequest = new PatientData();
         updateRequest.setGivenName("John");
         updateRequest.setSurName("Doe");
+        updateRequest.setRequestedBy("Bahmni");
         patientRepository.update(updateRequest, healthId);
 
         auditService.sync();
@@ -144,6 +146,7 @@ public class PatientAuditRepositoryIT {
         PatientAuditLog log1 = new PatientAuditLog();
         log1.setHealthId("h100");
         log1.setEventId(timeBased());
+        log1.setRequestedBy(buildRequestedBy());
         auditRepository.saveOrUpdate(asList(log1));
 
         List<PatientAuditLogData> logs = auditRepository.findByHealthId(log1.getHealthId());
@@ -153,11 +156,20 @@ public class PatientAuditRepositoryIT {
         PatientAuditLog log2 = new PatientAuditLog();
         log2.setHealthId(log1.getHealthId());
         log2.setEventId(log1.getEventId());
+        log2.setRequestedBy(buildRequestedBy());
         auditRepository.saveOrUpdate(asList(log2));
 
         logs = auditRepository.findByHealthId(log1.getHealthId());
         assertNotNull(logs);
         assertEquals(1, logs.size());
+    }
+
+    private String buildRequestedBy() {
+        Map<String, Set<String>> requestedBy = new HashMap<>();
+        Set<String> requester = new HashSet<>();
+        requester.add("CHW");
+        requestedBy.put("ALL_FIELDS", requester);
+        return writeValueAsString(requestedBy);
     }
 
     @After

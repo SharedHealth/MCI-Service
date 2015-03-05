@@ -8,10 +8,7 @@ import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.model.PatientUpdateLog;
 import org.springframework.data.cassandra.convert.CassandraConverter;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
 import static com.datastax.driver.core.querybuilder.Select.Where;
@@ -24,7 +21,8 @@ import static org.springframework.data.cassandra.core.CassandraTemplate.createIn
 public class PatientUpdateLogQueryBuilder {
 
     static void buildCreateUpdateLogStmt(PatientData patientDataToSave, PatientData existingPatientData,
-                                         CassandraConverter converter, Batch batch, boolean isApprovalFlow) {
+                                         Map<String, Set<String>> requestedBy, String approvedBy,
+                                         CassandraConverter converter, Batch batch) {
         PatientUpdateLog patientUpdateLog = new PatientUpdateLog();
         String changeSet = getChangeSet(patientDataToSave, existingPatientData);
 
@@ -32,13 +30,8 @@ public class PatientUpdateLogQueryBuilder {
             patientUpdateLog.setEventId(timeBased());
             patientUpdateLog.setHealthId(existingPatientData.getHealthId());
             patientUpdateLog.setChangeSet(changeSet);
-
-            if (isApprovalFlow) {
-                patientUpdateLog.setApprovedBy(patientDataToSave.getRequestedBy());
-            } else {
-                patientUpdateLog.setRequestedBy(patientDataToSave.getRequestedBy());
-            }
-
+            patientUpdateLog.setRequestedBy(writeValueAsString(requestedBy));
+            patientUpdateLog.setApprovedBy(approvedBy);
             batch.add(createInsertQuery(CF_PATIENT_UPDATE_LOG, patientUpdateLog, null, converter));
         }
     }
