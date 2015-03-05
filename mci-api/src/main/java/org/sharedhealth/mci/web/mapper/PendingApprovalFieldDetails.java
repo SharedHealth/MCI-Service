@@ -4,23 +4,23 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.web.utils.JsonConstants.CREATED_AT;
-import static org.sharedhealth.mci.web.utils.JsonConstants.FACILITY_ID;
+import static org.sharedhealth.mci.web.utils.JsonConstants.REQUESTED_BY;
 
 public class PendingApprovalFieldDetails {
 
-    @JsonProperty(FACILITY_ID)
-    private String facilityId;
+    @JsonProperty(REQUESTED_BY)
+    private String requestedBy;
 
     private Object value;
 
     private String createdAt;
 
-    public String getFacilityId() {
-        return facilityId;
+    public String getRequestedBy() {
+        return requestedBy;
     }
 
-    public void setFacilityId(String facilityId) {
-        this.facilityId = facilityId;
+    public void setRequestedBy(String requestedBy) {
+        this.requestedBy = requestedBy;
     }
 
     public Object getValue() {
@@ -53,7 +53,6 @@ public class PendingApprovalFieldDetails {
         PendingApprovalFieldDetails that = (PendingApprovalFieldDetails) o;
 
         if (!createdAt.equals(that.createdAt)) return false;
-        if (!facilityId.equals(that.facilityId)) return false;
         if (!value.equals(that.value)) return false;
 
         return true;
@@ -61,16 +60,15 @@ public class PendingApprovalFieldDetails {
 
     @Override
     public int hashCode() {
-        int result = facilityId.hashCode();
-        result = 31 * result + value.hashCode();
-        result = 31 * result + createdAt.hashCode();
+        int result = value != null ? value.hashCode() : 0;
+        result = 31 * result + (createdAt != null ? createdAt.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("PendingApprovalFieldDetails{");
-        sb.append("facilityId='").append(facilityId).append('\'');
+        sb.append("requestedBy='").append(requestedBy).append('\'');
         sb.append(", value=").append(value);
         sb.append(", createdAt='").append(createdAt).append('\'');
         sb.append('}');

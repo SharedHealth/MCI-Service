@@ -263,7 +263,7 @@ public class CatchmentControllerTest {
         TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap = new TreeMap<>();
         UUID timeuuid = timeBased();
         PendingApprovalFieldDetails approvalFieldDetails = new PendingApprovalFieldDetails();
-        approvalFieldDetails.setFacilityId("facility-100");
+        approvalFieldDetails.setRequestedBy("facility-100");
         approvalFieldDetails.setValue("some value");
         approvalFieldDetails.setCreatedAt(unixTimestamp(timeuuid));
         fieldDetailsMap.put(timeuuid, approvalFieldDetails);
@@ -285,7 +285,7 @@ public class CatchmentControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.results[0].field_name", is(OCCUPATION)))
                 .andExpect(jsonPath("$.results[0].current_value", is("curr val")))
-                .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".facility_id", is("facility-100")))
+                .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".requested_by", is("facility-100")))
                 .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".value", is("some value")))
                 .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".created_at", is(toIsoFormat(unixTimestamp(timeuuid)))));
 

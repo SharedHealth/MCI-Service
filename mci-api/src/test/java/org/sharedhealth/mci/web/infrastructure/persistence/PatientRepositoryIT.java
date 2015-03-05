@@ -1561,6 +1561,7 @@ public class PatientRepositoryIT {
         String healthId = patientRepository.create(data).getId();
         PatientData patientData = new PatientData();
         patientData.setGender("F");
+        patientData.setRequestedBy("10000059");
         patientRepository.update(patientData, healthId);
         Patient patient = cassandraOps.selectOneById(Patient.class, healthId);
 
@@ -1577,7 +1578,7 @@ public class PatientRepositoryIT {
         assertEquals(1, fieldDetailsMap.size());
         PendingApprovalFieldDetails fieldDetails = fieldDetailsMap.values().iterator().next();
         assertEquals("F", fieldDetails.getValue());
-        assertEquals("10000059", fieldDetails.getFacilityId());
+        assertEquals("10000059", fieldDetails.getRequestedBy());
 
         List<PendingApprovalMapping> mappings = findAllPendingApprovalMappings();
         List<String> catchmentIds = buildCatchment(data.getAddress()).getAllIds();
@@ -1593,10 +1594,12 @@ public class PatientRepositoryIT {
         String healthId = patientRepository.create(data).getId();
         PatientData patientData = new PatientData();
         patientData.setGender("F");
+        patientData.setRequestedBy("10000059");
         patientRepository.update(patientData, healthId);
         Thread.sleep(0, 10);
         patientData = new PatientData();
         patientData.setGender("O");
+        patientData.setRequestedBy("10000060");
         patientRepository.update(patientData, healthId);
         Patient patient = cassandraOps.selectOneById(Patient.class, healthId);
 
@@ -1615,11 +1618,11 @@ public class PatientRepositoryIT {
         Iterator<PendingApprovalFieldDetails> fieldDetailsIterator = fieldDetailsMap.values().iterator();
         PendingApprovalFieldDetails fieldDetails1 = fieldDetailsIterator.next();
         assertEquals("O", fieldDetails1.getValue());
-        assertEquals("10000059", fieldDetails1.getFacilityId());
+        assertEquals("10000060", fieldDetails1.getRequestedBy());
 
         PendingApprovalFieldDetails fieldDetails2 = fieldDetailsIterator.next();
         assertEquals("F", fieldDetails2.getValue());
-        assertEquals("10000059", fieldDetails2.getFacilityId());
+        assertEquals("10000059", fieldDetails2.getRequestedBy());
 
         List<PendingApprovalMapping> mappings = findAllPendingApprovalMappings();
         List<String> catchmentIds = buildCatchment(data.getAddress()).getAllIds();

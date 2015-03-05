@@ -17,6 +17,7 @@ import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static java.util.Arrays.asList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
@@ -54,10 +55,11 @@ public class PendingApprovalFilterTest {
         updateRequest.setGender("F");
         updateRequest.setDateOfDeath("");
         updateRequest.setReligion("2");
+        updateRequest.setRequestedBy("Bahmni");
 
         PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
-        verify(approvalFieldService, Mockito.atLeastOnce()).getProperty(GENDER);
-        assertPendingApprovals(existingPatient, newPatient, 2);
+        verify(approvalFieldService, atLeastOnce()).getProperty(GENDER);
+        assertPendingApprovals(existingPatient, newPatient, 2, updateRequest.getRequestedBy());
     }
 
     @Test
@@ -66,13 +68,14 @@ public class PendingApprovalFilterTest {
 
         PatientData updateRequest = buildPatientData();
         updateRequest.setGender("F");
+        updateRequest.setRequestedBy("Bahmni");
 
         PatientData existingPatient = buildPatientData();
         existingPatient.setGender("M");
 
 
         PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
-        assertPendingApprovals(existingPatient, newPatient, 1);
+        assertPendingApprovals(existingPatient, newPatient, 1, updateRequest.getRequestedBy());
 
         updateRequest = buildPatientData();
         updateRequest.setGender("O");
@@ -119,6 +122,7 @@ public class PendingApprovalFilterTest {
         updateRequest.setAddress(presentAddress);
         Address permanentAddress = new Address("11", "22", "33");
         updateRequest.setPermanentAddress(permanentAddress);
+        updateRequest.setRequestedBy("Bahmni");
 
         PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
 
@@ -127,7 +131,7 @@ public class PendingApprovalFilterTest {
         verify(approvalFieldService).getProperty(PRESENT_ADDRESS);
         verify(approvalFieldService).getProperty(PERMANENT_ADDRESS);
 
-        assertPendingApprovals(existingPatient, newPatient, 4);
+        assertPendingApprovals(existingPatient, newPatient, 4, updateRequest.getRequestedBy());
     }
 
     @Test
@@ -223,35 +227,35 @@ public class PendingApprovalFilterTest {
         assertTrue(isEmpty(newPatient.getPendingApprovals()));
         assertEquals("2001-02-10", newPatient.getDateOfBirth());
 
-        verify(approvalFieldService, Mockito.atLeastOnce()).getProperty(Mockito.anyString());
+        verify(approvalFieldService, atLeastOnce()).getProperty(Mockito.anyString());
     }
 
-    private void assertPendingApprovals(PatientData existingPatient, PatientData newPatient, int pendingApprovalsCount) {
+    private void assertPendingApprovals(PatientData existingPatient, PatientData newPatient, int pendingApprovalsCount, String requestedBy) {
         TreeSet<PendingApproval> pendingApprovals = newPatient.getPendingApprovals();
         assertNotNull(pendingApprovals);
         assertEquals(pendingApprovalsCount, pendingApprovals.size());
 
         for (PendingApproval pendingApproval : pendingApprovals) {
             if (GENDER.equals(pendingApproval.getName())) {
-                assertFieldDetails(pendingApproval.getFieldDetails(), "F");
+                assertFieldDetails(pendingApproval.getFieldDetails(), "F", requestedBy);
                 assertEquals(existingPatient.getGender(), newPatient.getGender());
 
             } else if (PHONE_NUMBER.equals(pendingApproval.getName())) {
                 PhoneNumber phoneNumber = new PhoneNumber();
                 phoneNumber.setNumber("123");
-                assertFieldDetails(pendingApproval.getFieldDetails(), phoneNumber);
+                assertFieldDetails(pendingApproval.getFieldDetails(), phoneNumber, requestedBy);
                 assertEquals(existingPatient.getPhoneNumber(), newPatient.getPhoneNumber());
 
             } else if (PRESENT_ADDRESS.equals(pendingApproval.getName())) {
-                assertFieldDetails(pendingApproval.getFieldDetails(), new Address("10", "20", "30"));
+                assertFieldDetails(pendingApproval.getFieldDetails(), new Address("10", "20", "30"), requestedBy);
                 assertEquals(existingPatient.getAddress(), newPatient.getAddress());
 
             } else if (PERMANENT_ADDRESS.equals(pendingApproval.getName())) {
-                assertFieldDetails(pendingApproval.getFieldDetails(), new Address("11", "22", "33"));
+                assertFieldDetails(pendingApproval.getFieldDetails(), new Address("11", "22", "33"), requestedBy);
                 assertEquals(existingPatient.getPermanentAddress(), newPatient.getPermanentAddress());
 
             } else if (RELIGION.equals(pendingApproval.getName())) {
-                assertFieldDetails(pendingApproval.getFieldDetails(), "2");
+                assertFieldDetails(pendingApproval.getFieldDetails(), "2", requestedBy);
                 assertEquals(existingPatient.getReligion(), newPatient.getReligion());
 
             } else {
@@ -260,12 +264,12 @@ public class PendingApprovalFilterTest {
         }
     }
 
-    private void assertFieldDetails(TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap, Object value) {
+    private void assertFieldDetails(TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap, Object value, String requestedBy) {
         assertNotNull(fieldDetailsMap);
         assertEquals(1, fieldDetailsMap.size());
         PendingApprovalFieldDetails fieldDetails = fieldDetailsMap.values().iterator().next();
         assertEquals(value, fieldDetails.getValue());
-        assertNotNull(fieldDetails.getFacilityId());
+        assertEquals(requestedBy, fieldDetails.getRequestedBy());
         long expectedCreatedAt = unixTimestamp(fieldDetailsMap.keySet().iterator().next());
         assertEquals(toIsoFormat(expectedCreatedAt), fieldDetails.getCreatedAt());
     }

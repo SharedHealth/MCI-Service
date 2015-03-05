@@ -21,9 +21,9 @@ public class PendingApprovalFilter {
 
     private static final String NEEDS_APPROVAL = "NA";
     private static final String NON_UPDATABLE = "NU";
-    private static final String DUMMY_FACILITY = "10000059";
 
     private PatientData newPatient;
+    private String requestedBy;
     private ApprovalFieldService properties;
 
     @Autowired
@@ -33,6 +33,7 @@ public class PendingApprovalFilter {
 
     public PatientData filter(PatientData existingPatient, PatientData updateRequest) {
         this.newPatient = new PatientData();
+        this.requestedBy = updateRequest.getRequestedBy();
         newPatient.setPendingApprovals(existingPatient.getPendingApprovals());
 
         newPatient.setHealthId(processString(HID, existingPatient.getHealthId(), updateRequest.getHealthId()));
@@ -120,7 +121,7 @@ public class PendingApprovalFilter {
         TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap = new TreeMap<>();
         PendingApprovalFieldDetails fieldDetails = new PendingApprovalFieldDetails();
         fieldDetails.setValue(newValue);
-        fieldDetails.setFacilityId(DUMMY_FACILITY);
+        fieldDetails.setRequestedBy(this.requestedBy);
         UUID uuid = timeBased();
         fieldDetails.setCreatedAt(unixTimestamp(uuid));
         fieldDetailsMap.put(uuid, fieldDetails);
