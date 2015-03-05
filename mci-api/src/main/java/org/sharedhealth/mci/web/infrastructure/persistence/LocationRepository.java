@@ -68,7 +68,7 @@ public class LocationRepository extends BaseRepository {
         return mapper.map(locations);
     }
 
-    public void saveOrUpdateLocationData(List<LocationData> locationDataList) {
+    public boolean saveOrUpdateLocationData(List<LocationData> locationDataList) {
 
         LocationData existingLocationData;
         List<Location> insertLocations = new ArrayList<>();
@@ -96,6 +96,8 @@ public class LocationRepository extends BaseRepository {
         if(updatedLocations.size() > 0) {
             cassandraOps.update(updatedLocations);
         }
+
+        return true;
 
     }
 

@@ -22,6 +22,7 @@ import java.util.concurrent.ExecutionException;
 public class FacilityRegistryWrapper {
 
     public static final String AUTH_KEY = "X-Auth-Token";
+    public static final String HRM_CLIENT_ID = "client_id";
     private AsyncRestTemplate mciRestTemplate;
     private MCIProperties mciProperties;
 
@@ -35,6 +36,7 @@ public class FacilityRegistryWrapper {
     private HttpEntity getHttpEntityWithAuthenticationHeader() {
         MultiValueMap<String, String> header = new LinkedMultiValueMap<>();
         header.add(AUTH_KEY, mciProperties.getFacilityRegistryToken());
+        header.add(HRM_CLIENT_ID, mciProperties.getHrmClientId());
         return new HttpEntity(header);
     }
 

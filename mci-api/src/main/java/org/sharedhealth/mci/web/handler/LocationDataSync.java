@@ -16,7 +16,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.client.AsyncRestTemplate;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -28,23 +27,10 @@ public class LocationDataSync {
 
     private final Logger logger = Logger.getLogger(LocationDataSync.class);
     public static final String AUTH_KEY = "X-Auth-Token";
+    public static final String HRM_CLIENT_ID = "client_id";
 
     private AsyncRestTemplate mciRestTemplate;
     private MCIProperties mciProperties;
-
-    public static final String LR_DIVISION_URI_PATH = "/list/division";
-    public static final String LR_DISTRICT_URI_PATH = "/list/district";
-    public static final String LR_UPAZILA_URI_PATH = "/list/upazila";
-    public static final String LR_PAURASAVA_PATH = "/list/paurasava";
-    public static final String LR_UNION_URI_PATH = "/list/union";
-    public static final String LR_WARD_URI_PATH = "/list/ward";
-    public static final String DIVISION_TYPE = "DIVISION";
-
-    public static final String DISTRICT_TYPE = "DISTRICT";
-    public static final String UPAZILA_TYPE = "UPAZILA";
-    public static final String PAURASAVA_TYPE = "PAURASAVA";
-    public static final String UNION_TYPE = "UNION";
-    public static final String WARD_TYPE = "WARD";
 
     private static final int DEFAULT_LIMIT = 100;
     private static final String EXTRA_FILTER_PATTERN = "?limit=%s";
@@ -63,19 +49,11 @@ public class LocationDataSync {
     private HttpEntity getHttpEntityWithAuthenticationHeader() {
         MultiValueMap<String, String> header = new LinkedMultiValueMap<>();
         header.add(AUTH_KEY, mciProperties.getLocaitonRegistryToken());
+        header.add(HRM_CLIENT_ID, mciProperties.getHrmClientId());
         return new HttpEntity(header);
     }
 
-    public void sync() throws IOException {
-        syncLRData(LR_DIVISION_URI_PATH, DIVISION_TYPE);
-        syncLRData(LR_DISTRICT_URI_PATH, DISTRICT_TYPE);
-        syncLRData(LR_UPAZILA_URI_PATH, UPAZILA_TYPE);
-        syncLRData(LR_PAURASAVA_PATH, PAURASAVA_TYPE);
-        syncLRData(LR_UNION_URI_PATH, UNION_TYPE);
-        syncLRData(LR_WARD_URI_PATH, WARD_TYPE);
-    }
-
-    private void syncLRData(String uri, String type) {
+    public boolean syncLRData(String uri, String type) {
 
         List<LocationData> lastRetrieveList;
 
@@ -95,6 +73,8 @@ public class LocationDataSync {
             logger.info(e.getMessage(), e);
             throw new RuntimeException(e);
         }
+
+        return true;
     }
 
     private List<LocationData> getNextChunkOfDataFromLR(String url) throws ExecutionException, InterruptedException {

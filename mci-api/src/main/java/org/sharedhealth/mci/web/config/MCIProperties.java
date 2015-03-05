@@ -31,6 +31,8 @@ public class MCIProperties {
     private String identityServerBaseUrl;
     @Value("${FR_CACHE_TTL}")
     private int frCacheTtl;
+    @Value("${HRM_CLIENT_ID}")
+    private String hrmClientId;
 
     public String getCassandraKeySpace() {
         return cassandraKeySpace;
@@ -74,5 +76,9 @@ public class MCIProperties {
 
     public int getFrCacheTtl() {
         return frCacheTtl;
+    }
+
+    public String getHrmClientId() {
+        return hrmClientId;
     }
 }

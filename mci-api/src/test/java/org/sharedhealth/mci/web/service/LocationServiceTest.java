@@ -7,12 +7,15 @@ import org.mockito.Mockito;
 import org.sharedhealth.mci.web.infrastructure.persistence.LocationRepository;
 import org.sharedhealth.mci.web.mapper.LocationCriteria;
 import org.sharedhealth.mci.web.mapper.LocationData;
+import org.sharedhealth.mci.web.model.LRMarker;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class LocationServiceTest {
@@ -37,7 +40,7 @@ public class LocationServiceTest {
         locationData.setActive("1");
         Mockito.when(locationRepository.findByGeoCode("10")).thenReturn(locationData);
         LocationData locationData1 = locationService.findByGeoCode("10");
-        assertNotNull(locationData1);
+        assertEquals("10", locationData1.getCode());
     }
 
     @Test
@@ -57,6 +60,54 @@ public class LocationServiceTest {
         Mockito.when(locationRepository.findLocationsByParent(locationCriteria)).thenReturn(locationDataList);
 
         List<LocationData> locationDataList1 = locationService.findLocationsByParent(locationCriteria);
-        assertNotNull(locationDataList1);
+        assertEquals("10", locationDataList1.get(0).getCode());
+    }
+
+    @Test
+    public void shouldSaveLocationDataIfNotExist() throws Exception {
+
+        List<LocationData> locationDataList = new ArrayList<>();
+        LocationData locationData = new LocationData();
+
+        locationData.setCode("10");
+        locationData.setParent("00");
+        locationData.setActive("1");
+        locationDataList.add(locationData);
+
+        Mockito.when(locationRepository.saveOrUpdateLocationData(locationDataList)).thenReturn(true);
+        assertTrue(locationService.saveOrUpdateLocationData(locationDataList));
+    }
+
+    @Test
+    public void shouldReturnLRMarkerDataIfExist() throws Exception {
+
+        LRMarker lrMarker = new LRMarker();
+        lrMarker.setLastSync("2015-03-04");
+        lrMarker.setType("DIVISION");
+
+        Mockito.when(locationRepository.getLRMarkerData("DIVSION")).thenReturn(lrMarker);
+
+        lrMarker = locationService.getLRMarkerData("DIVSION");
+
+        assertEquals("2015-03-04", lrMarker.getLastSync());
+        assertEquals("DIVISION", lrMarker.getType());
+
+    }
+
+    @Test
+    public void shouldReturnNullIfLRMarkerDataNotExist() throws Exception {
+
+        Mockito.when(locationRepository.getLRMarkerData("DIVSION")).thenReturn(null);
+
+        LRMarker lrMarker = locationService.getLRMarkerData("DIVSION");
+        assertNull(lrMarker);
+
+    }
+
+    @Test
+    public void shouldSaveLRMarkerDataIfNotExist() throws Exception {
+
+        Mockito.when(locationRepository.saveOrUpdateLRMarkerData("DIVISION", "2015-03-04")).thenReturn(true);
+        assertTrue(locationService.saveOrUpdateLRMarkerData("DIVISION", "2015-03-04"));
     }
 }

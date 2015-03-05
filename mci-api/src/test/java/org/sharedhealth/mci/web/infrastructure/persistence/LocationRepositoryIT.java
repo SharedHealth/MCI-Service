@@ -40,9 +40,6 @@ public class LocationRepositoryIT {
 
     @Before
     public void setup() throws ExecutionException, InterruptedException {
-        cqlTemplate.execute("truncate lr_markers");
-        cqlTemplate.execute("delete from locations where code = '90' and parent='00'");
-        cqlTemplate.execute("delete from locations where code = '90' and parent='30'");
 
         locationDataList = new ArrayList<>();
 
@@ -89,7 +86,8 @@ public class LocationRepositoryIT {
         locationCriteria.setParent("00");
         List<LocationData> locationDataList1 = locationRepository.findLocationsByParent(locationCriteria);
 
-        Assert.assertEquals("90", locationDataList1.get(7).getCode());
+        Assert.assertEquals("10", locationDataList1.get(0).getCode());
+        Assert.assertEquals("20", locationDataList1.get(1).getCode());
 
     }
 
@@ -109,9 +107,74 @@ public class LocationRepositoryIT {
 
     }
 
+    @Test
+    public void shouldSaveLRDataIFNotExist() throws Exception {
+
+        locationDataList = new ArrayList<>();
+
+        LocationData locationData = new LocationData();
+        locationData.setActive("1");
+        locationData.setName("New Division");
+        locationData.setCode("66");
+        locationData.setParent("00");
+        locationDataList.add(locationData);
+
+        locationRepository.saveOrUpdateLocationData(locationDataList);
+
+        LocationData locationData1 = locationRepository.findByGeoCode("66");
+
+        Assert.assertEquals("66", locationData1.getCode());
+        Assert.assertEquals("00", locationData1.getParent());
+        Assert.assertEquals("New Division", locationData1.getName());
+
+    }
+
+    @Test
+    public void shouldUpdateLRDataIFExist() throws Exception {
+
+        locationDataList = new ArrayList<>();
+
+        LocationData locationData = new LocationData();
+        locationData.setActive("1");
+        locationData.setName("New Division");
+        locationData.setCode("33");
+        locationData.setParent("00");
+        locationDataList.add(locationData);
+
+        locationRepository.saveOrUpdateLocationData(locationDataList);
+
+        locationData = locationRepository.findByGeoCode("33");
+
+        Assert.assertEquals("33", locationData.getCode());
+        Assert.assertEquals("00", locationData.getParent());
+        Assert.assertEquals("New Division", locationData.getName());
+
+        locationDataList = new ArrayList<>();
+
+        locationData = new LocationData();
+        locationData.setActive("1");
+        locationData.setName("Division Updated");
+        locationData.setCode("33");
+        locationData.setParent("00");
+        locationDataList.add(locationData);
+
+        locationRepository.saveOrUpdateLocationData(locationDataList);
+
+        locationData = locationRepository.findByGeoCode("33");
+
+        Assert.assertEquals("33", locationData.getCode());
+        Assert.assertEquals("00", locationData.getParent());
+        Assert.assertEquals("Division Updated", locationData.getName());
+
+
+
+    }
+
     @After
     public void teardown() {
         cqlTemplate.execute("truncate lr_markers");
+        cqlTemplate.execute("delete from locations where code = '66' and parent='00'");
+        cqlTemplate.execute("delete from locations where code = '33' and parent='00'");
         cqlTemplate.execute("delete from locations where code = '90' and parent='00'");
         cqlTemplate.execute("delete from locations where code = '90' and parent='30'");
     }

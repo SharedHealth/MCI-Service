@@ -28,8 +28,8 @@ public class LocationService {
         return locationRepository.findLocationsByParent(locationCriteria);
     }
 
-    public void saveOrUpdateLocationData(List<LocationData> locationDataList) {
-        locationRepository.saveOrUpdateLocationData(locationDataList);
+    public boolean saveOrUpdateLocationData(List<LocationData> locationDataList) {
+        return locationRepository.saveOrUpdateLocationData(locationDataList);
     }
 
     public LRMarker getLRMarkerData(String type) {
