@@ -4,11 +4,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.web.utils.JsonConstants.CREATED_AT;
-import static org.sharedhealth.mci.web.utils.JsonConstants.REQUESTED_BY;
+import static org.sharedhealth.mci.web.utils.JsonConstants.FACILITY_ID;
 
 public class PendingApprovalFieldDetails {
 
-    @JsonProperty(REQUESTED_BY)
+    @JsonProperty(FACILITY_ID)
     private String requestedBy;
 
     private Object value;
