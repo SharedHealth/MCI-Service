@@ -1,0 +1,45 @@
+apply plugin: 'java'
+
+
+repositories {
+    mavenCentral()
+    flatDir {
+        dirs "${rootDir}/lib"
+    }
+}
+
+configurations.all{
+    resolutionStrategy {
+        force 'com.google.guava:guava:18.0', 'org.apache.httpcomponents:httpclient:4.3.5'
+    }
+}
+def mainClassName = "org.sharedhealth.mci.web.launch.Migrations"
+
+jar {
+    baseName = 'mci-schema'
+    version = '0.1-SNAPSHOT'
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    manifest{
+        attributes('Main-Class': mainClassName)
+    }
+}
+
+
+dependencies {
+    compile libraries.mutagen
+    compile libraries.mutagen_cassandra,libraries.apache_lang
+    compile libraries.spring_data_cassandra,libraries.lz4,libraries.snappy
+
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+}
+
+task runMigration(type: org.gradle.api.tasks.JavaExec){
+    Properties properties = new Properties();
+    properties.load(new FileInputStream(file('../env/local.properties')))
+    main = mainClassName
+    jvmArgs = ['-DSHR_LOG_LEVEL=DEBUG']
+    classpath = sourceSets.main.runtimeClasspath
+    environment properties
+}

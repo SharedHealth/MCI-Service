@@ -42,14 +42,18 @@ task wrapper(type: Wrapper) {
 
 ext.libraries = [
         spring_boot_logging  : "org.springframework.boot:spring-boot-starter-log4j:1.2.0.RELEASE",
-        spring_boot_actuator: "org.springframework.boot:spring-boot-starter-actuator:1.2.0.RELEASE",
+        spring_boot_actuator : "org.springframework.boot:spring-boot-starter-actuator:1.2.0.RELEASE",
         spring_data_cassandra: "org.springframework.data:spring-data-cassandra:1.1.1.RELEASE",
-        mutagen_cassandra    : "com.toddfast.mutagen:mutagen-cassandra:0.4.0",
+        mutagen              : "com.toddfast.mutagen:mutagen:0.3.0",
+        mutagen_cassandra    : "com.toddfast.mutagen:mutagen-cassandra-0.4.2-SNAPSHOT",
         hibernate_validator  : "org.hibernate:hibernate-validator:5.1.1.Final",
         snappy               : 'org.xerial.snappy:snappy-java:1.1.1-M1',
-        apache_collections: "org.apache.commons:commons-collections4:4.0",
-        apache_bean_utils   : "commons-beanutils:commons-beanutils:1.9.2",
-        apache_lang: "org.apache.commons:commons-lang3:3.3.2",
+        lz4                  : "net.jpountz.lz4:lz4:1.3.0",
+        apache_collections   : "org.apache.commons:commons-collections4:4.0",
+        apache_bean_utils    : "commons-beanutils:commons-beanutils:1.9.2",
+        commons_codec        : "commons-codec:commons-codec:1.4",
+        joda_time            : "joda-time:joda-time:2.7",
+        apache_lang          : "org.apache.commons:commons-lang3:3.3.2",
         spring_security      : "org.springframework.security:spring-security-web:3.2.5.RELEASE",
         spring_boot_security : "org.springframework.boot:spring-boot-starter-security:1.2.0.RELEASE",
         rome                 : "rome:rome:1.0"

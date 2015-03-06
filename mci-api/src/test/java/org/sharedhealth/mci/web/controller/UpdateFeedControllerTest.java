@@ -333,8 +333,8 @@ public class UpdateFeedControllerTest {
                     @Override
                     public void handle(MvcResult result) throws Exception {
                         String content = result.getResponse().getContentAsString();
-                        assertTrue(content.contains("\"healthId\":\"h100\""));
-                        assertTrue(content.contains("\"changeSet\":\"{\\\"sur_name\\\":\\\"updated\\\"}\""));
+                        assertTrue(content.contains("\"health_id\":\"h100\""));
+                        assertTrue(content.contains("\"change_set\":{\"sur_name\":\"updated\"}"));
                     }
                 });
 

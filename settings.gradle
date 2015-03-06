@@ -1,2 +1,2 @@
 include 'mci-api'
-
+include 'schema'

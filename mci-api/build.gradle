@@ -11,6 +11,14 @@ idea{
     }
 }
 
+repositories {
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+    mavenCentral()
+    flatDir {
+        dirs "${rootDir}/lib"
+    }
+}
+
 dependencies {
     compile('org.springframework.boot:spring-boot-starter-web:1.1.8.RELEASE') {
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
@@ -22,8 +30,8 @@ dependencies {
     compile libraries.snappy, libraries.spring_boot_logging,
             libraries.spring_data_cassandra, libraries.hibernate_validator,
             libraries.apache_collections, libraries.apache_lang,
-            libraries.apache_bean_utils,
-            libraries.spring_security, libraries.rome
+            libraries.apache_bean_utils,libraries.commons_codec,
+            libraries.spring_security, libraries.rome, libraries.joda_time
 
     compile(libraries.spring_boot_actuator){
         exclude group: 'ch.qos.logback', module: "logback-classic"
@@ -32,10 +40,8 @@ dependencies {
     compile('io.netty:netty:3.9.0.Final') {
         force = 'true'
     }
-    compile('com.toddfast.mutagen:mutagen-cassandra:0.4.0') {
-        exclude group: 'org.slf4j', module: 'slf4j-log4j12'
-    }
 
+    testCompile project(":schema")
     testCompile('org.cassandraunit:cassandra-unit-spring:2.0.2.2') {
         exclude group: 'com.datastax.cassandra', module: 'cassandra-driver-core'
     }
@@ -43,7 +49,7 @@ dependencies {
 }
 
 test.doFirst {
-    project(":mci-api").tasks.migrateDatabase.execute()
+    project(":schema").tasks.runMigration.execute()
 }
 
 test {
@@ -122,19 +128,6 @@ task dist(dependsOn: 'exportProperties', type: Rpm) {
 
 }
 
-task migrateDatabase << {
-    tasks.compileJava.execute()
-    tasks.processResources.execute()
-    tasks.applyDbMigrations.execute()
-}
-
-task applyDbMigrations(type: JavaExec) {
-    workingDir = project.sourceSets.main.output.classesDir
-    classpath(sourceSets.main.runtimeClasspath)
-    main "org.sharedhealth.mci.web.launch.migration.Migrations"
-    environment(loadConfig())
-}
-
 war {
     from sourceSets.main.resources
     manifest {
@@ -166,7 +159,6 @@ buildscript {
         classpath(
                 'org.springframework.boot:spring-boot-gradle-plugin:1.0.2.RELEASE',
                 'com.netflix.nebula:gradle-ospackage-plugin:1.9.1+',
-                'com.netflix.astyanax:astyanax:1.56.48',
                 'net.saliman:gradle-cobertura-plugin:2.2.4'
         )
     }

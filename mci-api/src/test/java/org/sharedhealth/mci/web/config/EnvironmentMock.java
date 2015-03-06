@@ -1,6 +1,6 @@
 package org.sharedhealth.mci.web.config;
 
-import org.sharedhealth.mci.web.launch.migration.Migrations;
+import org.sharedhealth.mci.web.launch.Migrations;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;

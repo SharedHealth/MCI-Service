@@ -1,10 +1,10 @@
 package org.sharedhealth.mci.web.handler;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.syndication.feed.atom.*;
 import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.WireFeedOutput;
 import org.apache.commons.lang3.StringUtils;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.sharedhealth.mci.web.mapper.Feed;
 import org.sharedhealth.mci.web.mapper.FeedEntry;
 import org.springframework.http.HttpInputMessage;
