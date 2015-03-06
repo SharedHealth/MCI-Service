@@ -87,7 +87,7 @@ task exportProperties(dependsOn: 'assembly') << {
     }
 }
 
-task dist(dependsOn: 'exportProperties', type: Rpm) {
+task dist(dependsOn: [project(":schema").tasks.build, 'exportProperties'], type: Rpm) {
     packageName = 'mci'
     version = '0.1'
     release = 1
@@ -124,6 +124,16 @@ task dist(dependsOn: 'exportProperties', type: Rpm) {
         createDirectoryEntry = true
         exclude 'mci'
         into 'var'
+    }
+
+    from("${rootDir}/schema/scripts/rpm") {
+        fileMode = 0755
+        into 'bin'
+    }
+
+    from("${rootDir}/schema/build/libs") {
+        fileMode = 0755
+        into 'lib'
     }
 
 }
