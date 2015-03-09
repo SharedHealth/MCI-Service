@@ -42,11 +42,6 @@ check_proc() {
 
 case "$1" in
     start)
-        if [ "${CUR_USER}" != "root" ] ; then
-          show_message "MCI Server can only be started as 'root'."
-          exit 4
-        fi
-
         check_proc
         if [ $? -eq 0 ]; then
             echo "$?"
