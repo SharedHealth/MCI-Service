@@ -19,20 +19,18 @@ public class MCIProperties {
     private int cassandraTimeout;
     @Value("${REST_POOL_SIZE}")
     private int restPoolSize;
-    @Value("${FR_TOKEN}")
-    private String frToken;
     @Value("${FR_URL}")
     private String frUrl;
-    @Value("${LR_TOKEN}")
-    private String LrToken;
     @Value("${LR_URL}")
     private String LrUrl;
     @Value("${IDENTITY_SERVER_BASE_URL}")
     private String identityServerBaseUrl;
     @Value("${FR_CACHE_TTL}")
     private int frCacheTtl;
-    @Value("${HRM_CLIENT_ID}")
-    private String hrmClientId;
+    @Value("${IDP_CLIENT_ID}")
+    private String idpClientId;
+    @Value("${IDP_AUTH_TOKEN}")
+    private String idpAuthToken;
 
     public String getCassandraKeySpace() {
         return cassandraKeySpace;
@@ -54,20 +52,12 @@ public class MCIProperties {
         return restPoolSize;
     }
 
-    public String getFacilityRegistryToken() {
-        return frToken;
-    }
-
     public String getFacilityRegistryUrl() {
         return frUrl;
     }
 
     public String getIdentityServerBaseUrl(){
         return identityServerBaseUrl;
-    }
-
-    public String getLocaitonRegistryToken() {
-        return LrToken;
     }
 
     public String getLocaitonRegistryUrl() {
@@ -78,7 +68,11 @@ public class MCIProperties {
         return frCacheTtl;
     }
 
-    public String getHrmClientId() {
-        return hrmClientId;
+    public String getIdpClientId() {
+        return idpClientId;
+    }
+
+    public String getIdpAuthToken() {
+        return idpAuthToken;
     }
 }

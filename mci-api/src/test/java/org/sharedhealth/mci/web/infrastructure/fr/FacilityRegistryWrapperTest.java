@@ -17,6 +17,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
+import static org.sharedhealth.mci.utils.HttpUtil.AUTH_TOKEN_KEY;
+import static org.sharedhealth.mci.utils.HttpUtil.CLIENT_ID_KEY;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -34,6 +36,8 @@ public class FacilityRegistryWrapperTest {
         String facilityId = "10000059";
 
         givenThat(get(urlEqualTo("/api/1.0/facilities/" + facilityId + ".json"))
+                .withHeader(CLIENT_ID_KEY, equalTo("18554"))
+                .withHeader(AUTH_TOKEN_KEY, equalTo("b43d2b284fa678fb8248b7cc3ab391f9c21e5d7f8e88f815a9ef4346e426bd33"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")

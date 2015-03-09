@@ -3,7 +3,6 @@ package org.sharedhealth.mci.web.infrastructure.security;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.sharedhealth.mci.web.config.MCIProperties;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
@@ -12,13 +11,16 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.UUID;
 
+import static java.util.Arrays.asList;
+import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.sharedhealth.mci.utils.HttpUtil.*;
 
 public class TokenAuthenticationFilterTest {
     @Mock
@@ -39,18 +41,46 @@ public class TokenAuthenticationFilterTest {
 
     @Test
     public void shouldFilterOutRequestsWithoutToken() throws Exception {
-        when(request.getHeader(MCIProperties.SECURITY_TOKEN_HEADER)).thenReturn("");
+        when(request.getHeader(AUTH_TOKEN_KEY)).thenReturn("");
+        when(request.getHeader(CLIENT_ID_KEY)).thenReturn("1232");
+        when(request.getHeader(FROM_KEY)).thenReturn("email@gmail.com");
         TokenAuthenticationFilter tokenAuthenticationFilter = new TokenAuthenticationFilter(authenticationManager);
         tokenAuthenticationFilter.doFilter(request, response, chain);
         verify(authenticationManager, never()).authenticate(any(Authentication.class));
         verify(chain, never()).doFilter(request, response);
-        verify(response, times(1)).sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token not provided");
+        verify(response, times(1)).sendError(SC_UNAUTHORIZED, "Headers are incomplete");
+    }
+
+    @Test
+    public void shouldFilterOutRequestsWithoutClientId() throws Exception {
+        when(request.getHeader(AUTH_TOKEN_KEY)).thenReturn("zdfed");
+        when(request.getHeader(CLIENT_ID_KEY)).thenReturn("");
+        when(request.getHeader(FROM_KEY)).thenReturn("email@gmail.com");
+        TokenAuthenticationFilter tokenAuthenticationFilter = new TokenAuthenticationFilter(authenticationManager);
+        tokenAuthenticationFilter.doFilter(request, response, chain);
+        verify(authenticationManager, never()).authenticate(any(Authentication.class));
+        verify(chain, never()).doFilter(request, response);
+        verify(response, times(1)).sendError(SC_UNAUTHORIZED, "Headers are incomplete");
+    }
+
+    @Test
+    public void shouldFilterOutRequestsWithoutEmail() throws Exception {
+        when(request.getHeader(AUTH_TOKEN_KEY)).thenReturn("acv");
+        when(request.getHeader(CLIENT_ID_KEY)).thenReturn("1232");
+        when(request.getHeader(FROM_KEY)).thenReturn("");
+        TokenAuthenticationFilter tokenAuthenticationFilter = new TokenAuthenticationFilter(authenticationManager);
+        tokenAuthenticationFilter.doFilter(request, response, chain);
+        verify(authenticationManager, never()).authenticate(any(Authentication.class));
+        verify(chain, never()).doFilter(request, response);
+        verify(response, times(1)).sendError(SC_UNAUTHORIZED, "Headers are incomplete");
     }
 
     @Test
     public void shouldFilterOutRequestsWithInvalidToken() throws Exception {
         String invalidToken = UUID.randomUUID().toString();
-        when(request.getHeader(MCIProperties.SECURITY_TOKEN_HEADER)).thenReturn(invalidToken);
+        when(request.getHeader(AUTH_TOKEN_KEY)).thenReturn(invalidToken);
+        when(request.getHeader(CLIENT_ID_KEY)).thenReturn("1232");
+        when(request.getHeader(FROM_KEY)).thenReturn("email@gmail.com");
         when(authenticationManager.authenticate(any(Authentication.class))).thenThrow(new BadCredentialsException
                 ("bar"));
 
@@ -61,13 +91,15 @@ public class TokenAuthenticationFilterTest {
             assertEquals(ex.getMessage(), "bar");
         }
         verify(chain, never()).doFilter(request, response);
-        verify(response, times(1)).sendError(HttpServletResponse.SC_UNAUTHORIZED, "bar");
+        verify(response, times(1)).sendError(SC_UNAUTHORIZED, "bar");
     }
 
     @Test
     public void shouldSetAuthenticationAndPropagateChainOnSuccess() throws Exception {
         UUID token = UUID.randomUUID();
-        when(request.getHeader(MCIProperties.SECURITY_TOKEN_HEADER)).thenReturn(token.toString());
+        when(request.getHeader(AUTH_TOKEN_KEY)).thenReturn(token.toString());
+        when(request.getHeader(CLIENT_ID_KEY)).thenReturn("1232");
+        when(request.getHeader(FROM_KEY)).thenReturn("email@gmail.com");
         when(authenticationManager.authenticate(any(Authentication.class))).thenReturn(tokenAuthentication(token));
         TokenAuthenticationFilter tokenAuthenticationFilter = new TokenAuthenticationFilter(authenticationManager);
         tokenAuthenticationFilter.doFilter(request, response, chain);
@@ -77,6 +109,7 @@ public class TokenAuthenticationFilterTest {
     }
 
     private TokenAuthentication tokenAuthentication(UUID token) {
-        return new TokenAuthentication(new UserInfo("foo", Arrays.asList("SHR_USER", "MCI_USER")), token.toString());
+        return new TokenAuthentication(new UserInfo("1232", "foo", "email@gmail.com", 1, true,
+                token.toString(), new ArrayList<String>(), asList()), true);
     }
 }

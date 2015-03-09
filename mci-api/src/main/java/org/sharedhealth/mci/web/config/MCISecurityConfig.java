@@ -45,7 +45,7 @@ public class MCISecurityConfig extends WebSecurityConfigurerAdapter {
                 }
                 }))
                 .authorizeRequests()
-                .anyRequest().hasRole("MCI_USER")
+                .anyRequest().hasRole("Facility Admin")
                 .and()
                 .addFilterBefore(new TokenAuthenticationFilter(authenticationManager()), BasicAuthenticationFilter
                         .class)

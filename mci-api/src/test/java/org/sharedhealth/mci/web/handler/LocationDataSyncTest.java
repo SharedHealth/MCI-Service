@@ -5,6 +5,7 @@ import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.sharedhealth.mci.utils.HttpUtil;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.mapper.LocationData;
@@ -20,6 +21,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
+import static org.sharedhealth.mci.utils.HttpUtil.AUTH_TOKEN_KEY;
+import static org.sharedhealth.mci.utils.HttpUtil.CLIENT_ID_KEY;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -138,7 +141,10 @@ public class LocationDataSyncTest {
     }
 
     private void mockApiCall(String url, String body, int priority) {
-        stubFor(get(urlEqualTo(url)).atPriority(priority)
+        stubFor(get(urlEqualTo(url))
+                .withHeader(CLIENT_ID_KEY, equalTo("18554"))
+                .withHeader(AUTH_TOKEN_KEY, equalTo("b43d2b284fa678fb8248b7cc3ab391f9c21e5d7f8e88f815a9ef4346e426bd33"))
+                .atPriority(priority)
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")

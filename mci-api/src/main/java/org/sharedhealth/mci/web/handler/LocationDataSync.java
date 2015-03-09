@@ -1,6 +1,7 @@
 package org.sharedhealth.mci.web.handler;
 
 import org.apache.log4j.Logger;
+import org.sharedhealth.mci.utils.HttpUtil;
 import org.sharedhealth.mci.web.config.MCIProperties;
 import org.sharedhealth.mci.web.mapper.LocationData;
 import org.sharedhealth.mci.web.model.LRMarker;
@@ -22,12 +23,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import static org.sharedhealth.mci.utils.HttpUtil.AUTH_TOKEN_KEY;
+import static org.sharedhealth.mci.utils.HttpUtil.CLIENT_ID_KEY;
+
 @Component
 public class LocationDataSync {
 
     private final Logger logger = Logger.getLogger(LocationDataSync.class);
-    public static final String AUTH_KEY = "X-Auth-Token";
-    public static final String HRM_CLIENT_ID = "client_id";
 
     private AsyncRestTemplate mciRestTemplate;
     private MCIProperties mciProperties;
@@ -48,8 +50,8 @@ public class LocationDataSync {
 
     private HttpEntity getHttpEntityWithAuthenticationHeader() {
         MultiValueMap<String, String> header = new LinkedMultiValueMap<>();
-        header.add(AUTH_KEY, mciProperties.getLocaitonRegistryToken());
-        header.add(HRM_CLIENT_ID, mciProperties.getHrmClientId());
+        header.add(AUTH_TOKEN_KEY, mciProperties.getIdpAuthToken());
+        header.add(CLIENT_ID_KEY, mciProperties.getIdpClientId());
         return new HttpEntity(header);
     }
 

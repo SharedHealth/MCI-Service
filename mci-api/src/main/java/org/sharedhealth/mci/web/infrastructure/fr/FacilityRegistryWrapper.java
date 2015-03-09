@@ -17,12 +17,13 @@ import org.springframework.web.client.AsyncRestTemplate;
 
 import java.util.concurrent.ExecutionException;
 
+import static org.sharedhealth.mci.utils.HttpUtil.AUTH_TOKEN_KEY;
+import static org.sharedhealth.mci.utils.HttpUtil.CLIENT_ID_KEY;
+
 
 @Component
 public class FacilityRegistryWrapper {
 
-    public static final String AUTH_KEY = "X-Auth-Token";
-    public static final String HRM_CLIENT_ID = "client_id";
     private AsyncRestTemplate mciRestTemplate;
     private MCIProperties mciProperties;
 
@@ -35,8 +36,8 @@ public class FacilityRegistryWrapper {
 
     private HttpEntity getHttpEntityWithAuthenticationHeader() {
         MultiValueMap<String, String> header = new LinkedMultiValueMap<>();
-        header.add(AUTH_KEY, mciProperties.getFacilityRegistryToken());
-        header.add(HRM_CLIENT_ID, mciProperties.getHrmClientId());
+        header.add(AUTH_TOKEN_KEY, mciProperties.getIdpAuthToken());
+        header.add(CLIENT_ID_KEY, mciProperties.getIdpClientId());
         return new HttpEntity(header);
     }
 
