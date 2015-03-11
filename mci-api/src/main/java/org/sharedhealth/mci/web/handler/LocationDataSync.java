@@ -1,7 +1,6 @@
 package org.sharedhealth.mci.web.handler;
 
 import org.apache.log4j.Logger;
-import org.sharedhealth.mci.utils.HttpUtil;
 import org.sharedhealth.mci.web.config.MCIProperties;
 import org.sharedhealth.mci.web.mapper.LocationData;
 import org.sharedhealth.mci.web.model.LRMarker;

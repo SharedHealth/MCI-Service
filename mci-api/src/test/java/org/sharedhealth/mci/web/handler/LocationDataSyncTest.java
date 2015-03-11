@@ -5,7 +5,6 @@ import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.sharedhealth.mci.utils.HttpUtil;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.mapper.LocationData;
@@ -166,6 +165,4 @@ public class LocationDataSyncTest {
         cqlTemplate.execute("delete from locations where code = '80' and parent='10040920'");
         cqlTemplate.execute("delete from locations where code = '80' and parent='1004099913'");
     }
-
-
 }
