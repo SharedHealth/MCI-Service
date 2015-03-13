@@ -123,6 +123,7 @@ task dist(dependsOn: [project(":schema").tasks.build, 'exportProperties'], type:
         fileMode = 0755
         createDirectoryEntry = true
         exclude 'mci'
+        exclude 'start.sh'
         into 'var'
     }
 

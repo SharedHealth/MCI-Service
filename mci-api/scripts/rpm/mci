@@ -1,7 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# mci        This shell script takes care of starting and stopping
-#              the mci system
+# mci        start/stop/status script
 #
 # chkconfig: - 64 36
 # description: The mci shared health record system
@@ -13,76 +12,84 @@
 # Required-Start: $local_fs $remote_fs $network $named $syslog $time
 # Required-Stop: $local_fs $remote_fs $network $named $syslog $time
 # Short-Description: start and stop mci system,
-# Description: mci system
+# Description: BDSHR system
 ### END INIT INFO
 
-. /etc/rc.d/init.d/functions
+export MCI_USER=sharedhealth
+export MCI_RUN=/opt/mci/bin/start.sh
 
-NAME="mci"
-pid_file="/var/run/$NAME/$NAME.pid"
-log_file="/var/log/$NAME/$NAME.log"
-PROG_FILE="/opt/mci/lib/mci-api.war"
+# load configuration
+. /etc/default/mci
 
-CUR_USER=`/usr/bin/whoami`
+create_dirs() {
+    if [[ ! -e /var/run/mci ]]; then
+        ln -s /opt/mci/var /var/run/mci
+    fi
 
-# Read configuration variable file if it is present
-[ -r /etc/default/$NAME ] && . /etc/default/$NAME
-
-if [ ! -e "/var/run/$NAME" ]; then
-    mkdir "/var/run/$NAME"
-fi
-
-show_message() {
-    echo $1
+    if [[ ! -e /var/log/mci ]]; then
+        mkdir /var/log/mci
+    fi
+}
+mci_pid() {
+        echo `ps -fe | grep 'mci-api.war' | grep -v grep | tr -s " "|cut -d" " -f2`
 }
 
-check_proc() {
-    /usr/bin/pgrep -u $CUR_USER -f "$PROG_FILE" >/dev/null
+start(){
+    pid=$(mci_pid)
+    if [ -n "$pid" ]
+    then
+        echo -e "\e[00;31mService mci is already running (pid: $pid)\e[00m"
+    else
+        # Start mci
+        create_dirs
+        echo -e "\e[00;32mStarting mci\e[00m"
+        if [ `user_exists $MCI_USER` = "1" ]
+        then
+                /bin/su $MCI_USER -c $MCI_RUN
+        else
+                sh $MCI_RUN
+        fi
+  fi
+  return 0
+}
+status(){
+          pid=$(mci_pid)
+          if [ -n "$pid" ]; then echo -e "\e[00;32mService mci is running with pid: $pid\e[00m"
+          else echo -e "\e[00;31mService mci is not running\e[00m"
+          fi
 }
 
-case "$1" in
-    start)
-        check_proc
-        if [ $? -eq 0 ]; then
-            echo "$?"
-            show_message "MCI Server already running on port $MCI_PORT"
-            exit 0
+stop() {
+	echo -e "\e[00;31mTerminating mci\e[00m"
+	kill -9 $(mci_pid)
+}
+user_exists(){
+        if id -u $1 >/dev/null 2>&1; then
+        echo "1"
+        else
+                echo "0"
         fi
+}
 
-        # MCI startup
-        echo -n "Starting MCI: "
-        nohup java -Dserver.port=$MCI_PORT -jar $PROG_FILE > /var/log/mci/mci.log &
-        echo $! > $pid_file
-        echo "OK"
-        ;;
-    stop)
-        # MCI shutdown
-        #Instead of dependending on pid file search for running process
-        PID=`/usr/bin/pgrep -u $CUR_USER -f "$PROG_FILE"`
+case $1 in
+	start)
+	  start
+	;;
+	stop)
+	  stop
+	;;
+	restart)
+	  stop
+	  start
+	;;
+	status)
+		status
+	;;
+	kill)
+		stop
+	;;
+	*)
 
-        if [[ -z "$PID" ]]; then
-            show_message "MCI Server is not running"
-            echo "" > $pid_file
-            exit 0
-        fi
-
-        echo -n "Shutdown MCI: "
-        su $CUR_USER -c "kill $PID"
-        for t in `seq 40`; do $0 status > /dev/null 2>&1 && sleep 0.5 || break; done
-        sleep 5
-        echo "OK"
-        echo "" > $pid_file
-        ;;
-    reload|restart)
-        $0 stop
-        $0 start
-        ;;
-    status)
-        status -p $pid_file mci
-        exit $?
-        ;;
-    *)
-        echo "Usage: `basename $0` start|stop|status|restart|reload"
-        exit 1
+	;;
 esac
 exit 0
