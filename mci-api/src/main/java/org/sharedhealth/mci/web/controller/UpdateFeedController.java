@@ -2,6 +2,7 @@ package org.sharedhealth.mci.web.controller;
 
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.utils.TimeUid;
+import org.sharedhealth.mci.web.config.MCIProperties;
 import org.sharedhealth.mci.web.mapper.Feed;
 import org.sharedhealth.mci.web.mapper.FeedEntry;
 import org.sharedhealth.mci.web.model.PatientUpdateLog;
@@ -42,8 +43,8 @@ public class UpdateFeedController extends FeedController {
     private static final String CATEGORY_PATIENT = "patient";
 
     @Autowired
-    public UpdateFeedController(PatientService patientService) {
-        super(patientService);
+    public UpdateFeedController(PatientService patientService, MCIProperties properties) {
+        super(patientService, properties);
     }
 
     @RequestMapping(value = "/patients", method = GET,
@@ -81,7 +82,7 @@ public class UpdateFeedController extends FeedController {
 
         PatientUpdateLog lastPatient = patients.get(patients.size() - 1);
 
-        return fromUriString(request.getRequestURL().toString())
+        return fromUriString(buildUrl(request))
                 .queryParam(LAST_MARKER, lastPatient.getEventId())
                 .build().toString();
     }

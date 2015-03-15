@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.sharedhealth.mci.utils.DateUtil;
+import org.sharedhealth.mci.web.config.MCIProperties;
 import org.sharedhealth.mci.web.handler.FeedMessageConverter;
 import org.sharedhealth.mci.web.mapper.Feed;
 import org.sharedhealth.mci.web.mapper.FeedEntry;
@@ -53,19 +54,25 @@ public class UpdateFeedControllerTest {
     @Mock
     private PatientService patientService;
     @Mock
+    private MCIProperties properties;
+    @Mock
     private LocalValidatorFactoryBean validatorFactory;
     private MockMvc mockMvc;
+
+    private UpdateFeedController updateFeedController;
 
     @Before
     public void setup() throws ParseException {
         initMocks(this);
+        this.updateFeedController = new UpdateFeedController(patientService, properties);
 
         mockMvc = MockMvcBuilders
-                .standaloneSetup(new UpdateFeedController(patientService))
+                .standaloneSetup(updateFeedController)
                 .setMessageConverters(new FeedMessageConverter(), new MappingJackson2HttpMessageConverter())
-
                 .setValidator(validatorFactory)
                 .build();
+
+        when(properties.getHttpScheme()).thenReturn("httpx");
     }
 
     @Test
@@ -82,7 +89,7 @@ public class UpdateFeedControllerTest {
                         buildPatientLog("h300", uuid3)));
 
 
-        String url = format("http://localhost/%s/patients", API_END_POINT);
+        String url = format("httpx://localhost:80/%s/patients", API_END_POINT);
 
         String nextUrl = fromUriString(url)
                 .queryParam(LAST_MARKER, encode(uuid3.toString(), "UTF-8")).build().toString();
@@ -100,7 +107,7 @@ public class UpdateFeedControllerTest {
                 .andExpect(jsonPath("$.entries.[0].id", is(uuid1.toString())))
                 .andExpect(jsonPath("$.entries.[0].publishedDate", is(DateUtil.toIsoFormat(uuid1))))
                 .andExpect(jsonPath("$.entries.[0].title", is("Patient updates: h100")))
-                .andExpect(jsonPath("$.entries.[0].link", is("http://localhost:80/api/v1/patients/h100")))
+                .andExpect(jsonPath("$.entries.[0].link", is("httpx://localhost:80/api/v1/patients/h100")))
                 .andExpect(jsonPath("$.entries.[0].categories[0]", is("patient")))
                 .andExpect(jsonPath("$.entries.[0].content.health_id", is("h100")))
                 .andExpect(jsonPath("$.entries.[0].content.change_set.sur_name", is("updated")))
@@ -121,7 +128,7 @@ public class UpdateFeedControllerTest {
                         buildPatientLog("h300", uuid3)));
 
 
-        String url = format("http://localhost/%s/patients", API_END_POINT);
+        String url = format("httpx://localhost:80/%s/patients", API_END_POINT);
 
         String nextUrl = fromUriString(url)
                 .queryParam(LAST_MARKER, encode(uuid3.toString(), "UTF-8")).build().toString();
@@ -139,7 +146,7 @@ public class UpdateFeedControllerTest {
                 .andExpect(jsonPath("$.entries.[0].id", is(uuid2.toString())))
                 .andExpect(jsonPath("$.entries.[0].publishedDate", is(DateUtil.toIsoFormat(uuid2))))
                 .andExpect(jsonPath("$.entries.[0].title", is("Patient updates: h200")))
-                .andExpect(jsonPath("$.entries.[0].link", is("http://localhost:80/api/v1/patients/h200")))
+                .andExpect(jsonPath("$.entries.[0].link", is("httpx://localhost:80/api/v1/patients/h200")))
                 .andExpect(jsonPath("$.entries.[0].categories[0]", is("patient")))
                 .andExpect(jsonPath("$.entries.[0].content.health_id", is("h200")))
                 .andExpect(jsonPath("$.entries.[0].content.change_set.sur_name", is("updated")))
@@ -154,7 +161,7 @@ public class UpdateFeedControllerTest {
 
         when(patientService.findPatientsUpdatedSince(startDate, null)).thenReturn(null);
 
-        String url = format("http://localhost/%s/patients?since=2010-01-01T10:20:30Z", API_END_POINT);
+        String url = format("httpx://localhost:80/%s/patients?since=2010-01-01T10:20:30Z", API_END_POINT);
 
         mockMvc.perform(get(url).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -173,7 +180,7 @@ public class UpdateFeedControllerTest {
 
         when(patientService.findPatientsUpdatedSince(null, null)).thenReturn(null);
 
-        String url = format("http://localhost/%s/patients?" + LAST_MARKER + "=123", API_END_POINT);
+        String url = format("httpx://localhost:80/%s/patients?" + LAST_MARKER + "=123", API_END_POINT);
 
         mockMvc.perform(get(url).accept(APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -202,12 +209,12 @@ public class UpdateFeedControllerTest {
         MockHttpServletRequest request = buildHttpRequest(dateString, uuid1.toString());
 
         String title = "Patients";
-        Feed feed = new UpdateFeedController(null).buildFeedResponse(patients, request);
+        Feed feed = updateFeedController.buildFeedResponse(patients, request);
 
         assertEquals("MCI", feed.getAuthor());
         assertEquals(title, feed.getTitle());
 
-        String requestUrl = request.getRequestURL().toString();
+        String requestUrl = updateFeedController.buildUrl(request);
         String feedUrl = fromUriString(requestUrl)
                 .queryParam(SINCE, encode(dateString, "UTF-8"))
                 .queryParam(LAST_MARKER, encode(uuid1.toString(), "UTF-8")).build().toString();
@@ -242,7 +249,7 @@ public class UpdateFeedControllerTest {
                 asList(buildPatientLog("h100", uuid1, null), buildPatientLog("h200", uuid2))
         );
 
-        String url = format("http://localhost/%s/patients", API_END_POINT);
+        String url = format("httpx://localhost:80/%s/patients", API_END_POINT);
 
         mockMvc.perform(get(url).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -254,7 +261,7 @@ public class UpdateFeedControllerTest {
                 .andExpect(jsonPath("$.entries.[0].id", is(uuid1.toString())))
                 .andExpect(jsonPath("$.entries.[0].publishedDate", is(DateUtil.toIsoFormat(uuid1))))
                 .andExpect(jsonPath("$.entries.[0].title", is("Patient updates: h100")))
-                .andExpect(jsonPath("$.entries.[0].link", is("http://localhost:80/api/v1/patients/h100")))
+                .andExpect(jsonPath("$.entries.[0].link", is("httpx://localhost:80/api/v1/patients/h100")))
                 .andExpect(jsonPath("$.entries.[0].categories", is(asList("patient"))))
                 .andExpect(jsonPath("$.entries.[0].content.health_id", is("h100")))
                 .andExpect(jsonPath("$.entries.[0].content.change_set", is(nullValue())))
@@ -279,6 +286,7 @@ public class UpdateFeedControllerTest {
     private MockHttpServletRequest buildHttpRequest(String since, String lastMarker) throws
             UnsupportedEncodingException {
         MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setScheme("httpx");
         request.setServerName("www.mci.com");
         request.setServerPort(8081);
         request.setMethod("GET");
@@ -302,7 +310,7 @@ public class UpdateFeedControllerTest {
         assertEquals(patient.getEventId(), entry.getId());
         assertEquals(patient.getEventTimeAsString(), entry.getPublishedDate());
         assertEquals("Patient updates: " + healthId, entry.getTitle());
-        assertEquals("http://www.mci.com:8081/api/v1/patients/" + healthId, entry.getLink());
+        assertEquals("httpx://www.mci.com:8081/api/v1/patients/" + healthId, entry.getLink());
         assertNotNull(entry.getCategories());
         assertEquals(2, entry.getCategories().length);
         assertEquals("patient", entry.getCategories()[0]);
@@ -321,14 +329,14 @@ public class UpdateFeedControllerTest {
 
         when(patientService.findPatientsUpdatedSince(null, null)).thenReturn(patients);
 
-        String url = format("http://localhost/%s/patients", API_END_POINT);
+        String url = format("httpx://localhost:80/%s/patients", API_END_POINT);
         mockMvc.perform(get(url).accept(APPLICATION_ATOM_XML_VALUE))
                 .andExpect(status().isOk())
                 .andExpect(xpath("feed/title").string("Patients"))
                 .andExpect(xpath("feed/entry/title").string("Patient updates: h100"))
                 .andExpect(xpath("feed/entry/category[@term='patient']").exists())
                 .andExpect(xpath("feed/entry/category[@term='update:sur_name']").exists())
-                .andExpect(xpath("feed/entry/link[@href='http://localhost:80/api/v1/patients/h100']").exists())
+                .andExpect(xpath("feed/entry/link[@href='httpx://localhost:80/api/v1/patients/h100']").exists())
                 .andDo(new ResultHandler() {
                     @Override
                     public void handle(MvcResult result) throws Exception {

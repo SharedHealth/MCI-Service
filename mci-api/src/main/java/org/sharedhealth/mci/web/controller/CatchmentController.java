@@ -2,6 +2,7 @@ package org.sharedhealth.mci.web.controller;
 
 import org.sharedhealth.mci.utils.TimeUid;
 import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
+import org.sharedhealth.mci.web.config.MCIProperties;
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.handler.MCIResponse;
@@ -47,8 +48,8 @@ public class CatchmentController extends FeedController {
     static final String REQUESTED_BY = "MCI Admin";
 
     @Autowired
-    public CatchmentController(PatientService patientService) {
-        super(patientService);
+    public CatchmentController(PatientService patientService, MCIProperties properties) {
+        super(patientService, properties);
     }
 
     @RequestMapping(value = "/{catchmentId}/approvals", method = GET, produces = APPLICATION_JSON_VALUE)
@@ -181,7 +182,7 @@ public class CatchmentController extends FeedController {
         String since = encode(lastPatient.getUpdatedAtAsString(), "UTF-8");
         String lastMarker = encode(lastPatient.getUpdatedAt().toString(), "UTF-8");
 
-        return fromUriString(request.getRequestURL().toString())
+        return fromUriString(buildUrl(request))
                 .queryParam(SINCE, since)
                 .queryParam(LAST_MARKER, lastMarker)
                 .build().toString();
@@ -240,14 +241,14 @@ public class CatchmentController extends FeedController {
         return new MCIMultiResponse(response, additionalInfo, OK);
     }
 
-    private String buildPendingApprovalNextUrl(HttpServletRequest httpRequest, UUID lastUUID) {
-        return fromUriString(httpRequest.getRequestURL().toString())
+    private String buildPendingApprovalNextUrl(HttpServletRequest request, UUID lastUUID) {
+        return fromUriString(buildUrl(request))
                 .queryParam(AFTER, lastUUID)
                 .build().toString();
     }
 
-    private String buildPendingApprovalPreviousUrl(HttpServletRequest httpRequest, UUID lastUUID) {
-        return fromUriString(httpRequest.getRequestURL().toString())
+    private String buildPendingApprovalPreviousUrl(HttpServletRequest request, UUID lastUUID) {
+        return fromUriString(buildUrl(request))
                 .queryParam(BEFORE, lastUUID)
                 .build().toString();
     }

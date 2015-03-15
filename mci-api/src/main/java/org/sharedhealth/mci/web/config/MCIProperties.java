@@ -31,6 +31,8 @@ public class MCIProperties {
     private String idpClientId;
     @Value("${IDP_AUTH_TOKEN}")
     private String idpAuthToken;
+    @Value("${HTTP_SCHEME}")
+    private String httpScheme;
 
     public String getCassandraKeySpace() {
         return cassandraKeySpace;
@@ -74,5 +76,9 @@ public class MCIProperties {
 
     public String getIdpAuthToken() {
         return idpAuthToken;
+    }
+
+    public String getHttpScheme() {
+        return httpScheme;
     }
 }

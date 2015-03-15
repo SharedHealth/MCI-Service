@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.sharedhealth.mci.web.config.MCIProperties;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.service.PatientService;
@@ -53,6 +54,8 @@ public class CatchmentControllerTest {
     @Mock
     private PatientService patientService;
     @Mock
+    private MCIProperties properties;
+    @Mock
     private LocalValidatorFactoryBean validatorFactory;
 
     private MockMvc mockMvc;
@@ -61,12 +64,13 @@ public class CatchmentControllerTest {
     @Before
     public void setup() throws ParseException {
         initMocks(this);
-        catchmentController = new CatchmentController(patientService);
+        catchmentController = new CatchmentController(patientService, properties);
         mockMvc = MockMvcBuilders
                 .standaloneSetup(catchmentController)
                 .setValidator(validatorFactory)
                 .build();
 
+        when(properties.getHttpScheme()).thenReturn("httpx");
         when(patientService.getPerPageMaximumLimit()).thenReturn(MAX_PAGE_SIZE);
     }
 
@@ -109,7 +113,7 @@ public class CatchmentControllerTest {
             pendingApprovals.add(buildPendingApprovalListResponse(x));
         }
 
-        String nextUrl = fromUriString(format("http://localhost/%s/%s/approvals", API_END_POINT, "102030"))
+        String nextUrl = fromUriString(format("httpx://localhost:80/%s/%s/approvals", API_END_POINT, "102030"))
                 .queryParam("after", pendingApprovals.get(2).getLastUpdated()).build().toString();
 
         when(patientService.findPendingApprovalList(catchment, null, null, MAX_PAGE_SIZE + 1)).thenReturn(pendingApprovals);
@@ -176,7 +180,7 @@ public class CatchmentControllerTest {
             pendingApprovals.add(buildPendingApprovalListResponse(x));
         }
 
-        String previousUrl = fromUriString(format("http://localhost/%s/%s/approvals", API_END_POINT, "102030"))
+        String previousUrl = fromUriString(format("httpx://localhost:80/%s/%s/approvals", API_END_POINT, "102030"))
                 .queryParam("before", pendingApprovals.get(0).getLastUpdated()).build().toString();
 
         when(patientService.findPendingApprovalList(catchment, after, null, MAX_PAGE_SIZE + 1)).thenReturn(pendingApprovals);
@@ -220,7 +224,7 @@ public class CatchmentControllerTest {
         }
         when(patientService.findPendingApprovalList(catchment, null, before, MAX_PAGE_SIZE + 1)).thenReturn(pendingApprovals);
 
-        String nextUrl = fromUriString(format("http://localhost/%s/%s/approvals", API_END_POINT, "102030"))
+        String nextUrl = fromUriString(format("httpx://localhost:80/%s/%s/approvals", API_END_POINT, "102030"))
                 .queryParam("after", pendingApprovals.get(3).getLastUpdated()).build().toString();
 
         String url = buildPendingApprovalUrl("102030");
@@ -351,7 +355,7 @@ public class CatchmentControllerTest {
         HttpHeaders headers = new HttpHeaders();
         headers.add(FACILITY_ID, facilityId);
 
-        String url = format("http://localhost/%s/%s/patients?" + LAST_MARKER + "=123", API_END_POINT, catchmentId);
+        String url = format("httpx://localhost:80/%s/%s/patients?" + LAST_MARKER + "=123", API_END_POINT, catchmentId);
 
         MvcResult mvcResult = mockMvc.perform(get(url).contentType(APPLICATION_JSON).headers(headers))
                 .andExpect(request().asyncStarted())
@@ -389,7 +393,7 @@ public class CatchmentControllerTest {
         HttpHeaders headers = new HttpHeaders();
         headers.add(FACILITY_ID, facilityId);
 
-        String url = format("http://localhost/%s/%s/patients", API_END_POINT, catchmentId);
+        String url = format("httpx://localhost:80/%s/%s/patients", API_END_POINT, catchmentId);
 
         String nextUrl = fromUriString(url)
                 .queryParam(SINCE, encode(patients.get(2).getUpdatedAtAsString(), "UTF-8"))
@@ -411,7 +415,7 @@ public class CatchmentControllerTest {
                 .andExpect(jsonPath("$.entries.[0].id", is(patients.get(0).getUpdatedAt().toString())))
                 .andExpect(jsonPath("$.entries.[0].publishedDate", is(patients.get(0).getUpdatedAtAsString())))
                 .andExpect(jsonPath("$.entries.[0].title", is("Patient in Catchment: h100")))
-                .andExpect(jsonPath("$.entries.[0].link", is("http://localhost:80/api/v1/patients/h100")))
+                .andExpect(jsonPath("$.entries.[0].link", is("httpx://localhost:80/api/v1/patients/h100")))
                 .andExpect(jsonPath("$.entries.[0].categories[0]", is("patient")))
                 .andExpect(jsonPath("$.entries.[0].content.hid", is("h100")))
 
@@ -432,7 +436,7 @@ public class CatchmentControllerTest {
         HttpHeaders headers = new HttpHeaders();
         headers.add(FACILITY_ID, facilityId);
 
-        String url = format("http://localhost/%s/%s/patients", API_END_POINT, catchmentId);
+        String url = format("httpx://localhost:80/%s/%s/patients", API_END_POINT, catchmentId);
 
         MvcResult mvcResult = mockMvc.perform(get(url).contentType(APPLICATION_JSON).headers(headers))
                 .andExpect(request().asyncStarted())
@@ -463,7 +467,7 @@ public class CatchmentControllerTest {
         HttpHeaders headers = new HttpHeaders();
         headers.add(FACILITY_ID, facilityId);
 
-        String requestUrl = format("http://localhost/%s/%s/patients", API_END_POINT, catchmentId);
+        String requestUrl = format("httpx://localhost:80/%s/%s/patients", API_END_POINT, catchmentId);
 
         String url = fromUriString(requestUrl)
                 .queryParam(SINCE, since)
@@ -506,7 +510,7 @@ public class CatchmentControllerTest {
         HttpHeaders headers = new HttpHeaders();
         headers.add(FACILITY_ID, facilityId);
 
-        String requestUrl = format("http://localhost/%s/%s/patients", API_END_POINT, catchmentId);
+        String requestUrl = format("httpx://localhost:80/%s/%s/patients", API_END_POINT, catchmentId);
 
         String url = fromUriString(requestUrl)
                 .queryParam(SINCE, since)
@@ -547,7 +551,7 @@ public class CatchmentControllerTest {
         assertEquals("MCI", feed.getAuthor());
         assertEquals(title, feed.getTitle());
 
-        String requestUrl = request.getRequestURL().toString();
+        String requestUrl = this.catchmentController.buildUrl(request);
         assertEquals(requestUrl, feed.getFeedUrl());
 
         assertNull(feed.getPrevUrl());
@@ -583,7 +587,7 @@ public class CatchmentControllerTest {
         assertEquals("MCI", feed.getAuthor());
         assertEquals(title, feed.getTitle());
 
-        String requestUrl = request.getRequestURL().toString();
+        String requestUrl = this.catchmentController.buildUrl(request);
         String feedUrl = fromUriString(requestUrl)
                 .queryParam(SINCE, encode("2010-01-01T10:20:30Z", "UTF-8"))
                 .queryParam(LAST_MARKER, encode("h000", "UTF-8")).build().toString();
@@ -621,6 +625,7 @@ public class CatchmentControllerTest {
 
     private MockHttpServletRequest buildCatchmentHttpRequest(String since, String lastMarker) throws UnsupportedEncodingException {
         MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setScheme("httpx");
         request.setServerName("www.mci.com");
         request.setServerPort(8081);
         request.setMethod("GET");
@@ -644,7 +649,7 @@ public class CatchmentControllerTest {
         assertEquals(patient.getUpdatedAt(), entry.getId());
         assertEquals(patient.getUpdatedAtAsString(), entry.getPublishedDate());
         assertEquals("Patient in Catchment: " + healthId, entry.getTitle());
-        assertEquals("http://www.mci.com:8081/api/v1/patients/" + healthId, entry.getLink());
+        assertEquals("httpx://www.mci.com:8081/api/v1/patients/" + healthId, entry.getLink());
         assertNotNull(entry.getCategories());
         assertEquals(1, entry.getCategories().length);
         assertEquals("patient", entry.getCategories()[0]);
@@ -662,7 +667,7 @@ public class CatchmentControllerTest {
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();
         assertTrue(additionalInfo != null && additionalInfo.size() == 1);
-        assertEquals("http://www.mci.com:8081/api/v1/catchments/201915/approvals?after=" + approvalListResponse.get(2).getLastUpdated(),
+        assertEquals("httpx://www.mci.com:8081/api/v1/catchments/201915/approvals?after=" + approvalListResponse.get(2).getLastUpdated(),
                 additionalInfo.get(NEXT));
     }
 
@@ -678,7 +683,7 @@ public class CatchmentControllerTest {
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();
         assertTrue(additionalInfo != null && additionalInfo.size() == 1);
-        assertEquals("http://www.mci.com:8081/api/v1/catchments/201915/approvals?before=" + approvalListResponse.get(0).getLastUpdated(),
+        assertEquals("httpx://www.mci.com:8081/api/v1/catchments/201915/approvals?before=" + approvalListResponse.get(0).getLastUpdated(),
                 additionalInfo.get(PREVIOUS));
 
     }
@@ -695,9 +700,9 @@ public class CatchmentControllerTest {
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();
         assertTrue(additionalInfo != null && additionalInfo.size() == 2);
-        assertEquals("http://www.mci.com:8081/api/v1/catchments/201915/approvals?before=" + approvalListResponse.get(0).getLastUpdated(),
+        assertEquals("httpx://www.mci.com:8081/api/v1/catchments/201915/approvals?before=" + approvalListResponse.get(0).getLastUpdated(),
                 additionalInfo.get(PREVIOUS));
-        assertEquals("http://www.mci.com:8081/api/v1/catchments/201915/approvals?after=" + approvalListResponse.get(2).getLastUpdated(),
+        assertEquals("httpx://www.mci.com:8081/api/v1/catchments/201915/approvals?after=" + approvalListResponse.get(2).getLastUpdated(),
                 additionalInfo.get(NEXT));
     }
 
@@ -725,7 +730,7 @@ public class CatchmentControllerTest {
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();
         assertTrue(additionalInfo != null && additionalInfo.size() == 1);
-        assertEquals("http://www.mci.com:8081/api/v1/catchments/201915/approvals?after=" + approvalListResponse.get(2).getLastUpdated(),
+        assertEquals("httpx://www.mci.com:8081/api/v1/catchments/201915/approvals?after=" + approvalListResponse.get(2).getLastUpdated(),
                 additionalInfo.get(NEXT));
     }
 
@@ -754,7 +759,7 @@ public class CatchmentControllerTest {
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();
         assertTrue(additionalInfo != null && additionalInfo.size() == 1);
-        assertEquals("http://www.mci.com:8081/api/v1/catchments/201915/approvals?after=" + approvalListResponse.get(2).getLastUpdated(),
+        assertEquals("httpx://www.mci.com:8081/api/v1/catchments/201915/approvals?after=" + approvalListResponse.get(2).getLastUpdated(),
                 additionalInfo.get(NEXT));
     }
 
