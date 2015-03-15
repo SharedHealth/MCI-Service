@@ -1,7 +1,6 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
 import junit.framework.Assert;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,6 +19,8 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+
+import static junit.framework.Assert.assertEquals;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -57,6 +58,8 @@ public class LocationRepositoryIT {
 
         locationDataList.add(locationData);
         locationDataList.add(locationData1);
+
+        truncateLocationCFs();
     }
 
     @Test
@@ -66,15 +69,15 @@ public class LocationRepositoryIT {
 
         LocationData locationData = locationRepository.findByGeoCode("90");
 
-        Assert.assertEquals("90", locationData.getCode());
-        Assert.assertEquals("00", locationData.getParent());
-        Assert.assertEquals("New Division", locationData.getName());
+        assertEquals("90", locationData.getCode());
+        assertEquals("00", locationData.getParent());
+        assertEquals("New Division", locationData.getName());
 
         LocationData locationData1 = locationRepository.findByGeoCode("3090");
 
-        Assert.assertEquals("90", locationData1.getCode());
-        Assert.assertEquals("30", locationData1.getParent());
-        Assert.assertEquals("New District", locationData1.getName());
+        assertEquals("90", locationData1.getCode());
+        assertEquals("30", locationData1.getParent());
+        assertEquals("New District", locationData1.getName());
 
     }
 
@@ -84,10 +87,10 @@ public class LocationRepositoryIT {
         locationRepository.saveOrUpdateLocationData(locationDataList);
         LocationCriteria locationCriteria = new LocationCriteria();
         locationCriteria.setParent("00");
-        List<LocationData> locationDataList1 = locationRepository.findLocationsByParent(locationCriteria);
+        List<LocationData> locationDataList = locationRepository.findLocationsByParent(locationCriteria);
 
-        Assert.assertEquals("10", locationDataList1.get(0).getCode());
-        Assert.assertEquals("20", locationDataList1.get(1).getCode());
+        assertEquals(1, locationDataList.size());
+        assertEquals("90", locationDataList.get(0).getCode());
 
     }
 
@@ -97,13 +100,13 @@ public class LocationRepositoryIT {
         locationRepository.saveOrUpdateLRMarkerData("DISTRICT", "2015-02-08");
 
         LRMarker lrMarker = locationRepository.getLRMarkerData("DIVISION");
-        Assert.assertEquals("2015-02-08", lrMarker.getLastSync());
+        assertEquals("2015-02-08", lrMarker.getLastSync());
         LRMarker lrMarker1 = locationRepository.getLRMarkerData("UPAZILA");
         Assert.assertNull(lrMarker1);
 
         locationRepository.saveOrUpdateLRMarkerData("DIVISION", "2015-02-09");
         LRMarker lrMarker2 = locationRepository.getLRMarkerData("DIVISION");
-        Assert.assertEquals("2015-02-09", lrMarker2.getLastSync());
+        assertEquals("2015-02-09", lrMarker2.getLastSync());
 
     }
 
@@ -123,9 +126,9 @@ public class LocationRepositoryIT {
 
         LocationData locationData1 = locationRepository.findByGeoCode("66");
 
-        Assert.assertEquals("66", locationData1.getCode());
-        Assert.assertEquals("00", locationData1.getParent());
-        Assert.assertEquals("New Division", locationData1.getName());
+        assertEquals("66", locationData1.getCode());
+        assertEquals("00", locationData1.getParent());
+        assertEquals("New Division", locationData1.getName());
 
     }
 
@@ -145,9 +148,9 @@ public class LocationRepositoryIT {
 
         locationData = locationRepository.findByGeoCode("33");
 
-        Assert.assertEquals("33", locationData.getCode());
-        Assert.assertEquals("00", locationData.getParent());
-        Assert.assertEquals("New Division", locationData.getName());
+        assertEquals("33", locationData.getCode());
+        assertEquals("00", locationData.getParent());
+        assertEquals("New Division", locationData.getName());
 
         locationDataList = new ArrayList<>();
 
@@ -162,21 +165,15 @@ public class LocationRepositoryIT {
 
         locationData = locationRepository.findByGeoCode("33");
 
-        Assert.assertEquals("33", locationData.getCode());
-        Assert.assertEquals("00", locationData.getParent());
-        Assert.assertEquals("Division Updated", locationData.getName());
-
+        assertEquals("33", locationData.getCode());
+        assertEquals("00", locationData.getParent());
+        assertEquals("Division Updated", locationData.getName());
 
 
     }
 
-    @After
-    public void teardown() {
+    private void truncateLocationCFs() {
+        cqlTemplate.execute("truncate locations");
         cqlTemplate.execute("truncate lr_markers");
-        cqlTemplate.execute("delete from locations where code = '66' and parent='00'");
-        cqlTemplate.execute("delete from locations where code = '33' and parent='00'");
-        cqlTemplate.execute("delete from locations where code = '90' and parent='00'");
-        cqlTemplate.execute("delete from locations where code = '90' and parent='30'");
     }
-
 }
