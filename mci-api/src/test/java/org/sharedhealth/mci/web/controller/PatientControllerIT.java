@@ -36,6 +36,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
 import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.setupApprovalsConfig;
+import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.setupLocation;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -96,6 +97,7 @@ public class PatientControllerIT extends BaseControllerTest {
         patientData.setPermanentAddress(permanentAddress);
 
         setupApprovalsConfig(cassandraOps);
+        setupLocation(cassandraOps);
 
     }
 

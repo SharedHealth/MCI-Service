@@ -9,6 +9,18 @@ import static org.sharedhealth.mci.web.infrastructure.persistence.PatientReposit
 
 public class TestUtil {
 
+    public static void setupLocation(CassandraOperations cassandraOps) {
+        cassandraOps.execute("TRUNCATE " + CF_LOCATIONS);
+        cassandraOps.execute("INSERT INTO locations (\"code\", \"name\", \"parent\") VALUES ('01', 'Union X', '20134942')");
+
+        cassandraOps.execute("INSERT INTO locations (\"code\", \"name\", \"parent\") VALUES ('64', 'Upazila X', '5573')");
+
+        cassandraOps.execute("INSERT INTO locations (\"code\", \"name\", \"parent\") VALUES ('09', 'Upazila 1', '1004')");
+        cassandraOps.execute("INSERT INTO locations (\"code\", \"name\", \"parent\") VALUES ('20', 'City Corp 1', '100409')");
+        cassandraOps.execute("INSERT INTO locations (\"code\", \"name\", \"parent\") VALUES ('01', 'Union 1', '10040920')");
+        cassandraOps.execute("INSERT INTO locations (\"code\", \"name\", \"parent\") VALUES ('06', 'Union 2', '10040920')");
+    }
+
     public static void setupApprovalsConfig(CassandraOperations cassandraOps) {
         cassandraOps.execute("TRUNCATE " + CF_APPROVAL_FIELDS);
         cassandraOps.execute("INSERT INTO approval_fields (\"field\", \"option\") VALUES ('gender', 'NA')");

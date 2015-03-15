@@ -5,6 +5,8 @@ apply plugin: 'rpm'
 apply plugin: 'cobertura'
 apply plugin: 'idea'
 
+mainClassName = "org.sharedhealth.mci.web.launch.Main"
+
 idea{
     project{
         jdkName = '1.7'
@@ -46,10 +48,6 @@ dependencies {
         exclude group: 'com.datastax.cassandra', module: 'cassandra-driver-core'
     }
     testCompile testLibraries.mockito, testLibraries.junit, testLibraries.spring_test, testLibraries.http_client, testLibraries.wiremock
-}
-
-test.doFirst {
-    project(":schema").tasks.runMigration.execute()
 }
 
 test {
@@ -142,18 +140,18 @@ task dist(dependsOn: [project(":schema").tasks.build, 'exportProperties'], type:
 war {
     from sourceSets.main.resources
     manifest {
-        attributes('Main-Class': 'launch.Main')
+        attributes('Main-Class': mainClassName)
     }
 }
 
 task runMCI(type: JavaExec) {
-    main "org.sharedhealth.mci.web.launch.Main"
+    main = mainClassName
     classpath sourceSets.main.runtimeClasspath
     environment(loadConfig())
 }
 
 task debugMCI(type: JavaExec) {
-    main "org.sharedhealth.mci.web.launch.Main"
+    main = mainClassName
     classpath sourceSets.main.runtimeClasspath
     environment(loadConfig())
     debug = true

@@ -13,6 +13,7 @@ public class PatientRepositoryConstants {
     public static final String CF_PATIENT_UPDATE_LOG = "patient_update_log";
     public static final String CF_APPROVAL_FIELDS = "approval_fields";
     public static final String CF_PATIENT_AUDIT_LOG = "patient_audit_log";
+    public static final String CF_LOCATIONS = "locations";
     public static final String CF_MARKER = "marker";
 
     public static final String HEALTH_ID = "health_id";
