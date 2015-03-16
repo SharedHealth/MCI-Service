@@ -34,6 +34,9 @@ public class MCIProperties {
     @Value("${HTTP_SCHEME}")
     private String httpScheme;
 
+    @Value("${WORKER_ID}")
+    private String workerId;
+
     public String getCassandraKeySpace() {
         return cassandraKeySpace;
     }
@@ -80,5 +83,9 @@ public class MCIProperties {
 
     public String getHttpScheme() {
         return httpScheme;
+    }
+
+    public String getWorkerId() {
+        return workerId;
     }
 }

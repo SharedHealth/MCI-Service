@@ -3,7 +3,7 @@ package org.sharedhealth.mci.web.infrastructure.persistence;
 import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.Delete;
 import com.datastax.driver.core.querybuilder.Insert;
-import org.sharedhealth.mci.utils.UidGenerator;
+import org.sharedhealth.mci.utils.HidGenerator;
 import org.sharedhealth.mci.web.exception.HealthIDExistException;
 import org.sharedhealth.mci.web.exception.PatientNotFoundException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
@@ -48,16 +48,17 @@ public class PatientRepository extends BaseRepository {
     private static final long QUERY_EXEC_DELAY = 1;
     private static final String ALL_FIELDS = "ALL_FIELDS";
 
-    private UidGenerator uidGenerator;
+    private HidGenerator hidGenerator;
     private PendingApprovalFilter pendingApprovalFilter;
     private PatientMapper mapper;
 
     @Autowired
     public PatientRepository(@Qualifier("MCICassandraTemplate") CassandraOperations cassandraOperations,
-                             PatientMapper mapper, UidGenerator uidGenerator, PendingApprovalFilter pendingApprovalFilter) {
+                             PatientMapper mapper, @Qualifier("MciHidGenerator") HidGenerator hidGenerator,
+                             PendingApprovalFilter pendingApprovalFilter) {
         super(cassandraOperations);
         this.mapper = mapper;
-        this.uidGenerator = uidGenerator;
+        this.hidGenerator = hidGenerator;
         this.pendingApprovalFilter = pendingApprovalFilter;
     }
 
@@ -68,7 +69,7 @@ public class PatientRepository extends BaseRepository {
             throw new HealthIDExistException(bindingResult);
         }
         Patient patient = mapper.map(patientData, new PatientData());
-        patient.setHealthId(uidGenerator.getId());
+        patient.setHealthId(hidGenerator.generate());
         patient.setCreatedAt(timeBased());
         patient.setUpdatedAt(timeBased());
         patient.setCreatedBy(patientData.getRequestedBy());
