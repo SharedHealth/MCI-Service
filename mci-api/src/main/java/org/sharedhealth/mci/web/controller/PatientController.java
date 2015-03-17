@@ -90,7 +90,7 @@ public class PatientController {
         List<PatientSummaryData> results = patientService.findAllSummaryByQuery(searchQuery);
         HashMap<String, String> additionalInfo = new HashMap<>();
         if (results.size() > limit) {
-            results.remove(limit);
+            results = results.subList(0, limit);
             additionalInfo.put("note", note);
         }
         MCIMultiResponse mciMultiResponse = new MCIMultiResponse<>(results, additionalInfo, OK);

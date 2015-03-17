@@ -26,7 +26,7 @@ import static org.sharedhealth.mci.web.utils.JsonConstants.HID;
 public class PatientService {
 
     private static final int PER_PAGE_MAXIMUM_LIMIT = 25;
-    private static final String PER_PAGE_MAXIMUM_LIMIT_NOTE = "There are more record for this search criteria. " +
+    public static final String PER_PAGE_MAXIMUM_LIMIT_NOTE = "There are more record for this search criteria. " +
             "Please narrow down your search";
     public static final String MESSAGE_INSUFFICIENT_PRIVILEGE = "insufficient.privilege";
     public static final String MESSAGE_INVALID_PENDING_APPROVALS = "invalid.pending.approvals";

@@ -26,17 +26,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static java.util.Arrays.asList;
 import static junit.framework.Assert.assertEquals;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.web.controller.PatientController.REQUESTED_BY;
+import static org.sharedhealth.mci.web.service.PatientService.PER_PAGE_MAXIMUM_LIMIT_NOTE;
 import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PatientControllerTest {
@@ -330,6 +333,42 @@ public class PatientControllerTest {
         ArgumentCaptor<String> argument2 = ArgumentCaptor.forClass(String.class);
         verify(patientService).update(argument1.capture(), argument2.capture());
         assertEquals(REQUESTED_BY, argument1.getValue().getRequestedBy());
+    }
+
+    @Test
+    public void shouldTruncateSearchResultWhenResultSizeExceedsMaxLimit() throws Exception {
+        when(patientService.getPerPageMaximumLimitNote()).thenReturn(PER_PAGE_MAXIMUM_LIMIT_NOTE);
+        when(patientService.getPerPageMaximumLimit()).thenReturn(3);
+
+        searchQuery.setMaximum_limit(3);
+        searchQuery.setNid(nationalId);
+        List<PatientSummaryData> patientSummaryDataList = asList(buildPatientSummaryData("100"),
+                buildPatientSummaryData("200"), buildPatientSummaryData("300"), buildPatientSummaryData("400"),
+                buildPatientSummaryData("500"));
+        when(patientService.findAllSummaryByQuery(searchQuery)).thenReturn(patientSummaryDataList);
+
+        MvcResult mvcResult = mockMvc.perform(get(API_END_POINT + "?nid=" + nationalId))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isOk())
+
+                .andExpect(jsonPath("$.results[0]").exists())
+                .andExpect(jsonPath("$.results[1]").exists())
+                .andExpect(jsonPath("$.results[2]").exists())
+                .andExpect(jsonPath("$.results[3]").doesNotExist())
+
+                .andExpect(jsonPath("$.additional_info.note", is(PER_PAGE_MAXIMUM_LIMIT_NOTE)));
+
+        verify(patientService).findAllSummaryByQuery(searchQuery);
+    }
+
+    private PatientSummaryData buildPatientSummaryData(String healthId) {
+        PatientSummaryData data = new PatientSummaryData();
+        data.setHealthId(healthId);
+        data.setGivenName("Name" + healthId);
+        return data;
     }
 }
 
