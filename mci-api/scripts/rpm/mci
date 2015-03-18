@@ -17,7 +17,6 @@
 
 export MCI_USER=sharedhealth
 export MCI_RUN=/opt/mci/bin/start.sh
-export PROG_FILE=/opt/mci/lib/mci-api.war
 
 # load configuration
 . /etc/default/mci
