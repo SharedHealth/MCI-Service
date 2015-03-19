@@ -1,6 +1,7 @@
 package org.sharedhealth.mci.web.handler;
 
 import org.apache.log4j.Logger;
+import org.sharedhealth.mci.utils.DateUtil;
 import org.sharedhealth.mci.web.config.MCIProperties;
 import org.sharedhealth.mci.web.mapper.LocationData;
 import org.sharedhealth.mci.web.model.LRMarker;
@@ -16,7 +17,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.client.AsyncRestTemplate;
 
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -72,7 +72,7 @@ public class LocationDataSync {
             }
         } catch (Exception e) {
             logger.info(e.getMessage(), e);
-            throw new RuntimeException(e);
+            return false;
         }
 
         return true;
@@ -119,7 +119,7 @@ public class LocationDataSync {
     }
 
     private String getCurrentDateTime() {
-        return new SimpleDateFormat("YYYY-MM-dd HH:mm:ss").format(new Date());
+        return DateUtil.toIsoFormat(new Date());
     }
 
 }

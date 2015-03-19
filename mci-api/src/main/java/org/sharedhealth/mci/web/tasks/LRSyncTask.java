@@ -33,67 +33,37 @@ public class LRSyncTask {
 
     @Scheduled(fixedDelayString = "${LR_SYNC_FIXED_DELAY}")
     public void syncDivision() {
-        try {
-            logger.info("Division Syncing start....");
-            locationDataSync.syncLRData(LR_DIVISION_URI_PATH, DIVISION_TYPE);
-
-        } catch (Exception e) {
-            logger.info(e.getMessage(),e);
-        }
+        logger.info("Division Syncing start....");
+        locationDataSync.syncLRData(LR_DIVISION_URI_PATH, DIVISION_TYPE);
     }
 
     @Scheduled(fixedDelayString = "${LR_SYNC_FIXED_DELAY}")
     public void syncDistrict() {
-        try {
-            logger.info("District Syncing start....");
-            locationDataSync.syncLRData(LR_DISTRICT_URI_PATH, DISTRICT_TYPE);
-
-        } catch (Exception e) {
-            logger.info(e.getMessage(),e);
-        }
+        logger.info("District Syncing start....");
+        locationDataSync.syncLRData(LR_DISTRICT_URI_PATH, DISTRICT_TYPE);
     }
 
     @Scheduled(fixedDelayString = "${LR_SYNC_FIXED_DELAY}")
     public void syncUpazila() {
-        try {
-            logger.info("Upazila Syncing start....");
-            locationDataSync.syncLRData(LR_UPAZILA_URI_PATH, UPAZILA_TYPE);
-
-        } catch (Exception e) {
-            logger.info(e.getMessage(),e);
-        }
+        logger.info("Upazila Syncing start....");
+        locationDataSync.syncLRData(LR_UPAZILA_URI_PATH, UPAZILA_TYPE);
     }
 
     @Scheduled(fixedDelayString = "${LR_SYNC_FIXED_DELAY}")
     public void syncPaurasava() {
-        try {
-            logger.info("Paurasava Syncing start....");
-            locationDataSync.syncLRData(LR_PAURASAVA_PATH, PAURASAVA_TYPE);
-
-        } catch (Exception e) {
-            logger.info(e.getMessage(),e);
-        }
+        logger.info("Paurasava Syncing start....");
+        locationDataSync.syncLRData(LR_PAURASAVA_PATH, PAURASAVA_TYPE);
     }
 
     @Scheduled(fixedDelayString = "${LR_SYNC_FIXED_DELAY}")
     public void syncUnion() {
-        try {
-            logger.info("Union Syncing start....");
-            locationDataSync.syncLRData(LR_UNION_URI_PATH, UNION_TYPE);
-
-        } catch (Exception e) {
-            logger.info(e.getMessage(),e);
-        }
+        logger.info("Union Syncing start....");
+        locationDataSync.syncLRData(LR_UNION_URI_PATH, UNION_TYPE);
     }
 
     @Scheduled(fixedDelayString = "${LR_SYNC_FIXED_DELAY}")
     public void syncWard() {
-        try {
-            logger.info("Ward Syncing start....");
-            locationDataSync.syncLRData(LR_WARD_URI_PATH, WARD_TYPE);
-
-        } catch (Exception e) {
-            logger.info(e.getMessage(),e);
-        }
+        logger.info("Ward Syncing start....");
+        locationDataSync.syncLRData(LR_WARD_URI_PATH, WARD_TYPE);
     }
 }
