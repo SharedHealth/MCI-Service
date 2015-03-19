@@ -17,6 +17,7 @@
 
 export MCI_USER=sharedhealth
 export MCI_RUN=/opt/mci/bin/start.sh
+export CUR_USER=`/usr/bin/whoami`
 
 # load configuration
 . /etc/default/mci
@@ -36,14 +37,14 @@ mci_pid() {
 
 start(){
     pid=$(mci_pid)
-    if [ -n "$pid" ]
+    if [ -n "$pid" ];
     then
         echo -e "\e[00;31mService mci is already running (pid: $pid)\e[00m"
     else
         # Start mci
         create_dirs
         echo -e "\e[00;32mStarting mci\e[00m"
-        if [ `user_exists $MCI_USER` = "1" ]
+        if [ `user_exists $MCI_USER` = "1" ] && ["$CUR_USER" != "$MCI_USER"] ;
         then
                 /bin/su $MCI_USER -c $MCI_RUN
         else
