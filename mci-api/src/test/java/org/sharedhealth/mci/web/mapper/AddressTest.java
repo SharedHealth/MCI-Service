@@ -5,28 +5,18 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
-import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
 
 import static org.junit.Assert.assertEquals;
 
 public class AddressTest extends ValidationAwareMapper{
 
     @Test
-    public void shouldFailIfAddressLineIsBlank() {
-        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "addressLine", null, RequiredOnUpdateGroup.class);
-        assertEquals(1, constraintViolations.size());
-        printViolations(constraintViolations);
+    public void shouldFailIfAddressLineIsMoreThan_255_Characters() {
+        assertLengthViolation("addressLine", 255);
     }
 
     @Test
-    public void shouldFailIfAddressLineSizeLessThan3() {
-        Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "addressLine", "ab");
-        assertEquals(1, constraintViolations.size());
-        printViolations(constraintViolations);
-    }
-
-    @Test
-    public void shouldPassIfAddressLineSize3() {
+    public void shouldPassIfAddressLineSizeValid() {
         Set<ConstraintViolation<Address>> constraintViolations = validator.validateValue(Address.class, "addressLine", "row");
         assertEquals(0, constraintViolations.size());
     }

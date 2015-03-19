@@ -33,6 +33,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
 import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.setupApprovalsConfig;
@@ -145,20 +146,20 @@ public class PatientControllerIT extends BaseControllerTest {
 
     @Test
     public void shouldReturnBadRequestForInvalidRequestData() throws Exception {
-        patientData.getAddress().setAddressLine("h");
+        patientData.setSurName(null);
         String json = mapper.writeValueAsString(patientData);
         MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType
                 (APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         JSONAssert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\"," +
-                "\"errors\":[{\"code\":1002,\"field\":\"present_address.address_line\",\"message\":\"invalid " +
-                "present_address.address_line\"}]}", result.getResponse().getContentAsString(), JSONCompareMode.STRICT);
+                "\"errors\":[{\"code\":1001,\"field\":\"sur_name\",\"message\":\"invalid " +
+                "sur_name\"}]}", result.getResponse().getContentAsString(), JSONCompareMode.STRICT);
     }
 
     @Test
     public void shouldReturnBadRequestWithErrorDetailsForMultipleInvalidRequestData() throws Exception {
-        patientData.getAddress().setAddressLine("h");
+        patientData.setSurName(null);
         patientData.setGender("0");
         String json = mapper.writeValueAsString(patientData);
 
@@ -173,7 +174,7 @@ public class PatientControllerIT extends BaseControllerTest {
         Collections.sort(errorInfoErrors);
 
         assertEquals(2, errorInfoErrors.size());
-        assertEquals(1002, errorInfoErrors.get(0).getCode());
+        assertEquals(1001, errorInfoErrors.get(0).getCode());
         assertEquals(1004, errorInfoErrors.get(1).getCode());
     }
 
@@ -451,6 +452,26 @@ public class PatientControllerIT extends BaseControllerTest {
 
         assertEquals(updateRequest.getAddress(), patientInDb.getAddress());
 
+    }
+
+    @Test
+    public void shouldRemovePermanentAddressBlock() throws Exception {
+
+        String createJson = asString("jsons/patient/full_payload.json");
+        MvcResult createdResult = createPatient(createJson);
+        String healthId = getMciResponse(createdResult).getId();
+
+        String updateJson = "{\"permanent_address\":{}}";
+
+        MvcResult mvcResult = mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON)
+                .content(updateJson).contentType(APPLICATION_JSON))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+        mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isAccepted());
+
+        PatientData patientInDb = getPatientMapperObjectByHealthId(healthId);
+
+        assertNull(patientInDb.getPermanentAddress());
     }
 
     @Ignore

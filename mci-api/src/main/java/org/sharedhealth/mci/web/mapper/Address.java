@@ -1,18 +1,16 @@
 package org.sharedhealth.mci.web.mapper;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.validation.constraints.Code;
-import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
 import org.sharedhealth.mci.web.builder.DiffBuilder;
 import org.sharedhealth.mci.web.builder.DiffResult;
 import org.sharedhealth.mci.web.builder.Diffable;
 
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -23,9 +21,9 @@ import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 @JsonIgnoreProperties({"geoCode"})
 public class Address implements Diffable<Address> {
 
+    @JsonInclude(NON_EMPTY)
     @JsonProperty(ADDRESS_LINE)
-    @NotNull(message = "1001", groups = RequiredOnUpdateGroup.class)
-    @Size(min = 3, max = 255, message = ERROR_CODE_PATTERN)
+    @Pattern(regexp = "^[\\s\\S]{0,255}$", message = ERROR_CODE_PATTERN)
     private String addressLine;
 
     @JsonProperty(DIVISION_ID)
@@ -127,6 +125,11 @@ public class Address implements Diffable<Address> {
         return true;
     }
 
+    @JsonIgnore
+    public boolean isEmpty() {
+        return this.equals(new Address());
+    }
+
     @Override
     public int hashCode() {
         int result = addressLine != null ? addressLine.hashCode() : 0;
@@ -145,6 +148,7 @@ public class Address implements Diffable<Address> {
         result = 31 * result + (countryCode != null ? countryCode.hashCode() : 0);
         return result;
     }
+
 
     @Override
     public String toString() {

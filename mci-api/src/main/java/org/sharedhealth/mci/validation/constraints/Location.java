@@ -24,4 +24,6 @@ public @interface Location {
     Class<? extends Payload>[] payload() default {};
 
     String country_code() default "";
+
+    boolean required() default false;
 }

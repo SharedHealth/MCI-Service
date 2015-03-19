@@ -84,6 +84,11 @@ public class LocationValidatorTest {
         assertInvalidAddressValue();
     }
 
+    public void shouldFailIfAddressLineIsBlank() {
+        address.setAddressLine(null);
+        assertInvalidAddressValue();
+    }
+
     private void assertInvalidAddressValue() {
         Set<ConstraintViolation<PatientData>> constraintViolations = validator.validateValue(PatientData.class, "address", address);
         assertEquals(1, constraintViolations.size());

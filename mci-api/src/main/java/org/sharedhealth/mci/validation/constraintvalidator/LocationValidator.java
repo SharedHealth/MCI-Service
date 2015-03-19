@@ -26,6 +26,7 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
     private LocationService locationService;
     private String countryCode;
     private Pattern pattern;
+    private boolean isRequired;
 
     @Autowired
     public LocationValidator(LocationService locationService) {
@@ -36,6 +37,7 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
     public void initialize(Location constraintAnnotation) {
         this.countryCode = constraintAnnotation.country_code();
         this.pattern = Pattern.compile("[\\d]{" + BANGLADESH_POST_CODE_LENGTH + "}");
+        this.isRequired = constraintAnnotation.required();
     }
 
     @Override
@@ -49,15 +51,23 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
 
         context.disableDefaultConstraintViolation();
 
-        if (StringUtils.isEmpty(this.countryCode) && value.getCountryCode() != null && !value.getCountryCode().equals(BD_COUNTRY_CODE)) {
+        if(!this.isRequired && value.isEmpty()) {
             return true;
+        }
+
+        if(isInvalidAddressLine(value, context)) {
+            isValid = false;
+        }
+
+        if (StringUtils.isEmpty(this.countryCode) && value.getCountryCode() != null && !value.getCountryCode().equals(BD_COUNTRY_CODE)) {
+            return isValid;
         }
 
         if (StringUtils.isNotEmpty(this.countryCode) && value.getCountryCode() != null && !value.getCountryCode().equals(this.countryCode)) {
             isValid = false;
         }
 
-        isValid = isMinimumRequiredFieldsGiven(value, context, isValid);
+        isValid =  isMinimumRequiredFieldsGiven(value, context, isValid);
 
         isValid = isValid && isValidPostCode(value.getPostCode(), context);
 
@@ -74,6 +84,21 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
 
         return isValid;
 
+    }
+
+    private boolean isInvalidAddressLine(Address address, ConstraintValidatorContext context) {
+
+        if (StringUtils.isNotBlank(address.getAddressLine()) || address.isEmpty()) {
+            return false;
+        }
+
+        addConstraintViolation(
+                context,
+                address.getAddressLine() == null ? ERROR_CODE_REQUIRED : ERROR_CODE_PATTERN,
+                "addressLine"
+        );
+
+        return true;
     }
 
     private boolean isValidPostCode(String postCode, ConstraintValidatorContext context) {

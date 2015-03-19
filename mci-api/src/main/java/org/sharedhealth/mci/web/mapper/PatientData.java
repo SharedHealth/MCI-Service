@@ -141,7 +141,7 @@ public class PatientData implements Diffable<PatientData> {
     @JsonInclude(NON_EMPTY)
     @NotNull(message = ERROR_CODE_REQUIRED, groups = RequiredGroup.class)
     @Valid
-    @Location(message = ERROR_CODE_INVALID, country_code = COUNTRY_CODE_BANGLADESH)
+    @Location(message = ERROR_CODE_INVALID, country_code = COUNTRY_CODE_BANGLADESH, required=true)
     private Address address;
 
     @JsonProperty(PRIMARY_CONTACT)
@@ -162,7 +162,7 @@ public class PatientData implements Diffable<PatientData> {
     @JsonProperty(PERMANENT_ADDRESS)
     @Valid
     @JsonInclude(NON_EMPTY)
-    @Location(message = ERROR_CODE_INVALID)
+    @Location(message = ERROR_CODE_INVALID, required=false)
     private Address permanentAddress;
 
     @JsonProperty(MARITAL_STATUS)
