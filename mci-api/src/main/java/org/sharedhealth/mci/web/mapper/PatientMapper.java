@@ -19,6 +19,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.time.DateFormatUtils.ISO_DATE_FORMAT;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_INVALID;
 import static org.sharedhealth.mci.web.utils.JsonConstants.RELATIONS;
+import static org.sharedhealth.mci.web.utils.PatientDataConstants.COUNTRY_CODE_BANGLADESH;
 import static org.sharedhealth.mci.web.utils.PatientDataConstants.STRING_YES;
 
 @Component
@@ -277,7 +278,7 @@ public class PatientMapper {
         patient.setPostCode(defaultString(address.getPostCode()));
         patient.setRuralWardId(defaultString(address.getRuralWardId()));
         patient.setCityCorporationId(defaultString(address.getCityCorporationId()));
-        patient.setCountryCode(defaultString(address.getCountryCode()));
+        patient.setCountryCode(defaultString(address.getCountryCode(), COUNTRY_CODE_BANGLADESH));
     }
 
     private PatientSummaryData mapSummary(PatientData patient) {

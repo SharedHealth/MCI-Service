@@ -89,7 +89,7 @@ public class Address implements Diffable<Address> {
     @JsonProperty(COUNTRY_CODE)
     @JsonInclude(NON_EMPTY)
     @Code(type = COUNTRY_CODE, regexp = "[\\d]{3}", message = ERROR_CODE_INVALID)
-    private String countryCode = "050";
+    private String countryCode;
 
     public Address() {
     }

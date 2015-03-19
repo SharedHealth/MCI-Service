@@ -99,14 +99,19 @@ public class PatientRepositoryIT {
     }
 
     private Address createAddress(String division, String district, String upazila, String cityCorp, String union, String ruralWard) {
-        Address address = new Address();
+        Address address = new Address(division, district, upazila);
         address.setAddressLine("house-10");
-        address.setDivisionId(division);
-        address.setDistrictId(district);
-        address.setUpazilaId(upazila);
         address.setCityCorporationId(cityCorp);
         address.setUnionOrUrbanWardId(union);
         address.setRuralWardId(ruralWard);
+        address.setCountryCode("050");
+
+        return address;
+    }
+
+    private Address createAddress(String division, String district, String upazila) {
+        Address address = new Address(division, district, upazila);
+        address.setCountryCode("050");
 
         return address;
     }
@@ -158,7 +163,7 @@ public class PatientRepositoryIT {
         PatientData patient = new PatientData();
         patient.setGivenName("John");
         patient.setSurName("Doe");
-        patient.setAddress(new Address("10", "20", "30"));
+        patient.setAddress(createAddress("10", "20", "30"));
 
         assertNotNull(patientRepository.create(patient).getId());
         assertIdAndPhoneNumberMappingsEmpty();
@@ -169,7 +174,7 @@ public class PatientRepositoryIT {
         PatientData patient = new PatientData();
         patient.setGivenName("John");
         patient.setSurName("Doe");
-        patient.setAddress(new Address("10", "20", "30"));
+        patient.setAddress(createAddress("10", "20", "30"));
 
         assertNotNull(patientRepository.create(patient).getId());
         assertHouseholdCodeMappingEmpty();
@@ -180,7 +185,7 @@ public class PatientRepositoryIT {
         PatientData patient = new PatientData();
         patient.setGivenName("John");
         patient.setSurName("Doe");
-        patient.setAddress(new Address("1", "2", "3"));
+        patient.setAddress(createAddress("1", "2", "3"));
         assertNotNull(patientRepository.create(patient).getId());
 
         String cql = select().from(CF_PHONE_NUMBER_MAPPING).toString();
@@ -278,7 +283,7 @@ public class PatientRepositoryIT {
         patient.setBirthRegistrationNumber(existingBrn);
         patient.setUid(existingUid);
         patient.setReligion(existingReligion);
-        patient.setAddress(new Address("10", "20", "30"));
+        patient.setAddress(createAddress("10", "20", "30"));
         patient.setPhoneNumber(existingPhoneNumber);
         String healthId = patientRepository.create(patient).getId();
         assertNotNull(healthId);
@@ -321,7 +326,7 @@ public class PatientRepositoryIT {
         patient.setGivenName("John");
         patient.setSurName("Doe");
         patient.setHouseholdCode(existingHouseholdCode);
-        patient.setAddress(new Address("10", "20", "30"));
+        patient.setAddress(createAddress("10", "20", "30"));
         String healthId = patientRepository.create(patient).getId();
         assertNotNull(healthId);
 
@@ -352,7 +357,7 @@ public class PatientRepositoryIT {
         patient.setGivenName("John");
         patient.setSurName("Doe");
         patient.setHouseholdCode(existingHouseholdCode);
-        patient.setAddress(new Address("10", "20", "30"));
+        patient.setAddress(createAddress("10", "20", "30"));
         String healthId = patientRepository.create(patient).getId();
         assertNotNull(healthId);
 
@@ -382,7 +387,7 @@ public class PatientRepositoryIT {
         patient.setGivenName("John");
         patient.setSurName("Doe");
         patient.setHouseholdCode(existingHouseholdCode);
-        patient.setAddress(new Address("10", "20", "30"));
+        patient.setAddress(createAddress("10", "20", "30"));
         String healthId = patientRepository.create(patient).getId();
         assertNotNull(healthId);
 
@@ -412,7 +417,7 @@ public class PatientRepositoryIT {
         patient.setGivenName("John");
         patient.setSurName("Doe");
         patient.setHouseholdCode(existingHouseholdCode);
-        patient.setAddress(new Address("10", "20", "30"));
+        patient.setAddress(createAddress("10", "20", "30"));
         String healthId = patientRepository.create(patient).getId();
         assertNotNull(healthId);
 
@@ -442,7 +447,7 @@ public class PatientRepositoryIT {
         patient.setGivenName("John");
         patient.setSurName("Doe");
         patient.setHouseholdCode(existingHouseholdCode);
-        patient.setAddress(new Address("10", "20", "30"));
+        patient.setAddress(createAddress("10", "20", "30"));
         String healthId = patientRepository.create(patient).getId();
         assertNotNull(healthId);
 
@@ -480,7 +485,7 @@ public class PatientRepositoryIT {
         patient.setBirthRegistrationNumber(existingBrn);
         patient.setUid(existingUid);
         patient.setReligion(existingReligion);
-        patient.setAddress(new Address("10", "20", "30"));
+        patient.setAddress(createAddress("10", "20", "30"));
         patient.setPhoneNumber(existingPhoneNumber);
         String healthId = patientRepository.create(patient).getId();
         assertNotNull(healthId);
@@ -536,7 +541,7 @@ public class PatientRepositoryIT {
         patient.setBirthRegistrationNumber(existingBrn);
         patient.setUid(existingUid);
         patient.setReligion(existingReligion);
-        patient.setAddress(new Address("10", "20", "30"));
+        patient.setAddress(createAddress("10", "20", "30"));
         patient.setPhoneNumber(existingPhoneNumber);
         String healthId = patientRepository.create(patient).getId();
         assertNotNull(healthId);
@@ -601,7 +606,7 @@ public class PatientRepositoryIT {
         patient.setBirthRegistrationNumber(existingBrn);
         patient.setUid(existingUid);
         patient.setReligion(existingReligion);
-        patient.setAddress(new Address("10", "20", "30"));
+        patient.setAddress(createAddress("10", "20", "30"));
         patient.setPhoneNumber(existingPhoneNumber);
         String healthId = patientRepository.create(patient).getId();
         assertNotNull(healthId);
@@ -654,7 +659,7 @@ public class PatientRepositoryIT {
         patient.setBirthRegistrationNumber(existingBrn);
         patient.setUid(existingUid);
         patient.setReligion(existingReligion);
-        patient.setAddress(new Address("10", "20", "30"));
+        patient.setAddress(createAddress("10", "20", "30"));
         patient.setPhoneNumber(existingPhoneNumber);
         String healthId = patientRepository.create(patient).getId();
         assertNotNull(healthId);
@@ -710,7 +715,7 @@ public class PatientRepositoryIT {
         patient.setBirthRegistrationNumber(existingBrn);
         patient.setUid(existingUid);
         patient.setReligion(existingReligion);
-        patient.setAddress(new Address("10", "20", "30"));
+        patient.setAddress(createAddress("10", "20", "30"));
         patient.setPhoneNumber(existingPhoneNumber);
         String healthId = patientRepository.create(patient).getId();
         assertNotNull(healthId);
@@ -774,7 +779,7 @@ public class PatientRepositoryIT {
         patient.setBirthRegistrationNumber(existingBrn);
         patient.setUid(existingUid);
         patient.setReligion(existingReligion);
-        patient.setAddress(new Address("10", "20", "30"));
+        patient.setAddress(createAddress("10", "20", "30"));
         patient.setPhoneNumber(existingPhoneNumber);
         String healthId = patientRepository.create(patient).getId();
         assertNotNull(healthId);
@@ -835,7 +840,7 @@ public class PatientRepositoryIT {
         patient.setBirthRegistrationNumber(existingBrn);
         patient.setUid(existingUid);
         patient.setReligion(existingReligion);
-        patient.setAddress(new Address("10", "20", "30"));
+        patient.setAddress(createAddress("10", "20", "30"));
         patient.setPhoneNumber(existingPhoneNumber);
         String healthId = patientRepository.create(patient).getId();
         assertNotNull(healthId);
@@ -898,7 +903,7 @@ public class PatientRepositoryIT {
         patient.setBirthRegistrationNumber(existingBrn);
         patient.setUid(existingUid);
         patient.setReligion(existingReligion);
-        patient.setAddress(new Address("10", "20", "30"));
+        patient.setAddress(createAddress("10", "20", "30"));
         patient.setPhoneNumber(existingPhoneNumber);
         String healthId = patientRepository.create(patient).getId();
         assertNotNull(healthId);
@@ -959,7 +964,7 @@ public class PatientRepositoryIT {
         patient.setBirthRegistrationNumber(existingBrn);
         patient.setUid(existingUid);
         patient.setReligion(existingReligion);
-        patient.setAddress(new Address("10", "20", "30"));
+        patient.setAddress(createAddress("10", "20", "30"));
         patient.setPhoneNumber(existingPhoneNumber);
         String healthId = patientRepository.create(patient).getId();
         assertNotNull(healthId);
@@ -1098,7 +1103,7 @@ public class PatientRepositoryIT {
         patient.setNationalId(nid1);
         patient.setBirthRegistrationNumber(brn1);
         patient.setUid(uid1);
-        patient.setAddress(new Address("10", "20", "30"));
+        patient.setAddress(createAddress("10", "20", "30"));
         patient.setPhoneNumber(phoneNumber1);
         String healthId1 = patientRepository.create(patient).getId();
         assertNotNull(healthId1);
@@ -1162,7 +1167,7 @@ public class PatientRepositoryIT {
         patient.setBirthRegistrationNumber(brn);
         patient.setUid(uid);
         patient.setReligion("01");
-        patient.setAddress(new Address("10", "20", "30"));
+        patient.setAddress(createAddress("10", "20", "30"));
         patient.setPhoneNumber(phoneNumber);
         String healthId = patientRepository.create(patient).getId();
         assertNotNull(healthId);
@@ -1183,7 +1188,7 @@ public class PatientRepositoryIT {
         PatientData existingPatient = new PatientData();
         existingPatient.setGivenName(existingGivenName);
         existingPatient.setSurName("Doe");
-        existingPatient.setAddress(new Address("10", "20", "30"));
+        existingPatient.setAddress(createAddress("10", "20", "30"));
         String healthId = patientRepository.create(existingPatient).getId();
         assertNotNull(healthId);
 
@@ -1207,12 +1212,12 @@ public class PatientRepositoryIT {
         PatientData existingPatient = new PatientData();
         existingPatient.setGivenName(existingGivenName);
         existingPatient.setSurName("Doe");
-        existingPatient.setAddress(new Address("10", "20", "30"));
+        existingPatient.setAddress(createAddress("10", "20", "30"));
         String healthId = patientRepository.create(existingPatient).getId();
         assertNotNull(healthId);
 
         PatientData updateRequest = new PatientData();
-        Address newAddress = new Address("11", "22", "33");
+        Address newAddress = createAddress("11", "22", "33");
         updateRequest.setAddress(newAddress);
         patientRepository.update(updateRequest, healthId);
 
@@ -1236,14 +1241,14 @@ public class PatientRepositoryIT {
         PatientData existingPatient = new PatientData();
         existingPatient.setGivenName(existingGivenName);
         existingPatient.setSurName("Doe");
-        existingPatient.setAddress(new Address("10", "20", "30"));
+        existingPatient.setAddress(createAddress("10", "20", "30"));
         String healthId = patientRepository.create(existingPatient).getId();
         assertNotNull(healthId);
 
         String newGivenName = "Jane";
         PatientData updateRequest = new PatientData();
         updateRequest.setGivenName(newGivenName);
-        Address newAddress = new Address("11", "22", "33");
+        Address newAddress = createAddress("11", "22", "33");
         updateRequest.setAddress(newAddress);
         patientRepository.update(updateRequest, healthId);
 
@@ -1273,7 +1278,7 @@ public class PatientRepositoryIT {
         PatientData patient = new PatientData();
         patient.setGivenName("John");
         patient.setSurName("Doe");
-        Address address = new Address("10", "20", "30");
+        Address address = createAddress("10", "20", "30");
         patient.setAddress(address);
         String healthId1 = patientRepository.create(patient).getId();
         assertNotNull(healthId1);
@@ -1323,7 +1328,7 @@ public class PatientRepositoryIT {
     public void shouldFindAllPatientsByCatchmentWithSinceParam() throws Exception {
         List<String> healthIds = new ArrayList<>();
         PatientData patient = buildPatient();
-        Address address = new Address("10", "20", "30");
+        Address address = createAddress("10", "20", "30");
         address.setCityCorporationId("40");
 
         for (int i = 1; i <= 5; i++) {
@@ -1354,7 +1359,7 @@ public class PatientRepositoryIT {
     public void shouldFindAllPatientsByCatchmentWithLastMarkerParam() throws Exception {
         List<String> healthIds = new ArrayList<>();
         PatientData patient = buildPatient();
-        Address address = new Address("10", "20", "30");
+        Address address = createAddress("10", "20", "30");
         address.setCityCorporationId("40");
 
         for (int i = 1; i <= 5; i++) {
@@ -1409,7 +1414,7 @@ public class PatientRepositoryIT {
     @Test
     public void shouldCreateAsManyPendingApprovalMappingsAsNumberOfPossibleCatchments() {
         PatientData createPatientData = data;
-        Address address = new Address("10", "20", "30");
+        Address address = createAddress("10", "20", "30");
         address.setCityCorporationId("40");
         address.setUnionOrUrbanWardId("50");
         address.setRuralWardId("60");
@@ -1950,7 +1955,7 @@ public class PatientRepositoryIT {
         assertEquals(healthId, patients.get(0).getHealthId());
 
         PatientData updateRequest = new PatientData();
-        Address newAddress = new Address("10", "20", "30");
+        Address newAddress = createAddress("10", "20", "30");
         updateRequest.setAddress(newAddress);
         updateRequest.setGender("O");
         patientRepository.update(updateRequest, healthId);
@@ -1972,7 +1977,7 @@ public class PatientRepositoryIT {
 
     @Test
     public void shouldUpdatePendingApprovalMappingWhenUpdateAddressRequestIsApproved() throws Exception {
-        Address existingAddress = new Address("10", "20", "30");
+        Address existingAddress = createAddress("10", "20", "30");
         existingAddress.setCityCorporationId("40");
         PatientData existingPatient = new PatientData();
         existingPatient.setGivenName("John");
@@ -1982,7 +1987,7 @@ public class PatientRepositoryIT {
         String healthId = patientRepository.create(existingPatient).getId();
         assertNotNull(healthId);
 
-        Address newAddress = new Address("11", "22", "33");
+        Address newAddress = createAddress("11", "22", "33");
         PatientData updateRequest = new PatientData();
         updateRequest.setOccupation("02");
         updateRequest.setAddress(newAddress);
@@ -2002,7 +2007,7 @@ public class PatientRepositoryIT {
 
     @Test
     public void shouldNotUpdatePendingApprovalMappingWhenUpdateAddressRequestIsRejected() throws Exception {
-        Address existingAddress = new Address("10", "20", "30");
+        Address existingAddress = createAddress("10", "20", "30");
         existingAddress.setCityCorporationId("40");
         PatientData existingPatient = new PatientData();
         existingPatient.setGivenName("John");
@@ -2012,7 +2017,7 @@ public class PatientRepositoryIT {
         String healthId = patientRepository.create(existingPatient).getId();
         assertNotNull(healthId);
 
-        Address newAddress = new Address("11", "22", "33");
+        Address newAddress = createAddress("11", "22", "33");
         PatientData updateRequest = new PatientData();
         updateRequest.setGivenName("Jane");
         updateRequest.setOccupation("02");

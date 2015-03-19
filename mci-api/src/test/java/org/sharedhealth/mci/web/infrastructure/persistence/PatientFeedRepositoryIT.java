@@ -76,6 +76,7 @@ public class PatientFeedRepositoryIT {
         address.setUpazilaId("09");
         address.setCityCorporationId("20");
         address.setUnionOrUrbanWardId("01");
+        address.setCountryCode("050");
         data.setAddress(address);
 
         data.setRequestedBy(REQUESTED_BY);
