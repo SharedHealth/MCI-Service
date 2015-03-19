@@ -1,19 +1,17 @@
 package org.sharedhealth.mci.web.mapper;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
 import org.sharedhealth.mci.web.builder.DiffBuilder;
 import org.sharedhealth.mci.web.builder.DiffResult;
 import org.sharedhealth.mci.web.builder.Diffable;
 
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_PATTERN;
-import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_REQUIRED;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
 public class PhoneNumber implements Diffable<PhoneNumber> {
@@ -30,7 +28,6 @@ public class PhoneNumber implements Diffable<PhoneNumber> {
 
     @JsonProperty(NUMBER)
     @JsonInclude(NON_EMPTY)
-    @NotNull(message = ERROR_CODE_REQUIRED, groups = RequiredOnUpdateGroup.class)
     @Pattern(regexp = "[0-9]{1,12}$", message = ERROR_CODE_PATTERN)
     private String number;
 
@@ -69,6 +66,11 @@ public class PhoneNumber implements Diffable<PhoneNumber> {
 
     public void setExtension(String extension) {
         this.extension = extension;
+    }
+
+    @JsonIgnore
+    public boolean isEmpty() {
+        return this.equals(new PhoneNumber());
     }
 
     @Override

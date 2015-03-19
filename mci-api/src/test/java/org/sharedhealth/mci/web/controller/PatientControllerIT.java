@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
@@ -474,7 +473,26 @@ public class PatientControllerIT extends BaseControllerTest {
         assertNull(patientInDb.getPermanentAddress());
     }
 
-    @Ignore
+    @Test
+    public void shouldRemovePhoneNumberBlocks() throws Exception {
+
+        String createJson = asString("jsons/patient/full_payload.json");
+        MvcResult createdResult = createPatient(createJson);
+        String healthId = getMciResponse(createdResult).getId();
+
+        String updateJson = "{\"primary_contact_number\":{}}";
+
+        MvcResult mvcResult = mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON)
+                .content(updateJson).contentType(APPLICATION_JSON))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+        mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isAccepted());
+
+        PatientData patientInDb = getPatientMapperObjectByHealthId(healthId);
+
+        assertTrue(patientInDb.getPrimaryContactNumber().isEmpty());
+    }
+
     @Test
     public void shouldRemovePhoneBlockOptionalFieldsIfNotGiven() throws Exception {
 
@@ -484,7 +502,7 @@ public class PatientControllerIT extends BaseControllerTest {
 
         final MCIResponse createdResponse = getMciResponse(createdResult);
         String healthId = createdResponse.getId();
-        String phoneJson = asString("jsons/patient/payload_with_phone.json");
+        String phoneJson = "{\"primary_contact_number\":{\"number\": \"9678909\"}}";
         PatientData patientData1 = getPatientObjectFromString(phoneJson);
 
         MvcResult updatedResult = mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON)
@@ -494,7 +512,7 @@ public class PatientControllerIT extends BaseControllerTest {
 
         PatientData patient = getPatientMapperObjectByHealthId(healthId);
 
-        assertEquals(patientData1.getPhoneNumber(), patient.getPhoneNumber());
+        assertEquals(patientData1.getPrimaryContactNumber(), patient.getPrimaryContactNumber());
 
     }
 

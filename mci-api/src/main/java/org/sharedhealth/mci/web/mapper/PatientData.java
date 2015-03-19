@@ -152,11 +152,13 @@ public class PatientData implements Diffable<PatientData> {
     @JsonProperty(PHONE_NUMBER)
     @Valid
     @JsonInclude(NON_EMPTY)
+    @PhoneBlock(message = ERROR_CODE_INVALID)
     private PhoneNumber phoneNumber;
 
     @JsonProperty(PRIMARY_CONTACT_NUMBER)
     @Valid
     @JsonInclude(NON_EMPTY)
+    @PhoneBlock(message = ERROR_CODE_INVALID)
     private PhoneNumber primaryContactNumber;
 
     @JsonProperty(PERMANENT_ADDRESS)
