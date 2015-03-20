@@ -18,12 +18,12 @@
     </appender>
 
     <logger name="org.sharedhealth.mci" additivity="false">
-        <level value="${SHR_LOG_LEVEL}"/>
+        <level value="${MCI_LOG_LEVEL}"/>
         <appender-ref ref="VAR_LOG"/>
     </logger>
 
     <root>
-        <priority value ="${SHR_LOG_LEVEL}" />
+        <priority value ="${MCI_LOG_LEVEL}" />
         <appender-ref ref="VAR_LOG" />
     </root>
 
