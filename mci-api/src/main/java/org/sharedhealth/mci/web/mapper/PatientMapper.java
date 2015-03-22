@@ -82,10 +82,15 @@ public class PatientMapper {
         data.setNationality(patient.getNationality());
         data.setDisability(patient.getDisability());
         data.setEthnicity(patient.getEthnicity());
-        data.setStatus(patient.getStatus());
 
+        PatientStatus patientStatus = new PatientStatus();
+        patientStatus.setType(patient.getStatus());
         if (isPatientDeadAndHasDateOfDeath(patient)) {
-            data.setDateOfDeath(ISO_DATE_FORMAT.format(patient.getDateOfDeath()));
+            patientStatus.setDateOfDeath(ISO_DATE_FORMAT.format(patient.getDateOfDeath()));
+        }
+
+        if(!patientStatus.isEmpty()) {
+            data.setPatientStatus(patientStatus);
         }
 
         if (patient.getConfidential() != null) {
@@ -175,7 +180,7 @@ public class PatientMapper {
 
         Address address = data.getAddress();
         Address permanentAddress = data.getPermanentAddress();
-
+        PatientStatus patientStatus = data.getPatientStatus();
         PhoneNumber phoneNumber = data.getPhoneNumber();
         PhoneNumber primaryContactNumber = data.getPrimaryContactNumber();
 
@@ -197,8 +202,7 @@ public class PatientMapper {
         patient.setNationality(StringUtils.trim(data.getNationality()));
         patient.setDisability(data.getDisability());
         patient.setEthnicity(data.getEthnicity());
-        patient.setStatus(data.getStatus());
-        patient.setDateOfDeath(data.getDateOfDeath());
+
         patient.setMaritalStatus(data.getMaritalStatus());
 
         if (data.getConfidential() != null) {
@@ -215,6 +219,10 @@ public class PatientMapper {
 
         if (phoneNumber != null) {
             mapPhoneNumber(patient, phoneNumber);
+        }
+
+        if(patientStatus != null) {
+            mapPatientStatus(patient, patientStatus);
         }
 
         if (primaryContactNumber != null) {
@@ -240,6 +248,11 @@ public class PatientMapper {
         patient.setPhoneNumberAreaCode(defaultString(phoneNumber.getAreaCode()));
         patient.setPhoneNumberCountryCode(defaultString(phoneNumber.getCountryCode()));
         patient.setPhoneNumberExtension(defaultString(phoneNumber.getExtension()));
+    }
+
+    private void mapPatientStatus(Patient patient, PatientStatus patientStatus) {
+        patient.setStatus(defaultString(patientStatus.getType()));
+        patient.setDateOfDeath(defaultString(patientStatus.getDateOfDeath()));
     }
 
     private void mapPermanentAddress(Patient patient, Address permanentAddress) {

@@ -81,7 +81,7 @@ public class PatientRepositoryConstants {
     public static final String PERMANENT_CITY_CORPORATION = "permanent_city_corporation_id";
     public static final String PERMANENT_COUNTRY = "permanent_country_code";
     public static final String FULL_NAME = "full_name";
-    public static final String PATIENT_STATUS = "status";
+    public static final String STATUS = "status";
     public static final String DATE_OF_DEATH = "date_of_death";
     public static final String RELATIONS = "relations";
     public static final String PRIMARY_CONTACT = "primary_contact";

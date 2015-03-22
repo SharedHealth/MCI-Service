@@ -8,20 +8,28 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
+import javax.validation.ConstraintViolation;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 @ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfigTest.class)
-public class PatientStatusCodeValidatorTest extends BaseCodeValidatorTest<PatientData> {
+public class PatientStatusCodeValidatorTest extends BaseCodeValidatorTest<PatientStatus> {
 
     @Test
     public void shouldPassForValidValues() throws Exception {
-        String[] validStatuses = {"1", "2", "3"};
-        assertValidValues(validStatuses, "status", PatientData.class);
+        String[] validStatus = {"1","2","3"};
+        assertValidValues(validStatus, "type", PatientStatus.class);
     }
 
     @Test
     public void shouldFailForInvalidValues() throws Exception {
-        String[] inValidRelations = {"", "some_invalid_code", "4", "0"};
-        assertInvalidValues(inValidRelations, "status", PatientData.class);
+        PatientStatus patientStatus = new PatientStatus();
+        patientStatus.setType("4");
+        Set<ConstraintViolation<PatientStatus>> constraintViolations = getValidator().validate(patientStatus);
+        assertEquals(1, constraintViolations.size());
+        assertEquals("1004", constraintViolations.iterator().next().getMessage());
     }
 }

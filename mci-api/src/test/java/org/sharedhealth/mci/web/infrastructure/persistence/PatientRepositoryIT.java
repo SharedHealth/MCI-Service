@@ -204,7 +204,9 @@ public class PatientRepositoryIT {
         createData.setHealthId(mciResponse.id);
         createData.setCreatedAt(p.getCreatedAt());
         createData.setUpdatedAt(p.getUpdatedAt());
-        createData.setStatus(PATIENT_STATUS_ALIVE);
+        PatientStatus patientStatus = p.getPatientStatus();
+        patientStatus.setType(PATIENT_STATUS_ALIVE);
+        createData.setPatientStatus(patientStatus);
         createData.setConfidential(STRING_NO);
 
         Address address = p.getAddress();

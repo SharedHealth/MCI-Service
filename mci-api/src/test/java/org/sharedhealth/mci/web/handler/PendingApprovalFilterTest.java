@@ -53,7 +53,6 @@ public class PendingApprovalFilterTest {
 
         PatientData updateRequest = buildPatientData();
         updateRequest.setGender("F");
-        updateRequest.setDateOfDeath("");
         updateRequest.setReligion("2");
         updateRequest.setRequestedBy("Bahmni");
 

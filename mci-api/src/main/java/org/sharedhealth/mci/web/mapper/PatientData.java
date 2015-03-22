@@ -29,14 +29,12 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static java.lang.String.valueOf;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.sharedhealth.mci.utils.DateUtil.ISO_DATE_FORMAT;
 import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 import static org.sharedhealth.mci.web.utils.PatientDataConstants.COUNTRY_CODE_BANGLADESH;
 
 @MaritalRelation(message = ERROR_CODE_DEPENDENT, field = "maritalStatus")
-@PatientStatus(message = ERROR_CODE_DEPENDENT)
 @JsonIgnoreProperties({"created_at"})
 public class PatientData implements Diffable<PatientData> {
 
@@ -172,11 +170,6 @@ public class PatientData implements Diffable<PatientData> {
     @Code(type = MARITAL_STATUS, regexp = "[\\d]{1}", message = ERROR_CODE_INVALID)
     private String maritalStatus;
 
-    @JsonProperty(PATIENT_STATUS)
-    @JsonInclude(NON_EMPTY)
-    @Code(type = PATIENT_STATUS, regexp = "[\\d]{1}", message = ERROR_CODE_INVALID)
-    private String status;
-
     @JsonProperty(CONFIDENTIAL)
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "^(yes|no)$", message = ERROR_CODE_INVALID, flags = Flag.CASE_INSENSITIVE)
@@ -187,11 +180,6 @@ public class PatientData implements Diffable<PatientData> {
     @Pattern(regexp = "^([\\d]*)$", message = ERROR_CODE_INVALID)
     private String householdCode;
 
-    @JsonProperty(DATE_OF_DEATH)
-    @JsonInclude(NON_EMPTY)
-    @Date(format = ISO_DATE_FORMAT, message = ERROR_CODE_PATTERN)
-    private String dateOfDeath;
-
     private UUID createdAt;
 
     @JsonProperty(CREATED_BY)
@@ -199,6 +187,12 @@ public class PatientData implements Diffable<PatientData> {
     private String createdBy;
 
     private UUID updatedAt;
+
+    @JsonProperty(STATUS)
+    @Valid
+    @JsonInclude(NON_EMPTY)
+    @PatientStatusBlock(message = ERROR_CODE_INVALID)
+    private PatientStatus patientStatus;
 
     @JsonIgnore
     private TreeSet<PendingApproval> pendingApprovals;
@@ -359,13 +353,6 @@ public class PatientData implements Diffable<PatientData> {
         this.permanentAddress = permanentAddress;
     }
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
 
     public List<Relation> getRelations() {
         return relations;
@@ -578,7 +565,6 @@ public class PatientData implements Diffable<PatientData> {
         if (confidential != null ? !confidential.equals(that.confidential) : that.confidential != null) return false;
         if (createdAt != null ? !createdAt.equals(that.createdAt) : that.createdAt != null) return false;
         if (dateOfBirth != null ? !dateOfBirth.equals(that.dateOfBirth) : that.dateOfBirth != null) return false;
-        if (dateOfDeath != null ? !dateOfDeath.equals(that.dateOfDeath) : that.dateOfDeath != null) return false;
         if (disability != null ? !disability.equals(that.disability) : that.disability != null) return false;
         if (educationLevel != null ? !educationLevel.equals(that.educationLevel) : that.educationLevel != null)
             return false;
@@ -597,6 +583,7 @@ public class PatientData implements Diffable<PatientData> {
         if (permanentAddress != null ? !permanentAddress.equals(that.permanentAddress) : that.permanentAddress != null)
             return false;
         if (phoneNumber != null ? !phoneNumber.equals(that.phoneNumber) : that.phoneNumber != null) return false;
+        if (patientStatus != null ? !patientStatus.equals(that.patientStatus) : that.patientStatus != null) return false;
         if (placeOfBirth != null ? !placeOfBirth.equals(that.placeOfBirth) : that.placeOfBirth != null) return false;
         if (primaryContact != null ? !primaryContact.equals(that.primaryContact) : that.primaryContact != null)
             return false;
@@ -604,7 +591,6 @@ public class PatientData implements Diffable<PatientData> {
             return false;
         if (relations != null ? !relations.equals(that.relations) : that.relations != null) return false;
         if (religion != null ? !religion.equals(that.religion) : that.religion != null) return false;
-        if (status != null ? !status.equals(that.status) : that.status != null) return false;
         if (surName != null ? !surName.equals(that.surName) : that.surName != null) return false;
         if (uid != null ? !uid.equals(that.uid) : that.uid != null) return false;
         if (updatedAt != null ? !updatedAt.equals(that.updatedAt) : that.updatedAt != null) return false;
@@ -637,12 +623,11 @@ public class PatientData implements Diffable<PatientData> {
         result = 31 * result + (address != null ? address.hashCode() : 0);
         result = 31 * result + (primaryContact != null ? primaryContact.hashCode() : 0);
         result = 31 * result + (phoneNumber != null ? phoneNumber.hashCode() : 0);
+        result = 31 * result + (patientStatus != null ? patientStatus.hashCode() : 0);
         result = 31 * result + (primaryContactNumber != null ? primaryContactNumber.hashCode() : 0);
         result = 31 * result + (permanentAddress != null ? permanentAddress.hashCode() : 0);
         result = 31 * result + (maritalStatus != null ? maritalStatus.hashCode() : 0);
-        result = 31 * result + (status != null ? status.hashCode() : 0);
         result = 31 * result + (confidential != null ? confidential.hashCode() : 0);
-        result = 31 * result + (dateOfDeath != null ? dateOfDeath.hashCode() : 0);
         result = 31 * result + (createdAt != null ? createdAt.hashCode() : 0);
         result = 31 * result + (updatedAt != null ? updatedAt.hashCode() : 0);
         result = 31 * result + (pendingApprovals != null ? pendingApprovals.hashCode() : 0);
@@ -674,27 +659,18 @@ public class PatientData implements Diffable<PatientData> {
         sb.append(", address=").append(address);
         sb.append(", primaryContact='").append(primaryContact).append('\'');
         sb.append(", phoneNumber=").append(phoneNumber);
+        sb.append(", patientStatus=").append(patientStatus);
         sb.append(", primaryContactNumber=").append(primaryContactNumber);
         sb.append(", permanentAddress=").append(permanentAddress);
         sb.append(", maritalStatus='").append(maritalStatus).append('\'');
-        sb.append(", status='").append(status).append('\'');
         sb.append(", confidential='").append(confidential).append('\'');
         sb.append(", householdCode='").append(householdCode).append('\'');
-        sb.append(", dateOfDeath='").append(dateOfDeath).append('\'');
         sb.append(", createdAt=").append(createdAt);
         sb.append(", updatedAt=").append(updatedAt);
         sb.append(", pendingApprovals=").append(pendingApprovals);
         sb.append(", requestedBy='").append(requestedBy).append('\'');
         sb.append('}');
         return sb.toString();
-    }
-
-    public String getDateOfDeath() {
-        return this.dateOfDeath;
-    }
-
-    public void setDateOfDeath(String dateOfDeath) {
-        this.dateOfDeath = dateOfDeath;
     }
 
     public String getConfidential() {
@@ -741,6 +717,14 @@ public class PatientData implements Diffable<PatientData> {
         this.createdBy = createdBy;
     }
 
+    public PatientStatus getPatientStatus() {
+        return patientStatus;
+    }
+
+    public void setPatientStatus(PatientStatus patientStatus) {
+        this.patientStatus = patientStatus;
+    }
+
     @Override
     public DiffResult diff(PatientData that) {
         return new DiffBuilder(this, that)
@@ -763,10 +747,8 @@ public class PatientData implements Diffable<PatientData> {
                 .append(DISABILITY, this.disability, that.disability)
                 .append(ETHNICITY, this.ethnicity, that.ethnicity)
                 .append(MARITAL_STATUS, this.maritalStatus, that.maritalStatus)
-                .append(PATIENT_STATUS, this.status, that.status)
                 .append(CONFIDENTIAL, this.confidential, that.confidential)
                 .append(HOUSEHOLD_CODE, this.householdCode, that.householdCode)
-                .append(DATE_OF_DEATH, this.dateOfDeath, that.dateOfDeath)
 
                 .append(PHONE_NUMBER, this.phoneNumber, that.phoneNumber)
                 .append(PRIMARY_CONTACT_NUMBER, this.primaryContactNumber, that.primaryContactNumber)

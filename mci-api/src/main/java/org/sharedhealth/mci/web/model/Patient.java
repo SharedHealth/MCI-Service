@@ -37,7 +37,6 @@ import static org.sharedhealth.mci.web.infrastructure.persistence.PatientReposit
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.MARITAL_STATUS;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.NATIONALITY;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.OCCUPATION;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.PATIENT_STATUS;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.PHONE_NO;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.PLACE_OF_BIRTH;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.POST_CODE;
@@ -52,6 +51,7 @@ import static org.sharedhealth.mci.web.infrastructure.persistence.PatientReposit
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.UNION_OR_URBAN_WARD_ID;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.UPAZILA_ID;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.VILLAGE;
+import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.STATUS;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonMapper.readValue;
 import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
@@ -256,7 +256,7 @@ public class Patient {
     @Column(FULL_NAME)
     private String fullName;
 
-    @Column(PATIENT_STATUS)
+    @Column(STATUS)
     private String status;
 
     @Column(DATE_OF_DEATH)

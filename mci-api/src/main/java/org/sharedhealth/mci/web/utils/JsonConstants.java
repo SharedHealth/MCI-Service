@@ -25,7 +25,8 @@ public class JsonConstants {
     public static final String PRIMARY_CONTACT_NUMBER = "primary_contact_number";
     public static final String PERMANENT_ADDRESS = "permanent_address";
     public static final String MARITAL_STATUS = "marital_status";
-    public static final String PATIENT_STATUS = "status";
+    public static final String STATUS = "status";
+    public static final String TYPE = "type";
     public static final String DATE_OF_DEATH = "date_of_death";
     public static final String CREATED = "created";
     public static final String MODIFIED = "modified";

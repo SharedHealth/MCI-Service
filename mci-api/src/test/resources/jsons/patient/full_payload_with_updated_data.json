@@ -61,8 +61,10 @@
         "post_code":"1213",
         "country_code":"050"
     },
-    "status":"2",
-    "date_of_death": "2014-01-01",
     "confidential": "Yes",
-    "household_code": "5678"
+    "household_code": "5678",
+    "status": {
+        "type": "2",
+        "date_of_death": "2014-01-01"
+    }
 }

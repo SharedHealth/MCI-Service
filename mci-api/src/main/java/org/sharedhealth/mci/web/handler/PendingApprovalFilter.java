@@ -57,12 +57,11 @@ public class PendingApprovalFilter {
         newPatient.setEthnicity(processString(ETHNICITY, existingPatient.getEthnicity(), updateRequest.getEthnicity()));
         newPatient.setPrimaryContact(processString(PRIMARY_CONTACT, existingPatient.getPrimaryContact(), updateRequest.getPrimaryContact()));
         newPatient.setMaritalStatus(processString(MARITAL_STATUS, existingPatient.getMaritalStatus(), updateRequest.getMaritalStatus()));
-        newPatient.setStatus(processString(PATIENT_STATUS, existingPatient.getStatus(), updateRequest.getStatus()));
-        newPatient.setDateOfDeath(processString(DATE_OF_DEATH, existingPatient.getDateOfDeath(), updateRequest.getDateOfDeath()));
         newPatient.setConfidential(processString(CONFIDENTIAL, existingPatient.getConfidential(), updateRequest.getConfidential()));
         newPatient.setCreatedAt(processUuid(CREATED, existingPatient.getCreatedAt(), updateRequest.getCreatedAt()));
         newPatient.setUpdatedAt(processUuid(MODIFIED, existingPatient.getUpdatedAt(), updateRequest.getUpdatedAt()));
         newPatient.setPhoneNumber(processPhoneNumber(PHONE_NUMBER, existingPatient.getPhoneNumber(), updateRequest.getPhoneNumber()));
+        newPatient.setPatientStatus(processPatientStatus(STATUS, existingPatient.getPatientStatus(), updateRequest.getPatientStatus()));
         newPatient.setPrimaryContactNumber(processPhoneNumber(PRIMARY_CONTACT_NUMBER, existingPatient.getPrimaryContactNumber(), updateRequest.getPrimaryContactNumber()));
         newPatient.setAddress(processAddress(PRESENT_ADDRESS, existingPatient.getAddress(), updateRequest.getAddress()));
         newPatient.setPermanentAddress(processAddress(PERMANENT_ADDRESS, existingPatient.getPermanentAddress(), updateRequest.getPermanentAddress()));
@@ -84,6 +83,11 @@ public class PendingApprovalFilter {
 
         Object address = process(key, oldValue, newValue);
         return address == null ? null : (Address) address;
+    }
+
+    private PatientStatus processPatientStatus(String key, PatientStatus oldValue, PatientStatus newValue) {
+        Object patientStatus = process(key, oldValue, newValue);
+        return patientStatus == null ? null : (PatientStatus) patientStatus;
     }
 
     private UUID processUuid(String key, UUID oldValue, UUID newValue) {
