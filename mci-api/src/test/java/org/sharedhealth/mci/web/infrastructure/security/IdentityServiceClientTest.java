@@ -13,6 +13,7 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.client.AsyncRestTemplate;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 import static java.util.Arrays.asList;
@@ -63,12 +64,12 @@ public class IdentityServiceClientTest {
 
         assertEquals(tokenAuthentication.getCredentials().toString(), token);
         UserInfo expectedUserInfo = userInfo(token);
-        assertEquals(((UserInfo) tokenAuthentication.getPrincipal()).getId(), expectedUserInfo.getId());
-        assertEquals(((UserInfo) tokenAuthentication.getPrincipal()).getAccessToken(), expectedUserInfo.getAccessToken());
-        assertEquals(((UserInfo) tokenAuthentication.getPrincipal()).getEmail(), expectedUserInfo.getEmail());
-        assertEquals(((UserInfo) tokenAuthentication.getPrincipal()).getIsActive(), expectedUserInfo.getIsActive());
-        assertEquals(((UserInfo) tokenAuthentication.getPrincipal()).isActivated(), expectedUserInfo.isActivated());
-        assertEquals(tokenAuthentication.getName(), expectedUserInfo.getName());
+        assertEquals(((UserInfo) tokenAuthentication.getPrincipal()).getProperties().getId(), expectedUserInfo.getProperties().getId());
+        assertEquals(((UserInfo) tokenAuthentication.getPrincipal()).getProperties().getAccessToken(), expectedUserInfo.getProperties().getAccessToken());
+        assertEquals(((UserInfo) tokenAuthentication.getPrincipal()).getProperties().getEmail(), expectedUserInfo.getProperties().getEmail());
+        assertEquals(((UserInfo) tokenAuthentication.getPrincipal()).getProperties().getIsActive(), expectedUserInfo.getProperties().getIsActive());
+        assertEquals(((UserInfo) tokenAuthentication.getPrincipal()).getProperties().isActivated(), expectedUserInfo.getProperties().isActivated());
+        assertEquals(tokenAuthentication.getName(), expectedUserInfo.getProperties().getName());
         assertEquals(tokenAuthentication.getName(), "bar");
         assertEquals(tokenAuthentication.getAuthorities().size(), 2);
         assertEquals(tokenAuthentication.getAuthorities().size(), 2);
@@ -112,6 +113,6 @@ public class IdentityServiceClientTest {
 
     private UserInfo userInfo(String token) {
         return new UserInfo("123", "bar", "email@gmail.com", 1, true,
-                token.toString(), asList("MCI_ADMIN", "SHR_USER"), asList());
+                token.toString(), new ArrayList<>(asList("MCI_ADMIN", "SHR_USER")), new ArrayList<UserProfile>());
     }
 }

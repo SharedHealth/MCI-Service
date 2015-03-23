@@ -5,8 +5,8 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import javax.naming.AuthenticationException;
+import java.util.ArrayList;
 
-import static java.util.Arrays.asList;
 import static org.junit.Assert.assertTrue;
 
 public class ClientAuthenticatorTest {
@@ -85,6 +85,7 @@ public class ClientAuthenticatorTest {
 
 
     private UserInfo getUserInfo(String id, String email, boolean activated, String xyz) {
-        return new UserInfo(id, "foo", email, 1, activated, xyz, asList(""), asList());
+        return new UserInfo(id, "foo", email, 1, activated, xyz,
+                new ArrayList<String>(), new ArrayList<UserProfile>());
     }
 }

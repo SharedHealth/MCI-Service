@@ -14,7 +14,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import static java.util.Arrays.asList;
 import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -110,6 +109,6 @@ public class TokenAuthenticationFilterTest {
 
     private TokenAuthentication tokenAuthentication(UUID token) {
         return new TokenAuthentication(new UserInfo("1232", "foo", "email@gmail.com", 1, true,
-                token.toString(), new ArrayList<String>(), asList()), true);
+                token.toString(), new ArrayList<String>(), new ArrayList<UserProfile>()), true);
     }
 }

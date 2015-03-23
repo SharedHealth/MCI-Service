@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class MCIProperties {
 
-    public static final String SECURITY_TOKEN_HEADER = "X-Auth-Token";
     public static final String DIAGNOSTICS_SERVLET_PATH = "/diagnostics/health";
 
     @Value("${CASSANDRA_KEYSPACE}")

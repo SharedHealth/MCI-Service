@@ -7,6 +7,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 import static java.util.Arrays.asList;
@@ -43,7 +44,7 @@ public class TokenAuthenticationProviderTest {
         Authentication tokenAuthentication = authenticationProvider.authenticate(authentication);
 
         assertEquals("foo", tokenAuthentication.getName());
-        assertEquals(getUserInfo(token).getId(), ((UserInfo) tokenAuthentication.getPrincipal()).getId());
+        assertEquals(getUserInfo(token).getProperties().getId(), ((UserInfo) tokenAuthentication.getPrincipal()).getProperties().getId());
         assertEquals(token.toString(), tokenAuthentication.getCredentials());
         assertTrue(tokenAuthentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_MCI_ADMIN")));
         assertTrue(tokenAuthentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_SHR_USER")));
@@ -66,6 +67,6 @@ public class TokenAuthenticationProviderTest {
 
     private UserInfo getUserInfo(UUID token) {
         return new UserInfo("123", "foo", "email@gmail.com", 1, true,
-                token.toString(), asList("MCI_ADMIN", "SHR_USER"), asList());
+                token.toString(), new ArrayList<>(asList("MCI_ADMIN", "SHR_USER")), new ArrayList<UserProfile>());
     }
 }

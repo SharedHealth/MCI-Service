@@ -20,14 +20,14 @@ public class TokenAuthentication implements Authentication {
     }
 
     private List<GrantedAuthority> getUserGroups(UserInfo userInfo) {
-        List<String> userGroups = userInfo.getGroups();
+        List<String> userGroups = userInfo.getProperties().getGroups();
         for (int index = 0; index < userGroups.size(); index++) {
             String group = userGroups.get(index);
             group = "ROLE_" + group;
             userGroups.set(index, group);
         }
 
-        String commaSeparateRoles = StringUtils.join(userInfo.getGroups(), ",");
+        String commaSeparateRoles = StringUtils.join(userGroups, ",");
         return AuthorityUtils.commaSeparatedStringToAuthorityList
                 (commaSeparateRoles);
     }
@@ -39,7 +39,7 @@ public class TokenAuthentication implements Authentication {
 
     @Override
     public Object getCredentials() {
-        return userInfo.getAccessToken();
+        return userInfo.getProperties().getAccessToken();
     }
 
     @Override
@@ -81,6 +81,6 @@ public class TokenAuthentication implements Authentication {
 
     @Override
     public String getName() {
-        return userInfo.getName();
+        return userInfo.getProperties().getName();
     }
 }
