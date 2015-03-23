@@ -15,15 +15,32 @@
         <layout class="org.apache.log4j.PatternLayout">
             <param name="ConversionPattern" value="%d{dd-MM-yyyy HH:mm:ss} [%-5p] %c{1} - %m%n"/>
         </layout>
+        <filter class="org.freeshr.utils.log4j.NormalLogFilter"/>
     </appender>
+
+    <appender name="ACCESS_LOG" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="file" value="/var/log/bdshr/access.log"/>
+        <param name="DatePattern" value="'.'dd-MM-yyyy"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{dd-MM-yyyy HH:mm:ss} [%-5p] %c{1} - %m%n"/>
+        </layout>
+        <filter class="org.freeshr.utils.log4j.AccessLogFilter"/>
+    </appender>
+
 
     <logger name="org.sharedhealth.mci" additivity="false">
         <level value="${MCI_LOG_LEVEL}"/>
         <appender-ref ref="VAR_LOG"/>
     </logger>
 
+    <logger name="org.sharedhealth.mci.web.controller">
+        <level value="${MCI_LOG_LEVEL}"/>
+        <appender-ref ref="ACCESS_LOG"/>
+    </logger>
+
     <root>
         <priority value ="${MCI_LOG_LEVEL}" />
+        <appender-ref ref="ACCESS_LOG"/>
         <appender-ref ref="VAR_LOG" />
     </root>
 

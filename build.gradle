@@ -1,16 +1,17 @@
 apply plugin: 'idea'
 
+idea {
+    project {
+        jdkName = '1.7'
+        languageLevel = '1.7'
+    }
+}
+
 subprojects {
 
     apply plugin: 'java'
     apply plugin: 'checkstyle'
     apply plugin: 'pmd'
-
-    compileJava {
-        sourceCompatibility = 1.7
-        targetCompatibility = 1.7
-        options.encoding = 'UTF-8'
-    }
 
     def localEnv = new Properties();
     localEnv.load(new FileInputStream(file("${projectDir}/../env/local.properties")))
@@ -41,6 +42,7 @@ task wrapper(type: Wrapper) {
 }
 
 ext.libraries = [
+        spring_boot_web      : "org.springframework.boot:spring-boot-starter-web:1.2.0.RELEASE",
         spring_boot_logging  : "org.springframework.boot:spring-boot-starter-log4j:1.2.0.RELEASE",
         spring_boot_actuator : "org.springframework.boot:spring-boot-starter-actuator:1.2.0.RELEASE",
         spring_data_cassandra: "org.springframework.data:spring-data-cassandra:1.1.1.RELEASE",
@@ -61,8 +63,9 @@ ext.libraries = [
 
 ext.testLibraries = [
         junit      : "junit:junit:4.10",
+        netty         : "io.netty:netty:3.9.0.Final",
         mockito    : "org.mockito:mockito-all:1.8.4",
         http_client: "org.apache.httpcomponents:httpclient:4.3.3",
         spring_test: "org.springframework:spring-test:4.0.3.RELEASE",
-        wiremock      : "com.github.tomakehurst:wiremock:1.43"
+        wiremock   : "com.github.tomakehurst:wiremock:1.43"
 ]

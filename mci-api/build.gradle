@@ -2,14 +2,15 @@ apply plugin: 'java'
 apply plugin: 'spring-boot'
 apply plugin: 'war'
 apply plugin: 'rpm'
-apply plugin: 'cobertura'
 apply plugin: 'idea'
 
 mainClassName = "org.sharedhealth.mci.web.launch.Main"
 
-idea{
-    project{
+idea {
+    project {
         jdkName = '1.7'
+        languageLevel = '1.7'
+
     }
 }
 
@@ -22,28 +23,28 @@ repositories {
 }
 
 dependencies {
-    compile('org.springframework.boot:spring-boot-starter-web:1.1.8.RELEASE') {
+    compile(libraries.spring_boot_web) {
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
         exclude group: 'ch.qos.logback', module: "logback-classic"
     }
-    compile('org.springframework.boot:spring-boot-starter-security:1.1.8.RELEASE') {
+
+    compile(libraries.spring_boot_security) {
         exclude group: 'ch.qos.logback', module: "logback-classic"
     }
-    compile libraries.snappy, libraries.spring_boot_logging,
+    compile(libraries.spring_boot_actuator) {
+        exclude group: 'ch.qos.logback', module: "logback-classic"
+    }
+
+    compile libraries.spring_boot_logging, libraries.snappy,
             libraries.spring_data_cassandra, libraries.hibernate_validator,
             libraries.apache_collections, libraries.apache_lang,
-            libraries.apache_bean_utils,libraries.commons_codec,
+            libraries.apache_bean_utils, libraries.commons_codec,
             libraries.spring_security, libraries.rome, libraries.joda_time
 
-    compile(libraries.spring_boot_actuator){
-        exclude group: 'ch.qos.logback', module: "logback-classic"
-    }
-
-    compile('io.netty:netty:3.9.0.Final') {
+    testCompile project(":schema")
+    testCompile(testLibraries.netty) {
         force = 'true'
     }
-
-    testCompile project(":schema")
     testCompile('org.cassandraunit:cassandra-unit-spring:2.0.2.2') {
         exclude group: 'com.datastax.cassandra', module: 'cassandra-driver-core'
     }
@@ -172,13 +173,3 @@ buildscript {
         )
     }
 }
-
-cobertura {
-    coverageFormats = ['html', 'xml']
-    coverageIgnoreTrivial = true
-    coverageIgnores = ['org.slf4j.Logger.*']
-    coverageReportDir = new File("$buildDir/reports/cobertura")
-}
-
-test.finalizedBy(project.tasks.cobertura)
-
