@@ -30,11 +30,10 @@ public class MCIProperties {
     private String idpClientId;
     @Value("${IDP_AUTH_TOKEN}")
     private String idpAuthToken;
-    @Value("${HTTP_SCHEME}")
-    private String httpScheme;
-
     @Value("${WORKER_ID}")
     private String workerId;
+    @Value("${SERVER_URLS}")
+    private String serverUrls;
 
     public String getCassandraKeySpace() {
         return cassandraKeySpace;
@@ -60,7 +59,7 @@ public class MCIProperties {
         return frUrl;
     }
 
-    public String getIdentityServerBaseUrl(){
+    public String getIdentityServerBaseUrl() {
         return identityServerBaseUrl;
     }
 
@@ -80,11 +79,11 @@ public class MCIProperties {
         return idpAuthToken;
     }
 
-    public String getHttpScheme() {
-        return httpScheme;
-    }
-
     public String getWorkerId() {
         return workerId;
+    }
+
+    public String getServerUrls() {
+        return serverUrls;
     }
 }

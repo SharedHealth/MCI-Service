@@ -6,6 +6,8 @@ import org.sharedhealth.mci.web.service.PatientService;
 
 import javax.servlet.http.HttpServletRequest;
 
+import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
+
 public class FeedController extends MciController {
 
     protected PatientService patientService;
@@ -26,12 +28,22 @@ public class FeedController extends MciController {
     }
 
     protected String buildPatientLink(String healthId, HttpServletRequest request) {
-        return String.format("%s://%s:%s/%s/%s", properties.getHttpScheme(), request.getServerName(),
-                request.getServerPort(), "api/v1/patients", healthId);
+        return String.format("%s/%s/%s", buildServerUrl(request), "api/v1/patients", healthId);
     }
 
     protected String buildUrl(HttpServletRequest request) {
-        return String.format("%s://%s:%s%s", properties.getHttpScheme(), request.getServerName(),
-                request.getServerPort(), request.getRequestURI());
+        return String.format("%s%s", buildServerUrl(request), request.getRequestURI().toString());
+    }
+
+    String buildServerUrl(HttpServletRequest request) {
+        String[] urls = properties.getServerUrls().split(",");
+        for (String url : urls) {
+            url = url.trim();
+            String host = fromHttpUrl(url).build().getHost();
+            if (host.equals(request.getServerName())) {
+                return url;
+            }
+        }
+        return urls[0];
     }
 }
