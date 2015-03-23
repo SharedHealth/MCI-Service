@@ -6,6 +6,7 @@ import org.sharedhealth.mci.web.config.MCIProperties;
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.handler.MCIResponse;
+import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
 import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.service.PatientService;
 import org.slf4j.Logger;
@@ -59,6 +60,9 @@ public class CatchmentController extends FeedController {
             @RequestParam(value = BEFORE, required = false) UUID before,
             HttpServletRequest request) {
 
+        UserInfo userInfo = getUserInfo();
+        logAccessDetails(userInfo, String.format("Find list of pending approvals for catchment %s", catchmentId));
+
         logger.debug("Find list of pending approvals.");
         final DeferredResult<ResponseEntity<MCIMultiResponse>> deferredResult = new DeferredResult<>();
 
@@ -81,7 +85,11 @@ public class CatchmentController extends FeedController {
             @PathVariable String catchmentId,
             @PathVariable String healthId) {
 
+        UserInfo userInfo = getUserInfo();
+        logAccessDetails(userInfo, String.format("Find list of pending approval details for patient (Health Id) : %s", catchmentId));
+
         logger.debug("Find list of pending approval details. Health ID : " + healthId);
+
         final DeferredResult<ResponseEntity<MCIMultiResponse>> deferredResult = new DeferredResult<>();
 
         Catchment catchment = new Catchment(catchmentId);
@@ -105,6 +113,9 @@ public class CatchmentController extends FeedController {
             @Validated({RequiredOnUpdateGroup.class, Default.class}) @RequestBody PatientData patient,
             BindingResult bindingResult) {
 
+        UserInfo userInfo = getUserInfo();
+        logAccessDetails(userInfo, String.format("Accepting (PUT) pending approval for patient (Health Id) : %s", catchmentId));
+
         logger.debug("Accepting pending approvals. Health ID : " + healthId);
         patient.setRequestedBy(REQUESTED_BY);
         return processPendingApprovals(new Catchment(catchmentId), healthId, patient, bindingResult, true);
@@ -116,6 +127,9 @@ public class CatchmentController extends FeedController {
             @PathVariable String healthId,
             @Validated({RequiredOnUpdateGroup.class, Default.class}) @RequestBody PatientData patient,
             BindingResult bindingResult) {
+
+        UserInfo userInfo = getUserInfo();
+        logAccessDetails(userInfo, String.format("Accepting(DELETE) pending approval for patient (Health Id) : %s", catchmentId));
 
         logger.debug("Accepting pending approvals. Health ID : " + healthId);
         patient.setRequestedBy(REQUESTED_BY);
@@ -146,6 +160,9 @@ public class CatchmentController extends FeedController {
             @RequestParam(value = LAST_MARKER, required = false) String last,
             @RequestHeader(FACILITY_ID) String facilityId,
             HttpServletRequest request) {
+
+        UserInfo userInfo = getUserInfo();
+        logAccessDetails(userInfo, String.format("Find all patients by catchment: %s", catchmentId));
 
         UUID lastMarker = TimeUid.fromString(last);
 

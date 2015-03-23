@@ -3,6 +3,7 @@ package org.sharedhealth.mci.web.controller;
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.utils.TimeUid;
 import org.sharedhealth.mci.web.config.MCIProperties;
+import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
 import org.sharedhealth.mci.web.mapper.Feed;
 import org.sharedhealth.mci.web.mapper.FeedEntry;
 import org.sharedhealth.mci.web.model.PatientUpdateLog;
@@ -53,6 +54,10 @@ public class UpdateFeedController extends FeedController {
             @RequestParam(value = SINCE, required = false) String since,
             @RequestParam(value = LAST_MARKER, required = false) String last,
             HttpServletRequest request) {
+
+        UserInfo userInfo = getUserInfo();
+        logAccessDetails(userInfo, String.format("Find all patients  updated since [%s] given last marker [%s]", since, last));
+
         Date date = isNotBlank(since) ? parseDate(since) : null;
         logger.debug("Find all patients  updated since [" + since + "] ");
         UUID lastMarker = TimeUid.fromString(last);

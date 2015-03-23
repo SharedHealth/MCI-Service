@@ -8,10 +8,14 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.sharedhealth.mci.web.config.MCIProperties;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
+import org.sharedhealth.mci.web.infrastructure.security.TokenAuthentication;
+import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
+import org.sharedhealth.mci.web.infrastructure.security.UserProfile;
 import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.service.PatientService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -70,8 +74,19 @@ public class CatchmentControllerTest {
                 .setValidator(validatorFactory)
                 .build();
 
+
+        UserInfo userInfo = getUserInfo();
+
+        SecurityContextHolder.getContext().setAuthentication(new TokenAuthentication(userInfo, true));
+
         when(properties.getHttpScheme()).thenReturn("httpx");
         when(patientService.getPerPageMaximumLimit()).thenReturn(MAX_PAGE_SIZE);
+    }
+
+    private UserInfo getUserInfo() {UserProfile userProfile = new UserProfile("facility", "100067", null);
+
+        return new UserInfo("102", "ABC", "abc@mail", 1, true, "111100",
+                new ArrayList<String>(), asList(userProfile));
     }
 
     @Test

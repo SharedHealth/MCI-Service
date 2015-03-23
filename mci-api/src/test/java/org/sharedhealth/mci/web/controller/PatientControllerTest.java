@@ -229,7 +229,7 @@ public class PatientControllerTest {
         List<PatientSummaryData> patientSummaryDataList = mapper.mapSummary(patients);
 
         when(patientService.findAllSummaryByQuery(searchQuery)).thenReturn(patientSummaryDataList);
-        MCIMultiResponse mciMultiResponse = new MCIMultiResponse<>(patientSummaryDataList, additionalInfo, OK);
+        MCIMultiResponse mciMultiResponse = new MCIMultiResponse(patientSummaryDataList, additionalInfo, OK);
 
         mockMvc.perform(get(API_END_POINT + "?" + queryString))
                 .andExpect(request().asyncResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject)));

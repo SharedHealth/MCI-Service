@@ -16,12 +16,12 @@ import static org.sharedhealth.mci.web.utils.JsonConstants.HTTP_STATUS;
 
 @JsonIgnoreProperties(value = {"httpStatusObject"})
 @JsonPropertyOrder({HTTP_STATUS, "results", ADDITIONAL_INFO})
-public class MCIMultiResponse<T> {
+public class MCIMultiResponse {
 
     @JsonProperty(HTTP_STATUS)
     public int httpStatus;
 
-    public Collection<T> results;
+    public Collection results;
 
     @JsonProperty(ADDITIONAL_INFO)
     @JsonInclude(NON_EMPTY)
@@ -29,7 +29,7 @@ public class MCIMultiResponse<T> {
 
     public HttpStatus httpStatusObject;
 
-    public MCIMultiResponse(Collection<T> results, HashMap<String, String> additionalInfo, HttpStatus httpStatusObject) {
+    public MCIMultiResponse(Collection results, HashMap<String, String> additionalInfo, HttpStatus httpStatusObject) {
         this.httpStatusObject = httpStatusObject;
         this.httpStatus = httpStatusObject.value();
         this.results = results;
@@ -49,11 +49,11 @@ public class MCIMultiResponse<T> {
         this.httpStatus = httpStatus;
     }
 
-    public Collection<T> getResults() {
+    public Collection getResults() {
         return results;
     }
 
-    public void setResults(List<T> results) {
+    public void setResults(List<Object> results) {
         this.results = results;
     }
 

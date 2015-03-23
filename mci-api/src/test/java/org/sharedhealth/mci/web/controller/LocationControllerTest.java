@@ -59,7 +59,7 @@ public class LocationControllerTest {
 
         HashMap<String, String> additionalInfo = new HashMap<>();
 
-        MCIMultiResponse mciMultiResponse = new MCIMultiResponse<>(locations, additionalInfo, OK);
+        MCIMultiResponse mciMultiResponse = new MCIMultiResponse(locations, additionalInfo, OK);
 
         mockMvc.perform(get(API_END_POINT))
                 .andExpect(request().asyncResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject)));
@@ -78,7 +78,7 @@ public class LocationControllerTest {
 
         HashMap<String, String> additionalInfo = new HashMap<>();
 
-        MCIMultiResponse mciMultiResponse = new MCIMultiResponse<>(locations, additionalInfo, OK);
+        MCIMultiResponse mciMultiResponse = new MCIMultiResponse(locations, additionalInfo, OK);
 
         mockMvc.perform(get(API_END_POINT + "?parent=10"))
                 .andExpect(request().asyncResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject)));

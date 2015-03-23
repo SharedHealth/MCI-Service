@@ -8,12 +8,16 @@ import org.mockito.Mock;
 import org.sharedhealth.mci.utils.DateUtil;
 import org.sharedhealth.mci.web.config.MCIProperties;
 import org.sharedhealth.mci.web.handler.FeedMessageConverter;
+import org.sharedhealth.mci.web.infrastructure.security.TokenAuthentication;
+import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
+import org.sharedhealth.mci.web.infrastructure.security.UserProfile;
 import org.sharedhealth.mci.web.mapper.Feed;
 import org.sharedhealth.mci.web.mapper.FeedEntry;
 import org.sharedhealth.mci.web.model.PatientUpdateLog;
 import org.sharedhealth.mci.web.service.PatientService;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultHandler;
@@ -23,6 +27,7 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -61,6 +66,7 @@ public class UpdateFeedControllerTest {
 
     private UpdateFeedController updateFeedController;
 
+
     @Before
     public void setup() throws ParseException {
         initMocks(this);
@@ -72,7 +78,17 @@ public class UpdateFeedControllerTest {
                 .setValidator(validatorFactory)
                 .build();
 
+        UserInfo userInfo = getUserInfo();
+
+        SecurityContextHolder.getContext().setAuthentication(new TokenAuthentication(userInfo, true));
         when(properties.getHttpScheme()).thenReturn("httpx");
+    }
+
+    private UserInfo getUserInfo() {
+        UserProfile userProfile = new UserProfile("facility", "100067", null);
+
+        return new UserInfo("102", "ABC", "abc@mail", 1, true, "111100",
+                new ArrayList<String>(), asList(userProfile));
     }
 
     @Test

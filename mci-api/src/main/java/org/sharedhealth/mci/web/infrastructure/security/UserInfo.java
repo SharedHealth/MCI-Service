@@ -92,7 +92,7 @@ public class UserInfo {
         return instance;
     }
 
-    class UserInfoProperties {
+    public class UserInfoProperties {
         private boolean isDatasenseFacility;
         private String facilityId;
         private String providerId;

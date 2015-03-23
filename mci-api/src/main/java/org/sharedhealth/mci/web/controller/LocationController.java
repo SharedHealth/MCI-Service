@@ -50,7 +50,7 @@ public class LocationController {
         List<LocationData> results = locationService.findLocationsByParent(locationCriteria);
         HashMap<String, String> additionalInfo = new HashMap<>();
 
-        MCIMultiResponse mciMultiResponse = new MCIMultiResponse<>(results, additionalInfo, OK);
+        MCIMultiResponse mciMultiResponse = new MCIMultiResponse(results, additionalInfo, OK);
         deferredResult.setResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject));
 
         return deferredResult;

@@ -93,7 +93,7 @@ public class PatientController {
             results = results.subList(0, limit);
             additionalInfo.put("note", note);
         }
-        MCIMultiResponse mciMultiResponse = new MCIMultiResponse<>(results, additionalInfo, OK);
+        MCIMultiResponse mciMultiResponse = new MCIMultiResponse(results, additionalInfo, OK);
         deferredResult.setResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject));
 
         return deferredResult;
