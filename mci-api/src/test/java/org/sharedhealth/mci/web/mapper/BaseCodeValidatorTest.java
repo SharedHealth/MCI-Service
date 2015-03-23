@@ -1,10 +1,10 @@
 package org.sharedhealth.mci.web.mapper;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 import java.util.Set;
-
-import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.Assert.assertEquals;
 

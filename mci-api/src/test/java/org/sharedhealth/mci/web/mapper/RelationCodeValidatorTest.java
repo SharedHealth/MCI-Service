@@ -1,8 +1,5 @@
 package org.sharedhealth.mci.web.mapper;
 
-import javax.validation.ConstraintViolation;
-import java.util.Set;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
@@ -10,6 +7,9 @@ import org.sharedhealth.mci.web.config.WebMvcConfigTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+
+import javax.validation.ConstraintViolation;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 

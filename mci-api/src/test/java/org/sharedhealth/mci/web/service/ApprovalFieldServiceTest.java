@@ -1,13 +1,13 @@
 package org.sharedhealth.mci.web.service;
 
-import java.util.concurrent.ExecutionException;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.sharedhealth.mci.web.infrastructure.persistence.ApprovalFieldRepository;
 import org.sharedhealth.mci.web.model.ApprovalField;
+
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;

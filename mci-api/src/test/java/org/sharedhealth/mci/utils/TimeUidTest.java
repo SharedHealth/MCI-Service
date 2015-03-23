@@ -1,11 +1,12 @@
 package org.sharedhealth.mci.utils;
 
-import java.util.UUID;
-
 import com.datastax.driver.core.utils.UUIDs;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import java.util.UUID;
+
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 public class TimeUidTest {
 

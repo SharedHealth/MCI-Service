@@ -7,21 +7,29 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
-import org.sharedhealth.mci.web.mapper.*;
+import org.sharedhealth.mci.web.infrastructure.security.TokenAuthentication;
+import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
+import org.sharedhealth.mci.web.infrastructure.security.UserProfile;
+import org.sharedhealth.mci.web.mapper.LocationCriteria;
+import org.sharedhealth.mci.web.mapper.LocationData;
 import org.sharedhealth.mci.web.service.LocationService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
+import static java.util.Arrays.asList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.springframework.http.HttpStatus.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -48,8 +56,16 @@ public class LocationControllerTest {
                 .build();
 
         locationCriteria = new LocationCriteria();
+        SecurityContextHolder.getContext().setAuthentication(new TokenAuthentication(getUserInfo(), true));
 
     }
+
+    private UserInfo getUserInfo() {UserProfile userProfile = new UserProfile("facility", "100067", null);
+
+        return new UserInfo("102", "ABC", "abc@mail", 1, true, "111100",
+                new ArrayList<String>(), asList(userProfile));
+    }
+
 
     @Test
     public void shouldFindAllDivisionsIfLevelAbsent() throws Exception {

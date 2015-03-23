@@ -3,10 +3,14 @@ package org.sharedhealth.mci.web.controller;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.sharedhealth.mci.web.infrastructure.security.TokenAuthentication;
+import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
+import org.sharedhealth.mci.web.infrastructure.security.UserProfile;
 import org.sharedhealth.mci.web.mapper.PatientAuditLogData;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.service.PatientAuditService;
 import org.sharedhealth.mci.web.service.PatientService;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -48,8 +52,16 @@ public class PatientAuditControllerTest {
                 .standaloneSetup(new PatientAuditController(patientService, auditService))
                 .setValidator(localValidatorFactoryBean)
                 .build();
+
+        SecurityContextHolder.getContext().setAuthentication(new TokenAuthentication(getUserInfo(), true));
+
     }
 
+    private UserInfo getUserInfo() {UserProfile userProfile = new UserProfile("facility", "100067", null);
+
+        return new UserInfo("102", "ABC", "abc@mail", 1, true, "111100",
+                new ArrayList<String>(), asList(userProfile));
+    }
     @Test
     public void shouldFindByHealthId() throws Exception {
         String healthId = "h100";

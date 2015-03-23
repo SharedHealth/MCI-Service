@@ -2,6 +2,7 @@ package org.sharedhealth.mci.web.controller;
 
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
+import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
 import org.sharedhealth.mci.web.mapper.LocationCriteria;
 import org.sharedhealth.mci.web.mapper.LocationData;
 import org.sharedhealth.mci.web.service.LocationService;
@@ -24,11 +25,9 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
 @RequestMapping("/api/v1/locations")
-public class LocationController {
+public class LocationController extends MciController {
     private static final Logger logger = LoggerFactory.getLogger(LocationController.class);
-
     private LocationService locationService;
-
 
     @Autowired
     public LocationController(LocationService locationService) {
@@ -39,6 +38,10 @@ public class LocationController {
     public DeferredResult<ResponseEntity<MCIMultiResponse>> findLocationsByParent(
             @Valid LocationCriteria locationCriteria,
             BindingResult bindingResult) {
+
+        UserInfo userInfo = getUserInfo();
+        logAccessDetails(userInfo, String.format("Find list of locations by parent, given search criteria : %s", locationCriteria));
+
 
         if (bindingResult.hasErrors()) {
             throw new ValidationException(bindingResult);
@@ -55,4 +58,6 @@ public class LocationController {
 
         return deferredResult;
     }
+
+
 }

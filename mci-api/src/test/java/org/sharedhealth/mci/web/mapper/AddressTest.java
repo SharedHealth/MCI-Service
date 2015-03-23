@@ -1,10 +1,10 @@
 package org.sharedhealth.mci.web.mapper;
 
-import javax.validation.ConstraintViolation;
-import java.util.Set;
-
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
+
+import javax.validation.ConstraintViolation;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 

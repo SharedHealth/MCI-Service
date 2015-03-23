@@ -1,11 +1,11 @@
 package org.sharedhealth.mci.validation.constraintvalidator;
 
-import javax.validation.ConstraintViolation;
-import java.util.Set;
-
 import org.junit.Test;
 import org.sharedhealth.mci.web.mapper.SearchQuery;
 import org.sharedhealth.mci.web.mapper.ValidationAwareMapper;
+
+import javax.validation.ConstraintViolation;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 

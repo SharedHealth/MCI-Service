@@ -2,8 +2,10 @@ package org.sharedhealth.mci.web.controller;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.infrastructure.persistence.TestUtil;
@@ -21,6 +23,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.util.List;
 
+import static org.sharedhealth.mci.utils.HttpUtil.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -29,6 +32,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 public class BaseControllerTest {
+    @Rule
+    public WireMockRule wireMockRule = new WireMockRule(9997);
+    protected final String validClientId = "6";
+    protected final String validEmail = "some@thoughtworks.com";
+    protected final String validAccessToken = "2361e0a8-f352-4155-8415-32adfb8c2472";
+
 
     @Autowired
     protected WebApplicationContext webApplicationContext;
@@ -44,7 +53,10 @@ public class BaseControllerTest {
     public static final String APPLICATION_JSON_UTF8 = "application/json;charset=UTF-8";
 
     protected MvcResult createPatient(String json) throws Exception {
-        return mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+        return mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON)
+                .header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
                 .andExpect(status().isOk())
                 .andReturn();
     }

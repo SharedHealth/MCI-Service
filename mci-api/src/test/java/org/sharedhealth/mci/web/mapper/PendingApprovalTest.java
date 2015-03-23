@@ -3,7 +3,10 @@ package org.sharedhealth.mci.web.mapper;
 import com.datastax.driver.core.utils.UUIDs;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.TreeMap;
+import java.util.UUID;
 
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;

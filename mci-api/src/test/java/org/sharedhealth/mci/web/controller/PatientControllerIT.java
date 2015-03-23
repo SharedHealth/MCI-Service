@@ -2,6 +2,7 @@ package org.sharedhealth.mci.web.controller;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.tomakehurst.wiremock.client.WireMock;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,15 +31,18 @@ import java.text.ParseException;
 import java.util.Collections;
 import java.util.List;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
+import static org.sharedhealth.mci.utils.HttpUtil.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.setupApprovalsConfig;
 import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.setupLocation;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 
@@ -99,6 +103,12 @@ public class PatientControllerIT extends BaseControllerTest {
         setupApprovalsConfig(cassandraOps);
         setupLocation(cassandraOps);
 
+        givenThat(WireMock.get(urlEqualTo("/token/" + validAccessToken))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(asString("jsons/userDetailsWithAllRoles.json"))));
+
     }
 
     @Test
@@ -124,7 +134,9 @@ public class PatientControllerIT extends BaseControllerTest {
 
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        mockMvc.perform(asyncDispatch(result))
+        mockMvc.perform(asyncDispatch(result)
+
+        )
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(APPLICATION_JSON_UTF8));
     }
@@ -137,7 +149,11 @@ public class PatientControllerIT extends BaseControllerTest {
         String json = mapper.writeValueAsString(patientData);
 
         mockMvc.perform(MockMvcRequestBuilders.post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType
-                (APPLICATION_JSON))
+                        (APPLICATION_JSON)
+                        .header(AUTH_TOKEN_KEY, validAccessToken)
+                        .header(FROM_KEY, validEmail)
+                        .header(CLIENT_ID_KEY, validClientId)
+        )
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
@@ -148,8 +164,11 @@ public class PatientControllerIT extends BaseControllerTest {
         patientData.setSurName(null);
         String json = mapper.writeValueAsString(patientData);
         MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType
-                (APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
+                (APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
+                .andExpect(status().isBadRequest()
+                )
                 .andReturn();
         JSONAssert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\"," +
                 "\"errors\":[{\"code\":1001,\"field\":\"sur_name\",\"message\":\"invalid " +
@@ -163,7 +182,9 @@ public class PatientControllerIT extends BaseControllerTest {
         String json = mapper.writeValueAsString(patientData);
 
         MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType
-                (APPLICATION_JSON))
+                (APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
@@ -182,7 +203,9 @@ public class PatientControllerIT extends BaseControllerTest {
         String json = mapper.writeValueAsString(patientData);
 
         MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content("invalidate" + json)
-                .contentType(APPLICATION_JSON))
+                .contentType(APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         JSONAssert.assertEquals("{\"error_code\":2000,\"http_status\":400,\"message\":\"invalid.request\"," +
@@ -196,7 +219,9 @@ public class PatientControllerIT extends BaseControllerTest {
         String json = mapper.writeValueAsString(patientData);
 
         MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType
-                (APPLICATION_JSON))
+                (APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         JSONAssert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\"," +
@@ -217,7 +242,9 @@ public class PatientControllerIT extends BaseControllerTest {
         String json = mapper.writeValueAsString(patientData);
 
         MvcResult result = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType
-                (APPLICATION_JSON))
+                (APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         JSONAssert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\"," +
@@ -229,7 +256,10 @@ public class PatientControllerIT extends BaseControllerTest {
     public void shouldReturnBadRequestForInvalidDataProperty() throws Exception {
         String json = mapper.writeValueAsString(new InvalidPatient());
 
-        mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
+        mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON).header(AUTH_TOKEN_KEY,
+                validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.http_status", is(400)))
                 .andExpect(jsonPath("$.error_code", is(2000)))
@@ -255,7 +285,9 @@ public class PatientControllerIT extends BaseControllerTest {
     @Test
     public void shouldReturnNotFoundResponseWhenSearchBy_ID_IfPatientNotExist() throws Exception {
 
-        MvcResult result = mockMvc.perform(get(API_END_POINT + "/random-1000"))
+        MvcResult result = mockMvc.perform(get(API_END_POINT + "/random-1000").header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
                 .andExpect(status().isNotFound())
                 .andReturn();
 
@@ -272,7 +304,9 @@ public class PatientControllerIT extends BaseControllerTest {
 
         MvcResult mvcResult = mockMvc.perform(put(API_END_POINT + "/health-1000").accept(APPLICATION_JSON).content
                 (json).contentType
-                (APPLICATION_JSON))
+                (APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
                 .andExpect(status().isNotFound())
                 .andReturn();
         String content = mvcResult.getResponse().getContentAsString();
@@ -284,7 +318,9 @@ public class PatientControllerIT extends BaseControllerTest {
         String json = asString("jsons/patient/payload_with_hid.json");
 
         MvcResult mvcResult = mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType
-                (APPLICATION_JSON))
+                (APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         String content = mvcResult.getResponse().getContentAsString();
@@ -298,7 +334,9 @@ public class PatientControllerIT extends BaseControllerTest {
         String json = mapper.writeValueAsString(patientData);
 
         MvcResult result = mockMvc.perform(put(API_END_POINT + "/health-1001").accept(APPLICATION_JSON).content(json)
-                .contentType(APPLICATION_JSON))
+                .contentType(APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         JSONAssert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\"," +
@@ -318,7 +356,9 @@ public class PatientControllerIT extends BaseControllerTest {
         String healthId = body.getId();
 
         MvcResult getResult = mockMvc.perform(get(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON)
-                .contentType(APPLICATION_JSON))
+                .contentType(APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -349,7 +389,9 @@ public class PatientControllerIT extends BaseControllerTest {
         Assert.assertEquals(202, body.getHttpStatus());
 
         MvcResult getResult = mockMvc.perform(get(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON)
-                .contentType(APPLICATION_JSON))
+                .contentType(APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -433,7 +475,9 @@ public class PatientControllerIT extends BaseControllerTest {
 
 
         MvcResult mvcResult = mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON)
-                .content(updateJson).contentType(APPLICATION_JSON))
+                .content(updateJson).contentType(APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
                 .andExpect(request().asyncStarted())
                 .andReturn();
         mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isAccepted());
@@ -441,7 +485,9 @@ public class PatientControllerIT extends BaseControllerTest {
         String url = "/api/v1/catchments/557364/approvals/" + healthId;
         String content = asString("jsons/patient/pending_approval_address_accept.json");
         mvcResult = mockMvc.perform(put(url).accept(APPLICATION_JSON)
-                .content(content).contentType(APPLICATION_JSON))
+                .content(content).contentType(APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
                 .andExpect(request().asyncStarted())
                 .andReturn();
         mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isAccepted());
@@ -463,7 +509,9 @@ public class PatientControllerIT extends BaseControllerTest {
         String updateJson = "{\"permanent_address\":{}}";
 
         MvcResult mvcResult = mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON)
-                .content(updateJson).contentType(APPLICATION_JSON))
+                .content(updateJson).contentType(APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
                 .andExpect(request().asyncStarted())
                 .andReturn();
         mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isAccepted());
@@ -483,7 +531,9 @@ public class PatientControllerIT extends BaseControllerTest {
         String updateJson = "{\"primary_contact_number\":{}}";
 
         MvcResult mvcResult = mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON)
-                .content(updateJson).contentType(APPLICATION_JSON))
+                .content(updateJson).contentType(APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
                 .andExpect(request().asyncStarted())
                 .andReturn();
         mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isAccepted());
@@ -506,7 +556,9 @@ public class PatientControllerIT extends BaseControllerTest {
         PatientData patientData1 = getPatientObjectFromString(phoneJson);
 
         MvcResult updatedResult = mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON)
-                .content(phoneJson).contentType(APPLICATION_JSON))
+                .content(phoneJson).contentType(APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -537,7 +589,9 @@ public class PatientControllerIT extends BaseControllerTest {
                 (0));
 
         mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(relationJson)
-                .contentType(APPLICATION_JSON))
+                .contentType(APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -565,7 +619,9 @@ public class PatientControllerIT extends BaseControllerTest {
         original.getRelations().remove(fth);
 
         mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(relationJson)
-                .contentType(APPLICATION_JSON))
+                .contentType(APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -592,7 +648,9 @@ public class PatientControllerIT extends BaseControllerTest {
         original.getRelations().add(newPatientData.getRelations().get(0));
 
         mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(relationJson)
-                .contentType(APPLICATION_JSON))
+                .contentType(APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -635,7 +693,9 @@ public class PatientControllerIT extends BaseControllerTest {
         original.getRelations().remove(fth);
 
         MvcResult result = mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content
-                (relationJson).contentType(APPLICATION_JSON))
+                (relationJson).contentType(APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
@@ -652,20 +712,26 @@ public class PatientControllerIT extends BaseControllerTest {
 
         String updateJson = asString("jsons/patient/full_payload_with_updated_data.json");
         mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).content(updateJson).contentType
-                (APPLICATION_JSON))
+                (APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
                 .andExpect(status().isOk())
                 .andReturn();
 
 
         MvcResult mvcResult = mockMvc.perform(put(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON)
-                .content(updateJson).contentType(APPLICATION_JSON))
+                .content(updateJson).contentType(APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
                 .andExpect(request().asyncStarted())
                 .andReturn();
         mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isAccepted());
 
         String url = "/api/v1/catchments/557364/approvals/" + healthId;
         String content = asString("jsons/patient/pending_approvals_accept.json");
-        mvcResult = mockMvc.perform(put(url).accept(APPLICATION_JSON).content(content).contentType(APPLICATION_JSON))
+        mvcResult = mockMvc.perform(put(url).accept(APPLICATION_JSON).content(content).contentType(APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
                 .andExpect(request().asyncStarted())
                 .andReturn();
         mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isAccepted());

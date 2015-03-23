@@ -11,11 +11,15 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
+import org.sharedhealth.mci.web.infrastructure.security.TokenAuthentication;
+import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
+import org.sharedhealth.mci.web.infrastructure.security.UserProfile;
 import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.service.LocationService;
 import org.sharedhealth.mci.web.service.PatientService;
 import org.sharedhealth.mci.web.service.SettingService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -85,6 +89,8 @@ public class PatientControllerTest {
                 .setValidator(validator())
                 .build();
 
+        SecurityContextHolder.getContext().setAuthentication(new TokenAuthentication(getUserInfo(), true));
+
         patientData = new PatientData();
         patientData.setNationalId(nationalId);
         patientData.setBirthRegistrationNumber(birthRegistrationNumber);
@@ -123,7 +129,11 @@ public class PatientControllerTest {
         mapper = new PatientMapper();
     }
 
+    private UserInfo getUserInfo() {UserProfile userProfile = new UserProfile("facility", "100067", null);
 
+        return new UserInfo("102", "ABC", "abc@mail", 1, true, "111100",
+                new ArrayList<String>(), asList(userProfile));
+    }
     @Test
     public void shouldCreatePatientAndReturnHealthId() throws Exception {
         String json = new ObjectMapper().writeValueAsString(patientData);

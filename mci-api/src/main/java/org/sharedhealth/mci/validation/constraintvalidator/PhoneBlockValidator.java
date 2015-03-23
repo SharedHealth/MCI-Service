@@ -1,11 +1,11 @@
 package org.sharedhealth.mci.validation.constraintvalidator;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
-
 import org.sharedhealth.mci.validation.constraints.PhoneBlock;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
 import org.springframework.stereotype.Component;
+
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
 
 @Component
 public class PhoneBlockValidator implements ConstraintValidator<PhoneBlock, PhoneNumber> {
