@@ -14,9 +14,11 @@ import javax.validation.constraints.Pattern;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_INVALID;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_PATTERN;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
+import static org.sharedhealth.mci.web.utils.PatientDataConstants.COUNTRY_CODE_BANGLADESH;
 
 @JsonIgnoreProperties({"geoCode"})
 public class Address implements Diffable<Address> {
@@ -94,10 +96,12 @@ public class Address implements Diffable<Address> {
     public Address() {
     }
 
+    /* for test only */
     public Address(String divisionId, String districtId, String upazilaId) {
         this.divisionId = divisionId;
         this.districtId = districtId;
         this.upazilaId = upazilaId;
+        this.countryCode = COUNTRY_CODE_BANGLADESH;
     }
 
     @Override
@@ -251,6 +255,11 @@ public class Address implements Diffable<Address> {
     }
 
     public String getCountryCode() {
+
+        if(isBlank(countryCode)) {
+            return null;
+        }
+
         return countryCode;
     }
 

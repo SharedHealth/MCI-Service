@@ -15,6 +15,7 @@ import static java.lang.String.valueOf;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.trim;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
+import static org.sharedhealth.mci.web.utils.PatientDataConstants.COUNTRY_CODE_BANGLADESH;
 
 @Component
 public class PendingApprovalFilter {
@@ -76,6 +77,11 @@ public class PendingApprovalFilter {
     }
 
     private Address processAddress(String key, Address oldValue, Address newValue) {
+
+        if(newValue!= null && !newValue.isEmpty()) {
+            newValue.setCountryCode(COUNTRY_CODE_BANGLADESH);
+        }
+
         Object address = process(key, oldValue, newValue);
         return address == null ? null : (Address) address;
     }

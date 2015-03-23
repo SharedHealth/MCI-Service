@@ -260,7 +260,7 @@ public class PatientMapper {
         if (permanentAddress.isEmpty()) {
             patient.setPermanentCountryCode("");
         } else {
-            patient.setPermanentCountryCode(defaultString(permanentAddress.getCountryCode()));
+            patient.setPermanentCountryCode(permanentAddress.getCountryCode());
         }
     }
 
