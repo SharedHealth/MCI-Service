@@ -42,10 +42,11 @@ task wrapper(type: Wrapper) {
 }
 
 ext.libraries = [
-        spring_boot_web      : "org.springframework.boot:spring-boot-starter-web:1.2.0.RELEASE",
-        spring_boot_logging  : "org.springframework.boot:spring-boot-starter-log4j:1.2.0.RELEASE",
+        spring_boot_web      : "org.springframework.boot:spring-boot-starter-web:1.1.8.RELEASE",
+        spring_boot_logging  : "org.springframework.boot:spring-boot-starter-log4j:1.1.8.RELEASE",
         spring_boot_actuator : "org.springframework.boot:spring-boot-starter-actuator:1.2.0.RELEASE",
         spring_data_cassandra: "org.springframework.data:spring-data-cassandra:1.1.1.RELEASE",
+        spring_context_support : "org.springframework:spring-context-support:4.1.3.RELEASE",
         mutagen              : "com.toddfast.mutagen:mutagen:0.3.0",
         mutagen_cassandra    : "com.toddfast.mutagen:mutagen-cassandra-0.4.2-SNAPSHOT",
         hibernate_validator  : "org.hibernate:hibernate-validator:5.1.1.Final",
@@ -57,7 +58,7 @@ ext.libraries = [
         joda_time            : "joda-time:joda-time:2.7",
         apache_lang          : "org.apache.commons:commons-lang3:3.3.2",
         spring_security      : "org.springframework.security:spring-security-web:3.2.5.RELEASE",
-        spring_boot_security : "org.springframework.boot:spring-boot-starter-security:1.2.0.RELEASE",
+        spring_boot_security : "org.springframework.boot:spring-boot-starter-security:1.1.8.RELEASE",
         rome                 : "rome:rome:1.0"
 ]
 

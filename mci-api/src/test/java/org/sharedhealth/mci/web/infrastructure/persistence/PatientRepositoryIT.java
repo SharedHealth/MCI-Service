@@ -65,9 +65,9 @@ public class PatientRepositoryIT {
     private static String buildFindCatchmentMappingsStmt(PatientData patient) {
         List<String> catchmentIds = patient.getCatchment().getAllIds();
         return select().from(CF_CATCHMENT_MAPPING)
-                .where(in(CATCHMENT_ID, catchmentIds.toArray(new String[catchmentIds.size()])))
-                .and(eq(LAST_UPDATED, patient.getUpdatedAt()))
-                .and(eq(HEALTH_ID, patient.getHealthId())).toString();
+                .where(in(CATCHMENT_ID, catchmentIds.toArray(((Object[]) new String[catchmentIds.size()]))))
+                        .and(eq(LAST_UPDATED, patient.getUpdatedAt()))
+                        .and(eq(HEALTH_ID, patient.getHealthId())).toString();
     }
 
     @Before

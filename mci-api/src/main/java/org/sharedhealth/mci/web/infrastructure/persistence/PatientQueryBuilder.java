@@ -215,7 +215,7 @@ public class PatientQueryBuilder {
     }
 
     public static String buildFindByHidStmt(String[] values) {
-        return select().from(CF_PATIENT).where(in(HEALTH_ID, values)).toString();
+        return select().from(CF_PATIENT).where(in(HEALTH_ID, (Object[])values)).toString();
     }
 
     public static String buildFindByNidStmt(String nid) {

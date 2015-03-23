@@ -15,7 +15,7 @@
         <layout class="org.apache.log4j.PatternLayout">
             <param name="ConversionPattern" value="%d{dd-MM-yyyy HH:mm:ss} [%-5p] %c{1} - %m%n"/>
         </layout>
-        <filter class="org.freeshr.utils.log4j.NormalLogFilter"/>
+        <filter class="org.sharedhealth.mci.web.utils.log4j.NormalLogFilter"/>
     </appender>
 
     <appender name="ACCESS_LOG" class="org.apache.log4j.DailyRollingFileAppender">
@@ -24,7 +24,7 @@
         <layout class="org.apache.log4j.PatternLayout">
             <param name="ConversionPattern" value="%d{dd-MM-yyyy HH:mm:ss} [%-5p] %c{1} - %m%n"/>
         </layout>
-        <filter class="org.freeshr.utils.log4j.AccessLogFilter"/>
+        <filter class="org.sharedhealth.mci.web.utils.log4j.AccessLogFilter"/>
     </appender>
 
 
