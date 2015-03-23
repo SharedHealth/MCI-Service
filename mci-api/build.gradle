@@ -54,7 +54,22 @@ dependencies {
 test {
     testLogging {
         exceptionFormat "full" // default is "short"
+        events "passed", "skipped", "failed"
     }
+
+    beforeTest { descriptor ->
+        logger.lifecycle("Running test: " + descriptor)
+    }
+    // set heap size for the test JVM(s)
+    minHeapSize = "512m"
+    maxHeapSize = "1024m"
+
+    // set JVM arguments for the test JVM(s)
+    jvmArgs '-XX:MaxPermSize=256m'
+
+//    onOutput { descriptor, event ->
+//        logger.lifecycle("Test: " + descriptor + " produced standard out/err: " + event.message )
+//    }
 }
 
 configurations {
