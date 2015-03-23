@@ -10,7 +10,7 @@
     </appender>
 
     <appender name="VAR_LOG" class="org.apache.log4j.DailyRollingFileAppender">
-        <param name="file" value="/var/log/bdshr/bdshr.log"/>
+        <param name="file" value="/var/log/mci/mci.log"/>
         <param name="DatePattern" value="'.'dd-MM-yyyy"/>
         <layout class="org.apache.log4j.PatternLayout">
             <param name="ConversionPattern" value="%d{dd-MM-yyyy HH:mm:ss} [%-5p] %c{1} - %m%n"/>
@@ -19,7 +19,7 @@
     </appender>
 
     <appender name="ACCESS_LOG" class="org.apache.log4j.DailyRollingFileAppender">
-        <param name="file" value="/var/log/bdshr/access.log"/>
+        <param name="file" value="/var/log/mci/access.log"/>
         <param name="DatePattern" value="'.'dd-MM-yyyy"/>
         <layout class="org.apache.log4j.PatternLayout">
             <param name="ConversionPattern" value="%d{dd-MM-yyyy HH:mm:ss} [%-5p] %c{1} - %m%n"/>

@@ -26,6 +26,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.sharedhealth.mci.utils.FileUtil.asString;
+import static org.sharedhealth.mci.utils.HttpUtil.AUTH_TOKEN_KEY;
+import static org.sharedhealth.mci.utils.HttpUtil.CLIENT_ID_KEY;
+import static org.sharedhealth.mci.utils.HttpUtil.FROM_KEY;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -84,7 +87,9 @@ public class SearchRestApiTest extends BaseControllerTest {
     public void shouldReturnBadRequestIfOnlySurNameGiven() throws Exception {
 
         MvcResult result = mockMvc.perform(get(API_END_POINT + "?sur_name=Mazumder").accept(APPLICATION_JSON)
-                .contentType(APPLICATION_JSON))
+                .contentType(APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         JSONAssert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\"," +
@@ -96,7 +101,9 @@ public class SearchRestApiTest extends BaseControllerTest {
     public void shouldReturnBadRequestIfOnlyGivenNameGiven() throws Exception {
 
         MvcResult result = mockMvc.perform(get(API_END_POINT + "?given_name=Mazumder").accept(APPLICATION_JSON)
-                .contentType(APPLICATION_JSON))
+                .contentType(APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         String expected = "{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\"," +
@@ -111,7 +118,9 @@ public class SearchRestApiTest extends BaseControllerTest {
                 patientData.getAddress().getDistrictId() + patientData.getAddress().getUpazilaId();
 
         MvcResult result = mockMvc.perform(get(API_END_POINT + "?present_address=" + present_address).accept(APPLICATION_JSON)
-                .contentType(APPLICATION_JSON))
+                .contentType(APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         String expected = "{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\"," +
@@ -125,7 +134,9 @@ public class SearchRestApiTest extends BaseControllerTest {
                 patientData.getAddress().getDistrictId() + patientData.getAddress().getUpazilaId();
         String givenName = "Rajus";
         MvcResult result = mockMvc.perform(get(API_END_POINT + "?given_name=" + givenName + "&present_address=" +
-                present_address).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
+                present_address).accept(APPLICATION_JSON).contentType(APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
                 .andExpect(status().isOk())
                 .andReturn();
         final MCIMultiResponse body = getMciMultiResponse(result);
@@ -145,7 +156,9 @@ public class SearchRestApiTest extends BaseControllerTest {
         String givenName = "Zaman";
 
         MvcResult searchResult = mockMvc.perform(get(API_END_POINT + "?given_name=" + givenName + "&present_address="
-                + present_address).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
+                + present_address).accept(APPLICATION_JSON).contentType(APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
                 .andExpect(status().isOk())
                 .andReturn();
         final MCIMultiResponse body = getMciMultiResponse(searchResult);
@@ -170,7 +183,9 @@ public class SearchRestApiTest extends BaseControllerTest {
         String surName = "aymaan";
         MvcResult searchResult = mockMvc.perform(get(API_END_POINT + "?given_name=" + givenName +
                 "&sur_name=" + surName + "&present_address=" + present_address).accept(APPLICATION_JSON).contentType
-                (APPLICATION_JSON))
+                (APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
                 .andExpect(status().isOk())
                 .andReturn();
         final MCIMultiResponse body = getMciMultiResponse(searchResult);
@@ -194,7 +209,9 @@ public class SearchRestApiTest extends BaseControllerTest {
         String surName = "mazumder";
         MvcResult result = mockMvc.perform(get(API_END_POINT + "?given_name=" + givenName +
                 "&sur_name=" + surName + "&present_address=" + present_address).accept(APPLICATION_JSON).contentType
-                (APPLICATION_JSON))
+                (APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
                 .andExpect(status().isOk())
                 .andReturn();
         final MCIMultiResponse body = getMciMultiResponse(result);
@@ -207,7 +224,10 @@ public class SearchRestApiTest extends BaseControllerTest {
     public void shouldReturnBadRequestIfOnlyExtensionOrCountryCodeOrAreaCodeGiven() throws Exception {
 
         MvcResult result = mockMvc.perform(get(API_END_POINT +
-                "?country_code=880&area_code=02&extension=122").accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
+                "?country_code=880&area_code=02&extension=122").accept(APPLICATION_JSON)
+                .contentType(APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         JSONAssert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\"," +
@@ -219,7 +239,10 @@ public class SearchRestApiTest extends BaseControllerTest {
     public void shouldReturnBadRequestIfOnlyCountryCodeGiven() throws Exception {
 
         MvcResult result = mockMvc.perform(get(API_END_POINT +
-                "?country_code=880").accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
+                "?country_code=880").accept(APPLICATION_JSON).contentType(APPLICATION_JSON)
+                .header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         JSONAssert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\"," +
@@ -234,7 +257,9 @@ public class SearchRestApiTest extends BaseControllerTest {
                 patientData.getAddress().getDistrictId() + patientData.getAddress().getUpazilaId();
         MvcResult result = mockMvc.perform(get(API_END_POINT +
                 "?phone_no=123456&country_code=880&present_address=" + present_address).accept(APPLICATION_JSON)
-                .contentType(APPLICATION_JSON))
+                .contentType(APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
                 .andExpect(status().isOk())
                 .andReturn();
         final MCIMultiResponse body = getMciMultiResponse(result);
@@ -253,7 +278,9 @@ public class SearchRestApiTest extends BaseControllerTest {
 
         MvcResult result = mockMvc.perform(get(API_END_POINT +
                 "?phone_no=1716528608&country_code=880&present_address=" + present_address).accept(APPLICATION_JSON)
-                .contentType(APPLICATION_JSON))
+                .contentType(APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId))
                 .andExpect(status().isOk())
                 .andReturn();
 
