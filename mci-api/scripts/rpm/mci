@@ -44,7 +44,7 @@ start(){
         # Start mci
         create_dirs
         echo -e "\e[00;32mStarting mci\e[00m"
-        if [ `user_exists $MCI_USER` = "1" ] && ["$CUR_USER" != "$MCI_USER"] ;
+        if [ `user_exists $MCI_USER` = "1" ] && [ "$CUR_USER" != "$MCI_USER" ] ;
         then
                 /bin/su $MCI_USER -c $MCI_RUN
         else
