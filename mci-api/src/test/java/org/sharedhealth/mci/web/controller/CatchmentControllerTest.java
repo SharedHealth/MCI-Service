@@ -78,7 +78,7 @@ public class CatchmentControllerTest {
 
         SecurityContextHolder.getContext().setAuthentication(new TokenAuthentication(getUserInfo(), true));
 
-        when(properties.getServerUrls()).thenReturn(SERVER_URL);
+        when(properties.getServerUrl()).thenReturn(SERVER_URL);
         when(patientService.getPerPageMaximumLimit()).thenReturn(MAX_PAGE_SIZE);
     }
 

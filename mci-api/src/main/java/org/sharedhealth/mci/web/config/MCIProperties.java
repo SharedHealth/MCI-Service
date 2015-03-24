@@ -32,8 +32,8 @@ public class MCIProperties {
     private String idpAuthToken;
     @Value("${WORKER_ID}")
     private String workerId;
-    @Value("${SERVER_URLS}")
-    private String serverUrls;
+    @Value("${SERVER_URL}")
+    private String serverUrl;
 
     public String getCassandraKeySpace() {
         return cassandraKeySpace;
@@ -83,7 +83,7 @@ public class MCIProperties {
         return workerId;
     }
 
-    public String getServerUrls() {
-        return serverUrls;
+    public String getServerUrl() {
+        return serverUrl;
     }
 }

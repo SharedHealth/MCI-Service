@@ -39,20 +39,21 @@ public class FeedControllerTest {
 
     @Test
     public void shouldBuildServerUrl() throws Exception {
-        when(properties.getServerUrls()).thenReturn("https://mci.dghs.com, http://www.mci.com:8081");
+        String serverUrl = "https://mci.dghs.com";
+        when(properties.getServerUrl()).thenReturn(serverUrl);
 
         HttpServletRequest request = buildHttpRequest("mci.dghs.com");
         String url = feedController.buildServerUrl(request);
-        assertEquals("https://mci.dghs.com", url);
+        assertEquals(serverUrl, url);
 
         request = buildHttpRequest("www.test.com");
         url = feedController.buildServerUrl(request);
-        assertEquals("https://mci.dghs.com", url);
+        assertEquals("http://www.test.com:8088", url);
     }
 
     private MockHttpServletRequest buildHttpRequest(String host) throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest();
-        request.setScheme("ftp");
+        request.setScheme("http");
         request.setServerName(host);
         request.setServerPort(8088);
         request.setMethod("GET");

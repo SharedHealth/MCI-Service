@@ -36,14 +36,11 @@ public class FeedController extends MciController {
     }
 
     String buildServerUrl(HttpServletRequest request) {
-        String[] urls = properties.getServerUrls().split(",");
-        for (String url : urls) {
-            url = url.trim();
-            String host = fromHttpUrl(url).build().getHost();
-            if (host.equals(request.getServerName())) {
-                return url;
-            }
+        String url = properties.getServerUrl();
+        String host = fromHttpUrl(url).build().getHost();
+        if (host.equals(request.getServerName())) {
+            return url;
         }
-        return urls[0];
+        return String.format("%s://%s:%s", request.getScheme(), request.getServerName(), request.getServerPort());
     }
 }

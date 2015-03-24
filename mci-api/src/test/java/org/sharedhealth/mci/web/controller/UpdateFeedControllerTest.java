@@ -57,8 +57,7 @@ public class UpdateFeedControllerTest {
 
     private static final String API_END_POINT = "api/v1/feed";
     public static final String SERVER_URL = "https://mci.dghs.com";
-    public static final String SERVER_URLS = SERVER_URL + ", http://172.18.46.56:8081";
-    public static final String REQUEST_URL = "http://mci.dghs.com";
+    public static final String REQUEST_URL = "http://mci.dghs.com:9090";
 
     @Mock
     private PatientService patientService;
@@ -85,7 +84,7 @@ public class UpdateFeedControllerTest {
         UserInfo userInfo = getUserInfo();
 
         SecurityContextHolder.getContext().setAuthentication(new TokenAuthentication(userInfo, true));
-        when(properties.getServerUrls()).thenReturn(SERVER_URLS);
+        when(properties.getServerUrl()).thenReturn(SERVER_URL);
     }
 
     private UserInfo getUserInfo() {
