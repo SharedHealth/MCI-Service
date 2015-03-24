@@ -13,7 +13,7 @@ public class MciController {
     }
 
     protected void logAccessDetails(UserInfo userInfo, String action) {
-        logger.info(String.format("ACCESS: USER=%s TYPE=%s ACTION=%s",
-                userInfo.getProperties().getId(), userInfo.getProperties().getName(), action));
+        logger.info(String.format("ACCESS: USER=%s EMAIL=%s ACTION=%s",
+                userInfo.getProperties().getId(), userInfo.getProperties().getEmail(), action));
     }
 }
