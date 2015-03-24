@@ -5,6 +5,8 @@ import org.sharedhealth.mci.web.infrastructure.security.TokenAuthenticationProvi
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -13,6 +15,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AndRequestMatcher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -24,6 +27,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
+
+import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.FACILITY_GROUP;
+import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.PROVIDER_GROUP;
 
 @Configuration
 @EnableWebSecurity
@@ -39,18 +45,19 @@ public class MCISecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         http
-                .requestMatcher(new AndRequestMatcher(new ArrayList<RequestMatcher>(){{
-                    add(new NegatedRequestMatcher(new AntPathRequestMatcher(MCIProperties.DIAGNOSTICS_SERVLET_PATH)));
-                    add(new AntPathRequestMatcher("/**"));
-                }
+                .requestMatcher(new AndRequestMatcher(new ArrayList<RequestMatcher>() {
+                    {
+                        add(new NegatedRequestMatcher(new AntPathRequestMatcher(MCIProperties.DIAGNOSTICS_SERVLET_PATH)));
+                        add(new AntPathRequestMatcher("/**"));
+                    }
                 }))
                 .authorizeRequests()
-                .anyRequest().authenticated()
+                .regexMatchers(HttpMethod.POST, "\\/api\\/v\\d+\\/patients/?")
+                    .hasAnyRole(PROVIDER_GROUP, FACILITY_GROUP)
                 .and()
                 .addFilterBefore(new TokenAuthenticationFilter(authenticationManager()), BasicAuthenticationFilter
                         .class)
-                .exceptionHandling().authenticationEntryPoint(unauthorizedEntryPoint());
-
+                .exceptionHandling().accessDeniedHandler(unauthorizedEntryPoint()).authenticationEntryPoint(unauthenticatedEntryPoint());
     }
 
     @Bean
@@ -65,7 +72,7 @@ public class MCISecurityConfig extends WebSecurityConfigurerAdapter {
         auth.authenticationProvider(tokenAuthenticationProvider);
     }
 
-    private AuthenticationEntryPoint unauthorizedEntryPoint() {
+    private AuthenticationEntryPoint unauthenticatedEntryPoint() {
         return new AuthenticationEntryPoint() {
             @Override
             public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException
@@ -75,5 +82,13 @@ public class MCISecurityConfig extends WebSecurityConfigurerAdapter {
         };
     }
 
+    private AccessDeniedHandler unauthorizedEntryPoint() {
+        return new AccessDeniedHandler() {
+            @Override
+            public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, accessDeniedException.getMessage());
+            }
+        };
+    }
 }
 

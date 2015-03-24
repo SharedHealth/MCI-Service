@@ -1,6 +1,7 @@
 package org.sharedhealth.mci.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.tomakehurst.wiremock.client.WireMock;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,9 +23,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
 import static org.sharedhealth.mci.utils.HttpUtil.AUTH_TOKEN_KEY;
 import static org.sharedhealth.mci.utils.HttpUtil.CLIENT_ID_KEY;
@@ -51,8 +52,226 @@ public class SearchRestApiTest extends BaseControllerTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+        setUpMockMvcBuilder();
 
+        validClientId = "6";
+        validEmail = "some@thoughtworks.com";
+        validAccessToken = "2361e0a8-f352-4155-8415-32adfb8c2472";
+        givenThat(WireMock.get(urlEqualTo("/token/" + validAccessToken))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(asString("jsons/userDetails/userDetailsWithAllRoles.json"))));
+        createPatientData();
+    }
+
+    @Test
+    public void shouldReturnBadRequestIfOnlySurNameGiven() throws Exception {
+
+        MvcResult result = mockMvc.perform(get(API_END_POINT_FOR_PATIENT + "?sur_name=Mazumder")
+                .header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId)
+                .accept(APPLICATION_JSON)
+                .contentType(APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+        JSONAssert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\"," +
+                "\"errors\":[{\"code\":1001,\"field\":\"given_name\",\"message\":\"invalid given_name\"}]}", result
+                .getResponse().getContentAsString(), JSONCompareMode.STRICT);
+    }
+
+    @Test
+    public void shouldReturnBadRequestIfOnlyGivenNameGiven() throws Exception {
+
+        MvcResult result = mockMvc.perform(get(API_END_POINT_FOR_PATIENT + "?given_name=Mazumder")
+                .header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId)
+                .accept(APPLICATION_JSON)
+                .contentType(APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+        String expected = "{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\"," +
+                "\"errors\":[{\"code\":1006,\"message\":\"Please provide a valid ID, Household code, Address or Phone number\"}]}";
+        JSONAssert.assertEquals(expected, result.getResponse().getContentAsString(), JSONCompareMode.STRICT);
+    }
+
+    @Test
+    public void shouldReturnBadRequestIfOnlyAddressGiven() throws Exception {
+
+        String present_address = patientData.getAddress().getDivisionId() +
+                patientData.getAddress().getDistrictId() + patientData.getAddress().getUpazilaId();
+
+        MvcResult result = mockMvc.perform(get(API_END_POINT_FOR_PATIENT + "?present_address=" + present_address)
+                .header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId)
+                .accept(APPLICATION_JSON)
+                .contentType(APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+        String expected = "{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\"," +
+                "\"errors\":[{\"code\":1006,\"message\":\"Please provide a valid ID, Household code, Name or Phone number\"}]}";
+        JSONAssert.assertEquals(expected, result.getResponse().getContentAsString(), JSONCompareMode.STRICT);
+    }
+
+    @Test
+    public void shouldReturnOkResponseIfPatientNotExistWithGivenNameAndAddress() throws Exception {
+        String present_address = patientData.getAddress().getDivisionId() +
+                patientData.getAddress().getDistrictId() + patientData.getAddress().getUpazilaId();
+        String givenName = "Rajus";
+
+        MvcResult result = mockMvc.perform(get(API_END_POINT_FOR_PATIENT + "?given_name=" + givenName + "&present_address=" +
+                present_address)
+                .header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId)
+                .accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+        final MCIMultiResponse body = getMciMultiResponse(result);
+        Assert.assertEquals("[]", body.getResults().toString());
+        Assert.assertEquals(200, body.getHttpStatus());
+    }
+
+    @Test
+    public void shouldReturnPatientIfGivenNameAndAddressMatchWithAnyPatient() throws Exception {
+        String json = asString("jsons/patient/full_payload.json");
+
+        PatientSummaryData original = getPatientSummaryObjectFromString(json);
+
+        MvcResult result = postPatient(json);
+        String present_address = original.getAddress().getDivisionId() +
+                original.getAddress().getDistrictId() + original.getAddress().getUpazilaId();
+        String givenName = "Zaman";
+
+        MvcResult searchResult = mockMvc.perform(get(API_END_POINT_FOR_PATIENT + "?given_name=" + givenName + "&present_address="
+                + present_address)
+                .header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId)
+                .accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+        final MCIMultiResponse body = getMciMultiResponse(searchResult);
+        PatientSummaryData patient = getPatientSummaryObjectFromString(mapper.writeValueAsString(body.getResults()
+                .iterator().next()));
+
+        original.setHealthId(patient.getHealthId());
+        Assert.assertEquals(original, patient);
+    }
+
+    @Test
+    public void shouldReturnPatientIfGivenNameAndSurNameAndAddressMatchWithCaseSensetiveSupport() throws Exception {
+        String json = asString("jsons/patient/full_payload.json");
+
+        PatientSummaryData original = getPatientSummaryObjectFromString(json);
+
+        MvcResult result = postPatient(json);
+        String present_address = original.getAddress().getDivisionId() +
+                original.getAddress().getDistrictId() + original.getAddress().getUpazilaId();
+        String givenName = "zaman";
+        String surName = "aymaan";
+
+        MvcResult searchResult = mockMvc.perform(get(API_END_POINT_FOR_PATIENT + "?given_name=" + givenName +
+                "&sur_name=" + surName + "&present_address=" + present_address)
+                .header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId)
+                .accept(APPLICATION_JSON).contentType
+                (APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+        final MCIMultiResponse body = getMciMultiResponse(searchResult);
+
+        PatientSummaryData patient = getPatientSummaryObjectFromString(mapper.writeValueAsString(body.getResults()
+                .iterator().next()));
+
+        original.setHealthId(patient.getHealthId());
+    }
+
+    @Test
+    public void shouldReturnPatientWithAdditionalNoteWhenSearchFindMorePatient() throws Exception {
+        String json = new ObjectMapper().writeValueAsString(patientData);
+
+        for (int x = 0; x <= PER_PAGE_MAXIMUM_LIMIT; x++) {
+            postPatient(json);
+        }
+        String present_address = patientData.getAddress().getDivisionId() +
+                patientData.getAddress().getDistrictId() + patientData.getAddress().getUpazilaId();
+        String givenName = "raju";
+        String surName = "mazumder";
+
+        MvcResult result = mockMvc.perform(get(API_END_POINT_FOR_PATIENT + "?given_name=" + givenName +
+                "&sur_name=" + surName + "&present_address=" + present_address)
+                .header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId)
+                .accept(APPLICATION_JSON).contentType
+                (APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+        final MCIMultiResponse body = getMciMultiResponse(result);
+        Assert.assertEquals("{note=" + PER_PAGE_MAXIMUM_LIMIT_NOTE + "}", body.getAdditionalInfo().toString());
+
+        Assert.assertEquals(200, body.getHttpStatus());
+    }
+
+    @Test
+    public void shouldReturnBadRequestIfOnlyExtensionOrCountryCodeOrAreaCodeGiven() throws Exception {
+
+
+        MvcResult result = mockMvc.perform(get(API_END_POINT_FOR_PATIENT +
+                "?country_code=880&area_code=02&extension=122")
+                .header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId)
+                .accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+        JSONAssert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\"," +
+                "\"errors\":[{\"code\":1001,\"field\":\"phone_no\",\"message\":\"invalid phone_no\"}]}", result
+                .getResponse().getContentAsString(), JSONCompareMode.STRICT);
+    }
+
+    @Test
+    public void shouldReturnBadRequestIfOnlyCountryCodeGiven() throws Exception {
+
+        MvcResult result = mockMvc.perform(get(API_END_POINT_FOR_PATIENT +
+                "?country_code=880")
+                .header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId)
+                .accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+        JSONAssert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\"," +
+                "\"errors\":[{\"code\":1001,\"field\":\"phone_no\",\"message\":\"invalid phone_no\"}]}", result
+                .getResponse().getContentAsString(), JSONCompareMode.STRICT);
+    }
+
+    @Test
+    public void shouldReturnOkResponseIfPatientNotExistWithPhoneNumber() throws Exception {
+        patientData.setHealthId("health-100");
+        String present_address = patientData.getAddress().getDivisionId() +
+                patientData.getAddress().getDistrictId() + patientData.getAddress().getUpazilaId();
+
+        MvcResult result = mockMvc.perform(get(API_END_POINT_FOR_PATIENT +
+                "?phone_no=123456&country_code=880&present_address=" + present_address)
+                .header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId)
+                .accept(APPLICATION_JSON)
+                .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+        final MCIMultiResponse body = getMciMultiResponse(result);
+        Assert.assertEquals("[]", body.getResults().toString());
+        Assert.assertEquals(200, body.getHttpStatus());
+    }
+
+    private void createPatientData() {
         patientData = new PatientData();
         patientData.setGivenName("Raju");
         patientData.setSurName("Mazumder");
@@ -84,203 +303,21 @@ public class SearchRestApiTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldReturnBadRequestIfOnlySurNameGiven() throws Exception {
-
-        MvcResult result = mockMvc.perform(get(API_END_POINT + "?sur_name=Mazumder").accept(APPLICATION_JSON)
-                .contentType(APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
-                .header(FROM_KEY, validEmail)
-                .header(CLIENT_ID_KEY, validClientId))
-                .andExpect(status().isBadRequest())
-                .andReturn();
-        JSONAssert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\"," +
-                "\"errors\":[{\"code\":1001,\"field\":\"given_name\",\"message\":\"invalid given_name\"}]}", result
-                .getResponse().getContentAsString(), JSONCompareMode.STRICT);
-    }
-
-    @Test
-    public void shouldReturnBadRequestIfOnlyGivenNameGiven() throws Exception {
-
-        MvcResult result = mockMvc.perform(get(API_END_POINT + "?given_name=Mazumder").accept(APPLICATION_JSON)
-                .contentType(APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
-                .header(FROM_KEY, validEmail)
-                .header(CLIENT_ID_KEY, validClientId))
-                .andExpect(status().isBadRequest())
-                .andReturn();
-        String expected = "{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\"," +
-                "\"errors\":[{\"code\":1006,\"message\":\"Please provide a valid ID, Household code, Address or Phone number\"}]}";
-        JSONAssert.assertEquals(expected, result.getResponse().getContentAsString(), JSONCompareMode.STRICT);
-    }
-
-    @Test
-    public void shouldReturnBadRequestIfOnlyAddressGiven() throws Exception {
-
+    public void shouldReturnAllTheCreatedPatientIfPhoneNumberMatchBySearch() throws Exception {
         String present_address = patientData.getAddress().getDivisionId() +
                 patientData.getAddress().getDistrictId() + patientData.getAddress().getUpazilaId();
 
-        MvcResult result = mockMvc.perform(get(API_END_POINT + "?present_address=" + present_address).accept(APPLICATION_JSON)
-                .contentType(APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
-                .header(FROM_KEY, validEmail)
-                .header(CLIENT_ID_KEY, validClientId))
-                .andExpect(status().isBadRequest())
-                .andReturn();
-        String expected = "{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\"," +
-                "\"errors\":[{\"code\":1006,\"message\":\"Please provide a valid ID, Household code, Name or Phone number\"}]}";
-        JSONAssert.assertEquals(expected, result.getResponse().getContentAsString(), JSONCompareMode.STRICT);
-    }
+        createPatient(patientData);
+        createPatient(patientData);
+        createPatient(patientData);
 
-    @Test
-    public void shouldReturnOkResponseIfPatientNotExistWithGivenNameAndAddress() throws Exception {
-        String present_address = patientData.getAddress().getDivisionId() +
-                patientData.getAddress().getDistrictId() + patientData.getAddress().getUpazilaId();
-        String givenName = "Rajus";
-        MvcResult result = mockMvc.perform(get(API_END_POINT + "?given_name=" + givenName + "&present_address=" +
-                present_address).accept(APPLICATION_JSON).contentType(APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
-                .header(FROM_KEY, validEmail)
-                .header(CLIENT_ID_KEY, validClientId))
-                .andExpect(status().isOk())
-                .andReturn();
-        final MCIMultiResponse body = getMciMultiResponse(result);
-        Assert.assertEquals("[]", body.getResults().toString());
-        Assert.assertEquals(200, body.getHttpStatus());
-    }
-
-    @Test
-    public void shouldReturnPatientIfGivenNameAndAddressMatchWithAnyPatient() throws Exception {
-        String json = asString("jsons/patient/full_payload.json");
-
-        PatientSummaryData original = getPatientSummaryObjectFromString(json);
-
-        MvcResult result = createPatient(json);
-        String present_address = original.getAddress().getDivisionId() +
-                original.getAddress().getDistrictId() + original.getAddress().getUpazilaId();
-        String givenName = "Zaman";
-
-        MvcResult searchResult = mockMvc.perform(get(API_END_POINT + "?given_name=" + givenName + "&present_address="
-                + present_address).accept(APPLICATION_JSON).contentType(APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
-                .header(FROM_KEY, validEmail)
-                .header(CLIENT_ID_KEY, validClientId))
-                .andExpect(status().isOk())
-                .andReturn();
-        final MCIMultiResponse body = getMciMultiResponse(searchResult);
-        PatientSummaryData patient = getPatientSummaryObjectFromString(mapper.writeValueAsString(body.getResults()
-                .iterator().next()));
-
-        original.setHealthId(patient.getHealthId());
-        Assert.assertEquals(original, patient);
-    }
-
-    @Test
-    public void shouldReturnPatientIfGivenNameAndSurNameAndAddressMatchWithCaseSensetiveSupport() throws Exception {
-
-        String json = asString("jsons/patient/full_payload.json");
-
-        PatientSummaryData original = getPatientSummaryObjectFromString(json);
-
-        MvcResult result = createPatient(json);
-        String present_address = original.getAddress().getDivisionId() +
-                original.getAddress().getDistrictId() + original.getAddress().getUpazilaId();
-        String givenName = "zaman";
-        String surName = "aymaan";
-        MvcResult searchResult = mockMvc.perform(get(API_END_POINT + "?given_name=" + givenName +
-                "&sur_name=" + surName + "&present_address=" + present_address).accept(APPLICATION_JSON).contentType
-                (APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
-                .header(FROM_KEY, validEmail)
-                .header(CLIENT_ID_KEY, validClientId))
-                .andExpect(status().isOk())
-                .andReturn();
-        final MCIMultiResponse body = getMciMultiResponse(searchResult);
-
-        PatientSummaryData patient = getPatientSummaryObjectFromString(mapper.writeValueAsString(body.getResults()
-                .iterator().next()));
-
-        original.setHealthId(patient.getHealthId());
-    }
-
-    @Test
-    public void shouldReturnPatientWithAdditionalNoteWhenSearchFindMorePatient() throws Exception {
-        String json = new ObjectMapper().writeValueAsString(patientData);
-
-        for (int x = 0; x <= PER_PAGE_MAXIMUM_LIMIT; x++) {
-            createPatient(json);
-        }
-        String present_address = patientData.getAddress().getDivisionId() +
-                patientData.getAddress().getDistrictId() + patientData.getAddress().getUpazilaId();
-        String givenName = "raju";
-        String surName = "mazumder";
-        MvcResult result = mockMvc.perform(get(API_END_POINT + "?given_name=" + givenName +
-                "&sur_name=" + surName + "&present_address=" + present_address).accept(APPLICATION_JSON).contentType
-                (APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
-                .header(FROM_KEY, validEmail)
-                .header(CLIENT_ID_KEY, validClientId))
-                .andExpect(status().isOk())
-                .andReturn();
-        final MCIMultiResponse body = getMciMultiResponse(result);
-        Assert.assertEquals("{note=" + PER_PAGE_MAXIMUM_LIMIT_NOTE + "}", body.getAdditionalInfo().toString());
-
-        Assert.assertEquals(200, body.getHttpStatus());
-    }
-
-    @Test
-    public void shouldReturnBadRequestIfOnlyExtensionOrCountryCodeOrAreaCodeGiven() throws Exception {
-
-        MvcResult result = mockMvc.perform(get(API_END_POINT +
-                "?country_code=880&area_code=02&extension=122").accept(APPLICATION_JSON)
-                .contentType(APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
-                .header(FROM_KEY, validEmail)
-                .header(CLIENT_ID_KEY, validClientId))
-                .andExpect(status().isBadRequest())
-                .andReturn();
-        JSONAssert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\"," +
-                "\"errors\":[{\"code\":1001,\"field\":\"phone_no\",\"message\":\"invalid phone_no\"}]}", result
-                .getResponse().getContentAsString(), JSONCompareMode.STRICT);
-    }
-
-    @Test
-    public void shouldReturnBadRequestIfOnlyCountryCodeGiven() throws Exception {
-
-        MvcResult result = mockMvc.perform(get(API_END_POINT +
-                "?country_code=880").accept(APPLICATION_JSON).contentType(APPLICATION_JSON)
+        MvcResult result = mockMvc.perform(get(API_END_POINT_FOR_PATIENT +
+                "?phone_no=1716528608&country_code=880&present_address=" + present_address)
                 .header(AUTH_TOKEN_KEY, validAccessToken)
                 .header(FROM_KEY, validEmail)
-                .header(CLIENT_ID_KEY, validClientId))
-                .andExpect(status().isBadRequest())
-                .andReturn();
-        JSONAssert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\"," +
-                "\"errors\":[{\"code\":1001,\"field\":\"phone_no\",\"message\":\"invalid phone_no\"}]}", result
-                .getResponse().getContentAsString(), JSONCompareMode.STRICT);
-    }
-
-    @Test
-    public void shouldReturnOkResponseIfPatientNotExistWithPhoneNumber() throws Exception {
-        patientData.setHealthId("health-100");
-        String present_address = patientData.getAddress().getDivisionId() +
-                patientData.getAddress().getDistrictId() + patientData.getAddress().getUpazilaId();
-        MvcResult result = mockMvc.perform(get(API_END_POINT +
-                "?phone_no=123456&country_code=880&present_address=" + present_address).accept(APPLICATION_JSON)
-                .contentType(APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
-                .header(FROM_KEY, validEmail)
-                .header(CLIENT_ID_KEY, validClientId))
-                .andExpect(status().isOk())
-                .andReturn();
-        final MCIMultiResponse body = getMciMultiResponse(result);
-        Assert.assertEquals("[]", body.getResults().toString());
-        Assert.assertEquals(200, body.getHttpStatus());
-    }
-
-    @Test
-    public void shouldReturnAllTheCreatedPatientIfPhoneNumberMatchBySearch() throws Exception {
-        String json = new ObjectMapper().writeValueAsString(patientData);
-        String present_address = patientData.getAddress().getDivisionId() +
-                patientData.getAddress().getDistrictId() + patientData.getAddress().getUpazilaId();
-        createPatient(json);
-        createPatient(json);
-        createPatient(json);
-
-        MvcResult result = mockMvc.perform(get(API_END_POINT +
-                "?phone_no=1716528608&country_code=880&present_address=" + present_address).accept(APPLICATION_JSON)
-                .contentType(APPLICATION_JSON).header(AUTH_TOKEN_KEY, validAccessToken)
-                .header(FROM_KEY, validEmail)
-                .header(CLIENT_ID_KEY, validClientId))
+                .header(CLIENT_ID_KEY, validClientId)
+                .accept(APPLICATION_JSON)
+                .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 

@@ -8,8 +8,8 @@ import org.junit.Assert;
 import org.junit.Rule;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.handler.MCIResponse;
+import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
 import org.sharedhealth.mci.web.infrastructure.persistence.TestUtil;
-import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PatientSummaryData;
 import org.sharedhealth.mci.web.mapper.Relation;
@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 
+import javax.servlet.Filter;
 import java.util.List;
 
 import static org.sharedhealth.mci.utils.HttpUtil.*;
@@ -29,36 +30,61 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 
 public class BaseControllerTest {
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(9997);
-    protected final String validClientId = "6";
-    protected final String validEmail = "some@thoughtworks.com";
-    protected final String validAccessToken = "2361e0a8-f352-4155-8415-32adfb8c2472";
-
 
     @Autowired
     protected WebApplicationContext webApplicationContext;
 
     @Autowired
+    private PatientRepository patientRepository;
+
+    @Autowired
     @Qualifier("MCICassandraTemplate")
     protected CassandraOperations cassandraOps;
 
+    @Autowired
+    private Filter springSecurityFilterChain;
+
+    protected String validClientId;
+    protected String validEmail;
+    protected String validAccessToken;
     protected MockMvc mockMvc;
     protected PatientData patientData;
     protected ObjectMapper mapper = new ObjectMapper();
-    public static final String API_END_POINT = "/api/v1/patients";
+    public static final String API_END_POINT_FOR_PATIENT = "/api/v1/patients";
     public static final String APPLICATION_JSON_UTF8 = "application/json;charset=UTF-8";
 
-    protected MvcResult createPatient(String json) throws Exception {
-        return mockMvc.perform(post(API_END_POINT).accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON)
+
+    protected void setUpMockMvcBuilder() {
+        mockMvc = webAppContextSetup(webApplicationContext)
+                .addFilters(springSecurityFilterChain)
+                .build();
+    }
+
+    protected MvcResult postPatient(String json) throws Exception {
+        return mockMvc.perform(post(API_END_POINT_FOR_PATIENT)
                 .header(AUTH_TOKEN_KEY, validAccessToken)
                 .header(FROM_KEY, validEmail)
-                .header(CLIENT_ID_KEY, validClientId))
+                .header(CLIENT_ID_KEY, validClientId)
+                .accept(APPLICATION_JSON)
+                .content(json)
+                .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
+    }
+
+    protected MCIResponse createPatient(PatientData patient) throws Exception {
+        return patientRepository.create(patient);
+    }
+
+    protected MCIResponse createPatient(String json) throws Exception {
+        PatientData data = getPatientObjectFromString(json);
+        return createPatient(data);
     }
 
     protected MCIMultiResponse getMciMultiResponse(MvcResult result) {
@@ -79,10 +105,6 @@ public class BaseControllerTest {
 
     protected PatientSummaryData getPatientSummaryObjectFromString(String json) throws Exception {
         return mapper.readValue(json, PatientSummaryData.class);
-    }
-
-    protected Address getAddressObjectFromString(String json) throws Exception {
-        return mapper.readValue(json, Address.class);
     }
 
     protected boolean isRelationsEqual(List<Relation> original, List<Relation> patient) {
@@ -110,7 +132,11 @@ public class BaseControllerTest {
     }
 
     protected PatientData getPatientMapperObjectByHealthId(String healthId) throws Exception {
-        MvcResult getResult = mockMvc.perform(get(API_END_POINT + "/" + healthId).accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
+        MvcResult getResult = mockMvc.perform(get(API_END_POINT_FOR_PATIENT + "/" + healthId)
+                .header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId)
+                .accept(APPLICATION_JSON).contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(request().asyncStarted())
                 .andReturn();

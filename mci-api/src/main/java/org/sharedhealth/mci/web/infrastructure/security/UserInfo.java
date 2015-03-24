@@ -179,7 +179,7 @@ public class UserInfo {
         }
 
         private void addGroupsBasedOnProfiles(UserProfile userProfile) {
-            if (userProfile.isFacility() && groups.contains(FACILITY_ADMIN_GROUP)) {
+            if (userProfile.isFacility() && groups.contains(FACILITY_ADMIN_GROUP) && !groups.contains(DATASENSE_FACILITY_GROUP)) {
                 groups.add(FACILITY_GROUP);
             } else if (userProfile.isProvider()) {
                 groups.add(PROVIDER_GROUP);

@@ -47,6 +47,11 @@ public class LocationControllerIT extends BaseControllerTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+
+        validClientId = "6";
+        validEmail = "some@thoughtworks.com";
+        validAccessToken = "2361e0a8-f352-4155-8415-32adfb8c2472";
+
         mockMvc = MockMvcBuilders
                 .webAppContextSetup(webApplicationContext)
                 .addFilters(springSecurityFilterChain)

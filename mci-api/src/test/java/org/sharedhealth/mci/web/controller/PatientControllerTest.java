@@ -19,6 +19,7 @@ import org.sharedhealth.mci.web.service.LocationService;
 import org.sharedhealth.mci.web.service.PatientService;
 import org.sharedhealth.mci.web.service.SettingService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -62,6 +63,9 @@ public class PatientControllerTest {
 
     @Mock
     private LocalValidatorFactoryBean localValidatorFactoryBean;
+
+    @Mock
+    private SecurityContext securityContext;
 
     private PatientMapper mapper;
 
@@ -139,6 +143,9 @@ public class PatientControllerTest {
         String json = new ObjectMapper().writeValueAsString(patientData);
         String healthId = "healthId-100";
         MCIResponse mciResponse = new MCIResponse(healthId, CREATED);
+        TokenAuthentication tokenAuthentication = tokenAuthentication();
+        SecurityContextHolder.setContext(securityContext);
+        when(securityContext.getAuthentication()).thenReturn(tokenAuthentication);
         when(locationService.findByGeoCode(GEO_CODE)).thenReturn(location);
         when(patientService.create(patientData)).thenReturn(mciResponse);
 
@@ -311,6 +318,9 @@ public class PatientControllerTest {
         String json = writeValueAsString(patientData);
         String healthId = "healthId-100";
         MCIResponse mciResponse = new MCIResponse(healthId, OK);
+        TokenAuthentication tokenAuthentication = tokenAuthentication();
+        SecurityContextHolder.setContext(securityContext);
+        when(securityContext.getAuthentication()).thenReturn(tokenAuthentication);
         when(patientService.create(patientData)).thenReturn(mciResponse);
 
         MvcResult mvcResult = mockMvc.perform(post(API_END_POINT).content(json).contentType(APPLICATION_JSON))
@@ -379,6 +389,11 @@ public class PatientControllerTest {
         data.setHealthId(healthId);
         data.setGivenName("Name" + healthId);
         return data;
+    }
+
+    private TokenAuthentication tokenAuthentication() {
+        return new TokenAuthentication(new UserInfo("1232", "foo", "email@gmail.com", 1, true,
+                "xyz", new ArrayList<String>(), asList(new UserProfile("facility", "10000069", asList("3026")))), true);
     }
 }
 
