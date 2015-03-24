@@ -86,7 +86,8 @@ public class CatchmentController extends FeedController {
             @PathVariable String healthId) {
 
         UserInfo userInfo = getUserInfo();
-        logAccessDetails(userInfo, String.format("Find list of pending approval details for patient (Health Id) : %s", catchmentId));
+        logAccessDetails(userInfo, String.format("Find list of pending approval details for patient (Health Id) : %s, catchment %s",
+                healthId, catchmentId));
 
         logger.debug("Find list of pending approval details. Health ID : " + healthId);
 
@@ -114,7 +115,8 @@ public class CatchmentController extends FeedController {
             BindingResult bindingResult) {
 
         UserInfo userInfo = getUserInfo();
-        logAccessDetails(userInfo, String.format("Accepting (PUT) pending approval for patient (Health Id) : %s", catchmentId));
+        logAccessDetails(userInfo, String.format("Accepting (PUT) pending approval for patient (Health Id) : %s, catchment: %s",
+                healthId, catchmentId));
 
         logger.debug("Accepting pending approvals. Health ID : " + healthId);
         patient.setRequestedBy(REQUESTED_BY);
@@ -129,7 +131,8 @@ public class CatchmentController extends FeedController {
             BindingResult bindingResult) {
 
         UserInfo userInfo = getUserInfo();
-        logAccessDetails(userInfo, String.format("Accepting(DELETE) pending approval for patient (Health Id) : %s", catchmentId));
+        logAccessDetails(userInfo, String.format("Accepting(DELETE) pending approval for patient (Health Id) : %s, catchment: %s",
+                healthId, catchmentId));
 
         logger.debug("Accepting pending approvals. Health ID : " + healthId);
         patient.setRequestedBy(REQUESTED_BY);
