@@ -66,8 +66,8 @@ public class PatientRepositoryIT {
         List<String> catchmentIds = patient.getCatchment().getAllIds();
         return select().from(CF_CATCHMENT_MAPPING)
                 .where(in(CATCHMENT_ID, catchmentIds.toArray(((Object[]) new String[catchmentIds.size()]))))
-                        .and(eq(LAST_UPDATED, patient.getUpdatedAt()))
-                        .and(eq(HEALTH_ID, patient.getHealthId())).toString();
+                .and(eq(LAST_UPDATED, patient.getUpdatedAt()))
+                .and(eq(HEALTH_ID, patient.getHealthId())).toString();
     }
 
     @Before
@@ -1512,12 +1512,12 @@ public class PatientRepositoryIT {
                 buildPendingApprovalMapping("30", "h105"));
         cassandraOps.insert(entities);
 
-        UUID before = entities.get(3).getLastUpdated();
-        List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(new Catchment("10", "20", "30"), null, before, 25);
+        UUID before = entities.get(4).getLastUpdated();
+        List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(new Catchment("10", "20", "30"), null, before, 3);
         assertEquals(3, mappings.size());
-        assertEquals("h101", mappings.get(0).getHealthId());
-        assertEquals("h102", mappings.get(1).getHealthId());
-        assertEquals("h103", mappings.get(2).getHealthId());
+        assertEquals("h102", mappings.get(0).getHealthId());
+        assertEquals("h103", mappings.get(1).getHealthId());
+        assertEquals("h104", mappings.get(2).getHealthId());
     }
 
     @Test

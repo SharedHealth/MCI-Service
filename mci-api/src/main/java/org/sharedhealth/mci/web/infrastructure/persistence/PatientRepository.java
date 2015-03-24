@@ -308,7 +308,24 @@ public class PatientRepository extends BaseRepository {
     }
 
     public List<PendingApprovalMapping> findPendingApprovalMapping(Catchment catchment, UUID after, UUID before, int limit) {
-        return cassandraOps.select(buildFindPendingApprovalMappingStmt(catchment, after, before, limit), PendingApprovalMapping.class);
+        List<PendingApprovalMapping> result = cassandraOps.select(buildFindPendingApprovalMappingStmt(catchment, after, before, limit), PendingApprovalMapping.class);
+        if (isNotEmpty(result)) {
+            Collections.sort(result, new Comparator<PendingApprovalMapping>() {
+                @Override
+                public int compare(PendingApprovalMapping m1, PendingApprovalMapping m2) {
+                    UUID uuid1 = m1.getLastUpdated();
+                    UUID uuid2 = m2.getLastUpdated();
+                    Long t1 = unixTimestamp(uuid1);
+                    Long t2 = unixTimestamp(uuid2);
+                    int result = t1.compareTo(t2);
+                    if (result == 0) {
+                        return uuid1.compareTo(uuid2);
+                    }
+                    return result;
+                }
+            });
+        }
+        return result;
     }
 
     public String processPendingApprovals(PatientData requestData, PatientData existingPatientData, boolean shouldAccept) {
