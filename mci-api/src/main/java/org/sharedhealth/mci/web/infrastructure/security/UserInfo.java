@@ -178,6 +178,12 @@ public class UserInfo {
             }
         }
 
+        public boolean isPatientUserOnly() {
+            return patientHid != null && providerId == null && facilityId == null
+                    && !groups.contains(MCI_ADMIN)
+                    && !groups.contains(MCI_APPROVER);
+        }
+
         private void addGroupsBasedOnProfiles(UserProfile userProfile) {
             if (userProfile.isFacility() && groups.contains(FACILITY_ADMIN_GROUP) && !groups.contains(DATASENSE_FACILITY_GROUP)) {
                 groups.add(FACILITY_GROUP);

@@ -109,9 +109,7 @@ public class PatientControllerIT extends BaseControllerTest {
 
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        mockMvc.perform(asyncDispatch(result)
-
-        )
+        mockMvc.perform(asyncDispatch(result))
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(APPLICATION_JSON_UTF8));
     }
@@ -411,7 +409,7 @@ public class PatientControllerIT extends BaseControllerTest {
         final MCIResponse body = getMciResponse(result);
         String healthId = body.getId();
 
-        PatientData patient = getPatientMapperObjectByHealthId(healthId);
+        PatientData patient = getPatientData(healthId);
         assertTrue(isRelationsEqual(original.getRelations(), patient.getRelations()));
     }
 
@@ -433,7 +431,7 @@ public class PatientControllerIT extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        PatientData patient = getPatientMapperObjectByHealthId(healthId);
+        PatientData patient = getPatientData(healthId);
 
         assertPatientEquals(original, patient);
     }
@@ -462,7 +460,7 @@ public class PatientControllerIT extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        PatientData patient = getPatientMapperObjectByHealthId(healthId);
+        PatientData patient = getPatientData(healthId);
         original.setNationalId(nid);
         assertPatientEquals(original, patient);
     }
@@ -496,7 +494,7 @@ public class PatientControllerIT extends BaseControllerTest {
                 .andReturn();
         mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isAccepted());
 
-        PatientData patientInDb = getPatientMapperObjectByHealthId(healthId);
+        PatientData patientInDb = getPatientData(healthId);
         PatientData updateRequest = getPatientObjectFromString(updateJson);
 
         assertEquals(updateRequest.getAddress(), patientInDb.getAddress());
@@ -520,7 +518,7 @@ public class PatientControllerIT extends BaseControllerTest {
                 .andReturn();
         mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isAccepted());
 
-        PatientData patientInDb = getPatientMapperObjectByHealthId(healthId);
+        PatientData patientInDb = getPatientData(healthId);
 
         assertNull(patientInDb.getPermanentAddress());
     }
@@ -543,7 +541,7 @@ public class PatientControllerIT extends BaseControllerTest {
                 .andReturn();
         mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isAccepted());
 
-        PatientData patientInDb = getPatientMapperObjectByHealthId(healthId);
+        PatientData patientInDb = getPatientData(healthId);
 
         assertTrue(patientInDb.getPrimaryContactNumber().isEmpty());
     }
@@ -566,7 +564,7 @@ public class PatientControllerIT extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        PatientData patient = getPatientMapperObjectByHealthId(healthId);
+        PatientData patient = getPatientData(healthId);
 
         assertEquals(patientData1.getPrimaryContactNumber(), patient.getPrimaryContactNumber());
     }
@@ -578,7 +576,7 @@ public class PatientControllerIT extends BaseControllerTest {
 
         final MCIResponse createdResponse = createPatient(json);
         String healthId = createdResponse.getId();
-        PatientData original = getPatientMapperObjectByHealthId(healthId);
+        PatientData original = getPatientData(healthId);
 
         String relationJson = asString("jsons/patient/payload_relation_with_id.json");
 
@@ -598,7 +596,7 @@ public class PatientControllerIT extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        PatientData updatedPatient = getPatientMapperObjectByHealthId(healthId);
+        PatientData updatedPatient = getPatientData(healthId);
 
         assertTrue(isRelationsEqual(original.getRelations(), updatedPatient.getRelations()));
     }
@@ -610,7 +608,7 @@ public class PatientControllerIT extends BaseControllerTest {
 
         final MCIResponse createdResponse = createPatient(json);
         String healthId = createdResponse.getId();
-        PatientData original = getPatientMapperObjectByHealthId(healthId);
+        PatientData original = getPatientData(healthId);
 
         String relationJson = asString("jsons/patient/payload_with_empty_relation.json");
 
@@ -628,7 +626,7 @@ public class PatientControllerIT extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        PatientData updatedPatient = getPatientMapperObjectByHealthId(healthId);
+        PatientData updatedPatient = getPatientData(healthId);
 
         assertTrue(isRelationsEqual(original.getRelations(), updatedPatient.getRelations()));
     }
@@ -639,7 +637,7 @@ public class PatientControllerIT extends BaseControllerTest {
 
         MCIResponse createdResponse = createPatient(json);
         String healthId = createdResponse.getId();
-        PatientData original = getPatientMapperObjectByHealthId(healthId);
+        PatientData original = getPatientData(healthId);
 
         String relationJson = asString("jsons/patient/payload_with_new_relation.json");
 
@@ -656,7 +654,7 @@ public class PatientControllerIT extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        PatientData updatedPatient = getPatientMapperObjectByHealthId(healthId);
+        PatientData updatedPatient = getPatientData(healthId);
 
         assertTrue(isRelationsEqual(original.getRelations(), updatedPatient.getRelations()));
     }
@@ -670,7 +668,7 @@ public class PatientControllerIT extends BaseControllerTest {
 
         final MCIResponse createdResponse = getMciResponse(createdResult);
         String healthId = createdResponse.getId();
-        PatientData original = getPatientMapperObjectByHealthId(healthId);
+        PatientData original = getPatientData(healthId);
 
         assertEquals(1, original.getRelations().size());
     }
@@ -683,7 +681,6 @@ public class PatientControllerIT extends BaseControllerTest {
         final MCIResponse createdResponse = createPatient(json);
         String healthId = createdResponse.getId();
         PatientData original = getPatientMapperObjectByHealthId(healthId);
-
         String relationJson = asString("jsons/patient/payload_with_empty_relation.json");
 
         Relation fth = original.getRelationOfType("FTH");

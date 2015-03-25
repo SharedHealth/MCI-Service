@@ -28,8 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.FACILITY_GROUP;
-import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.PROVIDER_GROUP;
+import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.*;
 
 @Configuration
 @EnableWebSecurity
@@ -52,8 +51,18 @@ public class MCISecurityConfig extends WebSecurityConfigurerAdapter {
                     }
                 }))
                 .authorizeRequests()
-                .regexMatchers(HttpMethod.POST, "\\/api\\/v\\d+\\/patients/?")
+                //post patient
+                .regexMatchers(HttpMethod.POST, "\\/api\\/v\\d+\\/patients\\/?")
                     .hasAnyRole(PROVIDER_GROUP, FACILITY_GROUP)
+                //get patient by hid
+                .regexMatchers(HttpMethod.GET, "\\/api\\/v\\d+\\/patients\\/.+")
+                    .hasAnyRole(PROVIDER_GROUP, FACILITY_GROUP, MCI_ADMIN, DATASENSE_FACILITY_GROUP, PATIENT_GROUP, MCI_APPROVER)
+                //get patient by search queries
+                .regexMatchers(HttpMethod.GET, "\\/api\\/v\\d+\\/patients\\?.+")
+                    .hasAnyRole(PROVIDER_GROUP, FACILITY_GROUP, MCI_ADMIN)
+                //update patient
+                .regexMatchers(HttpMethod.PUT, "\\/api\\/v\\d+\\/patients\\/\\d+")
+                    .hasAnyRole(PROVIDER_GROUP, FACILITY_GROUP, MCI_ADMIN)
                 .and()
                 .addFilterBefore(new TokenAuthenticationFilter(authenticationManager()), BasicAuthenticationFilter
                         .class)

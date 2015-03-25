@@ -2,6 +2,7 @@ package org.sharedhealth.mci.web.controller;
 
 import org.sharedhealth.mci.validation.group.RequiredGroup;
 import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
+import org.sharedhealth.mci.web.exception.Forbidden;
 import org.sharedhealth.mci.web.exception.SearchQueryParameterException;
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
@@ -28,6 +29,7 @@ import javax.validation.groups.Default;
 import java.util.HashMap;
 import java.util.List;
 
+import static java.lang.String.format;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.*;
@@ -52,7 +54,7 @@ public class PatientController extends MciController {
             BindingResult bindingResult) {
 
         UserInfo userInfo = getUserInfo();
-        logAccessDetails(userInfo, String.format("Creating a new patient : %s", patient.getHealthId()));
+        logAccessDetails(userInfo, format("Creating a new patient : %s", patient.getHealthId()));
 
         logger.debug("Trying to create patient.");
         patient.setRequestedBy(REQUESTED_BY);
@@ -70,10 +72,16 @@ public class PatientController extends MciController {
     @RequestMapping(value = "/{healthId}", method = GET)
     public DeferredResult<ResponseEntity<PatientData>> findByHealthId(@PathVariable String healthId) {
         UserInfo userInfo = getUserInfo();
-        logAccessDetails(userInfo, String.format("Find patient given (healthId) : %s", healthId));
-        logger.debug("Trying to find patient by health id [" + healthId + "]");
 
         final DeferredResult<ResponseEntity<PatientData>> deferredResult = new DeferredResult<>();
+        if(userInfo.getProperties().isPatientUserOnly()
+                && !userInfo.getProperties().getPatientHid().equals(healthId)) {
+            deferredResult.setErrorResult(new Forbidden(format("Access is denied for patient data with health id", healthId)));
+            return deferredResult;
+        }
+        logAccessDetails(userInfo, format("Find patient given (healthId) : %s", healthId));
+        logger.debug("Trying to find patient by health id [" + healthId + "]");
+
 
         PatientData result = patientService.findByHealthId(healthId);
         deferredResult.setResult(new ResponseEntity<>(result, OK));
@@ -84,9 +92,8 @@ public class PatientController extends MciController {
     public DeferredResult<ResponseEntity<MCIMultiResponse>> findPatients(
             @Valid SearchQuery searchQuery,
             BindingResult bindingResult) {
-
         UserInfo userInfo = getUserInfo();
-        logAccessDetails(userInfo, String.format("Find patients matching query : %s", searchQuery));
+        logAccessDetails(userInfo, format("Find patients matching query : %s", searchQuery));
 
         if (bindingResult.hasErrors()) {
             throw new SearchQueryParameterException(bindingResult);
@@ -116,7 +123,7 @@ public class PatientController extends MciController {
             BindingResult bindingResult) {
 
         UserInfo userInfo = getUserInfo();
-        logAccessDetails(userInfo, String.format("Updating patient (healthId): %s", healthId));
+        logAccessDetails(userInfo, format("Updating patient (healthId): %s", healthId));
 
         logger.debug(" Health id [" + healthId + "]");
         patient.setRequestedBy(REQUESTED_BY);

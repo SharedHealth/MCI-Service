@@ -3,9 +3,12 @@ package org.sharedhealth.mci.web.controller;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Rule;
+import org.sharedhealth.mci.web.exception.Forbidden;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
@@ -24,7 +27,9 @@ import org.springframework.web.context.WebApplicationContext;
 import javax.servlet.Filter;
 import java.util.List;
 
-import static org.sharedhealth.mci.utils.HttpUtil.*;
+import static org.sharedhealth.mci.utils.HttpUtil.AUTH_TOKEN_KEY;
+import static org.sharedhealth.mci.utils.HttpUtil.CLIENT_ID_KEY;
+import static org.sharedhealth.mci.utils.HttpUtil.FROM_KEY;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -140,11 +145,12 @@ public class BaseControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(request().asyncStarted())
                 .andReturn();
-
         final ResponseEntity asyncResult = (ResponseEntity<PatientData>) getResult.getAsyncResult();
-
-
         return getPatientObjectFromResponse(asyncResult);
+    }
+
+    protected PatientData getPatientData(String healthId) throws Exception {
+        return patientRepository.findByHealthId(healthId);
     }
 
     protected class InvalidPatient {
@@ -156,4 +162,18 @@ public class BaseControllerTest {
         public String birthRegistrationNumber = "some thing";
     }
 
+    protected BaseMatcher<Object> isForbidden() {
+        return new BaseMatcher<Object>() {
+
+            @Override
+            public boolean matches(Object item) {
+                return item instanceof Forbidden;
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendValue("Forbidden");
+            }
+        };
+    }
 }
