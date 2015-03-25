@@ -55,13 +55,13 @@ public class MCISecurityConfig extends WebSecurityConfigurerAdapter {
                 .regexMatchers(HttpMethod.POST, "\\/api\\/v\\d+\\/patients\\/?")
                     .hasAnyRole(PROVIDER_GROUP, FACILITY_GROUP)
                 //get patient by hid
-                .regexMatchers(HttpMethod.GET, "\\/api\\/v\\d+\\/patients\\/.+")
+                .regexMatchers(HttpMethod.GET, "\\/api\\/v\\d+\\/patients\\/[^?.]+")
                     .hasAnyRole(PROVIDER_GROUP, FACILITY_GROUP, MCI_ADMIN, DATASENSE_FACILITY_GROUP, PATIENT_GROUP, MCI_APPROVER)
                 //get patient by search queries
-                .regexMatchers(HttpMethod.GET, "\\/api\\/v\\d+\\/patients\\?.+")
+                .regexMatchers(HttpMethod.GET, "\\/api\\/v\\d+\\/patients\\/?\\?.+")
                     .hasAnyRole(PROVIDER_GROUP, FACILITY_GROUP, MCI_ADMIN)
                 //update patient
-                .regexMatchers(HttpMethod.PUT, "\\/api\\/v\\d+\\/patients\\/\\d+")
+                .regexMatchers(HttpMethod.PUT, "\\/api\\/v\\d+\\/patients\\/[^?.]+")
                     .hasAnyRole(PROVIDER_GROUP, FACILITY_GROUP, MCI_ADMIN)
                 .and()
                 .addFilterBefore(new TokenAuthenticationFilter(authenticationManager()), BasicAuthenticationFilter
