@@ -7,6 +7,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import java.io.IOException;
+
 
 @Configuration
 @EnableScheduling
@@ -32,37 +34,37 @@ public class LRSyncTask {
     LocationDataSync locationDataSync;
 
     @Scheduled(fixedDelayString = "${LR_SYNC_FIXED_DELAY}")
-    public void syncDivision() {
+    public void syncDivision() throws IOException {
         logger.info("Division Syncing start....");
         locationDataSync.syncLRData(LR_DIVISION_URI_PATH, DIVISION_TYPE);
     }
 
     @Scheduled(fixedDelayString = "${LR_SYNC_FIXED_DELAY}")
-    public void syncDistrict() {
+    public void syncDistrict() throws IOException {
         logger.info("District Syncing start....");
         locationDataSync.syncLRData(LR_DISTRICT_URI_PATH, DISTRICT_TYPE);
     }
 
     @Scheduled(fixedDelayString = "${LR_SYNC_FIXED_DELAY}")
-    public void syncUpazila() {
+    public void syncUpazila() throws IOException {
         logger.info("Upazila Syncing start....");
         locationDataSync.syncLRData(LR_UPAZILA_URI_PATH, UPAZILA_TYPE);
     }
 
     @Scheduled(fixedDelayString = "${LR_SYNC_FIXED_DELAY}")
-    public void syncPaurasava() {
+    public void syncPaurasava() throws IOException {
         logger.info("Paurasava Syncing start....");
         locationDataSync.syncLRData(LR_PAURASAVA_PATH, PAURASAVA_TYPE);
     }
 
     @Scheduled(fixedDelayString = "${LR_SYNC_FIXED_DELAY}")
-    public void syncUnion() {
+    public void syncUnion() throws IOException {
         logger.info("Union Syncing start....");
         locationDataSync.syncLRData(LR_UNION_URI_PATH, UNION_TYPE);
     }
 
     @Scheduled(fixedDelayString = "${LR_SYNC_FIXED_DELAY}")
-    public void syncWard() {
+    public void syncWard() throws IOException {
         logger.info("Ward Syncing start....");
         locationDataSync.syncLRData(LR_WARD_URI_PATH, WARD_TYPE);
     }

@@ -18,6 +18,9 @@ import org.springframework.test.context.web.WebAppConfiguration;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static junit.framework.Assert.assertEquals;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertThat;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
 import static org.sharedhealth.mci.utils.HttpUtil.AUTH_TOKEN_KEY;
 import static org.sharedhealth.mci.utils.HttpUtil.CLIENT_ID_KEY;
@@ -29,6 +32,8 @@ public class LocationDataSyncTest {
 
 
     private static final int DEFAULT_LIMIT = 100;
+    private static final int INITIAL_OFFSET = 0;
+    private static final String INITIAL_UPDATED_SINCE = "0000-00-00";
     public static final String LR_DIVISIONS_JSON = "jsons/lr/lr-divisions.json";
     public static final String LR_DISTRICTS_JSON = "jsons/lr/lr-districts.json";
     public static final String LR_UPAZILAS_JSON = "jsons/lr/lr-upazilas.json";
@@ -71,6 +76,8 @@ public class LocationDataSyncTest {
 
         LocationData locationData = locationService.findByGeoCode("80");
         LocationData locationData1 = locationService.findByGeoCode("60");
+        assertThat(locationData, is(notNullValue()));
+        assertThat(locationData1, is(notNullValue()));
         assertEquals("80", locationData.getCode());
         assertEquals("00", locationData.getParent());
         assertEquals("New Division", locationData.getName());
@@ -159,7 +166,8 @@ public class LocationDataSyncTest {
     }
 
     private String getCompleteUrl(String type) {
-        return "/api/1.0/locations/list/" + type + "?limit=" + DEFAULT_LIMIT;
+        return "/api/1.0/locations/list/" + type + "?offset=" + INITIAL_OFFSET +
+                "&limit=" + DEFAULT_LIMIT + "&updatedSince=" + INITIAL_UPDATED_SINCE;
     }
 
     @After

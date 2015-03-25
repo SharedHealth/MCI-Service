@@ -11,12 +11,12 @@ public class LRMarker {
     @PrimaryKey("type")
     private String type;
 
-    @Column("last_sync")
-    private String lastSync;
+    @Column("last_feed_url")
+    private String lastFeedUrl;
 
-    public LRMarker(String type, String lastSync) {
+    public LRMarker(String type, String lastFeedUrl) {
         this.type = type;
-        this.lastSync = lastSync;
+        this.lastFeedUrl = lastFeedUrl;
     }
 
     public LRMarker() {
@@ -31,12 +31,12 @@ public class LRMarker {
         this.type = type;
     }
 
-    public String getLastSync() {
-        return lastSync;
+    public String getLastFeedUrl() {
+        return lastFeedUrl;
     }
 
-    public void setLastSync(String lastSync) {
-        this.lastSync = lastSync;
+    public void setLastFeedUrl(String lastFeedUrl) {
+        this.lastFeedUrl = lastFeedUrl;
     }
 
 }

@@ -1,7 +1,6 @@
 package org.sharedhealth.mci.web.handler;
 
 import org.apache.log4j.Logger;
-import org.sharedhealth.mci.utils.DateUtil;
 import org.sharedhealth.mci.web.config.MCIProperties;
 import org.sharedhealth.mci.web.mapper.LocationData;
 import org.sharedhealth.mci.web.model.LRMarker;
@@ -17,13 +16,16 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.client.AsyncRestTemplate;
 
+import java.io.IOException;
+import java.net.URL;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import static org.sharedhealth.mci.utils.HttpUtil.AUTH_TOKEN_KEY;
 import static org.sharedhealth.mci.utils.HttpUtil.CLIENT_ID_KEY;
+import static org.sharedhealth.mci.web.utils.URLParser.parseURL;
 
 @Component
 public class LocationDataSync {
@@ -34,8 +36,11 @@ public class LocationDataSync {
     private MCIProperties mciProperties;
 
     private static final int DEFAULT_LIMIT = 100;
-    private static final String EXTRA_FILTER_PATTERN = "?limit=%s";
-    private static final String EXTRA_FILTER_PATTERN_WITH_UPDATED_SINCE = "?limit=%s&updatedSince=%s";
+    private static final int INITIAL_OFFSET = 0;
+    private static final String OFFSET = "offset";
+    private static final String UPDATED_SINCE = "updatedSince";
+    private static final String INITIAL_UPDATED_SINCE = "0000-00-00";
+    private static final String EXTRA_FILTER_PATTERN = "?offset=%s&limit=%s&updatedSince=%s";
 
     private LocationService locationService;
 
@@ -54,21 +59,37 @@ public class LocationDataSync {
         return new HttpEntity(header);
     }
 
-    public boolean syncLRData(String uri, String type) {
+    public boolean syncLRData(String uri, String type) throws IOException {
 
         List<LocationData> lastRetrieveList;
+        int offset;
+        String updatedSince;
 
-        String updatedSince = getUpdatedSince(type);
+        String lastFeedUrl = getLastFeedUri(type);
 
-        String url = getCompleteUrl(uri, updatedSince, DEFAULT_LIMIT);
+        if (lastFeedUrl != null) {
+            Map<String, String> parameters = parseURL(new URL(lastFeedUrl));
+            offset = Integer.parseInt(parameters.get(OFFSET));
+            updatedSince = parameters.get(UPDATED_SINCE);
+        } else {
+            offset = INITIAL_OFFSET;
+            updatedSince = INITIAL_UPDATED_SINCE;
+        }
+
+        String url = getCompleteUrl(uri, offset, DEFAULT_LIMIT, updatedSince);
+
         try {
             lastRetrieveList = getNextChunkOfDataFromLR(url);
             if (lastRetrieveList != null && lastRetrieveList.size() > 0) {
                 locationService.saveOrUpdateLocationData(lastRetrieveList);
                 updatedSince = lastRetrieveList.get(lastRetrieveList.size() - 1).getUpdatedAt();
-                locationService.saveOrUpdateLRMarkerData(type, updatedSince);
-            } else {
-                locationService.saveOrUpdateLRMarkerData(type, getCurrentDateTime());
+
+                if (lastRetrieveList.size() == DEFAULT_LIMIT) {
+                    url = getCompleteUrl(uri, offset + DEFAULT_LIMIT, DEFAULT_LIMIT, updatedSince);
+                } else {
+                    url = getCompleteUrl(uri, INITIAL_OFFSET, DEFAULT_LIMIT, updatedSince);
+                }
+                locationService.saveOrUpdateLRMarkerData(type, url);
             }
         } catch (Exception e) {
             logger.info(e.getMessage(), e);
@@ -94,32 +115,22 @@ public class LocationDataSync {
         return null;
     }
 
-    private String getCompleteUrl(String uri, String updatedSince, int limit) {
-        return mciProperties.getLocaitonRegistryUrl() + uri + getExtraFilter(updatedSince, limit);
+    private String getCompleteUrl(String uri, int offset, int limit, String updatedSince) {
+        return mciProperties.getLocaitonRegistryUrl() + uri + getExtraFilter(offset, limit, updatedSince);
     }
 
-    private String getExtraFilter(String updatedSince, int limit) {
-        if (updatedSince != null) {
-
-            return String.format(EXTRA_FILTER_PATTERN_WITH_UPDATED_SINCE, limit, updatedSince);
-        }
-
-        return String.format(EXTRA_FILTER_PATTERN, limit);
+    private String getExtraFilter(int offset, int limit, String updatedSince) {
+        return String.format(EXTRA_FILTER_PATTERN, offset, limit, updatedSince);
     }
 
-    private String getUpdatedSince(String type) {
+    private String getLastFeedUri(String type) {
 
         LRMarker lrMarker = locationService.getLRMarkerData(type);
 
         if (lrMarker != null) {
-            return lrMarker.getLastSync();
+            return lrMarker.getLastFeedUrl();
         }
-
         return null;
-    }
-
-    private String getCurrentDateTime() {
-        return DateUtil.toIsoFormat(new Date());
     }
 
 }

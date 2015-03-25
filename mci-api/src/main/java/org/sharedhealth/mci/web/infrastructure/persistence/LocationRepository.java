@@ -120,7 +120,7 @@ public class LocationRepository extends BaseRepository {
     public boolean saveOrUpdateLRMarkerData(String type, String lastSync) {
         LRMarker oldLrMarker = getLRMarkerData(type);
         if (oldLrMarker != null) {
-            oldLrMarker.setLastSync(lastSync);
+            oldLrMarker.setLastFeedUrl(lastSync);
             cassandraOps.update(oldLrMarker);
         } else {
             LRMarker lrMapper = new LRMarker(type, lastSync);

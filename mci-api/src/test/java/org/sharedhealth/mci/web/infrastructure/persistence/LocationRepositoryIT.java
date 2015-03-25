@@ -100,13 +100,13 @@ public class LocationRepositoryIT {
         locationRepository.saveOrUpdateLRMarkerData("DISTRICT", "2015-02-08");
 
         LRMarker lrMarker = locationRepository.getLRMarkerData("DIVISION");
-        assertEquals("2015-02-08", lrMarker.getLastSync());
+        assertEquals("2015-02-08", lrMarker.getLastFeedUrl());
         LRMarker lrMarker1 = locationRepository.getLRMarkerData("UPAZILA");
         Assert.assertNull(lrMarker1);
 
         locationRepository.saveOrUpdateLRMarkerData("DIVISION", "2015-02-09");
         LRMarker lrMarker2 = locationRepository.getLRMarkerData("DIVISION");
-        assertEquals("2015-02-09", lrMarker2.getLastSync());
+        assertEquals("2015-02-09", lrMarker2.getLastFeedUrl());
 
     }
 

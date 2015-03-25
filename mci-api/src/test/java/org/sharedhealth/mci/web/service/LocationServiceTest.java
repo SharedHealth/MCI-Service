@@ -80,14 +80,14 @@ public class LocationServiceTest {
     public void shouldReturnLRMarkerDataIfExist() throws Exception {
 
         LRMarker lrMarker = new LRMarker();
-        lrMarker.setLastSync("2015-03-04");
+        lrMarker.setLastFeedUrl("2015-03-04");
         lrMarker.setType("DIVISION");
 
         Mockito.when(locationRepository.getLRMarkerData("DIVSION")).thenReturn(lrMarker);
 
         lrMarker = locationService.getLRMarkerData("DIVSION");
 
-        assertEquals("2015-03-04", lrMarker.getLastSync());
+        assertEquals("2015-03-04", lrMarker.getLastFeedUrl());
         assertEquals("DIVISION", lrMarker.getType());
 
     }
