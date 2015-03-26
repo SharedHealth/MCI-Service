@@ -45,9 +45,9 @@
   ],
   "present_address":{
     "address_line":"xyz",
-    "division_id":"55",
-    "district_id":"73",
-    "upazila_id":"64",
+    "division_id":"30",
+    "district_id":"26",
+    "upazila_id":"18",
     "city_corporation_id":null,
     "union_or_urban_ward_id":null,
     "rural_ward_id":null,

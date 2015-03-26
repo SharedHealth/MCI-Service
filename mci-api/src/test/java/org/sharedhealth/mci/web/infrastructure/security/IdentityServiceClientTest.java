@@ -36,6 +36,7 @@ public class IdentityServiceClientTest {
     @Mock
     private ClientAuthenticator clientAuthenticator;
     private HttpHeaders httpHeaders;
+    private final String identityServerBaseUrl = "http://localhost:9997/token/";
 
     @Before
     public void setUp() throws Exception {
@@ -54,8 +55,8 @@ public class IdentityServiceClientTest {
         String token = UUID.randomUUID().toString();
         UserAuthInfo userAuthInfo = new UserAuthInfo("123", "email@gmail.com");
 
-        when(mciProperties.getIdentityServerBaseUrl()).thenReturn("foo/");
-        when(asyncRestTemplate.exchange("foo/" + token, GET, new HttpEntity(httpHeaders),
+        when(mciProperties.getIdentityServerBaseUrl()).thenReturn(identityServerBaseUrl);
+        when(asyncRestTemplate.exchange(identityServerBaseUrl + token, GET, new HttpEntity(httpHeaders),
                 UserInfo.class)).thenReturn(createResponse(token, OK));
         when(clientAuthenticator.authenticate(userAuthInfo, token, userInfo(token))).thenReturn(true);
 
@@ -80,8 +81,8 @@ public class IdentityServiceClientTest {
         String token = UUID.randomUUID().toString();
         UserAuthInfo userAuthInfo = new UserAuthInfo("123", "email@gmail.com");
 
-        when(mciProperties.getIdentityServerBaseUrl()).thenReturn("foo/");
-        when(asyncRestTemplate.exchange("foo/" + token, GET, new HttpEntity(httpHeaders),
+        when(mciProperties.getIdentityServerBaseUrl()).thenReturn(identityServerBaseUrl);
+        when(asyncRestTemplate.exchange(identityServerBaseUrl + token, GET, new HttpEntity(httpHeaders),
                 UserInfo.class)).thenReturn(createResponse(token, UNAUTHORIZED));
         new IdentityServiceClient(asyncRestTemplate,
                 mciProperties, clientAuthenticator).authenticate(userAuthInfo, token);
@@ -93,8 +94,8 @@ public class IdentityServiceClientTest {
         UserAuthInfo userAuthInfo = new UserAuthInfo("123", "email@gmail.com");
         UserInfo userInfo = userInfo(token);
 
-        when(mciProperties.getIdentityServerBaseUrl()).thenReturn("foo/");
-        when(asyncRestTemplate.exchange("foo/" + token, GET, new HttpEntity(httpHeaders),
+        when(mciProperties.getIdentityServerBaseUrl()).thenReturn(identityServerBaseUrl);
+        when(asyncRestTemplate.exchange(identityServerBaseUrl + token, GET, new HttpEntity(httpHeaders),
                 UserInfo.class)).thenReturn(createResponse(token, OK));
         when(clientAuthenticator.authenticate(userAuthInfo, token, userInfo)).thenReturn(true);
 

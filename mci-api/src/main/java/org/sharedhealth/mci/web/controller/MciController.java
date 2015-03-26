@@ -6,8 +6,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 public class MciController {
-
     private static final Logger logger = LoggerFactory.getLogger(MciController.class);
+
     protected UserInfo getUserInfo() {
         return (UserInfo) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }

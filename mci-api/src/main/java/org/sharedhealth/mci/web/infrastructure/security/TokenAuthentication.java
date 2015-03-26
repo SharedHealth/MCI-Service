@@ -21,12 +21,6 @@ public class TokenAuthentication implements Authentication {
 
     private List<GrantedAuthority> getUserGroups(UserInfo userInfo) {
         List<String> userGroups = userInfo.getProperties().getGroups();
-        for (int index = 0; index < userGroups.size(); index++) {
-            String group = userGroups.get(index);
-            group = "ROLE_" + group;
-            userGroups.set(index, group);
-        }
-
         String commaSeparateRoles = StringUtils.join(userGroups, ",");
         return AuthorityUtils.commaSeparatedStringToAuthorityList
                 (commaSeparateRoles);

@@ -11,7 +11,13 @@ import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.infrastructure.security.TokenAuthentication;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
 import org.sharedhealth.mci.web.infrastructure.security.UserProfile;
-import org.sharedhealth.mci.web.mapper.*;
+import org.sharedhealth.mci.web.mapper.Catchment;
+import org.sharedhealth.mci.web.mapper.Feed;
+import org.sharedhealth.mci.web.mapper.FeedEntry;
+import org.sharedhealth.mci.web.mapper.PatientData;
+import org.sharedhealth.mci.web.mapper.PendingApproval;
+import org.sharedhealth.mci.web.mapper.PendingApprovalFieldDetails;
+import org.sharedhealth.mci.web.mapper.PendingApprovalListResponse;
 import org.sharedhealth.mci.web.service.PatientService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -24,7 +30,12 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.UUID;
 
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
@@ -36,18 +47,28 @@ import static junit.framework.Assert.assertEquals;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.utils.DateUtil.parseDate;
 import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
+import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.FACILITY_GROUP;
+import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.MCI_ADMIN;
+import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.MCI_APPROVER;
+import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.PROVIDER_GROUP;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 public class CatchmentControllerTest {
@@ -83,10 +104,13 @@ public class CatchmentControllerTest {
     }
 
     private UserInfo getUserInfo() {
-        UserProfile userProfile = new UserProfile("facility", "100067", null);
+        UserProfile facilityProfile = new UserProfile("facility", "100067", asList("1020"));
+        UserProfile providerProfile = new UserProfile("provider", "100068", asList("102030"));
+        UserProfile adminProfile = new UserProfile("admin", "102", asList("10203090"));
 
         return new UserInfo("102", "ABC", "abc@mail", 1, true, "111100",
-                new ArrayList<String>(), asList(userProfile));
+                new ArrayList<>(asList(MCI_ADMIN, MCI_APPROVER, FACILITY_GROUP, PROVIDER_GROUP)),
+                asList(facilityProfile, providerProfile, adminProfile));
     }
 
     @Test
@@ -157,16 +181,6 @@ public class CatchmentControllerTest {
 
 
         verify(patientService).findPendingApprovalList(catchment, null, null, MAX_PAGE_SIZE + 1);
-    }
-
-    private PendingApprovalListResponse buildPendingApprovalListResponse(int suffix) throws InterruptedException {
-        PendingApprovalListResponse pendingApproval = new PendingApprovalListResponse();
-        pendingApproval.setHealthId("hid-" + suffix);
-        pendingApproval.setGivenName("Scott-" + suffix);
-        pendingApproval.setSurname("Tiger-" + suffix);
-        pendingApproval.setLastUpdated(timeBased());
-        Thread.sleep(0, 10);
-        return pendingApproval;
     }
 
     @Test
@@ -365,7 +379,7 @@ public class CatchmentControllerTest {
         String catchmentId = "102030405060";
         Catchment catchment = new Catchment(catchmentId);
 
-        when(patientService.findAllByCatchment(catchment, null, null, facilityId)).thenReturn(null);
+        when(patientService.findAllByCatchment(catchment, null, null)).thenReturn(null);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(FACILITY_ID, facilityId);
@@ -387,7 +401,7 @@ public class CatchmentControllerTest {
                 .andExpect(jsonPath("$.nextUrl", is(nullValue())))
                 .andExpect(jsonPath("$.entries", is(emptyList())));
 
-        verify(patientService).findAllByCatchment(catchment, null, null, facilityId);
+        verify(patientService).findAllByCatchment(catchment, null, null);
     }
 
     private String buildPendingApprovalUrl(String catchmentId) {
@@ -405,7 +419,7 @@ public class CatchmentControllerTest {
         Catchment catchment = new Catchment(catchmentId);
 
         List<PatientData> patients = asList(buildPatient("h100"), buildPatient("h200"), buildPatient("h300"));
-        when(patientService.findAllByCatchment(catchment, null, null, facilityId)).thenReturn(patients);
+        when(patientService.findAllByCatchment(catchment, null, null)).thenReturn(patients);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(FACILITY_ID, facilityId);
@@ -440,7 +454,7 @@ public class CatchmentControllerTest {
                 .andExpect(jsonPath("$.entries.[1].id", is(patients.get(1).getUpdatedAt().toString())))
                 .andExpect(jsonPath("$.entries.[2].id", is(patients.get(2).getUpdatedAt().toString())));
 
-        verify(patientService).findAllByCatchment(catchment, null, null, facilityId);
+        verify(patientService).findAllByCatchment(catchment, null, null);
     }
 
     @Test
@@ -449,7 +463,7 @@ public class CatchmentControllerTest {
         String catchmentId = "102030405060";
         Catchment catchment = new Catchment(catchmentId);
 
-        when(patientService.findAllByCatchment(catchment, null, null, facilityId)).thenReturn(null);
+        when(patientService.findAllByCatchment(catchment, null, null)).thenReturn(null);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(FACILITY_ID, facilityId);
@@ -470,7 +484,7 @@ public class CatchmentControllerTest {
                 .andExpect(jsonPath("$.nextUrl", is(nullValue())))
                 .andExpect(jsonPath("$.entries", is(emptyList())));
 
-        verify(patientService).findAllByCatchment(catchment, null, null, facilityId);
+        verify(patientService).findAllByCatchment(catchment, null, null);
     }
 
     @Test
@@ -481,7 +495,7 @@ public class CatchmentControllerTest {
         String since = "2000-01-01T10:20:30Z";
 
         List<PatientData> patients = asList(buildPatient("h100"), buildPatient("h200"), buildPatient("h300"));
-        when(patientService.findAllByCatchment(catchment, parseDate(since), null, facilityId)).thenReturn(patients);
+        when(patientService.findAllByCatchment(catchment, parseDate(since), null)).thenReturn(patients);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(FACILITY_ID, facilityId);
@@ -498,7 +512,9 @@ public class CatchmentControllerTest {
                 .queryParam(SINCE, encode(patients.get(2).getUpdatedAtAsString(), "UTF-8"))
                 .queryParam(LAST_MARKER, encode(patients.get(2).getUpdatedAt().toString(), "UTF-8")).build().toString();
 
-        MvcResult mvcResult = mockMvc.perform(get(requestUrl).contentType(APPLICATION_JSON).headers(headers))
+        MvcResult mvcResult = mockMvc.perform(get(requestUrl)
+                .contentType(APPLICATION_JSON)
+                .headers(headers))
                 .andExpect(request().asyncStarted())
                 .andReturn();
 
@@ -514,7 +530,7 @@ public class CatchmentControllerTest {
                 .andExpect(jsonPath("$.entries.[1].id", is(patients.get(1).getUpdatedAt().toString())))
                 .andExpect(jsonPath("$.entries.[2].id", is(patients.get(2).getUpdatedAt().toString())));
 
-        verify(patientService).findAllByCatchment(catchment, parseDate(since), null, facilityId);
+        verify(patientService).findAllByCatchment(catchment, parseDate(since), null);
     }
 
     @Test
@@ -526,7 +542,7 @@ public class CatchmentControllerTest {
         UUID lastMarker = timeBased();
 
         List<PatientData> patients = asList(buildPatient("h100"), buildPatient("h200"), buildPatient("h300"));
-        when(patientService.findAllByCatchment(catchment, parseDate(since), lastMarker, facilityId)).thenReturn(patients);
+        when(patientService.findAllByCatchment(catchment, parseDate(since), lastMarker)).thenReturn(patients);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(FACILITY_ID, facilityId);
@@ -561,7 +577,7 @@ public class CatchmentControllerTest {
                 .andExpect(jsonPath("$.entries.[1].id", is(patients.get(1).getUpdatedAt().toString())))
                 .andExpect(jsonPath("$.entries.[2].id", is(patients.get(2).getUpdatedAt().toString())));
 
-        verify(patientService).findAllByCatchment(catchment, parseDate(since), lastMarker, facilityId);
+        verify(patientService).findAllByCatchment(catchment, parseDate(since), lastMarker);
     }
 
     @Test
@@ -843,6 +859,16 @@ public class CatchmentControllerTest {
         ArgumentCaptor<Boolean> argument3 = ArgumentCaptor.forClass(Boolean.class);
         verify(patientService).processPendingApprovals(argument1.capture(), argument2.capture(), argument3.capture());
         assertEquals(CatchmentController.REQUESTED_BY, argument1.getValue().getRequestedBy());
+    }
+
+    private PendingApprovalListResponse buildPendingApprovalListResponse(int suffix) throws InterruptedException {
+        PendingApprovalListResponse pendingApproval = new PendingApprovalListResponse();
+        pendingApproval.setHealthId("hid-" + suffix);
+        pendingApproval.setGivenName("Scott-" + suffix);
+        pendingApproval.setSurname("Tiger-" + suffix);
+        pendingApproval.setLastUpdated(timeBased());
+        Thread.sleep(0, 10);
+        return pendingApproval;
     }
 
     private MockHttpServletRequest buildPendingApprovalHttpRequest() throws UnsupportedEncodingException {

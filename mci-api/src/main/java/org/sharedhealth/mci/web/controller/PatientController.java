@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,7 +33,9 @@ import java.util.List;
 import static java.lang.String.format;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.web.bind.annotation.RequestMethod.*;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
+import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 @RestController
 @RequestMapping("/api/v1/patients")
@@ -48,6 +51,7 @@ public class PatientController extends MciController {
         this.patientService = patientService;
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_PROVIDER', 'ROLE_FACILITY')")
     @RequestMapping(method = POST, consumes = {APPLICATION_JSON_VALUE})
     public DeferredResult<ResponseEntity<MCIResponse>> create(
             @RequestBody @Validated({RequiredGroup.class, Default.class}) PatientData patient,
@@ -69,6 +73,8 @@ public class PatientController extends MciController {
         return deferredResult;
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_PROVIDER', 'ROLE_FACILITY', 'ROLE_PATIENT', " +
+            "'ROLE_Datasense Facility', 'ROLE_MCI Admin', 'ROLE_MCI Approver')")
     @RequestMapping(value = "/{healthId}", method = GET)
     public DeferredResult<ResponseEntity<PatientData>> findByHealthId(@PathVariable String healthId) {
         UserInfo userInfo = getUserInfo();
@@ -88,6 +94,7 @@ public class PatientController extends MciController {
         return deferredResult;
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_PROVIDER', 'ROLE_FACILITY', 'ROLE_MCI Admin')")
     @RequestMapping(method = GET, produces = APPLICATION_JSON_VALUE)
     public DeferredResult<ResponseEntity<MCIMultiResponse>> findPatients(
             @Valid SearchQuery searchQuery,
@@ -116,6 +123,7 @@ public class PatientController extends MciController {
         return deferredResult;
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_PROVIDER', 'ROLE_FACILITY', 'ROLE_MCI Admin')")
     @RequestMapping(method = PUT, value = "/{healthId}", consumes = {APPLICATION_JSON_VALUE})
     public DeferredResult<ResponseEntity<MCIResponse>> update(
             @PathVariable String healthId,

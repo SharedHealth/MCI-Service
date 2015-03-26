@@ -17,17 +17,23 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.text.ParseException;
+import java.util.UUID;
 
+import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static java.lang.String.format;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
 import static org.sharedhealth.mci.utils.HttpUtil.AUTH_TOKEN_KEY;
 import static org.sharedhealth.mci.utils.HttpUtil.CLIENT_ID_KEY;
 import static org.sharedhealth.mci.utils.HttpUtil.FROM_KEY;
 import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.setupApprovalsConfig;
 import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.setupLocation;
+import static org.sharedhealth.mci.web.utils.JsonConstants.LAST_MARKER;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
@@ -36,7 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 @ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
-public class PatientControllerAuthorizationIT extends BaseControllerTest {
+public class AuthorizationIT extends BaseControllerTest {
 
     private final String patientClientId = "18558";
     private final String patientEmail = "patient@gmail.com";
@@ -415,6 +421,260 @@ public class PatientControllerAuthorizationIT extends BaseControllerTest {
                 .andReturn();
     }
 
+    @Test
+    public void mciAdminShouldFindAuditLogByHealthId() throws Exception {
+        MCIResponse mciResponse = createPatient(patientData);
+
+        mockMvc.perform(get("/api/v1/audit/patients/" + mciResponse.getId())
+                .header(AUTH_TOKEN_KEY, mciAdminAccessToken)
+                .header(FROM_KEY, mciAdminEmail)
+                .header(CLIENT_ID_KEY, mciAdminClientId)
+                .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(request().asyncStarted());
+    }
+
+    @Test
+    public void mciApproverShouldFindAuditLogByHealthId() throws Exception {
+        MCIResponse mciResponse = createPatient(patientData);
+
+        mockMvc.perform(get("/api/v1/audit/patients/" + mciResponse.getId())
+                .header(AUTH_TOKEN_KEY, mciApproverAccessToken)
+                .header(FROM_KEY, mciApproverEmail)
+                .header(CLIENT_ID_KEY, mciApproverClientId)
+                .contentType(APPLICATION_JSON))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void facilityShouldAccessUpdateFeed() throws Exception {
+        UUID uuid1 = timeBased();
+
+        String requestUrl = format("%s/%s/patients", "https://mci.dghs.com", "api/v1/feed") + "?"
+                + LAST_MARKER + "=" + uuid1.toString();
+
+        mockMvc.perform(get(requestUrl)
+                .header(AUTH_TOKEN_KEY, facilityAccessToken)
+                .header(FROM_KEY, facilityEmail)
+                .header(CLIENT_ID_KEY, facilityClientId)
+                .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void datasenseShouldAccessUpdateFeed() throws Exception {
+        UUID uuid1 = timeBased();
+
+        String requestUrl = format("%s/%s/patients", "https://mci.dghs.com", "api/v1/feed") + "?"
+                + LAST_MARKER + "=" + uuid1.toString();
+
+        mockMvc.perform(get(requestUrl)
+                .header(AUTH_TOKEN_KEY, datasenseAccessToken)
+                .header(FROM_KEY, datasenseEmail)
+                .header(CLIENT_ID_KEY, datasenseClientId)
+                .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void providerShouldNotAccessUpdateFeed() throws Exception {
+        UUID uuid1 = timeBased();
+
+        String requestUrl = format("%s/%s/patients", "https://mci.dghs.com", "api/v1/feed") + "?"
+                + LAST_MARKER + "=" + uuid1.toString();
+
+        mockMvc.perform(get(requestUrl)
+                .header(AUTH_TOKEN_KEY, providerAccessToken)
+                .header(FROM_KEY, providerEmail)
+                .header(CLIENT_ID_KEY, providerClientId)
+                .contentType(APPLICATION_JSON))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void facilityShouldFindPatientsForItsCatchmentOnly() throws Exception {
+        mockMvc.perform(get("/api/v1/catchments/3026/patients")
+                .header(AUTH_TOKEN_KEY, facilityAccessToken)
+                .header(FROM_KEY, facilityEmail)
+                .header(CLIENT_ID_KEY, facilityClientId))
+                .andExpect(status().isOk())
+                .andExpect(request().asyncStarted());
+
+        mockMvc.perform(get("/api/v1/catchments/1030/patients")
+                .header(AUTH_TOKEN_KEY, facilityAccessToken)
+                .header(FROM_KEY, facilityEmail)
+                .header(CLIENT_ID_KEY, facilityClientId))
+                .andExpect(status().isOk())
+                .andExpect(request().asyncResult(isForbidden()));
+    }
+
+    @Test
+    public void providerShouldFindPatientsForItsCatchmentOnly() throws Exception {
+        mockMvc.perform(get("/api/v1/catchments/3026/patients")
+                .header(AUTH_TOKEN_KEY, providerAccessToken)
+                .header(FROM_KEY, providerEmail)
+                .header(CLIENT_ID_KEY, providerClientId))
+                .andExpect(status().isOk())
+                .andExpect(request().asyncStarted());
+
+        mockMvc.perform(get("/api/v1/catchments/102030/patients")
+                .header(AUTH_TOKEN_KEY, providerAccessToken)
+                .header(FROM_KEY, providerEmail)
+                .header(CLIENT_ID_KEY, providerClientId))
+                .andExpect(request().asyncResult(isForbidden()));
+    }
+
+    @Test
+    public void datasenseShouldFindPatientsByCatchment() throws Exception {
+        mockMvc.perform(get("/api/v1/catchments/3026/patients")
+                .header(AUTH_TOKEN_KEY, datasenseAccessToken)
+                .header(FROM_KEY, datasenseEmail)
+                .header(CLIENT_ID_KEY, datasenseClientId))
+                .andExpect(status().isOk())
+                .andExpect(request().asyncStarted());
+
+        mockMvc.perform(get("/api/v1/catchments/102030/patients")
+                .header(AUTH_TOKEN_KEY, datasenseAccessToken)
+                .header(FROM_KEY, datasenseEmail)
+                .header(CLIENT_ID_KEY, datasenseClientId))
+                .andExpect(request().asyncResult(isForbidden()));
+    }
+
+    @Test
+    public void mciAdminShouldNotFindPatientsByCatchment() throws Exception {
+        mockMvc.perform(get("/api/v1/catchments/3026/patients")
+                .header(AUTH_TOKEN_KEY, mciAdminAccessToken)
+                .header(FROM_KEY, mciAdminEmail)
+                .header(CLIENT_ID_KEY, mciAdminClientId))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void mciApproverShouldGetAllApprovalsForItsCatchmentOnly() throws Exception {
+        mockMvc.perform(get("/api/v1/catchments/3026/approvals")
+                .header(AUTH_TOKEN_KEY, mciApproverAccessToken)
+                .header(FROM_KEY, mciApproverEmail)
+                .header(CLIENT_ID_KEY, mciApproverClientId))
+                .andExpect(status().isOk())
+                .andExpect(request().asyncStarted());
+
+        mockMvc.perform(get("/api/v1/catchments/1030/approvals")
+                .header(AUTH_TOKEN_KEY, mciApproverAccessToken)
+                .header(FROM_KEY, mciApproverEmail)
+                .header(CLIENT_ID_KEY, mciApproverClientId))
+                .andExpect(request().asyncResult(isForbidden()));
+    }
+
+    @Test
+    public void mciAdminShouldNotGetApprovalsList() throws Exception {
+        mockMvc.perform(get("/api/v1/catchments/3026/approvals")
+                .header(AUTH_TOKEN_KEY, mciAdminAccessToken)
+                .header(FROM_KEY, mciAdminEmail)
+                .header(CLIENT_ID_KEY, mciAdminClientId))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void mciApproverShouldGetAllApprovalsWithHidForItsCatchmentOnly() throws Exception {
+        MCIResponse mciResponse = createPatient(patientData);
+        String healthId = mciResponse.getId();
+
+        mockMvc.perform(get("/api/v1/catchments/3026/approvals/" + healthId)
+                .header(AUTH_TOKEN_KEY, mciApproverAccessToken)
+                .header(FROM_KEY, mciApproverEmail)
+                .header(CLIENT_ID_KEY, mciApproverClientId))
+                .andExpect(status().isOk())
+                .andExpect(request().asyncStarted());
+
+        mockMvc.perform(get("/api/v1/catchments/1030/approvals/" + healthId)
+                .header(AUTH_TOKEN_KEY, mciApproverAccessToken)
+                .header(FROM_KEY, mciApproverEmail)
+                .header(CLIENT_ID_KEY, mciApproverClientId))
+                .andExpect(request().asyncResult(isForbidden()));
+    }
+
+    @Test
+    public void mciAdminShouldNotGetApprovalsWithHid() throws Exception {
+        MCIResponse mciResponse = createPatient(patientData);
+
+        mockMvc.perform(get("/api/v1/catchments/3026/approvals/" + mciResponse.getId())
+                .header(AUTH_TOKEN_KEY, mciAdminAccessToken)
+                .header(FROM_KEY, mciAdminEmail)
+                .header(CLIENT_ID_KEY, mciAdminClientId))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void mciApproverShouldApprovePatientUpdatesForItsCatchmentOnly() throws Exception {
+        MCIResponse mciResponse = createPatient(patientData);
+        String healthId = mciResponse.getId();
+
+        mockMvc.perform(put("/api/v1/catchments/3026/approvals/" + healthId)
+                .content(mapper.writeValueAsString(patientData))
+                .contentType(APPLICATION_JSON)
+                .header(AUTH_TOKEN_KEY, mciApproverAccessToken)
+                .header(FROM_KEY, mciApproverEmail)
+                .header(CLIENT_ID_KEY, mciApproverClientId))
+                .andExpect(status().isOk())
+                .andExpect(request().asyncStarted());
+
+        mockMvc.perform(put("/api/v1/catchments/1030/approvals/" + healthId)
+                .content(mapper.writeValueAsString(patientData))
+                .contentType(APPLICATION_JSON)
+                .header(AUTH_TOKEN_KEY, mciApproverAccessToken)
+                .header(FROM_KEY, mciApproverEmail)
+                .header(CLIENT_ID_KEY, mciApproverClientId))
+                .andExpect(request().asyncResult(isForbidden()));
+    }
+
+    @Test
+    public void mciAdminShouldNotApprovePatientUpdates() throws Exception {
+        MCIResponse mciResponse = createPatient(patientData);
+
+        mockMvc.perform(put("/api/v1/catchments/3026/approvals/" + mciResponse.getId())
+                .content(mapper.writeValueAsString(patientData))
+                .contentType(APPLICATION_JSON)
+                .header(AUTH_TOKEN_KEY, mciAdminAccessToken)
+                .header(FROM_KEY, mciAdminEmail)
+                .header(CLIENT_ID_KEY, mciAdminClientId))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void mciApproverShouldRejectPatientUpdatesForItsCatchmentOnly() throws Exception {
+        MCIResponse mciResponse = createPatient(patientData);
+        String healthId = mciResponse.getId();
+
+        mockMvc.perform(delete("/api/v1/catchments/3026/approvals/" + healthId)
+                .content(mapper.writeValueAsString(patientData))
+                .contentType(APPLICATION_JSON)
+                .header(AUTH_TOKEN_KEY, mciApproverAccessToken)
+                .header(FROM_KEY, mciApproverEmail)
+                .header(CLIENT_ID_KEY, mciApproverClientId))
+                .andExpect(status().isOk())
+                .andExpect(request().asyncStarted());
+
+        mockMvc.perform(delete("/api/v1/catchments/1030/approvals/" + healthId)
+                .content(mapper.writeValueAsString(patientData))
+                .contentType(APPLICATION_JSON)
+                .header(AUTH_TOKEN_KEY, mciApproverAccessToken)
+                .header(FROM_KEY, mciApproverEmail)
+                .header(CLIENT_ID_KEY, mciApproverClientId))
+                .andExpect(request().asyncResult(isForbidden()));
+    }
+
+    @Test
+    public void mciAdminShouldNotRejectPatientUpdates() throws Exception {
+        MCIResponse mciResponse = createPatient(patientData);
+
+        mockMvc.perform(delete("/api/v1/catchments/3026/approvals/" + mciResponse.getId())
+                .content(mapper.writeValueAsString(patientData))
+                .contentType(APPLICATION_JSON)
+                .header(AUTH_TOKEN_KEY, mciAdminAccessToken)
+                .header(FROM_KEY, mciAdminEmail)
+                .header(CLIENT_ID_KEY, mciAdminClientId))
+                .andExpect(status().isForbidden());
+    }
     private void createPatientData() {
         patientData = new PatientData();
         patientData.setGivenName("Scott");

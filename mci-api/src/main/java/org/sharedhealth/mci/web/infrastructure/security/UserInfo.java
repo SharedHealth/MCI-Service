@@ -10,14 +10,14 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UserInfo {
-    public static final String FACILITY_GROUP = "FACILITY";
-    public static final String MCI_USER_GROUP = "MCI USER";
-    public static final String PROVIDER_GROUP = "PROVIDER";
-    public static final String PATIENT_GROUP = "PATIENT";
-    public static final String FACILITY_ADMIN_GROUP = "Facility Admin";
-    public static final String DATASENSE_FACILITY_GROUP = "Datasense Facility";
-    public static final String MCI_ADMIN = "MCI Admin";
-    public static final String MCI_APPROVER = "MCI Approver";
+    public static final String FACILITY_GROUP = "ROLE_FACILITY";
+    public static final String MCI_USER_GROUP = "ROLE_MCI USER";
+    public static final String PROVIDER_GROUP = "ROLE_PROVIDER";
+    public static final String PATIENT_GROUP = "ROLE_PATIENT";
+    public static final String FACILITY_ADMIN_GROUP = "ROLE_Facility Admin";
+    public static final String DATASENSE_FACILITY_GROUP = "ROLE_Datasense Facility";
+    public static final String MCI_ADMIN = "ROLE_MCI Admin";
+    public static final String MCI_APPROVER = "ROLE_MCI Approver";
 
     @JsonProperty("id")
     private String id;
@@ -165,6 +165,7 @@ public class UserInfo {
 
         public void loadUserProperties() {
             catchments = new ArrayList<>();
+            addRolePrefixToGroups();
             if (isNotEmpty(userProfiles)) {
                 for (UserProfile userProfile : userProfiles) {
                     addGroupsBasedOnProfiles(userProfile);
@@ -176,6 +177,15 @@ public class UserInfo {
             if (groups.contains(DATASENSE_FACILITY_GROUP)) {
                 isDatasenseFacility = true;
             }
+        }
+
+        private void addRolePrefixToGroups() {
+            for (int index = 0; index < groups.size(); index++) {
+                String group = groups.get(index);
+                group = "ROLE_" + group;
+                groups.set(index, group);
+            }
+
         }
 
         public boolean isPatientUserOnly() {

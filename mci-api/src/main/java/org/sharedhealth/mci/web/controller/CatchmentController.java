@@ -3,25 +3,41 @@ package org.sharedhealth.mci.web.controller;
 import org.sharedhealth.mci.utils.TimeUid;
 import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
 import org.sharedhealth.mci.web.config.MCIProperties;
+import org.sharedhealth.mci.web.exception.Forbidden;
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
-import org.sharedhealth.mci.web.mapper.*;
+import org.sharedhealth.mci.web.mapper.Catchment;
+import org.sharedhealth.mci.web.mapper.Feed;
+import org.sharedhealth.mci.web.mapper.FeedEntry;
+import org.sharedhealth.mci.web.mapper.PatientData;
+import org.sharedhealth.mci.web.mapper.PendingApproval;
+import org.sharedhealth.mci.web.mapper.PendingApprovalListResponse;
 import org.sharedhealth.mci.web.service.PatientService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.groups.Default;
 import java.io.UnsupportedEncodingException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.TreeSet;
+import java.util.UUID;
 
 import static java.lang.String.format;
 import static java.net.URLEncoder.encode;
@@ -33,7 +49,9 @@ import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 import static org.springframework.http.HttpStatus.ACCEPTED;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.web.bind.annotation.RequestMethod.*;
+import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 @RestController
@@ -53,6 +71,7 @@ public class CatchmentController extends FeedController {
         super(patientService, properties);
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_MCI Approver')")
     @RequestMapping(value = "/{catchmentId}/approvals", method = GET, produces = APPLICATION_JSON_VALUE)
     public DeferredResult<ResponseEntity<MCIMultiResponse>> findPendingApprovalList(
             @PathVariable String catchmentId,
@@ -65,6 +84,13 @@ public class CatchmentController extends FeedController {
 
         logger.debug("Find list of pending approvals.");
         final DeferredResult<ResponseEntity<MCIMultiResponse>> deferredResult = new DeferredResult<>();
+
+        if (!userInfo.getProperties().hasCatchment(catchmentId)) {
+            deferredResult.setErrorResult(new Forbidden
+                    (format("Access is denied for catchment %s for user %s.", catchmentId,
+                            userInfo.getProperties().getId())));
+            return deferredResult;
+        }
 
         Catchment catchment = new Catchment(catchmentId);
         int limit = patientService.getPerPageMaximumLimit() + 1;
@@ -80,6 +106,7 @@ public class CatchmentController extends FeedController {
         return deferredResult;
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_MCI Approver')")
     @RequestMapping(value = "/{catchmentId}/approvals/{healthId}", method = GET, produces = APPLICATION_JSON_VALUE)
     public DeferredResult<ResponseEntity<MCIMultiResponse>> findPendingApprovalDetails(
             @PathVariable String catchmentId,
@@ -92,6 +119,13 @@ public class CatchmentController extends FeedController {
         logger.debug("Find list of pending approval details. Health ID : " + healthId);
 
         final DeferredResult<ResponseEntity<MCIMultiResponse>> deferredResult = new DeferredResult<>();
+
+        if (!userInfo.getProperties().hasCatchment(catchmentId)) {
+            deferredResult.setErrorResult(new Forbidden
+                    (format("Access is denied for catchment %s for user %s.", catchmentId,
+                            userInfo.getProperties().getId())));
+            return deferredResult;
+        }
 
         Catchment catchment = new Catchment(catchmentId);
         TreeSet<PendingApproval> response = patientService.findPendingApprovalDetails(healthId, catchment);
@@ -107,6 +141,7 @@ public class CatchmentController extends FeedController {
         return deferredResult;
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_MCI Approver')")
     @RequestMapping(value = "/{catchmentId}/approvals/{healthId}", method = PUT, produces = APPLICATION_JSON_VALUE)
     public DeferredResult<ResponseEntity<MCIResponse>> acceptPendingApprovals(
             @PathVariable String catchmentId,
@@ -120,9 +155,10 @@ public class CatchmentController extends FeedController {
 
         logger.debug("Accepting pending approvals. Health ID : " + healthId);
         patient.setRequestedBy(REQUESTED_BY);
-        return processPendingApprovals(new Catchment(catchmentId), healthId, patient, bindingResult, true);
+        return processPendingApprovals(catchmentId, healthId, patient, userInfo, bindingResult, true);
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_MCI Approver')")
     @RequestMapping(value = "/{catchmentId}/approvals/{healthId}", method = DELETE, produces = APPLICATION_JSON_VALUE)
     public DeferredResult<ResponseEntity<MCIResponse>> rejectPendingApprovals(
             @PathVariable String catchmentId,
@@ -135,33 +171,17 @@ public class CatchmentController extends FeedController {
                 healthId, catchmentId));
 
         logger.debug("Accepting pending approvals. Health ID : " + healthId);
+
         patient.setRequestedBy(REQUESTED_BY);
-        return processPendingApprovals(new Catchment(catchmentId), healthId, patient, bindingResult, false);
+        return processPendingApprovals(catchmentId, healthId, patient, userInfo, bindingResult, false);
     }
 
-    private DeferredResult<ResponseEntity<MCIResponse>> processPendingApprovals(
-            Catchment catchment, String healthId, PatientData patient, BindingResult bindingResult, boolean shouldAccept) {
-
-        if (bindingResult.hasErrors()) {
-            throw new ValidationException(bindingResult);
-        }
-
-        final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
-
-        patient.setHealthId(healthId);
-        String hid = patientService.processPendingApprovals(patient, catchment, shouldAccept);
-
-        MCIResponse mciResponse = new MCIResponse(hid, ACCEPTED);
-        deferredResult.setResult(new ResponseEntity<>(mciResponse, mciResponse.httpStatusObject));
-        return deferredResult;
-    }
-
+    @PreAuthorize("hasAnyRole('ROLE_PROVIDER', 'ROLE_FACILITY', 'ROLE_Datasense Facility')")
     @RequestMapping(value = "/{catchmentId}/patients", method = GET, produces = APPLICATION_JSON_VALUE)
     public DeferredResult<Feed> findAllPatients(
             @PathVariable String catchmentId,
             @RequestParam(value = SINCE, required = false) String since,
             @RequestParam(value = LAST_MARKER, required = false) String last,
-            @RequestHeader(FACILITY_ID) String facilityId,
             HttpServletRequest request) {
 
         UserInfo userInfo = getUserInfo();
@@ -172,11 +192,42 @@ public class CatchmentController extends FeedController {
         Catchment catchment = new Catchment(catchmentId);
         logger.debug(format("Find all patients by catchment. Catchment ID: %s, since: %s, last marker: %s", catchment, since, lastMarker));
         final DeferredResult<Feed> deferredResult = new DeferredResult<>();
+        if (!userInfo.getProperties().hasCatchment(catchmentId)) {
+            deferredResult.setErrorResult(new Forbidden
+                    (format("Access is denied for catchment %s for user %s.", catchmentId,
+                            userInfo.getProperties().getId())));
+            return deferredResult;
+        }
 
         Date date = isNotBlank(since) ? parseDate(since) : null;
-        List<PatientData> patients = patientService.findAllByCatchment(catchment, date, lastMarker, facilityId);
+        List<PatientData> patients = patientService.findAllByCatchment(catchment, date, lastMarker);
 
         deferredResult.setResult(buildFeedResponse(patients, request));
+        return deferredResult;
+    }
+
+    private DeferredResult<ResponseEntity<MCIResponse>> processPendingApprovals(
+            String catchmentId, String healthId, PatientData patient, UserInfo userInfo, BindingResult bindingResult, boolean shouldAccept) {
+
+        if (bindingResult.hasErrors()) {
+            throw new ValidationException(bindingResult);
+        }
+
+        final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
+
+        if (!userInfo.getProperties().hasCatchment(catchmentId)) {
+            deferredResult.setErrorResult(new Forbidden
+                    (format("Access is denied for catchment %s for user %s.", catchmentId,
+                            userInfo.getProperties().getId())));
+            return deferredResult;
+        }
+
+        Catchment catchment = new Catchment(catchmentId);
+        patient.setHealthId(healthId);
+        String hid = patientService.processPendingApprovals(patient, catchment, shouldAccept);
+
+        MCIResponse mciResponse = new MCIResponse(hid, ACCEPTED);
+        deferredResult.setResult(new ResponseEntity<>(mciResponse, mciResponse.httpStatusObject));
         return deferredResult;
     }
 

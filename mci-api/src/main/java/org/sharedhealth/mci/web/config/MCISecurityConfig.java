@@ -5,10 +5,10 @@ import org.sharedhealth.mci.web.infrastructure.security.TokenAuthenticationProvi
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -28,10 +28,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.*;
-
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class MCISecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     TokenAuthenticationProvider tokenAuthenticationProvider;
@@ -51,18 +50,8 @@ public class MCISecurityConfig extends WebSecurityConfigurerAdapter {
                     }
                 }))
                 .authorizeRequests()
-                //post patient
-                .regexMatchers(HttpMethod.POST, "\\/api\\/v\\d+\\/patients\\/?")
-                    .hasAnyRole(PROVIDER_GROUP, FACILITY_GROUP)
-                //get patient by hid
-                .regexMatchers(HttpMethod.GET, "\\/api\\/v\\d+\\/patients\\/[^?.]+")
-                    .hasAnyRole(PROVIDER_GROUP, FACILITY_GROUP, MCI_ADMIN, DATASENSE_FACILITY_GROUP, PATIENT_GROUP, MCI_APPROVER)
-                //get patient by search queries
-                .regexMatchers(HttpMethod.GET, "\\/api\\/v\\d+\\/patients\\/?\\?.+")
-                    .hasAnyRole(PROVIDER_GROUP, FACILITY_GROUP, MCI_ADMIN)
-                //update patient
-                .regexMatchers(HttpMethod.PUT, "\\/api\\/v\\d+\\/patients\\/[^?.]+")
-                    .hasAnyRole(PROVIDER_GROUP, FACILITY_GROUP, MCI_ADMIN)
+                .anyRequest()
+                .authenticated()
                 .and()
                 .addFilterBefore(new TokenAuthenticationFilter(authenticationManager()), BasicAuthenticationFilter
                         .class)

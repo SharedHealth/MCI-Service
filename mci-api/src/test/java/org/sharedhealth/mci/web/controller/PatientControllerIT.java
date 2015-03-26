@@ -450,7 +450,7 @@ public class PatientControllerIT extends BaseControllerTest {
         String healthId = createdResponse.getId();
         String nidJson = "{\"nid\": \"" + nid + "\"}";
 
-        MvcResult updatedResult = mockMvc.perform(put(API_END_POINT_FOR_PATIENT + "/" + healthId)
+        mockMvc.perform(put(API_END_POINT_FOR_PATIENT + "/" + healthId)
                 .header(AUTH_TOKEN_KEY, validAccessToken)
                 .header(FROM_KEY, validEmail)
                 .header(CLIENT_ID_KEY, validClientId)
@@ -467,7 +467,6 @@ public class PatientControllerIT extends BaseControllerTest {
 
     @Test
     public void shouldRemoveAddressBlockOptionalFieldsIfNotGiven() throws Exception {
-
         String createJson = asString("jsons/patient/full_payload.json");
         String healthId = createPatient(createJson).getId();
 
@@ -483,7 +482,7 @@ public class PatientControllerIT extends BaseControllerTest {
                 .andReturn();
         mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isAccepted());
 
-        String url = "/api/v1/catchments/557364/approvals/" + healthId;
+        String url = "/api/v1/catchments/302618/approvals/" + healthId;
         String content = asString("jsons/patient/pending_approval_address_accept.json");
         mvcResult = mockMvc.perform(put(url).accept(APPLICATION_JSON)
                 .header(AUTH_TOKEN_KEY, validAccessToken)
@@ -494,11 +493,10 @@ public class PatientControllerIT extends BaseControllerTest {
                 .andReturn();
         mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isAccepted());
 
-        PatientData patientInDb = getPatientData(healthId);
+        PatientData patientInDb = getPatientMapperObjectByHealthId(healthId);
         PatientData updateRequest = getPatientObjectFromString(updateJson);
 
         assertEquals(updateRequest.getAddress(), patientInDb.getAddress());
-
     }
 
     @Test
@@ -728,7 +726,7 @@ public class PatientControllerIT extends BaseControllerTest {
                 .andReturn();
         mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isAccepted());
 
-        String url = "/api/v1/catchments/557364/approvals/" + healthId;
+        String url = "/api/v1/catchments/3026/approvals/" + healthId;
         String content = asString("jsons/patient/pending_approvals_accept.json");
 
         mvcResult = mockMvc.perform(put(url).accept(APPLICATION_JSON)

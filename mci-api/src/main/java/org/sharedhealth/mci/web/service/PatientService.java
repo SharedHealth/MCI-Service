@@ -124,8 +124,7 @@ public class PatientService {
         return patientRepository.findAllSummaryByQuery(searchQuery);
     }
 
-    public List<PatientData> findAllByCatchment(Catchment catchment, Date since, UUID lastMarker, String facilityId) {
-        verifyCatchment(facilityId, catchment);
+    public List<PatientData> findAllByCatchment(Catchment catchment, Date since, UUID lastMarker) {
         return patientRepository.findAllByCatchment(catchment, since, lastMarker, getPerPageMaximumLimit());
     }
 
@@ -192,13 +191,6 @@ public class PatientService {
 
     public List<PatientUpdateLog> findPatientsUpdatedSince(Date since, UUID lastMarker) {
         return feedRepository.findPatientsUpdatedSince(since, getPerPageMaximumLimit(), lastMarker);
-    }
-
-    private void verifyCatchment(String facilityId, Catchment catchment) {
-        List<Catchment> catchments = facilityService.getCatchmentAreasByFacility(facilityId);
-        if (!catchments.contains(catchment)) {
-            throw new InsufficientPrivilegeException(MESSAGE_INSUFFICIENT_PRIVILEGE);
-        }
     }
 
     private void verifyCatchment(PatientData patient, Catchment catchment) {

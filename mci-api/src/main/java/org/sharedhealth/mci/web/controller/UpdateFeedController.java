@@ -11,6 +11,7 @@ import org.sharedhealth.mci.web.service.PatientService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -48,13 +49,13 @@ public class UpdateFeedController extends FeedController {
         super(patientService, properties);
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_FACILITY', 'ROLE_Datasense Facility')")
     @RequestMapping(value = "/patients", method = GET,
             produces = {APPLICATION_JSON_VALUE, APPLICATION_ATOM_XML_VALUE})
     public Feed findAllPatients(
             @RequestParam(value = SINCE, required = false) String since,
             @RequestParam(value = LAST_MARKER, required = false) String last,
             HttpServletRequest request) {
-
         UserInfo userInfo = getUserInfo();
         logAccessDetails(userInfo, String.format("Find all patients  updated since [%s] given last marker [%s]", since, last));
 
