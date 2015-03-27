@@ -19,4 +19,13 @@ public class URLParser {
         }
         return parameters;
     }
+
+    public static String ensureEndsWithBackSlash(String value) {
+        String trimmedValue = value.trim();
+        if (!trimmedValue.endsWith("/")) {
+            return trimmedValue + "/";
+        } else {
+            return trimmedValue;
+        }
+    }
 }

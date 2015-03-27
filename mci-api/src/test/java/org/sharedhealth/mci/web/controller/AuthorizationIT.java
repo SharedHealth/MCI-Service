@@ -675,6 +675,50 @@ public class AuthorizationIT extends BaseControllerTest {
                 .header(CLIENT_ID_KEY, mciAdminClientId))
                 .andExpect(status().isForbidden());
     }
+
+    @Test
+    public void locationsByParentShouldBeAccessedOnlyByMciApproverAndMciAdmin() throws Exception {
+        createPatient(patientData);
+
+        mockMvc.perform(get(API_END_POINT_FOR_LOCATION + "?parent=11")
+                .header(AUTH_TOKEN_KEY, mciApproverAccessToken)
+                .header(FROM_KEY, mciApproverEmail)
+                .header(CLIENT_ID_KEY, mciApproverClientId))
+                .andExpect(status().isOk())
+                .andExpect(request().asyncStarted());
+
+        mockMvc.perform(get(API_END_POINT_FOR_LOCATION)
+                .header(AUTH_TOKEN_KEY, mciAdminAccessToken)
+                .header(FROM_KEY, mciAdminEmail)
+                .header(CLIENT_ID_KEY, mciAdminClientId))
+                .andExpect(status().isOk())
+                .andExpect(request().asyncStarted());
+
+        mockMvc.perform(get(API_END_POINT_FOR_LOCATION + "?parent=11")
+                .header(AUTH_TOKEN_KEY, facilityAccessToken)
+                .header(FROM_KEY, facilityEmail)
+                .header(CLIENT_ID_KEY, facilityClientId))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(get(API_END_POINT_FOR_LOCATION + "?parent=11")
+                .header(AUTH_TOKEN_KEY, providerAccessToken)
+                .header(FROM_KEY, providerEmail)
+                .header(CLIENT_ID_KEY, providerClientId))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(get(API_END_POINT_FOR_LOCATION + "?parent=11")
+                .header(AUTH_TOKEN_KEY, patientAccessToken)
+                .header(FROM_KEY, patientEmail)
+                .header(CLIENT_ID_KEY, patientClientId))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(get(API_END_POINT_FOR_LOCATION + "?parent=11")
+                .header(AUTH_TOKEN_KEY, datasenseAccessToken)
+                .header(FROM_KEY, datasenseEmail)
+                .header(CLIENT_ID_KEY, datasenseClientId))
+                .andExpect(status().isForbidden());
+    }
+
     private void createPatientData() {
         patientData = new PatientData();
         patientData.setGivenName("Scott");

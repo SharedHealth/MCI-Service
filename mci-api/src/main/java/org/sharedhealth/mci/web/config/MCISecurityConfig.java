@@ -2,6 +2,8 @@ package org.sharedhealth.mci.web.config;
 
 import org.sharedhealth.mci.web.infrastructure.security.TokenAuthenticationFilter;
 import org.sharedhealth.mci.web.infrastructure.security.TokenAuthenticationProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,6 +34,8 @@ import java.util.ArrayList;
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class MCISecurityConfig extends WebSecurityConfigurerAdapter {
+    private static final Logger logger = LoggerFactory.getLogger(MCISecurityConfig.class);
+
     @Autowired
     TokenAuthenticationProvider tokenAuthenticationProvider;
 
@@ -75,6 +79,7 @@ public class MCISecurityConfig extends WebSecurityConfigurerAdapter {
             @Override
             public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException
                     authException) throws IOException, ServletException {
+                logger.error(authException.getMessage());
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
             }
         };
@@ -84,6 +89,7 @@ public class MCISecurityConfig extends WebSecurityConfigurerAdapter {
         return new AccessDeniedHandler() {
             @Override
             public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
+                logger.error(accessDeniedException.getMessage());
                 response.sendError(HttpServletResponse.SC_FORBIDDEN, accessDeniedException.getMessage());
             }
         };

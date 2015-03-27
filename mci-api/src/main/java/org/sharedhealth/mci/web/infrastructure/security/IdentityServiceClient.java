@@ -16,6 +16,8 @@ import org.springframework.web.client.AsyncRestTemplate;
 import javax.naming.AuthenticationException;
 import java.util.concurrent.ExecutionException;
 
+import static org.sharedhealth.mci.web.utils.URLParser.ensureEndsWithBackSlash;
+
 
 @Component
 public class IdentityServiceClient {
@@ -33,7 +35,7 @@ public class IdentityServiceClient {
 
     public TokenAuthentication authenticate(UserAuthInfo userAuthInfo, String token) throws AuthenticationException, ExecutionException,
             InterruptedException {
-        String userInfoUrl = mciProperties.getIdentityServerBaseUrl() + token;
+        String userInfoUrl = ensureEndsWithBackSlash(mciProperties.getIdentityServerBaseUrl()) + token;
         HttpHeaders httpHeaders = HttpUtil.getHrmIdentityHeaders(mciProperties);
         ListenableFuture<ResponseEntity<UserInfo>> listenableFuture = mciRestTemplate.exchange(userInfoUrl,
                 HttpMethod.GET,
