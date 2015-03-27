@@ -185,6 +185,13 @@ public class GlobalExceptionHandler {
         return new ErrorInfo(HttpStatus.FORBIDDEN.value(), accessDeniedException.getMessage());
     }
 
+    @ResponseStatus(value = HttpStatus.FORBIDDEN)
+    @ResponseBody
+    @ExceptionHandler(Forbidden.class)
+    public ErrorInfo forbidden(Forbidden forbidden) {
+        return new ErrorInfo(HttpStatus.FORBIDDEN.value(), forbidden.getMessage());
+    }
+
     @JsonRootName(value = "error")
     public static class ErrorInfo implements Comparable<ErrorInfo> {
 

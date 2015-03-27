@@ -189,8 +189,6 @@ public class CatchmentController extends FeedController {
 
         UUID lastMarker = TimeUid.fromString(last);
 
-        Catchment catchment = new Catchment(catchmentId);
-        logger.debug(format("Find all patients by catchment. Catchment ID: %s, since: %s, last marker: %s", catchment, since, lastMarker));
         final DeferredResult<Feed> deferredResult = new DeferredResult<>();
         if (!userInfo.getProperties().hasCatchment(catchmentId)) {
             deferredResult.setErrorResult(new Forbidden
@@ -198,6 +196,8 @@ public class CatchmentController extends FeedController {
                             userInfo.getProperties().getId())));
             return deferredResult;
         }
+        Catchment catchment = new Catchment(catchmentId);
+        logger.debug(format("Find all patients by catchment. Catchment ID: %s, since: %s, last marker: %s", catchment, since, lastMarker));
 
         Date date = isNotBlank(since) ? parseDate(since) : null;
         List<PatientData> patients = patientService.findAllByCatchment(catchment, date, lastMarker);
