@@ -59,6 +59,8 @@ public class PendingApproval implements Comparable<PendingApproval> {
             type = Address.class;
         } else if (PHONE_NUMBER.equals(this.name) || PRIMARY_CONTACT_NUMBER.equals(this.name)) {
             type = PhoneNumber.class;
+        } else if (STATUS.equals(this.name)) {
+            type = PatientStatus.class;
         } else {
             return this.fieldDetails;
         }
