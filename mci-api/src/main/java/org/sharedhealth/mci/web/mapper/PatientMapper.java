@@ -20,6 +20,7 @@ import static org.apache.commons.lang3.time.DateFormatUtils.ISO_DATE_FORMAT;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_INVALID;
 import static org.sharedhealth.mci.web.utils.JsonConstants.RELATIONS;
 import static org.sharedhealth.mci.web.utils.PatientDataConstants.COUNTRY_CODE_BANGLADESH;
+import static org.sharedhealth.mci.web.utils.PatientDataConstants.PATIENT_STATUS_ALIVE;
 import static org.sharedhealth.mci.web.utils.PatientDataConstants.STRING_YES;
 
 @Component
@@ -251,7 +252,7 @@ public class PatientMapper {
     }
 
     private void mapPatientStatus(Patient patient, PatientStatus patientStatus) {
-        patient.setStatus(defaultString(patientStatus.getType()));
+        patient.setStatus(defaultString(patientStatus.getType(), PATIENT_STATUS_ALIVE));
         patient.setDateOfDeath(defaultString(patientStatus.getDateOfDeath()));
     }
 
