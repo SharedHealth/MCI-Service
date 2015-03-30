@@ -10,6 +10,7 @@ public class UserProfile {
     public static final String FACILITY_TYPE = "facility";
     public static final String PROVIDER_TYPE = "provider";
     public static final String PATIENT_TYPE = "patient";
+    public static final String ADMIN_TYPE = "admin";
     @JsonProperty("name")
     private String name;
     @JsonProperty("id")
@@ -36,6 +37,10 @@ public class UserProfile {
 
     public boolean isPatient() {
         return name.equalsIgnoreCase(PATIENT_TYPE);
+    }
+
+    public boolean isAdmin() {
+        return name.equalsIgnoreCase(ADMIN_TYPE);
     }
 
     public String getId() {

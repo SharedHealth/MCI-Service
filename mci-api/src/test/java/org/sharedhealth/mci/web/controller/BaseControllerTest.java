@@ -87,10 +87,15 @@ public class BaseControllerTest {
     protected MCIResponse createPatient(PatientData patient) throws Exception {
         return patientRepository.create(patient);
     }
-
     protected MCIResponse createPatient(String json) throws Exception {
         PatientData data = getPatientObjectFromString(json);
         return createPatient(data);
+    }
+
+    protected MCIResponse updatePatient(String json, String healthId) throws Exception {
+        PatientData data = getPatientObjectFromString(json);
+        data.setHealthId(healthId);
+        return patientRepository.update(data, data.getHealthId());
     }
 
     protected MCIMultiResponse getMciMultiResponse(MvcResult result) {

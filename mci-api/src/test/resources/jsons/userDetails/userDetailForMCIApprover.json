@@ -15,7 +15,7 @@
     {
       "name": "admin",
       "id": "18555",
-      "catchment": ["3026"]
+      "catchment": ["1000", "3026"]
     }
   ]
 }

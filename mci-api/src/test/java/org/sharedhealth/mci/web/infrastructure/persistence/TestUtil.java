@@ -14,7 +14,7 @@ public class TestUtil {
         cassandraOps.execute("INSERT INTO locations (\"code\", \"name\", \"parent\") VALUES ('01', 'Union X', '20134942')");
 
         cassandraOps.execute("INSERT INTO locations (\"code\", \"name\", \"parent\") VALUES ('64', 'Upazila X', '5573')");
-
+        cassandraOps.execute("INSERT INTO locations (\"code\", \"name\", \"parent\") VALUES ('26', 'Division Y', '30')");
         cassandraOps.execute("INSERT INTO locations (\"code\", \"name\", \"parent\") VALUES ('09', 'Upazila 1', '1004')");
         cassandraOps.execute("INSERT INTO locations (\"code\", \"name\", \"parent\") VALUES ('20', 'City Corp 1', '100409')");
         cassandraOps.execute("INSERT INTO locations (\"code\", \"name\", \"parent\") VALUES ('18', 'City Corp 2', '3026')");

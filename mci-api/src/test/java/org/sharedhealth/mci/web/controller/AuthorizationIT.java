@@ -14,6 +14,7 @@ import org.sharedhealth.mci.web.mapper.PhoneNumber;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.text.ParseException;
@@ -32,10 +33,7 @@ import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.setup
 import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.setupLocation;
 import static org.sharedhealth.mci.web.utils.JsonConstants.LAST_MARKER;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -117,7 +115,6 @@ public class AuthorizationIT extends BaseControllerTest {
     @Test
     public void facilityShouldCreatePatient() throws Exception {
         String json = mapper.writeValueAsString(patientData);
-
         mockMvc.perform(post(API_END_POINT_FOR_PATIENT)
                 .accept(APPLICATION_JSON)
                 .header(AUTH_TOKEN_KEY, facilityAccessToken)
@@ -551,12 +548,16 @@ public class AuthorizationIT extends BaseControllerTest {
 
     @Test
     public void mciApproverShouldGetAllApprovalsForItsCatchmentOnly() throws Exception {
-        mockMvc.perform(get("/api/v1/catchments/3026/approvals")
+        MvcResult mvcResult = mockMvc.perform(get("/api/v1/catchments/3026/approvals")
                 .header(AUTH_TOKEN_KEY, mciApproverAccessToken)
                 .header(FROM_KEY, mciApproverEmail)
                 .header(CLIENT_ID_KEY, mciApproverClientId))
                 .andExpect(status().isOk())
-                .andExpect(request().asyncStarted());
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isOk());
 
         mockMvc.perform(get("/api/v1/catchments/1030/approvals")
                 .header(AUTH_TOKEN_KEY, mciApproverAccessToken)
@@ -579,12 +580,16 @@ public class AuthorizationIT extends BaseControllerTest {
         MCIResponse mciResponse = createPatient(patientData);
         String healthId = mciResponse.getId();
 
-        mockMvc.perform(get("/api/v1/catchments/3026/approvals/" + healthId)
+        MvcResult mvcResult = mockMvc.perform(get("/api/v1/catchments/3026/approvals/" + healthId)
                 .header(AUTH_TOKEN_KEY, mciApproverAccessToken)
                 .header(FROM_KEY, mciApproverEmail)
                 .header(CLIENT_ID_KEY, mciApproverClientId))
                 .andExpect(status().isOk())
-                .andExpect(request().asyncStarted());
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isOk());
 
         mockMvc.perform(get("/api/v1/catchments/1030/approvals/" + healthId)
                 .header(AUTH_TOKEN_KEY, mciApproverAccessToken)
@@ -606,20 +611,24 @@ public class AuthorizationIT extends BaseControllerTest {
 
     @Test
     public void mciApproverShouldApprovePatientUpdatesForItsCatchmentOnly() throws Exception {
-        MCIResponse mciResponse = createPatient(patientData);
+        MCIResponse mciResponse = createPatient(asString("jsons/patient/full_payload.json"));
         String healthId = mciResponse.getId();
+        updatePatient(asString("jsons/patient/payload_with_address.json"), healthId);
 
-        mockMvc.perform(put("/api/v1/catchments/3026/approvals/" + healthId)
-                .content(mapper.writeValueAsString(patientData))
+        MvcResult mvcResult = mockMvc.perform(put("/api/v1/catchments/3026/approvals/" + healthId)
+                .content(asString("jsons/patient/pending_approval_address_accept.json"))
                 .contentType(APPLICATION_JSON)
                 .header(AUTH_TOKEN_KEY, mciApproverAccessToken)
                 .header(FROM_KEY, mciApproverEmail)
                 .header(CLIENT_ID_KEY, mciApproverClientId))
                 .andExpect(status().isOk())
-                .andExpect(request().asyncStarted());
+                .andExpect(request().asyncStarted())
+                .andReturn();
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isAccepted());
 
         mockMvc.perform(put("/api/v1/catchments/1030/approvals/" + healthId)
-                .content(mapper.writeValueAsString(patientData))
+                .content(asString("jsons/patient/pending_approval_address_accept.json"))
                 .contentType(APPLICATION_JSON)
                 .header(AUTH_TOKEN_KEY, mciApproverAccessToken)
                 .header(FROM_KEY, mciApproverEmail)
@@ -642,20 +651,24 @@ public class AuthorizationIT extends BaseControllerTest {
 
     @Test
     public void mciApproverShouldRejectPatientUpdatesForItsCatchmentOnly() throws Exception {
-        MCIResponse mciResponse = createPatient(patientData);
+        MCIResponse mciResponse = createPatient(asString("jsons/patient/full_payload.json"));
         String healthId = mciResponse.getId();
+        updatePatient(asString("jsons/patient/payload_with_address.json"), healthId);
 
-        mockMvc.perform(delete("/api/v1/catchments/3026/approvals/" + healthId)
-                .content(mapper.writeValueAsString(patientData))
+        MvcResult mvcResult = mockMvc.perform(delete("/api/v1/catchments/3026/approvals/" + healthId)
+                .content(asString("jsons/patient/pending_approval_address_accept.json"))
                 .contentType(APPLICATION_JSON)
                 .header(AUTH_TOKEN_KEY, mciApproverAccessToken)
                 .header(FROM_KEY, mciApproverEmail)
                 .header(CLIENT_ID_KEY, mciApproverClientId))
                 .andExpect(status().isOk())
-                .andExpect(request().asyncStarted());
+                .andExpect(request().asyncStarted())
+                .andReturn();
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isAccepted());
 
         mockMvc.perform(delete("/api/v1/catchments/1030/approvals/" + healthId)
-                .content(mapper.writeValueAsString(patientData))
+                .content(asString("jsons/patient/pending_approval_address_accept.json"))
                 .contentType(APPLICATION_JSON)
                 .header(AUTH_TOKEN_KEY, mciApproverAccessToken)
                 .header(FROM_KEY, mciApproverEmail)
@@ -742,13 +755,9 @@ public class AuthorizationIT extends BaseControllerTest {
 
         Address presentAddress = new Address();
         presentAddress.setAddressLine("house-12");
-        presentAddress.setDivisionId("10");
-        presentAddress.setDistrictId("04");
-        presentAddress.setUpazilaId("09");
-        presentAddress.setCityCorporationId("20");
-        presentAddress.setUnionOrUrbanWardId("01");
-        presentAddress.setRuralWardId(null);
-        presentAddress.setVillage("10");
+        presentAddress.setDivisionId("30");
+        presentAddress.setDistrictId("26");
+        presentAddress.setUpazilaId("18");
         presentAddress.setCountryCode("050");
 
         patientData.setAddress(presentAddress);

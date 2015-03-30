@@ -97,6 +97,7 @@ public class UserInfo {
         private String facilityId;
         private String providerId;
         private String patientHid;
+        private String adminId;
         private List<String> catchments;
 
         public UserInfoProperties() {
@@ -172,10 +173,20 @@ public class UserInfo {
                     loadFacilityProperties(userProfile);
                     loadProviderProperties(userProfile);
                     loadPatientProperties(userProfile);
+                    loadAdminProperties(userProfile);
                 }
             }
             if (groups.contains(DATASENSE_FACILITY_GROUP)) {
                 isDatasenseFacility = true;
+            }
+        }
+
+        private void loadAdminProperties(UserProfile userProfile) {
+            if (userProfile.isAdmin()) {
+                adminId = userProfile.getId();
+                if (isNotEmpty(userProfile.getCatchments())) {
+                    catchments.addAll(userProfile.getCatchments());
+                }
             }
         }
 
