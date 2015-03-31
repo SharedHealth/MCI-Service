@@ -751,6 +751,7 @@ public class PatientData implements Diffable<PatientData> {
                 .append(HOUSEHOLD_CODE, this.householdCode, that.householdCode)
 
                 .append(PHONE_NUMBER, this.phoneNumber, that.phoneNumber)
+                .append(STATUS, this.patientStatus, that.patientStatus)
                 .append(PRIMARY_CONTACT_NUMBER, this.primaryContactNumber, that.primaryContactNumber)
                 .append(PRIMARY_CONTACT, this.primaryContact, that.primaryContact)
 

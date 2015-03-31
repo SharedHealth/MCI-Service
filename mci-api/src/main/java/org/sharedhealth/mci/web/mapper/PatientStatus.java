@@ -6,16 +6,17 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.sharedhealth.mci.validation.constraints.Code;
 import org.sharedhealth.mci.validation.constraints.Date;
+import org.sharedhealth.mci.web.builder.DiffBuilder;
+import org.sharedhealth.mci.web.builder.DiffResult;
+import org.sharedhealth.mci.web.builder.Diffable;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static org.sharedhealth.mci.utils.DateUtil.ISO_DATE_FORMAT;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_INVALID;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_PATTERN;
-import static org.sharedhealth.mci.web.utils.JsonConstants.DATE_OF_DEATH;
-import static org.sharedhealth.mci.web.utils.JsonConstants.STATUS;
-import static org.sharedhealth.mci.web.utils.JsonConstants.TYPE;
+import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
-public class PatientStatus {
+public class PatientStatus implements Diffable<PatientStatus> {
 
     @JsonProperty(TYPE)
     @JsonInclude(NON_EMPTY)
@@ -75,4 +76,14 @@ public class PatientStatus {
                 ", dateOfDeath='" + dateOfDeath + '\'' +
                 '}';
     }
+
+    @Override
+    public DiffResult diff(PatientStatus that) {
+        return new DiffBuilder(this, that)
+                .append(TYPE, this.type, that.type)
+                .append(DATE_OF_DEATH, this.dateOfDeath, that.dateOfDeath)
+                .build();
+    }
+
+
 }
