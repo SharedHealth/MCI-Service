@@ -41,17 +41,17 @@ import java.util.UUID;
 
 import static java.lang.String.format;
 import static java.net.URLEncoder.encode;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.utils.DateUtil.parseDate;
+import static org.sharedhealth.mci.web.infrastructure.security.UserProfile.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 import static org.springframework.http.HttpStatus.ACCEPTED;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.PUT;
+import static org.springframework.web.bind.annotation.RequestMethod.*;
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 @RestController
@@ -85,10 +85,10 @@ public class CatchmentController extends FeedController {
         logger.debug("Find list of pending approvals.");
         final DeferredResult<ResponseEntity<MCIMultiResponse>> deferredResult = new DeferredResult<>();
 
-        if (!userInfo.getProperties().hasCatchment(catchmentId)) {
+        if (!userInfo.getProperties().hasCatchmentForProfileType(catchmentId, asList(ADMIN_TYPE))) {
             deferredResult.setErrorResult(new Forbidden
-                    (format("Access is denied for catchment %s for user %s.", catchmentId,
-                            userInfo.getProperties().getId())));
+                    (format("Access is denied to user %s for catchment %s",
+                            userInfo.getProperties().getId(), catchmentId)));
             return deferredResult;
         }
 
@@ -120,10 +120,12 @@ public class CatchmentController extends FeedController {
 
         final DeferredResult<ResponseEntity<MCIMultiResponse>> deferredResult = new DeferredResult<>();
 
-        if (!userInfo.getProperties().hasCatchment(catchmentId)) {
+        if (!userInfo.getProperties().hasCatchmentForProfileType(catchmentId, asList(ADMIN_TYPE))) {
+            String errorMessage = format("Access is denied to user %s for catchment %s",
+                    userInfo.getProperties().getId(), catchmentId);
+            logger.debug(errorMessage);
             deferredResult.setErrorResult(new Forbidden
-                    (format("Access is denied for catchment %s for user %s.", catchmentId,
-                            userInfo.getProperties().getId())));
+                    (errorMessage));
             return deferredResult;
         }
 
@@ -176,7 +178,7 @@ public class CatchmentController extends FeedController {
         return processPendingApprovals(catchmentId, healthId, patient, userInfo, bindingResult, false);
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_PROVIDER', 'ROLE_FACILITY', 'ROLE_Datasense Facility')")
+    @PreAuthorize("hasAnyRole('ROLE_PROVIDER', 'ROLE_FACILITY', 'ROLE_SHR System Admin')")
     @RequestMapping(value = "/{catchmentId}/patients", method = GET, produces = APPLICATION_JSON_VALUE)
     public DeferredResult<Feed> findAllPatients(
             @PathVariable String catchmentId,
@@ -190,10 +192,12 @@ public class CatchmentController extends FeedController {
         UUID lastMarker = TimeUid.fromString(last);
 
         final DeferredResult<Feed> deferredResult = new DeferredResult<>();
-        if (!userInfo.getProperties().hasCatchment(catchmentId)) {
+        if (!userInfo.getProperties().hasCatchmentForProfileType(catchmentId, asList(FACILITY_TYPE, PROVIDER_TYPE))) {
+            String errorMessage = format("Access is denied for catchment %s for user %s.", catchmentId,
+                    userInfo.getProperties().getId());
+            logger.debug(errorMessage);
             deferredResult.setErrorResult(new Forbidden
-                    (format("Access is denied for catchment %s for user %s.", catchmentId,
-                            userInfo.getProperties().getId())));
+                    (errorMessage));
             return deferredResult;
         }
         Catchment catchment = new Catchment(catchmentId);
@@ -215,10 +219,12 @@ public class CatchmentController extends FeedController {
 
         final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
 
-        if (!userInfo.getProperties().hasCatchment(catchmentId)) {
+        if (!userInfo.getProperties().hasCatchmentForProfileType(catchmentId, asList(ADMIN_TYPE))) {
+            String errorMessage = format("Access is denied to user %s for catchment %s",
+                    userInfo.getProperties().getId(), catchmentId);
+            logger.debug(errorMessage);
             deferredResult.setErrorResult(new Forbidden
-                    (format("Access is denied for catchment %s for user %s.", catchmentId,
-                            userInfo.getProperties().getId())));
+                    (errorMessage));
             return deferredResult;
         }
 

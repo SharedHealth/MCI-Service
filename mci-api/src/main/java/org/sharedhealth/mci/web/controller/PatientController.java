@@ -74,7 +74,7 @@ public class PatientController extends MciController {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_PROVIDER', 'ROLE_FACILITY', 'ROLE_PATIENT', " +
-            "'ROLE_Datasense Facility', 'ROLE_MCI Admin', 'ROLE_MCI Approver')")
+            "'ROLE_SHR System Admin', 'ROLE_MCI Admin', 'ROLE_MCI Approver')")
     @RequestMapping(value = "/{healthId}", method = GET)
     public DeferredResult<ResponseEntity<PatientData>> findByHealthId(@PathVariable String healthId) {
         UserInfo userInfo = getUserInfo();
@@ -82,7 +82,9 @@ public class PatientController extends MciController {
         final DeferredResult<ResponseEntity<PatientData>> deferredResult = new DeferredResult<>();
         if(userInfo.getProperties().isPatientUserOnly()
                 && !userInfo.getProperties().getPatientHid().equals(healthId)) {
-            deferredResult.setErrorResult(new Forbidden(format("Access is denied for patient data with health id", healthId)));
+            String errorMessage = format("Access is denied to user %s for patient with healthId : %s", userInfo.getProperties().getId(), healthId);
+            logger.debug(errorMessage);
+            deferredResult.setErrorResult(new Forbidden(errorMessage));
             return deferredResult;
         }
         logAccessDetails(userInfo, format("Find patient given (healthId) : %s", healthId));
@@ -105,7 +107,7 @@ public class PatientController extends MciController {
         if (bindingResult.hasErrors()) {
             throw new SearchQueryParameterException(bindingResult);
         }
-        logger.debug("Find all patients  by search query ");
+        logger.debug("Find all patients  by search query");
         final DeferredResult<ResponseEntity<MCIMultiResponse>> deferredResult = new DeferredResult<>();
         final int limit = patientService.getPerPageMaximumLimit();
         final String note = patientService.getPerPageMaximumLimitNote();

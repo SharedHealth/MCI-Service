@@ -49,7 +49,7 @@ public class UpdateFeedController extends FeedController {
         super(patientService, properties);
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_FACILITY', 'ROLE_Datasense Facility')")
+    @PreAuthorize("hasAnyRole('ROLE_FACILITY', 'ROLE_SHR System Admin')")
     @RequestMapping(value = "/patients", method = GET,
             produces = {APPLICATION_JSON_VALUE, APPLICATION_ATOM_XML_VALUE})
     public Feed findAllPatients(

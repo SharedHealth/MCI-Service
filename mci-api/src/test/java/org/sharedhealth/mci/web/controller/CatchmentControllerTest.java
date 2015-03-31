@@ -55,10 +55,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.utils.DateUtil.parseDate;
 import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
-import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.FACILITY_GROUP;
-import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.MCI_ADMIN;
-import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.MCI_APPROVER;
-import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.PROVIDER_GROUP;
+import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -106,10 +103,10 @@ public class CatchmentControllerTest {
     private UserInfo getUserInfo() {
         UserProfile facilityProfile = new UserProfile("facility", "100067", asList("1020"));
         UserProfile providerProfile = new UserProfile("provider", "100068", asList("102030"));
-        UserProfile adminProfile = new UserProfile("admin", "102", asList("10203090"));
+        UserProfile adminProfile = new UserProfile("admin", "102", asList("10"));
 
         return new UserInfo("102", "ABC", "abc@mail", 1, true, "111100",
-                new ArrayList<>(asList(MCI_ADMIN, MCI_APPROVER, FACILITY_GROUP, PROVIDER_GROUP)),
+                new ArrayList<>(asList(MCI_USER_GROUP, MCI_ADMIN, MCI_APPROVER, FACILITY_GROUP, PROVIDER_GROUP)),
                 asList(facilityProfile, providerProfile, adminProfile));
     }
 

@@ -10,7 +10,9 @@
   "created_at": "2015-03-20 06:52:54",
   "updated_at": "2015-03-20 06:52:54",
   "deleted_at": "2015-03-20 06:52:54",
-  "groups": ["MCI Admin"],
+  "groups": [
+    "MCI Admin"
+  ],
   "profiles": [
     {
       "name": "admin",

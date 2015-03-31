@@ -17,7 +17,8 @@
     "API Consumer",
     "MCI Admin",
     "MCI Approver",
-    "SHR USER"
+    "SHR User",
+    "MCI User"
   ],
   "profiles": [
     {
@@ -30,7 +31,10 @@
     {
       "name": "admin",
       "id": "6",
-      "catchment": null
+      "catchment": [
+        "30",
+        "10"
+      ]
     }
   ]
 }

@@ -2,6 +2,7 @@ package org.sharedhealth.mci.web.infrastructure.security;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
@@ -49,5 +50,20 @@ public class UserProfile {
 
     public List<String> getCatchments() {
         return catchments;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean hasCatchment(String requestedCatchment) {
+        if (!CollectionUtils.isEmpty(catchments)) {
+            for (String catchment : catchments) {
+                if (requestedCatchment.startsWith(catchment)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

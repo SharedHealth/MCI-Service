@@ -2,22 +2,24 @@ package org.sharedhealth.mci.web.infrastructure.security;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static java.lang.String.format;
+import static org.springframework.util.StringUtils.isEmpty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UserInfo {
-    public static final String FACILITY_GROUP = "ROLE_FACILITY";
-    public static final String MCI_USER_GROUP = "ROLE_MCI USER";
-    public static final String PROVIDER_GROUP = "ROLE_PROVIDER";
-    public static final String PATIENT_GROUP = "ROLE_PATIENT";
-    public static final String FACILITY_ADMIN_GROUP = "ROLE_Facility Admin";
-    public static final String DATASENSE_FACILITY_GROUP = "ROLE_Datasense Facility";
-    public static final String MCI_ADMIN = "ROLE_MCI Admin";
-    public static final String MCI_APPROVER = "ROLE_MCI Approver";
+    public static final String ROLE_PREFIX = "ROLE_";
+    public static final String FACILITY_GROUP = ROLE_PREFIX + "FACILITY";
+    public static final String MCI_USER_GROUP = ROLE_PREFIX + "MCI User";
+    public static final String PROVIDER_GROUP = ROLE_PREFIX + "PROVIDER";
+    public static final String PATIENT_GROUP = ROLE_PREFIX + "PATIENT";
+    public static final String FACILITY_ADMIN_GROUP = ROLE_PREFIX + "Facility Admin";
+    public static final String SHR_SYSTEM_ADMIN_GROUP = ROLE_PREFIX + "SHR System Admin";
+    public static final String MCI_ADMIN = ROLE_PREFIX + "MCI Admin";
+    public static final String MCI_APPROVER = ROLE_PREFIX + "MCI Approver";
 
     @JsonProperty("id")
     private String id;
@@ -93,12 +95,11 @@ public class UserInfo {
     }
 
     public class UserInfoProperties {
-        private boolean isDatasenseFacility;
+        private boolean isShrSystemAdmin;
         private String facilityId;
         private String providerId;
         private String patientHid;
         private String adminId;
-        private List<String> catchments;
 
         public UserInfoProperties() {
             loadUserProperties();
@@ -148,55 +149,59 @@ public class UserInfo {
             return patientHid;
         }
 
-        public boolean isNotDatasenseFacility() {
-            return !isDatasenseFacility;
-        }
-
-        public List<String> getCatchments() {
-            return catchments;
-        }
-
-        public boolean hasCatchment(String requestedCatchment) {
-            for (String catchment : catchments) {
-                if (requestedCatchment.startsWith(catchment))
+        public boolean hasCatchmentForProfileType(String requestedCatchment, List<String> profileTypes) {
+            for (String profileType : profileTypes) {
+                UserProfile userProfile = getUserProfileByType(profileType);
+                if (userProfile != null && userProfile.hasCatchment(requestedCatchment)) {
                     return true;
+                }
             }
             return false;
         }
 
-        public void loadUserProperties() {
-            catchments = new ArrayList<>();
-            addRolePrefixToGroups();
-            if (isNotEmpty(userProfiles)) {
+        private UserProfile getUserProfileByType(String profileType) {
+            if (!CollectionUtils.isEmpty(userProfiles)) {
                 for (UserProfile userProfile : userProfiles) {
-                    addGroupsBasedOnProfiles(userProfile);
-                    loadFacilityProperties(userProfile);
-                    loadProviderProperties(userProfile);
-                    loadPatientProperties(userProfile);
-                    loadAdminProperties(userProfile);
+                    if (userProfile.getName().equals(profileType)) {
+                        return userProfile;
+                    }
                 }
             }
-            if (groups.contains(DATASENSE_FACILITY_GROUP)) {
-                isDatasenseFacility = true;
+            return null;
+        }
+
+        public void loadUserProperties() {
+            addRolePrefixToGroups();
+            if (groups.contains(MCI_USER_GROUP)) {
+                addAddtionalUserGroupsBasedOnProfiles();
+            }
+            if (groups.contains(SHR_SYSTEM_ADMIN_GROUP)) {
+                isShrSystemAdmin = true;
+            }
+        }
+
+        private void addAddtionalUserGroupsBasedOnProfiles() {
+            if (isEmpty(userProfiles)) return;
+            for (UserProfile userProfile : userProfiles) {
+                addGroupsBasedOnProfiles(userProfile);
+                loadFacilityProperties(userProfile);
+                loadProviderProperties(userProfile);
+                loadPatientProperties(userProfile);
+                loadAdminProperties(userProfile);
             }
         }
 
         private void loadAdminProperties(UserProfile userProfile) {
             if (userProfile.isAdmin()) {
                 adminId = userProfile.getId();
-                if (isNotEmpty(userProfile.getCatchments())) {
-                    catchments.addAll(userProfile.getCatchments());
-                }
             }
         }
 
         private void addRolePrefixToGroups() {
             for (int index = 0; index < groups.size(); index++) {
                 String group = groups.get(index);
-                group = "ROLE_" + group;
-                groups.set(index, group);
+                groups.set(index, group.startsWith(ROLE_PREFIX) ? group : format("%s%s", ROLE_PREFIX, group));
             }
-
         }
 
         public boolean isPatientUserOnly() {
@@ -206,7 +211,7 @@ public class UserInfo {
         }
 
         private void addGroupsBasedOnProfiles(UserProfile userProfile) {
-            if (userProfile.isFacility() && groups.contains(FACILITY_ADMIN_GROUP) && !groups.contains(DATASENSE_FACILITY_GROUP)) {
+            if (userProfile.isFacility() && groups.contains(FACILITY_ADMIN_GROUP) && !groups.contains(SHR_SYSTEM_ADMIN_GROUP)) {
                 groups.add(FACILITY_GROUP);
             } else if (userProfile.isProvider()) {
                 groups.add(PROVIDER_GROUP);
@@ -224,18 +229,12 @@ public class UserInfo {
         private void loadProviderProperties(UserProfile userProfile) {
             if (userProfile.isProvider()) {
                 providerId = userProfile.getId();
-                if (isNotEmpty(userProfile.getCatchments())) {
-                    catchments.addAll(userProfile.getCatchments());
-                }
             }
         }
 
         private void loadFacilityProperties(UserProfile userProfile) {
             if (userProfile.isFacility()) {
                 facilityId = userProfile.getId();
-                if (isNotEmpty(userProfile.getCatchments())) {
-                    catchments.addAll(userProfile.getCatchments());
-                }
             }
         }
     }

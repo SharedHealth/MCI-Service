@@ -477,7 +477,8 @@ public class PatientControllerIT extends BaseControllerTest {
                 .header(FROM_KEY, validEmail)
                 .header(CLIENT_ID_KEY, validClientId)
                 .accept(APPLICATION_JSON)
-                .content(updateJson).contentType(APPLICATION_JSON))
+                .content(updateJson)
+                .contentType(APPLICATION_JSON))
                 .andExpect(request().asyncStarted())
                 .andReturn();
         mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isAccepted());

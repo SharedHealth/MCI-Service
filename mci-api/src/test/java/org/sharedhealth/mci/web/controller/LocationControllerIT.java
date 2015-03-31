@@ -61,7 +61,7 @@ public class LocationControllerIT extends BaseControllerTest {
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody(asString("jsons/userDetailsWithAllRoles.json"))));
+                        .withBody(asString("jsons/userDetails/userDetailsWithAllRoles.json"))));
     }
 
     @Test
