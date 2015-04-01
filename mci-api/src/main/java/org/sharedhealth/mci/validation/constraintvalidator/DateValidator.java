@@ -1,11 +1,11 @@
 package org.sharedhealth.mci.validation.constraintvalidator;
 
-import org.sharedhealth.mci.validation.constraints.Date;
-
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+
+import org.apache.commons.lang3.StringUtils;
+import org.sharedhealth.mci.utils.DateUtil;
+import org.sharedhealth.mci.validation.constraints.Date;
 
 public class DateValidator implements ConstraintValidator<Date, String> {
 
@@ -25,19 +25,12 @@ public class DateValidator implements ConstraintValidator<Date, String> {
 
         java.util.Date testDate;
 
-        SimpleDateFormat sdf = new SimpleDateFormat(this.format);
-        sdf.setLenient(false);
-
-        try {
-
-            testDate = new java.util.Date(sdf.parse(value).getTime());
-            System.out.println(testDate);
-
-        } catch (ParseException e) {
-            //The date pattern is invalid.;
-            return false;
+        if (StringUtils.isNotBlank(this.format)) {
+            testDate = DateUtil.parseDate(value, this.format);
+        } else {
+            testDate = DateUtil.parseDate(value);
         }
 
-        return sdf.format(testDate).equals(value);
+        return null != testDate;
     }
 }

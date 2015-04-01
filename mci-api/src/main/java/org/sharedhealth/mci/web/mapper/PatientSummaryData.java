@@ -3,10 +3,13 @@ package org.sharedhealth.mci.web.mapper;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.sharedhealth.mci.utils.DateStringDeserializer;
 
 import javax.validation.constraints.Pattern;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
+import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_PATTERN;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
@@ -39,6 +42,7 @@ public class PatientSummaryData {
     private String gender;
 
     @JsonProperty(DATE_OF_BIRTH)
+    @JsonDeserialize(using = DateStringDeserializer.class)
     private String dateOfBirth;
 
     @JsonProperty(PRESENT_ADDRESS)
@@ -85,7 +89,7 @@ public class PatientSummaryData {
     }
 
     public void setDateOfBirth(String dateOfBirth) {
-        this.dateOfBirth = dateOfBirth;
+        this.dateOfBirth = toIsoFormat(dateOfBirth);
     }
 
     public Address getAddress() {

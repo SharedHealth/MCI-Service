@@ -28,6 +28,7 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -102,7 +103,6 @@ public class PatientControllerTest {
         patientData.setSurName("Tiger");
         patientData.setGender("M");
         patientData.setDateOfBirth("2014-12-01");
-        patientData.setDateOfBirth("2014-12-01");
         patientData.setHouseholdCode(householdCode);
 
         Address address = new Address();
@@ -136,7 +136,7 @@ public class PatientControllerTest {
     private UserInfo getUserInfo() {UserProfile userProfile = new UserProfile("facility", "100067", null);
 
         return new UserInfo("102", "ABC", "abc@mail", 1, true, "111100",
-                new ArrayList<String>(), asList(userProfile));
+                new ArrayList<String>(), Collections.singletonList(userProfile));
     }
     @Test
     public void shouldCreatePatientAndReturnHealthId() throws Exception {

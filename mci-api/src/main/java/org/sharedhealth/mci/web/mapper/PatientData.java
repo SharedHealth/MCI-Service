@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.constraints.NotBlank;
+import org.sharedhealth.mci.utils.DateStringDeserializer;
 import org.sharedhealth.mci.utils.WhiteSpaceRemovalDeserializer;
 import org.sharedhealth.mci.validation.constraints.*;
 import org.sharedhealth.mci.validation.group.RequiredGroup;
@@ -75,8 +76,9 @@ public class PatientData implements Diffable<PatientData> {
     @JsonProperty(DATE_OF_BIRTH)
     @JsonInclude(NON_EMPTY)
     @NotNull(message = ERROR_CODE_REQUIRED, groups = RequiredGroup.class)
-    @Date(format = "yyyy-MM-dd", message = ERROR_CODE_PATTERN)
-    @Length(min = 1, max = 10, message = ERROR_CODE_PATTERN)
+    @Length(min = 1, message = ERROR_CODE_PATTERN)
+    @Date(message = ERROR_CODE_PATTERN)
+    @JsonDeserialize(using = DateStringDeserializer.class)
     private String dateOfBirth;
 
     @JsonProperty(GENDER)
@@ -237,7 +239,7 @@ public class PatientData implements Diffable<PatientData> {
     }
 
     public void setDateOfBirth(String dateOfBirth) {
-        this.dateOfBirth = dateOfBirth;
+        this.dateOfBirth = toIsoFormat(dateOfBirth);
     }
 
     public Address getAddress() {

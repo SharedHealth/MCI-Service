@@ -16,7 +16,7 @@ import java.util.*;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.time.DateFormatUtils.ISO_DATE_FORMAT;
+import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_INVALID;
 import static org.sharedhealth.mci.web.utils.JsonConstants.RELATIONS;
 import static org.sharedhealth.mci.web.utils.PatientDataConstants.COUNTRY_CODE_BANGLADESH;
@@ -75,7 +75,7 @@ public class PatientMapper {
         data.setSurName(patient.getSurName());
 
         if (patient.getDateOfBirth() != null) {
-            data.setDateOfBirth(ISO_DATE_FORMAT.format(patient.getDateOfBirth()));
+            data.setDateOfBirth(toIsoFormat(patient.getDateOfBirth()));
         }
         data.setGender(patient.getGender());
         data.setOccupation(patient.getOccupation());
@@ -87,7 +87,7 @@ public class PatientMapper {
         PatientStatus patientStatus = new PatientStatus();
         patientStatus.setType(patient.getStatus());
         if (isPatientDeadAndHasDateOfDeath(patient)) {
-            patientStatus.setDateOfDeath(ISO_DATE_FORMAT.format(patient.getDateOfDeath()));
+            patientStatus.setDateOfDeath(toIsoFormat(patient.getDateOfDeath()));
         }
 
         if(!patientStatus.isEmpty()) {

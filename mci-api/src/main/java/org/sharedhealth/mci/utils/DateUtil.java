@@ -66,6 +66,16 @@ public class DateUtil {
         return toIsoFormat(new Date(date));
     }
 
+    public static String toIsoFormat(String dateString) {
+
+        if(dateString == null) {
+            return null;
+        }
+
+        Date date = parseDate(dateString);
+        return  date == null ? null : toIsoFormat(date);
+    }
+
     public static String toIsoFormat(Date date) {
         DateFormat dateFormat = new SimpleDateFormat(ISO_DATE_TIME_TILL_MILLIS_FORMAT1);
         dateFormat.setTimeZone(getTimeZone(UTC_TIMEZONE));

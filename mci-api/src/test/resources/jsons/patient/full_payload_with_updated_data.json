@@ -5,7 +5,7 @@
     "name_bangla":"আয়মান আয়মান",
     "given_name":"Zaman Zaman",
     "sur_name":"AymaanAymaan",
-    "date_of_birth":"1990-02-28",
+    "date_of_birth":"1990-02-27T18:00:00.000Z",
     "gender":"F",
     "occupation":"03",
     "edu_level":"16",
@@ -65,6 +65,6 @@
     "household_code": "5678",
     "status": {
         "type": "2",
-        "date_of_death": "2014-01-01"
+        "date_of_death": "2014-01-01T00:00:00.000Z"
     }
 }

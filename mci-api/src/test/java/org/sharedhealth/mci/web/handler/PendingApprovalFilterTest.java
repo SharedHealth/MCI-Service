@@ -224,7 +224,7 @@ public class PendingApprovalFilterTest {
         PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
 
         assertTrue(isEmpty(newPatient.getPendingApprovals()));
-        assertEquals("2001-02-10", newPatient.getDateOfBirth());
+        assertEquals(toIsoFormat("2001-02-10"), newPatient.getDateOfBirth());
 
         verify(approvalFieldService, atLeastOnce()).getProperty(Mockito.anyString());
     }

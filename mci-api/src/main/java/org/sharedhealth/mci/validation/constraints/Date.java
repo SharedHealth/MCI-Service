@@ -23,5 +23,5 @@ public @interface Date {
 
     Class<? extends Payload>[] payload() default {};
 
-    String format() default "yyyy-MM-dd";
+    String format() default "";
 }

@@ -22,7 +22,7 @@ public class LengthValidator implements ConstraintValidator<Length, String> {
 
         String trimValue = value.trim();
 
-        return !(trimValue.length() > length.max() || trimValue.length() < length.min());
+        return !(trimValue.length() > length.max() && length.max() > 0 || trimValue.length() < length.min());
 
     }
 }

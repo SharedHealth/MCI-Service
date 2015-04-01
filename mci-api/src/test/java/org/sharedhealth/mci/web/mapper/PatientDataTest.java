@@ -43,13 +43,6 @@ public class PatientDataTest extends ValidationAwareMapper {
     }
 
     @Test
-    public void shouldFailIfDateOfBirthIsInvalidDate() {
-        Set<ConstraintViolation<PatientData>> constraintViolations = validator.validateValue(PatientData.class, "dateOfBirth", "1999-02-30");
-        assertEquals(1, constraintViolations.size());
-        assertEquals("1002", constraintViolations.iterator().next().getMessage());
-    }
-
-    @Test
     public void shouldPassIfDateOfBirthIsValidDate() {
         Set<ConstraintViolation<PatientData>> constraintViolations = validator.validateValue(PatientData.class, "dateOfBirth", "1983-09-21");
         assertEquals(0, constraintViolations.size());

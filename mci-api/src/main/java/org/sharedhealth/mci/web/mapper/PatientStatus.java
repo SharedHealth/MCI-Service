@@ -11,10 +11,12 @@ import org.sharedhealth.mci.web.builder.DiffResult;
 import org.sharedhealth.mci.web.builder.Diffable;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
-import static org.sharedhealth.mci.utils.DateUtil.ISO_DATE_FORMAT;
+import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_INVALID;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_PATTERN;
-import static org.sharedhealth.mci.web.utils.JsonConstants.*;
+import static org.sharedhealth.mci.web.utils.JsonConstants.DATE_OF_DEATH;
+import static org.sharedhealth.mci.web.utils.JsonConstants.STATUS;
+import static org.sharedhealth.mci.web.utils.JsonConstants.TYPE;
 
 public class PatientStatus implements Diffable<PatientStatus> {
 
@@ -25,7 +27,7 @@ public class PatientStatus implements Diffable<PatientStatus> {
 
     @JsonProperty(DATE_OF_DEATH)
     @JsonInclude(NON_EMPTY)
-    @Date(format = ISO_DATE_FORMAT, message = ERROR_CODE_PATTERN)
+    @Date(message = ERROR_CODE_PATTERN)
     private String dateOfDeath;
 
     public String getDateOfDeath() {
@@ -33,7 +35,7 @@ public class PatientStatus implements Diffable<PatientStatus> {
     }
 
     public void setDateOfDeath(String dateOfDeath) {
-        this.dateOfDeath = dateOfDeath;
+        this.dateOfDeath = toIsoFormat(dateOfDeath);
     }
 
     public String getType() {

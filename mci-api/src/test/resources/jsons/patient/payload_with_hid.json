@@ -2,7 +2,7 @@
   "hid":"1234567890",
   "given_name":"Rafan Zaman",
   "sur_name":"Aymaan",
-  "date_of_birth":"1990-02-28",
+  "date_of_birth":"1990-02-27T18:00:00.000Z",
   "gender":"M",
   "present_address":{
     "address_line":"xyz",
