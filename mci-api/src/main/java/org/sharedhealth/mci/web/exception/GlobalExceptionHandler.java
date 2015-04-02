@@ -182,6 +182,7 @@ public class GlobalExceptionHandler {
     @ResponseBody
     @ExceptionHandler(AccessDeniedException.class)
     public ErrorInfo accessDenied(AccessDeniedException accessDeniedException) {
+        logger.debug(accessDeniedException.getMessage());
         return new ErrorInfo(HttpStatus.FORBIDDEN.value(), accessDeniedException.getMessage());
     }
 
@@ -189,6 +190,7 @@ public class GlobalExceptionHandler {
     @ResponseBody
     @ExceptionHandler(Forbidden.class)
     public ErrorInfo forbidden(Forbidden forbidden) {
+        logger.debug(forbidden.getMessage());
         return new ErrorInfo(HttpStatus.FORBIDDEN.value(), forbidden.getMessage());
     }
 

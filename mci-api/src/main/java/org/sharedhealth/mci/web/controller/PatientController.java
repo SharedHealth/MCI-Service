@@ -82,9 +82,8 @@ public class PatientController extends MciController {
         final DeferredResult<ResponseEntity<PatientData>> deferredResult = new DeferredResult<>();
         if(userInfo.getProperties().isPatientUserOnly()
                 && !userInfo.getProperties().getPatientHid().equals(healthId)) {
-            String errorMessage = format("Access is denied to user %s for patient with healthId : %s", userInfo.getProperties().getId(), healthId);
-            logger.debug(errorMessage);
-            deferredResult.setErrorResult(new Forbidden(errorMessage));
+            deferredResult.setErrorResult(new Forbidden(
+                    format("Access is denied to user %s for patient with healthId : %s", userInfo.getProperties().getId(), healthId)));
             return deferredResult;
         }
         logAccessDetails(userInfo, format("Find patient given (healthId) : %s", healthId));

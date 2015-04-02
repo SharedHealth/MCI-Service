@@ -121,11 +121,9 @@ public class CatchmentController extends FeedController {
         final DeferredResult<ResponseEntity<MCIMultiResponse>> deferredResult = new DeferredResult<>();
 
         if (!userInfo.getProperties().hasCatchmentForProfileType(catchmentId, asList(ADMIN_TYPE))) {
-            String errorMessage = format("Access is denied to user %s for catchment %s",
-                    userInfo.getProperties().getId(), catchmentId);
-            logger.debug(errorMessage);
             deferredResult.setErrorResult(new Forbidden
-                    (errorMessage));
+                    (format("Access is denied to user %s for catchment %s",
+                            userInfo.getProperties().getId(), catchmentId)));
             return deferredResult;
         }
 
@@ -193,11 +191,9 @@ public class CatchmentController extends FeedController {
 
         final DeferredResult<Feed> deferredResult = new DeferredResult<>();
         if (!userInfo.getProperties().hasCatchmentForProfileType(catchmentId, asList(FACILITY_TYPE, PROVIDER_TYPE))) {
-            String errorMessage = format("Access is denied for catchment %s for user %s.", catchmentId,
-                    userInfo.getProperties().getId());
-            logger.debug(errorMessage);
             deferredResult.setErrorResult(new Forbidden
-                    (errorMessage));
+                    (format("Access is denied to user %s for catchment %s",
+                            userInfo.getProperties().getId(), catchmentId)));
             return deferredResult;
         }
         Catchment catchment = new Catchment(catchmentId);
@@ -220,11 +216,9 @@ public class CatchmentController extends FeedController {
         final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
 
         if (!userInfo.getProperties().hasCatchmentForProfileType(catchmentId, asList(ADMIN_TYPE))) {
-            String errorMessage = format("Access is denied to user %s for catchment %s",
-                    userInfo.getProperties().getId(), catchmentId);
-            logger.debug(errorMessage);
             deferredResult.setErrorResult(new Forbidden
-                    (errorMessage));
+                    (format("Access is denied to user %s for catchment %s",
+                            userInfo.getProperties().getId(), catchmentId)));
             return deferredResult;
         }
 
