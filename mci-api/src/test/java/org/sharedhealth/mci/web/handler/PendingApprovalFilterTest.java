@@ -184,10 +184,10 @@ public class PendingApprovalFilterTest {
         setUpApprovalFieldServiceFor(DATE_OF_BIRTH, "NU");
 
         PatientData existingPatient = buildPatientData();
-        existingPatient.setDateOfBirth("2000-02-10");
+        existingPatient.setDateOfBirth(toIsoFormat("2000-02-10"));
 
         PatientData updateRequest = buildPatientData();
-        updateRequest.setDateOfBirth("2000-02-11");
+        updateRequest.setDateOfBirth(toIsoFormat("2000-02-11"));
 
         pendingApprovalFilter.filter(existingPatient, updateRequest);
 
@@ -199,10 +199,10 @@ public class PendingApprovalFilterTest {
         setUpApprovalFieldServiceFor(DATE_OF_BIRTH, "NU");
 
         PatientData existingPatient = buildPatientData();
-        existingPatient.setDateOfBirth("2000-02-10");
+        existingPatient.setDateOfBirth(toIsoFormat("2000-02-10"));
 
         PatientData updateRequest = buildPatientData();
-        updateRequest.setDateOfBirth("2000-02-10");
+        updateRequest.setDateOfBirth(toIsoFormat("2000-02-10"));
 
         PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
 
@@ -216,10 +216,10 @@ public class PendingApprovalFilterTest {
     public void shouldUpdateFieldsThatAreNeitherMarkedForApprovalNorMarkedAsNonUpdatable() throws ParseException {
 
         PatientData existingPatient = buildPatientData();
-        existingPatient.setDateOfBirth("2000-02-10");
+        existingPatient.setDateOfBirth(toIsoFormat("2000-02-10"));
 
         PatientData updateRequest = buildPatientData();
-        updateRequest.setDateOfBirth("2001-02-10");
+        updateRequest.setDateOfBirth(toIsoFormat("2001-02-10"));
 
         PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
 
@@ -280,7 +280,7 @@ public class PendingApprovalFilterTest {
         patient.setGivenName("Scott");
         patient.setSurName("Tiger");
         patient.setGender("M");
-        patient.setDateOfBirth("2014-12-01");
+        patient.setDateOfBirth(toIsoFormat("2014-12-01"));
 
         Address address = new Address();
         address.setAddressLine("house-10");

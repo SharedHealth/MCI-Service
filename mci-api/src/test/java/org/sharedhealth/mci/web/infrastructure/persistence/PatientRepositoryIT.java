@@ -30,6 +30,7 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.junit.Assert.*;
+import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.setupApprovalsConfig;
@@ -83,7 +84,7 @@ public class PatientRepositoryIT {
         data.setUid(uid);
         data.setGivenName(givenName);
         data.setSurName(surname);
-        data.setDateOfBirth("2014-12-01");
+        data.setDateOfBirth(toIsoFormat("2014-12-01"));
         data.setGender("M");
         data.setOccupation("03");
         data.setEducationLevel("BA");

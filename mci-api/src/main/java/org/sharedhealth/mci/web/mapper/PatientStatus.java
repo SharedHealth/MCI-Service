@@ -4,6 +4,8 @@ package org.sharedhealth.mci.web.mapper;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.sharedhealth.mci.utils.DateStringDeserializer;
 import org.sharedhealth.mci.validation.constraints.Code;
 import org.sharedhealth.mci.validation.constraints.Date;
 import org.sharedhealth.mci.web.builder.DiffBuilder;
@@ -11,7 +13,6 @@ import org.sharedhealth.mci.web.builder.DiffResult;
 import org.sharedhealth.mci.web.builder.Diffable;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
-import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_INVALID;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_PATTERN;
 import static org.sharedhealth.mci.web.utils.JsonConstants.DATE_OF_DEATH;
@@ -28,6 +29,7 @@ public class PatientStatus implements Diffable<PatientStatus> {
     @JsonProperty(DATE_OF_DEATH)
     @JsonInclude(NON_EMPTY)
     @Date(message = ERROR_CODE_PATTERN)
+    @JsonDeserialize(using = DateStringDeserializer.class)
     private String dateOfDeath;
 
     public String getDateOfDeath() {
@@ -35,7 +37,7 @@ public class PatientStatus implements Diffable<PatientStatus> {
     }
 
     public void setDateOfDeath(String dateOfDeath) {
-        this.dateOfDeath = toIsoFormat(dateOfDeath);
+        this.dateOfDeath = dateOfDeath;
     }
 
     public String getType() {

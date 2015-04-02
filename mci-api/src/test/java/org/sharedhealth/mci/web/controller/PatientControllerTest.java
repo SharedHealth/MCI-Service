@@ -38,6 +38,7 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.web.controller.PatientController.REQUESTED_BY;
 import static org.sharedhealth.mci.web.service.PatientService.PER_PAGE_MAXIMUM_LIMIT_NOTE;
 import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
@@ -102,7 +103,7 @@ public class PatientControllerTest {
         patientData.setGivenName("Scott");
         patientData.setSurName("Tiger");
         patientData.setGender("M");
-        patientData.setDateOfBirth("2014-12-01");
+        patientData.setDateOfBirth(toIsoFormat("2014-12-01"));
         patientData.setHouseholdCode(householdCode);
 
         Address address = new Address();

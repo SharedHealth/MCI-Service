@@ -23,6 +23,7 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.*;
+import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.setupApprovalsConfig;
 import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.truncateAllColumnFamilies;
 import static org.sharedhealth.mci.web.utils.JsonConstants.NEW_VALUE;
@@ -59,7 +60,7 @@ public class PatientFeedRepositoryIT {
         data.setUid("12345678901");
         data.setGivenName("Scott");
         data.setSurName("Tiger");
-        data.setDateOfBirth("2014-12-01");
+        data.setDateOfBirth(toIsoFormat("2014-12-01"));
         data.setGender("M");
         data.setOccupation("03");
         data.setEducationLevel("BA");

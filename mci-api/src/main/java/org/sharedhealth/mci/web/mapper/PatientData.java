@@ -239,7 +239,7 @@ public class PatientData implements Diffable<PatientData> {
     }
 
     public void setDateOfBirth(String dateOfBirth) {
-        this.dateOfBirth = toIsoFormat(dateOfBirth);
+        this.dateOfBirth = dateOfBirth;
     }
 
     public Address getAddress() {

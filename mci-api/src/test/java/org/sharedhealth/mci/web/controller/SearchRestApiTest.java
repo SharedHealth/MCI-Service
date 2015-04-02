@@ -26,6 +26,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
 import static org.sharedhealth.mci.utils.HttpUtil.AUTH_TOKEN_KEY;
 import static org.sharedhealth.mci.utils.HttpUtil.CLIENT_ID_KEY;
@@ -276,7 +277,7 @@ public class SearchRestApiTest extends BaseControllerTest {
         patientData.setGivenName("Raju");
         patientData.setSurName("Mazumder");
         patientData.setGender("M");
-        patientData.setDateOfBirth("2014-12-01");
+        patientData.setDateOfBirth(toIsoFormat("2014-12-01"));
         patientData.setEducationLevel("01");
         patientData.setOccupation("02");
         patientData.setMaritalStatus("1");

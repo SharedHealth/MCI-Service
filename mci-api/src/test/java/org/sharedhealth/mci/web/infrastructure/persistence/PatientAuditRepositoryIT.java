@@ -27,6 +27,7 @@ import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static java.util.Arrays.asList;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
+import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.setupApprovalsConfig;
 import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.truncateAllColumnFamilies;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
@@ -106,7 +107,7 @@ public class PatientAuditRepositoryIT {
         patient.setUid("12345678901");
         patient.setGivenName("Happy");
         patient.setSurName("Rotter");
-        patient.setDateOfBirth("2014-12-01");
+        patient.setDateOfBirth(toIsoFormat("2014-12-01"));
         patient.setGender("M");
         patient.setOccupation("01");
         patient.setEducationLevel("01");
