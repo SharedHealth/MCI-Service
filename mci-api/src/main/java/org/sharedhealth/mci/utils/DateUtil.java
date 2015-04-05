@@ -9,14 +9,11 @@ import java.util.*;
 
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static java.util.Calendar.YEAR;
-import static java.util.TimeZone.getTimeZone;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class DateUtil {
 
     private static final Logger logger = getLogger(DateUtil.class);
-
-    private static final String UTC_TIMEZONE = "UTC";
 
     public static final String ISO_DATE_FORMAT = "yyyy-MM-dd";
 
@@ -78,7 +75,6 @@ public class DateUtil {
 
     public static String toIsoFormat(Date date) {
         DateFormat dateFormat = new SimpleDateFormat(ISO_DATE_TIME_TILL_MILLIS_FORMAT1);
-        dateFormat.setTimeZone(getTimeZone(UTC_TIMEZONE));
         return dateFormat.format(date);
     }
 
