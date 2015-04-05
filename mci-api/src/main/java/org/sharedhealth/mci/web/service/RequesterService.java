@@ -5,7 +5,11 @@ import org.sharedhealth.mci.web.mapper.Requester;
 import org.sharedhealth.mci.web.mapper.RequesterDetails;
 import org.sharedhealth.mci.web.model.Facility;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+import java.util.Set;
+
+@Component
 public class RequesterService {
 
     private FacilityService facilityService;
@@ -15,6 +19,15 @@ public class RequesterService {
     public RequesterService(FacilityService facilityService, ProviderService providerService) {
         this.facilityService = facilityService;
         this.providerService = providerService;
+    }
+
+    public void populateRequesterDetails(Set<Requester> requesters) {
+        if (requesters == null || requesters.size() == 0) {
+            return;
+        }
+        for (Requester requester : requesters) {
+            populateRequesterDetails(requester);
+        }
     }
 
     public void populateRequesterDetails(Requester requester) {

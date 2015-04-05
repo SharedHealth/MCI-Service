@@ -6,12 +6,12 @@ import org.mockito.Mock;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientAuditRepository;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientFeedRepository;
 import org.sharedhealth.mci.web.mapper.PatientAuditLogData;
+import org.sharedhealth.mci.web.mapper.Requester;
+import org.sharedhealth.mci.web.mapper.RequesterDetails;
 import org.sharedhealth.mci.web.model.PatientAuditLog;
 import org.sharedhealth.mci.web.model.PatientUpdateLog;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static java.util.Arrays.asList;
@@ -28,23 +28,37 @@ public class PatientAuditServiceTest {
     private PatientAuditRepository auditRepository;
     @Mock
     private PatientFeedRepository feedRepository;
+    @Mock
+    private RequesterService requesterService;
 
     private PatientAuditService auditService;
 
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-        auditService = new PatientAuditService(auditRepository, feedRepository);
+        auditService = new PatientAuditService(auditRepository, feedRepository, requesterService);
     }
 
     @Test
     public void shouldFindByHealthId() {
         String healthId = "h100";
         List<PatientAuditLogData> logs = new ArrayList<>();
+        PatientAuditLogData log = new PatientAuditLogData();
+        Requester approvedBy = new Requester(null, null, new RequesterDetails("a100", "Admin Monika"));
+        log.setApprovedBy(approvedBy);
+        Map<String, Set<Requester>> requestedBy = new HashMap<>();
+        Set<Requester> requesters = new HashSet<>();
+        requesters.add(new Requester("f100", "p100"));
+        requestedBy.put("fieldX", requesters);
+        log.setRequestedBy(requestedBy);
+        logs.add(log);
+
         when(auditRepository.findByHealthId(healthId)).thenReturn(logs);
 
         assertEquals(logs, auditService.findByHealthId(healthId));
         verify(auditRepository).findByHealthId(healthId);
+        verify(requesterService).populateRequesterDetails(approvedBy);
+        verify(requesterService).populateRequesterDetails(requesters);
     }
 
     @Test

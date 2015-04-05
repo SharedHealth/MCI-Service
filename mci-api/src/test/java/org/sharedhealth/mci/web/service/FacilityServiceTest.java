@@ -5,7 +5,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.sharedhealth.mci.web.config.MCIProperties;
-import org.sharedhealth.mci.web.exception.FacilityNotFoundException;
 import org.sharedhealth.mci.web.infrastructure.persistence.FacilityRepository;
 import org.sharedhealth.mci.web.infrastructure.registry.FacilityRegistryClient;
 import org.sharedhealth.mci.web.mapper.Catchment;
@@ -15,10 +14,8 @@ import org.sharedhealth.mci.web.model.Facility;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -42,17 +39,15 @@ public class FacilityServiceTest {
     }
 
     @Test
-    public void shouldNotQueryFacilityRegistryWrapperIfFacilityFoundInLocalDatabase() throws ExecutionException,
-            InterruptedException {
+    public void shouldNotQueryFacilityRegistryServiceIfFacilityFoundInLocalDatabase() {
         Facility facility = new Facility("1", "foo", "bar", "101010", "101010");
         when(facilityRepository.find(facility.getId())).thenReturn(facility);
-        facilityService.ensurePresent(facility.getId());
+        facilityService.find(facility.getId());
         verify(facilityRegistryClient, never()).find(facility.getId());
     }
 
     @Test
-    public void shouldQueryFacilityRegistryWrapperIfFacilityNotFoundInLocalDatabase() throws ExecutionException,
-            InterruptedException {
+    public void shouldQueryFacilityRegistryIfFacilityNotFoundInLocalDatabase() {
         FacilityResponse facility = new FacilityResponse();
         facility.setId("1");
         facility.setName("foo");
@@ -61,15 +56,16 @@ public class FacilityServiceTest {
         when(facilityRepository.find(facility.getId())).thenReturn(null);
         when(facilityRegistryClient.find(facility.getId())).thenReturn(facility);
         when(mciProperties.getFrCacheTtl()).thenReturn(ttl);
-        assertNotNull(facilityService.ensurePresent(facility.getId()));
+
+        facilityService.find(facility.getId());
+
         verify(facilityRepository).find(facility.getId());
-        verify(facilityRepository).save(facilityService.map(facility), ttl);
         verify(facilityRegistryClient).find(facility.getId());
+        verify(facilityRepository).save(facilityService.map(facility), ttl);
     }
 
     @Test
-    public void shouldReturnCatchmentLists() throws ExecutionException,
-            InterruptedException {
+    public void shouldReturnCatchmentLists() {
 
         final String catchmentsString = "101010,101020";
 
@@ -81,30 +77,16 @@ public class FacilityServiceTest {
         assertEquals(getCatchmentsList(catchmentsString), catchments);
     }
 
-    @Test(expected = FacilityNotFoundException.class)
-    public void shouldThrowFacilityNotFoundExceptionIfFacilityNotFound() {
-        final String facilityId = "1998876";
-        when(facilityRepository.find(facilityId)).thenReturn(null);
-        when(facilityRegistryClient.find(facilityId)).thenReturn(null);
-        assertNotNull(facilityService.find(facilityId).getCatchmentsList());
-        verify(facilityRepository).find(facilityId);
-        verify(facilityRegistryClient).find(facilityId);
-    }
-
     private List<Catchment> getCatchmentsList(String catchments) {
-
         List<String> catchmentsStringList = new ArrayList<>();
-
         if (StringUtils.isNotBlank(catchments)) {
             catchmentsStringList = Arrays.asList(catchments.split(","));
         }
 
         List<Catchment> catchmentArrayList = new ArrayList<>();
-
         for (String catchment : catchmentsStringList) {
             catchmentArrayList.add(new Catchment(catchment));
         }
-
         return catchmentArrayList;
     }
 }

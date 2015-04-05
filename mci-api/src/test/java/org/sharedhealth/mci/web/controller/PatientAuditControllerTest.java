@@ -9,8 +9,10 @@ import org.sharedhealth.mci.web.infrastructure.security.UserProfile;
 import org.sharedhealth.mci.web.mapper.PatientAuditLogData;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.Requester;
+import org.sharedhealth.mci.web.mapper.RequesterDetails;
 import org.sharedhealth.mci.web.service.PatientAuditService;
 import org.sharedhealth.mci.web.service.PatientService;
+import org.sharedhealth.mci.web.service.RequesterService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -42,6 +44,8 @@ public class PatientAuditControllerTest {
     @Mock
     private PatientAuditService auditService;
     @Mock
+    private RequesterService requesterService;
+    @Mock
     private LocalValidatorFactoryBean localValidatorFactoryBean;
 
     private MockMvc mockMvc;
@@ -50,7 +54,7 @@ public class PatientAuditControllerTest {
     public void setup() throws ParseException {
         initMocks(this);
         mockMvc = MockMvcBuilders
-                .standaloneSetup(new PatientAuditController(patientService, auditService))
+                .standaloneSetup(new PatientAuditController(patientService, auditService, requesterService))
                 .setValidator(localValidatorFactoryBean)
                 .build();
 
@@ -71,6 +75,7 @@ public class PatientAuditControllerTest {
         PatientData patient = new PatientData();
         patient.setRequester("Bahmni", "Dr. Monika");
         patient.setCreatedAt(timeBased());
+        patient.setCreatedBy(new Requester(new RequesterDetails("r100", "CHW"), null, null));
         when(patientService.findByHealthId(healthId)).thenReturn(patient);
 
         String eventTime = "2015-01-02T10:20:30Z";
@@ -83,16 +88,29 @@ public class PatientAuditControllerTest {
         mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk())
 
-                .andExpect(jsonPath("$.created_by", is(patient.getCreatedBy())))
+                .andExpect(jsonPath("$.created_by.facility.id", is("r100")))
+                .andExpect(jsonPath("$.created_by.facility.name", is("CHW")))
                 .andExpect(jsonPath("$.created_at", is(patient.getCreatedAtAsString())))
 
                 .andExpect(jsonPath("$.updates.[0].event_time", is(eventTime)))
 
-                .andExpect(jsonPath("$.updates.[0].requested_by.given_name.facility.id", is(asList("Bahmni1"))))
-                .andExpect(jsonPath("$.updates.[0].requested_by.occupation.facility.id", is(asList("Bahmni2"))))
-                .andExpect(jsonPath("$.updates.[0].requested_by.edu_level.facility.id", is(asList("Bahmni3"))))
+                .andExpect(jsonPath("$.updates.[0].requested_by.given_name.facility.id", is(asList("f100"))))
+                .andExpect(jsonPath("$.updates.[0].requested_by.given_name.facility.name", is(asList("Bahmni1"))))
+                .andExpect(jsonPath("$.updates.[0].requested_by.given_name.provider.id", is(asList("p100"))))
+                .andExpect(jsonPath("$.updates.[0].requested_by.given_name.provider.name", is(asList("Doc1"))))
 
-                .andExpect(jsonPath("$.updates.[0].approved_by", is("admin")))
+                .andExpect(jsonPath("$.updates.[0].requested_by.occupation.facility.id", is(asList("f200"))))
+                .andExpect(jsonPath("$.updates.[0].requested_by.occupation.facility.name", is(asList("Bahmni2"))))
+                .andExpect(jsonPath("$.updates.[0].requested_by.occupation.provider.id", is(asList("p200"))))
+                .andExpect(jsonPath("$.updates.[0].requested_by.occupation.provider.name", is(asList("Doc2"))))
+
+                .andExpect(jsonPath("$.updates.[0].requested_by.edu_level.facility.id", is(asList("f300"))))
+                .andExpect(jsonPath("$.updates.[0].requested_by.edu_level.facility.name", is(asList("Bahmni3"))))
+                .andExpect(jsonPath("$.updates.[0].requested_by.edu_level.provider.id", is(asList("p300"))))
+                .andExpect(jsonPath("$.updates.[0].requested_by.edu_level.provider.name", is(asList("Doc3"))))
+
+                .andExpect(jsonPath("$.updates.[0].approved_by.admin.id", is("a100")))
+                .andExpect(jsonPath("$.updates.[0].approved_by.admin.name", is("Admin Monika")))
 
                 .andExpect(jsonPath("$.updates.[0].change_set.given_name", is(notNullValue())))
                 .andExpect(jsonPath("$.updates.[0].change_set.given_name.old_value", is("Harry")))
@@ -115,17 +133,18 @@ public class PatientAuditControllerTest {
         PatientAuditLogData log = new PatientAuditLogData();
         log.setEventTime(eventTime);
         log.setChangeSet(buildChangeSets());
-        log.setApprovedBy("admin");
-        log.addRequestedBy(GIVEN_NAME, buildRequesters("Bahmni1"));
-        log.addRequestedBy(OCCUPATION, buildRequesters("Bahmni2"));
-        log.addRequestedBy(EDU_LEVEL, buildRequesters("Bahmni3"));
+        log.setApprovedBy(new Requester(null, null, new RequesterDetails("a100", "Admin Monika")));
+        log.addRequestedBy(GIVEN_NAME, buildRequesters("f100", "Bahmni1", "p100", "Doc1"));
+        log.addRequestedBy(OCCUPATION, buildRequesters("f200", "Bahmni2", "p200", "Doc2"));
+        log.addRequestedBy(EDU_LEVEL, buildRequesters("f300", "Bahmni3", "p300", "Doc3"));
         logs.add(log);
         return logs;
     }
 
-    private Set<Requester> buildRequesters(String facilityId) {
+    private Set<Requester> buildRequesters(String facilityId, String facilityName, String providerId, String providerName) {
         Set<Requester> requesters = new HashSet<>();
-        Requester facility = new Requester(facilityId);
+        Requester facility = new Requester(new RequesterDetails(facilityId, facilityName),
+                new RequesterDetails(providerId, providerName), null);
         requesters.add(facility);
         return requesters;
     }

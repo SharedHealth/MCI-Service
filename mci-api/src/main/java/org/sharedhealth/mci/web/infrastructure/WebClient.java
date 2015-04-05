@@ -3,6 +3,7 @@ package org.sharedhealth.mci.web.infrastructure;
 import org.sharedhealth.mci.web.config.MCIProperties;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.concurrent.ListenableFutureAdapter;
@@ -27,7 +28,7 @@ public class WebClient<T> {
         return new HttpEntity(new LinkedMultiValueMap<String, String>());
     }
 
-    protected T getResponse(String url) throws ExecutionException, InterruptedException {
+    protected T getResponse(final String url) throws ExecutionException, InterruptedException {
         return new ListenableFutureAdapter<T, ResponseEntity<T>>(restTemplate.exchange(
                 url,
                 HttpMethod.GET,
@@ -36,11 +37,11 @@ public class WebClient<T> {
 
             @Override
             protected T adapt(ResponseEntity<T> result) throws ExecutionException {
-                if (result.getStatusCode().is2xxSuccessful()) {
+                HttpStatus statusCode = result.getStatusCode();
+                if (statusCode.is2xxSuccessful()) {
                     return result.getBody();
-                } else {
-                    return null;
                 }
+                return null;
             }
         }.get();
     }

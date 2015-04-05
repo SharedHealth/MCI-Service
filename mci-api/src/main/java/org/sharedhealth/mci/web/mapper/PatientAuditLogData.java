@@ -20,7 +20,7 @@ public class PatientAuditLogData {
     private Map<String, Set<Requester>> requestedBy;
 
     @JsonProperty(APPROVED_BY)
-    private String approvedBy;
+    private Requester approvedBy;
 
     public String getEventTime() {
         return eventTime;
@@ -53,11 +53,11 @@ public class PatientAuditLogData {
         this.requestedBy.put(fieldName, requesters);
     }
 
-    public String getApprovedBy() {
+    public Requester getApprovedBy() {
         return approvedBy;
     }
 
-    public void setApprovedBy(String approvedBy) {
+    public void setApprovedBy(Requester approvedBy) {
         this.approvedBy = approvedBy;
     }
 }

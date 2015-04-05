@@ -3,8 +3,10 @@ package org.sharedhealth.mci.web.controller;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
 import org.sharedhealth.mci.web.mapper.PatientAuditLogData;
 import org.sharedhealth.mci.web.mapper.PatientData;
+import org.sharedhealth.mci.web.mapper.Requester;
 import org.sharedhealth.mci.web.service.PatientAuditService;
 import org.sharedhealth.mci.web.service.PatientService;
+import org.sharedhealth.mci.web.service.RequesterService;
 import org.sharedhealth.mci.web.utils.JsonConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,17 +29,20 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @RestController
 @RequestMapping("/api/v1/audit/patients")
-public class PatientAuditController extends MciController{
+public class PatientAuditController extends MciController {
 
     private static final Logger logger = LoggerFactory.getLogger(PatientAuditController.class);
 
     private PatientService patientService;
     private PatientAuditService auditService;
+    private RequesterService requesterService;
 
     @Autowired
-    public PatientAuditController(PatientService patientService, PatientAuditService auditService) {
+    public PatientAuditController(PatientService patientService, PatientAuditService auditService,
+                                  RequesterService requesterService) {
         this.patientService = patientService;
         this.auditService = auditService;
+        this.requesterService = requesterService;
     }
 
     @PreAuthorize("hasAnyRole('ROLE_MCI Admin')")
@@ -55,7 +60,11 @@ public class PatientAuditController extends MciController{
 
         Map<String, Object> result = new HashMap<>();
         result.put(CREATED_AT, patient.getCreatedAtAsString());
-        result.put(CREATED_BY, patient.getCreatedBy());
+
+        Requester createdBy = patient.getCreatedBy();
+        requesterService.populateRequesterDetails(createdBy);
+        result.put(CREATED_BY, createdBy);
+
         result.put(JsonConstants.UPDATES, auditLogs);
 
         deferredResult.setResult(new ResponseEntity<>(result, OK));

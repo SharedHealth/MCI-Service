@@ -3,6 +3,8 @@ package org.sharedhealth.mci.web.infrastructure.registry;
 import org.sharedhealth.mci.web.config.MCIProperties;
 import org.sharedhealth.mci.web.infrastructure.WebClient;
 import org.sharedhealth.mci.web.mapper.ProviderResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
@@ -10,8 +12,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.AsyncRestTemplate;
+import org.springframework.web.client.RestClientException;
 
-import java.nio.file.ProviderNotFoundException;
 import java.util.concurrent.ExecutionException;
 
 import static org.sharedhealth.mci.utils.HttpUtil.AUTH_TOKEN_KEY;
@@ -20,6 +22,7 @@ import static org.sharedhealth.mci.utils.HttpUtil.CLIENT_ID_KEY;
 
 @Component
 public class ProviderRegistryClient extends WebClient<ProviderResponse> {
+    private static final Logger logger = LoggerFactory.getLogger(ProviderRegistryClient.class);
 
     @Autowired
     public ProviderRegistryClient(@Qualifier("MCIRestTemplate") AsyncRestTemplate restTemplate, MCIProperties properties) {
@@ -31,8 +34,9 @@ public class ProviderRegistryClient extends WebClient<ProviderResponse> {
         try {
             return getResponse(url);
 
-        } catch (InterruptedException | ExecutionException e) {
-            throw new ProviderNotFoundException("No provider found with URL: " + url);
+        } catch (RestClientException | InterruptedException | ExecutionException e) {
+            logger.debug("No provider found with URL: " + url, e);
+            return null;
         }
     }
 

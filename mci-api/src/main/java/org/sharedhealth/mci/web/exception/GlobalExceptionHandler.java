@@ -97,15 +97,6 @@ public class GlobalExceptionHandler {
         return new ErrorHandler(NOT_FOUND.value(), MESSAGE_PATIENT_NOT_FOUND);
     }
 
-    @ResponseStatus(value = NOT_FOUND)
-    @ExceptionHandler(FacilityNotFoundException.class)
-    @ResponseBody
-    public ErrorHandler handleFacilityNotFoundException(FacilityNotFoundException e) {
-        logger.error("Handling FacilityNotFoundException. ", e);
-
-        return new ErrorHandler(NOT_FOUND.value(), MESSAGE_FACILITY_NOT_FOUND);
-    }
-
     @ResponseStatus(value = BAD_REQUEST)
     @ExceptionHandler(InsufficientPrivilegeException.class)
     @ResponseBody

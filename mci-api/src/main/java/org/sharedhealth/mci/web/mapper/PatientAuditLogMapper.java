@@ -29,7 +29,9 @@ public class PatientAuditLogMapper {
         data.setChangeSet(buildChangeSet(log.getChangeSet()));
         data.setRequestedBy(readValue(log.getRequestedBy(), new TypeReference<Map<String, Set<Requester>>>() {
         }));
-        data.setApprovedBy(log.getApprovedBy());
+        if (log.getApprovedBy() != null) {
+            data.setApprovedBy(readValue(log.getApprovedBy(), Requester.class));
+        }
         return data;
     }
 
