@@ -1,4 +1,4 @@
-package org.sharedhealth.mci.web.infrastructure.fr;
+package org.sharedhealth.mci.web.infrastructure.registry;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import org.junit.Rule;
@@ -23,13 +23,13 @@ import static org.sharedhealth.mci.utils.HttpUtil.CLIENT_ID_KEY;
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 @ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
-public class FacilityRegistryWrapperTest {
+public class FacilityRegistryClientTest {
 
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(9997);
 
     @Autowired
-    private FacilityRegistryWrapper fr;
+    private FacilityRegistryClient frClient;
 
     @Test
     public void shouldFetchAFacilityByFacilityIdWhenFacilityCatersToOneCatchment() throws Exception {
@@ -43,7 +43,7 @@ public class FacilityRegistryWrapperTest {
                         .withHeader("Content-Type", "application/json")
                         .withBody(asString("jsons/facility.json"))));
 
-        FacilityResponse facility = fr.getFacility(facilityId).get();
+        FacilityResponse facility = frClient.find(facilityId);
 
         assertThat(facility, is(notNullValue()));
         assertThat(facility.getId(), is(facilityId));
@@ -62,7 +62,7 @@ public class FacilityRegistryWrapperTest {
                         .withHeader("Content-Type", "application/json")
                         .withBody(asString("jsons/facility-multiple-catchments.json"))));
 
-        FacilityResponse facility = fr.getFacility(facilityId).get();
+        FacilityResponse facility = frClient.find(facilityId);
 
         assertThat(facility, is(notNullValue()));
         assertThat(facility.getId(), is(facilityId));

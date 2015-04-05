@@ -34,6 +34,8 @@ public class MCIProperties {
     private String workerId;
     @Value("${SERVER_URL}")
     private String serverUrl;
+    @Value("${PR_URL}")
+    private String providerRegistryUrl;
 
     public String getCassandraKeySpace() {
         return cassandraKeySpace;
@@ -85,5 +87,9 @@ public class MCIProperties {
 
     public String getServerUrl() {
         return serverUrl;
+    }
+
+    public String getProviderRegistryUrl() {
+        return providerRegistryUrl;
     }
 }

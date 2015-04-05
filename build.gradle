@@ -67,6 +67,6 @@ ext.testLibraries = [
         netty         : "io.netty:netty:3.9.0.Final",
         mockito    : "org.mockito:mockito-all:1.8.4",
         http_client: "org.apache.httpcomponents:httpclient:4.3.3",
-        spring_test: "org.springframework:spring-test:4.0.3.RELEASE",
+        spring_test: "org.springframework:spring-test:4.1.6.RELEASE",
         wiremock   : "com.github.tomakehurst:wiremock:1.43"
 ]

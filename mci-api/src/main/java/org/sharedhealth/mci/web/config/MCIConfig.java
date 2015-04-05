@@ -17,6 +17,9 @@ import org.springframework.web.client.AsyncRestTemplate;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
+import static java.util.concurrent.TimeUnit.DAYS;
+import static java.util.concurrent.TimeUnit.MINUTES;
+
 @Configuration
 @EnableCaching
 @Import({MCISecurityConfig.class, MCICassandraConfig.class, MCIWebConfig.class, ActuatorConfig.class})
@@ -35,6 +38,8 @@ public class MCIConfig {
 
     public static final int CACHE_TTL_IN_MINUTES = 15;
     public static final int MASTER_DATA_CACHE_TTL_IN_DAYS = 1;
+
+    public static final String PROVIDER_CACHE = "PROVIDER_CACHE";
 
     @Autowired
     private MCIProperties mciProperties;
@@ -57,20 +62,21 @@ public class MCIConfig {
         SimpleCacheManager cacheManager = new SimpleCacheManager();
 
         cacheManager.setCaches(Arrays.asList(
-                createConcurrentMapCache("mciSettings", CACHE_TTL_IN_MINUTES, TimeUnit.MINUTES, 10),
-                createConcurrentMapCache("mciApprovalFields", CACHE_TTL_IN_MINUTES, TimeUnit.MINUTES, 50),
-                createConcurrentMapCache("masterData", MASTER_DATA_CACHE_TTL_IN_DAYS, TimeUnit.DAYS, 500)
+                createConcurrentMapCache("mciSettings", CACHE_TTL_IN_MINUTES, MINUTES, 10),
+                createConcurrentMapCache("mciApprovalFields", CACHE_TTL_IN_MINUTES, MINUTES, 50),
+                createConcurrentMapCache(PROVIDER_CACHE, 15, DAYS, 500),
+                createConcurrentMapCache("masterData", MASTER_DATA_CACHE_TTL_IN_DAYS, DAYS, 500)
         ));
 
         return cacheManager;
     }
 
-    private ConcurrentMapCache createConcurrentMapCache(String name, int facilityCacheTtlInMinutes, TimeUnit timeUnit, int size) {
+    private ConcurrentMapCache createConcurrentMapCache(String name, int duration, TimeUnit unit, int maxSize) {
         return new ConcurrentMapCache(name,
                 CacheBuilder
                         .newBuilder()
-                        .expireAfterWrite(facilityCacheTtlInMinutes, timeUnit)
-                        .maximumSize(size).build().asMap(),
+                        .expireAfterWrite(duration, unit)
+                        .maximumSize(maxSize).build().asMap(),
                 true
         );
     }

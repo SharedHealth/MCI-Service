@@ -1,0 +1,49 @@
+{
+    "name": "Dr. Monika",
+    "url": "http://hrmtest.dghs.gov.bd/api/1.0/providers/113068.json",
+    "id": 113068,
+    "active": 1,
+    "createdAt": "2015-02-26 08:19:33",
+    "updatedAt": "2015-03-18 08:57:54",
+    "birthDate": "1980-02-27",
+    "gender": "Male",
+    "organization": {
+        "reference": "http://hrmtest.dghs.gov.bd/api/1.0/facilities/10019842.json",
+        "display": "Bahmni2"
+    },
+    "identifiers": [
+        {
+            "system": "DGHS",
+            "value": 113068
+        },
+        {
+            "system": "NationalId",
+            "value": "3396363433389"
+        },
+        {
+            "system": "PDS",
+            "value": ""
+        }
+    ],
+    "telecom": [
+        {
+            "system": "phone",
+            "value": "01711393232"
+        },
+        {
+            "system": "email",
+            "value": "monikar@thoughtworks.com"
+        }
+    ],
+    "address": {
+        "text": ""
+    },
+    "properties": {
+        "postingOption": "Against Sanctioned Post ",
+        "maritalStatus": "Unmarried",
+        "qualification": "",
+        "category": null,
+        "discipline": null,
+        "department": "Casualty"
+    }
+}

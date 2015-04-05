@@ -2,7 +2,7 @@ package org.sharedhealth.mci.web.mapper;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class RequesterDetails implements Comparable<RequesterDetails> {
+public class RequesterDetails {
 
     private String id;
     private String name;
@@ -62,10 +62,5 @@ public class RequesterDetails implements Comparable<RequesterDetails> {
         sb.append(", name='").append(name).append('\'');
         sb.append('}');
         return sb.toString();
-    }
-
-    @Override
-    public int compareTo(RequesterDetails o) {
-        return this.id.compareTo(o.id);
     }
 }
