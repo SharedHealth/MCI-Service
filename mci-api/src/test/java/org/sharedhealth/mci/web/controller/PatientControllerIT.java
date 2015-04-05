@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
+import org.sharedhealth.mci.web.dummy.InvalidPatient;
 import org.sharedhealth.mci.web.handler.ErrorHandler;
 import org.sharedhealth.mci.web.handler.MCIError;
 import org.sharedhealth.mci.web.handler.MCIResponse;
@@ -31,7 +32,6 @@ import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
 import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
@@ -241,21 +241,27 @@ public class PatientControllerIT extends BaseControllerTest {
     }
 
     @Test
-    public void shouldReturnBadRequestForInvalidDataProperty() throws Exception {
-        String json = mapper.writeValueAsString(new InvalidPatient());
+    public void shouldNotReturnBadRequestForInvalidDataProperty() throws Exception {
 
-        mockMvc.perform(post(API_END_POINT_FOR_PATIENT)
+        String json = mapper.writeValueAsString(this.patientData);
+
+        final InvalidPatient patientData = mapper.readValue(json, InvalidPatient.class);
+
+        patientData.invalidProperty = "some value";
+
+        MvcResult result = mockMvc.perform(post(API_END_POINT_FOR_PATIENT)
                 .header(AUTH_TOKEN_KEY, validAccessToken)
                 .header(FROM_KEY, validEmail)
                 .header(CLIENT_ID_KEY, validClientId)
-                .accept(APPLICATION_JSON).content(json).contentType(APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.http_status", is(400)))
-                .andExpect(jsonPath("$.error_code", is(2000)))
-                .andExpect(jsonPath("$.message", is("invalid.request")))
-                .andExpect(jsonPath("$.errors[0].code", is(2002)))
-                .andExpect(jsonPath("$.errors[0].field", is("invalid_property")))
-                .andExpect(jsonPath("$.errors[0].message", is("Unrecognized field: 'invalid_property'")));
+                .accept(APPLICATION_JSON)
+                .content(json)
+                .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(result))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(APPLICATION_JSON_UTF8));
     }
 
     @Test

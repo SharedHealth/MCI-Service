@@ -2,6 +2,7 @@ package org.sharedhealth.mci.web.mapper;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -19,6 +20,7 @@ import static org.sharedhealth.mci.web.utils.JsonConstants.DATE_OF_DEATH;
 import static org.sharedhealth.mci.web.utils.JsonConstants.STATUS;
 import static org.sharedhealth.mci.web.utils.JsonConstants.TYPE;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PatientStatus implements Diffable<PatientStatus> {
 
     @JsonProperty(TYPE)

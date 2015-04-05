@@ -1,6 +1,5 @@
 package org.sharedhealth.mci.web.controller;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import org.hamcrest.BaseMatcher;
@@ -163,15 +162,6 @@ public class BaseControllerTest {
 
     protected PatientData getPatientData(String healthId) throws Exception {
         return patientRepository.findByHealthId(healthId);
-    }
-
-    protected class InvalidPatient {
-
-        @JsonProperty("nid")
-        public String nationalId = "1234567890123";
-
-        @JsonProperty("invalid_property")
-        public String birthRegistrationNumber = "some thing";
     }
 
     protected BaseMatcher<Object> isForbidden() {

@@ -20,7 +20,7 @@ import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_PATTERN;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 import static org.sharedhealth.mci.web.utils.PatientDataConstants.COUNTRY_CODE_BANGLADESH;
 
-@JsonIgnoreProperties({"geoCode"})
+@JsonIgnoreProperties(ignoreUnknown = true, value = {"geoCode"})
 public class Address implements Diffable<Address> {
 
     @JsonInclude(NON_EMPTY)

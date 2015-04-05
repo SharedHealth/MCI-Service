@@ -36,7 +36,7 @@ import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 import static org.sharedhealth.mci.web.utils.PatientDataConstants.COUNTRY_CODE_BANGLADESH;
 
 @MaritalRelation(message = ERROR_CODE_DEPENDENT, field = "maritalStatus")
-@JsonIgnoreProperties({"created_at"})
+@JsonIgnoreProperties(ignoreUnknown = true, value = {"created_at"})
 public class PatientData implements Diffable<PatientData> {
 
     private static final String INVALID_CATCHMENT = "invalid.catchment";

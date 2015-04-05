@@ -1,6 +1,7 @@
 package org.sharedhealth.mci.web.mapper;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -17,6 +18,7 @@ import static org.sharedhealth.mci.web.utils.ErrorConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
 @RelationType(message = ERROR_CODE_REQUIRED, field = "type")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Relation {
 
     private final String RELATION_TYPE = "type";

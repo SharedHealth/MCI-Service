@@ -1,6 +1,7 @@
 package org.sharedhealth.mci.web.mapper;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.sharedhealth.mci.web.builder.DiffBuilder;
@@ -14,6 +15,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_PATTERN;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PhoneNumber implements Diffable<PhoneNumber> {
 
     @JsonProperty(COUNTRY_CODE)
