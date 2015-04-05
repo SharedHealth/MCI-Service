@@ -149,6 +149,10 @@ public class UserInfo {
             return patientHid;
         }
 
+        public String getAdminId() {
+            return adminId;
+        }
+
         public boolean hasCatchmentForProfileType(String requestedCatchment, List<String> profileTypes) {
             for (String profileType : profileTypes) {
                 UserProfile userProfile = getUserProfileByType(profileType);

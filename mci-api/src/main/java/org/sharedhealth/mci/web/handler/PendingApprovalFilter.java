@@ -24,7 +24,7 @@ public class PendingApprovalFilter {
     private static final String NON_UPDATABLE = "NU";
 
     private PatientData newPatient;
-    private String requestedBy;
+    private Requester requestedBy;
     private ApprovalFieldService properties;
 
     @Autowired
@@ -34,7 +34,7 @@ public class PendingApprovalFilter {
 
     public PatientData filter(PatientData existingPatient, PatientData updateRequest) {
         this.newPatient = new PatientData();
-        this.requestedBy = updateRequest.getRequestedBy();
+        this.requestedBy = updateRequest.getRequester();
         newPatient.setPendingApprovals(existingPatient.getPendingApprovals());
 
         newPatient.setHealthId(processString(HID, existingPatient.getHealthId(), updateRequest.getHealthId()));
@@ -77,7 +77,7 @@ public class PendingApprovalFilter {
 
     private Address processAddress(String key, Address oldValue, Address newValue) {
 
-        if(newValue!= null && !newValue.isEmpty()) {
+        if (newValue != null && !newValue.isEmpty()) {
             newValue.setCountryCode(COUNTRY_CODE_BANGLADESH);
         }
 

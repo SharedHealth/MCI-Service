@@ -14,6 +14,7 @@ import org.sharedhealth.mci.validation.group.RequiredGroup;
 import org.sharedhealth.mci.web.builder.DiffBuilder;
 import org.sharedhealth.mci.web.builder.DiffResult;
 import org.sharedhealth.mci.web.builder.Diffable;
+import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -28,8 +29,7 @@ import java.util.UUID;
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static java.lang.String.valueOf;
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
@@ -141,7 +141,7 @@ public class PatientData implements Diffable<PatientData> {
     @JsonInclude(NON_EMPTY)
     @NotNull(message = ERROR_CODE_REQUIRED, groups = RequiredGroup.class)
     @Valid
-    @Location(message = ERROR_CODE_INVALID, country_code = COUNTRY_CODE_BANGLADESH, required=true)
+    @Location(message = ERROR_CODE_INVALID, country_code = COUNTRY_CODE_BANGLADESH, required = true)
     private Address address;
 
     @JsonProperty(PRIMARY_CONTACT)
@@ -164,7 +164,7 @@ public class PatientData implements Diffable<PatientData> {
     @JsonProperty(PERMANENT_ADDRESS)
     @Valid
     @JsonInclude(NON_EMPTY)
-    @Location(message = ERROR_CODE_INVALID, required=false)
+    @Location(message = ERROR_CODE_INVALID, required = false)
     private Address permanentAddress;
 
     @JsonProperty(MARITAL_STATUS)
@@ -183,12 +183,9 @@ public class PatientData implements Diffable<PatientData> {
     private String householdCode;
 
     private UUID createdAt;
-
-    @JsonProperty(CREATED_BY)
-    @JsonInclude(NON_EMPTY)
-    private String createdBy;
-
+    private Requester createdBy;
     private UUID updatedAt;
+    private Requester updatedBy;
 
     @JsonProperty(STATUS)
     @Valid
@@ -200,7 +197,10 @@ public class PatientData implements Diffable<PatientData> {
     private TreeSet<PendingApproval> pendingApprovals;
 
     @JsonIgnore
-    private String requestedBy;
+    private Requester requester;
+
+    private String providerId;
+
 
     public String getNationalId() {
         return nationalId;
@@ -585,7 +585,8 @@ public class PatientData implements Diffable<PatientData> {
         if (permanentAddress != null ? !permanentAddress.equals(that.permanentAddress) : that.permanentAddress != null)
             return false;
         if (phoneNumber != null ? !phoneNumber.equals(that.phoneNumber) : that.phoneNumber != null) return false;
-        if (patientStatus != null ? !patientStatus.equals(that.patientStatus) : that.patientStatus != null) return false;
+        if (patientStatus != null ? !patientStatus.equals(that.patientStatus) : that.patientStatus != null)
+            return false;
         if (placeOfBirth != null ? !placeOfBirth.equals(that.placeOfBirth) : that.placeOfBirth != null) return false;
         if (primaryContact != null ? !primaryContact.equals(that.primaryContact) : that.primaryContact != null)
             return false;
@@ -670,7 +671,7 @@ public class PatientData implements Diffable<PatientData> {
         sb.append(", createdAt=").append(createdAt);
         sb.append(", updatedAt=").append(updatedAt);
         sb.append(", pendingApprovals=").append(pendingApprovals);
-        sb.append(", requestedBy='").append(requestedBy).append('\'');
+        sb.append(", requester='").append(requester).append('\'');
         sb.append('}');
         return sb.toString();
     }
@@ -703,19 +704,68 @@ public class PatientData implements Diffable<PatientData> {
         this.householdCode = householdCode;
     }
 
-    public String getRequestedBy() {
-        return requestedBy;
+    @JsonProperty(PROVIDER_ID)
+    public void setProviderId(String providerId) {
+        this.providerId = providerId;
     }
 
-    public void setRequestedBy(String requestedBy) {
-        this.requestedBy = requestedBy;
+    @JsonIgnore
+    public void setRequester(UserInfo.UserInfoProperties properties) {
+        if (properties == null) {
+            return;
+        }
+
+        RequesterDetails facility = null;
+        RequesterDetails provider = null;
+        RequesterDetails admin = null;
+
+        String facilityId = properties.getFacilityId();
+        if (isNotBlank(facilityId)) {
+            facility = new RequesterDetails(facilityId);
+        }
+
+        String providerId = properties.getProviderId() != null ? properties.getProviderId() : this.providerId;
+        if (isNotBlank(providerId)) {
+            provider = new RequesterDetails(providerId);
+        }
+
+
+        String adminId = properties.getAdminId();
+        if (isNotBlank(adminId)) {
+            admin = new RequesterDetails(adminId, properties.getName());
+        }
+
+        this.requester = new Requester(facility, provider, admin);
     }
 
-    public String getCreatedBy() {
+    @JsonIgnore
+    public void setRequester(String facilityId, String providerId) {
+        RequesterDetails facility = null;
+        RequesterDetails provider = null;
+
+        if (isNotBlank(facilityId)) {
+            facility = new RequesterDetails(facilityId);
+        }
+
+        if (isNotBlank(providerId)) {
+            provider = new RequesterDetails(providerId);
+        }
+
+        this.requester = new Requester(facility, provider, null);
+    }
+
+    public Requester getRequester() {
+        return requester;
+    }
+
+    @JsonProperty(CREATED_BY)
+    @JsonInclude(NON_EMPTY)
+    public Requester getCreatedBy() {
         return createdBy;
     }
 
-    public void setCreatedBy(String createdBy) {
+    @JsonIgnore
+    public void setCreatedBy(Requester createdBy) {
         this.createdBy = createdBy;
     }
 
@@ -725,6 +775,17 @@ public class PatientData implements Diffable<PatientData> {
 
     public void setPatientStatus(PatientStatus patientStatus) {
         this.patientStatus = patientStatus;
+    }
+
+    @JsonProperty(UPDATED_BY)
+    @JsonInclude(NON_EMPTY)
+    public Requester getUpdatedBy() {
+        return updatedBy;
+    }
+
+    @JsonIgnore
+    public void setUpdatedBy(Requester updatedBy) {
+        this.updatedBy = updatedBy;
     }
 
     @Override

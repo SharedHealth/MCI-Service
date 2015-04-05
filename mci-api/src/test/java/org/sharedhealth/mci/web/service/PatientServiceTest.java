@@ -7,23 +7,11 @@ import org.mockito.Mock;
 import org.sharedhealth.mci.web.exception.InsufficientPrivilegeException;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientFeedRepository;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
-import org.sharedhealth.mci.web.mapper.Address;
-import org.sharedhealth.mci.web.mapper.Catchment;
-import org.sharedhealth.mci.web.mapper.PatientData;
-import org.sharedhealth.mci.web.mapper.PendingApproval;
-import org.sharedhealth.mci.web.mapper.PendingApprovalFieldDetails;
-import org.sharedhealth.mci.web.mapper.PendingApprovalListResponse;
-import org.sharedhealth.mci.web.mapper.PhoneNumber;
-import org.sharedhealth.mci.web.mapper.SearchQuery;
+import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.model.PatientUpdateLog;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.UUID;
+import java.util.*;
 
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
@@ -31,10 +19,7 @@ import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
@@ -242,19 +227,21 @@ public class PatientServiceTest {
         pendingApprovals.add(buildPendingApprovalField(GIVEN_NAME, "Harry", uuids));
         pendingApprovals.add(buildPendingApprovalField(SUR_NAME, "Potter", uuids));
         pendingApprovals.add(buildPendingApprovalField(BLOOD_GROUP, "As if I care!", uuids));
-        pendingApprovals.add(buildPendingApprovalField(OCCUPATION, "Wizard", uuids.get(3), "facility-4", "Jobless"));
+        Requester requester1 = new Requester("facility-4", "provider-4");
+        pendingApprovals.add(buildPendingApprovalField(OCCUPATION, "Wizard", uuids.get(3), requester1, "Jobless"));
 
         PhoneNumber newPhoneNumber = new PhoneNumber();
         newPhoneNumber.setCountryCode("91");
         newPhoneNumber.setAreaCode("033");
         newPhoneNumber.setNumber("30001234");
-        pendingApprovals.add(buildPendingApprovalField(PHONE_NUMBER, phoneNumber, uuids.get(0), "facility-1", newPhoneNumber));
+        Requester requester2 = new Requester("facility-1", "provider-1");
+        pendingApprovals.add(buildPendingApprovalField(PHONE_NUMBER, phoneNumber, uuids.get(0), requester2, newPhoneNumber));
 
         Address newAddress = new Address();
         newAddress.setDivisionId("10");
         newAddress.setDistrictId("21");
         newAddress.setUpazilaId("31");
-        pendingApprovals.add(buildPendingApprovalField(PRESENT_ADDRESS, address, uuids.get(0), "facility-1", newAddress));
+        pendingApprovals.add(buildPendingApprovalField(PRESENT_ADDRESS, address, uuids.get(0), requester2, newAddress));
         return pendingApprovals;
     }
 
@@ -275,19 +262,19 @@ public class PatientServiceTest {
         TreeMap<UUID, PendingApprovalFieldDetails> detailsMap = new TreeMap<>();
 
         PendingApprovalFieldDetails details1 = new PendingApprovalFieldDetails();
-        details1.setRequestedBy("facility-1");
+        details1.setRequestedBy(new Requester("facility-1", "provider-1"));
         details1.setValue("A." + name);
         details1.setCreatedAt(unixTimestamp(uuids.get(0)));
         detailsMap.put(uuids.get(0), details1);
 
         PendingApprovalFieldDetails details2 = new PendingApprovalFieldDetails();
-        details2.setRequestedBy("facility-2");
+        details2.setRequestedBy(new Requester("facility-2", "provider-2"));
         details2.setValue("B." + name);
         details2.setCreatedAt(unixTimestamp(uuids.get(1)));
         detailsMap.put(uuids.get(1), details2);
 
         PendingApprovalFieldDetails details3 = new PendingApprovalFieldDetails();
-        details3.setRequestedBy("facility-3");
+        details3.setRequestedBy(new Requester("facility-3", "provider-3"));
         details3.setValue("C." + name);
         details3.setCreatedAt(unixTimestamp(uuids.get(2)));
         detailsMap.put(uuids.get(2), details3);
@@ -296,14 +283,14 @@ public class PatientServiceTest {
         return pendingApproval;
     }
 
-    private PendingApproval buildPendingApprovalField(String name, Object currentValue, UUID uuid, String facilityId, Object value) {
+    private PendingApproval buildPendingApprovalField(String name, Object currentValue, UUID uuid, Requester requester, Object value) {
         PendingApproval fieldDetails = new PendingApproval();
         fieldDetails.setName(name);
         fieldDetails.setCurrentValue(currentValue);
 
         TreeMap<UUID, PendingApprovalFieldDetails> detailsMap = new TreeMap<>();
         PendingApprovalFieldDetails details = new PendingApprovalFieldDetails();
-        details.setRequestedBy(facilityId);
+        details.setRequestedBy(requester);
         details.setValue(value);
         details.setCreatedAt(unixTimestamp(uuid));
         detailsMap.put(uuid, details);

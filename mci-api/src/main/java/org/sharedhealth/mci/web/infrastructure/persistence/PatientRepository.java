@@ -72,8 +72,10 @@ public class PatientRepository extends BaseRepository {
         patient.setHealthId(hidGenerator.generate());
         patient.setCreatedAt(timeBased());
         patient.setUpdatedAt(timeBased());
-        patient.setCreatedBy(patientData.getRequestedBy());
-        patient.setUpdatedBy(patientData.getRequestedBy());
+
+        Requester requester = patientData.getRequester();
+        patient.setCreatedBy(requester);
+        patient.setUpdatedBy(requester);
 
         if (isBlank(patient.getStatus())) {
             patient.setStatus(PATIENT_STATUS_ALIVE);
@@ -89,7 +91,7 @@ public class PatientRepository extends BaseRepository {
 
     public MCIResponse update(PatientData updateRequest, String healthId) {
         updateRequest.setHealthId(healthId);
-        String requester = updateRequest.getRequestedBy();
+        Requester requester = updateRequest.getRequester();
 
         PatientData existingPatientData = this.findByHealthId(healthId);
         PatientData newPatientData = this.pendingApprovalFilter.filter(existingPatientData, updateRequest);
@@ -103,7 +105,7 @@ public class PatientRepository extends BaseRepository {
         buildUpdatePendingApprovalsBatch(newPatient, existingPatientData, batch);
         buildUpdateBatch(newPatient, existingPatientData, cassandraOps.getConverter(), batch);
 
-        Map<String, Set<String>> requestedBy = new HashMap<>();
+        Map<String, Set<Requester>> requestedBy = new HashMap<>();
         buildRequestedBy(requestedBy, ALL_FIELDS, requester);
         buildCreateUpdateLogStmt(newPatientData, existingPatientData, requestedBy, null, cassandraOps.getConverter(), batch);
 
@@ -331,13 +333,13 @@ public class PatientRepository extends BaseRepository {
     public String processPendingApprovals(PatientData requestData, PatientData existingPatientData, boolean shouldAccept) {
         Batch batch = batch();
         Patient newPatient;
-        String approvedBy = requestData.getRequestedBy();
+        Requester approver = requestData.getRequester();
         TreeSet<PendingApproval> existingPendingApprovals = existingPatientData.getPendingApprovals();
 
         if (shouldAccept) {
             newPatient = mapper.map(requestData, existingPatientData);
-            Map<String, Set<String>> requestedBy = findRequestedBy(existingPendingApprovals, requestData);
-            buildCreateUpdateLogStmt(requestData, existingPatientData, requestedBy, approvedBy, cassandraOps.getConverter(), batch);
+            Map<String, Set<Requester>> requestedBy = findRequestedBy(existingPendingApprovals, requestData);
+            buildCreateUpdateLogStmt(requestData, existingPatientData, requestedBy, approver, cassandraOps.getConverter(), batch);
 
         } else {
             newPatient = new Patient();
@@ -345,7 +347,7 @@ public class PatientRepository extends BaseRepository {
         }
 
         newPatient.setUpdatedAt(timeBased());
-        newPatient.setUpdatedBy(approvedBy);
+        newPatient.setUpdatedBy(approver);
         newPatient.setPendingApprovals(existingPendingApprovals);
 
         String healthId = requestData.getHealthId();
@@ -403,8 +405,8 @@ public class PatientRepository extends BaseRepository {
         }
     }
 
-    Map<String, Set<String>> findRequestedBy(TreeSet<PendingApproval> pendingApprovals, PatientData requestData) {
-        Map<String, Set<String>> requestedBy = new HashMap<>();
+    Map<String, Set<Requester>> findRequestedBy(TreeSet<PendingApproval> pendingApprovals, PatientData requestData) {
+        Map<String, Set<Requester>> requestedBy = new HashMap<>();
         for (PendingApproval pendingApproval : pendingApprovals) {
             String fieldName = pendingApproval.getName();
             Object value = requestData.getValue(fieldName);
@@ -420,13 +422,13 @@ public class PatientRepository extends BaseRepository {
         return requestedBy;
     }
 
-    private void buildRequestedBy(Map<String, Set<String>> map, String key, String value) {
+    private void buildRequestedBy(Map<String, Set<Requester>> map, String key, Requester value) {
         if (value == null) {
             return;
         }
-        Set<String> valueList = map.get(key);
+        Set<Requester> valueList = map.get(key);
         if (isEmpty(valueList)) {
-            valueList = new TreeSet<>();
+            valueList = new HashSet<>();
             map.put(key, valueList);
         }
         valueList.add(value);

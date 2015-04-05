@@ -11,14 +11,9 @@ import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.infrastructure.security.TokenAuthentication;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
 import org.sharedhealth.mci.web.infrastructure.security.UserProfile;
-import org.sharedhealth.mci.web.mapper.Catchment;
-import org.sharedhealth.mci.web.mapper.Feed;
-import org.sharedhealth.mci.web.mapper.FeedEntry;
-import org.sharedhealth.mci.web.mapper.PatientData;
-import org.sharedhealth.mci.web.mapper.PendingApproval;
-import org.sharedhealth.mci.web.mapper.PendingApprovalFieldDetails;
-import org.sharedhealth.mci.web.mapper.PendingApprovalListResponse;
+import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.service.PatientService;
+import org.sharedhealth.mci.web.utils.JsonConstants;
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,12 +25,7 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.UUID;
+import java.util.*;
 
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
@@ -44,10 +34,10 @@ import static java.net.URLEncoder.encode;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
@@ -59,13 +49,9 @@ import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 public class CatchmentControllerTest {
@@ -74,6 +60,9 @@ public class CatchmentControllerTest {
     private static final int MAX_PAGE_SIZE = 3;
     public static final String SERVER_URL = "https://mci.dghs.com";
     public static final String REQUEST_URL = "http://mci.dghs.com:8081";
+
+    private static final String FACILITY_ID = "100067";
+    private static final String PROVIDER_ID = "100068";
 
     @Mock
     private PatientService patientService;
@@ -101,8 +90,8 @@ public class CatchmentControllerTest {
     }
 
     private UserInfo getUserInfo() {
-        UserProfile facilityProfile = new UserProfile("facility", "100067", asList("1020"));
-        UserProfile providerProfile = new UserProfile("provider", "100068", asList("102030"));
+        UserProfile facilityProfile = new UserProfile("facility", FACILITY_ID, asList("1020"));
+        UserProfile providerProfile = new UserProfile("provider", PROVIDER_ID, asList("102030"));
         UserProfile adminProfile = new UserProfile("admin", "102", asList("10"));
 
         return new UserInfo("102", "ABC", "abc@mail", 1, true, "111100",
@@ -293,7 +282,7 @@ public class CatchmentControllerTest {
         TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap = new TreeMap<>();
         UUID timeuuid = timeBased();
         PendingApprovalFieldDetails approvalFieldDetails = new PendingApprovalFieldDetails();
-        approvalFieldDetails.setRequestedBy("facility-100");
+        approvalFieldDetails.setRequestedBy(new Requester("facility-100", "provider-100"));
         approvalFieldDetails.setValue("some value");
         approvalFieldDetails.setCreatedAt(unixTimestamp(timeuuid));
         fieldDetailsMap.put(timeuuid, approvalFieldDetails);
@@ -315,7 +304,15 @@ public class CatchmentControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.results[0].field_name", is(OCCUPATION)))
                 .andExpect(jsonPath("$.results[0].current_value", is("curr val")))
-                .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".facility_id", is("facility-100")))
+
+                .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".requested_by.facility").exists())
+                .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".requested_by.facility.id", is("facility-100")))
+                .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".requested_by.facility.name", is(nullValue())))
+
+                .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".requested_by.provider").exists())
+                .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".requested_by.provider.id", is("provider-100")))
+                .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".requested_by.provider.name", is(nullValue())))
+
                 .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".value", is("some value")))
                 .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".created_at", is(toIsoFormat(unixTimestamp(timeuuid)))));
 
@@ -811,8 +808,10 @@ public class CatchmentControllerTest {
         when(patientService.processPendingApprovals(patient, catchment, true)).thenReturn(healthId);
 
         String url = buildPendingApprovalUrl(catchmentId, healthId);
-        String content = writeValueAsString(patient);
-        MvcResult mvcResult = mockMvc.perform(put(url).content(content).contentType(APPLICATION_JSON))
+        Map<String, String> content = new HashMap<>();
+        content.put(HID, healthId);
+        content.put(JsonConstants.PROVIDER_ID, "Dr. Monika");
+        MvcResult mvcResult = mockMvc.perform(put(url).content(writeValueAsString(content)).contentType(APPLICATION_JSON))
                 .andExpect(request().asyncStarted())
                 .andReturn();
 
@@ -826,7 +825,8 @@ public class CatchmentControllerTest {
         ArgumentCaptor<Catchment> argument2 = ArgumentCaptor.forClass(Catchment.class);
         ArgumentCaptor<Boolean> argument3 = ArgumentCaptor.forClass(Boolean.class);
         verify(patientService).processPendingApprovals(argument1.capture(), argument2.capture(), argument3.capture());
-        assertEquals(CatchmentController.REQUESTED_BY, argument1.getValue().getRequestedBy());
+
+        assertRequester(argument1.getValue().getRequester(), FACILITY_ID, PROVIDER_ID);
     }
 
     @Test
@@ -840,8 +840,10 @@ public class CatchmentControllerTest {
         when(patientService.processPendingApprovals(patient, catchment, false)).thenReturn(healthId);
 
         String url = buildPendingApprovalUrl(catchmentId, healthId);
-        String content = writeValueAsString(patient);
-        MvcResult mvcResult = mockMvc.perform(delete(url).content(content).contentType(APPLICATION_JSON))
+        Map<String, String> content = new HashMap<>();
+        content.put(HID, healthId);
+        content.put(JsonConstants.PROVIDER_ID, "Dr. Monika");
+        MvcResult mvcResult = mockMvc.perform(delete(url).content(writeValueAsString(content)).contentType(APPLICATION_JSON))
                 .andExpect(request().asyncStarted())
                 .andReturn();
 
@@ -855,7 +857,8 @@ public class CatchmentControllerTest {
         ArgumentCaptor<Catchment> argument2 = ArgumentCaptor.forClass(Catchment.class);
         ArgumentCaptor<Boolean> argument3 = ArgumentCaptor.forClass(Boolean.class);
         verify(patientService).processPendingApprovals(argument1.capture(), argument2.capture(), argument3.capture());
-        assertEquals(CatchmentController.REQUESTED_BY, argument1.getValue().getRequestedBy());
+
+        assertRequester(argument1.getValue().getRequester(), FACILITY_ID, PROVIDER_ID);
     }
 
     private PendingApprovalListResponse buildPendingApprovalListResponse(int suffix) throws InterruptedException {
@@ -876,5 +879,13 @@ public class CatchmentControllerTest {
         request.setMethod("GET");
         request.setRequestURI("/api/v1/catchments/201915/approvals");
         return request;
+    }
+
+    private void assertRequester(Requester requester, String facilityId, String providerId) {
+        assertNotNull(requester);
+        assertNotNull(requester.getFacility());
+        assertEquals(facilityId, requester.getFacility().getId());
+        assertNotNull(requester.getProvider());
+        assertEquals(providerId, requester.getProvider().getId());
     }
 }

@@ -8,12 +8,7 @@ import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
-import org.sharedhealth.mci.web.mapper.Catchment;
-import org.sharedhealth.mci.web.mapper.Feed;
-import org.sharedhealth.mci.web.mapper.FeedEntry;
-import org.sharedhealth.mci.web.mapper.PatientData;
-import org.sharedhealth.mci.web.mapper.PendingApproval;
-import org.sharedhealth.mci.web.mapper.PendingApprovalListResponse;
+import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.service.PatientService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,22 +17,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.groups.Default;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.TreeSet;
-import java.util.UUID;
+import java.util.*;
 
 import static java.lang.String.format;
 import static java.net.URLEncoder.encode;
@@ -63,8 +49,6 @@ public class CatchmentController extends FeedController {
     private static final String FEED_TITLE = "Patients";
     private static final String ENTRY_TITLE = "Patient in Catchment: ";
     private static final String ENTRY_CATEGORY = "patient";
-
-    static final String REQUESTED_BY = "MCI Admin";
 
     @Autowired
     public CatchmentController(PatientService patientService, MCIProperties properties) {
@@ -153,8 +137,9 @@ public class CatchmentController extends FeedController {
         logAccessDetails(userInfo, String.format("Accepting (PUT) pending approval for patient (Health Id) : %s, catchment: %s",
                 healthId, catchmentId));
 
+        patient.setRequester(userInfo.getProperties());
+
         logger.debug("Accepting pending approvals. Health ID : " + healthId);
-        patient.setRequestedBy(REQUESTED_BY);
         return processPendingApprovals(catchmentId, healthId, patient, userInfo, bindingResult, true);
     }
 
@@ -170,9 +155,9 @@ public class CatchmentController extends FeedController {
         logAccessDetails(userInfo, String.format("Accepting(DELETE) pending approval for patient (Health Id) : %s, catchment: %s",
                 healthId, catchmentId));
 
+        patient.setRequester(userInfo.getProperties());
+        
         logger.debug("Accepting pending approvals. Health ID : " + healthId);
-
-        patient.setRequestedBy(REQUESTED_BY);
         return processPendingApprovals(catchmentId, healthId, patient, userInfo, bindingResult, false);
     }
 

@@ -33,16 +33,12 @@ import java.util.List;
 import static java.lang.String.format;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-import static org.springframework.web.bind.annotation.RequestMethod.PUT;
+import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 @RestController
 @RequestMapping("/api/v1/patients")
 public class PatientController extends MciController {
     private static final Logger logger = LoggerFactory.getLogger(PatientController.class);
-
-    static final String REQUESTED_BY = "Bahmni";
 
     private PatientService patientService;
 
@@ -60,8 +56,9 @@ public class PatientController extends MciController {
         UserInfo userInfo = getUserInfo();
         logAccessDetails(userInfo, format("Creating a new patient : %s", patient.getHealthId()));
 
+        patient.setRequester(userInfo.getProperties());
+
         logger.debug("Trying to create patient.");
-        patient.setRequestedBy(REQUESTED_BY);
         final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
 
         if (bindingResult.hasErrors()) {
@@ -80,7 +77,7 @@ public class PatientController extends MciController {
         UserInfo userInfo = getUserInfo();
 
         final DeferredResult<ResponseEntity<PatientData>> deferredResult = new DeferredResult<>();
-        if(userInfo.getProperties().isPatientUserOnly()
+        if (userInfo.getProperties().isPatientUserOnly()
                 && !userInfo.getProperties().getPatientHid().equals(healthId)) {
             deferredResult.setErrorResult(new Forbidden(
                     format("Access is denied to user %s for patient with healthId : %s", userInfo.getProperties().getId(), healthId)));
@@ -134,8 +131,9 @@ public class PatientController extends MciController {
         UserInfo userInfo = getUserInfo();
         logAccessDetails(userInfo, format("Updating patient (healthId): %s", healthId));
 
+        patient.setRequester(userInfo.getProperties());
+
         logger.debug(" Health id [" + healthId + "]");
-        patient.setRequestedBy(REQUESTED_BY);
         final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
 
         if (bindingResult.hasErrors()) {

@@ -43,6 +43,8 @@ import static org.sharedhealth.mci.web.utils.PatientDataConstants.STRING_NO;
 @WebAppConfiguration
 @ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
 public class PatientRepositoryIT {
+    public static final String FACILITY = "Bahmni";
+
     public String surname = "Tiger";
     public String phoneNumber = "999900000";
     public String divisionId = "10";
@@ -78,7 +80,7 @@ public class PatientRepositoryIT {
     }
 
     private PatientData buildPatient() {
-        PatientData data = new PatientData();
+        PatientData data = initPatientData();
         data.setNationalId(nationalId);
         data.setBirthRegistrationNumber(birthRegistrationNumber);
         data.setUid(uid);
@@ -95,6 +97,8 @@ public class PatientRepositoryIT {
 
         Address address = createAddress(divisionId, districtId, upazilaId, "99", "01", "02");
         data.setAddress(address);
+
+        data.setRequester(FACILITY, null);
 
         return data;
     }
@@ -161,7 +165,7 @@ public class PatientRepositoryIT {
 
     @Test
     public void shouldNotCreateIdMappingsWhenPatientIsCreatedWithoutIds() {
-        PatientData patient = new PatientData();
+        PatientData patient = initPatientData();
         patient.setGivenName("John");
         patient.setSurName("Doe");
         patient.setAddress(createAddress("10", "20", "30"));
@@ -172,7 +176,7 @@ public class PatientRepositoryIT {
 
     @Test
     public void shouldNotCreateHouseholdCodeMappingsWhenPatientIsCreatedWithoutHouseholdCode() {
-        PatientData patient = new PatientData();
+        PatientData patient = initPatientData();
         patient.setGivenName("John");
         patient.setSurName("Doe");
         patient.setAddress(createAddress("10", "20", "30"));
@@ -183,7 +187,7 @@ public class PatientRepositoryIT {
 
     @Test
     public void shouldNotCreatePhoneNumberMappingWhenPatientIsCreatedWithoutPhoneNumber() {
-        PatientData patient = new PatientData();
+        PatientData patient = initPatientData();
         patient.setGivenName("John");
         patient.setSurName("Doe");
         patient.setAddress(createAddress("1", "2", "3"));
@@ -195,8 +199,7 @@ public class PatientRepositoryIT {
 
     @Test
     public void shouldFindPatientWithMatchingGeneratedHealthId() throws ExecutionException, InterruptedException {
-        PatientData createData = data;
-        createData.setRequestedBy("Bahmni");
+        PatientData createData = initPatientData(data);
 
         MCIResponse mciResponse = patientRepository.create(createData);
         PatientData p = patientRepository.findByHealthId(mciResponse.id);
@@ -227,7 +230,7 @@ public class PatientRepositoryIT {
 
         assertEquals(createData, p);
         assertNotNull(p.getCreatedBy());
-        assertEquals(createData.getRequestedBy(), p.getCreatedBy());
+        assertEquals(createData.getRequester(), p.getCreatedBy());
         assertNotNull(p.getCreatedAt());
         assertNotNull(p.getCreatedAt());
     }
@@ -245,7 +248,7 @@ public class PatientRepositoryIT {
 
     @Test(expected = PatientNotFoundException.class)
     public void shouldThrowErrorIfPatientNotFound() throws Exception {
-        patientRepository.update(new PatientData(), "1");
+        patientRepository.update(initPatientData(), "1");
     }
 
     @Test
@@ -279,7 +282,7 @@ public class PatientRepositoryIT {
         PhoneNumber existingPhoneNumber = null;
         String existingReligion = "01";
 
-        PatientData patient = new PatientData();
+        PatientData patient = initPatientData();
         patient.setGivenName("John");
         patient.setSurName("Doe");
         patient.setNationalId(existingNid);
@@ -299,7 +302,7 @@ public class PatientRepositoryIT {
         PhoneNumber newPhoneNumber = null;
         String newReligion = "02";
 
-        PatientData updateRequest = new PatientData();
+        PatientData updateRequest = initPatientData();
         updateRequest.setReligion(newReligion);
         updateRequest.setNationalId(newNid);
         updateRequest.setBirthRegistrationNumber(newBrn);
@@ -325,7 +328,7 @@ public class PatientRepositoryIT {
     public void shouldNotUpdateHouseholdCodeMappingsWhenExistingValueIsNullAndNewValueIsNull() {
         String existingHouseholdCode = null;
 
-        PatientData patient = new PatientData();
+        PatientData patient = initPatientData();
         patient.setGivenName("John");
         patient.setSurName("Doe");
         patient.setHouseholdCode(existingHouseholdCode);
@@ -338,7 +341,7 @@ public class PatientRepositoryIT {
         String newHouseholdCode = null;
         final String newReligion = "02";
 
-        PatientData updateRequest = new PatientData();
+        PatientData updateRequest = initPatientData();
         updateRequest.setReligion(newReligion);
         updateRequest.setHouseholdCode(newHouseholdCode);
         patientRepository.update(updateRequest, healthId);
@@ -356,7 +359,7 @@ public class PatientRepositoryIT {
     public void shouldNotUpdateHouseholdCodeMappingsWhenExistingValueIsNullAndNewValueIsEmpty() {
         String existingHouseholdCode = null;
 
-        PatientData patient = new PatientData();
+        PatientData patient = initPatientData();
         patient.setGivenName("John");
         patient.setSurName("Doe");
         patient.setHouseholdCode(existingHouseholdCode);
@@ -369,7 +372,7 @@ public class PatientRepositoryIT {
         String newHouseholdCode = "";
         final String newReligion = "02";
 
-        PatientData updateRequest = new PatientData();
+        PatientData updateRequest = initPatientData();
         updateRequest.setReligion(newReligion);
         updateRequest.setHouseholdCode(newHouseholdCode);
         patientRepository.update(updateRequest, healthId);
@@ -386,7 +389,7 @@ public class PatientRepositoryIT {
     public void shouldUpdateHouseholdCodeMappingsWhenExistingValueIsNullAndNewValueIsNotEmpty() {
         String existingHouseholdCode = null;
 
-        PatientData patient = new PatientData();
+        PatientData patient = initPatientData();
         patient.setGivenName("John");
         patient.setSurName("Doe");
         patient.setHouseholdCode(existingHouseholdCode);
@@ -399,7 +402,7 @@ public class PatientRepositoryIT {
         String newHouseholdCode = "1234";
         final String newReligion = "02";
 
-        PatientData updateRequest = new PatientData();
+        PatientData updateRequest = initPatientData();
         updateRequest.setReligion(newReligion);
         updateRequest.setHouseholdCode(newHouseholdCode);
         patientRepository.update(updateRequest, healthId);
@@ -416,7 +419,7 @@ public class PatientRepositoryIT {
     public void shouldUpdateHouseholdCodeMappingsWhenExistingValueIsNotEmptyAndNewValueIsEmpty() {
         String existingHouseholdCode = "12345";
 
-        PatientData patient = new PatientData();
+        PatientData patient = initPatientData();
         patient.setGivenName("John");
         patient.setSurName("Doe");
         patient.setHouseholdCode(existingHouseholdCode);
@@ -429,7 +432,7 @@ public class PatientRepositoryIT {
         String newHouseholdCode = "";
         final String newReligion = "02";
 
-        PatientData updateRequest = new PatientData();
+        PatientData updateRequest = initPatientData();
         updateRequest.setReligion(newReligion);
         updateRequest.setHouseholdCode(newHouseholdCode);
         patientRepository.update(updateRequest, healthId);
@@ -446,7 +449,7 @@ public class PatientRepositoryIT {
     public void shouldUpdateHouseholdCodeMappingsWhenExistingValueIsNotEmptyAndNewValueIsNotEmptyAndBothValuesAreDifferent() {
         String existingHouseholdCode = "12345";
 
-        PatientData patient = new PatientData();
+        PatientData patient = initPatientData();
         patient.setGivenName("John");
         patient.setSurName("Doe");
         patient.setHouseholdCode(existingHouseholdCode);
@@ -459,7 +462,7 @@ public class PatientRepositoryIT {
         String newHouseholdCode = "5678";
         final String newReligion = "02";
 
-        PatientData updateRequest = new PatientData();
+        PatientData updateRequest = initPatientData();
         updateRequest.setReligion(newReligion);
         updateRequest.setHouseholdCode(newHouseholdCode);
         patientRepository.update(updateRequest, healthId);
@@ -481,7 +484,7 @@ public class PatientRepositoryIT {
         PhoneNumber existingPhoneNumber = null;
         String existingReligion = "01";
 
-        PatientData patient = new PatientData();
+        PatientData patient = initPatientData();
         patient.setGivenName("John");
         patient.setSurName("Doe");
         patient.setNationalId(existingNid);
@@ -505,7 +508,7 @@ public class PatientRepositoryIT {
         newPhoneNumber.setNumber("");
         newPhoneNumber.setExtension("");
 
-        PatientData updateRequest = new PatientData();
+        PatientData updateRequest = initPatientData();
         updateRequest.setReligion(newReligion);
         updateRequest.setNationalId(newNid);
         updateRequest.setBirthRegistrationNumber(newBrn);
@@ -513,7 +516,7 @@ public class PatientRepositoryIT {
         updateRequest.setPhoneNumber(newPhoneNumber);
         patientRepository.update(updateRequest, healthId);
 
-        PatientData approvalRequest = new PatientData();
+        PatientData approvalRequest = initPatientData();
         approvalRequest.setHealthId(healthId);
         approvalRequest.setPhoneNumber(newPhoneNumber);
         patientRepository.processPendingApprovals(approvalRequest, patientRepository.findByHealthId(healthId), true);
@@ -537,7 +540,7 @@ public class PatientRepositoryIT {
         PhoneNumber existingPhoneNumber = null;
         String existingReligion = "01";
 
-        PatientData patient = new PatientData();
+        PatientData patient = initPatientData();
         patient.setGivenName("John");
         patient.setSurName("Doe");
         patient.setNationalId(existingNid);
@@ -561,7 +564,7 @@ public class PatientRepositoryIT {
         newPhoneNumber.setNumber("10002000");
         newPhoneNumber.setExtension("");
 
-        PatientData updateRequest = new PatientData();
+        PatientData updateRequest = initPatientData();
         updateRequest.setReligion(newReligion);
         updateRequest.setNationalId(newNid);
         updateRequest.setBirthRegistrationNumber(newBrn);
@@ -569,7 +572,7 @@ public class PatientRepositoryIT {
         updateRequest.setPhoneNumber(newPhoneNumber);
         patientRepository.update(updateRequest, healthId);
 
-        PatientData approvalRequest = new PatientData();
+        PatientData approvalRequest = initPatientData();
         approvalRequest.setHealthId(healthId);
         approvalRequest.setPhoneNumber(newPhoneNumber);
         patientRepository.processPendingApprovals(approvalRequest, patientRepository.findByHealthId(healthId), true);
@@ -602,7 +605,7 @@ public class PatientRepositoryIT {
         existingPhoneNumber.setNumber("");
         existingPhoneNumber.setExtension("");
 
-        PatientData patient = new PatientData();
+        PatientData patient = initPatientData();
         patient.setGivenName("John");
         patient.setSurName("Doe");
         patient.setNationalId(existingNid);
@@ -622,7 +625,7 @@ public class PatientRepositoryIT {
         PhoneNumber newPhoneNumber = null;
         String newReligion = "02";
 
-        PatientData updateRequest = new PatientData();
+        PatientData updateRequest = initPatientData();
         updateRequest.setReligion(newReligion);
         updateRequest.setNationalId(newNid);
         updateRequest.setBirthRegistrationNumber(newBrn);
@@ -655,7 +658,7 @@ public class PatientRepositoryIT {
         existingPhoneNumber.setNumber("");
         existingPhoneNumber.setExtension("");
 
-        PatientData patient = new PatientData();
+        PatientData patient = initPatientData();
         patient.setGivenName("John");
         patient.setSurName("Doe");
         patient.setNationalId(existingNid);
@@ -679,7 +682,7 @@ public class PatientRepositoryIT {
         newPhoneNumber.setNumber("");
         newPhoneNumber.setExtension("");
 
-        PatientData updateRequest = new PatientData();
+        PatientData updateRequest = initPatientData();
         updateRequest.setReligion(newReligion);
         updateRequest.setNationalId(newNid);
         updateRequest.setBirthRegistrationNumber(newBrn);
@@ -711,7 +714,7 @@ public class PatientRepositoryIT {
         existingPhoneNumber.setNumber("");
         existingPhoneNumber.setExtension("");
 
-        PatientData patient = new PatientData();
+        PatientData patient = initPatientData();
         patient.setGivenName("John");
         patient.setSurName("Doe");
         patient.setNationalId(existingNid);
@@ -735,7 +738,7 @@ public class PatientRepositoryIT {
         newPhoneNumber.setNumber("10002000");
         newPhoneNumber.setExtension("");
 
-        PatientData updateRequest = new PatientData();
+        PatientData updateRequest = initPatientData();
         updateRequest.setReligion(newReligion);
         updateRequest.setNationalId(newNid);
         updateRequest.setBirthRegistrationNumber(newBrn);
@@ -743,7 +746,7 @@ public class PatientRepositoryIT {
         updateRequest.setPhoneNumber(newPhoneNumber);
         patientRepository.update(updateRequest, healthId);
 
-        PatientData approvalRequest = new PatientData();
+        PatientData approvalRequest = initPatientData();
         approvalRequest.setHealthId(healthId);
         approvalRequest.setPhoneNumber(newPhoneNumber);
         patientRepository.processPendingApprovals(approvalRequest, patientRepository.findByHealthId(healthId), true);
@@ -775,7 +778,7 @@ public class PatientRepositoryIT {
         existingPhoneNumber.setNumber("10002000");
         existingPhoneNumber.setExtension("");
 
-        PatientData patient = new PatientData();
+        PatientData patient = initPatientData();
         patient.setGivenName("John");
         patient.setSurName("Doe");
         patient.setNationalId(existingNid);
@@ -799,7 +802,7 @@ public class PatientRepositoryIT {
         String newReligion = "02";
         PhoneNumber newPhoneNumber = null;
 
-        PatientData updateRequest = new PatientData();
+        PatientData updateRequest = initPatientData();
         updateRequest.setReligion(newReligion);
         updateRequest.setNationalId(newNid);
         updateRequest.setBirthRegistrationNumber(newBrn);
@@ -836,7 +839,7 @@ public class PatientRepositoryIT {
         existingPhoneNumber.setNumber("10002000");
         existingPhoneNumber.setExtension("");
 
-        PatientData patient = new PatientData();
+        PatientData patient = initPatientData();
         patient.setGivenName("John");
         patient.setSurName("Doe");
         patient.setNationalId(existingNid);
@@ -864,7 +867,7 @@ public class PatientRepositoryIT {
         newPhoneNumber.setNumber("");
         newPhoneNumber.setExtension("");
 
-        PatientData updateRequest = new PatientData();
+        PatientData updateRequest = initPatientData();
         updateRequest.setReligion(newReligion);
         updateRequest.setNationalId(newNid);
         updateRequest.setBirthRegistrationNumber(newBrn);
@@ -872,7 +875,7 @@ public class PatientRepositoryIT {
         updateRequest.setPhoneNumber(newPhoneNumber);
         patientRepository.update(updateRequest, healthId);
 
-        PatientData approvalRequest = new PatientData();
+        PatientData approvalRequest = initPatientData();
         approvalRequest.setHealthId(healthId);
         approvalRequest.setPhoneNumber(newPhoneNumber);
         patientRepository.processPendingApprovals(approvalRequest, patientRepository.findByHealthId(healthId), true);
@@ -899,7 +902,7 @@ public class PatientRepositoryIT {
         existingPhoneNumber.setNumber("10002000");
         existingPhoneNumber.setExtension("");
 
-        PatientData patient = new PatientData();
+        PatientData patient = initPatientData();
         patient.setGivenName("John");
         patient.setSurName("Doe");
         patient.setNationalId(existingNid);
@@ -923,7 +926,7 @@ public class PatientRepositoryIT {
         String newReligion = "02";
         PhoneNumber newPhoneNumber = existingPhoneNumber;
 
-        PatientData updateRequest = new PatientData();
+        PatientData updateRequest = initPatientData();
         updateRequest.setReligion(newReligion);
         updateRequest.setNationalId(newNid);
         updateRequest.setBirthRegistrationNumber(newBrn);
@@ -960,7 +963,7 @@ public class PatientRepositoryIT {
         existingPhoneNumber.setNumber("10002000");
         existingPhoneNumber.setExtension("");
 
-        PatientData patient = new PatientData();
+        PatientData patient = initPatientData();
         patient.setGivenName("John");
         patient.setSurName("Doe");
         patient.setNationalId(existingNid);
@@ -988,7 +991,7 @@ public class PatientRepositoryIT {
         newPhoneNumber.setNumber("90008000");
         newPhoneNumber.setExtension("1200");
 
-        PatientData updateRequest = new PatientData();
+        PatientData updateRequest = initPatientData();
         updateRequest.setReligion(newReligion);
         updateRequest.setNationalId(newNid);
         updateRequest.setBirthRegistrationNumber(newBrn);
@@ -996,7 +999,7 @@ public class PatientRepositoryIT {
         updateRequest.setPhoneNumber(newPhoneNumber);
         patientRepository.update(updateRequest, healthId);
 
-        PatientData approvalRequest = new PatientData();
+        PatientData approvalRequest = initPatientData();
         approvalRequest.setHealthId(healthId);
         approvalRequest.setPhoneNumber(newPhoneNumber);
         patientRepository.processPendingApprovals(approvalRequest, patientRepository.findByHealthId(healthId), true);
@@ -1100,7 +1103,7 @@ public class PatientRepositoryIT {
         PhoneNumber phoneNumber1 = new PhoneNumber();
         phoneNumber1.setNumber("100000000");
 
-        PatientData patient = new PatientData();
+        PatientData patient = initPatientData();
         patient.setGivenName("John");
         patient.setSurName("Doe");
         patient.setNationalId(nid1);
@@ -1122,7 +1125,7 @@ public class PatientRepositoryIT {
         PhoneNumber phoneNumber2 = new PhoneNumber();
         phoneNumber2.setNumber("200000000");
 
-        PatientData updateRequest = new PatientData();
+        PatientData updateRequest = initPatientData();
         updateRequest.setHealthId(healthId2);
         updateRequest.setNationalId(nid2);
         updateRequest.setBirthRegistrationNumber(brn2);
@@ -1130,7 +1133,7 @@ public class PatientRepositoryIT {
         updateRequest.setPhoneNumber(phoneNumber2);
         patientRepository.update(updateRequest, healthId2);
 
-        PatientData approvalRequest = new PatientData();
+        PatientData approvalRequest = initPatientData();
         approvalRequest.setHealthId(healthId2);
         approvalRequest.setPhoneNumber(phoneNumber2);
         patientRepository.processPendingApprovals(approvalRequest, patientRepository.findByHealthId(healthId2), true);
@@ -1163,7 +1166,7 @@ public class PatientRepositoryIT {
         PhoneNumber phoneNumber = new PhoneNumber();
         phoneNumber.setNumber("100000000");
 
-        PatientData patient = new PatientData();
+        PatientData patient = initPatientData();
         patient.setGivenName("John");
         patient.setSurName("Doe");
         patient.setNationalId(nid);
@@ -1177,7 +1180,7 @@ public class PatientRepositoryIT {
 
         assertIdAndPhoneNumberMappingsExist();
 
-        PatientData updateRequest = new PatientData();
+        PatientData updateRequest = initPatientData();
         updateRequest.setHealthId(healthId);
         updateRequest.setReligion("02");
         patientRepository.update(updateRequest, healthId);
@@ -1188,7 +1191,7 @@ public class PatientRepositoryIT {
     @Test
     public void shouldUpdateNameMappingWhenGivenNameIsUpdated() {
         String existingGivenName = "John";
-        PatientData existingPatient = new PatientData();
+        PatientData existingPatient = initPatientData();
         existingPatient.setGivenName(existingGivenName);
         existingPatient.setSurName("Doe");
         existingPatient.setAddress(createAddress("10", "20", "30"));
@@ -1196,7 +1199,7 @@ public class PatientRepositoryIT {
         assertNotNull(healthId);
 
         String newGivenName = "Jane";
-        PatientData updateRequest = new PatientData();
+        PatientData updateRequest = initPatientData();
         updateRequest.setGivenName(newGivenName);
         patientRepository.update(updateRequest, healthId);
 
@@ -1212,19 +1215,19 @@ public class PatientRepositoryIT {
     public void shouldUpdateNameMappingWhenPresentAddressIsUpdated() {
         String existingGivenName = "John";
 
-        PatientData existingPatient = new PatientData();
+        PatientData existingPatient = initPatientData();
         existingPatient.setGivenName(existingGivenName);
         existingPatient.setSurName("Doe");
         existingPatient.setAddress(createAddress("10", "20", "30"));
         String healthId = patientRepository.create(existingPatient).getId();
         assertNotNull(healthId);
 
-        PatientData updateRequest = new PatientData();
+        PatientData updateRequest = initPatientData();
         Address newAddress = createAddress("11", "22", "33");
         updateRequest.setAddress(newAddress);
         patientRepository.update(updateRequest, healthId);
 
-        PatientData approvalRequest = new PatientData();
+        PatientData approvalRequest = initPatientData();
         approvalRequest.setHealthId(healthId);
         approvalRequest.setAddress(newAddress);
         patientRepository.processPendingApprovals(approvalRequest, patientRepository.findByHealthId(healthId), true);
@@ -1241,7 +1244,7 @@ public class PatientRepositoryIT {
     @Test
     public void shouldUpdateNameMappingWhenBothGivenNameAndPresentAddressAreUpdated() {
         String existingGivenName = "John";
-        PatientData existingPatient = new PatientData();
+        PatientData existingPatient = initPatientData();
         existingPatient.setGivenName(existingGivenName);
         existingPatient.setSurName("Doe");
         existingPatient.setAddress(createAddress("10", "20", "30"));
@@ -1249,13 +1252,13 @@ public class PatientRepositoryIT {
         assertNotNull(healthId);
 
         String newGivenName = "Jane";
-        PatientData updateRequest = new PatientData();
+        PatientData updateRequest = initPatientData();
         updateRequest.setGivenName(newGivenName);
         Address newAddress = createAddress("11", "22", "33");
         updateRequest.setAddress(newAddress);
         patientRepository.update(updateRequest, healthId);
 
-        PatientData approvalRequest = new PatientData();
+        PatientData approvalRequest = initPatientData();
         approvalRequest.setHealthId(healthId);
         approvalRequest.setAddress(newAddress);
         patientRepository.processPendingApprovals(approvalRequest, patientRepository.findByHealthId(healthId), true);
@@ -1278,7 +1281,7 @@ public class PatientRepositoryIT {
 
     @Test
     public void shouldUpdateAppropriateNameMappingWhenMultiplePatientsWithSameNameAndAddressExist() {
-        PatientData patient = new PatientData();
+        PatientData patient = initPatientData();
         patient.setGivenName("John");
         patient.setSurName("Doe");
         Address address = createAddress("10", "20", "30");
@@ -1289,7 +1292,7 @@ public class PatientRepositoryIT {
         String healthId2 = patientRepository.create(patient).getId();
         assertNotNull(healthId2);
 
-        PatientData updateRequest = new PatientData();
+        PatientData updateRequest = initPatientData();
         updateRequest.setGivenName("Jane");
         patientRepository.update(updateRequest, healthId2);
 
@@ -1424,7 +1427,7 @@ public class PatientRepositoryIT {
         createPatientData.setAddress(address);
         String healthId = patientRepository.create(createPatientData).getId();
 
-        PatientData patientData = new PatientData();
+        PatientData patientData = initPatientData();
         patientData.setGender("F");
         patientRepository.update(patientData, healthId);
 
@@ -1567,9 +1570,9 @@ public class PatientRepositoryIT {
     @Test
     public void shouldCreatePendingApprovalInPatientAndMappingTables_IfPatientDoesNotHaveExistingPendingApproval() throws Exception {
         String healthId = patientRepository.create(data).getId();
-        PatientData patientData = new PatientData();
+        PatientData patientData = initPatientData();
         patientData.setGender("F");
-        patientData.setRequestedBy("10000059");
+        patientData.setRequester("Bahmni", "Dr. Monika");
         patientRepository.update(patientData, healthId);
         Patient patient = cassandraOps.selectOneById(Patient.class, healthId);
 
@@ -1586,7 +1589,7 @@ public class PatientRepositoryIT {
         assertEquals(1, fieldDetailsMap.size());
         PendingApprovalFieldDetails fieldDetails = fieldDetailsMap.values().iterator().next();
         assertEquals("F", fieldDetails.getValue());
-        assertEquals("10000059", fieldDetails.getRequestedBy());
+        assertEquals(new Requester("Bahmni", "Dr. Monika"), fieldDetails.getRequestedBy());
 
         List<PendingApprovalMapping> mappings = findAllPendingApprovalMappings();
         List<String> catchmentIds = buildCatchment(data.getAddress()).getAllIds();
@@ -1599,16 +1602,19 @@ public class PatientRepositoryIT {
 
     @Test
     public void shouldAddPendingApprovalInPatientAndUpdateMappingTables_IfPatientHasAnyPendingApproval() throws Exception {
-        String healthId = patientRepository.create(data).getId();
-        PatientData patientData = new PatientData();
-        patientData.setGender("F");
-        patientData.setRequestedBy("10000059");
-        patientRepository.update(patientData, healthId);
+        String healthId = patientRepository.create(initPatientData(data)).getId();
+
+        PatientData updateRequest = initPatientData();
+        updateRequest.setGender("F");
+        updateRequest.setRequester(FACILITY, "Dr. Monika");
+        patientRepository.update(updateRequest, healthId);
+
         Thread.sleep(0, 10);
-        patientData = new PatientData();
-        patientData.setGender("O");
-        patientData.setRequestedBy("10000060");
-        patientRepository.update(patientData, healthId);
+
+        updateRequest = initPatientData();
+        updateRequest.setGender("O");
+        updateRequest.setRequester(FACILITY, "Dr. Seuss");
+        patientRepository.update(updateRequest, healthId);
         Patient patient = cassandraOps.selectOneById(Patient.class, healthId);
 
         TreeSet<PendingApproval> pendingApprovals = patient.getPendingApprovals();
@@ -1626,11 +1632,11 @@ public class PatientRepositoryIT {
         Iterator<PendingApprovalFieldDetails> fieldDetailsIterator = fieldDetailsMap.values().iterator();
         PendingApprovalFieldDetails fieldDetails1 = fieldDetailsIterator.next();
         assertEquals("O", fieldDetails1.getValue());
-        assertEquals("10000060", fieldDetails1.getRequestedBy());
+        assertEquals(new Requester(FACILITY, "Dr. Seuss"), fieldDetails1.getRequestedBy());
 
         PendingApprovalFieldDetails fieldDetails2 = fieldDetailsIterator.next();
         assertEquals("F", fieldDetails2.getValue());
-        assertEquals("10000059", fieldDetails2.getRequestedBy());
+        assertEquals(new Requester(FACILITY, "Dr. Monika"), fieldDetails2.getRequestedBy());
 
         List<PendingApprovalMapping> mappings = findAllPendingApprovalMappings();
         List<String> catchmentIds = buildCatchment(data.getAddress()).getAllIds();
@@ -1645,7 +1651,7 @@ public class PatientRepositoryIT {
     public void shouldBeAbleToAddPendingApprovalsForMultipleFields() {
         String healthId = patientRepository.create(data).getId();
 
-        PatientData patientData = new PatientData();
+        PatientData patientData = initPatientData();
         patientData.setGivenName("John Doe");
         patientData.setGender("O");
         patientData.setOccupation("07");
@@ -1693,7 +1699,7 @@ public class PatientRepositoryIT {
     private String processPendingApprovalsWhenPatientHasOnePendingApproval(boolean shouldAccept) {
         String healthId = patientRepository.create(data).getId();
 
-        PatientData patientData = new PatientData();
+        PatientData patientData = initPatientData();
         patientData.setGender("F");
         patientRepository.update(patientData, healthId);
 
@@ -1716,7 +1722,7 @@ public class PatientRepositoryIT {
 
         assertPendingApprovalMappings(healthId, data.getAddress(), pendingApprovals);
 
-        patientData = new PatientData();
+        patientData = initPatientData();
         patientData.setHealthId(healthId);
         patientData.setGender("F");
         PatientData existingPatientData = patientRepository.findByHealthId(healthId);
@@ -1773,7 +1779,7 @@ public class PatientRepositoryIT {
     private String processPendingApprovalsWhenPatientHasOnePendingApprovalEachForMultipleFields(boolean shouldAccept) {
         String healthId = patientRepository.create(data).getId();
 
-        PatientData patientData = new PatientData();
+        PatientData patientData = initPatientData();
         patientData.setGender("F");
         patientData.setOccupation("09");
         PhoneNumber phoneNumber = new PhoneNumber();
@@ -1789,7 +1795,7 @@ public class PatientRepositoryIT {
 
         assertPendingApprovalMappings(healthId, data.getAddress(), pendingApprovals);
 
-        patientData = new PatientData();
+        patientData = initPatientData();
         patientData.setHealthId(healthId);
         patientData.setGender("F");
         patientData.setPhoneNumber(phoneNumber);
@@ -1856,13 +1862,13 @@ public class PatientRepositoryIT {
     private String processPendingApprovalsWhenPatientHasMultiplePendingApprovalsForMultipleFields(boolean shouldAccept) throws Exception {
         String healthId = patientRepository.create(data).getId();
 
-        PatientData patientData = new PatientData();
+        PatientData patientData = initPatientData();
         patientData.setGender("F");
         patientData.setOccupation("05");
         patientRepository.update(patientData, healthId);
         Thread.sleep(0, 10);
 
-        patientData = new PatientData();
+        patientData = initPatientData();
         patientData.setGender("O");
         patientData.setOccupation("06");
         patientRepository.update(patientData, healthId);
@@ -1881,7 +1887,7 @@ public class PatientRepositoryIT {
 
         assertPendingApprovalMappings(healthId, data.getAddress(), pendingApprovals);
 
-        patientData = new PatientData();
+        patientData = initPatientData();
         patientData.setHealthId(healthId);
         patientData.setGender("F");
         PatientData existingPatientData = patientRepository.findByHealthId(healthId);
@@ -1927,7 +1933,7 @@ public class PatientRepositoryIT {
         p.setPhoneNumber(phoneNo);
         String healthId = patientRepository.create(p).getId();
 
-        PatientData patientData = new PatientData();
+        PatientData patientData = initPatientData();
         PhoneNumber phoneNumber = new PhoneNumber();
         phoneNumber.setAreaCode("011");
         phoneNumber.setNumber("10002001");
@@ -1942,7 +1948,7 @@ public class PatientRepositoryIT {
 
         assertPendingApprovalMappings(healthId, data.getAddress(), pendingApprovals);
 
-        patientData = new PatientData();
+        patientData = initPatientData();
         patientData.setHealthId(healthId);
         patientData.setPhoneNumber(phoneNumber);
         PatientData existingPatientData = patientRepository.findByHealthId(healthId);
@@ -1957,7 +1963,7 @@ public class PatientRepositoryIT {
         assertEquals(1, patients.size());
         assertEquals(healthId, patients.get(0).getHealthId());
 
-        PatientData updateRequest = new PatientData();
+        PatientData updateRequest = initPatientData();
         Address newAddress = createAddress("10", "20", "30");
         updateRequest.setAddress(newAddress);
         updateRequest.setGender("O");
@@ -1982,7 +1988,7 @@ public class PatientRepositoryIT {
     public void shouldUpdatePendingApprovalMappingWhenUpdateAddressRequestIsApproved() throws Exception {
         Address existingAddress = createAddress("10", "20", "30");
         existingAddress.setCityCorporationId("40");
-        PatientData existingPatient = new PatientData();
+        PatientData existingPatient = initPatientData();
         existingPatient.setGivenName("John");
         existingPatient.setSurName("Doe");
         existingPatient.setOccupation("01");
@@ -1991,13 +1997,13 @@ public class PatientRepositoryIT {
         assertNotNull(healthId);
 
         Address newAddress = createAddress("11", "22", "33");
-        PatientData updateRequest = new PatientData();
+        PatientData updateRequest = initPatientData();
         updateRequest.setOccupation("02");
         updateRequest.setAddress(newAddress);
         patientRepository.update(updateRequest, healthId);
         assertPendingApprovalMappings(existingPatient.getCatchment().getAllIds());
 
-        PatientData approvalRequest = new PatientData();
+        PatientData approvalRequest = initPatientData();
         approvalRequest.setHealthId(healthId);
         approvalRequest.setAddress(newAddress);
         patientRepository.processPendingApprovals(approvalRequest, patientRepository.findByHealthId(healthId), true);
@@ -2012,7 +2018,7 @@ public class PatientRepositoryIT {
     public void shouldNotUpdatePendingApprovalMappingWhenUpdateAddressRequestIsRejected() throws Exception {
         Address existingAddress = createAddress("10", "20", "30");
         existingAddress.setCityCorporationId("40");
-        PatientData existingPatient = new PatientData();
+        PatientData existingPatient = initPatientData();
         existingPatient.setGivenName("John");
         existingPatient.setSurName("Doe");
         existingPatient.setOccupation("01");
@@ -2021,14 +2027,14 @@ public class PatientRepositoryIT {
         assertNotNull(healthId);
 
         Address newAddress = createAddress("11", "22", "33");
-        PatientData updateRequest = new PatientData();
+        PatientData updateRequest = initPatientData();
         updateRequest.setGivenName("Jane");
         updateRequest.setOccupation("02");
         updateRequest.setAddress(newAddress);
         patientRepository.update(updateRequest, healthId);
         assertPendingApprovalMappings(existingPatient.getCatchment().getAllIds());
 
-        PatientData approvalRequest = new PatientData();
+        PatientData approvalRequest = initPatientData();
         approvalRequest.setHealthId(healthId);
         approvalRequest.setAddress(newAddress);
         patientRepository.processPendingApprovals(approvalRequest, patientRepository.findByHealthId(healthId), false);
@@ -2049,6 +2055,18 @@ public class PatientRepositoryIT {
 
     private void assertHouseholdCodeMappingEmpty() {
         assertTrue(isEmpty(cassandraOps.select(select().from(CF_HOUSEHOLD_CODE_MAPPING).toString(), HouseholdCodeMapping.class)));
+    }
+
+    private PatientData initPatientData() {
+        PatientData patient = new PatientData();
+        patient.setRequester(FACILITY, null);
+        return patient;
+    }
+
+    private PatientData initPatientData(PatientData data) {
+        PatientData patient = data;
+        patient.setRequester(FACILITY, null);
+        return patient;
     }
 
     @After

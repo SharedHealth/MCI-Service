@@ -8,6 +8,7 @@ import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
 import org.sharedhealth.mci.web.infrastructure.security.UserProfile;
 import org.sharedhealth.mci.web.mapper.PatientAuditLogData;
 import org.sharedhealth.mci.web.mapper.PatientData;
+import org.sharedhealth.mci.web.mapper.Requester;
 import org.sharedhealth.mci.web.service.PatientAuditService;
 import org.sharedhealth.mci.web.service.PatientService;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,12 +18,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static java.util.Arrays.asList;
@@ -35,9 +31,7 @@ import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 public class PatientAuditControllerTest {
 
@@ -64,7 +58,8 @@ public class PatientAuditControllerTest {
 
     }
 
-    private UserInfo getUserInfo() {UserProfile userProfile = new UserProfile("facility", "100067", null);
+    private UserInfo getUserInfo() {
+        UserProfile userProfile = new UserProfile("facility", "100067", null);
 
         return new UserInfo("102", "ABC", "abc@mail", 1, true, "111100",
                 new ArrayList<String>(), asList(userProfile));
@@ -74,7 +69,7 @@ public class PatientAuditControllerTest {
     public void shouldFindByHealthId() throws Exception {
         String healthId = "h100";
         PatientData patient = new PatientData();
-        patient.setCreatedBy("Bahmni");
+        patient.setRequester("Bahmni", "Dr. Monika");
         patient.setCreatedAt(timeBased());
         when(patientService.findByHealthId(healthId)).thenReturn(patient);
 
@@ -92,9 +87,11 @@ public class PatientAuditControllerTest {
                 .andExpect(jsonPath("$.created_at", is(patient.getCreatedAtAsString())))
 
                 .andExpect(jsonPath("$.updates.[0].event_time", is(eventTime)))
-                .andExpect(jsonPath("$.updates.[0].requested_by.given_name", is(asList("Bahmni1"))))
-                .andExpect(jsonPath("$.updates.[0].requested_by.occupation", is(asList("Bahmni2"))))
-                .andExpect(jsonPath("$.updates.[0].requested_by.edu_level", is(asList("Bahmni3"))))
+
+                .andExpect(jsonPath("$.updates.[0].requested_by.given_name.facility.id", is(asList("Bahmni1"))))
+                .andExpect(jsonPath("$.updates.[0].requested_by.occupation.facility.id", is(asList("Bahmni2"))))
+                .andExpect(jsonPath("$.updates.[0].requested_by.edu_level.facility.id", is(asList("Bahmni3"))))
+
                 .andExpect(jsonPath("$.updates.[0].approved_by", is("admin")))
 
                 .andExpect(jsonPath("$.updates.[0].change_set.given_name", is(notNullValue())))
@@ -126,9 +123,10 @@ public class PatientAuditControllerTest {
         return logs;
     }
 
-    private Set<String> buildRequesters(String requester) {
-        Set<String> requesters = new HashSet<>();
-        requesters.add(requester);
+    private Set<Requester> buildRequesters(String facilityId) {
+        Set<Requester> requesters = new HashSet<>();
+        Requester facility = new Requester(facilityId);
+        requesters.add(facility);
         return requesters;
     }
 

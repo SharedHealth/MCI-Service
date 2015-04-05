@@ -2,9 +2,9 @@ package org.sharedhealth.mci.web.model;
 
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants;
 import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.PendingApproval;
+import org.sharedhealth.mci.web.mapper.Requester;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.cassandra.mapping.Column;
 import org.springframework.data.cassandra.mapping.PrimaryKey;
@@ -17,41 +17,7 @@ import java.util.UUID;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.sharedhealth.mci.utils.DateUtil.parseDate;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.ADDRESS_LINE;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.AREA_MOUJA;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.BIN_BRN;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.BLOOD_GROUP;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.*;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.CREATED_AT;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.DATE_OF_BIRTH;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.DATE_OF_DEATH;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.DISABILITY;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.DISTRICT_ID;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.DIVISION_ID;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.EDU_LEVEL;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.ETHNICITY;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.GENDER;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.GIVEN_NAME;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.HOLDING_NUMBER;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.MARITAL_STATUS;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.NATIONALITY;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.OCCUPATION;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.PHONE_NO;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.PLACE_OF_BIRTH;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.POST_CODE;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.POST_OFFICE;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.PRIMARY_CONTACT;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.RELATIONS;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.RELIGION;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.RURAL_WARD_ID;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.STREET;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.SUR_NAME;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.UID;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.UNION_OR_URBAN_WARD_ID;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.UPAZILA_ID;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.VILLAGE;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.STATUS;
-import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonMapper.readValue;
 import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
 import static org.sharedhealth.mci.web.utils.PatientDataConstants.COUNTRY_CODE_BANGLADESH;
@@ -192,24 +158,6 @@ public class Patient {
     @Column(COUNTRY)
     private String countryCode;
 
-    @Column(LOCATION_LEVEL1)
-    private String locationLevel1;
-
-    @Column(LOCATION_LEVEL2)
-    private String locationLevel2;
-
-    @Column(LOCATION_LEVEL3)
-    private String locationLevel3;
-
-    @Column(LOCATION_LEVEL4)
-    private String locationLevel4;
-
-    @Column(LOCATION_LEVEL5)
-    private String locationLevel5;
-
-    @Column(LOCATION_LEVEL6)
-    private String locationLevel6;
-
     @Column(PERMANENT_ADDRESS_LINE)
     private String permanentAddressLine;
 
@@ -294,7 +242,7 @@ public class Patient {
     @Column(UPDATED_AT)
     private UUID updatedAt;
 
-    @Column(PatientRepositoryConstants.CREATED_BY)
+    @Column(CREATED_BY)
     private String createdBy;
 
     @Column(UPDATED_BY)
@@ -362,18 +310,6 @@ public class Patient {
         if (givenName != null ? !givenName.equals(patient.givenName) : patient.givenName != null) return false;
         if (healthId != null ? !healthId.equals(patient.healthId) : patient.healthId != null) return false;
         if (holdingNumber != null ? !holdingNumber.equals(patient.holdingNumber) : patient.holdingNumber != null)
-            return false;
-        if (locationLevel1 != null ? !locationLevel1.equals(patient.locationLevel1) : patient.locationLevel1 != null)
-            return false;
-        if (locationLevel2 != null ? !locationLevel2.equals(patient.locationLevel2) : patient.locationLevel2 != null)
-            return false;
-        if (locationLevel3 != null ? !locationLevel3.equals(patient.locationLevel3) : patient.locationLevel3 != null)
-            return false;
-        if (locationLevel4 != null ? !locationLevel4.equals(patient.locationLevel4) : patient.locationLevel4 != null)
-            return false;
-        if (locationLevel5 != null ? !locationLevel5.equals(patient.locationLevel5) : patient.locationLevel5 != null)
-            return false;
-        if (locationLevel6 != null ? !locationLevel6.equals(patient.locationLevel6) : patient.locationLevel6 != null)
             return false;
         if (lowerGivenName != null ? !lowerGivenName.equals(patient.lowerGivenName) : patient.lowerGivenName != null)
             return false;
@@ -508,12 +444,6 @@ public class Patient {
         result = 31 * result + (ruralWardId != null ? ruralWardId.hashCode() : 0);
         result = 31 * result + (cityCorporationId != null ? cityCorporationId.hashCode() : 0);
         result = 31 * result + (countryCode != null ? countryCode.hashCode() : 0);
-        result = 31 * result + (locationLevel1 != null ? locationLevel1.hashCode() : 0);
-        result = 31 * result + (locationLevel2 != null ? locationLevel2.hashCode() : 0);
-        result = 31 * result + (locationLevel3 != null ? locationLevel3.hashCode() : 0);
-        result = 31 * result + (locationLevel4 != null ? locationLevel4.hashCode() : 0);
-        result = 31 * result + (locationLevel5 != null ? locationLevel5.hashCode() : 0);
-        result = 31 * result + (locationLevel6 != null ? locationLevel6.hashCode() : 0);
         result = 31 * result + (permanentAddressLine != null ? permanentAddressLine.hashCode() : 0);
         result = 31 * result + (permanentDivisionId != null ? permanentDivisionId.hashCode() : 0);
         result = 31 * result + (permanentDistrictId != null ? permanentDistrictId.hashCode() : 0);
@@ -1134,20 +1064,20 @@ public class Patient {
         this.primaryContactNumberExtension = primaryContactNumberExtension;
     }
 
-    public String getCreatedBy() {
-        return createdBy;
+    public Requester getCreatedBy() {
+        return readValue(this.createdBy, Requester.class);
     }
 
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
+    public void setCreatedBy(Requester createdBy) {
+        this.createdBy = writeValueAsString(createdBy);
     }
 
-    public String getUpdatedBy() {
-        return updatedBy;
+    public Requester getUpdatedBy() {
+        return readValue(this.updatedBy, Requester.class);
     }
 
-    public void setUpdatedBy(String updatedBy) {
-        this.updatedBy = updatedBy;
+    public void setUpdatedBy(Requester updatedBy) {
+        this.updatedBy = writeValueAsString(updatedBy);
     }
 
     public TreeSet<PendingApproval> getPendingApprovals() {

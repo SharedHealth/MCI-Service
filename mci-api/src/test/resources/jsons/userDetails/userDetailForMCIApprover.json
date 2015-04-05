@@ -11,7 +11,7 @@
   "updated_at": "2015-03-20 06:52:54",
   "deleted_at": "2015-03-20 06:52:54",
   "groups": [
-    "MCI Approver"
+    "MCI Approver", "MCI User"
   ],
   "profiles": [
     {

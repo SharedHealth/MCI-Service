@@ -52,6 +52,7 @@ public class JsonConstants {
     public static final String EXTENSION = "extension";
 
     public static final String PENDING_APPROVALS = "pending_approvals";
+    public static final String REQUESTED_BY = "requested_by";
     public static final String AFTER = "after";
     public static final String NEXT = "next";
     public static final String PREVIOUS = "previous";
@@ -63,6 +64,7 @@ public class JsonConstants {
     public static final String OPTION = "option";
     public static final String CREATED_AT = "created_at";
     public static final String CREATED_BY = "created_by";
+    public static final String UPDATED_BY = "updated_by";
     public static final String LAST_UPDATED = "last_updated";
     public static final String FIELD_NAME = "field_name";
     public static final String CURRENT_VALUE = "current_value";
@@ -82,7 +84,7 @@ public class JsonConstants {
     public static final String EVENT_TIME = "event_time";
     public static final String UPDATES = "updates";
     public static final String CHANGE_SET = "change_set";
-    public static final String REQUESTED_BY = "requested_by";
+    public static final String PROVIDER_ID = "provider_id";
     public static final String APPROVED_BY = "approved_by";
     public static final String OLD_VALUE = "old_value";
     public static final String NEW_VALUE = "new_value";

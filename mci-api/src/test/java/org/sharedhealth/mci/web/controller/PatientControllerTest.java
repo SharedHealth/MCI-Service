@@ -28,18 +28,17 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.*;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
-import static org.sharedhealth.mci.web.controller.PatientController.REQUESTED_BY;
+import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.MCI_USER_GROUP;
 import static org.sharedhealth.mci.web.service.PatientService.PER_PAGE_MAXIMUM_LIMIT_NOTE;
 import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
 import static org.springframework.http.HttpStatus.*;
@@ -51,6 +50,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(MockitoJUnitRunner.class)
 public class PatientControllerTest {
 
+    public static final String USER_INFO_FACILITY = "100067";
     @Mock
     private PatientService patientService;
 
@@ -134,19 +134,16 @@ public class PatientControllerTest {
         mapper = new PatientMapper();
     }
 
-    private UserInfo getUserInfo() {UserProfile userProfile = new UserProfile("facility", "100067", null);
-
-        return new UserInfo("102", "ABC", "abc@mail", 1, true, "111100",
-                new ArrayList<String>(), Collections.singletonList(userProfile));
+    private UserInfo getUserInfo() {
+        UserProfile userProfile = new UserProfile("facility", USER_INFO_FACILITY, null);
+        return new UserInfo("102", "ABC", "abc@mail", 1, true, "111100", asList(MCI_USER_GROUP), asList(userProfile));
     }
+
     @Test
     public void shouldCreatePatientAndReturnHealthId() throws Exception {
         String json = new ObjectMapper().writeValueAsString(patientData);
         String healthId = "healthId-100";
         MCIResponse mciResponse = new MCIResponse(healthId, CREATED);
-        TokenAuthentication tokenAuthentication = tokenAuthentication();
-        SecurityContextHolder.setContext(securityContext);
-        when(securityContext.getAuthentication()).thenReturn(tokenAuthentication);
         when(locationService.findByGeoCode(GEO_CODE)).thenReturn(location);
         when(patientService.create(patientData)).thenReturn(mciResponse);
 
@@ -319,12 +316,10 @@ public class PatientControllerTest {
         String json = writeValueAsString(patientData);
         String healthId = "healthId-100";
         MCIResponse mciResponse = new MCIResponse(healthId, OK);
-        TokenAuthentication tokenAuthentication = tokenAuthentication();
-        SecurityContextHolder.setContext(securityContext);
-        when(securityContext.getAuthentication()).thenReturn(tokenAuthentication);
         when(patientService.create(patientData)).thenReturn(mciResponse);
 
-        MvcResult mvcResult = mockMvc.perform(post(API_END_POINT).content(json).contentType(APPLICATION_JSON))
+        MvcResult mvcResult = mockMvc.perform(post(API_END_POINT).content(json)
+                .contentType(APPLICATION_JSON))
                 .andExpect(request().asyncStarted())
                 .andReturn();
 
@@ -333,7 +328,11 @@ public class PatientControllerTest {
 
         ArgumentCaptor<PatientData> argument = ArgumentCaptor.forClass(PatientData.class);
         verify(patientService).create(argument.capture());
-        assertEquals(REQUESTED_BY, argument.getValue().getRequestedBy());
+
+        Requester requester = argument.getValue().getRequester();
+        assertNotNull(requester);
+        assertNotNull(requester.getFacility());
+        assertEquals(USER_INFO_FACILITY, requester.getFacility().getId());
     }
 
     @Test
@@ -353,7 +352,12 @@ public class PatientControllerTest {
         ArgumentCaptor<PatientData> argument1 = ArgumentCaptor.forClass(PatientData.class);
         ArgumentCaptor<String> argument2 = ArgumentCaptor.forClass(String.class);
         verify(patientService).update(argument1.capture(), argument2.capture());
-        assertEquals(REQUESTED_BY, argument1.getValue().getRequestedBy());
+
+        Requester requester = argument1.getValue().getRequester();
+        assertNotNull(requester);
+        assertNotNull(requester.getFacility());
+        assertEquals(USER_INFO_FACILITY, requester.getFacility().getId());
+        assertNull(requester.getProvider());
     }
 
     @Test
@@ -390,11 +394,6 @@ public class PatientControllerTest {
         data.setHealthId(healthId);
         data.setGivenName("Name" + healthId);
         return data;
-    }
-
-    private TokenAuthentication tokenAuthentication() {
-        return new TokenAuthentication(new UserInfo("1232", "foo", "email@gmail.com", 1, true,
-                "xyz", new ArrayList<String>(), asList(new UserProfile("facility", "10000069", asList("3026")))), true);
     }
 }
 

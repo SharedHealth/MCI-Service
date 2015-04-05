@@ -39,6 +39,10 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 
 
 public class BaseControllerTest {
+    protected static final String FACILITY_ID = "1111111";
+    protected static final String PROVIDER_ID = "222222";
+    protected static final String ADMIN_ID = "333333";
+
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(9997);
 
@@ -89,12 +93,14 @@ public class BaseControllerTest {
     }
     protected MCIResponse createPatient(String json) throws Exception {
         PatientData data = getPatientObjectFromString(json);
+        data.setRequester(FACILITY_ID, null);
         return createPatient(data);
     }
 
     protected MCIResponse updatePatient(String json, String healthId) throws Exception {
         PatientData data = getPatientObjectFromString(json);
         data.setHealthId(healthId);
+        data.setRequester(FACILITY_ID, null);
         return patientRepository.update(data, data.getHealthId());
     }
 

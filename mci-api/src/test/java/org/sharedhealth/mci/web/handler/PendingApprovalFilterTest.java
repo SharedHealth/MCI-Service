@@ -54,11 +54,11 @@ public class PendingApprovalFilterTest {
         PatientData updateRequest = buildPatientData();
         updateRequest.setGender("F");
         updateRequest.setReligion("2");
-        updateRequest.setRequestedBy("Bahmni");
+        updateRequest.setRequester("Bahmni", "Dr. Monika");
 
         PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
         verify(approvalFieldService, atLeastOnce()).getProperty(GENDER);
-        assertPendingApprovals(existingPatient, newPatient, 2, updateRequest.getRequestedBy());
+        assertPendingApprovals(existingPatient, newPatient, 2, updateRequest.getRequester());
     }
 
     @Test
@@ -67,14 +67,14 @@ public class PendingApprovalFilterTest {
 
         PatientData updateRequest = buildPatientData();
         updateRequest.setGender("F");
-        updateRequest.setRequestedBy("Bahmni");
+        updateRequest.setRequester("Bahmni", "Dr. Monika");
 
         PatientData existingPatient = buildPatientData();
         existingPatient.setGender("M");
 
 
         PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
-        assertPendingApprovals(existingPatient, newPatient, 1, updateRequest.getRequestedBy());
+        assertPendingApprovals(existingPatient, newPatient, 1, updateRequest.getRequester());
 
         updateRequest = buildPatientData();
         updateRequest.setGender("O");
@@ -121,7 +121,7 @@ public class PendingApprovalFilterTest {
         updateRequest.setAddress(presentAddress);
         Address permanentAddress = new Address("11", "22", "33");
         updateRequest.setPermanentAddress(permanentAddress);
-        updateRequest.setRequestedBy("Bahmni");
+        updateRequest.setRequester("Bahmni", "Dr. Monika");
 
         PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
 
@@ -130,7 +130,7 @@ public class PendingApprovalFilterTest {
         verify(approvalFieldService).getProperty(PRESENT_ADDRESS);
         verify(approvalFieldService).getProperty(PERMANENT_ADDRESS);
 
-        assertPendingApprovals(existingPatient, newPatient, 4, updateRequest.getRequestedBy());
+        assertPendingApprovals(existingPatient, newPatient, 4, updateRequest.getRequester());
     }
 
     @Test
@@ -229,7 +229,7 @@ public class PendingApprovalFilterTest {
         verify(approvalFieldService, atLeastOnce()).getProperty(Mockito.anyString());
     }
 
-    private void assertPendingApprovals(PatientData existingPatient, PatientData newPatient, int pendingApprovalsCount, String requestedBy) {
+    private void assertPendingApprovals(PatientData existingPatient, PatientData newPatient, int pendingApprovalsCount, Requester requestedBy) {
         TreeSet<PendingApproval> pendingApprovals = newPatient.getPendingApprovals();
         assertNotNull(pendingApprovals);
         assertEquals(pendingApprovalsCount, pendingApprovals.size());
@@ -263,7 +263,7 @@ public class PendingApprovalFilterTest {
         }
     }
 
-    private void assertFieldDetails(TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap, Object value, String requestedBy) {
+    private void assertFieldDetails(TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap, Object value, Requester requestedBy) {
         assertNotNull(fieldDetailsMap);
         assertEquals(1, fieldDetailsMap.size());
         PendingApprovalFieldDetails fieldDetails = fieldDetailsMap.values().iterator().next();
@@ -314,6 +314,8 @@ public class PendingApprovalFilterTest {
         location.setUpazilaId("09");
         location.setCityCorporationId("20");
         location.setUnionOrUrbanWardId("01");
+
+        patient.setRequester("Bahmni", null);
         return patient;
     }
 }

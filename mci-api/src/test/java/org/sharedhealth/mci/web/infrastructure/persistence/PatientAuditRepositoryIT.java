@@ -7,10 +7,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
-import org.sharedhealth.mci.web.mapper.Address;
-import org.sharedhealth.mci.web.mapper.PatientAuditLogData;
-import org.sharedhealth.mci.web.mapper.PatientData;
-import org.sharedhealth.mci.web.mapper.PhoneNumber;
+import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.model.PatientAuditLog;
 import org.sharedhealth.mci.web.model.PatientUpdateLog;
 import org.sharedhealth.mci.web.service.PatientAuditService;
@@ -62,23 +59,25 @@ public class PatientAuditRepositoryIT {
 
     @Test
     public void shouldFindByHealthId() {
+        String facility = "CHW";
+        String provider = "Dr. Monika";
         PatientData patientCreateData = buildPatient();
         String healthId = patientRepository.create(patientCreateData).getId();
 
         PatientData updateRequest = new PatientData();
         updateRequest.setGivenName("John");
-        updateRequest.setRequestedBy("CHW");
+        updateRequest.setRequester(facility, provider);
         patientRepository.update(updateRequest, healthId);
 
         updateRequest = new PatientData();
         updateRequest.setEducationLevel("02");
-        updateRequest.setRequestedBy("CHW");
+        updateRequest.setRequester(facility, provider);
         patientRepository.update(updateRequest, healthId);
 
         updateRequest = new PatientData();
         Address address = new Address("10", "20", "31");
         updateRequest.setPermanentAddress(address);
-        updateRequest.setRequestedBy("CHW");
+        updateRequest.setRequester(facility, provider);
         patientRepository.update(updateRequest, healthId);
 
         auditService.sync();
@@ -117,6 +116,7 @@ public class PatientAuditRepositoryIT {
         patient.setHouseholdCode("12345");
         patient.setAddress(new Address("10", "20", "30"));
         patient.setPermanentAddress(new Address("10", "20", "30"));
+        patient.setRequester("Bahmni", null);
         return patient;
     }
 
@@ -128,7 +128,7 @@ public class PatientAuditRepositoryIT {
         PatientData updateRequest = new PatientData();
         updateRequest.setGivenName("John");
         updateRequest.setSurName("Doe");
-        updateRequest.setRequestedBy("Bahmni");
+        updateRequest.setRequester("Bahmni", "Dr. Monika");
         patientRepository.update(updateRequest, healthId);
 
         auditService.sync();
@@ -166,9 +166,9 @@ public class PatientAuditRepositoryIT {
     }
 
     private String buildRequestedBy() {
-        Map<String, Set<String>> requestedBy = new HashMap<>();
-        Set<String> requester = new HashSet<>();
-        requester.add("CHW");
+        Map<String, Set<Requester>> requestedBy = new HashMap<>();
+        Set<Requester> requester = new HashSet<>();
+        requester.add(new Requester("CHW"));
         requestedBy.put("ALL_FIELDS", requester);
         return writeValueAsString(requestedBy);
     }

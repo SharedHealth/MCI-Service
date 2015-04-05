@@ -52,6 +52,7 @@ public class PatientRepositoryConstants {
     public static final String SPOUSE_NAME_BANGLA = "spouse_name_bangla";
     public static final String SPOUSE_NAME = "spouse_name";
     public static final String SPOUSE_UID_NID = "spouse_uid_nid";
+    public static final String CONFIDENTIAL = "confidential";
     public static final String RELIGION = "religion";
     public static final String BLOOD_GROUP = "blood_group";
     public static final String NATIONALITY = "nationality";
@@ -99,6 +100,7 @@ public class PatientRepositoryConstants {
     public static final String LOCATION_LEVEL4 = "location_level4";
     public static final String LOCATION_LEVEL5 = "location_level5";
     public static final String LOCATION_LEVEL6 = "location_level6";
+    public static final String HOUSEHOLD_CODE = "household_code";
     public static final String CREATED_AT = "created_at";
     public static final String UPDATED_AT = "updated_at";
     public static final String CREATED_BY = "created_by";
@@ -107,6 +109,7 @@ public class PatientRepositoryConstants {
     public static final String APPROVED_BY = "approved_by";
     public static final String LOWER_SUR_NAME = "lower_sur_name";
     public static final String LOWER_GIVEN_NAME = "lower_given_name";
+    public static final String PENDING_APPROVALS = "pending_approvals";
     public static final String TYPE = "type";
     public static final String MARKER = "marker";
     public static final String CHANGE_SET = "change_set";

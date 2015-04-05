@@ -4,22 +4,22 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.web.utils.JsonConstants.CREATED_AT;
-import static org.sharedhealth.mci.web.utils.JsonConstants.FACILITY_ID;
+import static org.sharedhealth.mci.web.utils.JsonConstants.REQUESTED_BY;
 
 public class PendingApprovalFieldDetails {
 
-    @JsonProperty(FACILITY_ID)
-    private String requestedBy;
+    @JsonProperty(REQUESTED_BY)
+    private Requester requestedBy;
 
     private Object value;
 
     private String createdAt;
 
-    public String getRequestedBy() {
+    public Requester getRequestedBy() {
         return requestedBy;
     }
 
-    public void setRequestedBy(String requestedBy) {
+    public void setRequestedBy(Requester requestedBy) {
         this.requestedBy = requestedBy;
     }
 

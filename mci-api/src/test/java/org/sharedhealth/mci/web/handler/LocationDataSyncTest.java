@@ -18,9 +18,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static junit.framework.Assert.assertEquals;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertThat;
+import static junit.framework.Assert.assertNotNull;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
 import static org.sharedhealth.mci.utils.HttpUtil.AUTH_TOKEN_KEY;
 import static org.sharedhealth.mci.utils.HttpUtil.CLIENT_ID_KEY;
@@ -76,8 +74,8 @@ public class LocationDataSyncTest {
 
         LocationData locationData = locationService.findByGeoCode("80");
         LocationData locationData1 = locationService.findByGeoCode("60");
-        assertThat(locationData, is(notNullValue()));
-        assertThat(locationData1, is(notNullValue()));
+        assertNotNull(locationData);
+        assertNotNull(locationData1);
         assertEquals("80", locationData.getCode());
         assertEquals("00", locationData.getParent());
         assertEquals("New Division", locationData.getName());

@@ -3,13 +3,18 @@ package org.sharedhealth.mci.web.mapper;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.sharedhealth.mci.validation.group.RequiredGroup;
+import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
+import org.sharedhealth.mci.web.infrastructure.security.UserProfile;
 
 import javax.validation.ConstraintViolation;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static java.util.Arrays.asList;
+import static org.junit.Assert.*;
+import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.MCI_USER_GROUP;
+import static org.sharedhealth.mci.web.infrastructure.security.UserProfile.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
 public class PatientDataTest extends ValidationAwareMapper {
@@ -293,5 +298,37 @@ public class PatientDataTest extends ValidationAwareMapper {
         patient.setAddress(address);
 
         assertTrue(patient.belongsTo(catchment));
+    }
+
+    @Test
+    public void shouldPopulateRequester() {
+        UserProfile facilityProfile = new UserProfile(FACILITY_TYPE, "f100", asList("3026", "4019"));
+        UserProfile providerProfile = new UserProfile(PROVIDER_TYPE, "p100", asList("1001"));
+        UserProfile adminProfile = new UserProfile(ADMIN_TYPE, "a100", asList("2020"));
+
+        UserInfo userInfo = new UserInfo("102", "ABC", "abc@mail", 1, true, "111100",
+                new ArrayList<>(asList(MCI_USER_GROUP)), asList(adminProfile, providerProfile, facilityProfile));
+
+        PatientData patient = new PatientData();
+        patient.setProviderId("p000");
+        patient.setRequester(userInfo.getProperties());
+
+        Requester requester = patient.getRequester();
+        assertNotNull(requester);
+
+        RequesterDetails provider = requester.getProvider();
+        assertNotNull(provider);
+        assertEquals("p100", provider.getId());
+        assertNull(provider.getName());
+
+        RequesterDetails facility = requester.getFacility();
+        assertNotNull(facility);
+        assertEquals("f100", facility.getId());
+        assertNull(facility.getName());
+
+        RequesterDetails admin = requester.getAdmin();
+        assertNotNull(admin);
+        assertEquals("a100", admin.getId());
+        assertEquals("ABC", admin.getName());
     }
 }

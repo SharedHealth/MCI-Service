@@ -5,6 +5,7 @@ import com.datastax.driver.core.querybuilder.Select;
 import com.datastax.driver.core.utils.UUIDs;
 import org.sharedhealth.mci.web.builder.PatientDiffBuilder;
 import org.sharedhealth.mci.web.mapper.PatientData;
+import org.sharedhealth.mci.web.mapper.Requester;
 import org.sharedhealth.mci.web.model.PatientUpdateLog;
 import org.springframework.data.cassandra.convert.CassandraConverter;
 
@@ -21,7 +22,7 @@ import static org.springframework.data.cassandra.core.CassandraTemplate.createIn
 public class PatientUpdateLogQueryBuilder {
 
     static void buildCreateUpdateLogStmt(PatientData patientDataToSave, PatientData existingPatientData,
-                                         Map<String, Set<String>> requestedBy, String approvedBy,
+                                         Map<String, Set<Requester>> requestedBy, Requester approvedBy,
                                          CassandraConverter converter, Batch batch) {
         PatientUpdateLog patientUpdateLog = new PatientUpdateLog();
         String changeSet = getChangeSet(patientDataToSave, existingPatientData);
@@ -31,7 +32,7 @@ public class PatientUpdateLogQueryBuilder {
             patientUpdateLog.setHealthId(existingPatientData.getHealthId());
             patientUpdateLog.setChangeSet(changeSet);
             patientUpdateLog.setRequestedBy(writeValueAsString(requestedBy));
-            patientUpdateLog.setApprovedBy(approvedBy);
+            patientUpdateLog.setApprovedBy(writeValueAsString(approvedBy));
             batch.add(createInsertQuery(CF_PATIENT_UPDATE_LOG, patientUpdateLog, null, converter));
         }
     }

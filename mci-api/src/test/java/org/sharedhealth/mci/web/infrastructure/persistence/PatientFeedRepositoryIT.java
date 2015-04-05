@@ -10,6 +10,7 @@ import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
+import org.sharedhealth.mci.web.mapper.Requester;
 import org.sharedhealth.mci.web.model.PatientUpdateLog;
 import org.sharedhealth.mci.web.utils.JsonConstants;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,6 @@ import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
 @ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
 public class PatientFeedRepositoryIT {
 
-    public static final String REQUESTED_BY = "Bahmni";
     @Autowired
     @Qualifier("MCICassandraTemplate")
     private CassandraOperations cassandraOps;
@@ -80,8 +80,7 @@ public class PatientFeedRepositoryIT {
         address.setCountryCode("050");
         data.setAddress(address);
 
-        data.setRequestedBy(REQUESTED_BY);
-
+        data.setRequester("Bahmni", "Dr. Monika");
         return data;
     }
 
@@ -96,7 +95,7 @@ public class PatientFeedRepositoryIT {
         updateRequest.setHealthId(healthId);
         updateRequest.setGivenName("Harry");
         updateRequest.setAddress(new Address("99", "88", "77"));
-        updateRequest.setRequestedBy(REQUESTED_BY);
+        updateRequest.setRequester("Bahmni", "Dr. Monika");
         patientRepository.update(updateRequest, healthId);
 
         assertUpdateLogEntry(healthId, since, true);
@@ -111,7 +110,7 @@ public class PatientFeedRepositoryIT {
         PatientData updateRequest1 = new PatientData();
         updateRequest1.setHealthId(healthId);
         updateRequest1.setEducationLevel("02");
-        updateRequest1.setRequestedBy(REQUESTED_BY);
+        updateRequest1.setRequester("Bahmni", "Dr. Monika");
         patientRepository.update(updateRequest1, healthId);
         assertUpdateLogEntry(healthId, since, true);
 
@@ -122,14 +121,14 @@ public class PatientFeedRepositoryIT {
         updateRequest2.setGender("F");
         Address newAddress = new Address("99", "88", "77");
         updateRequest2.setAddress(newAddress);
-        updateRequest2.setRequestedBy(REQUESTED_BY);
+        updateRequest2.setRequester("Bahmni", "Dr. Monika");
         patientRepository.update(updateRequest2, healthId);
 
         PatientData acceptRequest = new PatientData();
         acceptRequest.setHealthId(healthId);
         acceptRequest.setGender("F");
         acceptRequest.setAddress(newAddress);
-        acceptRequest.setRequestedBy(REQUESTED_BY);
+        acceptRequest.setRequester("Bahmni", "Dr. Monika");
         PatientData existingPatient = patientRepository.findByHealthId(healthId);
         patientRepository.processPendingApprovals(acceptRequest, existingPatient, true);
 
@@ -180,18 +179,18 @@ public class PatientFeedRepositoryIT {
         PatientData updateRequest = new PatientData();
         Address newAddress = new Address("99", "88", "77");
         updateRequest.setAddress(newAddress);
-        updateRequest.setRequestedBy(REQUESTED_BY);
+        updateRequest.setRequester("Bahmni", "Dr. Monika");
         patientRepository.update(updateRequest, healthId);
 
         assertUpdateLogEntry(healthId, since, false);
 
         PatientData updatedPatient = patientRepository.findByHealthId(healthId);
-        updateRequest.setRequestedBy(REQUESTED_BY);
+        updateRequest.setRequester("Bahmni", "Dr. Monika");
         patientRepository.processPendingApprovals(updateRequest, updatedPatient, true);
 
         List<PatientUpdateLog> patientUpdateLogs = feedRepository.findPatientsUpdatedSince(since, 1, null);
         assertEquals(healthId, patientUpdateLogs.get(0).getHealthId());
-        assertEquals(REQUESTED_BY, patientUpdateLogs.get(0).getApprovedBy());
+        assertEquals(writeValueAsString(new Requester("Bahmni", "Dr. Monika")), patientUpdateLogs.get(0).getApprovedBy());
     }
 
     private void assertUpdateLogEntry(String healthId, Date since, boolean shouldFind) {
@@ -206,9 +205,9 @@ public class PatientFeedRepositoryIT {
     }
 
     private String buildRequestedBy() {
-        Map<String, Set<String>> requestedBy = new HashMap<>();
-        Set<String> requester = new HashSet<>();
-        requester.add(REQUESTED_BY);
+        Map<String, Set<Requester>> requestedBy = new HashMap<>();
+        Set<Requester> requester = new HashSet<>();
+        requester.add(new Requester("Bahmni", "Dr. Monika"));
         requestedBy.put("ALL_FIELDS", requester);
         return writeValueAsString(requestedBy);
     }
@@ -225,7 +224,7 @@ public class PatientFeedRepositoryIT {
         PatientData updateRequest = new PatientData();
         updateRequest.setHealthId(healthId);
         updateRequest.setGivenName("Update1");
-        updateRequest.setRequestedBy(REQUESTED_BY);
+        updateRequest.setRequester("Bahmni", "Dr. Monika");
         patientRepository.update(updateRequest, healthId);
         updateRequest.setGivenName("Update2");
         patientRepository.update(updateRequest, healthId);
@@ -247,7 +246,7 @@ public class PatientFeedRepositoryIT {
         PatientData updateRequest = new PatientData();
         updateRequest.setHealthId(healthId);
         updateRequest.setGivenName("Update1");
-        updateRequest.setRequestedBy(REQUESTED_BY);
+        updateRequest.setRequester("Bahmni", "Dr. Monika");
         patientRepository.update(updateRequest, healthId);
 
         patientUpdateLogs = feedRepository.findPatientsUpdatedSince(since, limit, null);
