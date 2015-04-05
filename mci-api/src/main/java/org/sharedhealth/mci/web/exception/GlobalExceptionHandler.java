@@ -3,6 +3,7 @@ package org.sharedhealth.mci.web.exception;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import org.sharedhealth.mci.web.handler.ErrorHandler;
 import org.sharedhealth.mci.web.utils.JsonConstants;
@@ -72,6 +73,12 @@ public class GlobalExceptionHandler {
             code = ERROR_CODE_UNRECOGNIZED_FIELD;
             field = ((UnrecognizedPropertyException) cause).getPropertyName();
             msg = String.format(MESSAGE_UNRECOGNIZED_FIELD, field);
+
+        } else if (cause != null && cause.getClass() == JsonMappingException.class) {
+            errorHandler = new ErrorHandler(BAD_REQUEST.value(),
+                    ErrorHandler.INVALID_REQUEST_ERROR_CODE, MESSAGE_INVALID_REQUEST);
+            code = ERROR_CODE_JSON_PARSE;
+            msg = MESSAGE_INVALID_PAYLOAD;
         } else if (cause != null) {
             errorHandler = new ErrorHandler(BAD_REQUEST.value(),
                     ErrorHandler.INVALID_REQUEST_ERROR_CODE, MESSAGE_INVALID_REQUEST);
