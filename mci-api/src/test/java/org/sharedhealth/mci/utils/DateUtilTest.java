@@ -9,9 +9,7 @@ import java.util.Date;
 import java.util.UUID;
 
 import static org.junit.Assert.*;
-import static org.sharedhealth.mci.utils.DateUtil.ISO_DATE_TIME_TILL_MILLIS_FORMAT1;
-import static org.sharedhealth.mci.utils.DateUtil.parseDate;
-import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
+import static org.sharedhealth.mci.utils.DateUtil.*;
 import static org.sharedhealth.mci.utils.TimeUid.fromString;
 
 public class DateUtilTest {
@@ -70,7 +68,7 @@ public class DateUtilTest {
         UUID uuid = fromString("6d713100-a7a3-11e4-8319-5fcb9978cb86");
         String isoDate = toIsoFormat(uuid);
 
-        DateFormat dateFormat = new SimpleDateFormat(ISO_DATE_TIME_TILL_MILLIS_FORMAT1);
+        DateFormat dateFormat = new SimpleDateFormat(ISO_DATE_TIME_TILL_MILLIS_FORMAT3);
         assertEquals(dateFormat.format(parseDate("2015-01-29T10:41:48.560Z")), isoDate);
     }
 

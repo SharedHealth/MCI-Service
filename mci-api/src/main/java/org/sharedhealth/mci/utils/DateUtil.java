@@ -64,17 +64,15 @@ public class DateUtil {
     }
 
     public static String toIsoFormat(String dateString) {
-
-        if(dateString == null) {
+        if (dateString == null) {
             return null;
         }
-
         Date date = parseDate(dateString);
-        return  date == null ? null : toIsoFormat(date);
+        return date == null ? null : toIsoFormat(date);
     }
 
     public static String toIsoFormat(Date date) {
-        DateFormat dateFormat = new SimpleDateFormat(ISO_DATE_TIME_TILL_MILLIS_FORMAT1);
+        DateFormat dateFormat = new SimpleDateFormat(ISO_DATE_TIME_TILL_MILLIS_FORMAT3);
         return dateFormat.format(date);
     }
 
