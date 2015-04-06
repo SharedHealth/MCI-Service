@@ -8,12 +8,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
-import org.springframework.web.filter.GenericFilterBean;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -23,7 +21,7 @@ import static org.sharedhealth.mci.utils.HttpUtil.*;
 import static org.springframework.util.StringUtils.isEmpty;
 
 
-public class TokenAuthenticationFilter extends GenericFilterBean {
+public class TokenAuthenticationFilter extends OncePerRequestFilter {
     private AuthenticationManager authenticationManager;
     private final static Logger logger = LoggerFactory.getLogger(TokenAuthenticationFilter.class);
 
@@ -32,10 +30,7 @@ public class TokenAuthenticationFilter extends GenericFilterBean {
     }
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
-            ServletException {
-        HttpServletRequest httpRequest = (HttpServletRequest) request;
-        HttpServletResponse httpResponse = (HttpServletResponse) response;
+    protected void doFilterInternal(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain filterChain) throws ServletException, IOException {
         String token = httpRequest.getHeader(AUTH_TOKEN_KEY);
         String clientId = httpRequest.getHeader(CLIENT_ID_KEY);
         String email = httpRequest.getHeader(FROM_KEY);
@@ -46,8 +41,9 @@ public class TokenAuthenticationFilter extends GenericFilterBean {
 
         logger.debug("Authenticating for client : {} with token: {} and email : {}", clientId, token, email);
         try {
+            SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
             processTokenAuthentication(clientId, email, token);
-            chain.doFilter(request, response);
+            filterChain.doFilter(httpRequest, httpResponse);
 
         } catch (AuthenticationException ex) {
             logger.error(String.format("Access to user=%s with email=%s is denied.", clientId, email));
