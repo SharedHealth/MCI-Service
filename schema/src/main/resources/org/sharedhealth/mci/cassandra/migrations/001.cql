@@ -8,6 +8,20 @@ CREATE TABLE IF NOT EXISTS patient (
   sur_name varchar,
   full_name_bangla varchar,
 
+   fathers_nid varchar,
+   fathers_uid varchar,
+   fathers_brn varchar,
+   fathers_given_name varchar,
+   fathers_sur_name varchar,
+   fathers_name_bangla varchar,
+   mothers_nid varchar,
+   mothers_uid varchar,
+   mothers_brn varchar,
+   mothers_given_name varchar,
+   mothers_sur_name varchar,
+   mothers_name_bangla varchar,
+
+  household_code varchar,
   address_line varchar,
   division_id varchar,
   district_id varchar,
@@ -38,19 +52,6 @@ CREATE TABLE IF NOT EXISTS patient (
   permanent_street varchar,
   permanent_village varchar,
 
-  fathers_nid varchar,
-  fathers_uid varchar,
-  fathers_brn varchar,
-  fathers_given_name varchar,
-  fathers_sur_name varchar,
-  fathers_name_bangla varchar,
-  mothers_nid varchar,
-  mothers_uid varchar,
-  mothers_brn varchar,
-  mothers_given_name varchar,
-  mothers_sur_name varchar,
-  mothers_name_bangla varchar,
-
   marriage_id varchar,
   marital_relations varchar,
   marital_status varchar,
@@ -66,7 +67,6 @@ CREATE TABLE IF NOT EXISTS patient (
   place_of_birth varchar,
   relations varchar,
   religion varchar,
-  is_alive varchar,
   primary_contact varchar,
 
   phone_no varchar,
@@ -81,25 +81,15 @@ CREATE TABLE IF NOT EXISTS patient (
 
   pending_approvals varchar,
 
-  location_level1 varchar,
-  location_level2 varchar,
-  location_level3 varchar,
-  location_level4 varchar,
-  location_level5 varchar,
-  location_level6 varchar,
-  created_at timestamp,
+  confidential boolean,
+  status varchar,
+  date_of_death timestamp,
+  created_at timeuuid,
   created_by varchar,
-  updated_at timestamp,
+  updated_at timeuuid,
   updated_by varchar,
-  full_name varchar,
+
   PRIMARY KEY (health_id)
 );
-
-CREATE INDEX location_level1_key ON patient (location_level1);
-CREATE INDEX location_level2_key ON patient (location_level2);
-CREATE INDEX location_level3_key ON patient (location_level3);
-CREATE INDEX location_level4_key ON patient (location_level4);
-CREATE INDEX location_level5_key ON patient (location_level5);
-CREATE INDEX location_level6_key ON patient (location_level6);
 
 

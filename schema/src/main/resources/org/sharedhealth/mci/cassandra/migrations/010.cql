@@ -1,0 +1,1 @@
+CREATE INDEX idx_pending_approval_mapping_health_id on pending_approval_mapping(health_id);

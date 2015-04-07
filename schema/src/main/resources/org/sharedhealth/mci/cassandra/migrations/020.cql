@@ -1,8 +1,3 @@
-CREATE TABLE IF NOT EXISTS approval_fields (
-  field text  PRIMARY KEY,
-  option text
-);
-
 INSERT INTO approval_fields ("field", "option") VALUES ('gender', 'NA');
 INSERT INTO approval_fields ("field", "option") VALUES ('given_name', 'NA');
 INSERT INTO approval_fields ("field", "option") VALUES ('occupation', 'NA');

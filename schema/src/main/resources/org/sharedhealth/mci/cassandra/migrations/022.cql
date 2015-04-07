@@ -1,10 +1,3 @@
-CREATE TABLE IF NOT EXISTS master_data (
-  type text,
-  key text,
-  value text,
-  PRIMARY KEY (type, key)
-);
-
 INSERT INTO master_data ("type", "key", "value") VALUES ('relations', 'FAMMEMB', 'family member');
 INSERT INTO master_data ("type", "key", "value") VALUES ('relations', 'CHILD', 'child');
 INSERT INTO master_data ("type", "key", "value") VALUES ('relations', 'CHLDADOPT', 'adopted child');
@@ -475,3 +468,7 @@ INSERT INTO master_data ("type", "key", "value") VALUES ('country_code', '528', 
 INSERT INTO master_data ("type", "key", "value") VALUES ('country_code', '530', 'Netherlands Antilles');
 INSERT INTO master_data ("type", "key", "value") VALUES ('country_code', '540', 'New Caledonia');
 INSERT INTO master_data ("type", "key", "value") VALUES ('country_code', '554', 'New Zealand');
+
+INSERT INTO master_data ("type", "key", "value") VALUES ('status', '1', 'Alive');
+INSERT INTO master_data ("type", "key", "value") VALUES ('status', '2', 'Deceased');
+INSERT INTO master_data ("type", "key", "value") VALUES ('status', '3', 'Unknown');

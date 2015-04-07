@@ -1,6 +1,5 @@
 CREATE TABLE IF NOT EXISTS lr_markers (
     type varchar,
-    offset int,
-    last_sync varchar,
+    last_feed_url varchar,
     PRIMARY KEY (type)
 );

@@ -251,12 +251,6 @@ public class Patient {
     @Column(RELATIONS)
     private String relations;
 
-    @Column(LOWER_SUR_NAME)
-    private String lowerSurName;
-
-    @Column(LOWER_GIVEN_NAME)
-    private String lowerGivenName;
-
     @Column(PENDING_APPROVALS)
     private String pendingApprovals;
 
@@ -310,10 +304,6 @@ public class Patient {
         if (givenName != null ? !givenName.equals(patient.givenName) : patient.givenName != null) return false;
         if (healthId != null ? !healthId.equals(patient.healthId) : patient.healthId != null) return false;
         if (holdingNumber != null ? !holdingNumber.equals(patient.holdingNumber) : patient.holdingNumber != null)
-            return false;
-        if (lowerGivenName != null ? !lowerGivenName.equals(patient.lowerGivenName) : patient.lowerGivenName != null)
-            return false;
-        if (lowerSurName != null ? !lowerSurName.equals(patient.lowerSurName) : patient.lowerSurName != null)
             return false;
         if (maritalStatus != null ? !maritalStatus.equals(patient.maritalStatus) : patient.maritalStatus != null)
             return false;
@@ -475,8 +465,6 @@ public class Patient {
         result = 31 * result + (createdBy != null ? createdBy.hashCode() : 0);
         result = 31 * result + (updatedBy != null ? updatedBy.hashCode() : 0);
         result = 31 * result + (relations != null ? relations.hashCode() : 0);
-        result = 31 * result + (lowerSurName != null ? lowerSurName.hashCode() : 0);
-        result = 31 * result + (lowerGivenName != null ? lowerGivenName.hashCode() : 0);
         result = 31 * result + (pendingApprovals != null ? pendingApprovals.hashCode() : 0);
         result = 31 * result + (confidential != null ? confidential.hashCode() : 0);
         result = 31 * result + (householdCode != null ? householdCode.hashCode() : 0);
