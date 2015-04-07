@@ -1,5 +1,7 @@
 package org.sharedhealth.mci.web.mapper;
 
+import org.sharedhealth.mci.web.exception.InvalidRequesterException;
+
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class RequesterDetails {
@@ -16,7 +18,7 @@ public class RequesterDetails {
 
     public RequesterDetails(String id, String name) {
         if (isBlank(id)) {
-            throw new IllegalArgumentException("Requester details id cannot be empty.");
+            throw new InvalidRequesterException("Requester details id cannot be empty.");
         }
         this.id = id;
         this.name = name;

@@ -1,6 +1,7 @@
 package org.sharedhealth.mci.web.mapper;
 
 import org.junit.Test;
+import org.sharedhealth.mci.web.exception.InvalidRequesterException;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -50,8 +51,13 @@ public class RequesterTest {
         assertTrue(requesters.contains(requester8));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void shouldThrowExceptionWhenBothFacilityAndProviderAreEmpty() {
+    @Test(expected = InvalidRequesterException.class)
+    public void shouldThrowExceptionWhenFacilityProviderAndAdminAreEmpty() {
         new Requester(null, "");
+    }
+
+    @Test(expected = InvalidRequesterException.class)
+    public void shouldThrowExceptionWhenRequesterDetailsIdNotPresent() {
+        new RequesterDetails("");
     }
 }

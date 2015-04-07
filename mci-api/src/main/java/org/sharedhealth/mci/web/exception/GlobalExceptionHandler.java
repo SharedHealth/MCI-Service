@@ -32,10 +32,10 @@ public class GlobalExceptionHandler {
     public static final int ERROR_CODE_FIELD_NOT_PERMITTED = 3001;
     private static final String MESSAGE_VALIDATION_ERROR = "validation error";
     private static final String MESSAGE_INVALID_REQUEST = "invalid.request";
+    private static final String MESSAGE_INVALID_REQUESTER = "invalid.requester";
     private static final String MESSAGE_INVALID_JSON = "invalid.json";
     private static final String MESSAGE_UNRECOGNIZED_FIELD = "Unrecognized field: '%s'";
     private static final String MESSAGE_PATIENT_NOT_FOUND = "patient.not.found";
-    private static final String MESSAGE_FACILITY_NOT_FOUND = "facility.not.found";
     private static final String MESSAGE_PATIENT_ALREADY_EXIST_WITH_HEALTH_ID = "Patient already exist with health id: %s";
     private static final String MESSAGE_PERMISSION_ERROR = "permission.error";
     private static final String MESSAGE_HID_FIELD_IS_NOT_PERMITTED = "hid field is not permitted";
@@ -119,6 +119,14 @@ public class GlobalExceptionHandler {
     public ErrorHandler handleIllegalArgumentException(IllegalArgumentException e) {
         logger.error("Handling IllegalArgumentException. ", e);
         return new ErrorHandler(BAD_REQUEST.value(), MESSAGE_INVALID_PAYLOAD);
+    }
+
+    @ResponseStatus(value = BAD_REQUEST)
+    @ExceptionHandler(InvalidRequesterException.class)
+    @ResponseBody
+    public ErrorHandler handleInvalidRequesterException(InvalidRequesterException e) {
+        logger.error("Handling InvalidRequesterException. ", e);
+        return new ErrorHandler(BAD_REQUEST.value(), MESSAGE_INVALID_REQUESTER);
     }
 
     @ResponseStatus(value = CONFLICT)

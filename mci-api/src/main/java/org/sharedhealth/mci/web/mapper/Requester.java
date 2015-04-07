@@ -1,5 +1,7 @@
 package org.sharedhealth.mci.web.mapper;
 
+import org.sharedhealth.mci.web.exception.InvalidRequesterException;
+
 public class Requester {
 
     private RequesterDetails facility;
@@ -19,7 +21,7 @@ public class Requester {
 
     public Requester(RequesterDetails facility, RequesterDetails provider, RequesterDetails admin) {
         if (facility == null && provider == null && admin == null) {
-            throw new IllegalArgumentException("All of facility, provider and admin cannot be empty");
+            throw new InvalidRequesterException("All of facility, provider and admin cannot be empty");
         }
         this.facility = facility;
         this.provider = provider;
