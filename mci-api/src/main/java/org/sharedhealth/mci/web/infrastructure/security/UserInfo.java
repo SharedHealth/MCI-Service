@@ -176,9 +176,14 @@ public class UserInfo {
 
         public void loadUserProperties() {
             addRolePrefixToGroups();
-            if (containsCaseInsensitive(groups, MCI_USER_GROUP)
-                    || containsCaseInsensitive(groups, MCI_ADMIN) || containsCaseInsensitive(groups, MCI_APPROVER)) {
+            if (containsCaseInsensitive(groups, MCI_USER_GROUP)) {
                 addAddtionalUserGroupsBasedOnProfiles();
+            }
+            if (!isEmpty(userProfiles) && (containsCaseInsensitive(groups, MCI_ADMIN)
+                    || containsCaseInsensitive(groups, MCI_APPROVER))) {
+                    for (UserProfile userProfile : userProfiles) {
+                        loadAdminProperties(userProfile);
+                    }
             }
             if (containsCaseInsensitive(groups, SHR_SYSTEM_ADMIN_GROUP)) {
                 isShrSystemAdmin = true;
@@ -192,20 +197,12 @@ public class UserInfo {
                 loadFacilityProperties(userProfile);
                 loadProviderProperties(userProfile);
                 loadPatientProperties(userProfile);
-                loadAdminProperties(userProfile);
-                loadApproverProperties(userProfile);
             }
         }
 
         private void loadAdminProperties(UserProfile userProfile) {
             if (userProfile.isAdmin()) {
                 adminId = userProfile.getId();
-            }
-        }
-
-        private void loadApproverProperties(UserProfile userProfile) {
-            if (userProfile.isProvider()) {
-                providerId = userProfile.getId();
             }
         }
 

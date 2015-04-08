@@ -325,10 +325,5 @@ public class PatientDataTest extends ValidationAwareMapper {
         assertNotNull(facility);
         assertEquals("f100", facility.getId());
         assertNull(facility.getName());
-
-        RequesterDetails admin = requester.getAdmin();
-        assertNotNull(admin);
-        assertEquals("a100", admin.getId());
-        assertEquals("ABC", admin.getName());
     }
 }
