@@ -166,7 +166,7 @@ public class UserInfo {
         private UserProfile getUserProfileByType(String profileType) {
             if (!CollectionUtils.isEmpty(userProfiles)) {
                 for (UserProfile userProfile : userProfiles) {
-                    if (userProfile.getName().equals(profileType)) {
+                    if (userProfile.getName().equalsIgnoreCase(profileType)) {
                         return userProfile;
                     }
                 }
@@ -176,10 +176,11 @@ public class UserInfo {
 
         public void loadUserProperties() {
             addRolePrefixToGroups();
-            if (groups.contains(MCI_USER_GROUP) || groups.contains(MCI_ADMIN) || groups.contains(MCI_APPROVER)) {
+            if (containsCaseInsensitive(groups, MCI_USER_GROUP)
+                    || containsCaseInsensitive(groups, MCI_ADMIN) || containsCaseInsensitive(groups, MCI_APPROVER)) {
                 addAddtionalUserGroupsBasedOnProfiles();
             }
-            if (groups.contains(SHR_SYSTEM_ADMIN_GROUP)) {
+            if (containsCaseInsensitive(groups, SHR_SYSTEM_ADMIN_GROUP)) {
                 isShrSystemAdmin = true;
             }
         }
@@ -217,14 +218,15 @@ public class UserInfo {
 
         public boolean isPatientUserOnly() {
             return patientHid != null && providerId == null && facilityId == null
-                    && !groups.contains(MCI_ADMIN)
-                    && !groups.contains(MCI_APPROVER);
+                    && !containsCaseInsensitive(groups, MCI_ADMIN)
+                    && !containsCaseInsensitive(groups, MCI_APPROVER);
         }
 
         private void addGroupsBasedOnProfiles(UserProfile userProfile) {
-            if (userProfile.isFacility() && groups.contains(FACILITY_ADMIN_GROUP) && !groups.contains(SHR_SYSTEM_ADMIN_GROUP)) {
+            if (userProfile.isFacility() && containsCaseInsensitive(groups, FACILITY_ADMIN_GROUP)
+                    && !containsCaseInsensitive(groups, SHR_SYSTEM_ADMIN_GROUP)) {
                 groups.add(FACILITY_GROUP);
-            } else if (userProfile.isProvider()) {
+            }else if (userProfile.isProvider()) {
                 groups.add(PROVIDER_GROUP);
             } else if (userProfile.isPatient()) {
                 groups.add(PATIENT_GROUP);
@@ -247,6 +249,15 @@ public class UserInfo {
             if (userProfile.isFacility()) {
                 facilityId = userProfile.getId();
             }
+        }
+
+        private boolean containsCaseInsensitive(List<String> groups, String role) {
+            for (String groupMember : groups) {
+                if (groupMember.equalsIgnoreCase(role)) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }
