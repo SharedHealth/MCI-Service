@@ -176,7 +176,7 @@ public class UserInfo {
 
         public void loadUserProperties() {
             addRolePrefixToGroups();
-            if (groups.contains(MCI_USER_GROUP)) {
+            if (groups.contains(MCI_USER_GROUP) || groups.contains(MCI_ADMIN) || groups.contains(MCI_APPROVER)) {
                 addAddtionalUserGroupsBasedOnProfiles();
             }
             if (groups.contains(SHR_SYSTEM_ADMIN_GROUP)) {
@@ -192,12 +192,19 @@ public class UserInfo {
                 loadProviderProperties(userProfile);
                 loadPatientProperties(userProfile);
                 loadAdminProperties(userProfile);
+                loadApproverProperties(userProfile);
             }
         }
 
         private void loadAdminProperties(UserProfile userProfile) {
             if (userProfile.isAdmin()) {
                 adminId = userProfile.getId();
+            }
+        }
+
+        private void loadApproverProperties(UserProfile userProfile) {
+            if (userProfile.isProvider()) {
+                providerId = userProfile.getId();
             }
         }
 
