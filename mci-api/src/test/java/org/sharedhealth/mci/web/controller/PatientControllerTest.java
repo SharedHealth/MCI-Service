@@ -79,8 +79,8 @@ public class PatientControllerTest {
     private String birthRegistrationNumber = "12345678901234567";
     private String uid = "11111111111";
     private static final String householdCode = "1234";
-    public static final String API_END_POINT = "/api/v1/patients";
-    public static final String PUT_API_END_POINT = "/api/v1/patients/{healthId}";
+    public static final String API_END_POINT = "/patients";
+    public static final String PUT_API_END_POINT = "/patients/{healthId}";
     public static final String GEO_CODE = "1004092001";
     private SearchQuery searchQuery;
     private StringBuilder stringBuilder;

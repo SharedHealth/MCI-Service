@@ -38,7 +38,7 @@ public class LocationControllerIT extends BaseControllerTest {
 
     @Mock
     private LocationService locationService;
-    public static final String API_END_POINT = "/api/v1/locations";
+    public static final String API_END_POINT = "/locations";
 
 
     @Autowired

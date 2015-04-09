@@ -17,6 +17,7 @@ import org.springframework.web.client.AsyncRestTemplate;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
+import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
@@ -79,5 +80,20 @@ public class MCIConfig {
                         .maximumSize(maxSize).build().asMap(),
                 true
         );
+    }
+
+    public static String[] getSupportedServletMappings(String apiVersion, boolean isLatestApiVersion) {
+        String defaultProfile = "default";
+        String[] mappings = new String[4];
+
+        mappings[0] = format("/api/%s/%s/*", apiVersion, defaultProfile);
+        mappings[1] = format("/api/%s/*", apiVersion);
+
+        if (isLatestApiVersion) {
+            mappings[2] = format("/api/%s/*", defaultProfile);
+            mappings[3] = "/api/*";
+        }
+
+        return mappings;
     }
 }

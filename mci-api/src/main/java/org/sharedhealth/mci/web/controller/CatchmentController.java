@@ -41,7 +41,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 @RestController
-@RequestMapping("/api/v1/catchments")
+@RequestMapping("/catchments")
 public class CatchmentController extends FeedController {
 
     private static final Logger logger = LoggerFactory.getLogger(PatientController.class);

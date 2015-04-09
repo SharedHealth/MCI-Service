@@ -56,7 +56,7 @@ import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 public class CatchmentControllerTest {
 
-    private static final String API_END_POINT = "api/v1/catchments";
+    private static final String API_END_POINT = "catchments";
     private static final int MAX_PAGE_SIZE = 3;
     public static final String SERVER_URL = "https://mci.dghs.com";
     public static final String REQUEST_URL = "http://mci.dghs.com:8081";
@@ -86,6 +86,7 @@ public class CatchmentControllerTest {
         SecurityContextHolder.getContext().setAuthentication(new TokenAuthentication(getUserInfo(), true));
 
         when(properties.getServerUrl()).thenReturn(SERVER_URL);
+        when(properties.getSupportedRequestUris()).thenReturn(new String[]{""});
         when(patientService.getPerPageMaximumLimit()).thenReturn(MAX_PAGE_SIZE);
     }
 
@@ -441,7 +442,7 @@ public class CatchmentControllerTest {
                 .andExpect(jsonPath("$.entries.[0].id", is(patients.get(0).getUpdatedAt().toString())))
                 .andExpect(jsonPath("$.entries.[0].publishedDate", is(patients.get(0).getUpdatedAtAsString())))
                 .andExpect(jsonPath("$.entries.[0].title", is("Patient in Catchment: h100")))
-                .andExpect(jsonPath("$.entries.[0].link", is(SERVER_URL + "/api/v1/patients/h100")))
+                .andExpect(jsonPath("$.entries.[0].link", is(SERVER_URL + "/patients/h100")))
                 .andExpect(jsonPath("$.entries.[0].categories[0]", is("patient")))
                 .andExpect(jsonPath("$.entries.[0].content.hid", is("h100")))
 
@@ -663,7 +664,7 @@ public class CatchmentControllerTest {
         request.setServerName("mci.dghs.com");
         request.setServerPort(8081);
         request.setMethod("GET");
-        request.setRequestURI("/api/v1/catchments/102030/patients");
+        request.setRequestURI("/catchments/102030/patients");
 
         StringBuilder queryString = new StringBuilder();
         if (isNotEmpty(since)) {
@@ -683,7 +684,7 @@ public class CatchmentControllerTest {
         assertEquals(patient.getUpdatedAt(), entry.getId());
         assertEquals(patient.getUpdatedAtAsString(), entry.getPublishedDate());
         assertEquals("Patient in Catchment: " + healthId, entry.getTitle());
-        assertEquals(SERVER_URL + "/api/v1/patients/" + healthId, entry.getLink());
+        assertEquals(SERVER_URL + "/patients/" + healthId, entry.getLink());
         assertNotNull(entry.getCategories());
         assertEquals(1, entry.getCategories().length);
         assertEquals("patient", entry.getCategories()[0]);
@@ -701,7 +702,7 @@ public class CatchmentControllerTest {
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();
         assertTrue(additionalInfo != null && additionalInfo.size() == 1);
-        assertEquals(SERVER_URL + "/api/v1/catchments/201915/approvals?after=" + approvalListResponse.get(2).getLastUpdated(),
+        assertEquals(SERVER_URL + "/catchments/201915/approvals?after=" + approvalListResponse.get(2).getLastUpdated(),
                 additionalInfo.get(NEXT));
     }
 
@@ -717,7 +718,7 @@ public class CatchmentControllerTest {
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();
         assertTrue(additionalInfo != null && additionalInfo.size() == 1);
-        assertEquals(SERVER_URL + "/api/v1/catchments/201915/approvals?before=" + approvalListResponse.get(0).getLastUpdated(),
+        assertEquals(SERVER_URL + "/catchments/201915/approvals?before=" + approvalListResponse.get(0).getLastUpdated(),
                 additionalInfo.get(PREVIOUS));
 
     }
@@ -734,9 +735,9 @@ public class CatchmentControllerTest {
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();
         assertTrue(additionalInfo != null && additionalInfo.size() == 2);
-        assertEquals(SERVER_URL + "/api/v1/catchments/201915/approvals?before=" + approvalListResponse.get(0).getLastUpdated(),
+        assertEquals(SERVER_URL + "/catchments/201915/approvals?before=" + approvalListResponse.get(0).getLastUpdated(),
                 additionalInfo.get(PREVIOUS));
-        assertEquals(SERVER_URL + "/api/v1/catchments/201915/approvals?after=" + approvalListResponse.get(2).getLastUpdated(),
+        assertEquals(SERVER_URL + "/catchments/201915/approvals?after=" + approvalListResponse.get(2).getLastUpdated(),
                 additionalInfo.get(NEXT));
     }
 
@@ -764,7 +765,7 @@ public class CatchmentControllerTest {
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();
         assertTrue(additionalInfo != null && additionalInfo.size() == 1);
-        assertEquals(SERVER_URL + "/api/v1/catchments/201915/approvals?after=" + approvalListResponse.get(2).getLastUpdated(),
+        assertEquals(SERVER_URL + "/catchments/201915/approvals?after=" + approvalListResponse.get(2).getLastUpdated(),
                 additionalInfo.get(NEXT));
     }
 
@@ -793,7 +794,7 @@ public class CatchmentControllerTest {
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();
         assertTrue(additionalInfo != null && additionalInfo.size() == 1);
-        assertEquals(SERVER_URL + "/api/v1/catchments/201915/approvals?after=" + approvalListResponse.get(2).getLastUpdated(),
+        assertEquals(SERVER_URL + "/catchments/201915/approvals?after=" + approvalListResponse.get(2).getLastUpdated(),
                 additionalInfo.get(NEXT));
     }
 
@@ -877,7 +878,7 @@ public class CatchmentControllerTest {
         request.setServerName("mci.dghs.com");
         request.setServerPort(8081);
         request.setMethod("GET");
-        request.setRequestURI("/api/v1/catchments/201915/approvals");
+        request.setRequestURI("/catchments/201915/approvals");
         return request;
     }
 

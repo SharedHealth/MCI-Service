@@ -37,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 public class PatientAuditControllerTest {
 
-    private static final String API_END_POINT = "/api/v1/audit/patients/{healthId}";
+    private static final String API_END_POINT = "/audit/patients/{healthId}";
 
     @Mock
     private PatientService patientService;

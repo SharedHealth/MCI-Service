@@ -25,7 +25,7 @@ import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
-@RequestMapping("/api/v1/locations")
+@RequestMapping("/locations")
 public class LocationController extends MciController {
     private static final Logger logger = LoggerFactory.getLogger(LocationController.class);
     private LocationService locationService;

@@ -26,6 +26,7 @@ import java.util.UUID;
 import static java.util.Collections.emptyList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.join;
 import static org.sharedhealth.mci.utils.DateUtil.parseDate;
 import static org.sharedhealth.mci.web.utils.JsonConstants.LAST_MARKER;
 import static org.sharedhealth.mci.web.utils.JsonConstants.SINCE;
@@ -35,7 +36,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 @RestController
-@RequestMapping("/api/v1/feed")
+@RequestMapping("/feed")
 public class UpdateFeedController extends FeedController {
 
     private static final Logger logger = LoggerFactory.getLogger(UpdateFeedController.class);
@@ -50,8 +51,7 @@ public class UpdateFeedController extends FeedController {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_FACILITY', 'ROLE_SHR System Admin')")
-    @RequestMapping(value = "/patients", method = GET,
-            produces = {APPLICATION_JSON_VALUE, APPLICATION_ATOM_XML_VALUE})
+    @RequestMapping(value = "/patients", method = GET, produces = {APPLICATION_JSON_VALUE, APPLICATION_ATOM_XML_VALUE})
     public Feed findAllPatients(
             @RequestParam(value = SINCE, required = false) String since,
             @RequestParam(value = LAST_MARKER, required = false) String last,
@@ -80,14 +80,12 @@ public class UpdateFeedController extends FeedController {
         }
     }
 
-    private String buildNextUrl(List<PatientUpdateLog> patients, HttpServletRequest request) throws
-            UnsupportedEncodingException {
+    private String buildNextUrl(List<PatientUpdateLog> patients, HttpServletRequest request)
+            throws UnsupportedEncodingException {
         if (isEmpty(patients)) {
             return null;
         }
-
         PatientUpdateLog lastPatient = patients.get(patients.size() - 1);
-
         return fromUriString(buildUrl(request))
                 .queryParam(LAST_MARKER, lastPatient.getEventId())
                 .build().toString();
@@ -97,11 +95,9 @@ public class UpdateFeedController extends FeedController {
         if (isEmpty(patients)) {
             return emptyList();
         }
-
         List<FeedEntry> entries = new ArrayList<>();
 
         for (PatientUpdateLog patient : patients) {
-
             FeedEntry entry = new FeedEntry();
             entry.setId(patient.getEventId());
             entry.setPublishedDate(patient.getEventTimeAsString());
@@ -111,18 +107,14 @@ public class UpdateFeedController extends FeedController {
             entry.setContent(patient);
             entries.add(entry);
         }
-
         return entries;
     }
 
     private String[] buildCategoryArray(PatientUpdateLog patient) {
-
         if (StringUtils.isBlank(patient.getChangeSet())) {
             return new String[]{CATEGORY_PATIENT};
         }
-
-        String updateCategory = "update:" + StringUtils.join(patient.getChangeSetMap().keySet().toArray(), ",");
-
+        String updateCategory = "update:" + join(patient.getChangeSetMap().keySet().toArray(), ",");
         return new String[]{CATEGORY_PATIENT, updateCategory};
     }
 }

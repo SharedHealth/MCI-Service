@@ -490,7 +490,7 @@ public class PatientControllerIT extends BaseControllerTest {
                 .andReturn();
         mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isAccepted());
 
-        String url = "/api/v1/catchments/302618/approvals/" + healthId;
+        String url = "/catchments/302618/approvals/" + healthId;
         String content = asString("jsons/patient/pending_approval_address_accept.json");
         mvcResult = mockMvc.perform(put(url).accept(APPLICATION_JSON)
                 .header(AUTH_TOKEN_KEY, validAccessToken)
@@ -734,7 +734,7 @@ public class PatientControllerIT extends BaseControllerTest {
                 .andReturn();
         mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isAccepted());
 
-        String url = "/api/v1/catchments/3026/approvals/" + healthId;
+        String url = "/catchments/3026/approvals/" + healthId;
         String content = asString("jsons/patient/pending_approvals_accept.json");
 
         mvcResult = mockMvc.perform(put(url).accept(APPLICATION_JSON)

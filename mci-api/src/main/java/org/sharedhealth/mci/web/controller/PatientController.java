@@ -36,7 +36,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 @RestController
-@RequestMapping("/api/v1/patients")
+@RequestMapping("/patients")
 public class PatientController extends MciController {
     private static final Logger logger = LoggerFactory.getLogger(PatientController.class);
 

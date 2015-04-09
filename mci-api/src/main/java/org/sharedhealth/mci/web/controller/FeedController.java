@@ -6,6 +6,7 @@ import org.sharedhealth.mci.web.service.PatientService;
 
 import javax.servlet.http.HttpServletRequest;
 
+import static java.lang.String.format;
 import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
 
 public class FeedController extends MciController {
@@ -28,11 +29,23 @@ public class FeedController extends MciController {
     }
 
     protected String buildPatientLink(String healthId, HttpServletRequest request) {
-        return String.format("%s/%s/%s", buildServerUrl(request), "api/v1/patients", healthId);
+        String patientUrl = format("%s/patients", buildPatientRequestUri(request));
+        return format("%s%s/%s", buildServerUrl(request), patientUrl, healthId);
+    }
+
+    private String buildPatientRequestUri(HttpServletRequest request) {
+        String requestURI = request.getRequestURI();
+        for (String mapping : properties.getSupportedRequestUris()) {
+            if (requestURI.startsWith(mapping)) {
+                return mapping;
+            }
+        }
+        // should never happen
+        return "/api/v1";
     }
 
     protected String buildUrl(HttpServletRequest request) {
-        return String.format("%s%s", buildServerUrl(request), request.getRequestURI().toString());
+        return format("%s%s", buildServerUrl(request), request.getRequestURI());
     }
 
     String buildServerUrl(HttpServletRequest request) {
@@ -41,6 +54,6 @@ public class FeedController extends MciController {
         if (host.equals(request.getServerName())) {
             return url;
         }
-        return String.format("%s://%s:%s", request.getScheme(), request.getServerName(), request.getServerPort());
+        return format("%s://%s:%s", request.getScheme(), request.getServerName(), request.getServerPort());
     }
 }

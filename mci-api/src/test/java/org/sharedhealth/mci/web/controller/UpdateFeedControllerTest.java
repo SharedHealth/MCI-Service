@@ -55,7 +55,7 @@ import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 public class UpdateFeedControllerTest {
 
-    private static final String API_END_POINT = "api/v1/feed";
+    private static final String API_END_POINT = "feed";
     public static final String SERVER_URL = "https://mci.dghs.com";
     public static final String REQUEST_URL = "http://mci.dghs.com:9090";
 
@@ -68,7 +68,6 @@ public class UpdateFeedControllerTest {
     private MockMvc mockMvc;
 
     private UpdateFeedController updateFeedController;
-
 
     @Before
     public void setup() throws ParseException {
@@ -84,7 +83,9 @@ public class UpdateFeedControllerTest {
         UserInfo userInfo = getUserInfo();
 
         SecurityContextHolder.getContext().setAuthentication(new TokenAuthentication(userInfo, true));
+
         when(properties.getServerUrl()).thenReturn(SERVER_URL);
+        when(properties.getSupportedRequestUris()).thenReturn(new String[]{"/api/v1/default"});
     }
 
     private UserInfo getUserInfo() {
@@ -347,7 +348,6 @@ public class UpdateFeedControllerTest {
     public void shouldGiveFeedInAtomXMLFormat() throws Exception {
         UUID uuid1 = timeBased();
         UUID uuid2 = timeBased();
-
 
         List<PatientUpdateLog> patients = asList(buildPatientLog("h100", uuid1),
                 buildPatientLog("h200", uuid2));

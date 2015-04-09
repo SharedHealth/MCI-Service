@@ -3,6 +3,9 @@ package org.sharedhealth.mci.web.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import static java.lang.Boolean.valueOf;
+import static org.sharedhealth.mci.web.config.MCIConfig.getSupportedServletMappings;
+
 @Component
 public class MCIProperties {
 
@@ -18,6 +21,12 @@ public class MCIProperties {
     private int cassandraTimeout;
     @Value("${REST_POOL_SIZE}")
     private int restPoolSize;
+
+    @Value("${API_VERSION}")
+    private String apiVersion;
+    @Value("${IS_LATEST_API_VERSION}")
+    private String isLatestApiVersion;
+
     @Value("${FR_URL}")
     private String frUrl;
     @Value("${LR_URL}")
@@ -91,5 +100,24 @@ public class MCIProperties {
 
     public String getProviderRegistryUrl() {
         return providerRegistryUrl;
+    }
+
+    public String getApiVersion() {
+        return apiVersion;
+    }
+
+    public boolean isLatestApiVersion() {
+        return valueOf(isLatestApiVersion);
+    }
+
+    public String[] getSupportedRequestUris() {
+        String[] mappings = getSupportedServletMappings(getApiVersion(), isLatestApiVersion());
+        int length = mappings.length;
+        String[] uris = new String[length];
+
+        for (int i = 0; i < length; i++) {
+            uris[i] = mappings[i].substring(0, mappings[i].length() - 2);
+        }
+        return uris;
     }
 }

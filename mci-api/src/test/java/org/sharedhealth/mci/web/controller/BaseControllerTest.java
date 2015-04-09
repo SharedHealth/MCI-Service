@@ -64,8 +64,8 @@ public class BaseControllerTest {
     protected MockMvc mockMvc;
     protected PatientData patientData;
     protected ObjectMapper mapper = new ObjectMapper();
-    public static final String API_END_POINT_FOR_PATIENT = "/api/v1/patients";
-    public static final String API_END_POINT_FOR_LOCATION = "/api/v1/locations";
+    public static final String API_END_POINT_FOR_PATIENT = "/patients";
+    public static final String API_END_POINT_FOR_LOCATION = "/locations";
     public static final String APPLICATION_JSON_UTF8 = "application/json;charset=UTF-8";
 
 

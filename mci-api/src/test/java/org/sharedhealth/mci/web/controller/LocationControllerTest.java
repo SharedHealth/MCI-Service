@@ -41,9 +41,8 @@ public class LocationControllerTest {
     @Mock
     private LocalValidatorFactoryBean localValidatorFactoryBean;
 
-
     private MockMvc mockMvc;
-    public static final String API_END_POINT = "/api/v1/locations";
+    public static final String API_END_POINT = "/locations";
     private LocationCriteria locationCriteria;
     private List<LocationData> locations;
 

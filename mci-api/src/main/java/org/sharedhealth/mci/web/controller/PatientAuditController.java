@@ -28,7 +28,7 @@ import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @RestController
-@RequestMapping("/api/v1/audit/patients")
+@RequestMapping("/audit/patients")
 public class PatientAuditController extends MciController {
 
     private static final Logger logger = LoggerFactory.getLogger(PatientAuditController.class);
