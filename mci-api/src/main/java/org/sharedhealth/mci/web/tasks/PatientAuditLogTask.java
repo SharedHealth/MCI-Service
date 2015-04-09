@@ -21,11 +21,11 @@ public class PatientAuditLogTask {
     @Scheduled(fixedDelayString = "${AUDIT_LOG_SYNC_DELAY}")
     public void execute() {
         try {
-            logger.info("Syncing audit log.");
+            logger.debug("Syncing audit log.");
             auditService.sync();
 
         } catch (Exception e) {
-            logger.info("Failed to sync audit log.", e);
+            logger.error("Failed to sync audit log.", e);
         }
     }
 }
