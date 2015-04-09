@@ -41,6 +41,9 @@ public class MCIConfig {
     public static final int MASTER_DATA_CACHE_TTL_IN_DAYS = 1;
 
     public static final String PROVIDER_CACHE = "PROVIDER_CACHE";
+    public static final String SETTINGS_CACHE = "SETTINGS_CACHE";
+    public static final String APPROVAL_FIELDS_CACHE = "APPROVAL_FIELDS_CACHE";
+    public static final String MASTER_DATA_CACHE = "MASTER_DATA_CACHE";
 
     @Autowired
     private MCIProperties mciProperties;
@@ -63,10 +66,10 @@ public class MCIConfig {
         SimpleCacheManager cacheManager = new SimpleCacheManager();
 
         cacheManager.setCaches(Arrays.asList(
-                createConcurrentMapCache("mciSettings", CACHE_TTL_IN_MINUTES, MINUTES, 10),
-                createConcurrentMapCache("mciApprovalFields", CACHE_TTL_IN_MINUTES, MINUTES, 50),
+                createConcurrentMapCache(SETTINGS_CACHE, CACHE_TTL_IN_MINUTES, MINUTES, 10),
+                createConcurrentMapCache(APPROVAL_FIELDS_CACHE, CACHE_TTL_IN_MINUTES, MINUTES, 50),
                 createConcurrentMapCache(PROVIDER_CACHE, 15, DAYS, 500),
-                createConcurrentMapCache("masterData", MASTER_DATA_CACHE_TTL_IN_DAYS, DAYS, 500)
+                createConcurrentMapCache(MASTER_DATA_CACHE, MASTER_DATA_CACHE_TTL_IN_DAYS, DAYS, 500)
         ));
 
         return cacheManager;

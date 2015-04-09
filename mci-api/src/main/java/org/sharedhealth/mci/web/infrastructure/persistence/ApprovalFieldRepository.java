@@ -10,6 +10,8 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.stereotype.Component;
 
+import static org.sharedhealth.mci.web.config.MCIConfig.APPROVAL_FIELDS_CACHE;
+
 @Component
 public class ApprovalFieldRepository extends BaseRepository {
 
@@ -26,18 +28,20 @@ public class ApprovalFieldRepository extends BaseRepository {
         return cassandraOps.selectOne(select, ApprovalField.class);
     }
 
-    @CacheEvict(value = { "mciApprovalFields" }, allEntries = true)
-    public void resetAllCache() {}
+    @CacheEvict(value = APPROVAL_FIELDS_CACHE, allEntries = true)
+    public void resetAllCache() {
+    }
 
-    @CacheEvict(value = { "mciApprovalFields" }, key = "#field")
-    public void resetCacheByKey(String field) {}
+    @CacheEvict(value = APPROVAL_FIELDS_CACHE, key = "#field")
+    public void resetCacheByKey(String field) {
+    }
 
     public void save(ApprovalField approvalField) {
         resetCacheByKey(approvalField.getField());
         cassandraOps.insert(approvalField);
     }
 
-    @Cacheable({"mciApprovalFields"})
+    @Cacheable(value = APPROVAL_FIELDS_CACHE, key = "#field", unless = "#result == null")
     public ApprovalField findByField(String field) {
         return findFieldDataByKey(field);
     }

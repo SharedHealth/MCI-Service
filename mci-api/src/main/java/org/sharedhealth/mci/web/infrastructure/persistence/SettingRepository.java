@@ -10,6 +10,8 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.stereotype.Component;
 
+import static org.sharedhealth.mci.web.config.MCIConfig.SETTINGS_CACHE;
+
 @Component
 public class SettingRepository extends BaseRepository {
 
@@ -26,12 +28,12 @@ public class SettingRepository extends BaseRepository {
         return cassandraOps.selectOne(select, Setting.class);
     }
 
-    @CacheEvict("mciSettings")
+    @CacheEvict(SETTINGS_CACHE)
     public void save(Setting setting) {
         cassandraOps.insert(setting);
     }
 
-    @Cacheable({"mciSettings"})
+    @Cacheable(value = SETTINGS_CACHE, unless = "#result == null")
     public Setting findByKey(String key) {
         return findSettingDataByKey(key);
     }

@@ -18,7 +18,7 @@ public class ProviderService {
         this.client = client;
     }
 
-    @Cacheable(value = PROVIDER_CACHE, unless = "#result != null")
+    @Cacheable(value = PROVIDER_CACHE, unless = "#result == null")
     public ProviderResponse find(String providerId) {
         return client.find(providerId);
     }

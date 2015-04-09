@@ -9,6 +9,8 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.stereotype.Component;
 
+import static org.sharedhealth.mci.web.config.MCIConfig.MASTER_DATA_CACHE;
+
 @Component
 public class MasterDataRepository extends BaseRepository {
 
@@ -27,7 +29,7 @@ public class MasterDataRepository extends BaseRepository {
         return cassandraOps.selectOne(select, MasterData.class);
     }
 
-    @Cacheable({"masterData"})
+    @Cacheable(value = MASTER_DATA_CACHE, unless = "#result == null")
     public MasterData findByKey(String type, String key) {
         return findDataByKey(type, key);
     }
