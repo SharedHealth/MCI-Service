@@ -15,7 +15,7 @@
   ],
   "profiles": [
     {
-      "name": "admin",
+      "name": "mci-supervisor",
       "id": "18557",
       "catchment": ["3026"]
     }

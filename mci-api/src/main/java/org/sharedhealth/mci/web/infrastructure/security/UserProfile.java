@@ -11,7 +11,7 @@ public class UserProfile {
     public static final String FACILITY_TYPE = "facility";
     public static final String PROVIDER_TYPE = "provider";
     public static final String PATIENT_TYPE = "patient";
-    public static final String ADMIN_TYPE = "admin";
+    public static final String ADMIN_TYPE = "mci-supervisor";
     @JsonProperty("name")
     private String name;
     @JsonProperty("id")

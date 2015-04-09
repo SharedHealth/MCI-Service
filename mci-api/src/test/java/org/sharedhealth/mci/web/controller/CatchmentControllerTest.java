@@ -92,7 +92,7 @@ public class CatchmentControllerTest {
     private UserInfo getUserInfo() {
         UserProfile facilityProfile = new UserProfile("facility", FACILITY_ID, asList("1020"));
         UserProfile providerProfile = new UserProfile("provider", PROVIDER_ID, asList("102030"));
-        UserProfile adminProfile = new UserProfile("admin", "102", asList("10"));
+        UserProfile adminProfile = new UserProfile("mci-supervisor", "102", asList("10"));
 
         return new UserInfo("102", "ABC", "abc@mail", 1, true, "111100",
                 new ArrayList<>(asList(MCI_USER_GROUP, MCI_ADMIN, MCI_APPROVER, FACILITY_GROUP, PROVIDER_GROUP)),

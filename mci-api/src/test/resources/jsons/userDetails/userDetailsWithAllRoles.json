@@ -29,7 +29,7 @@
       ]
     },
     {
-      "name": "admin",
+      "name": "mci-supervisor",
       "id": "6",
       "catchment": [
         "30",
