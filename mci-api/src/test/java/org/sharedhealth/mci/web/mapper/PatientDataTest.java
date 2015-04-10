@@ -310,7 +310,7 @@ public class PatientDataTest extends ValidationAwareMapper {
                 new ArrayList<>(asList(MCI_USER_GROUP)), asList(adminProfile, providerProfile, facilityProfile));
 
         PatientData patient = new PatientData();
-        patient.setProviderId("p000");
+        patient.setProviderUrl("p000");
         patient.setRequester(userInfo.getProperties());
 
         Requester requester = patient.getRequester();

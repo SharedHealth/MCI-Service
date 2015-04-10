@@ -811,7 +811,7 @@ public class CatchmentControllerTest {
         String url = buildPendingApprovalUrl(catchmentId, healthId);
         Map<String, String> content = new HashMap<>();
         content.put(HID, healthId);
-        content.put(JsonConstants.PROVIDER_ID, "Dr. Monika");
+        content.put(JsonConstants.PROVIDER, "Dr. Monika");
         MvcResult mvcResult = mockMvc.perform(put(url).content(writeValueAsString(content)).contentType(APPLICATION_JSON))
                 .andExpect(request().asyncStarted())
                 .andReturn();
@@ -843,7 +843,7 @@ public class CatchmentControllerTest {
         String url = buildPendingApprovalUrl(catchmentId, healthId);
         Map<String, String> content = new HashMap<>();
         content.put(HID, healthId);
-        content.put(JsonConstants.PROVIDER_ID, "Dr. Monika");
+        content.put(JsonConstants.PROVIDER, "Dr. Monika");
         MvcResult mvcResult = mockMvc.perform(delete(url).content(writeValueAsString(content)).contentType(APPLICATION_JSON))
                 .andExpect(request().asyncStarted())
                 .andReturn();

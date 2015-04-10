@@ -84,7 +84,7 @@ public class JsonConstants {
     public static final String EVENT_TIME = "event_time";
     public static final String UPDATES = "updates";
     public static final String CHANGE_SET = "change_set";
-    public static final String PROVIDER_ID = "provider_id";
+    public static final String PROVIDER = "provider";
     public static final String APPROVED_BY = "approved_by";
     public static final String OLD_VALUE = "old_value";
     public static final String NEW_VALUE = "new_value";

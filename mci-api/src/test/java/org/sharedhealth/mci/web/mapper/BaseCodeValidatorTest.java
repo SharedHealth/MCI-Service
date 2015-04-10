@@ -21,7 +21,6 @@ public abstract class BaseCodeValidatorTest<T> {
     }
 
     public void assertInvalidValues(String[] inValidValues, String property, Class<T> tClass) throws Exception {
-
         for (String code : inValidValues) {
             Set<ConstraintViolation<T>> constraintViolations = validator.validateValue(tClass, property, code);
             assertEquals(1, constraintViolations.size());

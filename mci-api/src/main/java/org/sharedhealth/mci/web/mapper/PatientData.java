@@ -41,6 +41,8 @@ public class PatientData implements Diffable<PatientData> {
 
     private static final String INVALID_CATCHMENT = "invalid.catchment";
 
+    private static final String JSON = ".json";
+
     @JsonProperty(HID)
     @JsonInclude(NON_EMPTY)
     private String healthId;
@@ -199,7 +201,8 @@ public class PatientData implements Diffable<PatientData> {
     @JsonIgnore
     private Requester requester;
 
-    private String providerId;
+    @ProviderUrl
+    private String providerUrl;
 
 
     public String getNationalId() {
@@ -704,9 +707,9 @@ public class PatientData implements Diffable<PatientData> {
         this.householdCode = householdCode;
     }
 
-    @JsonProperty(PROVIDER_ID)
-    public void setProviderId(String providerId) {
-        this.providerId = providerId;
+    @JsonProperty(PROVIDER)
+    public void setProviderUrl(String providerUrl) {
+        this.providerUrl = providerUrl;
     }
 
     @JsonIgnore
@@ -724,7 +727,7 @@ public class PatientData implements Diffable<PatientData> {
             facility = new RequesterDetails(facilityId);
         }
 
-        String providerId = properties.getProviderId() != null ? properties.getProviderId() : this.providerId;
+        String providerId = properties.getProviderId() != null ? properties.getProviderId() : this.getProviderId();
         if (isNotBlank(providerId)) {
             provider = new RequesterDetails(providerId);
         }
@@ -736,6 +739,12 @@ public class PatientData implements Diffable<PatientData> {
         }
 
         this.requester = new Requester(facility, provider, admin);
+    }
+
+    @JsonIgnore
+    public String getProviderId() {
+        String idWithJson = substringAfterLast(this.providerUrl, "/");
+        return StringUtils.substringBefore(idWithJson, JSON);
     }
 
     @JsonIgnore
