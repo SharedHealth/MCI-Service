@@ -5,8 +5,10 @@ import org.sharedhealth.mci.web.config.MCIProperties;
 import org.sharedhealth.mci.web.service.PatientService;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 import static java.lang.String.format;
+import static org.sharedhealth.mci.web.config.MCIConfig.getSupportedRequestUris;
 import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
 
 public class FeedController extends MciController {
@@ -34,14 +36,17 @@ public class FeedController extends MciController {
     }
 
     private String buildPatientRequestUri(HttpServletRequest request) {
-        String requestURI = request.getRequestURI();
-        for (String mapping : properties.getSupportedRequestUris()) {
-            if (requestURI.startsWith(mapping)) {
+        String requestUri = request.getRequestURI();
+        List<String> supportedRequestUris = getSupportedRequestUris(properties.getApiVersion(),
+                properties.isLatestApiVersion());
+
+        for (String mapping : supportedRequestUris) {
+            if (requestUri.startsWith(mapping)) {
                 return mapping;
             }
         }
         // should never happen
-        return "/api/v1";
+        return "";
     }
 
     protected String buildUrl(HttpServletRequest request) {

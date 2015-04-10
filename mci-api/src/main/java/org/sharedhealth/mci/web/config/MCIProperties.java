@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import static java.lang.Boolean.valueOf;
-import static org.sharedhealth.mci.web.config.MCIConfig.getSupportedServletMappings;
 
 @Component
 public class MCIProperties {
@@ -108,16 +107,5 @@ public class MCIProperties {
 
     public boolean isLatestApiVersion() {
         return valueOf(isLatestApiVersion);
-    }
-
-    public String[] getSupportedRequestUris() {
-        String[] mappings = getSupportedServletMappings(getApiVersion(), isLatestApiVersion());
-        int length = mappings.length;
-        String[] uris = new String[length];
-
-        for (int i = 0; i < length; i++) {
-            uris[i] = mappings[i].substring(0, mappings[i].length() - 2);
-        }
-        return uris;
     }
 }

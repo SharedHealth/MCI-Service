@@ -12,6 +12,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
+import java.util.List;
 import java.util.Map;
 
 import static java.lang.Integer.valueOf;
@@ -36,7 +37,8 @@ public class Main {
 
                 ServletRegistration.Dynamic mci = servletContext.addServlet("mci", DispatcherServlet.class);
 
-                mci.addMapping(getServletMappings(env));
+                List<String> servletMappings = getServletMappings(env);
+                mci.addMapping(servletMappings.toArray(new String[servletMappings.size()]));
 
                 mci.setInitParameter("contextClass", "org.springframework.web.context.support" +
                         ".AnnotationConfigWebApplicationContext");
@@ -51,7 +53,7 @@ public class Main {
         return factory;
     }
 
-    private String[] getServletMappings(Map<String, String> env) {
+    private java.util.List<String> getServletMappings(Map<String, String> env) {
         return getSupportedServletMappings(env.get(API_VERSION), Boolean.valueOf(env.get(IS_LATEST_API_VERSION)));
     }
 

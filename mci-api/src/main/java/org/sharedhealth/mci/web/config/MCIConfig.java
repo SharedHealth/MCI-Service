@@ -14,12 +14,15 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.AsyncRestTemplate;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.concurrent.TimeUnit.MINUTES;
+import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
 
 @Configuration
 @EnableCaching
@@ -44,6 +47,7 @@ public class MCIConfig {
     public static final String SETTINGS_CACHE = "SETTINGS_CACHE";
     public static final String APPROVAL_FIELDS_CACHE = "APPROVAL_FIELDS_CACHE";
     public static final String MASTER_DATA_CACHE = "MASTER_DATA_CACHE";
+    public static final String PROFILE_DEFAULT = "default";
 
     @Autowired
     private MCIProperties mciProperties;
@@ -85,16 +89,25 @@ public class MCIConfig {
         );
     }
 
-    public static String[] getSupportedServletMappings(String apiVersion, boolean isLatestApiVersion) {
-        String defaultProfile = "default";
-        String[] mappings = new String[4];
+    public static List<String> getSupportedRequestUris(String apiVersion, boolean isLatestApiVersion) {
+        List<String> mappings = getSupportedServletMappings(apiVersion, isLatestApiVersion);
+        List<String> uris = new ArrayList<>();
 
-        mappings[0] = format("/api/%s/%s/*", apiVersion, defaultProfile);
-        mappings[1] = format("/api/%s/*", apiVersion);
+        for (String mapping : mappings) {
+            uris.add(substringBeforeLast(mapping, "/*"));
+        }
+        return uris;
+    }
+
+    public static List<String> getSupportedServletMappings(String apiVersion, boolean isLatestApiVersion) {
+        List<String> mappings = new ArrayList<>();
+
+        mappings.add(format("/api/%s/%s/*", apiVersion, PROFILE_DEFAULT));
+        mappings.add(format("/api/%s/*", apiVersion));
 
         if (isLatestApiVersion) {
-            mappings[2] = format("/api/%s/*", defaultProfile);
-            mappings[3] = "/api/*";
+            mappings.add(format("/api/%s/*", PROFILE_DEFAULT));
+            mappings.add("/api/*");
         }
 
         return mappings;
