@@ -58,9 +58,9 @@ public class AuthorizationIT extends BaseControllerTest {
     private final String datasenseEmail = "datasense@gmail.com";
     private final String datasenseAccessToken = "40214a6c-e27c-4223-981c-1f837be90f04";
 
-    private final String mciAdminClientId = "18557";
-    private final String mciAdminEmail = "mciadmin@gmail.com";
-    private final String mciAdminAccessToken = "40214a6c-e27c-4223-981c-1f837be90f05";
+    private final String mciAdminClientId = "18564";
+    private final String mciAdminEmail = "MciAdmin@test.com";
+    private final String mciAdminAccessToken = "85HoExoxghh1pislg65hUM0q3wM9kfzcMdpYS0ixPD";
 
     private final String mciApproverClientId = "18555";
     private final String mciApproverEmail = "mciapprover@gmail.com";
