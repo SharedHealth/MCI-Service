@@ -202,7 +202,7 @@ public class PatientData implements Diffable<PatientData> {
     private Requester requester;
 
     @ProviderUrl
-    private String providerUrl;
+    private String provider;
 
 
     public String getNationalId() {
@@ -708,8 +708,8 @@ public class PatientData implements Diffable<PatientData> {
     }
 
     @JsonProperty(PROVIDER)
-    public void setProviderUrl(String providerUrl) {
-        this.providerUrl = providerUrl;
+    public void setProvider(String provider) {
+        this.provider = provider;
     }
 
     @JsonIgnore
@@ -743,7 +743,7 @@ public class PatientData implements Diffable<PatientData> {
 
     @JsonIgnore
     public String getProviderId() {
-        String idWithJson = substringAfterLast(this.providerUrl, "/");
+        String idWithJson = substringAfterLast(this.provider, "/");
         return StringUtils.substringBefore(idWithJson, JSON);
     }
 

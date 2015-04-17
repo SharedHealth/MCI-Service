@@ -1,13 +1,18 @@
 package org.sharedhealth.mci.utils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
 import java.util.List;
 
+import static java.lang.String.format;
+
 public class FieldPropertyNameReader {
+    private static final Logger logger = LoggerFactory.getLogger(FieldPropertyNameReader.class);
 
     public static String getFieldPropertyName(Class objectClass, String fieldName) {
 
@@ -18,9 +23,11 @@ public class FieldPropertyNameReader {
         try {
             Field field = objectClass.getDeclaredField(fieldName);
             JsonProperty annotation = field.getAnnotation(JsonProperty.class);
-            return annotation.value();
+            if (annotation != null) {
+                return annotation.value();
+            }
         } catch (NoSuchFieldException e) {
-            e.printStackTrace();
+            logger.error(format("Error while retrieving field name %s from %s.", fieldName, objectClass), e);
         }
 
         return fieldName;
