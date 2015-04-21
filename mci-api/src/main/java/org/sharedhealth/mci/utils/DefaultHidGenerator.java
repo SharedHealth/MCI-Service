@@ -19,7 +19,6 @@ import static java.lang.String.valueOf;
 import static java.lang.System.currentTimeMillis;
 import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.utils.NumberUtil.getMin10DigitNumber;
-import static org.sharedhealth.mci.utils.NumberUtil.is10DigitNumber;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Component
@@ -58,7 +57,7 @@ public class DefaultHidGenerator implements HidGenerator {
         do {
             id = generateId();
             counter++;
-        } while (!is10DigitNumber(id) && counter < MAX_RETRY_COUNT);
+        } while (!hidValidator.isValid(id) && counter < MAX_RETRY_COUNT);
 
         logger.debug("Retry counter: " + counter);
 
