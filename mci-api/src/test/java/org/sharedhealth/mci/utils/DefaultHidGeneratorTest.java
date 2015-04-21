@@ -20,13 +20,13 @@ public class DefaultHidGeneratorTest {
     private MCIProperties properties;
 
     private DefaultHidGenerator hidGenerator;
-    private DefaultChecksumGenerator checksumGenerator;
+    private LuhnChecksumGenerator checksumGenerator;
     private DefaultHidValidator hidValidator;
 
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-        checksumGenerator = new DefaultChecksumGenerator();
+        checksumGenerator = new LuhnChecksumGenerator();
         hidValidator = new DefaultHidValidator();
         hidGenerator = new DefaultHidGenerator(properties, hidValidator, checksumGenerator);
         when(properties.getWorkerId()).thenReturn(valueOf(hidGenerator.getMaxWorkerId()));

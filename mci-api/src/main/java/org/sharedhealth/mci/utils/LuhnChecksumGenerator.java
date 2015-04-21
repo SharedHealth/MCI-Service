@@ -1,0 +1,31 @@
+package org.sharedhealth.mci.utils;
+
+import org.apache.commons.validator.routines.checkdigit.CheckDigitException;
+import org.sharedhealth.mci.web.exception.HidGenerationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
+
+import static java.lang.Integer.parseInt;
+import static java.lang.String.valueOf;
+import static org.apache.commons.validator.routines.checkdigit.LuhnCheckDigit.LUHN_CHECK_DIGIT;
+
+@Component
+@Qualifier("MciChecksumGenerator")
+public class LuhnChecksumGenerator implements ChecksumGenerator {
+
+    private static final Logger logger = LoggerFactory.getLogger(LuhnChecksumGenerator.class);
+
+    @Override
+    public int generate(long id) {
+        try {
+            return parseInt(LUHN_CHECK_DIGIT.calculate(valueOf(id)));
+
+        } catch (CheckDigitException e) {
+            String message = "Cannot create checksum using Luhn algorithm for id " + id;
+            logger.error(message);
+            throw new HidGenerationException(message, e);
+        }
+    }
+}
