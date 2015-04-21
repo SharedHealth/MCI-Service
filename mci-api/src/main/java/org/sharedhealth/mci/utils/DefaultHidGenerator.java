@@ -18,7 +18,6 @@ import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static java.lang.System.currentTimeMillis;
 import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
-import static org.sharedhealth.mci.utils.NumberUtil.getMin10DigitNumber;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Component
@@ -108,9 +107,13 @@ public class DefaultHidGenerator implements HidGenerator {
         logger.debug("Random bits with shift: " + toBinaryString(randomBits));
         idBits.or(randomBits);
 
-        long id = toLong(idBits) + getMin10DigitNumber();
+        long id = toLong(idBits) + getMinHidValue();
         logger.debug("Id w/o prefix and checksum: " + id);
         return id;
+    }
+
+    long getMinHidValue() {
+        return 9000000000L;
     }
 
     private long getCurrentTimestamp() {

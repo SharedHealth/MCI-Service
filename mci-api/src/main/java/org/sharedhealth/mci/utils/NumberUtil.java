@@ -11,7 +11,7 @@ public class NumberUtil {
         return getMin10DigitNumber() <= id && id < round(pow(10, 10));
     }
 
-    public static long getMin10DigitNumber() {
+    static long getMin10DigitNumber() {
         return round(pow(10, 9));
     }
 

@@ -12,7 +12,6 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.utils.DefaultHidGenerator.RANDOM_BITS_SIZE;
 import static org.sharedhealth.mci.utils.DefaultHidGenerator.WORKER_ID_BITS_SIZE;
-import static org.sharedhealth.mci.utils.NumberUtil.getMin10DigitNumber;
 
 public class DefaultHidGeneratorTest {
 
@@ -57,7 +56,7 @@ public class DefaultHidGeneratorTest {
         assertNotNull(hid);
         assertEquals(10, hid.length());
 
-        hid = valueOf(Long.valueOf(hid) - getMin10DigitNumber());
+        hid = valueOf(Long.valueOf(hid) - hidGenerator.getMinHidValue());
         assertNotNull(hid);
 
         String hidBinary = Long.toBinaryString(Long.valueOf(hid));
