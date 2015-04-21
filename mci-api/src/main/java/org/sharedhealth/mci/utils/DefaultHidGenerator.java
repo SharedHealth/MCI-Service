@@ -12,9 +12,14 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
+import static java.lang.Math.pow;
+import static java.lang.Math.round;
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
+import static java.lang.System.currentTimeMillis;
 import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
+import static org.sharedhealth.mci.utils.NumberUtil.getMin10DigitNumber;
+import static org.sharedhealth.mci.utils.NumberUtil.is10DigitNumber;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Component
@@ -33,11 +38,18 @@ public class DefaultHidGenerator implements HidGenerator {
 
     private long lastTimestamp = 0;
     private Set<Long> recentRandoms = new HashSet<>(500);
+
     private MCIProperties properties;
+    private HidValidator hidValidator;
+    private ChecksumGenerator checksumGenerator;
 
     @Autowired
-    public DefaultHidGenerator(MCIProperties properties) {
+    public DefaultHidGenerator(MCIProperties properties,
+                               @Qualifier("MciHidValidator") HidValidator hidValidator,
+                               @Qualifier("MciChecksumGenerator") ChecksumGenerator checksumGenerator) {
         this.properties = properties;
+        this.hidValidator = hidValidator;
+        this.checksumGenerator = checksumGenerator;
     }
 
     public synchronized String generate() {
@@ -50,30 +62,18 @@ public class DefaultHidGenerator implements HidGenerator {
 
         logger.debug("Retry counter: " + counter);
 
-        if (!is10DigitNumber(id)) {
-            String message = format("Generated health id %s should be a 10 digit number.", id);
+        if (!hidValidator.isValid(id)) {
+            String message = format("Generated health id [%s] is not valid.", id);
             logger.debug(message);
             throw new HidGenerationException(message);
         }
 
-        int checksum = generateChecksum(id);
+        int checksum = this.checksumGenerator.generate(id);
         logger.debug("Checksum for id " + id + " is " + checksum);
 
         String generatedId = valueOf(id) + valueOf(checksum);
         logger.debug("Generated id: " + generatedId);
         return generatedId;
-    }
-
-    boolean is10DigitNumber(long id) {
-        return getMin10DigitNumber() <= id && id < getMin11DigitNumber();
-    }
-
-    int generateChecksum(long id) {
-        int sum = 0;
-        for (char c : Long.valueOf(id).toString().toCharArray()) {
-            sum += Integer.parseInt(valueOf(c));
-        }
-        return sum % 9;
     }
 
     private long generateId() {
@@ -138,16 +138,8 @@ public class DefaultHidGenerator implements HidGenerator {
     }
 
     long getCurrentTimeMins() {
-        long currentTimeMillis = System.currentTimeMillis();
+        long currentTimeMillis = currentTimeMillis();
         return currentTimeMillis / MILLIS_IN_MIN;
-    }
-
-    long getMin10DigitNumber() {
-        return Math.round(Math.pow(10, 9));
-    }
-
-    private long getMin11DigitNumber() {
-        return Math.round(Math.pow(10, 10));
     }
 
     long getWorkerId() {
@@ -162,7 +154,7 @@ public class DefaultHidGenerator implements HidGenerator {
     }
 
     long getMaxWorkerId() {
-        return Math.round(Math.pow(2, WORKER_ID_BITS_SIZE) - 1);
+        return round(pow(2, WORKER_ID_BITS_SIZE) - 1);
     }
 
     long generateRandomNumber() {
@@ -172,7 +164,7 @@ public class DefaultHidGenerator implements HidGenerator {
     }
 
     long getMaxRandomNumber() {
-        return Math.round(Math.pow(2, RANDOM_BITS_SIZE) - 1);
+        return round(pow(2, RANDOM_BITS_SIZE) - 1);
     }
 
     private static Long toLong(BitSet bs) {
@@ -180,7 +172,7 @@ public class DefaultHidGenerator implements HidGenerator {
         if (array.length == 0) {
             return null;
         }
-        return Long.valueOf(array[0]);
+        return array[0];
     }
 
     private static String toBinaryString(BitSet bs) {

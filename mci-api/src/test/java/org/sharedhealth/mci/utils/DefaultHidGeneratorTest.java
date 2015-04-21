@@ -12,17 +12,23 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.utils.DefaultHidGenerator.RANDOM_BITS_SIZE;
 import static org.sharedhealth.mci.utils.DefaultHidGenerator.WORKER_ID_BITS_SIZE;
+import static org.sharedhealth.mci.utils.NumberUtil.getMin10DigitNumber;
 
 public class DefaultHidGeneratorTest {
 
     @Mock
     private MCIProperties properties;
+
     private DefaultHidGenerator hidGenerator;
+    private DefaultChecksumGenerator checksumGenerator;
+    private DefaultHidValidator hidValidator;
 
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-        hidGenerator = new DefaultHidGenerator(properties);
+        checksumGenerator = new DefaultChecksumGenerator();
+        hidValidator = new DefaultHidValidator();
+        hidGenerator = new DefaultHidGenerator(properties, hidValidator, checksumGenerator);
         when(properties.getWorkerId()).thenReturn(valueOf(hidGenerator.getMaxWorkerId()));
     }
 
@@ -38,7 +44,7 @@ public class DefaultHidGeneratorTest {
         String hid = hidWithCheckSum.substring(0, hidWithCheckSum.length() - 1);
         assertEquals(10, hid.length());
 
-        assertEquals((int) Integer.valueOf(checksum), hidGenerator.generateChecksum(Long.valueOf(hid)));
+        assertEquals((int) Integer.valueOf(checksum), checksumGenerator.generate(Long.valueOf(hid)));
     }
 
     @Test
@@ -51,7 +57,7 @@ public class DefaultHidGeneratorTest {
         assertNotNull(hid);
         assertEquals(10, hid.length());
 
-        hid = valueOf(Long.valueOf(hid) - hidGenerator.getMin10DigitNumber());
+        hid = valueOf(Long.valueOf(hid) - getMin10DigitNumber());
         assertNotNull(hid);
 
         String hidBinary = Long.toBinaryString(Long.valueOf(hid));
@@ -77,20 +83,6 @@ public class DefaultHidGeneratorTest {
         assertNotNull(randomBits);
 
         assertEquals(hidBinary, timestampBits + workerIdBits + randomBits);
-    }
-
-    @Test
-    public void shouldValidateWhether10DigitNumber() {
-        assertFalse(hidGenerator.is10DigitNumber(1));
-        assertFalse(hidGenerator.is10DigitNumber(12345678901L));
-        assertTrue(hidGenerator.is10DigitNumber(1234567890L));
-    }
-
-    @Test
-    public void shouldGenerateChecksum() {
-        assertEquals(6, hidGenerator.generateChecksum(12345));
-        assertEquals(3, hidGenerator.generateChecksum(123456));
-        assertEquals(1, hidGenerator.generateChecksum(1234567));
     }
 
     @Test
