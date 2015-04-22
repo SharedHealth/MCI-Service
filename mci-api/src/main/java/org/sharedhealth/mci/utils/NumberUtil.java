@@ -1,9 +1,7 @@
 package org.sharedhealth.mci.utils;
 
-import static java.lang.Integer.parseInt;
 import static java.lang.Math.pow;
 import static java.lang.Math.round;
-import static java.lang.String.valueOf;
 
 public class NumberUtil {
 
@@ -13,9 +11,5 @@ public class NumberUtil {
 
     static long getMin10DigitNumber() {
         return round(pow(10, 9));
-    }
-
-    public static int getDigitAt(long value, int position) {
-        return parseInt(valueOf(valueOf(value).charAt(position)));
     }
 }

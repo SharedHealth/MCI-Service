@@ -113,7 +113,7 @@ public class DefaultHidGenerator implements HidGenerator {
     }
 
     long getMinHidValue() {
-        return 9000000000L;
+        return 9800000000L;
     }
 
     private long getCurrentTimestamp() {

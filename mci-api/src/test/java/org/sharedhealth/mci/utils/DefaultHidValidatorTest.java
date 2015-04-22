@@ -22,7 +22,9 @@ public class DefaultHidValidatorTest {
         assertFalse(defaultHidValidator.isValid(9034567890L));
         assertFalse(defaultHidValidator.isValid(9833277770L));
         assertFalse(defaultHidValidator.isValid(9877743330L));
+        assertFalse(defaultHidValidator.isValid(9677743320L));
 
+        assertTrue(defaultHidValidator.isValid(9977743320L));
         assertTrue(defaultHidValidator.isValid(9877743320L));
     }
 }
