@@ -113,7 +113,13 @@ public class DefaultHidGenerator implements HidGenerator {
     }
 
     long getMinHidValue() {
-        return 9800000000L;
+        /**
+         * One of the generated ids while implementing was 164041872.
+         * 9636000000 + 164041872 = 9800041872.
+         * And first several bits contain time component.
+         * So generated ids will not be less than 164000000.
+         */
+        return 9636000000L;
     }
 
     private long getCurrentTimestamp() {
