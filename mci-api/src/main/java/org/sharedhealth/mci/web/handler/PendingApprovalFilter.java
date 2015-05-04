@@ -1,7 +1,14 @@
 package org.sharedhealth.mci.web.handler;
 
 import org.sharedhealth.mci.web.exception.NonUpdatableFieldUpdateException;
-import org.sharedhealth.mci.web.mapper.*;
+import org.sharedhealth.mci.web.mapper.Address;
+import org.sharedhealth.mci.web.mapper.PatientActivationInfo;
+import org.sharedhealth.mci.web.mapper.PatientData;
+import org.sharedhealth.mci.web.mapper.PatientStatus;
+import org.sharedhealth.mci.web.mapper.PendingApproval;
+import org.sharedhealth.mci.web.mapper.PendingApprovalFieldDetails;
+import org.sharedhealth.mci.web.mapper.PhoneNumber;
+import org.sharedhealth.mci.web.mapper.Requester;
 import org.sharedhealth.mci.web.service.ApprovalFieldService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -66,6 +73,7 @@ public class PendingApprovalFilter {
         newPatient.setAddress(processAddress(PRESENT_ADDRESS, existingPatient.getAddress(), updateRequest.getAddress(), this.requestedBy));
         newPatient.setPermanentAddress(processAddress(PERMANENT_ADDRESS, existingPatient.getPermanentAddress(), updateRequest.getPermanentAddress(), this.requestedBy));
         newPatient.setHouseholdCode(processString(HOUSEHOLD_CODE, existingPatient.getHouseholdCode(), updateRequest.getHouseholdCode(), this.requestedBy));
+        newPatient.setPatientActivationInfo(processPatientActivationInfo(ACTIVE, existingPatient.getPatientActivationInfo(), updateRequest.getPatientActivationInfo(), this.requestedBy));
 
         return newPatient;
     }
@@ -93,6 +101,11 @@ public class PendingApprovalFilter {
     private UUID processUuid(String key, UUID oldValue, UUID newValue, Requester requester) {
         Object value = process(key, oldValue, newValue, requester);
         return value == null ? null : (UUID) value;
+    }
+
+    private PatientActivationInfo processPatientActivationInfo(String key, PatientActivationInfo oldValue, PatientActivationInfo newValue, Requester requester) {
+        Object patientActivationInfo = process(key, oldValue, newValue, requester);
+        return patientActivationInfo == null ? null : (PatientActivationInfo) patientActivationInfo;
     }
 
     private String processString(String key, String oldValue, String newValue, Requester requester) {

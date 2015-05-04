@@ -1,5 +1,6 @@
 package org.sharedhealth.mci.web.controller;
 
+import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.validation.group.RequiredGroup;
 import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
 import org.sharedhealth.mci.web.exception.Forbidden;
@@ -8,6 +9,7 @@ import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
+import org.sharedhealth.mci.web.mapper.PatientActivationInfo;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PatientSummaryData;
 import org.sharedhealth.mci.web.mapper.SearchQuery;
@@ -33,7 +35,9 @@ import java.util.List;
 import static java.lang.String.format;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.web.bind.annotation.RequestMethod.*;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
+import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 @RestController
 @RequestMapping("/patients")
@@ -61,6 +65,10 @@ public class PatientController extends MciController {
         logger.debug("Trying to create patient.");
         final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
 
+        if (!shouldCreatePatient(patient.getPatientActivationInfo())) {
+            deferredResult.setErrorResult(new Forbidden(format("Cannot create inactive patient")));
+            return deferredResult;
+        }
         if (bindingResult.hasErrors()) {
             logger.debug("Validation error while trying to create patient.");
             throw new ValidationException(bindingResult);
@@ -143,8 +151,28 @@ public class PatientController extends MciController {
             throw new ValidationException(bindingResult);
         }
 
+        if (mergingWithSamePatient(patient, healthId)) {
+            deferredResult.setErrorResult(new Forbidden(format("Cannot merge with the same patient")));
+            return deferredResult;
+        }
+
         MCIResponse mciResponse = patientService.update(patient, healthId);
         deferredResult.setResult(new ResponseEntity<>(mciResponse, mciResponse.httpStatusObject));
         return deferredResult;
+    }
+
+    private boolean mergingWithSamePatient(PatientData patient, String healthId) {
+        PatientActivationInfo patientActivationInfo = patient.getPatientActivationInfo();
+        if (null == patientActivationInfo || StringUtils.isBlank(patientActivationInfo.getMergedWith())) {
+            return false;
+        }
+        return patientActivationInfo.getMergedWith().equals(healthId);
+    }
+
+    private boolean shouldCreatePatient(PatientActivationInfo patientActivationInfo) {
+        if (null == patientActivationInfo) {
+            return true;
+        }
+        return null == patientActivationInfo.getActive() || patientActivationInfo.getActive();
     }
 }

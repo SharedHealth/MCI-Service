@@ -195,6 +195,12 @@ public class PatientData implements Diffable<PatientData> {
     @PatientStatusBlock(message = ERROR_CODE_INVALID)
     private PatientStatus patientStatus;
 
+    @JsonProperty(ACTIVATION_INFO)
+    @Valid
+    @JsonInclude(NON_EMPTY)
+    @PatientActivationInfoBlock(message = ERROR_CODE_INVALID)
+    private PatientActivationInfo patientActivationInfo;
+
     @JsonIgnore
     private TreeSet<PendingApproval> pendingApprovals;
 
@@ -805,6 +811,14 @@ public class PatientData implements Diffable<PatientData> {
 
     public void setPatientStatus(PatientStatus patientStatus) {
         this.patientStatus = patientStatus;
+    }
+
+    public PatientActivationInfo getPatientActivationInfo() {
+        return patientActivationInfo;
+    }
+
+    public void setPatientActivationInfo(PatientActivationInfo patientActivationInfo) {
+        this.patientActivationInfo = patientActivationInfo;
     }
 
     @JsonProperty(UPDATED_BY)

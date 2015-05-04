@@ -260,6 +260,12 @@ public class Patient {
     @Column(CONFIDENTIAL)
     private Boolean confidential;
 
+    @Column(ACTIVE)
+    private Boolean active;
+
+    @Column(MERGED_WITH)
+    private String mergedWith;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -1130,6 +1136,22 @@ public class Patient {
 
     public void setConfidential(Boolean confidential) {
         this.confidential = confidential;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
+    public String getMergedWith() {
+        return mergedWith;
+    }
+
+    public void setMergedWith(String mergedWith) {
+        this.mergedWith = mergedWith;
     }
 
     @Transient

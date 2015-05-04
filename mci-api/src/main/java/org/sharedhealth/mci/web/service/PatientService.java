@@ -23,7 +23,10 @@ import static java.lang.String.format;
 import static org.apache.commons.collections4.CollectionUtils.*;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_INVALID;
+import static org.sharedhealth.mci.web.utils.JsonConstants.ACTIVATION_INFO;
+import static org.sharedhealth.mci.web.utils.JsonConstants.ACTIVE;
 import static org.sharedhealth.mci.web.utils.JsonConstants.HID;
+import static org.sharedhealth.mci.web.utils.JsonConstants.MERGED_WITH;
 
 @Component
 public class PatientService {
@@ -213,6 +216,18 @@ public class PatientService {
         }
         List<String> fieldNames = patient.findNonEmptyFieldNames();
         fieldNames.remove(HID);
+        
+//        if (fieldNames.contains(ACTIVATION_INFO)) {
+//            fieldNames.remove(ACTIVATION_INFO);
+//            for (PendingApproval pendingApproval : existingPatient.getPendingApprovals()) {
+//                if (pendingApproval.getName().equals(ACTIVE)) {
+//                    fieldNames.add(ACTIVE);
+//                }
+//                if (pendingApproval.getName().equals(MERGED_WITH)) {
+//                    fieldNames.add(MERGED_WITH);
+//                }
+//            }
+//        }
 
         for (PendingApproval pendingApproval : existingPatient.getPendingApprovals()) {
             String fieldName = pendingApproval.getName();

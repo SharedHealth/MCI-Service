@@ -53,6 +53,8 @@ public class PatientRepositoryConstants {
     public static final String SPOUSE_NAME = "spouse_name";
     public static final String SPOUSE_UID_NID = "spouse_uid_nid";
     public static final String CONFIDENTIAL = "confidential";
+    public static final String ACTIVE = "active";
+    public static final String MERGED_WITH = "merged_with";
     public static final String RELIGION = "religion";
     public static final String BLOOD_GROUP = "blood_group";
     public static final String NATIONALITY = "nationality";

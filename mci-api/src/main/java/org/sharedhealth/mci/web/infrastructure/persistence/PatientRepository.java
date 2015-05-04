@@ -86,6 +86,7 @@ public class PatientRepository extends BaseRepository {
             patient.setConfidential(false);
         }
 
+        patient.setActive(true);
         cassandraOps.execute(buildSaveBatch(patient, cassandraOps.getConverter()));
         return new MCIResponse(patient.getHealthId(), HttpStatus.CREATED);
     }

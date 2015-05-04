@@ -11,7 +11,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.FieldError;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -93,6 +97,17 @@ public class PatientMapper {
         if(!patientStatus.isEmpty()) {
             data.setPatientStatus(patientStatus);
         }
+
+        Boolean isActive = patient.getActive();
+        PatientActivationInfo patientActivationInfo = new PatientActivationInfo();
+        if (null == isActive) {
+            patientActivationInfo.setActive(true);
+        }
+        patientActivationInfo.setActive(isActive);
+        if (null != isActive && !isActive) {
+            patientActivationInfo.setMergedWith(patient.getMergedWith());
+        }
+        data.setPatientActivationInfo(patientActivationInfo);
 
         if (patient.getConfidential() != null) {
             mapConfidentiality(patient, data);
@@ -185,6 +200,7 @@ public class PatientMapper {
         PatientStatus patientStatus = data.getPatientStatus();
         PhoneNumber phoneNumber = data.getPhoneNumber();
         PhoneNumber primaryContactNumber = data.getPrimaryContactNumber();
+        PatientActivationInfo patientActivationInfo = data.getPatientActivationInfo();
 
         patient.setHealthId(data.getHealthId());
         patient.setNationalId(data.getNationalId());
@@ -231,6 +247,10 @@ public class PatientMapper {
             mapPrimaryContactNumber(patient, primaryContactNumber);
         }
 
+        if (null != patientActivationInfo) {
+            mapPatientActivationInfo(patient, patientActivationInfo);
+        }
+
         patient.setPrimaryContact(StringUtils.trim(data.getPrimaryContact()));
         patient.setPendingApprovals(data.getPendingApprovals());
         patient.setHouseholdCode(data.getHouseholdCode());
@@ -255,6 +275,11 @@ public class PatientMapper {
     private void mapPatientStatus(Patient patient, PatientStatus patientStatus) {
         patient.setStatus(defaultString(patientStatus.getType(), PATIENT_STATUS_ALIVE));
         patient.setDateOfDeath(defaultString(patientStatus.getDateOfDeath()));
+    }
+
+    private void mapPatientActivationInfo(Patient patient, PatientActivationInfo patientActivationInfo) {
+        patient.setActive(patientActivationInfo.getActive());
+        patient.setMergedWith(patientActivationInfo.getMergedWith());
     }
 
     private void mapPermanentAddress(Patient patient, Address permanentAddress) {
