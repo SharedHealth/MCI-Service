@@ -150,12 +150,41 @@ public class PatientController extends MciController {
             logger.debug(format("Validation error while updating patient (healthId): %s", healthId));
             throw new ValidationException(bindingResult);
         }
+        if (null != patient.getPatientActivationInfo()) {
+            deferredResult.setErrorResult(new Forbidden(format("Cannot update active field")));
+            return deferredResult;
+        }
+
+        MCIResponse mciResponse = patientService.update(patient, healthId);
+        deferredResult.setResult(new ResponseEntity<>(mciResponse, mciResponse.httpStatusObject));
+        return deferredResult;
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_MCI Approver')")
+    @RequestMapping(method = PUT, value = "/active/{healthId}", consumes = {APPLICATION_JSON_VALUE})
+    public DeferredResult<ResponseEntity<MCIResponse>> active(
+            @PathVariable String healthId,
+            @Validated({RequiredOnUpdateGroup.class, Default.class}) @RequestBody PatientData patient,
+            BindingResult bindingResult) {
+
+        UserInfo userInfo = getUserInfo();
+        logAccessDetails(userInfo, format("Updating patient (healthId): %s", healthId));
+
+        patient.setRequester(userInfo.getProperties());
+
+        logger.debug(" Health id [" + healthId + "]");
+        final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
+
+        if (bindingResult.hasErrors()) {
+            throw new ValidationException(bindingResult);
+        }
 
         if (mergingWithSamePatient(patient, healthId)) {
             deferredResult.setErrorResult(new Forbidden(format("Cannot merge with the same patient")));
             return deferredResult;
         }
 
+        
         MCIResponse mciResponse = patientService.update(patient, healthId);
         deferredResult.setResult(new ResponseEntity<>(mciResponse, mciResponse.httpStatusObject));
         return deferredResult;

@@ -16,7 +16,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Constraint(validatedBy = PatientActivationInfoValidator.class)
 @Documented
 public @interface PatientActivationInfoBlock {
-    String message() default "Invalid patient activation info block";
+    String message() default "Invalid active info";
 
     Class<?>[] groups() default {};
 

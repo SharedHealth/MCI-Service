@@ -169,6 +169,14 @@ public class GlobalExceptionHandler {
         return errorHandler.handleSearchQueryParameterError(e);
     }
 
+    @ResponseStatus(value = BAD_REQUEST)
+    @ExceptionHandler(RuntimeException.class)
+    @ResponseBody
+    public ErrorInfo handleException(RuntimeException e) {
+        logger.error("Handling bad request exception. ", e);
+        return new ErrorInfo(BAD_REQUEST.value(), MESSAGE_VALIDATION_ERROR);
+    }
+
     @ResponseStatus(value = INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
     @ResponseBody
