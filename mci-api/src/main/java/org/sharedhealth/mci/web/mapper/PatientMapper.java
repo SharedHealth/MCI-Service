@@ -101,9 +101,9 @@ public class PatientMapper {
         Boolean isActive = patient.getActive();
         PatientActivationInfo patientActivationInfo = new PatientActivationInfo();
         if (null == isActive) {
-            patientActivationInfo.setActive(true);
+            patientActivationInfo.setActivated(true);
         }
-        patientActivationInfo.setActive(isActive);
+        patientActivationInfo.setActivated(isActive);
         if (null != isActive && !isActive) {
             patientActivationInfo.setMergedWith(patient.getMergedWith());
         }
@@ -278,7 +278,7 @@ public class PatientMapper {
     }
 
     private void mapPatientActivationInfo(Patient patient, PatientActivationInfo patientActivationInfo) {
-        patient.setActive(patientActivationInfo.getActive());
+        patient.setActive(patientActivationInfo.getActivated());
         patient.setMergedWith(patientActivationInfo.getMergedWith());
     }
 

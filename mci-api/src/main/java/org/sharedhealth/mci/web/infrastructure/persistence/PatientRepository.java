@@ -4,11 +4,20 @@ import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.Delete;
 import com.datastax.driver.core.querybuilder.Insert;
 import org.sharedhealth.mci.utils.HidGenerator;
+import org.sharedhealth.mci.web.exception.Forbidden;
 import org.sharedhealth.mci.web.exception.HealthIDExistException;
 import org.sharedhealth.mci.web.exception.PatientNotFoundException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.handler.PendingApprovalFilter;
-import org.sharedhealth.mci.web.mapper.*;
+import org.sharedhealth.mci.web.mapper.Address;
+import org.sharedhealth.mci.web.mapper.Catchment;
+import org.sharedhealth.mci.web.mapper.PatientData;
+import org.sharedhealth.mci.web.mapper.PatientMapper;
+import org.sharedhealth.mci.web.mapper.PatientSummaryData;
+import org.sharedhealth.mci.web.mapper.PendingApproval;
+import org.sharedhealth.mci.web.mapper.PendingApprovalFieldDetails;
+import org.sharedhealth.mci.web.mapper.Requester;
+import org.sharedhealth.mci.web.mapper.SearchQuery;
 import org.sharedhealth.mci.web.model.CatchmentMapping;
 import org.sharedhealth.mci.web.model.Patient;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
@@ -24,7 +33,10 @@ import org.springframework.validation.FieldError;
 
 import java.util.*;
 
-import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.batch;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.timestamp;
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static java.util.Collections.emptyList;
@@ -97,6 +109,9 @@ public class PatientRepository extends BaseRepository {
         Requester requester = updateRequest.getRequester();
 
         PatientData existingPatientData = this.findByHealthId(healthId);
+        if (!shouldUpdatePatient(updateRequest, existingPatientData)) {
+            throw new Forbidden("Cannot update patient");
+        }
         PatientData newPatientData = this.pendingApprovalFilter.filter(existingPatientData, updateRequest);
 
         Patient newPatient = mapper.map(newPatientData, existingPatientData);
@@ -115,6 +130,26 @@ public class PatientRepository extends BaseRepository {
         cassandraOps.execute(batch);
 
         return new MCIResponse(newPatient.getHealthId(), HttpStatus.ACCEPTED);
+    }
+
+    protected boolean shouldUpdatePatient(PatientData updateRequest, PatientData existingPatientData) {
+        if (existingPatientData.getPatientActivationInfo().getActivated()) {
+            return true;
+        }
+        if (checkIfTryingToUpdateFieldsOtherThanMergedWith(updateRequest)) {
+            return false;
+        }
+        if (updateRequest.getPatientActivationInfo().getActivated()) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean checkIfTryingToUpdateFieldsOtherThanMergedWith(PatientData updateRequest) {
+        List<String> nonEmptyFieldNames = updateRequest.findNonEmptyFieldNames();
+        nonEmptyFieldNames.remove("hid");
+        nonEmptyFieldNames.remove("active");
+        return !nonEmptyFieldNames.isEmpty();
     }
 
     private Batch buildUpdatePendingApprovalsBatch(Patient newPatient, PatientData existingPatientData, Batch batch) {

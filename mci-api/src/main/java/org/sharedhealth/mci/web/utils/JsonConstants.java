@@ -30,8 +30,8 @@ public class JsonConstants {
     public static final String DATE_OF_DEATH = "date_of_death";
     public static final String CREATED = "created";
     public static final String MODIFIED = "modified";
-    public static final String ACTIVATION_INFO = "activation_info";
     public static final String ACTIVE = "active";
+    public static final String ACTIVATED = "activated";
     public static final String MERGED_WITH = "merged_with";
 
     public static final String CATCHMENT_ID = "catchment_id";

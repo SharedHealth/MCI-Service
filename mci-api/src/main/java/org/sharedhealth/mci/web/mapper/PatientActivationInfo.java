@@ -10,15 +10,15 @@ import org.sharedhealth.mci.web.builder.Diffable;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_PATTERN;
-import static org.sharedhealth.mci.web.utils.JsonConstants.ACTIVE;
+import static org.sharedhealth.mci.web.utils.JsonConstants.ACTIVATED;
 import static org.sharedhealth.mci.web.utils.JsonConstants.MERGED_WITH;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PatientActivationInfo implements Diffable<PatientActivationInfo> {
 
-    @JsonProperty(ACTIVE)
+    @JsonProperty(ACTIVATED)
     @JsonInclude(NON_EMPTY)
-    private Boolean active;
+    private Boolean activated;
 
     @JsonProperty(MERGED_WITH)
     @JsonInclude(NON_EMPTY)
@@ -26,12 +26,12 @@ public class PatientActivationInfo implements Diffable<PatientActivationInfo> {
     private String mergedWith;
 
 
-    public Boolean getActive() {
-        return active;
+    public Boolean getActivated() {
+        return activated;
     }
 
-    public void setActive(Boolean active) {
-        this.active = active;
+    public void setActivated(Boolean activated) {
+        this.activated = activated;
     }
 
     public String getMergedWith() {
@@ -49,7 +49,7 @@ public class PatientActivationInfo implements Diffable<PatientActivationInfo> {
 
         PatientActivationInfo that = (PatientActivationInfo) o;
 
-        if (active != null ? !active.equals(that.active) : that.active != null) return false;
+        if (activated != null ? !activated.equals(that.activated) : that.activated != null) return false;
         if (mergedWith != null ? !mergedWith.equals(that.mergedWith) : that.mergedWith != null) return false;
 
         return true;
@@ -57,7 +57,7 @@ public class PatientActivationInfo implements Diffable<PatientActivationInfo> {
 
     @Override
     public int hashCode() {
-        int result = active != null ? active.hashCode() : 0;
+        int result = activated != null ? activated.hashCode() : 0;
         result = 31 * result + (mergedWith != null ? mergedWith.hashCode() : 0);
         return result;
     }
@@ -65,7 +65,7 @@ public class PatientActivationInfo implements Diffable<PatientActivationInfo> {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("PatientActivationInfo{");
-        sb.append("active=").append(active);
+        sb.append("activated=").append(activated);
         sb.append(", mergedWith='").append(mergedWith).append('\'');
         sb.append('}');
         return sb.toString();
@@ -74,7 +74,7 @@ public class PatientActivationInfo implements Diffable<PatientActivationInfo> {
     @Override
     public DiffResult diff(PatientActivationInfo obj) {
         return new DiffBuilder(this, obj)
-                .append(ACTIVE, this.active, obj.active)
+                .append(ACTIVATED, this.activated, obj.activated)
                 .append(MERGED_WITH, this.mergedWith, obj.mergedWith)
                 .build();
     }

@@ -195,7 +195,7 @@ public class PatientData implements Diffable<PatientData> {
     @PatientStatusBlock(message = ERROR_CODE_INVALID)
     private PatientStatus patientStatus;
 
-    @JsonProperty(ACTIVATION_INFO)
+    @JsonProperty(ACTIVE)
     @Valid
     @JsonInclude(NON_EMPTY)
     @PatientActivationInfoBlock(message = ERROR_CODE_INVALID)

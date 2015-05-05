@@ -7,7 +7,12 @@ import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientFeedRepository;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
-import org.sharedhealth.mci.web.mapper.*;
+import org.sharedhealth.mci.web.mapper.Catchment;
+import org.sharedhealth.mci.web.mapper.PatientData;
+import org.sharedhealth.mci.web.mapper.PatientSummaryData;
+import org.sharedhealth.mci.web.mapper.PendingApproval;
+import org.sharedhealth.mci.web.mapper.PendingApprovalListResponse;
+import org.sharedhealth.mci.web.mapper.SearchQuery;
 import org.sharedhealth.mci.web.model.PatientUpdateLog;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
 import org.slf4j.Logger;
@@ -17,16 +22,17 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.FieldError;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.TreeSet;
+import java.util.UUID;
 
 import static java.lang.String.format;
 import static org.apache.commons.collections4.CollectionUtils.*;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_INVALID;
-import static org.sharedhealth.mci.web.utils.JsonConstants.ACTIVATION_INFO;
-import static org.sharedhealth.mci.web.utils.JsonConstants.ACTIVE;
 import static org.sharedhealth.mci.web.utils.JsonConstants.HID;
-import static org.sharedhealth.mci.web.utils.JsonConstants.MERGED_WITH;
 
 @Component
 public class PatientService {
@@ -216,18 +222,6 @@ public class PatientService {
         }
         List<String> fieldNames = patient.findNonEmptyFieldNames();
         fieldNames.remove(HID);
-        
-//        if (fieldNames.contains(ACTIVATION_INFO)) {
-//            fieldNames.remove(ACTIVATION_INFO);
-//            for (PendingApproval pendingApproval : existingPatient.getPendingApprovals()) {
-//                if (pendingApproval.getName().equals(ACTIVE)) {
-//                    fieldNames.add(ACTIVE);
-//                }
-//                if (pendingApproval.getName().equals(MERGED_WITH)) {
-//                    fieldNames.add(MERGED_WITH);
-//                }
-//            }
-//        }
 
         for (PendingApproval pendingApproval : existingPatient.getPendingApprovals()) {
             String fieldName = pendingApproval.getName();

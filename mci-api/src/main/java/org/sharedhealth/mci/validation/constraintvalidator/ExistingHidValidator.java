@@ -12,6 +12,7 @@ import javax.validation.ConstraintValidatorContext;
 
 @Component
 public class ExistingHidValidator implements ConstraintValidator<ExistingHid, String> {
+    private static final String ERROR_CODE_REQUIRED = "1001";
 
     private PatientService patientService;
 
@@ -30,8 +31,18 @@ public class ExistingHidValidator implements ConstraintValidator<ExistingHid, St
         if (StringUtils.isBlank(value)) {
             return true;
         }
+
+        context.disableDefaultConstraintViolation();
+        addConstraintViolation(context, ERROR_CODE_REQUIRED, "hid");
+
         PatientData patientData = patientService.findByHealthId(value);
-        Boolean isActive = patientData.getPatientActivationInfo().getActive();
+        Boolean isActive = patientData.getPatientActivationInfo().getActivated();
         return isActive == null || isActive;
+    }
+
+    private void addConstraintViolation(ConstraintValidatorContext context, String code, String field) {
+        context.buildConstraintViolationWithTemplate(code)
+                .addPropertyNode(field)
+                .addConstraintViolation();
     }
 }

@@ -173,6 +173,6 @@ public class PatientController extends MciController {
         if (null == patientActivationInfo) {
             return true;
         }
-        return null == patientActivationInfo.getActive() || patientActivationInfo.getActive();
+        return null == patientActivationInfo.getActivated() || patientActivationInfo.getActivated();
     }
 }

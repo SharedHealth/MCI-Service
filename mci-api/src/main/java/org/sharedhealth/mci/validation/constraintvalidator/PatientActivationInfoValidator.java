@@ -8,6 +8,7 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 public class PatientActivationInfoValidator implements ConstraintValidator<PatientActivationInfoBlock, PatientActivationInfo> {
+    private static final String ERROR_CODE_REQUIRED = "1001";
     @Override
     public void initialize(PatientActivationInfoBlock constraintAnnotation) {
 
@@ -19,19 +20,28 @@ public class PatientActivationInfoValidator implements ConstraintValidator<Patie
             return true;
         }
 
-        if (null == value.getActive()) {
+        context.disableDefaultConstraintViolation();
+        addConstraintViolation(context, ERROR_CODE_REQUIRED, "activation");
+
+        if (null == value.getActivated()) {
             if (StringUtils.isBlank(value.getMergedWith())) {
                 return true;
             }
             return false;
         }
 
-        if (value.getActive() && StringUtils.isNotBlank(value.getMergedWith())) {
+        if (value.getActivated() && StringUtils.isNotBlank(value.getMergedWith())) {
             return false;
         }
-        if (!value.getActive() && StringUtils.isBlank(value.getMergedWith())) {
+        if (!value.getActivated() && StringUtils.isBlank(value.getMergedWith())) {
             return false;
         }
         return true;
+    }
+
+    private void addConstraintViolation(ConstraintValidatorContext context, String code, String field) {
+        context.buildConstraintViolationWithTemplate(code)
+                .addPropertyNode(field)
+                .addConstraintViolation();
     }
 }
