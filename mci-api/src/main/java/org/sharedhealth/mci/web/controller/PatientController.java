@@ -62,6 +62,7 @@ public class PatientController extends MciController {
         final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
 
         if (bindingResult.hasErrors()) {
+            logger.debug("Validation error while trying to create patient.");
             throw new ValidationException(bindingResult);
         }
 
@@ -101,6 +102,7 @@ public class PatientController extends MciController {
         logAccessDetails(userInfo, format("Find patients matching query : %s", searchQuery));
 
         if (bindingResult.hasErrors()) {
+            logger.debug("Validation error while finding all patients  by search query");
             throw new SearchQueryParameterException(bindingResult);
         }
         logger.debug("Find all patients  by search query");
@@ -137,6 +139,7 @@ public class PatientController extends MciController {
         final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
 
         if (bindingResult.hasErrors()) {
+            logger.debug(format("Validation error while updating patient (healthId): %s", healthId));
             throw new ValidationException(bindingResult);
         }
 

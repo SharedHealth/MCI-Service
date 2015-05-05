@@ -46,6 +46,7 @@ public class LocationController extends MciController {
 
 
         if (bindingResult.hasErrors()) {
+            logger.debug("Validation error while finding locations by Parent ");
             throw new ValidationException(bindingResult);
         }
         logger.debug("Find locations by Parent ");

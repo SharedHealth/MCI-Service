@@ -49,7 +49,7 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public ErrorHandler handleValidationException(ValidationException e) {
 
-        logger.error("Handling ValidationException. ", e);
+        logger.debug("Handling ValidationException. ", e);
         ErrorHandler errorHandler = new ErrorHandler(BAD_REQUEST.value(),
                 ErrorHandler.VALIDATION_ERROR_CODE, MESSAGE_VALIDATION_ERROR);
 
@@ -60,7 +60,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     @ResponseBody
     public ErrorHandler handleHttpMessageNotReadableExceptionException(HttpMessageNotReadableException e) {
-        logger.error("Handling HttpMessageNotReadableExceptionException. ", e);
+        logger.debug("Handling HttpMessageNotReadableExceptionException. ", e);
 
         int code = BAD_REQUEST.value();
         String msg = MESSAGE_INVALID_REQUEST;
@@ -93,7 +93,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PatientNotFoundException.class)
     @ResponseBody
     public ErrorHandler handlePatientNotFoundException(PatientNotFoundException e) {
-        logger.error("Handling PatientNotFoundException. ", e);
+        logger.debug("Handling PatientNotFoundException. ", e);
         return new ErrorHandler(NOT_FOUND.value(), MESSAGE_PATIENT_NOT_FOUND);
     }
 
@@ -101,7 +101,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InsufficientPrivilegeException.class)
     @ResponseBody
     public ErrorHandler handleInsufficientPrivilegeException(InsufficientPrivilegeException e) {
-        logger.error("Handling InsufficientPrivilegeException. ", e);
+        logger.debug("Handling InsufficientPrivilegeException. ", e);
         return new ErrorHandler(BAD_REQUEST.value(), MESSAGE_INSUFFICIENT_PRIVILEGE);
     }
 
@@ -109,7 +109,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NonUpdatableFieldUpdateException.class)
     @ResponseBody
     public ErrorHandler handleNonUpdatableFieldUpdateException(NonUpdatableFieldUpdateException e) {
-        logger.error("Handling NonUpdatableFieldUpdateException. ", e);
+        logger.debug("Handling NonUpdatableFieldUpdateException. ", e);
         return new ErrorHandler(BAD_REQUEST.value(), MESSAGE_NONUPDATABLE_FIELD);
     }
 
@@ -117,7 +117,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseBody
     public ErrorHandler handleIllegalArgumentException(IllegalArgumentException e) {
-        logger.error("Handling IllegalArgumentException. ", e);
+        logger.debug("Handling IllegalArgumentException. ", e);
         return new ErrorHandler(BAD_REQUEST.value(), MESSAGE_INVALID_PAYLOAD);
     }
 
@@ -125,7 +125,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidRequesterException.class)
     @ResponseBody
     public ErrorHandler handleInvalidRequesterException(InvalidRequesterException e) {
-        logger.error("Handling InvalidRequesterException. ", e);
+        logger.debug("Handling InvalidRequesterException. ", e);
         return new ErrorHandler(BAD_REQUEST.value(), MESSAGE_INVALID_REQUESTER);
     }
 
@@ -133,7 +133,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PatientAlreadyExistException.class)
     @ResponseBody
     public ErrorInfo handlePatientAlreadyExistException(PatientAlreadyExistException e) {
-        logger.error("Handling PatientAlreadyExistException. ", e);
+        logger.debug("Handling PatientAlreadyExistException. ", e);
         return new ErrorInfo(CONFLICT.value(), String.format(MESSAGE_PATIENT_ALREADY_EXIST_WITH_HEALTH_ID, e.getMessage()));
     }
 
@@ -141,7 +141,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HealthIDExistException.class)
     @ResponseBody
     public ErrorHandler healthIDExistException(HealthIDExistException e) {
-        logger.error("Handling Health ID exist exception. ", e);
+        logger.debug("Handling Health ID exist exception. ", e);
         int code;
         String msg, field;
         ErrorHandler errorHandler;
@@ -159,7 +159,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(SearchQueryParameterException.class)
     @ResponseBody
     public ErrorHandler searchQueryParameterException(SearchQueryParameterException e) {
-        logger.error("Handling Search Query parameter exception. ", e);
+        logger.debug("Handling Search Query parameter exception. ", e);
 
         ErrorHandler errorHandler;
 
@@ -173,7 +173,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseBody
     public ErrorInfo handleException(Exception e) {
-        logger.error("Handling generic exception. ", e);
+        logger.debug("Handling generic exception. ", e);
         return new ErrorInfo(INTERNAL_SERVER_ERROR.value(), MESSAGE_INTERNAL_SERVER_ERROR);
     }
 

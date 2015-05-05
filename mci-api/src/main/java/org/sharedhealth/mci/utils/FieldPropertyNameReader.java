@@ -27,7 +27,7 @@ public class FieldPropertyNameReader {
                 return annotation.value();
             }
         } catch (NoSuchFieldException e) {
-            logger.error(format("Error while retrieving field name %s from %s.", fieldName, objectClass), e);
+            logger.debug(format("Error while retrieving field name %s from %s.", fieldName, objectClass), e);
         }
 
         return fieldName;

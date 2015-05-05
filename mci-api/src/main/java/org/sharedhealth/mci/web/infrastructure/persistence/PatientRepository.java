@@ -63,6 +63,7 @@ public class PatientRepository extends BaseRepository {
     }
 
     public MCIResponse create(PatientData patientData) {
+        logger.debug(String.format("Create patient: %s", patientData.toString()));
         if (!isBlank(patientData.getHealthId())) {
             DirectFieldBindingResult bindingResult = new DirectFieldBindingResult(patientData, "patient");
             bindingResult.addError(new FieldError("patient", "hid", "3001"));
@@ -90,6 +91,7 @@ public class PatientRepository extends BaseRepository {
     }
 
     public MCIResponse update(PatientData updateRequest, String healthId) {
+        logger.debug(String.format("Update patient: %s", healthId));
         updateRequest.setHealthId(healthId);
         Requester requester = updateRequest.getRequester();
 
@@ -179,6 +181,7 @@ public class PatientRepository extends BaseRepository {
     }
 
     public PatientData findByHealthId(final String healthId) {
+        logger.debug(String.format("Find patient by healthId: %s", healthId));
         Patient patient = cassandraOps.selectOneById(Patient.class, healthId);
         if (patient == null) {
             throw new PatientNotFoundException("No patient found with health id: " + healthId);

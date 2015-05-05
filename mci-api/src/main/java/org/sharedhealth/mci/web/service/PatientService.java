@@ -10,6 +10,8 @@ import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
 import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.model.PatientUpdateLog;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.DirectFieldBindingResult;
@@ -17,6 +19,7 @@ import org.springframework.validation.FieldError;
 
 import java.util.*;
 
+import static java.lang.String.format;
 import static org.apache.commons.collections4.CollectionUtils.*;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_INVALID;
@@ -25,6 +28,7 @@ import static org.sharedhealth.mci.web.utils.JsonConstants.HID;
 @Component
 public class PatientService {
 
+    private static final Logger logger = LoggerFactory.getLogger(PatientService.class);
     private static final int PER_PAGE_MAXIMUM_LIMIT = 25;
     public static final String PER_PAGE_MAXIMUM_LIMIT_NOTE = "There are more record for this search criteria. " +
             "Please narrow down your search";
@@ -49,6 +53,7 @@ public class PatientService {
     }
 
     public MCIResponse create(PatientData patient) {
+        logger.debug("Create patient");
         PatientData existingPatient = findPatientByMultipleIds(patient);
         if (existingPatient != null) {
             return this.update(patient, existingPatient.getHealthId());
@@ -104,6 +109,7 @@ public class PatientService {
     }
 
     public MCIResponse update(PatientData patient, String healthId) {
+        logger.debug(format("Update patient healthId: (%s)", healthId));
         if (patient.getHealthId() != null && !StringUtils.equals(patient.getHealthId(), healthId)) {
             DirectFieldBindingResult bindingResult = new DirectFieldBindingResult(patient, "patient");
             bindingResult.addError(new FieldError("patient", HID, ERROR_CODE_INVALID));
@@ -168,6 +174,7 @@ public class PatientService {
     }
 
     public TreeSet<PendingApproval> findPendingApprovalDetails(String healthId, Catchment catchment) {
+        logger.debug(format("find pending approval for healthId: %s and for catchment: %s", healthId, catchment.toString()));
         PatientData patient = this.findByHealthId(healthId);
         if (patient == null) {
             return null;
@@ -183,6 +190,7 @@ public class PatientService {
     }
 
     public String processPendingApprovals(PatientData requestData, Catchment catchment, boolean shouldAccept) {
+        logger.debug(format("process pending approval for healthId: %s and for catchment: %s", requestData.getHealthId(), catchment.toString()));
         PatientData existingPatient = this.findByHealthId(requestData.getHealthId());
         verifyCatchment(existingPatient, catchment);
         verifyPendingApprovalDetails(requestData, existingPatient);

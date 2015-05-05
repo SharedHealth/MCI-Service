@@ -73,6 +73,7 @@ public class CatchmentController extends FeedController {
             deferredResult.setErrorResult(new Forbidden
                     (format("Access is denied to user %s for catchment %s",
                             userInfo.getProperties().getId(), catchmentId)));
+            logger.debug(format("Access is denied to user %s for catchment %s", userInfo.getProperties().getId(), catchmentId));
             return deferredResult;
         }
 
@@ -108,6 +109,7 @@ public class CatchmentController extends FeedController {
             deferredResult.setErrorResult(new Forbidden
                     (format("Access is denied to user %s for catchment %s",
                             userInfo.getProperties().getId(), catchmentId)));
+            logger.debug(format("Access is denied to user %s for catchment %s", userInfo.getProperties().getId(), catchmentId));
             return deferredResult;
         }
 
@@ -179,6 +181,7 @@ public class CatchmentController extends FeedController {
             deferredResult.setErrorResult(new Forbidden
                     (format("Access is denied to user %s for catchment %s",
                             userInfo.getProperties().getId(), catchmentId)));
+            logger.debug(format("Access is denied to user %s for catchment %s",userInfo.getProperties().getId(),catchmentId));
             return deferredResult;
         }
         Catchment catchment = new Catchment(catchmentId);
@@ -195,6 +198,7 @@ public class CatchmentController extends FeedController {
             String catchmentId, String healthId, PatientData patient, UserInfo userInfo, BindingResult bindingResult, boolean shouldAccept) {
 
         if (bindingResult.hasErrors()) {
+            logger.debug("ValidationException while processing pending approvals");
             throw new ValidationException(bindingResult);
         }
 

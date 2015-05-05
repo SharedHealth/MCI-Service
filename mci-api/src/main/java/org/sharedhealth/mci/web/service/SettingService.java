@@ -20,6 +20,7 @@ public class SettingService {
     }
 
     public String getSettingAsStringByKey(String key) {
+        logger.debug(String.format("Get setting as string for key: %s",key));
 
         Setting setting = findByKey(key);
 
@@ -27,6 +28,7 @@ public class SettingService {
     }
 
     public Integer getSettingAsIntegerByKey(String key) {
+        logger.debug(String.format("Get setting as integer for key: %s",key));
 
         Setting setting = findByKey(key);
 
@@ -34,6 +36,7 @@ public class SettingService {
     }
 
     public Setting findByKey(String key) {
+        logger.debug(String.format("Find setting for key: %s",key));
         return allSettings.findByKey(key);
     }
 }

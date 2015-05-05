@@ -24,7 +24,7 @@ public class LuhnChecksumGenerator implements ChecksumGenerator {
 
         } catch (CheckDigitException e) {
             String message = "Cannot create checksum using Luhn algorithm for id " + id;
-            logger.error(message);
+            logger.debug(message);
             throw new HidGenerationException(message, e);
         }
     }

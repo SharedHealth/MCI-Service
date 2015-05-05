@@ -50,7 +50,7 @@ public class DateUtil {
         try {
             return org.apache.commons.lang3.time.DateUtils.parseDate(date, formats);
         } catch (IllegalArgumentException | ParseException e) {
-            logger.error("Invalid date:" + date, e);
+            logger.debug("Invalid date:" + date, e);
         }
         return null;
     }

@@ -35,6 +35,7 @@ public class PatientAuditRepository extends BaseRepository {
     }
 
     public List<PatientAuditLogData> findByHealthId(String healthId) {
+        logger.debug(String.format("get audit log for patient: healthId (%s)", healthId));
         List<PatientAuditLog> logs = cassandraOps.select(buildFindByHidStmt(healthId), PatientAuditLog.class);
         if (isNotEmpty(logs)) {
             return this.auditLogMapper.map(logs);

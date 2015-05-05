@@ -35,6 +35,7 @@ public class PatientAuditService {
     }
 
     public List<PatientAuditLogData> findByHealthId(String healthId) {
+        logger.debug(String.format("Find audit log for patient: (%s)",healthId));
         List<PatientAuditLogData> logs = auditRepository.findByHealthId(healthId);
         populateRequesterDetails(logs);
         return logs;

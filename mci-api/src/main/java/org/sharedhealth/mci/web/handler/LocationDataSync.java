@@ -92,7 +92,7 @@ public class LocationDataSync {
                 locationService.saveOrUpdateLRMarkerData(type, url);
             }
         } catch (Exception e) {
-            logger.info(e.getMessage(), e);
+            logger.debug(e.getMessage(), e);
             return false;
         }
 
