@@ -3,13 +3,11 @@ package org.sharedhealth.mci.web.mapper;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.sharedhealth.mci.validation.constraints.ExistingHid;
 import org.sharedhealth.mci.web.builder.DiffBuilder;
 import org.sharedhealth.mci.web.builder.DiffResult;
 import org.sharedhealth.mci.web.builder.Diffable;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
-import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_INVALID;
 import static org.sharedhealth.mci.web.utils.JsonConstants.ACTIVATED;
 import static org.sharedhealth.mci.web.utils.JsonConstants.MERGED_WITH;
 
@@ -22,7 +20,6 @@ public class PatientActivationInfo implements Diffable<PatientActivationInfo> {
 
     @JsonProperty(MERGED_WITH)
     @JsonInclude(NON_EMPTY)
-    @ExistingHid(message = ERROR_CODE_INVALID)
     private String mergedWith;
 
 

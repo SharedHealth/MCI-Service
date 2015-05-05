@@ -112,6 +112,7 @@ public class PatientRepository extends BaseRepository {
         if (!shouldUpdatePatient(updateRequest, existingPatientData)) {
             throw new Forbidden("Cannot update patient");
         }
+        checkIfTryingToMergeWithNonExistingHid(updateRequest);
         PatientData newPatientData = this.pendingApprovalFilter.filter(existingPatientData, updateRequest);
 
         Patient newPatient = mapper.map(newPatientData, existingPatientData);
@@ -130,6 +131,18 @@ public class PatientRepository extends BaseRepository {
         cassandraOps.execute(batch);
 
         return new MCIResponse(newPatient.getHealthId(), HttpStatus.ACCEPTED);
+    }
+
+    private boolean checkIfTryingToMergeWithNonExistingHid(PatientData updateRequest) {
+        if (null == updateRequest.getPatientActivationInfo() || updateRequest.getPatientActivationInfo().getActivated()) {
+            return false;
+        }
+        String mergedWith = updateRequest.getPatientActivationInfo().getMergedWith();
+        PatientData targetPatient = this.findByHealthId(mergedWith);
+        if (!targetPatient.getPatientActivationInfo().getActivated()) {
+            throw new Forbidden("Cannot merge with inactive patient");
+        }
+        return false;
     }
 
     protected boolean shouldUpdatePatient(PatientData updateRequest, PatientData existingPatientData) {
