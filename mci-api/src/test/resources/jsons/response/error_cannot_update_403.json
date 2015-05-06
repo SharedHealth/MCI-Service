@@ -1,0 +1,4 @@
+{
+  "message": "Cannot update active field or merge with other patient",
+  "code": 403
+}

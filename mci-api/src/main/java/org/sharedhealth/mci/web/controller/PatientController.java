@@ -65,9 +65,8 @@ public class PatientController extends MciController {
         logger.debug("Trying to create patient.");
         final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
 
-        if (!shouldCreatePatient(patient.getPatientActivationInfo())) {
-            deferredResult.setErrorResult(new Forbidden(format("Cannot create inactive patient")));
-            return deferredResult;
+        if (isTryingToCreateInactivePatient(patient.getPatientActivationInfo())) {
+            throw new Forbidden(format("Cannot create inactive patient"));
         }
         if (bindingResult.hasErrors()) {
             logger.debug("Validation error while trying to create patient.");
@@ -151,8 +150,7 @@ public class PatientController extends MciController {
             throw new ValidationException(bindingResult);
         }
         if (null != patient.getPatientActivationInfo()) {
-            deferredResult.setErrorResult(new Forbidden(format("Cannot update active field")));
-            return deferredResult;
+            throw new Forbidden(format("Cannot update active field or merge with other patient"));
         }
 
         MCIResponse mciResponse = patientService.update(patient, healthId);
@@ -179,18 +177,17 @@ public class PatientController extends MciController {
             throw new ValidationException(bindingResult);
         }
 
-        if (mergingWithSamePatient(patient, healthId)) {
-            deferredResult.setErrorResult(new Forbidden(format("Cannot merge with the same patient")));
-            return deferredResult;
+        if (mergingWithItself(patient, healthId)) {
+            throw new Forbidden(format("Cannot merge with the same patient"));
         }
 
-        
+
         MCIResponse mciResponse = patientService.update(patient, healthId);
         deferredResult.setResult(new ResponseEntity<>(mciResponse, mciResponse.httpStatusObject));
         return deferredResult;
     }
 
-    private boolean mergingWithSamePatient(PatientData patient, String healthId) {
+    private boolean mergingWithItself(PatientData patient, String healthId) {
         PatientActivationInfo patientActivationInfo = patient.getPatientActivationInfo();
         if (null == patientActivationInfo || StringUtils.isBlank(patientActivationInfo.getMergedWith())) {
             return false;
@@ -198,10 +195,10 @@ public class PatientController extends MciController {
         return patientActivationInfo.getMergedWith().equals(healthId);
     }
 
-    private boolean shouldCreatePatient(PatientActivationInfo patientActivationInfo) {
-        if (null == patientActivationInfo) {
+    private boolean isTryingToCreateInactivePatient(PatientActivationInfo patientActivationInfo) {
+        if (null != patientActivationInfo && !patientActivationInfo.getActivated()) {
             return true;
         }
-        return null == patientActivationInfo.getActivated() || patientActivationInfo.getActivated();
+        return false;
     }
 }

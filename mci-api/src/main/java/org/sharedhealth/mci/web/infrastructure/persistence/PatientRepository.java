@@ -99,6 +99,7 @@ public class PatientRepository extends BaseRepository {
         }
 
         patient.setActive(true);
+
         cassandraOps.execute(buildSaveBatch(patient, cassandraOps.getConverter()));
         return new MCIResponse(patient.getHealthId(), HttpStatus.CREATED);
     }
@@ -110,7 +111,8 @@ public class PatientRepository extends BaseRepository {
 
         PatientData existingPatientData = this.findByHealthId(healthId);
         if (!shouldUpdatePatient(updateRequest, existingPatientData)) {
-            throw new Forbidden("Cannot update patient");
+            throw new Forbidden(String.format("Cannot update inactive patient, already merged with %s",
+                    existingPatientData.getPatientActivationInfo().getMergedWith()));
         }
         checkIfTryingToMergeWithNonExistingHid(updateRequest);
         PatientData newPatientData = this.pendingApprovalFilter.filter(existingPatientData, updateRequest);
@@ -149,7 +151,7 @@ public class PatientRepository extends BaseRepository {
         if (existingPatientData.getPatientActivationInfo().getActivated()) {
             return true;
         }
-        if (checkIfTryingToUpdateFieldsOtherThanMergedWith(updateRequest)) {
+        if (checkIfTryingToUpdateFieldsOtherThanActive(updateRequest)) {
             return false;
         }
         if (updateRequest.getPatientActivationInfo().getActivated()) {
@@ -158,7 +160,7 @@ public class PatientRepository extends BaseRepository {
         return true;
     }
 
-    private boolean checkIfTryingToUpdateFieldsOtherThanMergedWith(PatientData updateRequest) {
+    private boolean checkIfTryingToUpdateFieldsOtherThanActive(PatientData updateRequest) {
         List<String> nonEmptyFieldNames = updateRequest.findNonEmptyFieldNames();
         nonEmptyFieldNames.remove("hid");
         nonEmptyFieldNames.remove("active");
