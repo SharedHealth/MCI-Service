@@ -9,15 +9,7 @@ import org.sharedhealth.mci.web.exception.HealthIDExistException;
 import org.sharedhealth.mci.web.exception.PatientNotFoundException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.handler.PendingApprovalFilter;
-import org.sharedhealth.mci.web.mapper.Address;
-import org.sharedhealth.mci.web.mapper.Catchment;
-import org.sharedhealth.mci.web.mapper.PatientData;
-import org.sharedhealth.mci.web.mapper.PatientMapper;
-import org.sharedhealth.mci.web.mapper.PatientSummaryData;
-import org.sharedhealth.mci.web.mapper.PendingApproval;
-import org.sharedhealth.mci.web.mapper.PendingApprovalFieldDetails;
-import org.sharedhealth.mci.web.mapper.Requester;
-import org.sharedhealth.mci.web.mapper.SearchQuery;
+import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.model.CatchmentMapping;
 import org.sharedhealth.mci.web.model.Patient;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
@@ -114,7 +106,10 @@ public class PatientRepository extends BaseRepository {
             throw new Forbidden(String.format("Cannot update inactive patient, already merged with %s",
                     existingPatientData.getPatientActivationInfo().getMergedWith()));
         }
+
+        final Batch batch = batch();
         checkIfTryingToMergeWithNonExistingHid(updateRequest);
+        clearPendingApprovalsIfRequired(updateRequest, existingPatientData, batch);
         PatientData newPatientData = this.pendingApprovalFilter.filter(existingPatientData, updateRequest);
 
         Patient newPatient = mapper.map(newPatientData, existingPatientData);
@@ -122,7 +117,7 @@ public class PatientRepository extends BaseRepository {
         newPatient.setUpdatedAt(timeBased());
         newPatient.setUpdatedBy(requester);
 
-        final Batch batch = batch();
+
         buildUpdatePendingApprovalsBatch(newPatient, existingPatientData, batch);
         buildUpdateBatch(newPatient, existingPatientData, cassandraOps.getConverter(), batch);
 
@@ -134,6 +129,15 @@ public class PatientRepository extends BaseRepository {
 
         return new MCIResponse(newPatient.getHealthId(), HttpStatus.ACCEPTED);
     }
+
+    private void clearPendingApprovalsIfRequired(PatientData updateRequest, PatientData existingPatientData, Batch batch) {
+        if (null == updateRequest.getPatientActivationInfo() || updateRequest.getPatientActivationInfo().getActivated()) {
+            return;
+        }
+        existingPatientData.setPendingApprovals(new TreeSet<PendingApproval>());
+        buildDeletePendingApprovalMappingStmt(existingPatientData.getHealthId(), batch, new Date().getTime());
+    }
+
 
     private boolean checkIfTryingToMergeWithNonExistingHid(PatientData updateRequest) {
         if (null == updateRequest.getPatientActivationInfo() || updateRequest.getPatientActivationInfo().getActivated()) {

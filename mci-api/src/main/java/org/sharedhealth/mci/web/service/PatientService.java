@@ -2,6 +2,7 @@ package org.sharedhealth.mci.web.service;
 
 
 import org.apache.commons.lang3.StringUtils;
+import org.sharedhealth.mci.web.exception.Forbidden;
 import org.sharedhealth.mci.web.exception.InsufficientPrivilegeException;
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
@@ -188,6 +189,9 @@ public class PatientService {
         if (patient == null) {
             return null;
         }
+        if (null != patient.getPatientActivationInfo() && !patient.getPatientActivationInfo().getActivated()) {
+            throw new Forbidden("patient is already marked inactive");
+        }
         verifyCatchment(patient, catchment);
         TreeSet<PendingApproval> pendingApprovals = patient.getPendingApprovals();
         if (isNotEmpty(pendingApprovals)) {
@@ -201,6 +205,9 @@ public class PatientService {
     public String processPendingApprovals(PatientData requestData, Catchment catchment, boolean shouldAccept) {
         logger.debug(format("process pending approval for healthId: %s and for catchment: %s", requestData.getHealthId(), catchment.toString()));
         PatientData existingPatient = this.findByHealthId(requestData.getHealthId());
+        if (null != existingPatient.getPatientActivationInfo() && !existingPatient.getPatientActivationInfo().getActivated()) {
+            throw new Forbidden("patient is already marked inactive");
+        }
         verifyCatchment(existingPatient, catchment);
         verifyPendingApprovalDetails(requestData, existingPatient);
         return patientRepository.processPendingApprovals(requestData, existingPatient, shouldAccept);

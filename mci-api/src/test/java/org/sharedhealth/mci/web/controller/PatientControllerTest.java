@@ -383,7 +383,6 @@ public class PatientControllerTest {
                 .andExpect(jsonPath("$.results[1]").exists())
                 .andExpect(jsonPath("$.results[2]").exists())
                 .andExpect(jsonPath("$.results[3]").doesNotExist())
-
                 .andExpect(jsonPath("$.additional_info.note", is(PER_PAGE_MAXIMUM_LIMIT_NOTE)));
 
         verify(patientService).findAllSummaryByQuery(searchQuery);
