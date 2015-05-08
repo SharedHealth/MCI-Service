@@ -33,9 +33,7 @@ public class PatientActivationInfoValidator implements ConstraintValidator<Patie
         if (value.getActivated() && StringUtils.isNotBlank(value.getMergedWith())) {
             return false;
         }
-        if (!value.getActivated() && StringUtils.isBlank(value.getMergedWith())) {
-            return false;
-        }
+
         return true;
     }
 

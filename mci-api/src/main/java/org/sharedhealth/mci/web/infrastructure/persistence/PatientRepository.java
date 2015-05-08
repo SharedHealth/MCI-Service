@@ -140,10 +140,11 @@ public class PatientRepository extends BaseRepository {
 
 
     private boolean checkIfTryingToMergeWithNonExistingHid(PatientData updateRequest) {
-        if (null == updateRequest.getPatientActivationInfo() || updateRequest.getPatientActivationInfo().getActivated()) {
+        PatientActivationInfo patientActivationInfo = updateRequest.getPatientActivationInfo();
+        if (null == patientActivationInfo || null == patientActivationInfo.getMergedWith() || patientActivationInfo.getActivated()) {
             return false;
         }
-        String mergedWith = updateRequest.getPatientActivationInfo().getMergedWith();
+        String mergedWith = patientActivationInfo.getMergedWith();
         PatientData targetPatient = this.findByHealthId(mergedWith);
         if (!targetPatient.getPatientActivationInfo().getActivated()) {
             throw new Forbidden("Cannot merge with inactive patient");
