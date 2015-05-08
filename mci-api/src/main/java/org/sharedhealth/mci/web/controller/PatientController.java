@@ -96,6 +96,12 @@ public class PatientController extends MciController {
 
 
         PatientData result = patientService.findByHealthId(healthId);
+        PatientActivationInfo patientActivationInfo = result.getPatientActivationInfo();
+        if (null != patientActivationInfo && !patientActivationInfo.getActivated()) {
+            result = new PatientData();
+            result.setHealthId(healthId);
+            result.setPatientActivationInfo(patientActivationInfo);
+        }
         deferredResult.setResult(new ResponseEntity<>(result, OK));
         return deferredResult;
     }
