@@ -12,12 +12,14 @@ import org.springframework.web.servlet.DispatcherServlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import static java.lang.Integer.valueOf;
 import static java.lang.System.getenv;
 import static org.sharedhealth.mci.web.config.MCIConfig.getSupportedServletMappings;
+import static org.sharedhealth.mci.web.config.MCIProperties.DIAGNOSTICS_SERVLET_PATH;
 
 @Configuration
 @Import(WebMvcConfig.class)
@@ -54,7 +56,10 @@ public class Main {
     }
 
     private java.util.List<String> getServletMappings(Map<String, String> env) {
-        return getSupportedServletMappings(env.get(API_VERSION), Boolean.valueOf(env.get(IS_LATEST_API_VERSION)));
+        List<String> mappings = new ArrayList<>();
+        mappings.add(DIAGNOSTICS_SERVLET_PATH);
+        mappings.addAll(getSupportedServletMappings(env.get(API_VERSION), Boolean.valueOf(env.get(IS_LATEST_API_VERSION))));
+        return mappings;
     }
 
     public static void main(String[] args) throws Exception {
