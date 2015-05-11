@@ -1,6 +1,6 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
-public class PatientRepositoryConstants {
+public class RepositoryConstants {
     public static final String CF_PATIENT = "patient";
     public static final String CF_NID_MAPPING = "nid_mapping";
     public static final String CF_BRN_MAPPING = "brn_mapping";
@@ -15,6 +15,7 @@ public class PatientRepositoryConstants {
     public static final String CF_PATIENT_AUDIT_LOG = "patient_audit_log";
     public static final String CF_LOCATIONS = "locations";
     public static final String CF_MARKER = "marker";
+    public static final String CF_PATIENT_DUPE = "patient_dupe";
 
     public static final String HEALTH_ID = "health_id";
     public static final String LAST_UPDATED = "last_updated";
@@ -109,4 +110,8 @@ public class PatientRepositoryConstants {
     public static final String CHANGE_SET = "change_set";
     public static final String YEAR = "year";
     public static final String EVENT_ID = "event_id";
+
+    public static final String HEALTH_ID1 = "health_id1";
+    public static final String HEALTH_ID2 = "health_id2";
+    public static final String REASON = "reason";
 }

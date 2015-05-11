@@ -17,7 +17,7 @@ import java.util.UUID;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
 import static com.datastax.driver.core.querybuilder.Select.Where;
 import static org.apache.commons.lang3.StringUtils.*;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.*;
+import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.HOUSEHOLD_CODE;
 import static org.springframework.data.cassandra.core.CassandraTemplate.*;
 

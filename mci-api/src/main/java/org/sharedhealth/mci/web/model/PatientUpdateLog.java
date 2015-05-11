@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.*;
+import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.*;
 import static org.springframework.cassandra.core.PrimaryKeyType.CLUSTERED;
 import static org.springframework.cassandra.core.PrimaryKeyType.PARTITIONED;
 

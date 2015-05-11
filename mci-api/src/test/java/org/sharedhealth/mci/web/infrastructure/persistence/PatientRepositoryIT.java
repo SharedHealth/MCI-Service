@@ -32,7 +32,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.junit.Assert.*;
 import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.*;
+import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.setupApprovalsConfig;
 import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.truncateAllColumnFamilies;
 import static org.sharedhealth.mci.web.utils.JsonConstants.PHONE_NUMBER;

@@ -5,7 +5,7 @@ import org.springframework.data.cassandra.core.CassandraOperations;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.*;
+import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.*;
 
 public class TestUtil {
 

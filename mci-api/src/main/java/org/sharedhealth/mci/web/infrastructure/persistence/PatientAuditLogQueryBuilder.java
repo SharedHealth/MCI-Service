@@ -12,7 +12,7 @@ import java.util.List;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.*;
+import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.*;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
 
 public class PatientAuditLogQueryBuilder {

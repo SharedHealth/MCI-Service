@@ -17,12 +17,12 @@ import java.util.UUID;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.sharedhealth.mci.utils.DateUtil.parseDate;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientRepositoryConstants.*;
+import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonMapper.readValue;
 import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
 import static org.sharedhealth.mci.web.utils.PatientDataConstants.COUNTRY_CODE_BANGLADESH;
 
-@Table(value = "patient")
+@Table(value = CF_PATIENT)
 public class Patient {
 
     public static final String EMPTY_DATE_VALUE = "0001-01-01";

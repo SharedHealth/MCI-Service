@@ -91,4 +91,8 @@ public class JsonConstants {
     public static final String APPROVED_BY = "approved_by";
     public static final String OLD_VALUE = "old_value";
     public static final String NEW_VALUE = "new_value";
+
+    public static final String HID1 = "hid1";
+    public static final String HID2 = "hid2";
+    public static final String REASON = "reason";
 }
