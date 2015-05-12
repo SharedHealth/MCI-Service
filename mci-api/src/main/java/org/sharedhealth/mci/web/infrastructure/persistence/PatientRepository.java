@@ -158,7 +158,12 @@ public class PatientRepository extends BaseRepository {
         if (null == mergedWith) {
             return false;
         }
-        PatientData targetPatient = this.findByHealthId(mergedWith);
+        PatientData targetPatient;
+        try {
+            targetPatient = this.findByHealthId(mergedWith);
+        } catch (PatientNotFoundException e) {
+            throw new PatientNotFoundException("Merge_with patient not found with health id: " + mergedWith);
+        }
         if (!targetPatient.getActive()) {
             throw new Forbidden("Cannot merge with inactive patient");
         }

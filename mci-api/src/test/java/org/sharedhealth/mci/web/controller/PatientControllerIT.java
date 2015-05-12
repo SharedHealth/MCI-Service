@@ -90,7 +90,6 @@ public class PatientControllerIT extends BaseControllerTest {
         createPatientData();
         setupApprovalsConfig(cassandraOps);
         setupLocation(cassandraOps);
-
     }
 
     @Test
@@ -152,7 +151,6 @@ public class PatientControllerIT extends BaseControllerTest {
                         (APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
-
     }
 
     @Test
@@ -299,7 +297,7 @@ public class PatientControllerIT extends BaseControllerTest {
     }
 
     @Test
-    public void shouldReturnNotFoundResponseWhenSearchBy_ID_IfPatientNotExist() throws Exception {
+    public void shouldReturnNotFindResponseWhenSearchBy_ID_IfPatientNotExist() throws Exception {
 
         MvcResult result = mockMvc.perform(get(API_END_POINT_FOR_PATIENT + "/random-1000")
                 .header(AUTH_TOKEN_KEY, validAccessToken)
@@ -312,7 +310,7 @@ public class PatientControllerIT extends BaseControllerTest {
                 .andExpect(content().contentType(APPLICATION_JSON_UTF8)).andReturn();
 
         String content = mvcResult.getResponse().getContentAsString();
-        JSONAssert.assertEquals(asString("jsons/response/error_404.json"), content, JSONCompareMode.STRICT);
+        content.contains("{\"message\":\"No patient found with health id: random-1000\",\"http_status\":404}");
     }
 
     @Test
@@ -329,7 +327,7 @@ public class PatientControllerIT extends BaseControllerTest {
                 .andExpect(status().isNotFound())
                 .andReturn();
         String content = mvcResult.getResponse().getContentAsString();
-        JSONAssert.assertEquals(asString("jsons/response/error_404.json"), content, JSONCompareMode.STRICT);
+        content.contains("{\"message\":\"No patient found with health id: health-1000\",\"http_status\":404}");
     }
 
     @Test
@@ -346,7 +344,6 @@ public class PatientControllerIT extends BaseControllerTest {
                 .andReturn();
         String content = mvcResult.getResponse().getContentAsString();
         JSONAssert.assertEquals(asString("jsons/response/error_hid.json"), content, JSONCompareMode.STRICT);
-
     }
 
     @Test

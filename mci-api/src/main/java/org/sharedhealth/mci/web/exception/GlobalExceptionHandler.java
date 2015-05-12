@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
+import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.web.handler.ErrorHandler;
 import org.sharedhealth.mci.web.utils.JsonConstants;
 import org.slf4j.Logger;
@@ -94,7 +95,11 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public ErrorHandler handlePatientNotFoundException(PatientNotFoundException e) {
         logger.debug("Handling PatientNotFoundException. ", e);
-        return new ErrorHandler(NOT_FOUND.value(), MESSAGE_PATIENT_NOT_FOUND);
+        String message = MESSAGE_PATIENT_NOT_FOUND;
+        if (StringUtils.isNotBlank(e.getMessage())) {
+            message = e.getMessage();
+        }
+        return new ErrorHandler(NOT_FOUND.value(), message);
     }
 
     @ResponseStatus(value = BAD_REQUEST)
