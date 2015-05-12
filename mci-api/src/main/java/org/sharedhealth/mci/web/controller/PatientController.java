@@ -67,6 +67,11 @@ public class PatientController extends MciController {
         if (null != patient.getActive() && !patient.getActive()) {
             throw new Forbidden(format("Cannot create inactive patient"));
         }
+
+        if (null != patient.getMergedWith()) {
+            throw new Forbidden(format("Cannot merge with another patient on creation"));
+        }
+
         if (bindingResult.hasErrors()) {
             logger.debug("Validation error while trying to create patient.");
             throw new ValidationException(bindingResult);
