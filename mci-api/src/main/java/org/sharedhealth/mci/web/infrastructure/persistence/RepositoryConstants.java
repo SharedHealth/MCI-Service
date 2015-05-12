@@ -113,5 +113,5 @@ public class RepositoryConstants {
 
     public static final String HEALTH_ID1 = "health_id1";
     public static final String HEALTH_ID2 = "health_id2";
-    public static final String REASON = "reason";
+    public static final String REASONS = "reasons";
 }

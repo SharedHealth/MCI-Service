@@ -93,5 +93,5 @@ public class JsonConstants {
 
     public static final String HID1 = "hid1";
     public static final String HID2 = "hid2";
-    public static final String REASON = "reason";
+    public static final String REASONS = "reasons";
 }

@@ -4,6 +4,7 @@ import org.springframework.data.cassandra.mapping.Column;
 import org.springframework.data.cassandra.mapping.PrimaryKeyColumn;
 import org.springframework.data.cassandra.mapping.Table;
 
+import java.util.Set;
 import java.util.UUID;
 
 import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.*;
@@ -22,8 +23,8 @@ public class PatientDupe {
     @PrimaryKeyColumn(name = HEALTH_ID2, ordinal = 2, type = CLUSTERED)
     private String health_id2;
 
-    @PrimaryKeyColumn(name = REASON, ordinal = 3, type = CLUSTERED)
-    private String reason;
+    @Column(REASONS)
+    private Set<String> reasons;
 
     @Column(CREATED_AT)
     private UUID created_at;
@@ -31,11 +32,11 @@ public class PatientDupe {
     public PatientDupe() {
     }
 
-    public PatientDupe(String catchment_id, String health_id1, String health_id2, String reason, UUID created_at) {
+    public PatientDupe(String catchment_id, String health_id1, String health_id2, Set<String> reasons, UUID created_at) {
         this.catchment_id = catchment_id;
         this.health_id1 = health_id1;
         this.health_id2 = health_id2;
-        this.reason = reason;
+        this.reasons = reasons;
         this.created_at = created_at;
     }
 
@@ -63,12 +64,12 @@ public class PatientDupe {
         this.health_id2 = health_id2;
     }
 
-    public String getReason() {
-        return reason;
+    public Set<String> getReasons() {
+        return reasons;
     }
 
-    public void setReason(String reason) {
-        this.reason = reason;
+    public void setReasons(Set<String> reasons) {
+        this.reasons = reasons;
     }
 
     public UUID getCreated_at() {

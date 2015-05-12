@@ -20,6 +20,7 @@ import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.asSet;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -35,22 +36,22 @@ public class PatientDupeRepositoryIT {
 
     @Test
     public void shouldFindAllByCatchment() throws Exception {
-        cassandraOps.insert(buildDupes());
+        cassandraOps.update(buildDupes());
         List<PatientDupe> dupes = patientDupeRepository.findAllByCatchment(new Catchment("102030"));
         assertTrue(isNotEmpty(dupes));
-        assertEquals(7, dupes.size());
+        assertEquals(6, dupes.size());
     }
 
     private List<PatientDupe> buildDupes() {
         List<PatientDupe> dupes = new ArrayList<>();
         String catchmentId = "A10B20C30";
-        dupes.add(new PatientDupe(catchmentId, "100", "101", "nid", timeBased()));
-        dupes.add(new PatientDupe(catchmentId, "100", "101", "phoneNo", timeBased()));
-        dupes.add(new PatientDupe(catchmentId, "102", "103", "nid", timeBased()));
-        dupes.add(new PatientDupe(catchmentId, "104", "105", "phoneNo", timeBased()));
-        dupes.add(new PatientDupe(catchmentId, "106", "107", "phoneNo", timeBased()));
-        dupes.add(new PatientDupe(catchmentId, "108", "109", "nid", timeBased()));
-        dupes.add(new PatientDupe(catchmentId, "110", "111", "nid", timeBased()));
+        dupes.add(new PatientDupe(catchmentId, "100", "101", asSet("nid"), timeBased()));
+        dupes.add(new PatientDupe(catchmentId, "100", "101", asSet("phoneNo"), timeBased()));
+        dupes.add(new PatientDupe(catchmentId, "102", "103", asSet("nid"), timeBased()));
+        dupes.add(new PatientDupe(catchmentId, "104", "105", asSet("phoneNo"), timeBased()));
+        dupes.add(new PatientDupe(catchmentId, "106", "107", asSet("phoneNo"), timeBased()));
+        dupes.add(new PatientDupe(catchmentId, "108", "109", asSet("nid"), timeBased()));
+        dupes.add(new PatientDupe(catchmentId, "110", "111", asSet("nid"), timeBased()));
         return dupes;
     }
 }

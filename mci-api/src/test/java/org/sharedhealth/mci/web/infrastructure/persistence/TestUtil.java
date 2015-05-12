@@ -2,9 +2,12 @@ package org.sharedhealth.mci.web.infrastructure.persistence;
 
 import org.springframework.data.cassandra.core.CassandraOperations;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.addAll;
 import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.*;
 
 public class TestUtil {
@@ -53,5 +56,11 @@ public class TestUtil {
                 CF_PATIENT_AUDIT_LOG,
                 CF_MARKER
         );
+    }
+
+    public static Set<String> asSet(String... values) {
+        Set<String> set = new HashSet<>();
+        addAll(set, values);
+        return set;
     }
 }
