@@ -2,7 +2,6 @@ package org.sharedhealth.mci.web.handler;
 
 import org.sharedhealth.mci.web.exception.NonUpdatableFieldUpdateException;
 import org.sharedhealth.mci.web.mapper.Address;
-import org.sharedhealth.mci.web.mapper.PatientActivationInfo;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PatientStatus;
 import org.sharedhealth.mci.web.mapper.PendingApproval;
@@ -73,7 +72,8 @@ public class PendingApprovalFilter {
         newPatient.setAddress(processAddress(PRESENT_ADDRESS, existingPatient.getAddress(), updateRequest.getAddress(), this.requestedBy));
         newPatient.setPermanentAddress(processAddress(PERMANENT_ADDRESS, existingPatient.getPermanentAddress(), updateRequest.getPermanentAddress(), this.requestedBy));
         newPatient.setHouseholdCode(processString(HOUSEHOLD_CODE, existingPatient.getHouseholdCode(), updateRequest.getHouseholdCode(), this.requestedBy));
-        newPatient.setPatientActivationInfo(processPatientActivationInfo(ACTIVE, existingPatient.getPatientActivationInfo(), updateRequest.getPatientActivationInfo(), this.requestedBy));
+        newPatient.setActive((Boolean) process(ACTIVE, existingPatient.getActive(), updateRequest.getActive(), this.requestedBy));
+        newPatient.setMergedWith(processString(MERGED_WITH, existingPatient.getMergedWith(), updateRequest.getMergedWith(), this.requestedBy));
 
         return newPatient;
     }
@@ -101,11 +101,6 @@ public class PendingApprovalFilter {
     private UUID processUuid(String key, UUID oldValue, UUID newValue, Requester requester) {
         Object value = process(key, oldValue, newValue, requester);
         return value == null ? null : (UUID) value;
-    }
-
-    private PatientActivationInfo processPatientActivationInfo(String key, PatientActivationInfo oldValue, PatientActivationInfo newValue, Requester requester) {
-        Object patientActivationInfo = process(key, oldValue, newValue, requester);
-        return patientActivationInfo == null ? null : (PatientActivationInfo) patientActivationInfo;
     }
 
     private String processString(String key, String oldValue, String newValue, Requester requester) {

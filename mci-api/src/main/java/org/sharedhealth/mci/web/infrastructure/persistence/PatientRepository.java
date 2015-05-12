@@ -9,7 +9,15 @@ import org.sharedhealth.mci.web.exception.HealthIDExistException;
 import org.sharedhealth.mci.web.exception.PatientNotFoundException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.handler.PendingApprovalFilter;
-import org.sharedhealth.mci.web.mapper.*;
+import org.sharedhealth.mci.web.mapper.Address;
+import org.sharedhealth.mci.web.mapper.Catchment;
+import org.sharedhealth.mci.web.mapper.PatientData;
+import org.sharedhealth.mci.web.mapper.PatientMapper;
+import org.sharedhealth.mci.web.mapper.PatientSummaryData;
+import org.sharedhealth.mci.web.mapper.PendingApproval;
+import org.sharedhealth.mci.web.mapper.PendingApprovalFieldDetails;
+import org.sharedhealth.mci.web.mapper.Requester;
+import org.sharedhealth.mci.web.mapper.SearchQuery;
 import org.sharedhealth.mci.web.model.CatchmentMapping;
 import org.sharedhealth.mci.web.model.Patient;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
@@ -37,12 +45,15 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
+import static org.sharedhealth.mci.web.infrastructure.persistence.PatientUpdateLogQueryBuilder.buildCreateUpdateLogStmt;
+import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.ACTIVE;
 import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.CF_PENDING_APPROVAL_MAPPING;
 import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.HEALTH_ID;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientUpdateLogQueryBuilder.buildCreateUpdateLogStmt;
+import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.MERGED_WITH;
 import static org.sharedhealth.mci.web.utils.PatientDataConstants.PATIENT_STATUS_ALIVE;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createDeleteQuery;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
+
 
 @Component
 public class PatientRepository extends BaseRepository {
@@ -103,12 +114,16 @@ public class PatientRepository extends BaseRepository {
 
         PatientData existingPatientData = this.findByHealthId(healthId);
         if (!shouldUpdatePatient(updateRequest, existingPatientData)) {
-            throw new Forbidden(String.format("Cannot update inactive patient, already merged with %s",
-                    existingPatientData.getPatientActivationInfo().getMergedWith()));
+            if (null == existingPatientData.getMergedWith()) {
+                throw new Forbidden(String.format("Cannot update inactive patient"));
+            } else {
+                throw new Forbidden(String.format("Cannot update inactive patient, already merged with %s",
+                        existingPatientData.getMergedWith()));
+            }
         }
 
         final Batch batch = batch();
-        checkIfTryingToMergeWithNonExistingHid(updateRequest);
+        checkIfTryingToMergeWithNonExistingOrInactiveHid(updateRequest.getMergedWith());
         clearPendingApprovalsIfRequired(updateRequest, existingPatientData, batch);
         PatientData newPatientData = this.pendingApprovalFilter.filter(existingPatientData, updateRequest);
 
@@ -131,7 +146,7 @@ public class PatientRepository extends BaseRepository {
     }
 
     private void clearPendingApprovalsIfRequired(PatientData updateRequest, PatientData existingPatientData, Batch batch) {
-        if (null == updateRequest.getPatientActivationInfo() || updateRequest.getPatientActivationInfo().getActivated()) {
+        if (null == updateRequest.getActive() || updateRequest.getActive()) {
             return;
         }
         existingPatientData.setPendingApprovals(new TreeSet<PendingApproval>());
@@ -139,36 +154,39 @@ public class PatientRepository extends BaseRepository {
     }
 
 
-    private boolean checkIfTryingToMergeWithNonExistingHid(PatientData updateRequest) {
-        PatientActivationInfo patientActivationInfo = updateRequest.getPatientActivationInfo();
-        if (null == patientActivationInfo || null == patientActivationInfo.getMergedWith() || patientActivationInfo.getActivated()) {
+    private boolean checkIfTryingToMergeWithNonExistingOrInactiveHid(String mergedWith) {
+        if (null == mergedWith) {
             return false;
         }
-        String mergedWith = patientActivationInfo.getMergedWith();
         PatientData targetPatient = this.findByHealthId(mergedWith);
-        if (!targetPatient.getPatientActivationInfo().getActivated()) {
+        if (!targetPatient.getActive()) {
             throw new Forbidden("Cannot merge with inactive patient");
         }
         return false;
     }
 
     protected boolean shouldUpdatePatient(PatientData updateRequest, PatientData existingPatientData) {
-        if (existingPatientData.getPatientActivationInfo().getActivated()) {
+        if (existingPatientData.getActive()) {
             return true;
         }
-        if (checkIfTryingToUpdateFieldsOtherThanActive(updateRequest)) {
+        if (checkIfTryingToUpdateFieldsOtherThanMergedWith(updateRequest)) {
             return false;
         }
-        if (updateRequest.getPatientActivationInfo().getActivated()) {
+        if (isTryingToActivateInactivePatient(updateRequest)) {
             return false;
         }
         return true;
     }
 
-    private boolean checkIfTryingToUpdateFieldsOtherThanActive(PatientData updateRequest) {
+    private boolean isTryingToActivateInactivePatient(PatientData updateRequest) {
+        return null != updateRequest.getActive() && updateRequest.getActive();
+    }
+
+    private boolean checkIfTryingToUpdateFieldsOtherThanMergedWith(PatientData updateRequest) {
         List<String> nonEmptyFieldNames = updateRequest.findNonEmptyFieldNames();
         nonEmptyFieldNames.remove("hid");
-        nonEmptyFieldNames.remove("active");
+        nonEmptyFieldNames.remove(ACTIVE);
+        nonEmptyFieldNames.remove(MERGED_WITH);
         return !nonEmptyFieldNames.isEmpty();
     }
 

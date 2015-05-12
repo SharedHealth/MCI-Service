@@ -15,7 +15,6 @@ import org.sharedhealth.mci.web.handler.MCIError;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.mapper.Address;
-import org.sharedhealth.mci.web.mapper.PatientActivationInfo;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
 import org.sharedhealth.mci.web.mapper.Relation;
@@ -785,12 +784,9 @@ public class PatientControllerIT extends BaseControllerTest {
 
     @Test
     public void shouldCreateActivePatient() throws Exception {
-        PatientActivationInfo patientActivationInfo = new PatientActivationInfo();
-        patientActivationInfo.setActivated(true);
-
-        patientData.setPatientActivationInfo(patientActivationInfo);
+        patientData.setActive(true);
         String json = mapper.writeValueAsString(patientData);
-        patientData.setPatientActivationInfo(null);
+        patientData.setActive(null);
 
         MvcResult result = mockMvc.perform(post(API_END_POINT_FOR_PATIENT)
                 .header(AUTH_TOKEN_KEY, validAccessToken)
@@ -811,16 +807,11 @@ public class PatientControllerIT extends BaseControllerTest {
 
     @Test
     public void shouldNotCreateInactivePatient() throws Exception {
-        String targetHealthId = createPatient(patientData).getId();
-        PatientActivationInfo patientActivationInfo = new PatientActivationInfo();
-        patientActivationInfo.setActivated(false);
-        patientActivationInfo.setMergedWith(targetHealthId);
-
-        patientData.setPatientActivationInfo(patientActivationInfo);
+        patientData.setActive(false);
         String json = mapper.writeValueAsString(patientData);
-        patientData.setPatientActivationInfo(null);
+        patientData.setActive(null);
 
-        MvcResult result = mockMvc.perform(post(API_END_POINT_FOR_PATIENT)
+        mockMvc.perform(post(API_END_POINT_FOR_PATIENT)
                 .header(AUTH_TOKEN_KEY, validAccessToken)
                 .header(FROM_KEY, validEmail)
                 .header(CLIENT_ID_KEY, validClientId)
@@ -834,15 +825,32 @@ public class PatientControllerIT extends BaseControllerTest {
     @Test
     public void shouldNotUpdateActiveFieldUsingUpdateApi() throws Exception {
         String healthId = createPatient(patientData).getId();
-        String targetHealthId = createPatient(patientData).getId();
-
-
-        PatientActivationInfo patientActivationInfo = new PatientActivationInfo();
-        patientActivationInfo.setActivated(false);
-        patientActivationInfo.setMergedWith(targetHealthId);
 
         PatientData patientDataWithActiveInfo = new PatientData();
-        patientDataWithActiveInfo.setPatientActivationInfo(patientActivationInfo);
+        patientDataWithActiveInfo.setActive(false);
+
+        String json = mapper.writeValueAsString(patientDataWithActiveInfo);
+
+        MvcResult mvcResult = mockMvc.perform(put(API_END_POINT_FOR_PATIENT + "/" + healthId)
+                .header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId)
+                .accept(APPLICATION_JSON).content
+                        (json).contentType
+                        (APPLICATION_JSON))
+                .andExpect(status().isForbidden())
+                .andReturn();
+        String content = mvcResult.getResponse().getContentAsString();
+        JSONAssert.assertEquals(asString("jsons/response/error_cannot_update_403.json"), content, JSONCompareMode.STRICT);
+    }
+
+    @Test
+    public void shouldNotUpdateMergedWithFieldUsingUpdateApi() throws Exception {
+        String healthId = createPatient(patientData).getId();
+        String targetHealthId = createPatient(patientData).getId();
+
+        PatientData patientDataWithActiveInfo = new PatientData();
+        patientDataWithActiveInfo.setMergedWith(targetHealthId);
 
         String json = mapper.writeValueAsString(patientDataWithActiveInfo);
 
@@ -863,12 +871,9 @@ public class PatientControllerIT extends BaseControllerTest {
     public void shouldNotUpdatePatientUsingActiveUpdateApiIfTargetHidNotFound() throws Exception {
         String healthId = createPatient(patientData).getId();
 
-        PatientActivationInfo patientActivationInfo = new PatientActivationInfo();
-        patientActivationInfo.setActivated(false);
-        patientActivationInfo.setMergedWith("some_non_existing_hid");
-
         PatientData patientDataWithActiveInfo = new PatientData();
-        patientDataWithActiveInfo.setPatientActivationInfo(patientActivationInfo);
+        patientDataWithActiveInfo.setActive(false);
+        patientDataWithActiveInfo.setMergedWith("some_non_existing_hid");
 
         String json = mapper.writeValueAsString(patientDataWithActiveInfo);
 
@@ -887,12 +892,9 @@ public class PatientControllerIT extends BaseControllerTest {
     public void shouldNotUpdatePatientUsingActiveUpdateApiIfPatientHidNotFound() throws Exception {
         String targetHealthId = createPatient(patientData).getId();
 
-        PatientActivationInfo patientActivationInfo = new PatientActivationInfo();
-        patientActivationInfo.setActivated(false);
-        patientActivationInfo.setMergedWith(targetHealthId);
-
         PatientData patientDataWithActiveInfo = new PatientData();
-        patientDataWithActiveInfo.setPatientActivationInfo(patientActivationInfo);
+        patientDataWithActiveInfo.setActive(false);
+        patientDataWithActiveInfo.setMergedWith(targetHealthId);
 
         String json = mapper.writeValueAsString(patientDataWithActiveInfo);
 
@@ -911,12 +913,9 @@ public class PatientControllerIT extends BaseControllerTest {
     public void shouldNotMergePatientWithItself() throws Exception {
         String healthId = createPatient(patientData).getId();
 
-        PatientActivationInfo patientActivationInfo = new PatientActivationInfo();
-        patientActivationInfo.setActivated(false);
-        patientActivationInfo.setMergedWith(healthId);
-
         PatientData patientDataWithActiveInfo = new PatientData();
-        patientDataWithActiveInfo.setPatientActivationInfo(patientActivationInfo);
+        patientDataWithActiveInfo.setActive(false);
+        patientDataWithActiveInfo.setMergedWith(healthId);
 
         String json = mapper.writeValueAsString(patientDataWithActiveInfo);
 
@@ -935,14 +934,9 @@ public class PatientControllerIT extends BaseControllerTest {
     public void shouldNotMergePatientWithInactivePatient() throws Exception {
         String healthId = createPatient(patientData).getId();
         String targetHealthId = createPatient(patientData).getId();
-        String newTargetHealthId = createPatient(patientData).getId();
-
-        PatientActivationInfo patientActivationInfo = new PatientActivationInfo();
-        patientActivationInfo.setActivated(false);
-        patientActivationInfo.setMergedWith(newTargetHealthId);
 
         PatientData patientDataWithActiveInfo = new PatientData();
-        patientDataWithActiveInfo.setPatientActivationInfo(patientActivationInfo);
+        patientDataWithActiveInfo.setActive(false);
 
         String json = mapper.writeValueAsString(patientDataWithActiveInfo);
 
@@ -950,11 +944,7 @@ public class PatientControllerIT extends BaseControllerTest {
 
         assertEquals(targetHealthId, inactiveHid);
 
-        patientActivationInfo = new PatientActivationInfo();
-        patientActivationInfo.setActivated(false);
-        patientActivationInfo.setMergedWith(targetHealthId);
-
-        patientDataWithActiveInfo.setPatientActivationInfo(patientActivationInfo);
+        patientDataWithActiveInfo.setMergedWith(targetHealthId);
 
         json = mapper.writeValueAsString(patientDataWithActiveInfo);
 
@@ -974,12 +964,9 @@ public class PatientControllerIT extends BaseControllerTest {
         String healthId = createPatient(patientData).getId();
         String targetHealthId = createPatient(patientData).getId();
 
-        PatientActivationInfo patientActivationInfo = new PatientActivationInfo();
-        patientActivationInfo.setActivated(false);
-        patientActivationInfo.setMergedWith(targetHealthId);
-
         PatientData patientDataWithActiveInfo = new PatientData();
-        patientDataWithActiveInfo.setPatientActivationInfo(patientActivationInfo);
+        patientDataWithActiveInfo.setActive(false);
+        patientDataWithActiveInfo.setMergedWith(targetHealthId);
 
         String json = mapper.writeValueAsString(patientDataWithActiveInfo);
 
@@ -987,8 +974,8 @@ public class PatientControllerIT extends BaseControllerTest {
 
         assertEquals(healthId, inactiveHid);
 
-        patientActivationInfo.setActivated(true);
-        patientActivationInfo.setMergedWith(null);
+        patientDataWithActiveInfo.setActive(true);
+        patientDataWithActiveInfo.setMergedWith(null);
 
         json = mapper.writeValueAsString(patientDataWithActiveInfo);
 
@@ -1016,20 +1003,15 @@ public class PatientControllerIT extends BaseControllerTest {
     @Test
     public void shouldNotUpdateInactivePatient() throws Exception {
         String healthId = createPatient(patientData).getId();
-        String targetHealthId = createPatient(patientData).getId();
 
-        PatientActivationInfo patientActivationInfo = new PatientActivationInfo();
-        patientActivationInfo.setActivated(false);
-        patientActivationInfo.setMergedWith(targetHealthId);
+        PatientData patientDataWithActiveInfo = new PatientData();
+        patientDataWithActiveInfo.setActive(false);
+
+        String json = mapper.writeValueAsString(patientDataWithActiveInfo);
+
+        updatePatient(json, healthId);
 
         PatientData updatePatientData = new PatientData();
-        updatePatientData.setPatientActivationInfo(patientActivationInfo);
-
-        String json = mapper.writeValueAsString(updatePatientData);
-
-        updatePatient(json, healthId).getId();
-
-        updatePatientData.setPatientActivationInfo(null);
         updatePatientData.setGivenName("newName");
 
         json = mapper.writeValueAsString(updatePatientData);
@@ -1061,12 +1043,9 @@ public class PatientControllerIT extends BaseControllerTest {
         String targetHealthId = createPatient(patientData).getId();
         String newTargetHealthId = createPatient(patientData).getId();
 
-        PatientActivationInfo patientActivationInfo = new PatientActivationInfo();
-        patientActivationInfo.setActivated(false);
-        patientActivationInfo.setMergedWith(targetHealthId);
-
         PatientData patientDataWithActiveInfo = new PatientData();
-        patientDataWithActiveInfo.setPatientActivationInfo(patientActivationInfo);
+        patientDataWithActiveInfo.setActive(false);
+        patientDataWithActiveInfo.setMergedWith(targetHealthId);
 
         String json = mapper.writeValueAsString(patientDataWithActiveInfo);
 
@@ -1074,7 +1053,7 @@ public class PatientControllerIT extends BaseControllerTest {
 
         assertEquals(healthId, inactiveHid);
 
-        patientActivationInfo.setMergedWith(newTargetHealthId);
+        patientDataWithActiveInfo.setMergedWith(newTargetHealthId);
 
         json = mapper.writeValueAsString(patientDataWithActiveInfo);
 
@@ -1087,6 +1066,42 @@ public class PatientControllerIT extends BaseControllerTest {
                 .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
+    }
+
+    @Test
+    public void shouldGetSelectiveFieldsForInactivePatient() throws Exception {
+        String healthId = createPatient(patientData).getId();
+        String targetHealthId = createPatient(patientData).getId();
+
+        PatientData patientDataWithActiveInfo = new PatientData();
+        patientDataWithActiveInfo.setActive(false);
+        patientDataWithActiveInfo.setMergedWith(targetHealthId);
+
+        String json = mapper.writeValueAsString(patientDataWithActiveInfo);
+
+        String inactiveHid = updatePatient(json, healthId).getId();
+
+        assertEquals(healthId, inactiveHid);
+
+
+        MvcResult getResult = mockMvc.perform(get(API_END_POINT_FOR_PATIENT + "/" + healthId)
+                .header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId)
+                .accept(APPLICATION_JSON)
+                .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        final ResponseEntity asyncResult = (ResponseEntity<PatientData>) getResult.getAsyncResult();
+
+        PatientData response = getPatientObjectFromResponse(asyncResult);
+        PatientData expected = new PatientData();
+        expected.setHealthId(healthId);
+        expected.setActive(false);
+        expected.setMergedWith(targetHealthId);
+
+        assertPatientEquals(response, expected);
     }
 
     private void createPatientData() {

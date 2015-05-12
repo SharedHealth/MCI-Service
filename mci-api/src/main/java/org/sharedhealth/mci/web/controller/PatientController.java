@@ -9,7 +9,6 @@ import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
-import org.sharedhealth.mci.web.mapper.PatientActivationInfo;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PatientSummaryData;
 import org.sharedhealth.mci.web.mapper.SearchQuery;
@@ -65,7 +64,7 @@ public class PatientController extends MciController {
         logger.debug("Trying to create patient.");
         final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
 
-        if (isTryingToCreateInactivePatient(patient.getPatientActivationInfo())) {
+        if (null != patient.getActive() && !patient.getActive()) {
             throw new Forbidden(format("Cannot create inactive patient"));
         }
         if (bindingResult.hasErrors()) {
@@ -96,11 +95,14 @@ public class PatientController extends MciController {
 
 
         PatientData result = patientService.findByHealthId(healthId);
-        PatientActivationInfo patientActivationInfo = result.getPatientActivationInfo();
-        if (null != patientActivationInfo && !patientActivationInfo.getActivated()) {
+
+        Boolean isActive = result.getActive();
+        if (null != isActive && !isActive) {
+            String mergedWith = result.getMergedWith();
             result = new PatientData();
             result.setHealthId(healthId);
-            result.setPatientActivationInfo(patientActivationInfo);
+            result.setActive(isActive);
+            result.setMergedWith(mergedWith);
         }
         deferredResult.setResult(new ResponseEntity<>(result, OK));
         return deferredResult;
@@ -155,7 +157,7 @@ public class PatientController extends MciController {
             logger.debug(format("Validation error while updating patient (healthId): %s", healthId));
             throw new ValidationException(bindingResult);
         }
-        if (null != patient.getPatientActivationInfo()) {
+        if (null != patient.getActive() || null != patient.getMergedWith()) {
             throw new Forbidden(format("Cannot update active field or merge with other patient"));
         }
 
@@ -183,8 +185,8 @@ public class PatientController extends MciController {
             throw new ValidationException(bindingResult);
         }
 
-        if (mergingWithItself(patient, healthId)) {
-            throw new Forbidden(format("Cannot merge with the same patient"));
+        if (mergingWithItself(patient.getMergedWith(), healthId)) {
+            throw new Forbidden(format("Cannot merge with itself"));
         }
 
 
@@ -193,18 +195,10 @@ public class PatientController extends MciController {
         return deferredResult;
     }
 
-    private boolean mergingWithItself(PatientData patient, String healthId) {
-        PatientActivationInfo patientActivationInfo = patient.getPatientActivationInfo();
-        if (null == patientActivationInfo || StringUtils.isBlank(patientActivationInfo.getMergedWith())) {
+    private boolean mergingWithItself(String mergedWith, String healthId) {
+        if (StringUtils.isBlank(mergedWith)) {
             return false;
         }
-        return patientActivationInfo.getMergedWith().equals(healthId);
-    }
-
-    private boolean isTryingToCreateInactivePatient(PatientActivationInfo patientActivationInfo) {
-        if (null != patientActivationInfo && !patientActivationInfo.getActivated()) {
-            return true;
-        }
-        return false;
+        return mergedWith.equals(healthId);
     }
 }

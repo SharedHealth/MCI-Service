@@ -9,7 +9,6 @@ import org.sharedhealth.mci.web.config.EnvironmentMock;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.mapper.Address;
-import org.sharedhealth.mci.web.mapper.PatientActivationInfo;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
 import org.springframework.test.context.ContextConfiguration;
@@ -738,12 +737,9 @@ public class AuthorizationIT extends BaseControllerTest {
         String healthId = createPatient(patientData).getId();
         String targetHealthId = createPatient(patientData).getId();
 
-        PatientActivationInfo patientActivationInfo = new PatientActivationInfo();
-        patientActivationInfo.setActivated(false);
-        patientActivationInfo.setMergedWith(targetHealthId);
-
         PatientData patientDataWithActiveInfo = new PatientData();
-        patientDataWithActiveInfo.setPatientActivationInfo(patientActivationInfo);
+        patientDataWithActiveInfo.setActive(false);
+        patientDataWithActiveInfo.setMergedWith(targetHealthId);
 
         String json = mapper.writeValueAsString(patientDataWithActiveInfo);
 

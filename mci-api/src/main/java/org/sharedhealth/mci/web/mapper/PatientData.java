@@ -196,10 +196,12 @@ public class PatientData implements Diffable<PatientData> {
     private PatientStatus patientStatus;
 
     @JsonProperty(ACTIVE)
-    @Valid
     @JsonInclude(NON_EMPTY)
-    @PatientActivationInfoBlock(message = ERROR_CODE_INVALID)
-    private PatientActivationInfo patientActivationInfo;
+    private Boolean active;
+
+    @JsonProperty(MERGED_WITH)
+    @JsonInclude(NON_EMPTY)
+    private String mergedWith;
 
     @JsonIgnore
     private TreeSet<PendingApproval> pendingApprovals;
@@ -813,12 +815,20 @@ public class PatientData implements Diffable<PatientData> {
         this.patientStatus = patientStatus;
     }
 
-    public PatientActivationInfo getPatientActivationInfo() {
-        return patientActivationInfo;
+    public Boolean getActive() {
+        return active;
     }
 
-    public void setPatientActivationInfo(PatientActivationInfo patientActivationInfo) {
-        this.patientActivationInfo = patientActivationInfo;
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
+    public String getMergedWith() {
+        return mergedWith;
+    }
+
+    public void setMergedWith(String mergedWith) {
+        this.mergedWith = mergedWith;
     }
 
     @JsonProperty(UPDATED_BY)

@@ -189,7 +189,7 @@ public class PatientService {
         if (patient == null) {
             return null;
         }
-        if (null != patient.getPatientActivationInfo() && !patient.getPatientActivationInfo().getActivated()) {
+        if (null != patient.getActive() && !patient.getActive()) {
             throw new Forbidden("patient is already marked inactive");
         }
         verifyCatchment(patient, catchment);
@@ -205,7 +205,7 @@ public class PatientService {
     public String processPendingApprovals(PatientData requestData, Catchment catchment, boolean shouldAccept) {
         logger.debug(format("process pending approval for healthId: %s and for catchment: %s", requestData.getHealthId(), catchment.toString()));
         PatientData existingPatient = this.findByHealthId(requestData.getHealthId());
-        if (null != existingPatient.getPatientActivationInfo() && !existingPatient.getPatientActivationInfo().getActivated()) {
+        if (null != existingPatient.getActive() && !existingPatient.getActive()) {
             throw new Forbidden("patient is already marked inactive");
         }
         verifyCatchment(existingPatient, catchment);

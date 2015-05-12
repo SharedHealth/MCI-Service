@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.utils.DateUtil;
+import org.sharedhealth.mci.web.exception.InvalidRequesterException;
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.model.Patient;
 import org.sharedhealth.mci.web.utils.PatientDataConstants;
@@ -98,16 +99,8 @@ public class PatientMapper {
             data.setPatientStatus(patientStatus);
         }
 
-        Boolean isActive = patient.getActive();
-        PatientActivationInfo patientActivationInfo = new PatientActivationInfo();
-        if (null == isActive) {
-            patientActivationInfo.setActivated(true);
-        }
-        patientActivationInfo.setActivated(isActive);
-        if (null != isActive && !isActive) {
-            patientActivationInfo.setMergedWith(patient.getMergedWith());
-        }
-        data.setPatientActivationInfo(patientActivationInfo);
+        data.setActive(patient.getActive());
+        data.setMergedWith(patient.getMergedWith());
 
         if (patient.getConfidential() != null) {
             mapConfidentiality(patient, data);
@@ -200,7 +193,6 @@ public class PatientMapper {
         PatientStatus patientStatus = data.getPatientStatus();
         PhoneNumber phoneNumber = data.getPhoneNumber();
         PhoneNumber primaryContactNumber = data.getPrimaryContactNumber();
-        PatientActivationInfo patientActivationInfo = data.getPatientActivationInfo();
 
         patient.setHealthId(data.getHealthId());
         patient.setNationalId(data.getNationalId());
@@ -247,9 +239,7 @@ public class PatientMapper {
             mapPrimaryContactNumber(patient, primaryContactNumber);
         }
 
-        if (null != patientActivationInfo) {
-            mapPatientActivationInfo(patient, patientActivationInfo);
-        }
+        mapPatientActivation(patient, data);
 
         patient.setPrimaryContact(StringUtils.trim(data.getPrimaryContact()));
         patient.setPendingApprovals(data.getPendingApprovals());
@@ -277,9 +267,12 @@ public class PatientMapper {
         patient.setDateOfDeath(defaultString(patientStatus.getDateOfDeath()));
     }
 
-    private void mapPatientActivationInfo(Patient patient, PatientActivationInfo patientActivationInfo) {
-        patient.setActive(patientActivationInfo.getActivated());
-        patient.setMergedWith(patientActivationInfo.getMergedWith());
+    private void mapPatientActivation(Patient patient, PatientData patientData) {
+        if (null != patientData.getActive() && patientData.getActive() && StringUtils.isNotBlank(patientData.getMergedWith())) {
+            throw new InvalidRequesterException("Active Patient cannot be merged with other patient");
+        }
+        patient.setActive(patientData.getActive());
+        patient.setMergedWith(patientData.getMergedWith());
     }
 
     private void mapPermanentAddress(Patient patient, Address permanentAddress) {
