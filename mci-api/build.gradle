@@ -80,7 +80,7 @@ configurations {
 
 jar {
     baseName = 'mci-api'
-    version = '0.1-SNAPSHOT'
+    version = '0.2-SNAPSHOT'
 }
 
 private Properties loadConfig() {
@@ -103,7 +103,7 @@ task exportProperties(dependsOn: 'assembly') << {
 
 task dist(dependsOn: [project(":schema").tasks.build, 'exportProperties'], type: Rpm) {
     packageName = 'mci'
-    version = '0.1'
+    version = '0.2'
     release = project.hasProperty('release') ? project.release : '1'
     arch = NOARCH
     os = LINUX
