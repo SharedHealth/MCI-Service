@@ -608,8 +608,9 @@ public class PatientData implements Diffable<PatientData> {
         if (surName != null ? !surName.equals(that.surName) : that.surName != null) return false;
         if (uid != null ? !uid.equals(that.uid) : that.uid != null) return false;
         if (updatedAt != null ? !updatedAt.equals(that.updatedAt) : that.updatedAt != null) return false;
-        if (householdCode != null ? !householdCode.equals(that.householdCode) : that.householdCode != null)
-            return false;
+        if (householdCode != null ? !householdCode.equals(that.householdCode) : that.householdCode != null) return false;
+        if (active != null ? !active.equals(that.active) : that.active != null) return false;
+        if (mergedWith != null ? !mergedWith.equals(that.mergedWith) : that.mergedWith != null) return false;
 
         return true;
     }
@@ -646,6 +647,8 @@ public class PatientData implements Diffable<PatientData> {
         result = 31 * result + (updatedAt != null ? updatedAt.hashCode() : 0);
         result = 31 * result + (pendingApprovals != null ? pendingApprovals.hashCode() : 0);
         result = 31 * result + (householdCode != null ? householdCode.hashCode() : 0);
+        result = 31 * result + (active != null ? active.hashCode() : 0);
+        result = 31 * result + (mergedWith!= null ? mergedWith.hashCode() : 0);
         return result;
     }
 
@@ -683,6 +686,8 @@ public class PatientData implements Diffable<PatientData> {
         sb.append(", updatedAt=").append(updatedAt);
         sb.append(", pendingApprovals=").append(pendingApprovals);
         sb.append(", requester='").append(requester).append('\'');
+        sb.append(", active='").append(active).append('\'');
+        sb.append(", mergedWith='").append(mergedWith).append('\'');
         sb.append('}');
         return sb.toString();
     }
@@ -876,6 +881,8 @@ public class PatientData implements Diffable<PatientData> {
                 .append(PERMANENT_ADDRESS, this.permanentAddress, that.permanentAddress)
 
                 .append(RELATIONS, this.relations, that.relations)
+                .append(ACTIVE, this.active, that.active)
+                .append(MERGED_WITH, this.mergedWith, that.mergedWith)
 
                 .build();
     }

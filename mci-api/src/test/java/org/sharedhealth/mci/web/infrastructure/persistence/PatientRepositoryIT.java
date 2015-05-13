@@ -99,6 +99,7 @@ public class PatientRepositoryIT {
         data.setAddress(address);
 
         data.setRequester(FACILITY, null);
+        data.setActive(true);
 
         return data;
     }

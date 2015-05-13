@@ -75,11 +75,10 @@
     "post_code":"1225",
     "country_code":"050"
   },
-    "status": {
-        "type": "1",
-        "date_of_death": null
+  "status": {
+    "type": "1",
+    "date_of_death": null
   },
   "confidential": "No",
-  "active": "true",
   "household_code": "1234"
 }

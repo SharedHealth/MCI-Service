@@ -442,6 +442,7 @@ public class PatientControllerIT extends BaseControllerTest {
     @Test
     public void shouldUpdatePatientSuccessfullyForValidData() throws Exception {
         String json = asString("jsons/patient/full_payload.json");
+        String updateJson = asString("jsons/patient/full_payload_for_update.json");
 
         PatientData original = getPatientObjectFromString(json);
 
@@ -452,7 +453,7 @@ public class PatientControllerIT extends BaseControllerTest {
                 .header(AUTH_TOKEN_KEY, validAccessToken)
                 .header(FROM_KEY, validEmail)
                 .header(CLIENT_ID_KEY, validClientId)
-                .accept(APPLICATION_JSON).content(json).contentType
+                .accept(APPLICATION_JSON).content(updateJson).contentType
                         (APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -463,7 +464,7 @@ public class PatientControllerIT extends BaseControllerTest {
     }
 
     @Test
-    public void shouldPatientUpdatePartiallyForValidPartialData() throws Exception {
+    public void shouldUpdatePatientPartiallyForValidPartialData() throws Exception {
 
         String fullPayloadJson = asString("jsons/patient/full_payload.json");
         String nid = "9934677890120";
@@ -766,6 +767,7 @@ public class PatientControllerIT extends BaseControllerTest {
         mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isAccepted());
 
         PatientData updatedPatient = getPatientObjectFromString(updateJson);
+        updatedPatient.setActive(true);
 
         PatientData patient = getPatientMapperObjectByHealthId(healthId);
         patient.setHealthId(patient.getHealthId());
