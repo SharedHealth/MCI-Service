@@ -20,6 +20,16 @@ public class PatientDupeData {
     @JsonProperty(CREATED_AT)
     private String createdAt;
 
+    public PatientDupeData() {
+    }
+
+    public PatientDupeData(String healthId1, String healthId2, Set<String> reasons, String createdAt) {
+        this.healthId1 = healthId1;
+        this.healthId2 = healthId2;
+        this.reasons = reasons;
+        this.createdAt = createdAt;
+    }
+
     public String getHealthId1() {
         return healthId1;
     }
