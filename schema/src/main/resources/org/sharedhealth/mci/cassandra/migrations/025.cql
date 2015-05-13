@@ -1,0 +1,1 @@
+DELETE FROM approval_fields WHERE FIELD='date_of_birth';
