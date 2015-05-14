@@ -66,7 +66,7 @@ public class DefaultHidGenerator implements HidGenerator {
             throw new HidGenerationException(message);
         }
 
-        int checksum = this.checksumGenerator.generate(id);
+        int checksum = this.checksumGenerator.generate(valueOf(id).substring(1));
         logger.debug("Checksum for id " + id + " is " + checksum);
 
         String generatedId = valueOf(id) + valueOf(checksum);

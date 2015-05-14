@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.sharedhealth.mci.web.exception.HidGenerationException;
 
+import static java.lang.String.valueOf;
 import static org.junit.Assert.assertEquals;
 
 public class LuhnChecksumGeneratorTest {
@@ -17,13 +18,13 @@ public class LuhnChecksumGeneratorTest {
 
     @Test
     public void shouldGenerateChecksumUsingLuhnAlgorithm() {
-        assertEquals(9, checksumGenerator.generate(7892402363L));
-        assertEquals(7, checksumGenerator.generate(6894402763L));
-        assertEquals(5, checksumGenerator.generate(3392244354L));
+        assertEquals(9, checksumGenerator.generate(valueOf(7892402363L)));
+        assertEquals(7, checksumGenerator.generate(valueOf(6894402763L)));
+        assertEquals(5, checksumGenerator.generate(valueOf(3392244354L)));
     }
 
     @Test(expected = HidGenerationException.class)
     public void shouldThrowExceptionIfChecksumGenerationFails() {
-        checksumGenerator.generate(-1);
+        checksumGenerator.generate(valueOf(-1));
     }
 }

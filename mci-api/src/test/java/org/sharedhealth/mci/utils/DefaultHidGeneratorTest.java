@@ -43,7 +43,7 @@ public class DefaultHidGeneratorTest {
         String hid = hidWithCheckSum.substring(0, hidWithCheckSum.length() - 1);
         assertEquals(10, hid.length());
 
-        assertEquals((int) Integer.valueOf(checksum), checksumGenerator.generate(Long.valueOf(hid)));
+        assertEquals((int) Integer.valueOf(checksum), checksumGenerator.generate(hid.substring(1)));
     }
 
     @Test

@@ -18,12 +18,12 @@ public class LuhnChecksumGenerator implements ChecksumGenerator {
     private static final Logger logger = getLogger(LuhnChecksumGenerator.class);
 
     @Override
-    public int generate(long id) {
+    public int generate(String code) {
         try {
-            return parseInt(LUHN_CHECK_DIGIT.calculate(valueOf(id)));
+            return parseInt(LUHN_CHECK_DIGIT.calculate(valueOf(code)));
 
         } catch (CheckDigitException e) {
-            String message = "Cannot create checksum using Luhn algorithm for id " + id;
+            String message = "Cannot create checksum using Luhn algorithm for code " + code;
             logger.debug(message);
             throw new HidGenerationException(message, e);
         }
