@@ -33,24 +33,37 @@ public class PatientSummaryData {
     private String birthRegistrationNumber;
 
     @JsonProperty(GIVEN_NAME)
+    @JsonInclude(NON_EMPTY)
     private String givenName;
 
     @JsonProperty(SUR_NAME)
+    @JsonInclude(NON_EMPTY)
     private String surName;
 
     @JsonProperty(GENDER)
+    @JsonInclude(NON_EMPTY)
     private String gender;
 
     @JsonProperty(DATE_OF_BIRTH)
+    @JsonInclude(NON_EMPTY)
     @JsonDeserialize(using = DateStringDeserializer.class)
     private String dateOfBirth;
 
     @JsonProperty(PRESENT_ADDRESS)
+    @JsonInclude(NON_EMPTY)
     private Address address;
 
     @JsonProperty(PHONE_NUMBER)
     @JsonInclude(NON_EMPTY)
     private PhoneNumber phoneNumber;
+
+    @JsonProperty(ACTIVE)
+    @JsonInclude(NON_EMPTY)
+    private Boolean active;
+
+    @JsonProperty(MERGED_WITH)
+    @JsonInclude(NON_EMPTY)
+    private String mergedWith;
 
     public String getNationalId() {
         return nationalId;
@@ -132,6 +145,22 @@ public class PatientSummaryData {
         this.phoneNumber = phoneNumber;
     }
 
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
+    public String getMergedWith() {
+        return mergedWith;
+    }
+
+    public void setMergedWith(String mergedWith) {
+        this.mergedWith = mergedWith;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -150,6 +179,8 @@ public class PatientSummaryData {
         if (phoneNumber != null ? !phoneNumber.equals(that.phoneNumber) : that.phoneNumber != null) return false;
         if (surName != null ? !surName.equals(that.surName) : that.surName != null) return false;
         if (uid != null ? !uid.equals(that.uid) : that.uid != null) return false;
+        if (active != null ? !active.equals(that.active) : that.active != null) return false;
+        if (mergedWith != null ? !mergedWith.equals(that.mergedWith) : that.mergedWith != null) return false;
 
         return true;
     }
@@ -166,6 +197,8 @@ public class PatientSummaryData {
         result = 31 * result + (dateOfBirth != null ? dateOfBirth.hashCode() : 0);
         result = 31 * result + (address != null ? address.hashCode() : 0);
         result = 31 * result + (phoneNumber != null ? phoneNumber.hashCode() : 0);
+        result = 31 * result + (active != null ? active.hashCode() : 0);
+        result = 31 * result + (mergedWith != null ? mergedWith.hashCode() : 0);
         return result;
     }
 
@@ -182,6 +215,8 @@ public class PatientSummaryData {
                 ", dateOfBirth='" + dateOfBirth + '\'' +
                 ", address=" + address +
                 ", phoneNumber=" + phoneNumber +
+                ", active=" + active +
+                ",mergedWith=" + mergedWith +
                 '}';
     }
 }

@@ -332,6 +332,8 @@ public class PatientMapper {
         data.setGender(patient.getGender());
         data.setAddress(patient.getAddress());
         data.setPhoneNumber(patient.getPhoneNumber());
+        data.setActive(patient.getActive());
+        data.setMergedWith(patient.getMergedWith());
 
         return data;
     }

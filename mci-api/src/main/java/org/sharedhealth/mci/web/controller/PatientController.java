@@ -28,6 +28,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.validation.Valid;
 import javax.validation.groups.Default;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -98,17 +99,8 @@ public class PatientController extends MciController {
         logAccessDetails(userInfo, format("Find patient given (healthId) : %s", healthId));
         logger.debug("Trying to find patient by health id [" + healthId + "]");
 
+        PatientData result = formatResponse(patientService.findByHealthId(healthId));
 
-        PatientData result = patientService.findByHealthId(healthId);
-
-        Boolean isActive = result.getActive();
-        if (null != isActive && !isActive) {
-            String mergedWith = result.getMergedWith();
-            result = new PatientData();
-            result.setHealthId(healthId);
-            result.setActive(isActive);
-            result.setMergedWith(mergedWith);
-        }
         deferredResult.setResult(new ResponseEntity<>(result, OK));
         return deferredResult;
     }
@@ -131,7 +123,7 @@ public class PatientController extends MciController {
         final String note = patientService.getPerPageMaximumLimitNote();
         searchQuery.setMaximum_limit(limit);
 
-        List<PatientSummaryData> results = patientService.findAllSummaryByQuery(searchQuery);
+        List<PatientSummaryData> results = formatResponse(patientService.findAllSummaryByQuery(searchQuery));
         HashMap<String, String> additionalInfo = new HashMap<>();
         if (results.size() > limit) {
             results = results.subList(0, limit);
@@ -206,4 +198,36 @@ public class PatientController extends MciController {
         }
         return mergedWith.equals(healthId);
     }
+
+    private PatientData formatResponse(PatientData patient) {
+        if (null == patient.getActive() || patient.getActive()) {
+            return patient;
+        }
+        PatientData inactivePatientData = new PatientData();
+        inactivePatientData.setHealthId(patient.getHealthId());
+        inactivePatientData.setActive(patient.getActive());
+        inactivePatientData.setMergedWith(patient.getMergedWith());
+        return inactivePatientData;
+    }
+
+
+    private List<PatientSummaryData> formatResponse(List<PatientSummaryData> patientSummaryDataList) {
+        ArrayList<PatientSummaryData> summaryDataList = new ArrayList<>();
+        for (PatientSummaryData patientSummaryData : patientSummaryDataList) {
+            summaryDataList.add(formatResponse(patientSummaryData));
+        }
+        return summaryDataList;
+    }
+
+    private PatientSummaryData formatResponse(PatientSummaryData patientSummaryData) {
+        if (null == patientSummaryData.getActive() || patientSummaryData.getActive()) {
+            return patientSummaryData;
+        }
+        PatientSummaryData inactivePatientSummaryData = new PatientSummaryData();
+        inactivePatientSummaryData.setHealthId(patientSummaryData.getHealthId());
+        inactivePatientSummaryData.setActive(patientSummaryData.getActive());
+        inactivePatientSummaryData.setMergedWith(patientSummaryData.getMergedWith());
+        return inactivePatientSummaryData;
+    }
+
 }
