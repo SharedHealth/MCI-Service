@@ -8,6 +8,8 @@ import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
 import org.sharedhealth.mci.web.infrastructure.security.UserProfile;
 import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.DuplicatePatientData;
+import org.sharedhealth.mci.web.mapper.DuplicatePatientMergeData;
+import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.service.DuplicatePatientService;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -21,15 +23,17 @@ import java.util.List;
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.asSet;
 import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.*;
+import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.core.context.SecurityContextHolder.getContext;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 
 public class DuplicatePatientControllerTest {
 
@@ -69,7 +73,7 @@ public class DuplicatePatientControllerTest {
     public void shouldFindDuplicatesByCatchment() throws Exception {
         when(duplicatePatientService.findAllByCatchment(new Catchment("102030"))).thenReturn(buildDuplicatePatientDataList());
 
-        String url = "/patients/duplicates/102030";
+        String url = "/patients/duplicates/catchments/102030";
         MvcResult mvcResult = mockMvc.perform(get(url).contentType(APPLICATION_JSON))
                 .andExpect(request().asyncStarted())
                 .andReturn();
@@ -100,11 +104,25 @@ public class DuplicatePatientControllerTest {
     @Test(expected = Exception.class)
     public void shouldNotFindDuplicatesIfCatchmentDoesNotMatch() throws Exception {
 
-        String url = "/patients/duplicates/112233";
+        String url = "/patients/duplicates/catchments/12345";
         MvcResult mvcResult = mockMvc.perform(get(url).contentType(APPLICATION_JSON))
                 .andExpect(request().asyncStarted())
                 .andReturn();
 
         mockMvc.perform(asyncDispatch(mvcResult));
+    }
+
+    @Test
+    public void shouldMergeDuplicates() throws Exception {
+        DuplicatePatientMergeData data = new DuplicatePatientMergeData("1000", new PatientData(), new PatientData());
+        doNothing().when(duplicatePatientService).merge(data);
+
+        String url = "/patients/duplicates";
+        MvcResult mvcResult = mockMvc.perform(put(url).content(writeValueAsString(data)).contentType(APPLICATION_JSON))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isAccepted());
     }
 }

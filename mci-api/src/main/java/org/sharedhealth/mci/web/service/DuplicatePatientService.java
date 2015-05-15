@@ -4,6 +4,7 @@ import org.sharedhealth.mci.utils.DateUtil;
 import org.sharedhealth.mci.web.infrastructure.persistence.DuplicatePatientRepository;
 import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.DuplicatePatientData;
+import org.sharedhealth.mci.web.mapper.DuplicatePatientMergeData;
 import org.sharedhealth.mci.web.model.DuplicatePatient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -41,5 +42,9 @@ public class DuplicatePatientService {
         duplicatePatientData.setReasons(duplicatePatient.getReasons());
         duplicatePatientData.setCreatedAt(DateUtil.toIsoFormat(duplicatePatient.getCreated_at()));
         return duplicatePatientData;
+    }
+
+    public void merge(DuplicatePatientMergeData data) {
+
     }
 }
