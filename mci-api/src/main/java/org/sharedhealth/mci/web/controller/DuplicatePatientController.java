@@ -4,8 +4,8 @@ import org.sharedhealth.mci.web.exception.Forbidden;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
 import org.sharedhealth.mci.web.mapper.Catchment;
-import org.sharedhealth.mci.web.mapper.PatientDupeData;
-import org.sharedhealth.mci.web.service.PatientDupeService;
+import org.sharedhealth.mci.web.mapper.DuplicatePatientData;
+import org.sharedhealth.mci.web.service.DuplicatePatientService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,16 +27,16 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @RestController
-@RequestMapping("/patients/dupes")
-public class PatientDupeController extends MciController {
+@RequestMapping("/patients/duplicates")
+public class DuplicatePatientController extends MciController {
 
-    private static final Logger logger = LoggerFactory.getLogger(PatientDupeController.class);
+    private static final Logger logger = LoggerFactory.getLogger(DuplicatePatientController.class);
 
-    private PatientDupeService dupeService;
+    private DuplicatePatientService duplicatePatientService;
 
     @Autowired
-    public PatientDupeController(PatientDupeService dupeService) {
-        this.dupeService = dupeService;
+    public DuplicatePatientController(DuplicatePatientService duplicatePatientService) {
+        this.duplicatePatientService = duplicatePatientService;
     }
 
     @PreAuthorize("hasAnyRole('ROLE_MCI Approver')")
@@ -58,7 +58,7 @@ public class PatientDupeController extends MciController {
             return deferredResult;
         }
 
-        List<PatientDupeData> response = dupeService.findAllByCatchment(new Catchment(catchmentId));
+        List<DuplicatePatientData> response = duplicatePatientService.findAllByCatchment(new Catchment(catchmentId));
 
         MCIMultiResponse mciMultiResponse;
         if (response != null) {

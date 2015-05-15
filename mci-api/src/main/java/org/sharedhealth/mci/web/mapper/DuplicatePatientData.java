@@ -6,7 +6,7 @@ import java.util.Set;
 
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
-public class PatientDupeData {
+public class DuplicatePatientData {
 
     @JsonProperty(HID1)
     private String healthId1;
@@ -20,10 +20,10 @@ public class PatientDupeData {
     @JsonProperty(CREATED_AT)
     private String createdAt;
 
-    public PatientDupeData() {
+    public DuplicatePatientData() {
     }
 
-    public PatientDupeData(String healthId1, String healthId2, Set<String> reasons, String createdAt) {
+    public DuplicatePatientData(String healthId1, String healthId2, Set<String> reasons, String createdAt) {
         this.healthId1 = healthId1;
         this.healthId2 = healthId2;
         this.reasons = reasons;

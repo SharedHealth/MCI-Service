@@ -7,8 +7,8 @@ import org.sharedhealth.mci.web.infrastructure.security.TokenAuthentication;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
 import org.sharedhealth.mci.web.infrastructure.security.UserProfile;
 import org.sharedhealth.mci.web.mapper.Catchment;
-import org.sharedhealth.mci.web.mapper.PatientDupeData;
-import org.sharedhealth.mci.web.service.PatientDupeService;
+import org.sharedhealth.mci.web.mapper.DuplicatePatientData;
+import org.sharedhealth.mci.web.service.DuplicatePatientService;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -31,7 +31,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-public class PatientDupeControllerTest {
+public class DuplicatePatientControllerTest {
 
     private static final String FACILITY_ID = "100067";
     private static final String PROVIDER_ID = "100068";
@@ -39,17 +39,17 @@ public class PatientDupeControllerTest {
     @Mock
     private LocalValidatorFactoryBean validatorFactory;
     @Mock
-    private PatientDupeService dupeService;
+    private DuplicatePatientService duplicatePatientService;
 
     private MockMvc mockMvc;
-    private PatientDupeController dupeController;
+    private DuplicatePatientController duplicatePatientController;
 
     @Before
     public void setup() throws ParseException {
         initMocks(this);
-        dupeController = new PatientDupeController(dupeService);
+        duplicatePatientController = new DuplicatePatientController(duplicatePatientService);
         mockMvc = MockMvcBuilders
-                .standaloneSetup(dupeController)
+                .standaloneSetup(duplicatePatientController)
                 .setValidator(validatorFactory)
                 .build();
         getContext().setAuthentication(new TokenAuthentication(getUserInfo(), true));
@@ -66,10 +66,10 @@ public class PatientDupeControllerTest {
     }
 
     @Test
-    public void shouldFindDupesByCatchment() throws Exception {
-        when(dupeService.findAllByCatchment(new Catchment("102030"))).thenReturn(buildDupeDataList());
+    public void shouldFindDuplicatesByCatchment() throws Exception {
+        when(duplicatePatientService.findAllByCatchment(new Catchment("102030"))).thenReturn(buildDuplicatePatientDataList());
 
-        String url = "/patients/dupes/102030";
+        String url = "/patients/duplicates/102030";
         MvcResult mvcResult = mockMvc.perform(get(url).contentType(APPLICATION_JSON))
                 .andExpect(request().asyncStarted())
                 .andReturn();
@@ -89,18 +89,18 @@ public class PatientDupeControllerTest {
                 .andExpect(jsonPath("$.results[0].reasons", is(asList("PHONE", "NID"))));
     }
 
-    private List<PatientDupeData> buildDupeDataList() {
-        return asList(new PatientDupeData("99001", "99002", asSet("NID", "PHONE"), timeBased().toString()),
-                new PatientDupeData("99003", "99004", asSet("NID"), timeBased().toString()),
-                new PatientDupeData("99005", "99006", asSet("NID"), timeBased().toString()),
-                new PatientDupeData("99007", "99008", asSet("PHONE"), timeBased().toString()),
-                new PatientDupeData("99009", "99010", asSet("NID", "PHONE"), timeBased().toString()));
+    private List<DuplicatePatientData> buildDuplicatePatientDataList() {
+        return asList(new DuplicatePatientData("99001", "99002", asSet("NID", "PHONE"), timeBased().toString()),
+                new DuplicatePatientData("99003", "99004", asSet("NID"), timeBased().toString()),
+                new DuplicatePatientData("99005", "99006", asSet("NID"), timeBased().toString()),
+                new DuplicatePatientData("99007", "99008", asSet("PHONE"), timeBased().toString()),
+                new DuplicatePatientData("99009", "99010", asSet("NID", "PHONE"), timeBased().toString()));
     }
 
     @Test(expected = Exception.class)
-    public void shouldNotFindDupesIfCatchmentDoesNotMatch() throws Exception {
+    public void shouldNotFindDuplicatesIfCatchmentDoesNotMatch() throws Exception {
 
-        String url = "/patients/dupes/112233";
+        String url = "/patients/duplicates/112233";
         MvcResult mvcResult = mockMvc.perform(get(url).contentType(APPLICATION_JSON))
                 .andExpect(request().asyncStarted())
                 .andReturn();

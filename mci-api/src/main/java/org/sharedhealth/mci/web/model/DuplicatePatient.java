@@ -11,8 +11,8 @@ import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryCons
 import static org.springframework.cassandra.core.PrimaryKeyType.CLUSTERED;
 import static org.springframework.cassandra.core.PrimaryKeyType.PARTITIONED;
 
-@Table(value = CF_PATIENT_DUPE)
-public class PatientDupe {
+@Table(value = CF_PATIENT_DUPLICATE)
+public class DuplicatePatient {
 
     @PrimaryKeyColumn(name = CATCHMENT_ID, ordinal = 0, type = PARTITIONED)
     private String catchment_id;
@@ -29,10 +29,10 @@ public class PatientDupe {
     @Column(CREATED_AT)
     private UUID created_at;
 
-    public PatientDupe() {
+    public DuplicatePatient() {
     }
 
-    public PatientDupe(String catchment_id, String health_id1, String health_id2, Set<String> reasons, UUID created_at) {
+    public DuplicatePatient(String catchment_id, String health_id1, String health_id2, Set<String> reasons, UUID created_at) {
         this.catchment_id = catchment_id;
         this.health_id1 = health_id1;
         this.health_id2 = health_id2;

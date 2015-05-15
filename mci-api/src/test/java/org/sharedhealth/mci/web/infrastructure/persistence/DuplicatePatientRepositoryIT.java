@@ -5,7 +5,7 @@ import org.junit.runner.RunWith;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.mapper.Catchment;
-import org.sharedhealth.mci.web.model.PatientDupe;
+import org.sharedhealth.mci.web.model.DuplicatePatient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.cassandra.core.CassandraOperations;
@@ -25,33 +25,33 @@ import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.asSet
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 @ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
-public class PatientDupeRepositoryIT {
+public class DuplicatePatientRepositoryIT {
 
     @Autowired
     @Qualifier("MCICassandraTemplate")
     private CassandraOperations cassandraOps;
 
     @Autowired
-    private PatientDupeRepository patientDupeRepository;
+    private DuplicatePatientRepository duplicatePatientRepository;
 
     @Test
     public void shouldFindAllByCatchment() throws Exception {
-        cassandraOps.update(buildDupes());
-        List<PatientDupe> dupes = patientDupeRepository.findAllByCatchment(new Catchment("102030"));
-        assertTrue(isNotEmpty(dupes));
-        assertEquals(6, dupes.size());
+        cassandraOps.update(buildDuplicatePatients());
+        List<DuplicatePatient> duplicatePatients = duplicatePatientRepository.findAllByCatchment(new Catchment("102030"));
+        assertTrue(isNotEmpty(duplicatePatients));
+        assertEquals(6, duplicatePatients.size());
     }
 
-    private List<PatientDupe> buildDupes() {
-        List<PatientDupe> dupes = new ArrayList<>();
+    private List<DuplicatePatient> buildDuplicatePatients() {
+        List<DuplicatePatient> duplicatePatients = new ArrayList<>();
         String catchmentId = "A10B20C30";
-        dupes.add(new PatientDupe(catchmentId, "100", "101", asSet("nid"), timeBased()));
-        dupes.add(new PatientDupe(catchmentId, "100", "101", asSet("phoneNo"), timeBased()));
-        dupes.add(new PatientDupe(catchmentId, "102", "103", asSet("nid"), timeBased()));
-        dupes.add(new PatientDupe(catchmentId, "104", "105", asSet("phoneNo"), timeBased()));
-        dupes.add(new PatientDupe(catchmentId, "106", "107", asSet("phoneNo"), timeBased()));
-        dupes.add(new PatientDupe(catchmentId, "108", "109", asSet("nid"), timeBased()));
-        dupes.add(new PatientDupe(catchmentId, "110", "111", asSet("nid"), timeBased()));
-        return dupes;
+        duplicatePatients.add(new DuplicatePatient(catchmentId, "100", "101", asSet("nid"), timeBased()));
+        duplicatePatients.add(new DuplicatePatient(catchmentId, "100", "101", asSet("phoneNo"), timeBased()));
+        duplicatePatients.add(new DuplicatePatient(catchmentId, "102", "103", asSet("nid"), timeBased()));
+        duplicatePatients.add(new DuplicatePatient(catchmentId, "104", "105", asSet("phoneNo"), timeBased()));
+        duplicatePatients.add(new DuplicatePatient(catchmentId, "106", "107", asSet("phoneNo"), timeBased()));
+        duplicatePatients.add(new DuplicatePatient(catchmentId, "108", "109", asSet("nid"), timeBased()));
+        duplicatePatients.add(new DuplicatePatient(catchmentId, "110", "111", asSet("nid"), timeBased()));
+        return duplicatePatients;
     }
 }

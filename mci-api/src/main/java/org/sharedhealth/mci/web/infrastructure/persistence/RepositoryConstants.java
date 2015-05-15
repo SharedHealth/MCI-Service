@@ -15,7 +15,7 @@ public class RepositoryConstants {
     public static final String CF_PATIENT_AUDIT_LOG = "patient_audit_log";
     public static final String CF_LOCATIONS = "locations";
     public static final String CF_MARKER = "marker";
-    public static final String CF_PATIENT_DUPE = "patient_dupe";
+    public static final String CF_PATIENT_DUPLICATE = "patient_duplicate";
 
     public static final String HEALTH_ID = "health_id";
     public static final String LAST_UPDATED = "last_updated";
