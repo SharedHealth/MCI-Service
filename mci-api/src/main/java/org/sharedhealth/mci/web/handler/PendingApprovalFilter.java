@@ -116,7 +116,8 @@ public class PendingApprovalFilter {
                 }
                 return oldValue;
             }
-            if (property.equals(NEEDS_APPROVAL) && !newValue.equals(oldValue)) {
+
+            if (property.equals(NEEDS_APPROVAL) && !newValue.equals(oldValue) && this.requestedBy.getAdmin() == null) {
                 newPatient.addPendingApproval(buildPendingApproval(key, newValue));
                 return oldValue;
             }
