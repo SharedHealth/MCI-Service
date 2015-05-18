@@ -1,1 +1,1 @@
-DROP TABLE patient_dupe;
+DROP TABLE IF EXISTS patient_dupe;

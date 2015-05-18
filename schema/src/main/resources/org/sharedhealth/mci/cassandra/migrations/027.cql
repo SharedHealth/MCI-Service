@@ -1,4 +1,4 @@
-CREATE TABLE patient_duplicate (
+CREATE TABLE IF NOT EXISTS patient_duplicate (
     catchment_id varchar,
     health_id1 varchar,
     health_id2 varchar,
