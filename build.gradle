@@ -58,6 +58,7 @@ ext.libraries = [
         commons_validator    : "commons-validator:commons-validator:1.4.1",
         joda_time            : "joda-time:joda-time:2.7",
         apache_lang          : "org.apache.commons:commons-lang3:3.3.2",
+        apache_commons_math  : "org.apache.commons:commons-math3:3.5",
         spring_security      : "org.springframework.security:spring-security-web:3.2.5.RELEASE",
         spring_boot_security : "org.springframework.boot:spring-boot-starter-security:1.1.8.RELEASE",
         rome                 : "rome:rome:1.0"
