@@ -68,6 +68,14 @@ public class BaseControllerTest {
     public static final String API_END_POINT_FOR_LOCATION = "/locations";
     public static final String APPLICATION_JSON_UTF8 = "application/json;charset=UTF-8";
 
+    protected final String facilityClientId = "18548";
+    protected final String facilityEmail = "facility@gmail.com";
+    protected final String facilityAccessToken = "40214a6c-e27c-4223-981c-1f837be90f02";
+
+    protected final String mciApproverClientId = "18555";
+    protected final String mciApproverEmail = "mciapprover@gmail.com";
+    protected final String mciApproverAccessToken = "40214a6c-e27c-4223-981c-1f837be90f06";
+
 
     protected void setUpMockMvcBuilder() {
         mockMvc = webAppContextSetup(webApplicationContext)

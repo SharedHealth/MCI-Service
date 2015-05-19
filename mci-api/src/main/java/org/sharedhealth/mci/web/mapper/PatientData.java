@@ -763,6 +763,27 @@ public class PatientData implements Diffable<PatientData> {
         this.requester = new Requester(facility, provider, null);
     }
 
+    @JsonIgnore
+    public void setRequester(String facilityId, String providerId, String adminId) {
+        RequesterDetails facility = null;
+        RequesterDetails provider = null;
+        RequesterDetails admin = null;
+
+        if (isNotBlank(facilityId)) {
+            facility = new RequesterDetails(facilityId);
+        }
+
+        if (isNotBlank(providerId)) {
+            provider = new RequesterDetails(providerId);
+        }
+
+        if (isNotBlank(adminId)) {
+            admin = new RequesterDetails(adminId);
+        }
+
+        this.requester = new Requester(facility, provider, admin);
+    }
+
     public Requester getRequester() {
         return requester;
     }

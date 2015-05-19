@@ -2,6 +2,7 @@ package org.sharedhealth.mci.web.controller;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.tomakehurst.wiremock.client.WireMock;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -58,12 +59,26 @@ public class PatientControllerIT extends BaseControllerTest {
         validEmail = "some@thoughtworks.com";
         validAccessToken = "2361e0a8-f352-4155-8415-32adfb8c2472";
 
+
+
         setUpMockMvcBuilder();
         givenThat(get(urlEqualTo("/token/" + validAccessToken))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withBody(asString("jsons/userDetails/userDetailsWithAllRoles.json"))));
+
+        givenThat(get(urlEqualTo("/token/" + facilityAccessToken))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(asString("jsons/userDetails/userDetailForFacility.json"))));
+
+        givenThat(WireMock.get(urlEqualTo("/token/" + mciApproverAccessToken))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(asString("jsons/userDetails/userDetailForMCIApprover.json"))));
 
         createPatientData();
         setupApprovalsConfig(cassandraOps);
@@ -480,9 +495,9 @@ public class PatientControllerIT extends BaseControllerTest {
         String updateJson = asString("jsons/patient/payload_with_address.json");
 
         MvcResult mvcResult = mockMvc.perform(put(API_END_POINT_FOR_PATIENT + "/" + healthId)
-                .header(AUTH_TOKEN_KEY, validAccessToken)
-                .header(FROM_KEY, validEmail)
-                .header(CLIENT_ID_KEY, validClientId)
+                .header(AUTH_TOKEN_KEY, facilityAccessToken)
+                .header(FROM_KEY, facilityEmail)
+                .header(CLIENT_ID_KEY, facilityClientId)
                 .accept(APPLICATION_JSON)
                 .content(updateJson)
                 .contentType(APPLICATION_JSON))
@@ -493,9 +508,9 @@ public class PatientControllerIT extends BaseControllerTest {
         String url = "/catchments/302618/approvals/" + healthId;
         String content = asString("jsons/patient/pending_approval_address_accept.json");
         mvcResult = mockMvc.perform(put(url).accept(APPLICATION_JSON)
-                .header(AUTH_TOKEN_KEY, validAccessToken)
-                .header(FROM_KEY, validEmail)
-                .header(CLIENT_ID_KEY, validClientId)
+                .header(AUTH_TOKEN_KEY, mciApproverAccessToken)
+                .header(FROM_KEY, mciApproverEmail)
+                .header(CLIENT_ID_KEY, mciApproverClientId)
                 .content(content).contentType(APPLICATION_JSON))
                 .andExpect(request().asyncStarted())
                 .andReturn();
@@ -716,18 +731,18 @@ public class PatientControllerIT extends BaseControllerTest {
         String updateJson = asString("jsons/patient/full_payload_with_updated_data.json");
 
         mockMvc.perform(put(API_END_POINT_FOR_PATIENT + "/" + healthId)
-                .header(AUTH_TOKEN_KEY, validAccessToken)
-                .header(FROM_KEY, validEmail)
-                .header(CLIENT_ID_KEY, validClientId)
+                .header(AUTH_TOKEN_KEY, facilityAccessToken)
+                .header(FROM_KEY, facilityEmail)
+                .header(CLIENT_ID_KEY, facilityClientId)
                 .accept(APPLICATION_JSON).content(updateJson).contentType
                         (APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 
         MvcResult mvcResult = mockMvc.perform(put(API_END_POINT_FOR_PATIENT + "/" + healthId)
-                .header(AUTH_TOKEN_KEY, validAccessToken)
-                .header(FROM_KEY, validEmail)
-                .header(CLIENT_ID_KEY, validClientId)
+                .header(AUTH_TOKEN_KEY, facilityAccessToken)
+                .header(FROM_KEY, facilityEmail)
+                .header(CLIENT_ID_KEY, facilityClientId)
                 .accept(APPLICATION_JSON)
                 .content(updateJson).contentType(APPLICATION_JSON))
                 .andExpect(request().asyncStarted())
@@ -738,9 +753,9 @@ public class PatientControllerIT extends BaseControllerTest {
         String content = asString("jsons/patient/pending_approvals_accept.json");
 
         mvcResult = mockMvc.perform(put(url).accept(APPLICATION_JSON)
-                .header(AUTH_TOKEN_KEY, validAccessToken)
-                .header(FROM_KEY, validEmail)
-                .header(CLIENT_ID_KEY, validClientId)
+                .header(AUTH_TOKEN_KEY, mciApproverAccessToken)
+                .header(FROM_KEY, mciApproverEmail)
+                .header(CLIENT_ID_KEY, mciApproverClientId)
                 .content(content).contentType(APPLICATION_JSON))
                 .andExpect(request().asyncStarted())
                 .andReturn();
