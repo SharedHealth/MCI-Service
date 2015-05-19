@@ -16,6 +16,8 @@ public class FeedEntry {
     @JsonProperty
     private String link;
     @JsonProperty
+    private String eventType;
+    @JsonProperty
     private String[] categories;
     @JsonProperty
     private Object content;
@@ -68,6 +70,14 @@ public class FeedEntry {
         this.content = content;
     }
 
+    public String getEventType() {
+        return eventType;
+    }
+
+    public void setEventType(String eventType) {
+        this.eventType = eventType;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("FeedEntry{");
@@ -75,6 +85,7 @@ public class FeedEntry {
         sb.append(",\n publishedDate='").append(publishedDate).append('\'');
         sb.append(",\n title='").append(title).append('\'');
         sb.append(",\n link='").append(link).append('\'');
+        sb.append(",\n eventType'").append(eventType).append('\'');
         sb.append(",\n categories=").append(Arrays.toString(categories));
         sb.append(",\n content=").append(content);
         sb.append('}');

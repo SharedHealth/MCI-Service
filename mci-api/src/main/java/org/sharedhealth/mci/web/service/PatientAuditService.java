@@ -1,5 +1,6 @@
 package org.sharedhealth.mci.web.service;
 
+import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientAuditRepository;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientFeedRepository;
 import org.sharedhealth.mci.web.mapper.PatientAuditLogData;
@@ -13,13 +14,15 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
+import static java.util.Arrays.asList;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 @Component
 public class PatientAuditService {
     private static final Logger logger = LoggerFactory.getLogger(PatientAuditService.class);
 
-    static final int UPDATE_LOG_LIMIT = 3;
+    static final int UPDATE_LOG_LIMIT = 5;
+    static final List<String> allowedEventTypes = asList("updated");
 
     private PatientFeedRepository feedRepository;
     private PatientAuditRepository auditRepository;
@@ -56,9 +59,23 @@ public class PatientAuditService {
     public void sync() {
         UUID marker = auditRepository.findLatestMarker();
         List<PatientUpdateLog> feeds = feedRepository.findPatientsUpdatedSince(marker, UPDATE_LOG_LIMIT);
+        feeds = filterBasedOnEventType(feeds);
         if (isNotEmpty(feeds)) {
             auditRepository.saveOrUpdate(map(feeds));
         }
+    }
+
+    private List<PatientUpdateLog> filterBasedOnEventType(List<PatientUpdateLog> feeds) {
+        if (null == feeds) {
+            return feeds;
+        }
+        ArrayList<PatientUpdateLog> filteredFeed = new ArrayList<>();
+        for (PatientUpdateLog feed : feeds) {
+            if (StringUtils.isBlank(feed.getEventType()) || allowedEventTypes.contains(feed.getEventType())) {
+                filteredFeed.add(feed);
+            }
+        }
+        return filteredFeed;
     }
 
     List<PatientAuditLog> map(List<PatientUpdateLog> feeds) {

@@ -110,6 +110,10 @@ public class RepositoryConstants {
     public static final String CHANGE_SET = "change_set";
     public static final String YEAR = "year";
     public static final String EVENT_ID = "event_id";
+    public static final String EVENT_TYPE = "event_type";
+    public static final String EVENT_TYPE_CREATED = "created";
+    public static final String EVENT_TYPE_UPDATED = "updated";
+    public static final String NOT_REQUIRED = "N/A";
 
     public static final String HEALTH_ID1 = "health_id1";
     public static final String HEALTH_ID2 = "health_id2";

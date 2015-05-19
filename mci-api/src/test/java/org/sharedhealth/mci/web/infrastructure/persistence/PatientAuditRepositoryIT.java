@@ -133,13 +133,13 @@ public class PatientAuditRepositoryIT {
 
         auditService.sync();
 
-        List<PatientUpdateLog> feeds = feedRepository.findPatientsUpdatedSince(null, 1);
+        List<PatientUpdateLog> feeds = feedRepository.findPatientsUpdatedSince(null, 10);
         assertNotNull(feeds);
-        assertEquals(1, feeds.size());
+        assertEquals(2, feeds.size());
 
         UUID marker = auditRepository.findLatestMarker();
         assertNotNull(marker);
-        assertEquals(feeds.get(0).getEventId(), marker);
+        assertEquals(feeds.get(1).getEventId(), marker);
     }
 
     @Test

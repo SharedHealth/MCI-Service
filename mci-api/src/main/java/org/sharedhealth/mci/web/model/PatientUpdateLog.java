@@ -46,6 +46,10 @@ public class PatientUpdateLog {
     @JsonProperty(JsonConstants.APPROVED_BY)
     private String approvedBy;
 
+    @Column(EVENT_TYPE)
+    @JsonProperty(EVENT_TYPE)
+    private String eventType;
+
     public String getHealthId() {
         return healthId;
     }
@@ -116,5 +120,13 @@ public class PatientUpdateLog {
 
     public void setApprovedBy(String approvedBy) {
         this.approvedBy = approvedBy;
+    }
+
+    public String getEventType() {
+        return eventType;
+    }
+
+    public void setEventType(String eventType) {
+        this.eventType = eventType;
     }
 }

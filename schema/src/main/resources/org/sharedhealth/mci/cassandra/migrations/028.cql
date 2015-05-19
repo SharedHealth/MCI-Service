@@ -1,0 +1,1 @@
+ALTER TABLE patient_update_log ADD event_type varchar;

@@ -25,9 +25,12 @@ import java.util.UUID;
 
 import static java.util.Collections.emptyList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.sharedhealth.mci.utils.DateUtil.parseDate;
+import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.EVENT_TYPE_CREATED;
+import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.EVENT_TYPE_UPDATED;
 import static org.sharedhealth.mci.web.utils.JsonConstants.LAST_MARKER;
 import static org.sharedhealth.mci.web.utils.JsonConstants.SINCE;
 import static org.springframework.http.MediaType.APPLICATION_ATOM_XML_VALUE;
@@ -44,6 +47,8 @@ public class UpdateFeedController extends FeedController {
     private static final String FEED_TITLE = "Patients";
     private static final String ENTRY_TITLE = "Patient updates: ";
     private static final String CATEGORY_PATIENT = "patient";
+    private static final String CATEGORY_CREATE = "create";
+    private static final String CATEGORY_UPDATE = "update";
 
     @Autowired
     public UpdateFeedController(PatientService patientService, MCIProperties properties) {
@@ -101,8 +106,9 @@ public class UpdateFeedController extends FeedController {
             FeedEntry entry = new FeedEntry();
             entry.setId(patient.getEventId());
             entry.setPublishedDate(patient.getEventTimeAsString());
-            entry.setTitle(ENTRY_TITLE + patient.getHealthId());
+            entry.setTitle(CATEGORY_PATIENT + StringUtils.SPACE + getEventType(patient.getEventType()) + ": " + patient.getHealthId());
             entry.setLink(buildPatientLink(patient.getHealthId(), request));
+            entry.setEventType(getEventType(patient.getEventType()));
             entry.setCategories(buildCategoryArray(patient));
             entry.setContent(patient);
             entries.add(entry);
@@ -110,11 +116,23 @@ public class UpdateFeedController extends FeedController {
         return entries;
     }
 
+    private String getEventType(String eventType) {
+        if (isBlank(eventType) || eventType.equalsIgnoreCase(EVENT_TYPE_UPDATED)) {
+            return EVENT_TYPE_UPDATED;
+        }
+        return EVENT_TYPE_CREATED;
+    }
+
     private String[] buildCategoryArray(PatientUpdateLog patient) {
         if (StringUtils.isBlank(patient.getChangeSet())) {
             return new String[]{CATEGORY_PATIENT};
         }
-        String updateCategory = "update:" + join(patient.getChangeSetMap().keySet().toArray(), ",");
+        String updateCategory;
+        if (getEventType(patient.getEventType()).equalsIgnoreCase(EVENT_TYPE_CREATED)) {
+            updateCategory = CATEGORY_CREATE;
+        } else {
+            updateCategory = CATEGORY_UPDATE + ":" + join(patient.getChangeSetMap().keySet().toArray(), ",");
+        }
         return new String[]{CATEGORY_PATIENT, updateCategory};
     }
 }

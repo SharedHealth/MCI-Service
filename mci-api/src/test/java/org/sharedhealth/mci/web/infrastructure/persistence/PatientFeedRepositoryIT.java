@@ -102,6 +102,13 @@ public class PatientFeedRepositoryIT {
     }
 
     @Test
+    public void shouldCreateCreateLogsWhenPatientIsCreated() {
+        Date since = new Date();
+        String healthId = patientRepository.create(data).getId();
+        assertUpdateLogEntry(healthId, since, true);
+    }
+
+    @Test
     public void shouldCreateUpdateLogsWhenAnyFieldIsUpdated() {
         String healthId = patientRepository.create(data).getId();
         Date since = new Date();
@@ -133,21 +140,21 @@ public class PatientFeedRepositoryIT {
         patientRepository.processPendingApprovals(acceptRequest, existingPatient, true);
 
         List<PatientUpdateLog> patientUpdateLogs = feedRepository.findPatientsUpdatedSince(null, 25, null);
-        assertEquals(3, patientUpdateLogs.size());
+        assertEquals(4, patientUpdateLogs.size());
 
-        Map<String, Map<String, Object>> changeSet1 = getChangeSet(patientUpdateLogs.get(0));
+        Map<String, Map<String, Object>> changeSet1 = getChangeSet(patientUpdateLogs.get(1));
         assertNotNull(changeSet1);
         assertEquals(1, changeSet1.size());
         assertChangeSet(changeSet1, JsonConstants.EDU_LEVEL, data.getEducationLevel(), "02");
 
-        Map<String, Map<String, Object>> changeSet2 = getChangeSet(patientUpdateLogs.get(1));
+        Map<String, Map<String, Object>> changeSet2 = getChangeSet(patientUpdateLogs.get(2));
         assertNotNull(changeSet2);
         assertEquals(3, changeSet2.size());
         assertChangeSet(changeSet2, JsonConstants.GIVEN_NAME, data.getGivenName(), "UpdGiv");
         assertChangeSet(changeSet2, JsonConstants.SUR_NAME, data.getSurName(), "UpdSur");
         assertChangeSet(changeSet2, JsonConstants.CONFIDENTIAL, "No", "Yes");
 
-        Map<String, Map<String, Object>> changeSet3 = getChangeSet(patientUpdateLogs.get(2));
+        Map<String, Map<String, Object>> changeSet3 = getChangeSet(patientUpdateLogs.get(3));
         assertNotNull(changeSet3);
         assertEquals(2, changeSet3.size());
         assertChangeSet(changeSet3, JsonConstants.GENDER, data.getGender(), "F");

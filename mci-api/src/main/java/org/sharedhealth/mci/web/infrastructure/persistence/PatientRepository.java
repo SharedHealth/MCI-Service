@@ -103,7 +103,13 @@ public class PatientRepository extends BaseRepository {
 
         patient.setActive(true);
 
-        cassandraOps.execute(buildSaveBatch(patient, cassandraOps.getConverter()));
+        Map<String, Set<Requester>> requestedBy = new HashMap<>();
+        buildRequestedBy(requestedBy, ALL_FIELDS, requester);
+
+        Batch batch = buildSaveBatch(patient, cassandraOps.getConverter());
+        addToPatientUpdateLogStmt(patient, requestedBy, cassandraOps.getConverter(), batch);
+
+        cassandraOps.execute(batch);
         return new MCIResponse(patient.getHealthId(), HttpStatus.CREATED);
     }
 

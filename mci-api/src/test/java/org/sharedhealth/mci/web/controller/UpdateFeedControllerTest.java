@@ -123,7 +123,7 @@ public class UpdateFeedControllerTest {
 
                 .andExpect(jsonPath("$.entries.[0].id", is(uuid1.toString())))
                 .andExpect(jsonPath("$.entries.[0].publishedDate", is(DateUtil.toIsoFormat(uuid1))))
-                .andExpect(jsonPath("$.entries.[0].title", is("Patient updates: h100")))
+                .andExpect(jsonPath("$.entries.[0].title", is("patient updated: h100")))
                 .andExpect(jsonPath("$.entries.[0].link", is(SERVER_URL + "/patients/h100")))
                 .andExpect(jsonPath("$.entries.[0].categories[0]", is("patient")))
                 .andExpect(jsonPath("$.entries.[0].content.health_id", is("h100")))
@@ -162,7 +162,7 @@ public class UpdateFeedControllerTest {
 
                 .andExpect(jsonPath("$.entries.[0].id", is(uuid2.toString())))
                 .andExpect(jsonPath("$.entries.[0].publishedDate", is(DateUtil.toIsoFormat(uuid2))))
-                .andExpect(jsonPath("$.entries.[0].title", is("Patient updates: h200")))
+                .andExpect(jsonPath("$.entries.[0].title", is("patient updated: h200")))
                 .andExpect(jsonPath("$.entries.[0].link", is(SERVER_URL + "/patients/h200")))
                 .andExpect(jsonPath("$.entries.[0].categories[0]", is("patient")))
                 .andExpect(jsonPath("$.entries.[0].content.health_id", is("h200")))
@@ -283,7 +283,7 @@ public class UpdateFeedControllerTest {
 
                 .andExpect(jsonPath("$.entries.[0].id", is(uuid1.toString())))
                 .andExpect(jsonPath("$.entries.[0].publishedDate", is(DateUtil.toIsoFormat(uuid1))))
-                .andExpect(jsonPath("$.entries.[0].title", is("Patient updates: h100")))
+                .andExpect(jsonPath("$.entries.[0].title", is("patient updated: h100")))
                 .andExpect(jsonPath("$.entries.[0].link", is(SERVER_URL + "/patients/h100")))
                 .andExpect(jsonPath("$.entries.[0].categories", is(asList("patient"))))
                 .andExpect(jsonPath("$.entries.[0].content.health_id", is("h100")))
@@ -332,7 +332,7 @@ public class UpdateFeedControllerTest {
         String healthId = patient.getHealthId();
         assertEquals(patient.getEventId(), entry.getId());
         assertEquals(patient.getEventTimeAsString(), entry.getPublishedDate());
-        assertEquals("Patient updates: " + healthId, entry.getTitle());
+        assertEquals("patient updated: " + healthId, entry.getTitle());
         assertEquals(SERVER_URL + "/patients/" + healthId, entry.getLink());
         assertNotNull(entry.getCategories());
         assertEquals(2, entry.getCategories().length);
@@ -355,7 +355,7 @@ public class UpdateFeedControllerTest {
         mockMvc.perform(get(url).accept(APPLICATION_ATOM_XML_VALUE))
                 .andExpect(status().isOk())
                 .andExpect(xpath("feed/title").string("Patients"))
-                .andExpect(xpath("feed/entry/title").string("Patient updates: h100"))
+                .andExpect(xpath("feed/entry/title").string("patient updated: h100"))
                 .andExpect(xpath("feed/entry/category[@term='patient']").exists())
                 .andExpect(xpath("feed/entry/category[@term='update:sur_name']").exists())
                 .andExpect(xpath("feed/entry/link[@href='https://mci.dghs.com/patients/h100']").exists())
@@ -367,10 +367,6 @@ public class UpdateFeedControllerTest {
                         assertTrue(content.contains("\"change_set\":{\"sur_name\":\"updated\"}"));
                     }
                 });
-
-
         verify(patientService).findPatientsUpdatedSince(null, null);
     }
-
-
 }

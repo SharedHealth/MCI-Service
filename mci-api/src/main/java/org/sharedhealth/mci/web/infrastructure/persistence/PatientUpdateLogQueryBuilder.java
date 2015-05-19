@@ -9,12 +9,18 @@ import org.sharedhealth.mci.web.mapper.Requester;
 import org.sharedhealth.mci.web.model.PatientUpdateLog;
 import org.springframework.data.cassandra.convert.CassandraConverter;
 
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
 import static com.datastax.driver.core.querybuilder.Select.Where;
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
-import static org.sharedhealth.mci.utils.DateUtil.*;
+import static org.sharedhealth.mci.utils.DateUtil.getCurrentYear;
+import static org.sharedhealth.mci.utils.DateUtil.getYearOf;
+import static org.sharedhealth.mci.utils.DateUtil.getYearsSince;
 import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
@@ -33,6 +39,7 @@ public class PatientUpdateLogQueryBuilder {
             patientUpdateLog.setChangeSet(changeSet);
             patientUpdateLog.setRequestedBy(writeValueAsString(requestedBy));
             patientUpdateLog.setApprovedBy(writeValueAsString(approvedBy));
+            patientUpdateLog.setEventType(EVENT_TYPE_UPDATED);
             batch.add(createInsertQuery(CF_PATIENT_UPDATE_LOG, patientUpdateLog, null, converter));
         }
     }

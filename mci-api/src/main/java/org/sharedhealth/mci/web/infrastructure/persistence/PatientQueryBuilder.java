@@ -7,18 +7,25 @@ import com.datastax.driver.core.utils.UUIDs;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.PatientData;
+import org.sharedhealth.mci.web.mapper.PatientMapper;
+import org.sharedhealth.mci.web.mapper.PatientSummaryData;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
+import org.sharedhealth.mci.web.mapper.Requester;
 import org.sharedhealth.mci.web.model.*;
 import org.springframework.data.cassandra.convert.CassandraConverter;
 
 import java.util.Date;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
 import static com.datastax.driver.core.querybuilder.Select.Where;
+import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static org.apache.commons.lang3.StringUtils.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.HOUSEHOLD_CODE;
+import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
 import static org.springframework.data.cassandra.core.CassandraTemplate.*;
 
 public class PatientQueryBuilder {
@@ -38,6 +45,24 @@ public class PatientQueryBuilder {
         buildCreateNameMappingStmt(patient, converter, batch);
         buildCreateCatchmentMappingsStmt(patient.getCatchment(), patient.getUpdatedAt(), patient.getHealthId(), converter, batch);
         return batch;
+    }
+
+    static void addToPatientUpdateLogStmt(Patient patient,
+                                         Map<String, Set<Requester>> requestedBy,
+                                         CassandraConverter converter, Batch batch) {
+        PatientUpdateLog patientUpdateLog = new PatientUpdateLog();
+        PatientSummaryData patientSummaryData = new PatientMapper().mapSummary(patient);
+        String changeSet = writeValueAsString(patientSummaryData);
+
+        if (changeSet != null) {
+            patientUpdateLog.setEventId(timeBased());
+            patientUpdateLog.setHealthId(patient.getHealthId());
+            patientUpdateLog.setChangeSet(changeSet);
+            patientUpdateLog.setRequestedBy(writeValueAsString(requestedBy));
+            patientUpdateLog.setApprovedBy(NOT_REQUIRED);
+            patientUpdateLog.setEventType(EVENT_TYPE_CREATED);
+            batch.add(createInsertQuery(CF_PATIENT_UPDATE_LOG, patientUpdateLog, null, converter));
+        }
     }
 
     static Batch buildUpdateBatch(Patient newPatient, PatientData existingPatientData, CassandraConverter converter, Batch batch) {
