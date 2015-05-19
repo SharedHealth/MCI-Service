@@ -318,4 +318,28 @@ public class PendingApprovalFilterTest {
         patient.setRequester("Bahmni", null);
         return patient;
     }
+
+    @Test
+    public void shouldNotAddFieldsToPendingApprovalsWhenMarkedForApprovalAndRequestByAdmin() throws ParseException {
+        setUpApprovalFieldServiceFor(GENDER, "NA");
+        setUpApprovalFieldServiceFor(DATE_OF_DEATH, "NA");
+        setUpApprovalFieldServiceFor(OCCUPATION, "NA");
+        setUpApprovalFieldServiceFor(RELIGION, "NA");
+
+        PatientData existingPatient = buildPatientData();
+        existingPatient.setGender("M");
+        existingPatient.setReligion("1");
+
+        PatientData updateRequest = buildPatientData();
+        updateRequest.setGender("F");
+        updateRequest.setReligion("2");
+        updateRequest.setRequester("Bahmni", "Dr. Monika", "Mr. Admin");
+
+        PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
+
+        assertTrue(isEmpty(newPatient.getPendingApprovals()));
+        assertEquals(newPatient.getGender(), "F");
+        assertEquals(newPatient.getReligion(), "2");
+    }
+
 }
