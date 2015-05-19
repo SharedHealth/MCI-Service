@@ -732,7 +732,7 @@ public class AuthorizationIT extends BaseControllerTest {
     }
 
     @Test
-    public void mciApproverShouldUpdatesPatientUsingActiveUpdateApi() throws Exception {
+    public void mciApproverShouldUpdatePatientUsingMergerequestApi() throws Exception {
 
         String healthId = createPatient(patientData).getId();
         String targetHealthId = createPatient(patientData).getId();
@@ -743,7 +743,7 @@ public class AuthorizationIT extends BaseControllerTest {
 
         String json = mapper.writeValueAsString(patientDataWithActiveInfo);
 
-        mockMvc.perform(put(API_END_POINT_FOR_PATIENT + "/active/" + healthId)
+        mockMvc.perform(put(API_END_POINT_FOR_MERGE_REQUEST + "/" + healthId)
                 .header(AUTH_TOKEN_KEY, mciApproverAccessToken)
                 .header(FROM_KEY, mciApproverEmail)
                 .header(CLIENT_ID_KEY, mciApproverClientId)

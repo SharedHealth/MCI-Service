@@ -867,98 +867,6 @@ public class PatientControllerIT extends BaseControllerTest {
     }
 
     @Test
-    public void shouldNotUpdatePatientUsingActiveUpdateApiIfTargetHidNotFound() throws Exception {
-        String healthId = createPatient(patientData).getId();
-
-        PatientData patientDataWithActiveInfo = new PatientData();
-        patientDataWithActiveInfo.setActive(false);
-        patientDataWithActiveInfo.setMergedWith("some_non_existing_hid");
-
-        String json = mapper.writeValueAsString(patientDataWithActiveInfo);
-
-        mockMvc.perform(put(API_END_POINT_FOR_PATIENT + "/active/" + healthId)
-                .header(AUTH_TOKEN_KEY, validAccessToken)
-                .header(FROM_KEY, validEmail)
-                .header(CLIENT_ID_KEY, validClientId)
-                .accept(APPLICATION_JSON)
-                .content(json)
-                .contentType(APPLICATION_JSON))
-                .andExpect(status().isNotFound())
-                .andReturn();
-    }
-
-    @Test
-    public void shouldNotUpdatePatientUsingActiveUpdateApiIfPatientHidNotFound() throws Exception {
-        String targetHealthId = createPatient(patientData).getId();
-
-        PatientData patientDataWithActiveInfo = new PatientData();
-        patientDataWithActiveInfo.setActive(false);
-        patientDataWithActiveInfo.setMergedWith(targetHealthId);
-
-        String json = mapper.writeValueAsString(patientDataWithActiveInfo);
-
-        mockMvc.perform(put(API_END_POINT_FOR_PATIENT + "/active/" + "some_non_existing_hid")
-                .header(AUTH_TOKEN_KEY, validAccessToken)
-                .header(FROM_KEY, validEmail)
-                .header(CLIENT_ID_KEY, validClientId)
-                .accept(APPLICATION_JSON)
-                .content(json)
-                .contentType(APPLICATION_JSON))
-                .andExpect(status().isNotFound())
-                .andReturn();
-    }
-
-    @Test
-    public void shouldNotMergePatientWithItself() throws Exception {
-        String healthId = createPatient(patientData).getId();
-
-        PatientData patientDataWithActiveInfo = new PatientData();
-        patientDataWithActiveInfo.setActive(false);
-        patientDataWithActiveInfo.setMergedWith(healthId);
-
-        String json = mapper.writeValueAsString(patientDataWithActiveInfo);
-
-        mockMvc.perform(put(API_END_POINT_FOR_PATIENT + "/active/" + healthId)
-                .header(AUTH_TOKEN_KEY, validAccessToken)
-                .header(FROM_KEY, validEmail)
-                .header(CLIENT_ID_KEY, validClientId)
-                .accept(APPLICATION_JSON)
-                .content(json)
-                .contentType(APPLICATION_JSON))
-                .andExpect(status().isForbidden())
-                .andReturn();
-    }
-
-    @Test
-    public void shouldNotMergePatientWithInactivePatient() throws Exception {
-        String healthId = createPatient(patientData).getId();
-        String targetHealthId = createPatient(patientData).getId();
-
-        PatientData patientDataWithActiveInfo = new PatientData();
-        patientDataWithActiveInfo.setActive(false);
-
-        String json = mapper.writeValueAsString(patientDataWithActiveInfo);
-
-        String inactiveHid = updatePatient(json, targetHealthId).getId();
-
-        assertEquals(targetHealthId, inactiveHid);
-
-        patientDataWithActiveInfo.setMergedWith(targetHealthId);
-
-        json = mapper.writeValueAsString(patientDataWithActiveInfo);
-
-        mockMvc.perform(put(API_END_POINT_FOR_PATIENT + "/active/" + healthId)
-                .header(AUTH_TOKEN_KEY, validAccessToken)
-                .header(FROM_KEY, validEmail)
-                .header(CLIENT_ID_KEY, validClientId)
-                .accept(APPLICATION_JSON)
-                .content(json)
-                .contentType(APPLICATION_JSON))
-                .andExpect(status().isForbidden())
-                .andReturn();
-    }
-
-    @Test
     public void shouldNotActivateInactivePatient() throws Exception {
         String healthId = createPatient(patientData).getId();
         String targetHealthId = createPatient(patientData).getId();
@@ -977,16 +885,6 @@ public class PatientControllerIT extends BaseControllerTest {
         patientDataWithActiveInfo.setMergedWith(null);
 
         json = mapper.writeValueAsString(patientDataWithActiveInfo);
-
-        mockMvc.perform(put(API_END_POINT_FOR_PATIENT + "/active/" + healthId)
-                .header(AUTH_TOKEN_KEY, validAccessToken)
-                .header(FROM_KEY, validEmail)
-                .header(CLIENT_ID_KEY, validClientId)
-                .accept(APPLICATION_JSON)
-                .content(json)
-                .contentType(APPLICATION_JSON))
-                .andExpect(status().isForbidden())
-                .andReturn();
 
         mockMvc.perform(put(API_END_POINT_FOR_PATIENT + "/" + healthId)
                 .header(AUTH_TOKEN_KEY, validAccessToken)
@@ -1015,16 +913,6 @@ public class PatientControllerIT extends BaseControllerTest {
 
         json = mapper.writeValueAsString(updatePatientData);
 
-        mockMvc.perform(put(API_END_POINT_FOR_PATIENT + "/active/" + healthId)
-                .header(AUTH_TOKEN_KEY, validAccessToken)
-                .header(FROM_KEY, validEmail)
-                .header(CLIENT_ID_KEY, validClientId)
-                .accept(APPLICATION_JSON)
-                .content(json)
-                .contentType(APPLICATION_JSON))
-                .andExpect(status().isForbidden())
-                .andReturn();
-
         mockMvc.perform(put(API_END_POINT_FOR_PATIENT + "/" + healthId)
                 .header(AUTH_TOKEN_KEY, validAccessToken)
                 .header(FROM_KEY, validEmail)
@@ -1033,37 +921,6 @@ public class PatientControllerIT extends BaseControllerTest {
                 .content(json)
                 .contentType(APPLICATION_JSON))
                 .andExpect(status().isForbidden())
-                .andReturn();
-    }
-
-    @Test
-    public void shouldUpdateOnlyMergedWithFieldForInactivePatient() throws Exception {
-        String healthId = createPatient(patientData).getId();
-        String targetHealthId = createPatient(patientData).getId();
-        String newTargetHealthId = createPatient(patientData).getId();
-
-        PatientData patientDataWithActiveInfo = new PatientData();
-        patientDataWithActiveInfo.setActive(false);
-        patientDataWithActiveInfo.setMergedWith(targetHealthId);
-
-        String json = mapper.writeValueAsString(patientDataWithActiveInfo);
-
-        String inactiveHid = updatePatient(json, healthId).getId();
-
-        assertEquals(healthId, inactiveHid);
-
-        patientDataWithActiveInfo.setMergedWith(newTargetHealthId);
-
-        json = mapper.writeValueAsString(patientDataWithActiveInfo);
-
-        mockMvc.perform(put(API_END_POINT_FOR_PATIENT + "/active/" + healthId)
-                .header(AUTH_TOKEN_KEY, validAccessToken)
-                .header(FROM_KEY, validEmail)
-                .header(CLIENT_ID_KEY, validClientId)
-                .accept(APPLICATION_JSON)
-                .content(json)
-                .contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
                 .andReturn();
     }
 
