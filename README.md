@@ -66,15 +66,15 @@ NOTES: Before you can post to MCI Service, you need to sign-in with the IdP and 
 
 Example steps:
 * Login to IdP and get a token:
-** curl http://192.168.33.19:8080/signin -H "X-Auth-Token:41eeda45e711cc6b3e660e4abb2cb863f93ae90815f0edf40a134dffedf6d885" -H "client_id:18548" --form "email=angshus@thoughtworks.com" --form "password=activation"
+  * curl http://192.168.33.19:8080/signin -H "X-Auth-Token:41eeda45e711cc6b3e660e4abb2cb863f93ae90815f0edf40a134dffedf6d885" -H "client_id:18548" --form "email=angshus@thoughtworks.com" --form "password=activation"
 
 (The above should return you an access_token)
 
 * With the above token, now you can post a JSON content to create a patient, with the following headers
-** X-Auth-Token:{the token you received in the previous step}
-** client_id:6 { this is client id for the user who signed in}
-** From: angshus@thoughtworks.com
-** Content-Type:application/json
+  * X-Auth-Token:{the token you received in the previous step}
+  * client_id:6 { this is client id for the user who signed in}
+  * From: angshus@thoughtworks.com
+  * Content-Type:application/json
 
 ```
 Sample json to create a patient:
@@ -95,10 +95,5 @@ Sample json to create a patient:
 ```
 
 The sub IdP doesn't expire the token unless the Identity-Service is restarted. So you can keep using the "access_token". In reality, the access_token is short-lived and also can be invalidated.
-
-
-
-
-
 
 
