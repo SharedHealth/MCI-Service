@@ -5,8 +5,9 @@
 VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  config.vm.box = "centos"
-  config.vm.box_url = "http://puppet-vagrant-boxes.puppetlabs.com/centos-65-x64-virtualbox-puppet.box"
+  # config.vm.box = "centos65"
+  config.vm.box = "nrel/CentOS-6.5-x86_64"
+  # config.vm.box_url = "http://puppet-vagrant-boxes.puppetlabs.com/centos-65-x64-virtualbox-puppet.box"
   config.vm.network "private_network", ip: "192.168.33.19"
   config.vm.provider "virtualbox" do |vb|
     vb.customize ["modifyvm", :id, "--memory", "2048", "--cpus", "2"]
@@ -19,7 +20,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       mci.vm.provision "ansible" do |ansible|
         ansible.inventory_path = "../FreeSHR-Playbooks/local"
         ansible.playbook =  "../FreeSHR-Playbooks/all.yml"
-        ansible.tags = ["setup", "cassandra", "mci-server", "datasense"]
+        ansible.tags = ["setup", "cassandra", "mci-server", "identity-server"]
         ansible.vault_password_file = "~/.vaultpass.txt"
       end
   end
