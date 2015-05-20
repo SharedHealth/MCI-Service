@@ -25,17 +25,17 @@ Properties
 
 Steps to setup environment and get MCI working with Stub Identity Server and sample locations
 ------------------------------------------------------------------------------------------------------------------------
-1. Pull the latest of the following repo (under a common parent directory)
-- FreeSHR-Playbooks
-- MCI-Service
-- Identity-Server
+### Pull the latest of the following repo (under a common parent directory)
+* [FreeSHR-Playbooks](https://github.com/SharedHealth/FreeSHR-Playbooks)
+* [MCI-Service](https://github.com/SharedHealth/MCI-Service)
+* [Identity-Server](https://github.com/SharedHealth/Identity-Server)
 
-2. cd to Identity-Server
+### cd to Identity-Server
 * ./gradlew clean dist
 * cp build/distributions/identity-server-0.1-1.noarch.rpm /tmp/
 
 
-3. cd to MCI-Service
+### cd to MCI-Service
 * ./gradlew clean dist
 * cp mci-api/build/distributions/mci-0.1-1.noarch.rpm /tmp/
 * vagrant up | vagrant provision
@@ -46,12 +46,13 @@ Notes:
 - MCI will run in port 8081
 - Stub Identity Server will run in port 8080
 
-4. load some location data in MCI
+### load some location data in MCI
 * cqlsh 192.168.33.19
 * describe keyspaces
 * use mci
 * copy and run the following scripts for some sample location data
 
+```
 INSERT INTO locations ("code", "name", "active","parent") VALUES ('30','Dhaka','1','00') IF NOT EXISTS;
 INSERT INTO locations ("code", "name", "active","parent") VALUES ('26','Dhaka','1','30') IF NOT EXISTS;
 INSERT INTO locations ("code", "name", "active","parent") VALUES ('02','Adabor','1','3026') IF NOT EXISTS;
@@ -59,22 +60,23 @@ INSERT INTO locations ("code", "name", "active","parent") VALUES ('20','Dhaka Da
 INSERT INTO locations ("code", "name", "active","parent") VALUES ('25','Dhaka Uttar City Corp.','1','302602') IF NOT EXISTS;
 INSERT INTO locations ("code", "name", "active","parent") VALUES ('30','Urban Ward No-30 (43)','1','30260225') IF NOT EXISTS;
 INSERT INTO locations ("code", "name", "active","parent") VALUES ('33','Urban Ward No-33 (part) (46)','1','30260225') IF NOT EXISTS;
-
+```
 
 NOTES: Before you can post to MCI Service, you need to sign-in with the IdP and get an access token.
 
 Example steps:
 * Login to IdP and get a token:
-curl http://192.168.33.19:8080/signin -H "X-Auth-Token:41eeda45e711cc6b3e660e4abb2cb863f93ae90815f0edf40a134dffedf6d885" -H "client_id:18548" --form "email=angshus@thoughtworks.com" --form "password=activation"
+** curl http://192.168.33.19:8080/signin -H "X-Auth-Token:41eeda45e711cc6b3e660e4abb2cb863f93ae90815f0edf40a134dffedf6d885" -H "client_id:18548" --form "email=angshus@thoughtworks.com" --form "password=activation"
 
 (The above should return you an access_token)
 
 * With the above token, now you can post a JSON content to create a patient, with the following headers
-X-Auth-Token:{the token you received in the previous step}
-client_id:6 { this is client id for the user who signed in}
-From: angshus@thoughtworks.com
-Content-Type:application/json
+** X-Auth-Token:{the token you received in the previous step}
+** client_id:6 { this is client id for the user who signed in}
+** From: angshus@thoughtworks.com
+** Content-Type:application/json
 
+```
 Sample json to create a patient:
 {
     "given_name": "Salman",
@@ -90,6 +92,7 @@ Sample json to create a patient:
     },
     "confidential": "No"
 }
+```
 
 The sub IdP doesn't expire the token unless the Identity-Service is restarted. So you can keep using the "access_token". In reality, the access_token is short-lived and also can be invalidated.
 
