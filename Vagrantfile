@@ -19,8 +19,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       mci.vm.provision "ansible" do |ansible|
         ansible.inventory_path = "../FreeSHR-Playbooks/local"
         ansible.playbook =  "../FreeSHR-Playbooks/all.yml"
-        #ansible.raw_arguments = ["--list-hosts"]
-        ansible.tags = ["setup", "cassandra", "mci-server"]
+        ansible.tags = ["setup", "cassandra", "mci-server", "datasense"]
         ansible.vault_password_file = "~/.vaultpass.txt"
       end
   end
