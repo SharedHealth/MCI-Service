@@ -6,6 +6,8 @@ import org.sharedhealth.mci.web.config.MCIProperties;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
 import org.sharedhealth.mci.web.mapper.Feed;
 import org.sharedhealth.mci.web.mapper.FeedEntry;
+import org.sharedhealth.mci.web.mapper.PatientUpdateLogData;
+import org.sharedhealth.mci.web.mapper.PatientUpdateLogMapper;
 import org.sharedhealth.mci.web.model.PatientUpdateLog;
 import org.sharedhealth.mci.web.service.PatientService;
 import org.slf4j.Logger;
@@ -45,7 +47,6 @@ public class UpdateFeedController extends FeedController {
     private static final Logger logger = LoggerFactory.getLogger(UpdateFeedController.class);
 
     private static final String FEED_TITLE = "Patients";
-    private static final String ENTRY_TITLE = "Patient updates: ";
     private static final String CATEGORY_PATIENT = "patient";
     private static final String CATEGORY_CREATE = "create";
     private static final String CATEGORY_UPDATE = "update";
@@ -103,6 +104,7 @@ public class UpdateFeedController extends FeedController {
         List<FeedEntry> entries = new ArrayList<>();
 
         for (PatientUpdateLog patient : patients) {
+            PatientUpdateLogData updateLogData = new PatientUpdateLogMapper().map(patient);
             FeedEntry entry = new FeedEntry();
             entry.setId(patient.getEventId());
             entry.setPublishedDate(patient.getEventTimeAsString());
@@ -110,7 +112,7 @@ public class UpdateFeedController extends FeedController {
             entry.setLink(buildPatientLink(patient.getHealthId(), request));
             entry.setEventType(getEventType(patient.getEventType()));
             entry.setCategories(buildCategoryArray(patient));
-            entry.setContent(patient);
+            entry.setContent(updateLogData);
             entries.add(entry);
         }
         return entries;

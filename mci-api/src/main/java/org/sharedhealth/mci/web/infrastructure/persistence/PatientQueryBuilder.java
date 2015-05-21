@@ -4,14 +4,21 @@ import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Update;
 import com.datastax.driver.core.utils.UUIDs;
+import org.sharedhealth.mci.web.builder.PatientDiffBuilder;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.PatientData;
-import org.sharedhealth.mci.web.mapper.PatientMapper;
-import org.sharedhealth.mci.web.mapper.PatientSummaryData;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
 import org.sharedhealth.mci.web.mapper.Requester;
-import org.sharedhealth.mci.web.model.*;
+import org.sharedhealth.mci.web.model.BrnMapping;
+import org.sharedhealth.mci.web.model.CatchmentMapping;
+import org.sharedhealth.mci.web.model.HouseholdCodeMapping;
+import org.sharedhealth.mci.web.model.NameMapping;
+import org.sharedhealth.mci.web.model.NidMapping;
+import org.sharedhealth.mci.web.model.Patient;
+import org.sharedhealth.mci.web.model.PatientUpdateLog;
+import org.sharedhealth.mci.web.model.PhoneNumberMapping;
+import org.sharedhealth.mci.web.model.UidMapping;
 import org.springframework.data.cassandra.convert.CassandraConverter;
 
 import java.util.Date;
@@ -22,11 +29,15 @@ import java.util.UUID;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
 import static com.datastax.driver.core.querybuilder.Select.Where;
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.HOUSEHOLD_CODE;
 import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
-import static org.springframework.data.cassandra.core.CassandraTemplate.*;
+import static org.springframework.data.cassandra.core.CassandraTemplate.createDeleteQuery;
+import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
+import static org.springframework.data.cassandra.core.CassandraTemplate.toUpdateQuery;
 
 public class PatientQueryBuilder {
 
@@ -51,18 +62,27 @@ public class PatientQueryBuilder {
                                          Map<String, Set<Requester>> requestedBy,
                                          CassandraConverter converter, Batch batch) {
         PatientUpdateLog patientUpdateLog = new PatientUpdateLog();
-        PatientSummaryData patientSummaryData = new PatientMapper().mapSummary(patient);
-        String changeSet = writeValueAsString(patientSummaryData);
+        PatientData patientDataBlank = new PatientData();
+        PatientData patientDataWithHid = new PatientData();
+        patientDataWithHid.setHealthId(patient.getHealthId());
+        String changeSet = getChangeSet(patientDataWithHid, patientDataBlank);
 
         if (changeSet != null) {
             patientUpdateLog.setEventId(timeBased());
             patientUpdateLog.setHealthId(patient.getHealthId());
             patientUpdateLog.setChangeSet(changeSet);
             patientUpdateLog.setRequestedBy(writeValueAsString(requestedBy));
-            patientUpdateLog.setApprovedBy(NOT_REQUIRED);
             patientUpdateLog.setEventType(EVENT_TYPE_CREATED);
             batch.add(createInsertQuery(CF_PATIENT_UPDATE_LOG, patientUpdateLog, null, converter));
         }
+    }
+
+    private static String getChangeSet(PatientData newData, PatientData oldData) {
+        Map<String, Map<String, Object>> diff = new PatientDiffBuilder(oldData, newData).build();
+        if (diff != null && diff.size() > 0) {
+            return writeValueAsString(diff);
+        }
+        return null;
     }
 
     static Batch buildUpdateBatch(Patient newPatient, PatientData existingPatientData, CassandraConverter converter, Batch batch) {

@@ -1,7 +1,7 @@
 package org.sharedhealth.mci.web.mapper;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import org.sharedhealth.mci.web.model.PatientAuditLog;
+import org.sharedhealth.mci.web.model.PatientUpdateLog;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -13,22 +13,23 @@ import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.web.utils.JsonMapper.readValue;
 
 @Component
-public class PatientAuditLogMapper {
-
-    public List<PatientAuditLogData> map(List<PatientAuditLog> logs) {
-        List<PatientAuditLogData> dataList = new ArrayList<>();
-        for (PatientAuditLog log : logs) {
+public class PatientUpdateLogMapper {
+    public List<PatientUpdateLogData> map(List<PatientUpdateLog> logs) {
+        List<PatientUpdateLogData> dataList = new ArrayList<>();
+        for (PatientUpdateLog log : logs) {
             dataList.add(this.map(log));
         }
         return dataList;
     }
 
-    public PatientAuditLogData map(PatientAuditLog log) {
-        PatientAuditLogData data = new PatientAuditLogData();
-        data.setEventTime(toIsoFormat(log.getEventId()));
+    public PatientUpdateLogData map(PatientUpdateLog log) {
+        PatientUpdateLogData data = new PatientUpdateLogData();
         data.setHealthId(log.getHealthId());
+        data.setEventTime(toIsoFormat(log.getEventId()));
         data.setChangeSet(buildChangeSet(log.getChangeSet()));
-        data.setRequestedBy(readValue(log.getRequestedBy(), new TypeReference<Map<String, Set<Requester>>>() {
+
+        String requestedBy = log.getRequestedBy();
+        data.setRequestedBy((null == requestedBy) ? null : readValue(log.getRequestedBy(), new TypeReference<Map<String, Set<Requester>>>() {
         }));
         if (log.getApprovedBy() != null) {
             data.setApprovedBy(readValue(log.getApprovedBy(), Requester.class));

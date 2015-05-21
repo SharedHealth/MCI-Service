@@ -485,16 +485,4 @@ public class PatientMapper {
         }
         return false;
     }
-
-    public PatientSummaryData mapSummary(Patient patient) {
-        if (patient == null) {
-            return null;
-        }
-
-        PatientSummaryData data = new PatientSummaryData();
-
-        data.setHealthId(patient.getHealthId());
-
-        return data;
-    }
 }

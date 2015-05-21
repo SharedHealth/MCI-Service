@@ -1,5 +1,6 @@
 package org.sharedhealth.mci.web.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.junit.Before;
@@ -24,11 +25,13 @@ import org.springframework.test.web.servlet.ResultHandler;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,7 +43,10 @@ import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -50,7 +56,9 @@ import static org.sharedhealth.mci.web.utils.JsonConstants.SINCE;
 import static org.springframework.http.MediaType.APPLICATION_ATOM_XML_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 public class UpdateFeedControllerTest {
@@ -127,7 +135,7 @@ public class UpdateFeedControllerTest {
                 .andExpect(jsonPath("$.entries.[0].link", is(SERVER_URL + "/patients/h100")))
                 .andExpect(jsonPath("$.entries.[0].categories[0]", is("patient")))
                 .andExpect(jsonPath("$.entries.[0].content.health_id", is("h100")))
-                .andExpect(jsonPath("$.entries.[0].content.change_set.sur_name", is("updated")))
+                .andExpect(jsonPath("$.entries.[0].content.change_set.gender", is(getHashmap("{\"new_value\":\"F\",\"old_value\":\"M\"}"))))
                 .andExpect(jsonPath("$.entries.[1].id", is(uuid2.toString())))
                 .andExpect(jsonPath("$.entries.[2].id", is(uuid3.toString())));
 
@@ -166,10 +174,21 @@ public class UpdateFeedControllerTest {
                 .andExpect(jsonPath("$.entries.[0].link", is(SERVER_URL + "/patients/h200")))
                 .andExpect(jsonPath("$.entries.[0].categories[0]", is("patient")))
                 .andExpect(jsonPath("$.entries.[0].content.health_id", is("h200")))
-                .andExpect(jsonPath("$.entries.[0].content.change_set.sur_name", is("updated")))
+                .andExpect(jsonPath("$.entries.[0].content.change_set.gender", is(getHashmap("{\"new_value\":\"F\",\"old_value\":\"M\"}"))))
                 .andExpect(jsonPath("$.entries.[1].id", is(uuid3.toString())));
 
         verify(patientService).findPatientsUpdatedSince(null, uuid1);
+    }
+
+    private HashMap<String, String> getHashmap(String json) {
+        HashMap<String,String> map = new HashMap<>();
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            map = mapper.readValue(json, HashMap.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return map;
     }
 
     @Test
@@ -287,9 +306,7 @@ public class UpdateFeedControllerTest {
                 .andExpect(jsonPath("$.entries.[0].link", is(SERVER_URL + "/patients/h100")))
                 .andExpect(jsonPath("$.entries.[0].categories", is(asList("patient"))))
                 .andExpect(jsonPath("$.entries.[0].content.health_id", is("h100")))
-                .andExpect(jsonPath("$.entries.[0].content.change_set", is(nullValue())))
-                .andExpect(jsonPath("$.entries.[1].categories", is(asList("patient", "update:sur_name"))))
-        ;
+                .andExpect(jsonPath("$.entries.[1].categories", is(asList("patient", "update:gender"))));
 
         verify(patientService).findPatientsUpdatedSince(null, null);
     }
@@ -303,7 +320,7 @@ public class UpdateFeedControllerTest {
     }
 
     private PatientUpdateLog buildPatientLog(String healthId, UUID eventId) {
-        return buildPatientLog(healthId, eventId, "{\"sur_name\":\"updated\"}");
+        return buildPatientLog(healthId, eventId, "{\"gender\":{\"new_value\":\"F\",\"old_value\":\"M\"}}");
     }
 
     private MockHttpServletRequest buildHttpRequest(String since, String lastMarker) throws
@@ -337,8 +354,7 @@ public class UpdateFeedControllerTest {
         assertNotNull(entry.getCategories());
         assertEquals(2, entry.getCategories().length);
         assertEquals("patient", entry.getCategories()[0]);
-        assertEquals("update:sur_name", entry.getCategories()[1]);
-        assertEquals(patient, entry.getContent());
+        assertEquals("update:gender", entry.getCategories()[1]);
     }
 
     @Test
@@ -357,14 +373,14 @@ public class UpdateFeedControllerTest {
                 .andExpect(xpath("feed/title").string("Patients"))
                 .andExpect(xpath("feed/entry/title").string("patient updated: h100"))
                 .andExpect(xpath("feed/entry/category[@term='patient']").exists())
-                .andExpect(xpath("feed/entry/category[@term='update:sur_name']").exists())
+                .andExpect(xpath("feed/entry/category[@term='update:gender']").exists())
                 .andExpect(xpath("feed/entry/link[@href='https://mci.dghs.com/patients/h100']").exists())
                 .andDo(new ResultHandler() {
                     @Override
                     public void handle(MvcResult result) throws Exception {
                         String content = result.getResponse().getContentAsString();
                         assertTrue(content.contains("\"health_id\":\"h100\""));
-                        assertTrue(content.contains("\"change_set\":{\"sur_name\":\"updated\"}"));
+                        assertTrue(content.contains("{\"gender\":{\"new_value\":\"F\",\"old_value\":\"M\"}}"));
                     }
                 });
         verify(patientService).findPatientsUpdatedSince(null, null);
