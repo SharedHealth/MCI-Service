@@ -2,7 +2,6 @@ package org.sharedhealth.mci.web.infrastructure.persistence;
 
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
-import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.web.mapper.LocationCriteria;
 import org.sharedhealth.mci.web.mapper.LocationData;
 import org.sharedhealth.mci.web.mapper.LocationMapper;
@@ -22,7 +21,6 @@ import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
 public class LocationRepository extends BaseRepository {
 
     public static final String DEFAULT_PARENT_CODE_FOR_DIVISION = "00";
-    public static final String INVALID_CITY_CORPORATION = "99";
     public static final String ACTIVE_STATUS = "1";
     public static final String INACTIVE_STATUS = "0";
     private LocationMapper mapper;
@@ -38,9 +36,6 @@ public class LocationRepository extends BaseRepository {
         String code = geoCode.substring(geoCode.length() - 2, geoCode.length());
         String parent = geoCode.substring(0, geoCode.length() - 2);
 
-        if (StringUtils.length(geoCode) == 8 && StringUtils.equals(code, INVALID_CITY_CORPORATION)) {
-            return null;
-        }
         if (parent.isEmpty()) {
             parent = DEFAULT_PARENT_CODE_FOR_DIVISION;
         }
