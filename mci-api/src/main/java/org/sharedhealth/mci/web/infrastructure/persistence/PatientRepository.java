@@ -9,15 +9,7 @@ import org.sharedhealth.mci.web.exception.HealthIDExistException;
 import org.sharedhealth.mci.web.exception.PatientNotFoundException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.handler.PendingApprovalFilter;
-import org.sharedhealth.mci.web.mapper.Address;
-import org.sharedhealth.mci.web.mapper.Catchment;
-import org.sharedhealth.mci.web.mapper.PatientData;
-import org.sharedhealth.mci.web.mapper.PatientMapper;
-import org.sharedhealth.mci.web.mapper.PatientSummaryData;
-import org.sharedhealth.mci.web.mapper.PendingApproval;
-import org.sharedhealth.mci.web.mapper.PendingApprovalFieldDetails;
-import org.sharedhealth.mci.web.mapper.Requester;
-import org.sharedhealth.mci.web.mapper.SearchQuery;
+import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.model.CatchmentMapping;
 import org.sharedhealth.mci.web.model.Patient;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
@@ -26,17 +18,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.cassandra.core.CassandraOperations;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.FieldError;
 
 import java.util.*;
 
-import static com.datastax.driver.core.querybuilder.QueryBuilder.batch;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.timestamp;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static java.util.Collections.emptyList;
@@ -46,13 +34,12 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientUpdateLogQueryBuilder.buildCreateUpdateLogStmt;
-import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.ACTIVE;
-import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.CF_PENDING_APPROVAL_MAPPING;
-import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.HEALTH_ID;
-import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.MERGED_WITH;
+import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.*;
 import static org.sharedhealth.mci.web.utils.PatientDataConstants.PATIENT_STATUS_ALIVE;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createDeleteQuery;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
+import static org.springframework.http.HttpStatus.ACCEPTED;
+import static org.springframework.http.HttpStatus.CREATED;
 
 
 @Component
@@ -110,10 +97,26 @@ public class PatientRepository extends BaseRepository {
         addToPatientUpdateLogStmt(patient, requestedBy, cassandraOps.getConverter(), batch);
 
         cassandraOps.execute(batch);
-        return new MCIResponse(patient.getHealthId(), HttpStatus.CREATED);
+        return new MCIResponse(patient.getHealthId(), CREATED);
+    }
+
+    public MCIResponse update(List<PatientData> updateRequests) {
+        Batch batch = batch();
+        for (PatientData updateRequest : updateRequests) {
+            processUpdate(updateRequest, updateRequest.getHealthId(), batch);
+        }
+        cassandraOps.execute(batch);
+        return new MCIResponse(ACCEPTED);
     }
 
     public MCIResponse update(PatientData updateRequest, String healthId) {
+        Batch batch = batch();
+        processUpdate(updateRequest, healthId, batch);
+        cassandraOps.execute(batch);
+        return new MCIResponse(healthId, ACCEPTED);
+    }
+
+    private void processUpdate(PatientData updateRequest, String healthId, Batch batch) {
         logger.debug(String.format("Update patient: %s", healthId));
         updateRequest.setHealthId(healthId);
         Requester requester = updateRequest.getRequester();
@@ -128,7 +131,7 @@ public class PatientRepository extends BaseRepository {
             }
         }
 
-        final Batch batch = batch();
+
         checkIfTryingToMergeWithNonExistingOrInactiveHid(updateRequest.getMergedWith());
         clearPendingApprovalsIfRequired(updateRequest, existingPatientData, batch);
         PatientData newPatientData = this.pendingApprovalFilter.filter(existingPatientData, updateRequest);
@@ -138,17 +141,12 @@ public class PatientRepository extends BaseRepository {
         newPatient.setUpdatedAt(timeBased());
         newPatient.setUpdatedBy(requester);
 
-
         buildUpdatePendingApprovalsBatch(newPatient, existingPatientData, batch);
         buildUpdateBatch(newPatient, existingPatientData, cassandraOps.getConverter(), batch);
 
         Map<String, Set<Requester>> requestedBy = new HashMap<>();
         buildRequestedBy(requestedBy, ALL_FIELDS, requester);
         buildCreateUpdateLogStmt(newPatientData, existingPatientData, requestedBy, null, cassandraOps.getConverter(), batch);
-
-        cassandraOps.execute(batch);
-
-        return new MCIResponse(newPatient.getHealthId(), HttpStatus.ACCEPTED);
     }
 
     private void clearPendingApprovalsIfRequired(PatientData updateRequest, PatientData existingPatientData, Batch batch) {

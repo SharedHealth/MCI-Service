@@ -84,7 +84,8 @@ public class DuplicatePatientController extends MciController {
             BindingResult bindingResult) {
 
         UserInfo userInfo = getUserInfo();
-        String message = format("Merging duplicate patients");
+        String message = format("Merging duplicate patients. HIDs: %s and %s. Action: %s",
+                data.getPatient1().getHealthId(), data.getPatient2().getHealthId(), data.getAction());
         logAccessDetails(userInfo, message);
         logger.debug(message);
 
@@ -96,12 +97,8 @@ public class DuplicatePatientController extends MciController {
         final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
         duplicatePatientService.merge(data);
 
-        MCIResponse mciResponse = new MCIResponse(getMergedIds(data), ACCEPTED);
+        MCIResponse mciResponse = new MCIResponse(ACCEPTED);
         deferredResult.setResult(new ResponseEntity<>(mciResponse, mciResponse.httpStatusObject));
         return deferredResult;
-    }
-
-    private String getMergedIds(DuplicatePatientMergeData data) {
-        return data.getPatient1().getHealthId() + ", " + data.getPatient2().getHealthId();
     }
 }

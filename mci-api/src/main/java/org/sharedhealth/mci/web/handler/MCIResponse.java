@@ -18,6 +18,11 @@ public class MCIResponse {
 
     public HttpStatus httpStatusObject;
 
+    public MCIResponse(HttpStatus httpStatusObject) {
+        this.httpStatusObject = httpStatusObject;
+        this.httpStatus = httpStatusObject.value();
+    }
+
     public MCIResponse(String id, HttpStatus httpStatusObject) {
         this.id = id;
         this.httpStatusObject = httpStatusObject;
