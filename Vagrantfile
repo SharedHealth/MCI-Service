@@ -22,6 +22,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         ansible.playbook =  "../FreeSHR-Playbooks/all.yml"
         ansible.tags = ["setup", "cassandra", "mci-server", "identity-server"]
         ansible.vault_password_file = "~/.vaultpass.txt"
+        ansible.verbose = 'vvvv'
       end
   end
 end
