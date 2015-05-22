@@ -12,7 +12,10 @@ import java.util.List;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
-import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.*;
+import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.CF_MARKER;
+import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.CF_PATIENT_AUDIT_LOG;
+import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.HEALTH_ID;
+import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.TYPE;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
 
 public class PatientAuditLogQueryBuilder {
@@ -40,7 +43,7 @@ public class PatientAuditLogQueryBuilder {
         return batch;
     }
 
-    private static void updateMarker(String marker, CassandraConverter converter, Batch batch) {
+    public static void updateMarker(String marker, CassandraConverter converter, Batch batch) {
         long time = new Date().getTime();
         Delete delete = delete().from(CF_MARKER);
         delete.where(eq(TYPE, AUDIT_MARKER_TYPE));

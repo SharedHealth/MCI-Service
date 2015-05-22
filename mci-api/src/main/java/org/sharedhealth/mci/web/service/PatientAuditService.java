@@ -12,7 +12,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 import static java.util.Arrays.asList;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
@@ -59,9 +63,14 @@ public class PatientAuditService {
     public void sync() {
         UUID marker = auditRepository.findLatestMarker();
         List<PatientUpdateLog> feeds = feedRepository.findPatientsUpdatedSince(marker, UPDATE_LOG_LIMIT);
-        feeds = filterBasedOnEventType(feeds);
-        if (isNotEmpty(feeds)) {
-            auditRepository.saveOrUpdate(map(feeds));
+        if (null == feeds || feeds.isEmpty()) {
+            return;
+        }
+        List<PatientUpdateLog> filteredFeed = filterBasedOnEventType(feeds);
+        if (isNotEmpty(filteredFeed)) {
+            auditRepository.saveOrUpdate(map(filteredFeed));
+        } else {
+            auditRepository.updateMarkerTable(map(feeds));
         }
     }
 
