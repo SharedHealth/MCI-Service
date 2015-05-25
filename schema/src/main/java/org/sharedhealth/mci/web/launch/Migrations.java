@@ -68,6 +68,7 @@ public class Migrations {
                 .withClusterName(env.get("CASSANDRA_KEYSPACE"))
                 .withLoadBalancingPolicy(new RoundRobinPolicy())
                 .withPoolingOptions(new PoolingOptions())
+                .withAuthProvider(new PlainTextAuthProvider(env.get("CASSANDRA_USER"), env.get("CASSANDRA_PASSWORD")))
                 .withProtocolVersion(Integer.parseInt(env.get("CASSANDRA_VERSION")))
                 .withQueryOptions(queryOptions)
                 .withReconnectionPolicy(new ConstantReconnectionPolicy(ONE_MINUTE))
@@ -78,17 +79,6 @@ public class Migrations {
 
     protected Session createSession(Cluster cluster) {
         String keyspace = env.get("CASSANDRA_KEYSPACE");
-        String replicationStrategy = env.get("CASSANDRA_REPLICATION_STRATEGY");
-        String replicationFactor = env.get("CASSANDRA_REPLICATION_FACTOR");
-
-        Session session = cluster.connect();
-        session.execute(
-                String.format(
-                        "CREATE KEYSPACE IF NOT EXISTS %s " +
-                                "WITH replication = {'class':'%s', 'replication_factor':%s}; ",
-                        keyspace, replicationStrategy, replicationFactor)
-        );
-        session.close();
         return cluster.connect(keyspace);
     }
 
