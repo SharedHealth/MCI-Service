@@ -23,7 +23,6 @@ import java.util.List;
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.asSet;
@@ -115,7 +114,6 @@ public class DuplicatePatientControllerTest {
     @Test
     public void shouldMergeDuplicates() throws Exception {
         DuplicatePatientMergeData data = new DuplicatePatientMergeData("1000", new PatientData(), new PatientData());
-        doNothing().when(duplicatePatientService).merge(data);
 
         String url = "/patients/duplicates";
         MvcResult mvcResult = mockMvc.perform(put(url).content(writeValueAsString(data)).contentType(APPLICATION_JSON))

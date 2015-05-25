@@ -64,7 +64,7 @@ public class PatientController extends MciController {
         logger.debug("Trying to create patient.");
         final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
 
-        if (null != patient.getActive() && !patient.getActive()) {
+        if (null != patient.isActive() && !patient.isActive()) {
             throw new Forbidden(format("Cannot create inactive patient"));
         }
 
@@ -153,7 +153,7 @@ public class PatientController extends MciController {
             logger.debug(format("Validation error while updating patient (healthId): %s", healthId));
             throw new ValidationException(bindingResult);
         }
-        if (null != patient.getActive() || null != patient.getMergedWith()) {
+        if (null != patient.isActive() || null != patient.getMergedWith()) {
             throw new Forbidden(format("Cannot update active field or merge with other patient"));
         }
 
@@ -163,12 +163,12 @@ public class PatientController extends MciController {
     }
 
     private PatientData formatResponse(PatientData patient) {
-        if (null == patient.getActive() || patient.getActive()) {
+        if (null == patient.isActive() || patient.isActive()) {
             return patient;
         }
         PatientData inactivePatientData = new PatientData();
         inactivePatientData.setHealthId(patient.getHealthId());
-        inactivePatientData.setActive(patient.getActive());
+        inactivePatientData.setActive(patient.isActive());
         inactivePatientData.setMergedWith(patient.getMergedWith());
         return inactivePatientData;
     }

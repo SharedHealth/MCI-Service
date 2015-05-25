@@ -32,6 +32,10 @@ public class DuplicatePatient {
     public DuplicatePatient() {
     }
 
+    public DuplicatePatient(String catchment_id, String health_id1, String health_id2) {
+        this(catchment_id, health_id1, health_id2, null, null);
+    }
+
     public DuplicatePatient(String catchment_id, String health_id1, String health_id2, Set<String> reasons, UUID created_at) {
         this.catchment_id = catchment_id;
         this.health_id1 = health_id1;

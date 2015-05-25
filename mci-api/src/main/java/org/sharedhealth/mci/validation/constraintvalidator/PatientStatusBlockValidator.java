@@ -7,7 +7,7 @@ import org.sharedhealth.mci.web.mapper.PatientStatus;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import static org.sharedhealth.mci.web.utils.PatientDataConstants.PATIENT_STATUS_DEAD;
+import static org.sharedhealth.mci.web.utils.MCIConstants.PATIENT_STATUS_DEAD;
 
 public class PatientStatusBlockValidator implements ConstraintValidator<PatientStatusBlock, PatientStatus> {
 

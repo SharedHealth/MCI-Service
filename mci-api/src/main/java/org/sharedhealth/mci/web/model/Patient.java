@@ -20,7 +20,7 @@ import static org.sharedhealth.mci.utils.DateUtil.parseDate;
 import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonMapper.readValue;
 import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
-import static org.sharedhealth.mci.web.utils.PatientDataConstants.COUNTRY_CODE_BANGLADESH;
+import static org.sharedhealth.mci.web.utils.MCIConstants.COUNTRY_CODE_BANGLADESH;
 
 @Table(value = CF_PATIENT)
 public class Patient {

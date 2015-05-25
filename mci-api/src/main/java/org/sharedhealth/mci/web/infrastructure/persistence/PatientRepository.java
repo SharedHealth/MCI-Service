@@ -35,7 +35,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientQueryBuilder.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientUpdateLogQueryBuilder.buildCreateUpdateLogStmt;
 import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.*;
-import static org.sharedhealth.mci.web.utils.PatientDataConstants.PATIENT_STATUS_ALIVE;
+import static org.sharedhealth.mci.web.utils.MCIConstants.PATIENT_STATUS_ALIVE;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createDeleteQuery;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
 import static org.springframework.http.HttpStatus.ACCEPTED;
@@ -150,7 +150,7 @@ public class PatientRepository extends BaseRepository {
     }
 
     private void clearPendingApprovalsIfRequired(PatientData updateRequest, PatientData existingPatientData, Batch batch) {
-        if (null == updateRequest.getActive() || updateRequest.getActive()) {
+        if (null == updateRequest.isActive() || updateRequest.isActive()) {
             return;
         }
         existingPatientData.setPendingApprovals(new TreeSet<PendingApproval>());
@@ -168,14 +168,14 @@ public class PatientRepository extends BaseRepository {
         } catch (PatientNotFoundException e) {
             throw new PatientNotFoundException("Merge_with patient not found with health id: " + mergedWith);
         }
-        if (!targetPatient.getActive()) {
+        if (!targetPatient.isActive()) {
             throw new Forbidden("Cannot merge with inactive patient");
         }
         return false;
     }
 
     protected boolean shouldUpdatePatient(PatientData updateRequest, PatientData existingPatientData) {
-        if (existingPatientData.getActive()) {
+        if (existingPatientData.isActive()) {
             return true;
         }
         if (checkIfTryingToUpdateFieldsOtherThanMergedWith(updateRequest)) {
@@ -188,7 +188,7 @@ public class PatientRepository extends BaseRepository {
     }
 
     private boolean isTryingToActivateInactivePatient(PatientData updateRequest) {
-        return null != updateRequest.getActive() && updateRequest.getActive();
+        return null != updateRequest.isActive() && updateRequest.isActive();
     }
 
     private boolean checkIfTryingToUpdateFieldsOtherThanMergedWith(PatientData updateRequest) {

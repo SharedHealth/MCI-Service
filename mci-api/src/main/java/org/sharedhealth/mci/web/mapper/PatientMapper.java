@@ -7,7 +7,7 @@ import org.sharedhealth.mci.utils.DateUtil;
 import org.sharedhealth.mci.web.exception.InvalidRequesterException;
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.model.Patient;
-import org.sharedhealth.mci.web.utils.PatientDataConstants;
+import org.sharedhealth.mci.web.utils.MCIConstants;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.FieldError;
@@ -24,9 +24,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_INVALID;
 import static org.sharedhealth.mci.web.utils.JsonConstants.RELATIONS;
-import static org.sharedhealth.mci.web.utils.PatientDataConstants.COUNTRY_CODE_BANGLADESH;
-import static org.sharedhealth.mci.web.utils.PatientDataConstants.PATIENT_STATUS_ALIVE;
-import static org.sharedhealth.mci.web.utils.PatientDataConstants.STRING_YES;
+import static org.sharedhealth.mci.web.utils.MCIConstants.COUNTRY_CODE_BANGLADESH;
+import static org.sharedhealth.mci.web.utils.MCIConstants.PATIENT_STATUS_ALIVE;
+import static org.sharedhealth.mci.web.utils.MCIConstants.STRING_YES;
 
 @Component
 public class PatientMapper {
@@ -173,14 +173,14 @@ public class PatientMapper {
     }
 
     private boolean isPatientDeadAndHasDateOfDeath(Patient patient) {
-        return patient.getDateOfDeath() != null && PatientDataConstants.PATIENT_STATUS_DEAD.equals(patient.getStatus()) && DateUtil.getYearOf(patient.getDateOfDeath()) > 1;
+        return patient.getDateOfDeath() != null && MCIConstants.PATIENT_STATUS_DEAD.equals(patient.getStatus()) && DateUtil.getYearOf(patient.getDateOfDeath()) > 1;
     }
 
     private void mapConfidentiality(Patient patient, PatientData data) {
         if (patient.getConfidential()) {
-            data.setConfidential(PatientDataConstants.STRING_YES);
+            data.setConfidential(MCIConstants.STRING_YES);
         } else {
-            data.setConfidential(PatientDataConstants.STRING_NO);
+            data.setConfidential(MCIConstants.STRING_NO);
         }
     }
 
@@ -268,10 +268,10 @@ public class PatientMapper {
     }
 
     private void mapPatientActivation(Patient patient, PatientData patientData) {
-        if (null != patientData.getActive() && patientData.getActive() && StringUtils.isNotBlank(patientData.getMergedWith())) {
+        if (null != patientData.isActive() && patientData.isActive() && StringUtils.isNotBlank(patientData.getMergedWith())) {
             throw new InvalidRequesterException("Active Patient cannot be merged with other patient");
         }
-        patient.setActive(patientData.getActive());
+        patient.setActive(patientData.isActive());
         patient.setMergedWith(patientData.getMergedWith());
     }
 
@@ -332,7 +332,7 @@ public class PatientMapper {
         data.setGender(patient.getGender());
         data.setAddress(patient.getAddress());
         data.setPhoneNumber(patient.getPhoneNumber());
-        data.setActive(patient.getActive());
+        data.setActive(patient.isActive());
         data.setMergedWith(patient.getMergedWith());
 
         return data;

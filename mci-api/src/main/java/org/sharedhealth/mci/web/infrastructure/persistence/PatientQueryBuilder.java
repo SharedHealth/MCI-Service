@@ -5,20 +5,8 @@ import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Update;
 import com.datastax.driver.core.utils.UUIDs;
 import org.sharedhealth.mci.web.builder.PatientDiffBuilder;
-import org.sharedhealth.mci.web.mapper.Address;
-import org.sharedhealth.mci.web.mapper.Catchment;
-import org.sharedhealth.mci.web.mapper.PatientData;
-import org.sharedhealth.mci.web.mapper.PhoneNumber;
-import org.sharedhealth.mci.web.mapper.Requester;
-import org.sharedhealth.mci.web.model.BrnMapping;
-import org.sharedhealth.mci.web.model.CatchmentMapping;
-import org.sharedhealth.mci.web.model.HouseholdCodeMapping;
-import org.sharedhealth.mci.web.model.NameMapping;
-import org.sharedhealth.mci.web.model.NidMapping;
-import org.sharedhealth.mci.web.model.Patient;
-import org.sharedhealth.mci.web.model.PatientUpdateLog;
-import org.sharedhealth.mci.web.model.PhoneNumberMapping;
-import org.sharedhealth.mci.web.model.UidMapping;
+import org.sharedhealth.mci.web.mapper.*;
+import org.sharedhealth.mci.web.model.*;
 import org.springframework.data.cassandra.convert.CassandraConverter;
 
 import java.util.Date;
@@ -29,15 +17,11 @@ import java.util.UUID;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
 import static com.datastax.driver.core.querybuilder.Select.Where;
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.HOUSEHOLD_CODE;
 import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
-import static org.springframework.data.cassandra.core.CassandraTemplate.createDeleteQuery;
-import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
-import static org.springframework.data.cassandra.core.CassandraTemplate.toUpdateQuery;
+import static org.springframework.data.cassandra.core.CassandraTemplate.*;
 
 public class PatientQueryBuilder {
 
@@ -59,8 +43,8 @@ public class PatientQueryBuilder {
     }
 
     static void addToPatientUpdateLogStmt(Patient patient,
-                                         Map<String, Set<Requester>> requestedBy,
-                                         CassandraConverter converter, Batch batch) {
+                                          Map<String, Set<Requester>> requestedBy,
+                                          CassandraConverter converter, Batch batch) {
         PatientUpdateLog patientUpdateLog = new PatientUpdateLog();
         PatientData patientDataBlank = new PatientData();
         PatientData patientDataWithHid = new PatientData();

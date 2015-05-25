@@ -33,7 +33,7 @@ import static org.apache.commons.lang3.StringUtils.*;
 import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
-import static org.sharedhealth.mci.web.utils.PatientDataConstants.COUNTRY_CODE_BANGLADESH;
+import static org.sharedhealth.mci.web.utils.MCIConstants.COUNTRY_CODE_BANGLADESH;
 
 @MaritalRelation(message = ERROR_CODE_DEPENDENT, field = "maritalStatus")
 @JsonIgnoreProperties(ignoreUnknown = true, value = {"created_at"})
@@ -820,7 +820,7 @@ public class PatientData implements Diffable<PatientData> {
         this.patientStatus = patientStatus;
     }
 
-    public Boolean getActive() {
+    public Boolean isActive() {
         return active;
     }
 

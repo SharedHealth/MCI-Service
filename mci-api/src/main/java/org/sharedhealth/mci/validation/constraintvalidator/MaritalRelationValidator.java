@@ -6,8 +6,8 @@ import org.sharedhealth.mci.web.mapper.PatientData;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import static org.sharedhealth.mci.web.utils.PatientDataConstants.MARITAL_STATUS_UNMARRIED;
-import static org.sharedhealth.mci.web.utils.PatientDataConstants.RELATION_SPOUSE;
+import static org.sharedhealth.mci.web.utils.MCIConstants.MARITAL_STATUS_UNMARRIED;
+import static org.sharedhealth.mci.web.utils.MCIConstants.RELATION_SPOUSE;
 
 public class MaritalRelationValidator implements ConstraintValidator<MaritalRelation, PatientData> {
 
