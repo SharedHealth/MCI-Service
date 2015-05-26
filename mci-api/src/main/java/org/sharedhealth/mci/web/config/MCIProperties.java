@@ -16,6 +16,10 @@ public class MCIProperties {
     private String cassandraHost;
     @Value("${CASSANDRA_PORT}")
     private int cassandraPort;
+    @Value("${CASSANDRA_USER}")
+    private String cassandraUser;
+    @Value("${CASSANDRA_PASSWORD}")
+    private String cassandraPassword;
     @Value("${CASSANDRA_TIMEOUT}")
     private int cassandraTimeout;
     @Value("${REST_POOL_SIZE}")
@@ -107,5 +111,13 @@ public class MCIProperties {
 
     public boolean isLatestApiVersion() {
         return valueOf(isLatestApiVersion);
+    }
+
+    public String getCassandraUser() {
+        return cassandraUser;
+    }
+
+    public String getCassandraPassword() {
+        return cassandraPassword;
     }
 }

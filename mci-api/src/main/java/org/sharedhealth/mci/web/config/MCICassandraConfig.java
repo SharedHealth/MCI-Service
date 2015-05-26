@@ -1,5 +1,7 @@
 package org.sharedhealth.mci.web.config;
 
+import com.datastax.driver.core.AuthProvider;
+import com.datastax.driver.core.PlainTextAuthProvider;
 import com.datastax.driver.core.SocketOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -14,28 +16,33 @@ import org.springframework.data.cassandra.repository.config.EnableCassandraRepos
 public class MCICassandraConfig extends AbstractCassandraConfiguration {
 
     @Autowired
-    private MCIProperties MCIProperties;
+    private MCIProperties mciProperties;
 
     @Override
     protected String getKeyspaceName() {
-        return MCIProperties.getCassandraKeySpace();
+        return mciProperties.getCassandraKeySpace();
     }
 
     @Override
     protected String getContactPoints() {
-        return MCIProperties.getContactPoints();
+        return mciProperties.getContactPoints();
     }
 
     @Override
     protected int getPort() {
-        return MCIProperties.getCassandraPort();
+        return mciProperties.getCassandraPort();
+    }
+
+    @Override
+    protected AuthProvider getAuthProvider() {
+        return new PlainTextAuthProvider(mciProperties.getCassandraUser(), mciProperties.getCassandraPassword());
     }
 
     @Override
     protected SocketOptions getSocketOptions() {
         SocketOptions socketOptions = new SocketOptions();
-        socketOptions.setConnectTimeoutMillis(MCIProperties.getCassandraTimeout());
-        socketOptions.setReadTimeoutMillis(MCIProperties.getCassandraTimeout());
+        socketOptions.setConnectTimeoutMillis(mciProperties.getCassandraTimeout());
+        socketOptions.setReadTimeoutMillis(mciProperties.getCassandraTimeout());
         return socketOptions;
     }
 
