@@ -66,11 +66,13 @@ public class PatientRepository extends BaseRepository {
 
     public MCIResponse create(PatientData patientData) {
         logger.debug(String.format("Create patient: %s", patientData.toString()));
+
         if (!isBlank(patientData.getHealthId())) {
             DirectFieldBindingResult bindingResult = new DirectFieldBindingResult(patientData, "patient");
             bindingResult.addError(new FieldError("patient", "hid", "3001"));
             throw new HealthIDExistException(bindingResult);
         }
+
         Patient patient = mapper.map(patientData, new PatientData());
         patient.setHealthId(hidGenerator.generate());
         patient.setCreatedAt(timeBased());
@@ -100,23 +102,14 @@ public class PatientRepository extends BaseRepository {
         return new MCIResponse(patient.getHealthId(), CREATED);
     }
 
-    public MCIResponse update(List<PatientData> updateRequests) {
-        Batch batch = batch();
-        for (PatientData updateRequest : updateRequests) {
-            processUpdate(updateRequest, updateRequest.getHealthId(), batch);
-        }
-        cassandraOps.execute(batch);
-        return new MCIResponse(ACCEPTED);
-    }
-
     public MCIResponse update(PatientData updateRequest, String healthId) {
         Batch batch = batch();
-        processUpdate(updateRequest, healthId, batch);
+        buildUpdateProcessBatch(updateRequest, healthId, batch);
         cassandraOps.execute(batch);
         return new MCIResponse(healthId, ACCEPTED);
     }
 
-    private void processUpdate(PatientData updateRequest, String healthId, Batch batch) {
+    public void buildUpdateProcessBatch(PatientData updateRequest, String healthId, Batch batch) {
         logger.debug(String.format("Update patient: %s", healthId));
         updateRequest.setHealthId(healthId);
         Requester requester = updateRequest.getRequester();

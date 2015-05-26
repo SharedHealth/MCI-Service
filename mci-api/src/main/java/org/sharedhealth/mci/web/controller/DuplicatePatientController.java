@@ -95,7 +95,7 @@ public class DuplicatePatientController extends MciController {
         }
 
         final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
-        duplicatePatientService.mergeOrIgnore(data);
+        duplicatePatientService.processDuplicates(data);
 
         MCIResponse mciResponse = new MCIResponse(ACCEPTED);
         deferredResult.setResult(new ResponseEntity<>(mciResponse, mciResponse.httpStatusObject));

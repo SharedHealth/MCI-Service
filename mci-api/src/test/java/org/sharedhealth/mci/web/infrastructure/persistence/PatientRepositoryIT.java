@@ -1,5 +1,6 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
+import com.datastax.driver.core.querybuilder.Batch;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -276,37 +277,16 @@ public class PatientRepositoryIT {
     }
 
     @Test
-    public void shouldUpdatePatients() {
-        PatientData data1 = buildPatient();
-        MCIResponse response1 = patientRepository.create(data1);
-        assertEquals(201, response1.getHttpStatus());
-        String healthId1 = response1.getId();
-        String givenName1 = "John";
-        String religion1 = "p1r";
-        data1.setHealthId(healthId1);
-        data1.setGivenName(givenName1);
-        data1.setReligion(religion1);
+    public void shouldBuildUpdateProcessBatch() {
+        PatientData patient = buildPatient();
+        MCIResponse mciResponse = patientRepository.create(patient);
+        String healthId = mciResponse.getId();
 
-        PatientData data2 = buildPatient();
-        MCIResponse response2 = patientRepository.create(data2);
-        assertEquals(201, response2.getHttpStatus());
-        String healthId2 = response2.getId();
-        String givenName2 = "Jane";
-        String religion2 = "p2r";
-        data2.setHealthId(healthId2);
-        data2.setGivenName(givenName2);
-        data2.setReligion(religion2);
-
-        MCIResponse mciResponseForUpdate = patientRepository.update(asList(data1, data2));
-        assertEquals(202, mciResponseForUpdate.getHttpStatus());
-
-        PatientData updatedPatient1 = patientRepository.findByHealthId(healthId1);
-        assertEquals(givenName1, updatedPatient1.getGivenName());
-        assertEquals(religion1, updatedPatient1.getReligion());
-
-        PatientData updatedPatient2 = patientRepository.findByHealthId(healthId2);
-        assertEquals(givenName2, updatedPatient2.getGivenName());
-        assertEquals(religion2, updatedPatient2.getReligion());
+        Batch batch = batch();
+        patientRepository.buildUpdateProcessBatch(patient, healthId, batch);
+        String queryString = batch.getQueryString();
+        assertNotNull(queryString);
+        assertTrue(queryString.startsWith("BEGIN BATCH"));
     }
 
     @Test

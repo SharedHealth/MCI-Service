@@ -2,7 +2,6 @@ package org.sharedhealth.mci.web.service;
 
 import org.sharedhealth.mci.utils.DateUtil;
 import org.sharedhealth.mci.web.infrastructure.persistence.DuplicatePatientRepository;
-import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
 import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.DuplicatePatientData;
 import org.sharedhealth.mci.web.mapper.DuplicatePatientMergeData;
@@ -16,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.String.format;
-import static java.util.Arrays.asList;
 import static org.sharedhealth.mci.web.utils.MCIConstants.DUPLICATION_ACTION_IGNORE;
 import static org.sharedhealth.mci.web.utils.MCIConstants.DUPLICATION_ACTION_MERGE;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -26,13 +24,10 @@ public class DuplicatePatientService {
 
     private static final Logger logger = getLogger(DuplicatePatientService.class);
 
-    private PatientRepository patientRepository;
     private DuplicatePatientRepository duplicatePatientRepository;
 
     @Autowired
-    public DuplicatePatientService(PatientRepository patientRepository,
-                                   DuplicatePatientRepository duplicatePatientRepository) {
-        this.patientRepository = patientRepository;
+    public DuplicatePatientService(DuplicatePatientRepository duplicatePatientRepository) {
         this.duplicatePatientRepository = duplicatePatientRepository;
     }
 
@@ -58,12 +53,12 @@ public class DuplicatePatientService {
         return duplicatePatientData;
     }
 
-    public void mergeOrIgnore(DuplicatePatientMergeData data) {
+    public void processDuplicates(DuplicatePatientMergeData data) {
         PatientData patient1 = data.getPatient1();
         PatientData patient2 = data.getPatient2();
 
         if (DUPLICATION_ACTION_IGNORE.equals(data.getAction())) {
-            duplicatePatientRepository.ignore(patient1, patient2);
+            duplicatePatientRepository.processDuplicates(patient1, patient2, false);
 
         } else if (DUPLICATION_ACTION_MERGE.equals(data.getAction())) {
             if (patient1.isActive()) {
@@ -71,7 +66,7 @@ public class DuplicatePatientService {
                 logger.error(message);
                 throw new IllegalArgumentException(message);
             }
-            patientRepository.update(asList(patient1, patient2));
+            duplicatePatientRepository.processDuplicates(patient1, patient2, true);
         }
     }
 }

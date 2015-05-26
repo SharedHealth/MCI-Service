@@ -18,17 +18,25 @@ import static org.sharedhealth.mci.web.infrastructure.persistence.DuplicatePatie
 @Component
 public class DuplicatePatientRepository extends BaseRepository {
 
+    private PatientRepository patientRepository;
+
     @Autowired
-    public DuplicatePatientRepository(@Qualifier("MCICassandraTemplate") CassandraOperations cassandraOps) {
+    public DuplicatePatientRepository(PatientRepository patientRepository,
+                                      @Qualifier("MCICassandraTemplate") CassandraOperations cassandraOps) {
         super(cassandraOps);
+        this.patientRepository = patientRepository;
     }
 
     public List<DuplicatePatient> findAllByCatchment(Catchment catchment) {
         return cassandraOps.select(buildFindByCatchmentStmt(catchment), DuplicatePatient.class);
     }
 
-    public void ignore(PatientData patient1, PatientData patient2) {
+    public void processDuplicates(PatientData patient1, PatientData patient2, boolean shouldUpdatePatients) {
         Batch batch = batch();
+        if (shouldUpdatePatients) {
+            patientRepository.buildUpdateProcessBatch(patient1, patient1.getHealthId(), batch);
+            patientRepository.buildUpdateProcessBatch(patient2, patient2.getHealthId(), batch);
+        }
         buildDeleteDuplicatesStmt(patient1, patient2, cassandraOps.getConverter(), batch);
         cassandraOps.execute(batch);
     }

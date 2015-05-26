@@ -1,6 +1,5 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
@@ -8,6 +7,7 @@ import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.PatientData;
+import org.sharedhealth.mci.web.mapper.Requester;
 import org.sharedhealth.mci.web.model.DuplicatePatient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -41,13 +41,12 @@ public class DuplicatePatientRepositoryIT {
     @Autowired
     private DuplicatePatientRepository duplicatePatientRepository;
 
-    @Before
-    public void setUp() throws Exception {
-        cassandraOps.update(buildDuplicatePatients());
-    }
+    @Autowired
+    private PatientRepository patientRepository;
 
     @Test
     public void shouldFindAllByCatchment() {
+        cassandraOps.update(buildDuplicatePatientsForSearch());
         List<DuplicatePatient> duplicatePatients1 = duplicatePatientRepository.findAllByCatchment(new Catchment("102030"));
         assertTrue(isNotEmpty(duplicatePatients1));
         assertEquals(6, duplicatePatients1.size());
@@ -58,26 +57,54 @@ public class DuplicatePatientRepositoryIT {
     }
 
     @Test
-    public void shouldIgnoreDuplicates() throws Exception {
-        PatientData patient1 = new PatientData();
-        patient1.setHealthId("110");
-        patient1.setAddress(new Address("10", "20", "30"));
-        PatientData patient2 = new PatientData();
-        patient2.setHealthId("111");
-        patient2.setAddress(new Address("11", "22", "33"));
+    public void shouldIgnoreDuplicates() {
+        PatientData patientData1 = new PatientData();
+        PatientData patientData2 = new PatientData();
+        buildDuplicatePatientsForMerge(patientData1, patientData2);
 
-        duplicatePatientRepository.ignore(patient1, patient2);
+        patientData1.setBloodGroup("X");
+        patientData2.setBloodGroup("Y");
 
+        duplicatePatientRepository.processDuplicates(patientData1, patientData2, false);
+        assertDuplicatesDeleted(patientData1.getHealthId(), patientData2.getHealthId());
+
+        PatientData patient1 = patientRepository.findByHealthId(patientData1.getHealthId());
+        assertEquals("A", patient1.getBloodGroup());
+
+        PatientData patient2 = patientRepository.findByHealthId(patientData2.getHealthId());
+        assertEquals("B", patient2.getBloodGroup());
+    }
+
+    @Test
+    public void shouldMergeDuplicates() {
+        PatientData patientData1 = new PatientData();
+        PatientData patientData2 = new PatientData();
+        buildDuplicatePatientsForMerge(patientData1, patientData2);
+
+        patientData1.setBloodGroup("X");
+        patientData2.setBloodGroup("Y");
+
+        duplicatePatientRepository.processDuplicates(patientData1, patientData2, true);
+        assertDuplicatesDeleted(patientData1.getHealthId(), patientData2.getHealthId());
+
+        PatientData patient1 = patientRepository.findByHealthId(patientData1.getHealthId());
+        assertEquals("X", patient1.getBloodGroup());
+
+        PatientData patient2 = patientRepository.findByHealthId(patientData2.getHealthId());
+        assertEquals("Y", patient2.getBloodGroup());
+    }
+
+    private void assertDuplicatesDeleted(String healthId1, String healthId2) {
         String cql1 = select().from(CF_PATIENT_DUPLICATE).where(eq(CATCHMENT_ID, "A10B20C30"))
-                .and(eq(HEALTH_ID1, "110")).and(eq(HEALTH_ID2, "111")).toString();
+                .and(eq(HEALTH_ID1, healthId1)).and(eq(HEALTH_ID2, "111")).toString();
         assertTrue(isEmpty(cassandraOps.select(cql1, DuplicatePatient.class)));
 
         String cql2 = select().from(CF_PATIENT_DUPLICATE).where(eq(CATCHMENT_ID, "A11B22C33"))
-                .and(eq(HEALTH_ID1, "111")).and(eq(HEALTH_ID2, "110")).toString();
+                .and(eq(HEALTH_ID1, healthId2)).and(eq(HEALTH_ID2, healthId1)).toString();
         assertTrue(isEmpty(cassandraOps.select(cql2, DuplicatePatient.class)));
     }
 
-    private List<DuplicatePatient> buildDuplicatePatients() {
+    private List<DuplicatePatient> buildDuplicatePatientsForSearch() {
         List<DuplicatePatient> duplicatePatients = new ArrayList<>();
         String catchmentId = "A10B20C30";
         duplicatePatients.add(new DuplicatePatient(catchmentId, "100", "101", asSet("nid"), timeBased()));
@@ -89,5 +116,27 @@ public class DuplicatePatientRepositoryIT {
         duplicatePatients.add(new DuplicatePatient(catchmentId, "110", "111", asSet("nid"), timeBased()));
         duplicatePatients.add(new DuplicatePatient("A11B22C33", "111", "110", asSet("nid"), timeBased()));
         return duplicatePatients;
+    }
+
+    private void buildDuplicatePatientsForMerge(PatientData patientData1, PatientData patientData2) {
+        Address address1 = new Address("10", "20", "30");
+        patientData1.setAddress(address1);
+        patientData1.setBloodGroup("A");
+        patientData1.setCreatedBy(new Requester("f110"));
+
+        Address address2 = new Address("11", "22", "33");
+        patientData2.setAddress(address2);
+        patientData2.setBloodGroup("B");
+        patientData2.setCreatedBy(new Requester("f111"));
+
+        String healthId1 = patientRepository.create(patientData1).getId();
+        String healthId2 = patientRepository.create(patientData2).getId();
+        patientData1.setHealthId(healthId1);
+        patientData2.setHealthId(healthId2);
+
+        List<DuplicatePatient> duplicatePatients = new ArrayList<>();
+        duplicatePatients.add(new DuplicatePatient(patientData1.getCatchment().getId(), healthId1, healthId2, asSet("nid"), timeBased()));
+        duplicatePatients.add(new DuplicatePatient(patientData2.getCatchment().getId(), healthId2, healthId1, asSet("nid"), timeBased()));
+        cassandraOps.update(duplicatePatients);
     }
 }

@@ -1138,7 +1138,7 @@ public class Patient {
         this.confidential = confidential;
     }
 
-    public Boolean getActive() {
+    public Boolean isActive() {
         return active;
     }
 

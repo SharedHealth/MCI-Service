@@ -99,7 +99,7 @@ public class PatientMapper {
             data.setPatientStatus(patientStatus);
         }
 
-        data.setActive(patient.getActive());
+        data.setActive(patient.isActive());
         data.setMergedWith(patient.getMergedWith());
 
         if (patient.getConfidential() != null) {

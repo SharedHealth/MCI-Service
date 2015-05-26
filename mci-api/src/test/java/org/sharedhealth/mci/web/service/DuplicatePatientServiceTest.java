@@ -5,7 +5,6 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.sharedhealth.mci.web.infrastructure.persistence.DuplicatePatientRepository;
-import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
 import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.DuplicatePatientData;
 import org.sharedhealth.mci.web.mapper.DuplicatePatientMergeData;
@@ -16,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
-import static java.util.Arrays.asList;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -31,15 +29,13 @@ public class DuplicatePatientServiceTest {
 
     @Mock
     private DuplicatePatientRepository duplicatePatientRepository;
-    @Mock
-    private PatientRepository patientRepository;
 
     private DuplicatePatientService duplicatePatientService;
 
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-        duplicatePatientService = new DuplicatePatientService(patientRepository, duplicatePatientRepository);
+        duplicatePatientService = new DuplicatePatientService(duplicatePatientRepository);
     }
 
     @Test
@@ -63,7 +59,7 @@ public class DuplicatePatientServiceTest {
     }
 
     @Test
-    public void shouldIgnorePatients() {
+    public void shouldIgnoreDuplicates() {
         PatientData patient1 = new PatientData();
         patient1.setHealthId("100");
         PatientData patient2 = new PatientData();
@@ -73,13 +69,15 @@ public class DuplicatePatientServiceTest {
         data.setAction(DUPLICATION_ACTION_IGNORE);
         data.setPatient1(patient1);
         data.setPatient2(patient2);
-        duplicatePatientService.mergeOrIgnore(data);
+        duplicatePatientService.processDuplicates(data);
 
         ArgumentCaptor<PatientData> argument1 = ArgumentCaptor.forClass(PatientData.class);
         ArgumentCaptor<PatientData> argument2 = ArgumentCaptor.forClass(PatientData.class);
-        verify(duplicatePatientRepository).ignore(argument1.capture(), argument2.capture());
+        ArgumentCaptor<Boolean> argument3 = ArgumentCaptor.forClass(Boolean.class);
+        verify(duplicatePatientRepository).processDuplicates(argument1.capture(), argument2.capture(), argument3.capture());
         assertEquals(patient1, argument1.getValue());
         assertEquals(patient2, argument2.getValue());
+        assertEquals(false, argument3.getValue());
     }
 
     @Test
@@ -94,11 +92,15 @@ public class DuplicatePatientServiceTest {
         data.setAction(DUPLICATION_ACTION_MERGE);
         data.setPatient1(patient1);
         data.setPatient2(patient2);
-        duplicatePatientService.mergeOrIgnore(data);
+        duplicatePatientService.processDuplicates(data);
 
-        ArgumentCaptor<List> argument = ArgumentCaptor.forClass(List.class);
-        verify(patientRepository).update(argument.capture());
-        assertEquals(asList(patient1, patient2), argument.getValue());
+        ArgumentCaptor<PatientData> argument1 = ArgumentCaptor.forClass(PatientData.class);
+        ArgumentCaptor<PatientData> argument2 = ArgumentCaptor.forClass(PatientData.class);
+        ArgumentCaptor<Boolean> argument3 = ArgumentCaptor.forClass(Boolean.class);
+        verify(duplicatePatientRepository).processDuplicates(argument1.capture(), argument2.capture(), argument3.capture());
+        assertEquals(patient1, argument1.getValue());
+        assertEquals(patient2, argument2.getValue());
+        assertEquals(true, argument3.getValue());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -113,6 +115,6 @@ public class DuplicatePatientServiceTest {
         data.setAction(DUPLICATION_ACTION_MERGE);
         data.setPatient1(patient1);
         data.setPatient2(patient2);
-        duplicatePatientService.mergeOrIgnore(data);
+        duplicatePatientService.processDuplicates(data);
     }
 }
