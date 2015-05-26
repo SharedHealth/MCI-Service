@@ -6,10 +6,8 @@ import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.model.DuplicatePatient;
 import org.springframework.data.cassandra.convert.CassandraConverter;
 
-import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
-import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.CATCHMENT_ID;
-import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.CF_PATIENT_DUPLICATE;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
+import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.*;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createDeleteQuery;
 
 public class DuplicatePatientQueryBuilder {
@@ -30,5 +28,13 @@ public class DuplicatePatientQueryBuilder {
 
         DuplicatePatient duplicatePatient2 = new DuplicatePatient(catchmentId2, healthId2, healthId1);
         batch.add(createDeleteQuery(CF_PATIENT_DUPLICATE, duplicatePatient2, null, converter));
+    }
+
+    public static void buildDeleteDuplicatesStmt(PatientData patient, Batch batch) {
+        String catchmentId = patient.getCatchment().getId();
+        String healthId = patient.getHealthId();
+        batch.add(delete().from(CF_PATIENT_DUPLICATE)
+                .where(eq(CATCHMENT_ID, catchmentId))
+                .and(eq(HEALTH_ID1, healthId)));
     }
 }

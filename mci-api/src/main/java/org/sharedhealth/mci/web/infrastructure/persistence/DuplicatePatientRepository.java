@@ -31,11 +31,12 @@ public class DuplicatePatientRepository extends BaseRepository {
         return cassandraOps.select(buildFindByCatchmentStmt(catchment), DuplicatePatient.class);
     }
 
-    public void processDuplicates(PatientData patient1, PatientData patient2, boolean shouldUpdatePatients) {
+    public void processDuplicates(PatientData patient1, PatientData patient2, boolean isMerged) {
         Batch batch = batch();
-        if (shouldUpdatePatients) {
+        if (isMerged) {
             patientRepository.buildUpdateProcessBatch(patient1, patient1.getHealthId(), batch);
             patientRepository.buildUpdateProcessBatch(patient2, patient2.getHealthId(), batch);
+            buildDeleteDuplicatesStmt(patient1, batch);
         }
         buildDeleteDuplicatesStmt(patient1, patient2, cassandraOps.getConverter(), batch);
         cassandraOps.execute(batch);
