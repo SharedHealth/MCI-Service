@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
+import static java.lang.String.format;
 import static org.springframework.http.HttpStatus.*;
 
 @ControllerAdvice
@@ -73,7 +74,7 @@ public class GlobalExceptionHandler {
                     ErrorHandler.INVALID_REQUEST_ERROR_CODE, MESSAGE_INVALID_REQUEST);
             code = ERROR_CODE_UNRECOGNIZED_FIELD;
             field = ((UnrecognizedPropertyException) cause).getPropertyName();
-            msg = String.format(MESSAGE_UNRECOGNIZED_FIELD, field);
+            msg = format(MESSAGE_UNRECOGNIZED_FIELD, field);
 
         } else if (cause != null && cause.getClass() == JsonMappingException.class) {
             errorHandler = new ErrorHandler(BAD_REQUEST.value(),
@@ -123,7 +124,8 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public ErrorHandler handleIllegalArgumentException(IllegalArgumentException e) {
         logger.debug("Handling IllegalArgumentException. ", e);
-        return new ErrorHandler(BAD_REQUEST.value(), MESSAGE_INVALID_PAYLOAD);
+        String message = format("%s. %s", MESSAGE_INVALID_PAYLOAD, e.getMessage());
+        return new ErrorHandler(BAD_REQUEST.value(), message);
     }
 
     @ResponseStatus(value = BAD_REQUEST)
@@ -139,7 +141,7 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public ErrorInfo handlePatientAlreadyExistException(PatientAlreadyExistException e) {
         logger.debug("Handling PatientAlreadyExistException. ", e);
-        return new ErrorInfo(CONFLICT.value(), String.format(MESSAGE_PATIENT_ALREADY_EXIST_WITH_HEALTH_ID, e.getMessage()));
+        return new ErrorInfo(CONFLICT.value(), format(MESSAGE_PATIENT_ALREADY_EXIST_WITH_HEALTH_ID, e.getMessage()));
     }
 
     @ResponseStatus(value = BAD_REQUEST)
