@@ -16,6 +16,14 @@ public class DuplicatePatientQueryBuilder {
         return select().from(CF_PATIENT_DUPLICATE).where(eq(CATCHMENT_ID, catchment.getId())).toString();
     }
 
+    public static String buildFindByCatchmentAndHealthIdsStmt(Catchment catchment, String healthId1, String healthId2) {
+        return select().from(CF_PATIENT_DUPLICATE)
+                .where(eq(CATCHMENT_ID, catchment.getId()))
+                .and(eq(HEALTH_ID1, healthId1))
+                .and(eq(HEALTH_ID2, healthId2))
+                .toString();
+    }
+
     public static void buildDeleteDuplicatesStmt(PatientData patient1, PatientData patient2,
                                                  CassandraConverter converter, Batch batch) {
         String healthId1 = patient1.getHealthId();

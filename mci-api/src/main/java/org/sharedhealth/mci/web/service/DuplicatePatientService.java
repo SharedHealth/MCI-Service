@@ -24,10 +24,13 @@ public class DuplicatePatientService {
 
     private static final Logger logger = getLogger(DuplicatePatientService.class);
 
+    private PatientService patientService;
     private DuplicatePatientRepository duplicatePatientRepository;
 
     @Autowired
-    public DuplicatePatientService(DuplicatePatientRepository duplicatePatientRepository) {
+    public DuplicatePatientService(PatientService patientService,
+                                   DuplicatePatientRepository duplicatePatientRepository) {
+        this.patientService = patientService;
         this.duplicatePatientRepository = duplicatePatientRepository;
     }
 
@@ -61,12 +64,59 @@ public class DuplicatePatientService {
             duplicatePatientRepository.processDuplicates(patient1, patient2, false);
 
         } else if (DUPLICATION_ACTION_MERGE.equals(data.getAction())) {
-            if (patient1.isActive()) {
-                String message = format("Patient1 [hid: %s] is not retired. Cannot merge.", patient1.getHealthId());
-                logger.error(message);
-                throw new IllegalArgumentException(message);
-            }
+            validatePatientMergeRequest(patient1, patient2);
             duplicatePatientRepository.processDuplicates(patient1, patient2, true);
         }
+    }
+
+    private void validatePatientMergeRequest(PatientData patient1, PatientData patient2) {
+        validatePatientMergeRequestData(patient1, patient2);
+        validateExistingPatientsForMerge(patient1.getHealthId(), patient2.getHealthId());
+    }
+
+    private void validatePatientMergeRequestData(PatientData patient1, PatientData patient2) {
+        String healthId1 = patient1.getHealthId();
+        String healthId2 = patient2.getHealthId();
+
+        Boolean patient1Active = patient1.isActive();
+        if (patient1Active == null || patient1Active) {
+            handleIllegalArgument(format("Patient 1 [hid: %s] is not retired. Cannot merge.", healthId1));
+        }
+
+        String patient1MergedWith = patient1.getMergedWith();
+        if (patient1MergedWith == null || !patient1MergedWith.equals(healthId2)) {
+            handleIllegalArgument(
+                    format("'merge_with' field of Patient 1 [hid: %s] is not set properly. Cannot merge.", healthId1));
+        }
+
+        Boolean patient2Active = patient2.isActive();
+        if (patient2Active == null || !patient2Active) {
+            handleIllegalArgument(format("Patient 2 [hid: %s] is retired. Cannot merge.", healthId2));
+        }
+    }
+
+    private void validateExistingPatientsForMerge(String healthId1, String healthId2) {
+        PatientData patientData1 = patientService.findByHealthId(healthId1);
+        PatientData patientData2 = patientService.findByHealthId(healthId2);
+
+        if (!duplicatePatientExists(patientData1, patientData2)) {
+            handleIllegalArgument(
+                    format("Duplicates don't exist for health IDs %s & %s in db. Cannot merge.", healthId1, healthId2));
+        }
+    }
+
+    boolean duplicatePatientExists(PatientData patient1, PatientData patient2) {
+        String healthId1 = patient1.getHealthId();
+        String healthId2 = patient2.getHealthId();
+        DuplicatePatient duplicatePatient1 = duplicatePatientRepository
+                .findByCatchmentAndHealthIds(patient1.getCatchment(), healthId1, healthId2);
+        DuplicatePatient duplicatePatient2 = duplicatePatientRepository
+                .findByCatchmentAndHealthIds(patient1.getCatchment(), healthId1, healthId2);
+        return duplicatePatient1 != null || duplicatePatient2 != null;
+    }
+
+    private void handleIllegalArgument(String message) {
+        logger.error(message);
+        throw new IllegalArgumentException(message);
     }
 }

@@ -12,8 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.batch;
-import static org.sharedhealth.mci.web.infrastructure.persistence.DuplicatePatientQueryBuilder.buildDeleteDuplicatesStmt;
-import static org.sharedhealth.mci.web.infrastructure.persistence.DuplicatePatientQueryBuilder.buildFindByCatchmentStmt;
+import static org.sharedhealth.mci.web.infrastructure.persistence.DuplicatePatientQueryBuilder.*;
 
 @Component
 public class DuplicatePatientRepository extends BaseRepository {
@@ -29,6 +28,10 @@ public class DuplicatePatientRepository extends BaseRepository {
 
     public List<DuplicatePatient> findAllByCatchment(Catchment catchment) {
         return cassandraOps.select(buildFindByCatchmentStmt(catchment), DuplicatePatient.class);
+    }
+
+    public DuplicatePatient findByCatchmentAndHealthIds(Catchment catchment, String healthId1, String healthId2) {
+        return cassandraOps.selectOne(buildFindByCatchmentAndHealthIdsStmt(catchment, healthId1, healthId2), DuplicatePatient.class);
     }
 
     public void processDuplicates(PatientData patient1, PatientData patient2, boolean isMerged) {

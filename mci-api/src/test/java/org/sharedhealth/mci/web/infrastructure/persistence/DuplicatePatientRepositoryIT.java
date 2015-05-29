@@ -24,8 +24,7 @@ import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.asSet;
 
@@ -149,5 +148,14 @@ public class DuplicatePatientRepositoryIT {
         duplicatePatients.add(new DuplicatePatient(patientData2.getCatchment().getId(), healthId2, healthId1, asSet("nid"), timeBased()));
         duplicatePatients.add(new DuplicatePatient(patientData1.getCatchment().getId(), healthId1, healthId3, asSet("nid"), timeBased()));
         cassandraOps.update(duplicatePatients);
+    }
+
+    @Test
+    public void shouldFindByCatchmentAndHealthIds() {
+        cassandraOps.update(buildDuplicatePatientsForSearch());
+        DuplicatePatient duplicatePatient = duplicatePatientRepository.findByCatchmentAndHealthIds(new Catchment("182838"), "102", "103");
+        assertNotNull(duplicatePatient);
+        assertEquals("102", duplicatePatient.getHealth_id1());
+        assertEquals("103", duplicatePatient.getHealth_id2());
     }
 }
