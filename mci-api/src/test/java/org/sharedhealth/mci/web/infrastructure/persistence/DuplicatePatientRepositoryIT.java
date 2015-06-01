@@ -83,7 +83,7 @@ public class DuplicatePatientRepositoryIT {
         buildDuplicatePatientsForMerge(patientData1, patientData2, patientData3);
 
         patientData1.setBloodGroup("X");
-        patientData2.setBloodGroup("Y");
+        patientData2.setBloodGroup("A");
 
         duplicatePatientRepository.processDuplicates(patientData1, patientData2, true);
         assertDuplicatesDeleted(patientData1.getHealthId(), patientData2.getHealthId(), patientData3.getHealthId(), true);
@@ -92,7 +92,7 @@ public class DuplicatePatientRepositoryIT {
         assertEquals("X", patient1.getBloodGroup());
 
         PatientData patient2 = patientRepository.findByHealthId(patientData2.getHealthId());
-        assertEquals("Y", patient2.getBloodGroup());
+        assertEquals("A", patient2.getBloodGroup());
     }
 
     private void assertDuplicatesDeleted(String healthId1, String healthId2, String healthId3, boolean isMerged) {

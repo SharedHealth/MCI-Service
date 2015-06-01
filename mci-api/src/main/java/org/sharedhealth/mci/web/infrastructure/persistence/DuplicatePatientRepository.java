@@ -1,6 +1,7 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
 import com.datastax.driver.core.querybuilder.Batch;
+import org.apache.commons.lang3.builder.Diff;
 import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.model.DuplicatePatient;
@@ -46,6 +47,7 @@ public class DuplicatePatientRepository extends BaseRepository {
 
         Batch batch = batch();
         if (isMerged) {
+            validateMergedData(patientData2, patient2, patient1);
             patientRepository.buildUpdateProcessBatch(patientData1, healthId1, batch);
             patientRepository.buildUpdateProcessBatch(patientData2, healthId2, batch);
             buildDeleteDuplicatesStmt(patient1, batch);
@@ -54,13 +56,26 @@ public class DuplicatePatientRepository extends BaseRepository {
         cassandraOps.execute(batch);
     }
 
+    private void validateMergedData(PatientData patientData2, PatientData patient2, PatientData patient1) {
+        for (Diff<?> diff : patient2.diff(patientData2)) {
+            Object value = patient1.getValue(diff.getFieldName());
+            if (!diff.getValue().equals(value)) {
+                handleIllegalArgument(format("Patient 2 [hid: %s] not merged from patient 1 [hid: %s]",
+                        patient2.getHealthId(), patient1.getHealthId()));
+            }
+        }
+    }
+
     private void validateExistingPatientsForMerge(PatientData patient1, PatientData patient2) {
         if (!duplicatePatientExists(patient1, patient2)) {
-            String message = format("Duplicates don't exist for health IDs %s & %s in db. Cannot merge.",
-                    patient1.getHealthId(), patient2.getHealthId());
-            logger.error(message);
-            throw new IllegalArgumentException(message);
+            handleIllegalArgument(format("Duplicates don't exist for health IDs %s & %s in db. Cannot merge.",
+                    patient1.getHealthId(), patient2.getHealthId()));
         }
+    }
+
+    private void handleIllegalArgument(String message) {
+        logger.error(message);
+        throw new IllegalArgumentException(message);
     }
 
     boolean duplicatePatientExists(PatientData patient1, PatientData patient2) {

@@ -75,4 +75,67 @@ public class DuplicatePatientRepositoryTest {
 
         duplicatePatientRepository.processDuplicates(patient1, patient2, true);
     }
+
+    @Test
+    public void shouldNotMergePatientsIfPatient2NotMergedFromPatient1() {
+        expectedEx.expect(IllegalArgumentException.class);
+        expectedEx.expectMessage("Patient 2 [hid: 200] not merged from patient 1 [hid: 100]");
+
+        String healthId1 = "100";
+        String healthId2 = "200";
+
+        PatientData patient1 = new PatientData();
+        patient1.setHealthId(healthId1);
+        patient1.setMergedWith(healthId2);
+        patient1.setEducationLevel("01");
+        patient1.setAddress(new Address("10", "20", "30"));
+        patient1.setActive(true);
+
+        PatientData patient2 = new PatientData();
+        patient2.setHealthId(healthId2);
+        patient2.setEducationLevel("02");
+        patient2.setAddress(new Address("10", "20", "30"));
+        patient2.setActive(true);
+
+        when(patientRepository.findByHealthId(healthId1)).thenReturn(patient1);
+        when(patientRepository.findByHealthId(healthId2)).thenReturn(patient2);
+        when(cassandraOps.select(anyString(), eq(DuplicatePatient.class))).thenReturn(asList(new DuplicatePatient()));
+
+        PatientData requestData2 = new PatientData();
+        requestData2.setHealthId(healthId2);
+        requestData2.setEducationLevel("03");
+        requestData2.setAddress(new Address("10", "20", "30"));
+        requestData2.setActive(true);
+        duplicatePatientRepository.processDuplicates(patient1, requestData2, true);
+    }
+
+    @Test
+    public void shouldNotMergePatientsIfPatient2NotMergedFromPatient1_WhenBlockDataDiffer() {
+        expectedEx.expect(IllegalArgumentException.class);
+        expectedEx.expectMessage("Patient 2 [hid: 200] not merged from patient 1 [hid: 100]");
+
+        String healthId1 = "100";
+        String healthId2 = "200";
+
+        PatientData patient1 = new PatientData();
+        patient1.setHealthId(healthId1);
+        patient1.setMergedWith(healthId2);
+        patient1.setAddress(new Address("10", "20", "30"));
+        patient1.setActive(true);
+
+        PatientData patient2 = new PatientData();
+        patient2.setHealthId(healthId2);
+        patient2.setAddress(new Address("11", "22", "33"));
+        patient2.setActive(true);
+
+        when(patientRepository.findByHealthId(healthId1)).thenReturn(patient1);
+        when(patientRepository.findByHealthId(healthId2)).thenReturn(patient2);
+        when(cassandraOps.select(anyString(), eq(DuplicatePatient.class))).thenReturn(asList(new DuplicatePatient()));
+
+        PatientData requestData2 = new PatientData();
+        requestData2.setHealthId(healthId2);
+        requestData2.setAddress(new Address("99", "88", "77"));
+        requestData2.setActive(true);
+        duplicatePatientRepository.processDuplicates(patient1, requestData2, true);
+    }
 }
