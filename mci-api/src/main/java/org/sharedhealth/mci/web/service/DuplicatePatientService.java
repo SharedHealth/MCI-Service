@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.String.format;
-import static org.sharedhealth.mci.web.utils.MCIConstants.DUPLICATION_ACTION_IGNORE;
+import static org.sharedhealth.mci.web.utils.MCIConstants.DUPLICATION_ACTION_RETAIN_ALL;
 import static org.sharedhealth.mci.web.utils.MCIConstants.DUPLICATION_ACTION_MERGE;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -60,7 +60,7 @@ public class DuplicatePatientService {
         PatientData patient1 = data.getPatient1();
         PatientData patient2 = data.getPatient2();
 
-        if (DUPLICATION_ACTION_IGNORE.equals(data.getAction())) {
+        if (DUPLICATION_ACTION_RETAIN_ALL.equals(data.getAction())) {
             duplicatePatientRepository.processDuplicates(patient1, patient2, false);
 
         } else if (DUPLICATION_ACTION_MERGE.equals(data.getAction())) {

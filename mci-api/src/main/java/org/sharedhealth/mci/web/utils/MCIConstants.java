@@ -9,6 +9,6 @@ public class MCIConstants {
     public static final String STRING_YES = "Yes";
     public static final String STRING_NO = "No";
 
-    public static final String DUPLICATION_ACTION_IGNORE = "1000";
-    public static final String DUPLICATION_ACTION_MERGE = "1001";
+    public static final String DUPLICATION_ACTION_RETAIN_ALL = "RETAIN_ALL";
+    public static final String DUPLICATION_ACTION_MERGE = "MERGE";
 }

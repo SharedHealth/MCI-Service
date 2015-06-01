@@ -28,6 +28,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.asSet;
 import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.*;
 import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
+import static org.sharedhealth.mci.web.utils.MCIConstants.DUPLICATION_ACTION_RETAIN_ALL;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.core.context.SecurityContextHolder.getContext;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -115,7 +116,7 @@ public class DuplicatePatientControllerTest {
     public void shouldMergeDuplicates() throws Exception {
         PatientData patient1 = new PatientData();
         PatientData patient2 = new PatientData();
-        DuplicatePatientMergeData data = new DuplicatePatientMergeData("1000", patient1, patient2);
+        DuplicatePatientMergeData data = new DuplicatePatientMergeData(DUPLICATION_ACTION_RETAIN_ALL, patient1, patient2);
 
         String url = "/patients/duplicates";
         MvcResult mvcResult = mockMvc.perform(put(url).content(writeValueAsString(data)).contentType(APPLICATION_JSON))

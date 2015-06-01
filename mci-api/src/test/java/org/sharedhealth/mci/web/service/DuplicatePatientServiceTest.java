@@ -23,7 +23,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.asSet;
-import static org.sharedhealth.mci.web.utils.MCIConstants.DUPLICATION_ACTION_IGNORE;
+import static org.sharedhealth.mci.web.utils.MCIConstants.DUPLICATION_ACTION_RETAIN_ALL;
 import static org.sharedhealth.mci.web.utils.MCIConstants.DUPLICATION_ACTION_MERGE;
 
 public class DuplicatePatientServiceTest {
@@ -72,7 +72,7 @@ public class DuplicatePatientServiceTest {
         patient2.setHealthId("200");
 
         DuplicatePatientMergeData data = new DuplicatePatientMergeData();
-        data.setAction(DUPLICATION_ACTION_IGNORE);
+        data.setAction(DUPLICATION_ACTION_RETAIN_ALL);
         data.setPatient1(patient1);
         data.setPatient2(patient2);
         duplicatePatientService.processDuplicates(data);

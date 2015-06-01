@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 
+import javax.validation.Valid;
 import java.util.List;
 
 import static java.lang.String.format;
@@ -80,7 +81,7 @@ public class DuplicatePatientController extends MciController {
     @PreAuthorize("hasAnyRole('ROLE_MCI Approver')")
     @RequestMapping(method = PUT, consumes = {APPLICATION_JSON_VALUE})
     public DeferredResult<ResponseEntity<MCIResponse>> merge(
-            @RequestBody DuplicatePatientMergeData data,
+            @Valid @RequestBody DuplicatePatientMergeData data,
             BindingResult bindingResult) {
 
         UserInfo userInfo = getUserInfo();

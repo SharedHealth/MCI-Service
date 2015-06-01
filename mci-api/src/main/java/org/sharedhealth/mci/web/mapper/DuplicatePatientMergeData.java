@@ -13,7 +13,7 @@ import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_REQUIRED;
 public class DuplicatePatientMergeData {
 
     @NotNull(message = ERROR_CODE_REQUIRED)
-    @Pattern(regexp = "^(1000|1001)", message = ERROR_CODE_PATTERN)
+    @Pattern(regexp = "^(RETAIN_ALL|MERGE)", message = ERROR_CODE_PATTERN)
     private String action;
 
     @NotNull
