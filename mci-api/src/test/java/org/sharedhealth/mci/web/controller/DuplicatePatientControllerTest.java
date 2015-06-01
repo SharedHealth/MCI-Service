@@ -132,7 +132,7 @@ public class DuplicatePatientControllerTest {
         Requester requester = new Requester(FACILITY_ID, PROVIDER_ID);
         requester.setAdmin(new RequesterDetails(ADMIN_ID));
         DuplicatePatientMergeData argValue = argument.getValue();
-        assertEquals("1000", argValue.getAction());
+        assertEquals(DUPLICATION_ACTION_RETAIN_ALL, argValue.getAction());
         assertEquals(requester, argValue.getPatient1().getRequester());
         assertEquals(requester, argValue.getPatient2().getRequester());
     }
