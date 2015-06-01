@@ -6,6 +6,8 @@ import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.model.DuplicatePatient;
 import org.springframework.data.cassandra.convert.CassandraConverter;
 
+import java.util.List;
+
 import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.*;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createDeleteQuery;
@@ -18,7 +20,7 @@ public class DuplicatePatientQueryBuilder {
 
     public static String buildFindByCatchmentAndHealthIdsStmt(Catchment catchment, String healthId1, String healthId2) {
         return select().from(CF_PATIENT_DUPLICATE)
-                .where(eq(CATCHMENT_ID, catchment.getId()))
+                .where(in(CATCHMENT_ID, catchment.getAllIds().toArray()))
                 .and(eq(HEALTH_ID1, healthId1))
                 .and(eq(HEALTH_ID2, healthId2))
                 .toString();
@@ -27,22 +29,28 @@ public class DuplicatePatientQueryBuilder {
     public static void buildDeleteDuplicatesStmt(PatientData patient1, PatientData patient2,
                                                  CassandraConverter converter, Batch batch) {
         String healthId1 = patient1.getHealthId();
-        String catchmentId1 = patient1.getCatchment().getId();
+        List<String> catchmentIds1 = patient1.getCatchment().getAllIds();
         String healthId2 = patient2.getHealthId();
-        String catchmentId2 = patient2.getCatchment().getId();
+        List<String> catchmentIds2 = patient2.getCatchment().getAllIds();
 
-        DuplicatePatient duplicatePatient1 = new DuplicatePatient(catchmentId1, healthId1, healthId2);
-        batch.add(createDeleteQuery(CF_PATIENT_DUPLICATE, duplicatePatient1, null, converter));
+        buildDeleteDuplicateBatch(catchmentIds1, healthId1, healthId2, converter, batch);
+        buildDeleteDuplicateBatch(catchmentIds2, healthId2, healthId1, converter, batch);
+    }
 
-        DuplicatePatient duplicatePatient2 = new DuplicatePatient(catchmentId2, healthId2, healthId1);
-        batch.add(createDeleteQuery(CF_PATIENT_DUPLICATE, duplicatePatient2, null, converter));
+    private static void buildDeleteDuplicateBatch(List<String> catchmentIds1, String healthId1, String healthId2,
+                                                  CassandraConverter converter, Batch batch) {
+        for (String catchmentId : catchmentIds1) {
+            DuplicatePatient duplicatePatient = new DuplicatePatient(catchmentId, healthId1, healthId2);
+            batch.add(createDeleteQuery(CF_PATIENT_DUPLICATE, duplicatePatient, null, converter));
+        }
     }
 
     public static void buildDeleteDuplicatesStmt(PatientData patient, Batch batch) {
-        String catchmentId = patient.getCatchment().getId();
         String healthId = patient.getHealthId();
-        batch.add(delete().from(CF_PATIENT_DUPLICATE)
-                .where(eq(CATCHMENT_ID, catchmentId))
-                .and(eq(HEALTH_ID1, healthId)));
+        for (String catchmentId : patient.getCatchment().getAllIds()) {
+            batch.add(delete().from(CF_PATIENT_DUPLICATE)
+                    .where(eq(CATCHMENT_ID, catchmentId))
+                    .and(eq(HEALTH_ID1, healthId)));
+        }
     }
 }

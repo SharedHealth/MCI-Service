@@ -153,7 +153,10 @@ public class DuplicatePatientRepositoryIT {
     @Test
     public void shouldFindByCatchmentAndHealthIds() {
         cassandraOps.update(buildDuplicatePatientsForSearch());
-        DuplicatePatient duplicatePatient = duplicatePatientRepository.findByCatchmentAndHealthIds(new Catchment("182838"), "102", "103");
+        List<DuplicatePatient> duplicatePatients = duplicatePatientRepository.findByCatchmentAndHealthIds(new Catchment("182838"), "102", "103");
+        assertNotNull(duplicatePatients);
+        assertEquals(1, duplicatePatients.size());
+        DuplicatePatient duplicatePatient = duplicatePatients.get(0);
         assertNotNull(duplicatePatient);
         assertEquals("102", duplicatePatient.getHealth_id1());
         assertEquals("103", duplicatePatient.getHealth_id2());

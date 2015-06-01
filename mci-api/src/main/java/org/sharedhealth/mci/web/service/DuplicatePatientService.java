@@ -70,11 +70,6 @@ public class DuplicatePatientService {
     }
 
     private void validatePatientMergeRequest(PatientData patient1, PatientData patient2) {
-        validatePatientMergeRequestData(patient1, patient2);
-        validateExistingPatientsForMerge(patient1.getHealthId(), patient2.getHealthId());
-    }
-
-    private void validatePatientMergeRequestData(PatientData patient1, PatientData patient2) {
         String healthId1 = patient1.getHealthId();
         String healthId2 = patient2.getHealthId();
 
@@ -93,26 +88,6 @@ public class DuplicatePatientService {
         if (patient2Active == null || !patient2Active) {
             handleIllegalArgument(format("Patient 2 [hid: %s] is retired. Cannot merge.", healthId2));
         }
-    }
-
-    private void validateExistingPatientsForMerge(String healthId1, String healthId2) {
-        PatientData patientData1 = patientService.findByHealthId(healthId1);
-        PatientData patientData2 = patientService.findByHealthId(healthId2);
-
-        if (!duplicatePatientExists(patientData1, patientData2)) {
-            handleIllegalArgument(
-                    format("Duplicates don't exist for health IDs %s & %s in db. Cannot merge.", healthId1, healthId2));
-        }
-    }
-
-    boolean duplicatePatientExists(PatientData patient1, PatientData patient2) {
-        String healthId1 = patient1.getHealthId();
-        String healthId2 = patient2.getHealthId();
-        DuplicatePatient duplicatePatient1 = duplicatePatientRepository
-                .findByCatchmentAndHealthIds(patient1.getCatchment(), healthId1, healthId2);
-        DuplicatePatient duplicatePatient2 = duplicatePatientRepository
-                .findByCatchmentAndHealthIds(patient1.getCatchment(), healthId1, healthId2);
-        return duplicatePatient1 != null || duplicatePatient2 != null;
     }
 
     private void handleIllegalArgument(String message) {

@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
+import static java.util.Arrays.asList;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -104,7 +105,7 @@ public class DuplicatePatientServiceTest {
         when(patientService.findByHealthId(healthId1)).thenReturn(patient1);
         when(patientService.findByHealthId(healthId2)).thenReturn(patient2);
         when(duplicatePatientRepository.findByCatchmentAndHealthIds(patient1.getCatchment(), healthId1, healthId2))
-                .thenReturn(new DuplicatePatient());
+                .thenReturn(asList(new DuplicatePatient()));
 
         duplicatePatientService.processDuplicates(buildDuplicatePatientMergeData(patient1, patient2));
 
@@ -156,53 +157,11 @@ public class DuplicatePatientServiceTest {
         duplicatePatientService.processDuplicates(buildDuplicatePatientMergeData(patient1, patient2));
     }
 
-    @Test
-    public void shouldNotMergePatientsIfNoDuplicateInfoInDb() {
-        expectedEx.expect(IllegalArgumentException.class);
-        expectedEx.expectMessage("Duplicates don't exist for health IDs 100 & 200 in db. Cannot merge.");
-
-        String healthId1 = "100";
-        String healthId2 = "200";
-
-        PatientData patient1 = new PatientData();
-        patient1.setHealthId(healthId1);
-        patient1.setMergedWith(healthId2);
-        patient1.setAddress(new Address("10", "20", "30"));
-        patient1.setActive(false);
-
-        PatientData patient2 = new PatientData();
-        patient2.setHealthId(healthId2);
-        patient2.setAddress(new Address("10", "20", "30"));
-        patient2.setActive(true);
-
-        when(patientService.findByHealthId(healthId1)).thenReturn(patient1);
-        when(patientService.findByHealthId(healthId2)).thenReturn(patient2);
-        when(duplicatePatientRepository.findByCatchmentAndHealthIds(patient1.getCatchment(), healthId1, healthId2))
-                .thenReturn(null);
-        when(duplicatePatientRepository.findByCatchmentAndHealthIds(patient1.getCatchment(), healthId1, healthId2))
-                .thenReturn(null);
-
-        duplicatePatientService.processDuplicates(buildDuplicatePatientMergeData(patient1, patient2));
-    }
-
     private DuplicatePatientMergeData buildDuplicatePatientMergeData(PatientData patient1, PatientData patient2) {
         DuplicatePatientMergeData data = new DuplicatePatientMergeData();
         data.setAction(DUPLICATION_ACTION_MERGE);
         data.setPatient1(patient1);
         data.setPatient2(patient2);
         return data;
-    }
-
-    @Test
-    public void shouldVerifyWhetherDuplicatePatientsExist() {
-        String healthId1 = "h100";
-        PatientData patient1 = new PatientData();
-        patient1.setHealthId(healthId1);
-        patient1.setAddress(new Address("10", "20", "30"));
-        String healthId2 = "h200";
-        PatientData patient2 = new PatientData();
-        patient2.setHealthId(healthId2);
-        when(duplicatePatientRepository.findByCatchmentAndHealthIds(new Catchment("102030"), healthId1, healthId2)).thenReturn(new DuplicatePatient());
-        assertTrue(duplicatePatientService.duplicatePatientExists(patient1, patient2));
     }
 }
