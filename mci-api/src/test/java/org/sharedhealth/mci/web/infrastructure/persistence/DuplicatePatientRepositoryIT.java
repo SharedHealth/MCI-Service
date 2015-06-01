@@ -1,5 +1,6 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
@@ -27,6 +28,7 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.junit.Assert.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.asSet;
+import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.truncateAllColumnFamilies;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -160,5 +162,10 @@ public class DuplicatePatientRepositoryIT {
         assertNotNull(duplicatePatient);
         assertEquals("102", duplicatePatient.getHealth_id1());
         assertEquals("103", duplicatePatient.getHealth_id2());
+    }
+
+    @After
+    public void tearDown() {
+        truncateAllColumnFamilies(cassandraOps);
     }
 }
