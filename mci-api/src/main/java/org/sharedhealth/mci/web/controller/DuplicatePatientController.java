@@ -94,11 +94,18 @@ public class DuplicatePatientController extends MciController {
             throw new ValidationException(bindingResult);
         }
 
+        setRequester(data, userInfo);
         final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
         duplicatePatientService.processDuplicates(data);
 
         MCIResponse mciResponse = new MCIResponse(ACCEPTED);
         deferredResult.setResult(new ResponseEntity<>(mciResponse, mciResponse.httpStatusObject));
         return deferredResult;
+    }
+
+    private void setRequester(DuplicatePatientMergeData data, UserInfo userInfo) {
+        UserInfo.UserInfoProperties properties = userInfo.getProperties();
+        data.getPatient1().setRequester(properties);
+        data.getPatient2().setRequester(properties);
     }
 }

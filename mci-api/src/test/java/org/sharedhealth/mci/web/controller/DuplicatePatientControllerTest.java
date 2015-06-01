@@ -2,14 +2,12 @@ package org.sharedhealth.mci.web.controller;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.sharedhealth.mci.web.infrastructure.security.TokenAuthentication;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
 import org.sharedhealth.mci.web.infrastructure.security.UserProfile;
-import org.sharedhealth.mci.web.mapper.Catchment;
-import org.sharedhealth.mci.web.mapper.DuplicatePatientData;
-import org.sharedhealth.mci.web.mapper.DuplicatePatientMergeData;
-import org.sharedhealth.mci.web.mapper.PatientData;
+import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.service.DuplicatePatientService;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -22,7 +20,9 @@ import java.util.List;
 
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static java.util.Arrays.asList;
+import static junit.framework.Assert.assertEquals;
 import static org.hamcrest.CoreMatchers.is;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.asSet;
@@ -38,6 +38,7 @@ public class DuplicatePatientControllerTest {
 
     private static final String FACILITY_ID = "100067";
     private static final String PROVIDER_ID = "100068";
+    private static final String ADMIN_ID = "102";
 
     @Mock
     private LocalValidatorFactoryBean validatorFactory;
@@ -45,12 +46,11 @@ public class DuplicatePatientControllerTest {
     private DuplicatePatientService duplicatePatientService;
 
     private MockMvc mockMvc;
-    private DuplicatePatientController duplicatePatientController;
 
     @Before
     public void setup() throws ParseException {
         initMocks(this);
-        duplicatePatientController = new DuplicatePatientController(duplicatePatientService);
+        DuplicatePatientController duplicatePatientController = new DuplicatePatientController(duplicatePatientService);
         mockMvc = MockMvcBuilders
                 .standaloneSetup(duplicatePatientController)
                 .setValidator(validatorFactory)
@@ -61,7 +61,7 @@ public class DuplicatePatientControllerTest {
     private UserInfo getUserInfo() {
         UserProfile facilityProfile = new UserProfile("facility", FACILITY_ID, asList("1020"));
         UserProfile providerProfile = new UserProfile("provider", PROVIDER_ID, asList("102030"));
-        UserProfile adminProfile = new UserProfile("mci-supervisor", "102", asList("10"));
+        UserProfile adminProfile = new UserProfile("mci-supervisor", ADMIN_ID, asList("10"));
 
         return new UserInfo("102", "ABC", "abc@mail", 1, true, "111100",
                 new ArrayList<>(asList(MCI_USER_GROUP, MCI_ADMIN, MCI_APPROVER, FACILITY_GROUP, PROVIDER_GROUP)),
@@ -113,7 +113,9 @@ public class DuplicatePatientControllerTest {
 
     @Test
     public void shouldMergeDuplicates() throws Exception {
-        DuplicatePatientMergeData data = new DuplicatePatientMergeData("1000", new PatientData(), new PatientData());
+        PatientData patient1 = new PatientData();
+        PatientData patient2 = new PatientData();
+        DuplicatePatientMergeData data = new DuplicatePatientMergeData("1000", patient1, patient2);
 
         String url = "/patients/duplicates";
         MvcResult mvcResult = mockMvc.perform(put(url).content(writeValueAsString(data)).contentType(APPLICATION_JSON))
@@ -122,5 +124,15 @@ public class DuplicatePatientControllerTest {
 
         mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isAccepted());
+
+        ArgumentCaptor<DuplicatePatientMergeData> argument = ArgumentCaptor.forClass(DuplicatePatientMergeData.class);
+        verify(duplicatePatientService).processDuplicates(argument.capture());
+
+        Requester requester = new Requester(FACILITY_ID, PROVIDER_ID);
+        requester.setAdmin(new RequesterDetails(ADMIN_ID));
+        DuplicatePatientMergeData argValue = argument.getValue();
+        assertEquals("1000", argValue.getAction());
+        assertEquals(requester, argValue.getPatient1().getRequester());
+        assertEquals(requester, argValue.getPatient2().getRequester());
     }
 }
