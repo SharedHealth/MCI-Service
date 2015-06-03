@@ -49,6 +49,14 @@ public class MCIProperties {
     @Value("${PR_URL}")
     private String providerRegistryUrl;
 
+    @Value("${INVALID_HID_PATTERN}")
+    private String invalidHidPattern;
+    @Value("${MCI_START_HID}")
+    private String mciStartHid;
+    @Value("${MCI_END_HID}")
+    private String mciEndHid;
+
+
     public String getCassandraKeySpace() {
         return cassandraKeySpace;
     }
@@ -119,5 +127,29 @@ public class MCIProperties {
 
     public String getCassandraPassword() {
         return cassandraPassword;
+    }
+
+    public String getInvalidHidPattern() {
+        return invalidHidPattern;
+    }
+
+    public Long getMciEndHid() {
+        return Long.valueOf(mciEndHid);
+    }
+
+    public Long getMciStartHid() {
+        return Long.valueOf(mciStartHid);
+    }
+
+    public void setInvalidHidPattern(String invalidHidPattern) {
+        this.invalidHidPattern = invalidHidPattern;
+    }
+
+    public void setMciStartHid(String mciStartHid) {
+        this.mciStartHid = mciStartHid;
+    }
+
+    public void setMciEndHid(String mciEndHid) {
+        this.mciEndHid = mciEndHid;
     }
 }
