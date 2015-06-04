@@ -45,6 +45,7 @@ public class TestUtil {
         return asList(
                 CF_PATIENT,
                 CF_PATIENT_DUPLICATE,
+                CF_PATIENT_DUPLICATE_IGNORED,
                 CF_NID_MAPPING,
                 CF_BRN_MAPPING,
                 CF_UID_MAPPING,

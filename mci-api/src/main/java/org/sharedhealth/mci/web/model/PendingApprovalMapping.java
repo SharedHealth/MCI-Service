@@ -18,7 +18,7 @@ public class PendingApprovalMapping {
     @PrimaryKeyColumn(name = CATCHMENT_ID, ordinal = 0, type = PARTITIONED)
     private String catchment_id;
 
-    @PrimaryKeyColumn(name = LAST_UPDATED, ordinal = 2, type = CLUSTERED)
+    @PrimaryKeyColumn(name = LAST_UPDATED, ordinal = 1, type = CLUSTERED)
     private UUID last_updated;
 
     @Column(HEALTH_ID)

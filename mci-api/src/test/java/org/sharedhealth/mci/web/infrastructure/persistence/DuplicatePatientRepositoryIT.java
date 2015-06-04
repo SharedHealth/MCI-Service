@@ -1,5 +1,6 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,6 +11,7 @@ import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.Requester;
 import org.sharedhealth.mci.web.model.DuplicatePatient;
+import org.sharedhealth.mci.web.model.DuplicatePatientIgnored;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.cassandra.core.CassandraOperations;
@@ -63,18 +65,30 @@ public class DuplicatePatientRepositoryIT {
         PatientData patientData2 = new PatientData();
         PatientData patientData3 = new PatientData();
         buildDuplicatePatientsForMerge(patientData1, patientData2, patientData3);
-
+        String healthId1 = patientData1.getHealthId();
+        String healthId2 = patientData2.getHealthId();
         patientData1.setBloodGroup("X");
         patientData2.setBloodGroup("Y");
 
         duplicatePatientRepository.processDuplicates(patientData1, patientData2, false);
-        assertDuplicatesDeleted(patientData1.getHealthId(), patientData2.getHealthId(), patientData3.getHealthId(), false);
+        assertDuplicatesDeleted(healthId1, healthId2, patientData3.getHealthId(), false);
 
-        PatientData patient1 = patientRepository.findByHealthId(patientData1.getHealthId());
+        PatientData patient1 = patientRepository.findByHealthId(healthId1);
         assertEquals("A", patient1.getBloodGroup());
 
-        PatientData patient2 = patientRepository.findByHealthId(patientData2.getHealthId());
+        PatientData patient2 = patientRepository.findByHealthId(healthId2);
         assertEquals("B", patient2.getBloodGroup());
+
+        String cql = select().from(CF_PATIENT_DUPLICATE_IGNORED).where(eq(HEALTH_ID1, healthId1))
+                .and(eq(HEALTH_ID2, healthId2)).toString();
+        List<DuplicatePatientIgnored> ignoredList = cassandraOps.select(cql, DuplicatePatientIgnored.class);
+        assertNotNull(ignoredList);
+        assertEquals(1, ignoredList.size());
+        DuplicatePatientIgnored ignored = ignoredList.get(0);
+        assertNotNull(ignored);
+        assertEquals(healthId1, ignored.getHealth_id1());
+        assertEquals(healthId2, ignored.getHealth_id2());
+        assertTrue(CollectionUtils.isNotEmpty(ignored.getReasons()));
     }
 
     @Test
@@ -95,6 +109,10 @@ public class DuplicatePatientRepositoryIT {
 
         PatientData patient2 = patientRepository.findByHealthId(patientData2.getHealthId());
         assertEquals("A", patient2.getBloodGroup());
+
+        String cql = select().from(CF_PATIENT_DUPLICATE_IGNORED).where(eq(HEALTH_ID1, patientData1.getHealthId()))
+                .and(eq(HEALTH_ID2, patientData2.getHealthId())).toString();
+        assertTrue(cassandraOps.select(cql, DuplicatePatientIgnored.class).isEmpty());
     }
 
     private void assertDuplicatesDeleted(String healthId1, String healthId2, String healthId3, boolean isMerged) {

@@ -10,8 +10,13 @@ import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.model.DuplicatePatient;
 import org.springframework.data.cassandra.core.CassandraOperations;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import static java.util.Arrays.asList;
-import static org.junit.Assert.assertTrue;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static org.junit.Assert.*;
 import static org.junit.rules.ExpectedException.none;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -47,7 +52,7 @@ public class DuplicatePatientRepositoryTest {
         patient2.setHealthId(healthId2);
         when(cassandraOps.select(anyString(), eq(DuplicatePatient.class))).thenReturn(asList(new DuplicatePatient()));
 
-        assertTrue(duplicatePatientRepository.duplicatePatientExists(patient1, patient2));
+        assertTrue(isNotEmpty(duplicatePatientRepository.findDuplicatePatients(patient1, patient2)));
     }
 
     @Test
@@ -137,5 +142,15 @@ public class DuplicatePatientRepositoryTest {
         requestData2.setAddress(new Address("99", "88", "77"));
         requestData2.setActive(true);
         duplicatePatientRepository.processDuplicates(patient1, requestData2, true);
+    }
+
+    @Test
+    public void shouldFindReasonsForDuplicates() {
+        DuplicatePatient duplicatePatient = new DuplicatePatient();
+        duplicatePatient.setReasons(new HashSet<>(asList("nid", "urn", "phone")));
+        List<DuplicatePatient> duplicatePatients = asList(duplicatePatient, null, new DuplicatePatient());
+        Set<String> reasons = duplicatePatientRepository.findReasonsForDuplicates(duplicatePatients);
+        assertNotNull(reasons);
+        assertEquals(3, reasons.size());
     }
 }

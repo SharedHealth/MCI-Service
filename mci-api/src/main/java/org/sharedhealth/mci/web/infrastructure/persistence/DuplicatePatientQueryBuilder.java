@@ -4,13 +4,16 @@ import com.datastax.driver.core.querybuilder.Batch;
 import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.model.DuplicatePatient;
+import org.sharedhealth.mci.web.model.DuplicatePatientIgnored;
 import org.springframework.data.cassandra.convert.CassandraConverter;
 
 import java.util.List;
+import java.util.Set;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.*;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createDeleteQuery;
+import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
 
 public class DuplicatePatientQueryBuilder {
 
@@ -52,5 +55,11 @@ public class DuplicatePatientQueryBuilder {
                     .where(eq(CATCHMENT_ID, catchmentId))
                     .and(eq(HEALTH_ID1, healthId)));
         }
+    }
+
+    public static void buildCreateIgnoreDuplicatesStmt(String healthId1, String healthId2, Set<String> reasons,
+                                                       CassandraConverter converter, Batch batch) {
+        DuplicatePatientIgnored duplicateIgnorePatient = new DuplicatePatientIgnored(healthId1, healthId2, reasons);
+        batch.add(createInsertQuery(CF_PATIENT_DUPLICATE_IGNORED, duplicateIgnorePatient, null, converter));
     }
 }

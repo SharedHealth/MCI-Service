@@ -12,9 +12,11 @@ import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Set;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.batch;
 import static java.lang.String.format;
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.sharedhealth.mci.web.infrastructure.persistence.DuplicatePatientQueryBuilder.*;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -43,7 +45,12 @@ public class DuplicatePatientRepository extends BaseRepository {
 
         PatientData patient1 = patientRepository.findByHealthId(healthId1);
         PatientData patient2 = patientRepository.findByHealthId(healthId2);
-        validateExistingPatientsForMerge(patient1, patient2);
+
+        List<DuplicatePatient> duplicatePatients = findDuplicatePatients(patient1, patient2);
+        if (isEmpty(duplicatePatients)) {
+            handleIllegalArgument(format("Duplicates don't exist for health IDs %s & %s in db. Cannot merge.",
+                    patient1.getHealthId(), patient2.getHealthId()));
+        }
 
         Batch batch = batch();
         if (isMerged) {
@@ -51,7 +58,12 @@ public class DuplicatePatientRepository extends BaseRepository {
             patientRepository.buildUpdateProcessBatch(patientData1, healthId1, batch);
             patientRepository.buildUpdateProcessBatch(patientData2, healthId2, batch);
             buildDeleteDuplicatesStmt(patient1, batch);
+
+        } else {
+            Set<String> reasons = findReasonsForDuplicates(duplicatePatients);
+            buildCreateIgnoreDuplicatesStmt(healthId1, healthId2, reasons, cassandraOps.getConverter(), batch);
         }
+
         buildDeleteDuplicatesStmt(patient1, patient2, cassandraOps.getConverter(), batch);
         cassandraOps.execute(batch);
     }
@@ -66,27 +78,36 @@ public class DuplicatePatientRepository extends BaseRepository {
         }
     }
 
-    private void validateExistingPatientsForMerge(PatientData patient1, PatientData patient2) {
-        if (!duplicatePatientExists(patient1, patient2)) {
-            handleIllegalArgument(format("Duplicates don't exist for health IDs %s & %s in db. Cannot merge.",
-                    patient1.getHealthId(), patient2.getHealthId()));
-        }
-    }
-
     private void handleIllegalArgument(String message) {
         logger.error(message);
         throw new IllegalArgumentException(message);
     }
 
-    boolean duplicatePatientExists(PatientData patient1, PatientData patient2) {
+    List<DuplicatePatient> findDuplicatePatients(PatientData patient1, PatientData patient2) {
         String healthId1 = patient1.getHealthId();
         String healthId2 = patient2.getHealthId();
+
         List<DuplicatePatient> duplicatePatients1 = findByCatchmentAndHealthIds(patient1.getCatchment(), healthId1, healthId2);
-        List<DuplicatePatient> duplicatePatients2 = findByCatchmentAndHealthIds(patient1.getCatchment(), healthId1, healthId2);
-        return isNotEmpty(duplicatePatients1) || isNotEmpty(duplicatePatients2);
+        if (isNotEmpty(duplicatePatients1)) {
+            return duplicatePatients1;
+        }
+
+        List<DuplicatePatient> duplicatePatients2 = findByCatchmentAndHealthIds(patient2.getCatchment(), healthId2, healthId1);
+        if (isNotEmpty(duplicatePatients2)) {
+            return duplicatePatients2;
+        }
+
+        return null;
     }
 
     public List<DuplicatePatient> findByCatchmentAndHealthIds(Catchment catchment, String healthId1, String healthId2) {
         return cassandraOps.select(buildFindByCatchmentAndHealthIdsStmt(catchment, healthId1, healthId2), DuplicatePatient.class);
+    }
+
+    Set<String> findReasonsForDuplicates(List<DuplicatePatient> duplicatePatients) {
+        if (isNotEmpty(duplicatePatients)) {
+            return duplicatePatients.get(0).getReasons();
+        }
+        return null;
     }
 }
