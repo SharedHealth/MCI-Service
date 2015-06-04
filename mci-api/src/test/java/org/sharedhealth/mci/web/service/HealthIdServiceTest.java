@@ -54,6 +54,7 @@ public class HealthIdServiceTest {
     public void validIdsStartWith98Or99() {
         Pattern invalidPattern = Pattern.compile(mciProperties.getInvalidHidPattern());
         assertTrue(invalidPattern.matcher("9101543886").find());
+        assertTrue(invalidPattern.matcher("98000034730").find());
         assertFalse(invalidPattern.matcher("9801543886").find());
         assertFalse(invalidPattern.matcher("9901543886").find());
     }

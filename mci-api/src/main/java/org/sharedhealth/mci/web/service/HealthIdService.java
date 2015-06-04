@@ -28,7 +28,7 @@ public class HealthIdService {
             String possibleHid = String.valueOf(i);
             if (!invalidHidPattern.matcher(possibleHid).find()) {
                 numberOfValidHids += 1;
-                String newHealthId = possibleHid + checksumGenerator.generate(possibleHid);
+                String newHealthId = possibleHid + checksumGenerator.generate(possibleHid.substring(1));
                 healthIdRepository.saveHealthId(new HealthId(newHealthId));
             }
         }

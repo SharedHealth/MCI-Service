@@ -113,7 +113,7 @@ public class PatientController extends MciController {
         logAccessDetails(userInfo, format("Find patients matching query : %s", searchQuery));
 
         if (bindingResult.hasErrors()) {
-            logger.debug("Validation error while finding all patients  by search query");
+            logger.debug("Validation error while finding all patients by search query");
             throw new SearchQueryParameterException(bindingResult);
         }
         logger.debug("Find all patients  by search query");
