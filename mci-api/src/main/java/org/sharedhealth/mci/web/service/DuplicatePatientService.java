@@ -15,8 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.String.format;
-import static org.sharedhealth.mci.web.utils.MCIConstants.DUPLICATION_ACTION_RETAIN_ALL;
 import static org.sharedhealth.mci.web.utils.MCIConstants.DUPLICATION_ACTION_MERGE;
+import static org.sharedhealth.mci.web.utils.MCIConstants.DUPLICATION_ACTION_RETAIN_ALL;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Component
@@ -61,6 +61,7 @@ public class DuplicatePatientService {
         PatientData patient2 = data.getPatient2();
 
         if (DUPLICATION_ACTION_RETAIN_ALL.equals(data.getAction())) {
+            validatePatientRetainRequest(patient1, patient2);
             duplicatePatientRepository.processDuplicates(patient1, patient2, false);
 
         } else if (DUPLICATION_ACTION_MERGE.equals(data.getAction())) {
@@ -69,12 +70,21 @@ public class DuplicatePatientService {
         }
     }
 
+    private void validatePatientRetainRequest(PatientData patient1, PatientData patient2) {
+        String healthId1 = patient1.getHealthId();
+        String healthId2 = patient2.getHealthId();
+
+        if (patient1.isRetired() || patient2.isRetired()) {
+            handleIllegalArgument(format("Patient 1 [hid: %s] and/or patient 2 [hid: %s] are/is retired. Cannot retain.",
+                    healthId1, healthId2));
+        }
+    }
+
     private void validatePatientMergeRequest(PatientData patient1, PatientData patient2) {
         String healthId1 = patient1.getHealthId();
         String healthId2 = patient2.getHealthId();
 
-        Boolean patient1Active = patient1.isActive();
-        if (patient1Active == null || patient1Active) {
+        if (!patient1.isRetired()) {
             handleIllegalArgument(format("Patient 1 [hid: %s] is not retired. Cannot merge.", healthId1));
         }
 
@@ -84,8 +94,7 @@ public class DuplicatePatientService {
                     format("'merge_with' field of Patient 1 [hid: %s] is not set properly. Cannot merge.", healthId1));
         }
 
-        Boolean patient2Active = patient2.isActive();
-        if (patient2Active == null || !patient2Active) {
+        if (patient2.isRetired()) {
             handleIllegalArgument(format("Patient 2 [hid: %s] is retired. Cannot merge.", healthId2));
         }
     }

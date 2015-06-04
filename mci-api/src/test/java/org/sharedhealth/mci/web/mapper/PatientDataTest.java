@@ -255,7 +255,6 @@ public class PatientDataTest extends ValidationAwareMapper {
         }
     }
 
-
     @Test
     public void shouldRetrieveFieldValueFromJsonKey() {
         PatientData patient = new PatientData();
