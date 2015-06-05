@@ -8,6 +8,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.sharedhealth.mci.web.config.MCIProperties;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
 import org.sharedhealth.mci.web.infrastructure.security.UserProfile;
+import org.sharedhealth.mci.web.model.HealthId;
 import org.sharedhealth.mci.web.service.HealthIdService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -54,6 +55,22 @@ public class HealthIdControllerTest {
         HealthIdController healthIdController = new HealthIdController(service, mciProperties);
         assertEquals("GENERATED 100 Ids", healthIdController.generate().getResult());
         verify(service, times(1)).generate(start, end);
+    }
+
+    @Test
+    public void testGetNextBlock() {
+        when(service.getNextBlock()).thenReturn(getNextBlock());
+        HealthIdController healthIdController = new HealthIdController(service, mciProperties);
+        assertEquals(3, healthIdController.nextBlock().size());
+        verify(service, times(1)).getNextBlock();
+    }
+
+    private ArrayList<HealthId> getNextBlock() {
+        ArrayList<HealthId> healthIds = new ArrayList<>();
+        healthIds.add(new HealthId("123","MCI",0));
+        healthIds.add(new HealthId("124","MCI",0));
+        healthIds.add(new HealthId("125","MCI",0));
+        return healthIds;
     }
 
     @Test
