@@ -7,6 +7,7 @@ import org.sharedhealth.mci.web.model.HealthId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.regex.Pattern;
 
 @Component
@@ -33,5 +34,9 @@ public class HealthIdService {
             }
         }
         return numberOfValidHids;
+    }
+
+    public List<HealthId> getNextBlock() {
+        return healthIdRepository.getNextBlock();
     }
 }

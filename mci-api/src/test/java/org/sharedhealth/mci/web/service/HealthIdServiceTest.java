@@ -11,6 +11,8 @@ import org.sharedhealth.mci.web.config.MCIProperties;
 import org.sharedhealth.mci.web.infrastructure.persistence.HealthIdRepository;
 import org.sharedhealth.mci.web.model.HealthId;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import static org.junit.Assert.assertEquals;
@@ -130,5 +132,17 @@ public class HealthIdServiceTest {
         testProperties.setInvalidHidPattern("^[45]\\d*$");
         HealthIdService healthIdService = new HealthIdService(testProperties, healthIdRepository, checksumGenerator);
         assertEquals(0, healthIdService.generate(100, 99));
+    }
+
+    @Test
+    public void should10kBlockIdsForMCIService() {
+        ArrayList<HealthId> result = new ArrayList<>();
+        result.add(new HealthId("898998"));
+        result.add(new HealthId("898999"));
+        when(healthIdRepository.getNextBlock()).thenReturn(result);
+
+        HealthIdService healthIdService = new HealthIdService(mciProperties, healthIdRepository, checksumGenerator);
+        List<HealthId> nextBlock = healthIdService.getNextBlock();
+        assertEquals(2, nextBlock.size());
     }
 }
