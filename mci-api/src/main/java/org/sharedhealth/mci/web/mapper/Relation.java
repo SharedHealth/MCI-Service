@@ -14,7 +14,9 @@ import org.sharedhealth.mci.validation.constraints.RelationType;
 import javax.validation.constraints.Pattern;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
-import static org.sharedhealth.mci.web.utils.ErrorConstants.*;
+import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_INVALID;
+import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_PATTERN;
+import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_REQUIRED;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
 @RelationType(message = ERROR_CODE_REQUIRED, field = "type")

@@ -20,7 +20,6 @@ import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -37,6 +36,7 @@ public class HealthIdRepositoryIT {
 
     @Before
     public void setUp() throws ExecutionException, InterruptedException {
+        cqlTemplate.execute("truncate healthId");
         healthIdRepository.resetLastReservedHealthId();
     }
 

@@ -11,7 +11,10 @@ import java.util.UUID;
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static java.util.UUID.fromString;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.sharedhealth.mci.web.utils.JsonConstants.PRESENT_ADDRESS;
 
 public class PendingApprovalTest {

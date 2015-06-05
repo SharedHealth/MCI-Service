@@ -7,7 +7,11 @@ import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.sharedhealth.mci.web.infrastructure.persistence.DuplicatePatientRepository;
-import org.sharedhealth.mci.web.mapper.*;
+import org.sharedhealth.mci.web.mapper.Address;
+import org.sharedhealth.mci.web.mapper.Catchment;
+import org.sharedhealth.mci.web.mapper.DuplicatePatientData;
+import org.sharedhealth.mci.web.mapper.DuplicatePatientMergeData;
+import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.model.DuplicatePatient;
 
 import java.util.ArrayList;

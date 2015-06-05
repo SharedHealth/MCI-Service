@@ -8,8 +8,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
 
-import static org.junit.Assert.*;
-import static org.sharedhealth.mci.utils.DateUtil.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.sharedhealth.mci.utils.DateUtil.ISO_DATE_TIME_TILL_MILLIS_FORMAT3;
+import static org.sharedhealth.mci.utils.DateUtil.parseDate;
+import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.utils.TimeUid.fromString;
 
 public class DateUtilTest {

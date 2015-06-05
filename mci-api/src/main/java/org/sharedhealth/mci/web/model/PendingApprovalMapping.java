@@ -7,7 +7,9 @@ import org.springframework.data.cassandra.mapping.Table;
 
 import java.util.UUID;
 
-import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.*;
+import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.CF_PENDING_APPROVAL_MAPPING;
+import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.HEALTH_ID;
+import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.LAST_UPDATED;
 import static org.sharedhealth.mci.web.utils.JsonConstants.CATCHMENT_ID;
 import static org.springframework.cassandra.core.PrimaryKeyType.CLUSTERED;
 import static org.springframework.cassandra.core.PrimaryKeyType.PARTITIONED;

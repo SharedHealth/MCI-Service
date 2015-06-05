@@ -5,7 +5,11 @@ import org.slf4j.Logger;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static java.util.Calendar.YEAR;

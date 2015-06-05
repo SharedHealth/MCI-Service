@@ -4,7 +4,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.UUID;
 
-import static org.sharedhealth.mci.web.utils.JsonConstants.*;
+import static org.sharedhealth.mci.web.utils.JsonConstants.GIVEN_NAME;
+import static org.sharedhealth.mci.web.utils.JsonConstants.HID;
+import static org.sharedhealth.mci.web.utils.JsonConstants.LAST_UPDATED;
+import static org.sharedhealth.mci.web.utils.JsonConstants.SUR_NAME;
 
 public class PendingApprovalListResponse {
 

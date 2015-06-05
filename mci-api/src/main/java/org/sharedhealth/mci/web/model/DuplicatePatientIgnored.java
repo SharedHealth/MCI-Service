@@ -6,7 +6,10 @@ import org.springframework.data.cassandra.mapping.Table;
 
 import java.util.Set;
 
-import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.*;
+import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.CF_PATIENT_DUPLICATE_IGNORED;
+import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.HEALTH_ID1;
+import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.HEALTH_ID2;
+import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.REASONS;
 import static org.springframework.cassandra.core.PrimaryKeyType.PARTITIONED;
 
 @Table(value = CF_PATIENT_DUPLICATE_IGNORED)

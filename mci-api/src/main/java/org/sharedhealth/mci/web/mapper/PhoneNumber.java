@@ -13,7 +13,10 @@ import javax.validation.constraints.Pattern;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_PATTERN;
-import static org.sharedhealth.mci.web.utils.JsonConstants.*;
+import static org.sharedhealth.mci.web.utils.JsonConstants.AREA_CODE;
+import static org.sharedhealth.mci.web.utils.JsonConstants.COUNTRY_CODE;
+import static org.sharedhealth.mci.web.utils.JsonConstants.EXTENSION;
+import static org.sharedhealth.mci.web.utils.JsonConstants.NUMBER;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PhoneNumber implements Diffable<PhoneNumber> {

@@ -5,8 +5,8 @@ import org.springframework.data.cassandra.mapping.PrimaryKeyColumn;
 import org.springframework.data.cassandra.mapping.Table;
 
 import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.CF_HEALTH_ID;
-import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.RESERVED_FOR;
 import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.HID;
+import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.RESERVED_FOR;
 import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.STATUS;
 import static org.springframework.cassandra.core.PrimaryKeyType.PARTITIONED;
 

@@ -4,7 +4,9 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
 import static org.sharedhealth.mci.web.config.MCIConfig.getSupportedRequestUris;
 import static org.sharedhealth.mci.web.config.MCIConfig.getSupportedServletMappings;
 

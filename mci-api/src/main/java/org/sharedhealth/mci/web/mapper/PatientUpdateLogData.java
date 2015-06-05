@@ -9,7 +9,10 @@ import java.util.Set;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.CHANGE_SET;
-import static org.sharedhealth.mci.web.utils.JsonConstants.*;
+import static org.sharedhealth.mci.web.utils.JsonConstants.APPROVED_BY;
+import static org.sharedhealth.mci.web.utils.JsonConstants.EVENT_TIME;
+import static org.sharedhealth.mci.web.utils.JsonConstants.HEALTH_ID;
+import static org.sharedhealth.mci.web.utils.JsonConstants.REQUESTED_BY;
 
 public class PatientUpdateLogData {
 

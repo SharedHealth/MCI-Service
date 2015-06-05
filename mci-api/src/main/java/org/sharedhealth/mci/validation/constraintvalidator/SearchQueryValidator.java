@@ -10,7 +10,9 @@ import java.util.regex.Pattern;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.sharedhealth.mci.web.utils.JsonConstants.*;
+import static org.sharedhealth.mci.web.utils.JsonConstants.GIVEN_NAME;
+import static org.sharedhealth.mci.web.utils.JsonConstants.PHONE_NO;
+import static org.sharedhealth.mci.web.utils.JsonConstants.PRESENT_ADDRESS;
 
 public class SearchQueryValidator implements ConstraintValidator<SearchQueryConstraint, SearchQuery> {
 

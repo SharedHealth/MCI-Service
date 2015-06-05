@@ -12,10 +12,17 @@ import java.util.List;
 import java.util.Set;
 
 import static java.util.Arrays.asList;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.MCI_USER_GROUP;
-import static org.sharedhealth.mci.web.infrastructure.security.UserProfile.*;
-import static org.sharedhealth.mci.web.utils.JsonConstants.*;
+import static org.sharedhealth.mci.web.infrastructure.security.UserProfile.ADMIN_TYPE;
+import static org.sharedhealth.mci.web.infrastructure.security.UserProfile.FACILITY_TYPE;
+import static org.sharedhealth.mci.web.infrastructure.security.UserProfile.PROVIDER_TYPE;
+import static org.sharedhealth.mci.web.utils.JsonConstants.GIVEN_NAME;
+import static org.sharedhealth.mci.web.utils.JsonConstants.PRESENT_ADDRESS;
+import static org.sharedhealth.mci.web.utils.JsonConstants.SUR_NAME;
 
 public class PatientDataTest extends ValidationAwareMapper {
 

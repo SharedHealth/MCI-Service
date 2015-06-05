@@ -4,7 +4,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Set;
 
-import static org.sharedhealth.mci.web.utils.JsonConstants.*;
+import static org.sharedhealth.mci.web.utils.JsonConstants.CREATED_AT;
+import static org.sharedhealth.mci.web.utils.JsonConstants.HID1;
+import static org.sharedhealth.mci.web.utils.JsonConstants.HID2;
+import static org.sharedhealth.mci.web.utils.JsonConstants.REASONS;
 
 public class DuplicatePatientData {
 
