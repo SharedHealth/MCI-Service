@@ -19,7 +19,6 @@ import org.sharedhealth.mci.web.mapper.PendingApprovalFieldDetails;
 import org.sharedhealth.mci.web.mapper.Requester;
 import org.sharedhealth.mci.web.mapper.SearchQuery;
 import org.sharedhealth.mci.web.model.CatchmentMapping;
-import org.sharedhealth.mci.web.model.HealthId;
 import org.sharedhealth.mci.web.model.Patient;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
 import org.slf4j.Logger;
