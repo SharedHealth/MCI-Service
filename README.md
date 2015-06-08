@@ -61,7 +61,7 @@ Notes:
 - Stub Identity Server will run in port 8080
 
 ### load some location data in MCI
-* cqlsh 192.168.33.19
+* cqlsh 192.168.33.19 -umci -pexample_mci_password
 * describe keyspaces;
 * use mci;
 * copy and run the following scripts for some sample location data
