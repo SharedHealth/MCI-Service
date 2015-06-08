@@ -6,7 +6,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
-import org.sharedhealth.mci.web.exception.HealthIDExistException;
 import org.sharedhealth.mci.web.exception.PatientNotFoundException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
@@ -265,12 +264,6 @@ public class PatientRepositoryIT {
     @Test(expected = PatientNotFoundException.class)
     public void shouldThrowException_IfPatientDoesNotExistForGivenHealthId() {
         patientRepository.findByHealthId(UUID.randomUUID().toString());
-    }
-
-    @Test(expected = HealthIDExistException.class)
-    public void shouldThrowException_IfHealthIdProvidedForCreate() throws ExecutionException, InterruptedException {
-        data.setHealthId("12");
-        patientRepository.create(data);
     }
 
     @Test(expected = PatientNotFoundException.class)

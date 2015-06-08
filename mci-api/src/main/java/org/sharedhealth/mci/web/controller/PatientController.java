@@ -3,6 +3,7 @@ package org.sharedhealth.mci.web.controller;
 import org.sharedhealth.mci.validation.group.RequiredGroup;
 import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
 import org.sharedhealth.mci.web.exception.Forbidden;
+import org.sharedhealth.mci.web.exception.HealthIdExistsException;
 import org.sharedhealth.mci.web.exception.SearchQueryParameterException;
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -55,6 +58,11 @@ public class PatientController extends MciController {
     public DeferredResult<ResponseEntity<MCIResponse>> create(
             @RequestBody @Validated({RequiredGroup.class, Default.class}) PatientData patient,
             BindingResult bindingResult) {
+
+        if (!isBlank(patient.getHealthId())) {
+            bindingResult.addError(new FieldError("patient", "hid", "3001"));
+            throw new HealthIdExistsException(bindingResult);
+        }
 
         UserInfo userInfo = getUserInfo();
         logAccessDetails(userInfo, format("Creating a new patient : %s", patient.getHealthId()));

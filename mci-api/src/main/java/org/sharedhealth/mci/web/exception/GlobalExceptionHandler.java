@@ -148,9 +148,9 @@ public class GlobalExceptionHandler {
     }
 
     @ResponseStatus(value = BAD_REQUEST)
-    @ExceptionHandler(HealthIDExistException.class)
+    @ExceptionHandler(HealthIdExistsException.class)
     @ResponseBody
-    public ErrorHandler healthIDExistException(HealthIDExistException e) {
+    public ErrorHandler healthIDExistException(HealthIdExistsException e) {
         logger.debug("Handling Health ID exist exception. ", e);
         int code;
         String msg, field;

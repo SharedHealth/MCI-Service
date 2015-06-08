@@ -5,7 +5,6 @@ import com.datastax.driver.core.querybuilder.Delete;
 import com.datastax.driver.core.querybuilder.Insert;
 import org.sharedhealth.mci.utils.HidGenerator;
 import org.sharedhealth.mci.web.exception.Forbidden;
-import org.sharedhealth.mci.web.exception.HealthIDExistException;
 import org.sharedhealth.mci.web.exception.PatientNotFoundException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.handler.PendingApprovalFilter;
@@ -27,8 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.stereotype.Component;
-import org.springframework.validation.DirectFieldBindingResult;
-import org.springframework.validation.FieldError;
 
 import java.util.*;
 
@@ -80,12 +77,6 @@ public class PatientRepository extends BaseRepository {
 
     public MCIResponse create(PatientData patientData) {
         logger.debug(String.format("Create patient: %s", patientData.toString()));
-
-        if (!isBlank(patientData.getHealthId())) {
-            DirectFieldBindingResult bindingResult = new DirectFieldBindingResult(patientData, "patient");
-            bindingResult.addError(new FieldError("patient", "hid", "3001"));
-            throw new HealthIDExistException(bindingResult);
-        }
 
         Patient patient = mapper.map(patientData, new PatientData());
         patient.setHealthId(hidGenerator.generate());

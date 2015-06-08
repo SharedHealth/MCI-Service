@@ -8,6 +8,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.sharedhealth.mci.web.exception.HealthIdExistsException;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
@@ -31,6 +32,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.web.util.NestedServletException;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -41,6 +43,7 @@ import static java.util.Arrays.asList;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertTrue;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -166,6 +169,24 @@ public class PatientControllerTest {
         verify(patientService).create(patientData);
     }
 
+
+    @Test
+    public void shouldThrowExceptionIfHealthIdProvided() throws Exception {
+        patientData.setHealthId("FUBAR");
+        String json = new ObjectMapper().writeValueAsString(patientData);
+        String healthId = "healthId-100";
+        MCIResponse mciResponse = new MCIResponse(healthId, CREATED);
+        when(locationService.findByGeoCode(GEO_CODE)).thenReturn(location);
+        when(patientService.create(patientData)).thenReturn(mciResponse);
+        try {
+            mockMvc.perform(post(API_END_POINT).content(json).contentType(APPLICATION_JSON))
+                    .andExpect(request().asyncResult(new ResponseEntity<>(mciResponse, CREATED)));
+        } catch (NestedServletException e) {
+            assertEquals(HealthIdExistsException.class, e.getCause().getClass());
+        }
+    }
+
+
     @Test
     public void shouldFindPatientByHealthId() throws Exception {
         String healthId = "healthId-100";
@@ -290,6 +311,7 @@ public class PatientControllerTest {
 
         assertFindAllBy(searchQuery, stringBuilder.toString());
     }
+
 
     @Test
     public void shouldFindPatientsByAddressAndGivenName() throws Exception {
