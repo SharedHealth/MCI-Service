@@ -56,7 +56,6 @@ public class HealthIdController extends MciController {
         return deferredResult;
     }
 
-
     @PreAuthorize("hasAnyRole('ROLE_MCI Admin')")
     @RequestMapping(method = GET, value = "/nextBlock")
     public List<HealthId> nextBlock() {

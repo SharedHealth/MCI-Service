@@ -4,6 +4,8 @@ import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
 import org.sharedhealth.mci.web.exception.HealthIdExhaustedException;
 import org.sharedhealth.mci.web.model.HealthId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.cassandra.core.CassandraOperations;
@@ -16,7 +18,7 @@ import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryCons
 
 @Component
 public class HealthIdRepository extends BaseRepository{
-
+    private static final Logger logger = LoggerFactory.getLogger(HealthIdRepository.class);
     public static final int BLOCK_SIZE = 10000;
     private String lastReservedHealthId;
 
@@ -30,16 +32,21 @@ public class HealthIdRepository extends BaseRepository{
     }
 
     public HealthId saveHealthIdSync(HealthId healthId) {
+        logger.debug(String.format("Inserting new hid :%s", healthId.getHid()));
         return cassandraOps.insert(healthId);
     }
 
     public List<HealthId> getNextBlock(int blockSize) {
-        Select.Where from = QueryBuilder.select().from(CF_HEALTH_ID).where(QueryBuilder.eq(RESERVED_FOR, "MCI"));
+        logger.debug(String.format(String.format("Getting next block of size : %d", blockSize)));
+        Select.Where from = QueryBuilder.select().from(CF_HEALTH_ID)
+                .where(QueryBuilder.eq(RESERVED_FOR, "MCI"));
         if (null != lastReservedHealthId)
             from = from.and(QueryBuilder.gt("token(hid)",
                     QueryBuilder.raw(String.format("token('%s')", lastReservedHealthId))));
 
-        Select nextBlockQuery = from.and(QueryBuilder.eq("Status", 0)).limit(blockSize).allowFiltering();
+        Select nextBlockQuery = from
+                .and(QueryBuilder.eq("Status", 0))
+                .limit(blockSize).allowFiltering();
 
         List<HealthId> healthIds = cassandraOps.select(nextBlockQuery, HealthId.class);
         if (healthIds.size() < 1) throw new HealthIdExhaustedException();

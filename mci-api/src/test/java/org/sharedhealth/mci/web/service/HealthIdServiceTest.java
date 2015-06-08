@@ -145,4 +145,5 @@ public class HealthIdServiceTest {
         List<HealthId> nextBlock = healthIdService.getNextBlock();
         assertEquals(2, nextBlock.size());
     }
+
 }

@@ -36,7 +36,11 @@ public class HealthIdService {
         return numberOfValidHids;
     }
 
-    public List<HealthId> getNextBlock() {
+    public synchronized List<HealthId> getNextBlock() {
         return healthIdRepository.getNextBlock();
+    }
+
+    public synchronized List<HealthId> getNextBlock(int blockSize) {
+        return healthIdRepository.getNextBlock(blockSize);
     }
 }
