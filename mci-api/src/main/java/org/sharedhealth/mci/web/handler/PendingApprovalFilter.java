@@ -8,12 +8,14 @@ import org.sharedhealth.mci.web.mapper.PendingApproval;
 import org.sharedhealth.mci.web.mapper.PendingApprovalFieldDetails;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
 import org.sharedhealth.mci.web.mapper.Requester;
+import org.sharedhealth.mci.web.mapper.Relation;
 import org.sharedhealth.mci.web.service.ApprovalFieldService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.List;
 
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
@@ -51,7 +53,6 @@ public class PendingApprovalFilter {
         newPatient.setGender(processString(GENDER, existingPatient.getGender(), updateRequest.getGender(), requestedBy, newPatient));
         newPatient.setOccupation(processString(OCCUPATION, existingPatient.getOccupation(), updateRequest.getOccupation(), requestedBy, newPatient));
         newPatient.setEducationLevel(processString(EDU_LEVEL, existingPatient.getEducationLevel(), updateRequest.getEducationLevel(), requestedBy, newPatient));
-        newPatient.setRelations(updateRequest.getRelations()); //TODO : rewrite after relations bug is fixed.
         newPatient.setUid(processString(UID, existingPatient.getUid(), updateRequest.getUid(), requestedBy, newPatient));
         newPatient.setPlaceOfBirth(processString(PLACE_OF_BIRTH, existingPatient.getPlaceOfBirth(), updateRequest.getPlaceOfBirth(), requestedBy, newPatient));
         newPatient.setReligion(processString(RELIGION, existingPatient.getReligion(), updateRequest.getReligion(), requestedBy, newPatient));
@@ -65,6 +66,7 @@ public class PendingApprovalFilter {
         newPatient.setCreatedAt(processUuid(CREATED, existingPatient.getCreatedAt(), updateRequest.getCreatedAt(), requestedBy, newPatient));
         newPatient.setUpdatedAt(processUuid(MODIFIED, existingPatient.getUpdatedAt(), updateRequest.getUpdatedAt(), requestedBy, newPatient));
         newPatient.setPhoneNumber(processPhoneNumber(PHONE_NUMBER, existingPatient.getPhoneNumber(), updateRequest.getPhoneNumber(), requestedBy, newPatient));
+        newPatient.setRelations(processRelations(RELATIONS, existingPatient.getRelations(), updateRequest.getRelations(), requestedBy, newPatient));
         newPatient.setPatientStatus(processPatientStatus(STATUS, existingPatient.getPatientStatus(), updateRequest.getPatientStatus(), requestedBy, newPatient));
         newPatient.setPrimaryContactNumber(processPhoneNumber(PRIMARY_CONTACT_NUMBER, existingPatient.getPrimaryContactNumber(), updateRequest.getPrimaryContactNumber(), requestedBy, newPatient));
         newPatient.setAddress(processAddress(PRESENT_ADDRESS, existingPatient.getAddress(), updateRequest.getAddress(), requestedBy, newPatient));
@@ -74,6 +76,12 @@ public class PendingApprovalFilter {
         newPatient.setMergedWith(processString(MERGED_WITH, existingPatient.getMergedWith(), updateRequest.getMergedWith(), requestedBy, newPatient));
 
         return newPatient;
+    }
+
+    private List<Relation> processRelations(String key, List<Relation> oldRelations, List<Relation> newRelations, Requester requester, PatientData newPatient) {
+
+        Object relations = process(key, oldRelations, newRelations, requester, newPatient);
+        return relations == null ? null : (List<Relation>) relations;
     }
 
     private PhoneNumber processPhoneNumber(String key, PhoneNumber oldValue, PhoneNumber newValue, Requester requester, PatientData newPatient) {
@@ -123,7 +131,7 @@ public class PendingApprovalFilter {
                 return oldValue;
             }
 
-            if(requester != null && requester.getAdmin()!= null) {
+            if (requester != null && requester.getAdmin() != null) {
                 return newValue;
             }
 

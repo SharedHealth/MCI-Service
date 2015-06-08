@@ -5,19 +5,15 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.sharedhealth.mci.web.exception.NonUpdatableFieldUpdateException;
-import org.sharedhealth.mci.web.mapper.Address;
-import org.sharedhealth.mci.web.mapper.LocationData;
-import org.sharedhealth.mci.web.mapper.PatientData;
-import org.sharedhealth.mci.web.mapper.PendingApproval;
-import org.sharedhealth.mci.web.mapper.PendingApprovalFieldDetails;
-import org.sharedhealth.mci.web.mapper.PhoneNumber;
-import org.sharedhealth.mci.web.mapper.Requester;
+import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.service.ApprovalFieldService;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.List;
 
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static java.util.Arrays.asList;
@@ -266,6 +262,11 @@ public class PendingApprovalFilterTest {
                 assertFieldDetails(pendingApproval.getFieldDetails(), "2", requestedBy);
                 assertEquals(existingPatient.getReligion(), newPatient.getReligion());
 
+            } else if (RELATIONS.equals(pendingApproval.getName())) {
+                Relation relation = new Relation();
+                relation.setType("SPS");
+                assertRelationFieldDetails(pendingApproval.getFieldDetails(), relation, requestedBy);
+
             } else {
                 fail("Invalid pending approval.");
             }
@@ -349,6 +350,87 @@ public class PendingApprovalFilterTest {
         assertTrue(isEmpty(newPatient.getPendingApprovals()));
         assertEquals(newPatient.getGender(), "F");
         assertEquals(newPatient.getReligion(), "2");
+    }
+
+    @Test
+    public void shouldAddRelationUpdateToPendingApprovalsWhenMarkedForApproval() throws ParseException {
+        setUpApprovalFieldServiceFor(RELATIONS, "NA");
+
+        PatientData existingPatient = buildPatientData();
+
+        PatientData updateRequest = buildPatientData();
+        updateRequest.setRelations(getRelations());
+        updateRequest.setRequester("Bahmni", "Dr. Monika");
+
+        PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
+        verify(approvalFieldService, atLeastOnce()).getProperty(RELATIONS);
+        assertPendingApprovals(existingPatient, newPatient, 1, updateRequest.getRequester());
+    }
+
+    @Test
+    public void shouldAddRelationFieldsToExistingPendingApprovalsWhenMarkedForApproval() throws ParseException {
+        setUpApprovalFieldServiceFor(RELATIONS, "NA");
+
+        PatientData existingPatient = buildPatientData();
+
+        PatientData updateRequest = buildPatientData();
+        updateRequest.setRelations(getRelations());
+        updateRequest.setRequester("Bahmni", "Dr. Monika");
+
+        PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
+        verify(approvalFieldService, atLeastOnce()).getProperty(RELATIONS);
+        assertPendingApprovals(existingPatient, newPatient, 1, updateRequest.getRequester());
+
+        updateRequest = buildPatientData();
+        updateRequest.setRelations(getRelations());
+
+        newPatient = pendingApprovalFilter.filter(newPatient, updateRequest);
+        TreeSet<PendingApproval> pendingApprovals = newPatient.getPendingApprovals();
+        assertNotNull(pendingApprovals);
+        assertEquals(1, pendingApprovals.size());
+
+        PendingApproval pendingApproval = pendingApprovals.iterator().next();
+        assertEquals(RELATIONS, pendingApproval.getName());
+
+        TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap = pendingApproval.getFieldDetails();
+        assertNotNull(fieldDetailsMap);
+        assertEquals(2, fieldDetailsMap.size());
+
+        PendingApprovalFieldDetails fieldDetails = fieldDetailsMap.values().iterator().next();
+        List<Relation> relations  = (List<Relation>) fieldDetails.getValue();
+
+        assertEquals("SPS", relations.get(0).getType());
+
+        verify(approvalFieldService, Mockito.times(2)).getProperty(RELATIONS);
+    }
+
+    private void assertRelationFieldDetails(TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap, Relation value, Requester requestedBy) {
+        assertNotNull(fieldDetailsMap);
+        assertEquals(1, fieldDetailsMap.size());
+        PendingApprovalFieldDetails fieldDetails = fieldDetailsMap.values().iterator().next();
+        List<Relation> relations  = (List<Relation>) fieldDetails.getValue();
+
+        assertEquals(value.getType(), relations.get(0).getType());
+        assertEquals(requestedBy, fieldDetails.getRequestedBy());
+        long expectedCreatedAt = unixTimestamp(fieldDetailsMap.keySet().iterator().next());
+        assertEquals(toIsoFormat(expectedCreatedAt), fieldDetails.getCreatedAt());
+    }
+
+    private List<Relation> getRelations() {
+        Relation relation = new Relation();
+        relation.setType("SPS");
+        relation.setNameBangla("মেহজাবীন খান");
+        relation.setGivenName("Mehzabin");
+        relation.setSurName("Khan");
+        relation.setNationalId("1990567890163");
+        relation.setUid("38761111111");
+        relation.setBirthRegistrationNumber("52345678901633456");
+        relation.setMarriageId("12345678");
+        relation.setRelationalStatus("3");
+
+        List<Relation> relations = new ArrayList<>();
+        relations.add(relation);
+        return relations;
     }
 
 }

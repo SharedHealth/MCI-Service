@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Comparator;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.List;
+import java.util.ArrayList;
 
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
@@ -61,6 +63,9 @@ public class PendingApproval implements Comparable<PendingApproval> {
             type = PhoneNumber.class;
         } else if (STATUS.equals(this.name)) {
             type = PatientStatus.class;
+
+        } else if (RELATIONS.equals(this.name)) {
+            return getRelationFieldDetails();
         } else {
             return this.fieldDetails;
         }
@@ -107,5 +112,51 @@ public class PendingApproval implements Comparable<PendingApproval> {
             }
         }
         return false;
+    }
+
+    public boolean compareRelation(Object value) {
+
+        if (value == null) {
+            return false;
+        }
+
+        List<Relation> relationValues = (List<Relation>) value;
+        for (PendingApprovalFieldDetails fieldDetails : this.getFieldDetails().values()) {
+
+            List<Relation> pendingRelations = (List<Relation>) fieldDetails.getValue();
+
+            if (hasMatch(relationValues, pendingRelations)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean hasMatch(List<Relation> relationValues, List<Relation> pendingRelations) {
+        boolean valid = true;
+        for (Relation relation : pendingRelations) {
+            if (!relationValues.contains(relation)) {
+                valid = false;
+            }
+        }
+        return valid;
+    }
+
+    private TreeMap<UUID, PendingApprovalFieldDetails> getRelationFieldDetails() {
+
+        for (PendingApprovalFieldDetails details : fieldDetails.values()) {
+
+            List<Relation> pendingRelations = (List<Relation>) details.getValue();
+            List<Relation> relations = new ArrayList<>();
+            for (int i = 0; i < pendingRelations.size(); i++) {
+                relations.add(convertValue(pendingRelations.get(i), Relation.class));
+            }
+
+            details.setValue(relations);
+
+        }
+        return fieldDetails;
+
     }
 }

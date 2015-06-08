@@ -209,7 +209,7 @@ public class Relation {
         if (relationalStatus != null ? !relationalStatus.equals(relation.relationalStatus) : relation.relationalStatus != null)
             return false;
         if (surName != null ? !surName.equals(relation.surName) : relation.surName != null) return false;
-        if (!type.equals(relation.type)) return false;
+        if (type != null ? !type.equals(relation.type) : relation.type != null) return false;
         if (uid != null ? !uid.equals(relation.uid) : relation.uid != null) return false;
 
         return true;

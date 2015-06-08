@@ -37,6 +37,7 @@ import static org.apache.commons.collections4.CollectionUtils.union;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_INVALID;
 import static org.sharedhealth.mci.web.utils.JsonConstants.HID;
+import static org.sharedhealth.mci.web.utils.JsonConstants.RELATIONS;
 
 @Component
 public class PatientService {
@@ -236,7 +237,11 @@ public class PatientService {
         for (PendingApproval pendingApproval : existingPatient.getPendingApprovals()) {
             String fieldName = pendingApproval.getName();
             Object value = patient.getValue(fieldName);
-            if (value != null && !pendingApproval.contains(value)) {
+
+            if (value != null && fieldName.equals(RELATIONS) && !pendingApproval.compareRelation(value)) {
+                throw new IllegalArgumentException(MESSAGE_PENDING_APPROVALS_MISMATCH);
+            }
+            if (value != null && !pendingApproval.contains(value) && !fieldName.equals(RELATIONS)) {
                 throw new IllegalArgumentException(MESSAGE_PENDING_APPROVALS_MISMATCH);
             }
             fieldNames.remove(fieldName);
