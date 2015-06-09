@@ -53,24 +53,28 @@ public class PatientService {
     private PatientFeedRepository feedRepository;
     private FacilityService facilityService;
     private SettingService settingService;
+    private PatientHealthIdService patientHealthIdService;
 
     @Autowired
     public PatientService(PatientRepository patientRepository,
                           PatientFeedRepository feedRepository,
                           FacilityService facilityService,
-                          SettingService settingService) {
+                          SettingService settingService,
+                          PatientHealthIdService patientHealthIdService) {
         this.patientRepository = patientRepository;
         this.feedRepository = feedRepository;
         this.facilityService = facilityService;
         this.settingService = settingService;
+        this.patientHealthIdService = patientHealthIdService;
     }
 
-    public MCIResponse create(PatientData patient) {
+    public MCIResponse create(PatientData patient) throws InterruptedException {
         logger.debug("Create patient");
         PatientData existingPatient = findPatientByMultipleIds(patient);
         if (existingPatient != null) {
             return this.update(patient, existingPatient.getHealthId());
         }
+        patient.setHealthId(patientHealthIdService.getNextHealthId().getHid());
         return patientRepository.create(patient);
     }
 

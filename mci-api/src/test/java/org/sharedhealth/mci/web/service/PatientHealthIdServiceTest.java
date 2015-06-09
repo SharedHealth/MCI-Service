@@ -6,6 +6,14 @@ import org.mockito.Mock;
 import org.sharedhealth.mci.web.model.HealthId;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
@@ -41,6 +49,45 @@ public class PatientHealthIdServiceTest {
         patientHealthIdService.replenishIfNeeded();
         HealthId healthId = patientHealthIdService.getNextHealthId();
         assertEquals("1213", healthId.getHid());
+    }
+
+    @Test(expected = NoSuchElementException.class)
+    public void shouldThrowExceptionIfQueueIsEmpty() throws Exception {
+        ArrayList<HealthId> healthIds = new ArrayList<>();
+        when(healthIdService.getNextBlock()).thenReturn(healthIds);
+        PatientHealthIdService patientHealthIdService = new PatientHealthIdService(healthIdService);
+        patientHealthIdService.replenishIfNeeded();
+        patientHealthIdService.getNextHealthId();
+    }
+
+    @Test
+    public void shouldAllocateNewHealthIdEveryTime() throws Exception {
+        ArrayList<HealthId> healthIds = new ArrayList<>();
+        for (int i = 0; i < 10000; i++) {
+            healthIds.add(new HealthId(String.valueOf(1213000 + i), "MCI", 0));
+        }
+        when(healthIdService.getNextBlock()).thenReturn(healthIds);
+        final PatientHealthIdService patientHealthIdService = new PatientHealthIdService(healthIdService);
+        patientHealthIdService.replenishIfNeeded();
+
+        ExecutorService executor = Executors.newFixedThreadPool(1000);
+        final Set<Future<HealthId>> eventualHealthIds = new HashSet<>();
+        for (int i = 0; i < 10000; i++) {
+            Callable<HealthId> nextBlock = new Callable<HealthId>() {
+                @Override
+                public HealthId call() throws Exception {
+                    return patientHealthIdService.getNextHealthId();
+                }
+            };
+            Future<HealthId> eventualHealthId = executor.submit(nextBlock);
+            eventualHealthIds.add(eventualHealthId);
+        }
+        Set<HealthId> uniqueHealthIds = new HashSet<>();
+
+        for (Future<HealthId> eventualHealthId : eventualHealthIds) {
+            uniqueHealthIds.add(eventualHealthId.get());
+        }
+        assertEquals(10000, uniqueHealthIds.size());
     }
 
 }

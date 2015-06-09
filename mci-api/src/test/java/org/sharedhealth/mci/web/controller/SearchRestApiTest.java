@@ -53,7 +53,7 @@ public class SearchRestApiTest extends BaseControllerTest {
     private static final int PER_PAGE_MAXIMUM_LIMIT = 25;
 
     @Before
-    public void setup() {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
         setUpMockMvcBuilder();
 

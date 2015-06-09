@@ -20,6 +20,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
@@ -64,8 +65,11 @@ public class DuplicatePatientRepositoryIT {
     @Test
     public void shouldIgnoreDuplicates() {
         PatientData patientData1 = new PatientData();
+        patientData1.setHealthId(String.valueOf(new Date().getTime() + 1));
         PatientData patientData2 = new PatientData();
+        patientData2.setHealthId(String.valueOf(new Date().getTime() + 2));
         PatientData patientData3 = new PatientData();
+        patientData3.setHealthId(String.valueOf(new Date().getTime() + 3));
         buildDuplicatePatientsForMerge(patientData1, patientData2, patientData3);
         String healthId1 = patientData1.getHealthId();
         String healthId2 = patientData2.getHealthId();
@@ -96,8 +100,11 @@ public class DuplicatePatientRepositoryIT {
     @Test
     public void shouldMergeDuplicates() {
         PatientData patientData1 = new PatientData();
+        patientData1.setHealthId(String.valueOf(new Date().getTime() + 1));
         PatientData patientData2 = new PatientData();
+        patientData2.setHealthId(String.valueOf(new Date().getTime() + 2));
         PatientData patientData3 = new PatientData();
+        patientData3.setHealthId(String.valueOf(new Date().getTime() + 3));
         buildDuplicatePatientsForMerge(patientData1, patientData2, patientData3);
 
         patientData1.setBloodGroup("X");

@@ -57,7 +57,7 @@ public class PatientController extends MciController {
     @RequestMapping(method = POST, consumes = {APPLICATION_JSON_VALUE})
     public DeferredResult<ResponseEntity<MCIResponse>> create(
             @RequestBody @Validated({RequiredGroup.class, Default.class}) PatientData patient,
-            BindingResult bindingResult) {
+            BindingResult bindingResult) throws InterruptedException {
 
         if (!isBlank(patient.getHealthId())) {
             bindingResult.addError(new FieldError("patient", "hid", "3001"));

@@ -63,6 +63,7 @@ public class PatientFeedRepositoryIT {
 
     private PatientData createPatient() {
         PatientData data = new PatientData();
+        data.setHealthId(String.valueOf(new Date().getTime()));
         data.setNationalId("1234567890123");
         data.setBirthRegistrationNumber("12345678901234567");
         data.setUid("12345678901");

@@ -3,8 +3,10 @@ package org.sharedhealth.mci.web.controller;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
@@ -13,13 +15,16 @@ import org.sharedhealth.mci.web.dummy.InvalidPatient;
 import org.sharedhealth.mci.web.handler.ErrorHandler;
 import org.sharedhealth.mci.web.handler.MCIError;
 import org.sharedhealth.mci.web.handler.MCIResponse;
+import org.sharedhealth.mci.web.infrastructure.persistence.HealthIdRepository;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
 import org.sharedhealth.mci.web.mapper.Relation;
+import org.sharedhealth.mci.web.model.HealthId;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -29,6 +34,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.text.ParseException;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -58,6 +64,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebAppConfiguration
 @ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
 public class PatientControllerIT extends BaseControllerTest {
+    @Autowired
+    private HealthIdRepository healthIdRepository;
+    //to make sure healthIds are present
+    @BeforeClass
+    public static void setSystemProps() {
+        System.setProperty("HEALTH_ID_REPLENISH_INITIAL_DELAY", "0");
+        System.setProperty("HEALTH_ID_REPLENISH_DELAY", "1");
+    }
+
+    @AfterClass
+    public static void resetSystemProps() {
+        System.setProperty("HEALTH_ID_REPLENISH_INITIAL_DELAY", "10000000");
+        System.setProperty("HEALTH_ID_REPLENISH_DELAY", "60000");
+    }
+
     @Before
     public void setup() throws ParseException {
         MockitoAnnotations.initMocks(this);
@@ -65,7 +86,6 @@ public class PatientControllerIT extends BaseControllerTest {
         validClientId = "6";
         validEmail = "some@thoughtworks.com";
         validAccessToken = "2361e0a8-f352-4155-8415-32adfb8c2472";
-
 
 
         setUpMockMvcBuilder();
@@ -91,6 +111,7 @@ public class PatientControllerIT extends BaseControllerTest {
         setupApprovalsConfig(cassandraOps);
         setupLocation(cassandraOps);
     }
+
 
     @Test
     public void shouldCreatePatient() throws Exception {

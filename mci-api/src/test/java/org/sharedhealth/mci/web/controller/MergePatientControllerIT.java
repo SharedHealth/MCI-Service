@@ -25,7 +25,9 @@ public class MergePatientControllerIT extends PatientControllerIT {
     @Test
     public void shouldUpdateOnlyMergedWithFieldForInactivePatient() throws Exception {
         String healthId = createPatient(patientData).getId();
+        patientData.clearHealthId();
         String targetHealthId = createPatient(patientData).getId();
+        patientData.clearHealthId();
         String newTargetHealthId = createPatient(patientData).getId();
 
         PatientData patientDataWithActiveInfo = new PatientData();
@@ -56,6 +58,7 @@ public class MergePatientControllerIT extends PatientControllerIT {
     @Test
     public void shouldNotActivateInactivePatient() throws Exception {
         String healthId = createPatient(patientData).getId();
+        patientData.clearHealthId();
         String targetHealthId = createPatient(patientData).getId();
 
         PatientData patientDataWithActiveInfo = new PatientData();

@@ -21,7 +21,6 @@ public class PatientHealthIdBlockReplenishTask {
     @Scheduled(initialDelayString = "${HEALTH_ID_REPLENISH_INITIAL_DELAY}", fixedDelayString = "${HEALTH_ID_REPLENISH_DELAY}")
     public void execute() {
         try {
-            logger.debug("Replenishing Health Ids, if needed..");
             patientHealthIdService.replenishIfNeeded();
         } catch (Exception e) {
             logger.error("Failed to replenish health Ids", e);

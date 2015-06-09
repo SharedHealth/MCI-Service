@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
+import org.sharedhealth.mci.web.infrastructure.persistence.HealthIdRepository;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -39,6 +40,7 @@ public class HealthIdControllerIT extends BaseControllerTest {
 
     @Autowired
     private Filter springSecurityFilterChain;
+
 
     @Before
     public void setUp() throws Exception {

@@ -79,7 +79,6 @@ public class PatientRepository extends BaseRepository {
         logger.debug(String.format("Create patient: %s", patientData.toString()));
 
         Patient patient = mapper.map(patientData, new PatientData());
-        patient.setHealthId(hidGenerator.generate());
         patient.setCreatedAt(timeBased());
         patient.setUpdatedAt(timeBased());
 
