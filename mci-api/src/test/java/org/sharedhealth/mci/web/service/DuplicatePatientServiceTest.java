@@ -37,15 +37,13 @@ public class DuplicatePatientServiceTest {
 
     @Mock
     private DuplicatePatientRepository duplicatePatientRepository;
-    @Mock
-    private PatientService patientService;
 
     private DuplicatePatientService duplicatePatientService;
 
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-        duplicatePatientService = new DuplicatePatientService(patientService, duplicatePatientRepository);
+        duplicatePatientService = new DuplicatePatientService(duplicatePatientRepository);
     }
 
     @Test
@@ -106,8 +104,6 @@ public class DuplicatePatientServiceTest {
         patient2.setAddress(new Address("10", "20", "30"));
         patient2.setActive(true);
 
-        when(patientService.findByHealthId(healthId1)).thenReturn(patient1);
-        when(patientService.findByHealthId(healthId2)).thenReturn(patient2);
         when(duplicatePatientRepository.findByCatchmentAndHealthIds(patient1.getCatchment(), healthId1, healthId2))
                 .thenReturn(asList(new DuplicatePatient()));
 
@@ -184,8 +180,6 @@ public class DuplicatePatientServiceTest {
         patient2.setAddress(new Address("10", "20", "30"));
         patient2.setActive(true);
 
-        when(patientService.findByHealthId(healthId1)).thenReturn(patient1);
-        when(patientService.findByHealthId(healthId2)).thenReturn(patient2);
         when(duplicatePatientRepository.findByCatchmentAndHealthIds(patient1.getCatchment(), healthId1, healthId2))
                 .thenReturn(asList(new DuplicatePatient()));
 

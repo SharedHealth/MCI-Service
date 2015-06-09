@@ -24,13 +24,10 @@ public class DuplicatePatientService {
 
     private static final Logger logger = getLogger(DuplicatePatientService.class);
 
-    private PatientService patientService;
     private DuplicatePatientRepository duplicatePatientRepository;
 
     @Autowired
-    public DuplicatePatientService(PatientService patientService,
-                                   DuplicatePatientRepository duplicatePatientRepository) {
-        this.patientService = patientService;
+    public DuplicatePatientService(DuplicatePatientRepository duplicatePatientRepository) {
         this.duplicatePatientRepository = duplicatePatientRepository;
     }
 
