@@ -2,12 +2,10 @@ package org.sharedhealth.mci.web.mapper;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.HashSet;
 import java.util.Set;
 
-import static org.sharedhealth.mci.web.utils.JsonConstants.CREATED_AT;
-import static org.sharedhealth.mci.web.utils.JsonConstants.HID1;
-import static org.sharedhealth.mci.web.utils.JsonConstants.HID2;
-import static org.sharedhealth.mci.web.utils.JsonConstants.REASONS;
+import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
 public class DuplicatePatientData {
 
@@ -57,11 +55,51 @@ public class DuplicatePatientData {
         this.reasons = reasons;
     }
 
+    public void addReason(String reason) {
+        if (this.reasons == null) {
+            this.reasons = new HashSet<>();
+        }
+        this.reasons.add(reason);
+    }
+
     public String getCreatedAt() {
         return createdAt;
     }
 
     public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof DuplicatePatientData)) return false;
+
+        DuplicatePatientData that = (DuplicatePatientData) o;
+
+        if (!healthId1.equals(that.healthId1)) return false;
+        if (!healthId2.equals(that.healthId2)) return false;
+        if (!reasons.equals(that.reasons)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = healthId1.hashCode();
+        result = 31 * result + healthId2.hashCode();
+        result = 31 * result + reasons.hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("DuplicatePatientData{");
+        sb.append("healthId1='").append(healthId1).append('\'');
+        sb.append(", healthId2='").append(healthId2).append('\'');
+        sb.append(", reasons=").append(reasons);
+        sb.append(", createdAt='").append(createdAt).append('\'');
+        sb.append('}');
+        return sb.toString();
     }
 }
