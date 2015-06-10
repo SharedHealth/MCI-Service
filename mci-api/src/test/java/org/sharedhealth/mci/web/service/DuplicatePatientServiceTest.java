@@ -7,12 +7,11 @@ import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.sharedhealth.mci.web.infrastructure.persistence.DuplicatePatientRepository;
-import org.sharedhealth.mci.web.mapper.Address;
-import org.sharedhealth.mci.web.mapper.Catchment;
-import org.sharedhealth.mci.web.mapper.DuplicatePatientData;
-import org.sharedhealth.mci.web.mapper.DuplicatePatientMergeData;
-import org.sharedhealth.mci.web.mapper.PatientData;
+import org.sharedhealth.mci.web.infrastructure.persistence.MarkerRepository;
+import org.sharedhealth.mci.web.infrastructure.persistence.PatientFeedRepository;
+import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.model.DuplicatePatient;
+import org.sharedhealth.mci.web.model.PatientUpdateLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +25,7 @@ import static org.junit.rules.ExpectedException.none;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.EVENT_TYPE_CREATED;
 import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.asSet;
 import static org.sharedhealth.mci.web.utils.MCIConstants.DUPLICATION_ACTION_MERGE;
 import static org.sharedhealth.mci.web.utils.MCIConstants.DUPLICATION_ACTION_RETAIN_ALL;
@@ -37,13 +37,17 @@ public class DuplicatePatientServiceTest {
 
     @Mock
     private DuplicatePatientRepository duplicatePatientRepository;
+    @Mock
+    private PatientFeedRepository feedRepository;
+    @Mock
+    private MarkerRepository markerRepository;
 
     private DuplicatePatientService duplicatePatientService;
 
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-        duplicatePatientService = new DuplicatePatientService(duplicatePatientRepository);
+        duplicatePatientService = new DuplicatePatientService(duplicatePatientRepository, feedRepository, markerRepository);
     }
 
     @Test
@@ -228,5 +232,13 @@ public class DuplicatePatientServiceTest {
         data.setPatient1(patient1);
         data.setPatient2(patient2);
         return data;
+    }
+
+    @Test
+    public void shouldProcessCreateEventInFeed() {
+        PatientUpdateLog log = new PatientUpdateLog();
+        log.setHealthId("h100");
+        log.setEventType(EVENT_TYPE_CREATED);
+        when(feedRepository.findPatientUpdateLog(null)).thenReturn(log);
     }
 }

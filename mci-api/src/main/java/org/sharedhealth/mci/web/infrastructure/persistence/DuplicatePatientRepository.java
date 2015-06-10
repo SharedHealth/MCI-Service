@@ -18,10 +18,7 @@ import static com.datastax.driver.core.querybuilder.QueryBuilder.batch;
 import static java.lang.String.format;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-import static org.sharedhealth.mci.web.infrastructure.persistence.DuplicatePatientQueryBuilder.buildCreateIgnoreDuplicatesStmt;
-import static org.sharedhealth.mci.web.infrastructure.persistence.DuplicatePatientQueryBuilder.buildDeleteDuplicatesStmt;
-import static org.sharedhealth.mci.web.infrastructure.persistence.DuplicatePatientQueryBuilder.buildFindByCatchmentAndHealthIdsStmt;
-import static org.sharedhealth.mci.web.infrastructure.persistence.DuplicatePatientQueryBuilder.buildFindByCatchmentStmt;
+import static org.sharedhealth.mci.web.infrastructure.persistence.DuplicatePatientQueryBuilder.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Component
