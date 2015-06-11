@@ -1,6 +1,8 @@
 package org.sharedhealth.mci.web.infrastructure.dedup;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
@@ -11,11 +13,19 @@ import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryCons
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonMapper.readValue;
 
-public class DedupEventProcessorFactory {
+@Component
+public class DuplicatePatientEventProcessorFactory {
 
-    public static DedupEventProcessor getEventProcessor(String eventType, String changeSet) {
+    private DuplicatePatientRuleEngine ruleEngine;
+
+    @Autowired
+    public DuplicatePatientEventProcessorFactory(DuplicatePatientRuleEngine ruleEngine) {
+        this.ruleEngine = ruleEngine;
+    }
+
+    public DuplicatePatientEventProcessor getEventProcessor(String eventType, String changeSet) {
         if (EVENT_TYPE_CREATED.equals(eventType)) {
-            return new DedupCreateEventProcessor();
+            return new DuplicatePatientCreateEventProcessor(ruleEngine);
         }
 
         if (EVENT_TYPE_UPDATED.equals(eventType)) {
@@ -24,14 +34,14 @@ public class DedupEventProcessorFactory {
                     });
             Map<String, Object> activeField = changeSetMap.get(ACTIVE);
             if (isRetired(activeField)) {
-                return new DedupRetireEventProcessor();
+                return new DuplicatePatientRetireEventProcessor(ruleEngine);
             }
-            return new DedupUpdateEventProcessor();
+            return new DuplicatePatientUpdateEventProcessor(ruleEngine);
         }
         return null;
     }
 
-    static boolean isRetired(Map<String, Object> activeField) {
+    boolean isRetired(Map<String, Object> activeField) {
         if (activeField != null) {
             Object newValue = activeField.get(NEW_VALUE);
             Object oldValue = activeField.get(OLD_VALUE);

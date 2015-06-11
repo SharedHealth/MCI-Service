@@ -1,28 +1,20 @@
 package org.sharedhealth.mci.web.service;
 
 import org.sharedhealth.mci.utils.DateUtil;
-import org.sharedhealth.mci.web.infrastructure.dedup.DedupEventProcessor;
 import org.sharedhealth.mci.web.infrastructure.persistence.DuplicatePatientRepository;
-import org.sharedhealth.mci.web.infrastructure.persistence.MarkerRepository;
-import org.sharedhealth.mci.web.infrastructure.persistence.PatientFeedRepository;
 import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.DuplicatePatientData;
 import org.sharedhealth.mci.web.mapper.DuplicatePatientMergeData;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.model.DuplicatePatient;
-import org.sharedhealth.mci.web.model.PatientUpdateLog;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import static java.lang.String.format;
-import static java.util.UUID.fromString;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.sharedhealth.mci.web.infrastructure.dedup.DedupEventProcessorFactory.getEventProcessor;
 import static org.sharedhealth.mci.web.utils.MCIConstants.DUPLICATION_ACTION_MERGE;
 import static org.sharedhealth.mci.web.utils.MCIConstants.DUPLICATION_ACTION_RETAIN_ALL;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -31,18 +23,12 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class DuplicatePatientService {
 
     private static final Logger logger = getLogger(DuplicatePatientService.class);
-    private static final String DUPLICATE_PATIENT_MARKER = "duplicate_patient_marker";
 
     private DuplicatePatientRepository duplicatePatientRepository;
-    private PatientFeedRepository feedRepository;
-    private MarkerRepository markerRepository;
 
     @Autowired
-    public DuplicatePatientService(DuplicatePatientRepository duplicatePatientRepository,
-                                   PatientFeedRepository feedRepository, MarkerRepository markerRepository) {
+    public DuplicatePatientService(DuplicatePatientRepository duplicatePatientRepository) {
         this.duplicatePatientRepository = duplicatePatientRepository;
-        this.feedRepository = feedRepository;
-        this.markerRepository = markerRepository;
     }
 
     public List<DuplicatePatientData> findAllByCatchment(Catchment catchment) {
@@ -113,16 +99,5 @@ public class DuplicatePatientService {
     private void handleIllegalArgument(String message) {
         logger.error(message);
         throw new IllegalArgumentException(message);
-    }
-
-    public void processDuplicatePatients() {
-        String markerString = markerRepository.find(DUPLICATE_PATIENT_MARKER);
-        UUID marker = isNotBlank(markerString) ? fromString(markerString) : null;
-        PatientUpdateLog log = feedRepository.findPatientUpdateLog(marker);
-        if (log == null) {
-            return;
-        }
-        DedupEventProcessor eventProcessor = getEventProcessor(log.getEventType(), log.getChangeSet());
-        eventProcessor.process(log.getHealthId(), log.getEventId());
     }
 }
