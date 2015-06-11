@@ -50,6 +50,7 @@ public class PatientService {
     public static final String MESSAGE_INSUFFICIENT_PRIVILEGE = "insufficient.privilege";
     public static final String MESSAGE_INVALID_PENDING_APPROVALS = "invalid.pending.approvals";
     public static final String MESSAGE_PENDING_APPROVALS_MISMATCH = "pending.approvals.mismatch";
+    public static final int CREATED = 201;
 
     private PatientRepository patientRepository;
     private PatientFeedRepository feedRepository;
@@ -79,7 +80,7 @@ public class PatientService {
         HealthId nextHealthId = patientHealthIdService.getNextHealthId();
         patient.setHealthId(nextHealthId.getHid());
         MCIResponse mciResponse = patientRepository.create(patient);
-        if (201 == mciResponse.getHttpStatus()) {
+        if (CREATED == mciResponse.getHttpStatus()) {
             patientHealthIdService.markUsed(nextHealthId);
         } else {
             patientHealthIdService.putBackHealthId(nextHealthId);
