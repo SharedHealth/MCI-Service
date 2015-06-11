@@ -25,14 +25,11 @@ repositories {
 dependencies {
     compile(libraries.spring_boot_web) {
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
-        exclude group: 'ch.qos.logback', module: "logback-classic"
     }
 
     compile(libraries.spring_boot_security) {
-        exclude group: 'ch.qos.logback', module: "logback-classic"
     }
     compile(libraries.spring_boot_actuator) {
-        exclude group: 'ch.qos.logback', module: "logback-classic"
     }
 
     compile libraries.spring_boot_logging, libraries.snappy, libraries.spring_context_support,
@@ -73,6 +70,8 @@ test {
 }
 
 configurations {
+    all*.exclude group: 'ch.qos.logback', module: "logback-classic"
+    all*.exclude group: 'ch.qos.logback', module: "logback-core"
     migration {
         extendsFrom compile
     }

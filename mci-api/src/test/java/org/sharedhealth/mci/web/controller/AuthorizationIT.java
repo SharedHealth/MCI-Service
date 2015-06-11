@@ -4,43 +4,41 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.MockitoAnnotations;
-import org.sharedhealth.mci.web.config.EnvironmentMock;
 import org.sharedhealth.mci.web.handler.MCIResponse;
-import org.sharedhealth.mci.web.launch.WebMvcConfig;
+import org.sharedhealth.mci.web.infrastructure.persistence.HealthIdRepository;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.text.ParseException;
 import java.util.UUID;
 
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static java.lang.String.format;
+import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
-import static org.sharedhealth.mci.utils.HttpUtil.AUTH_TOKEN_KEY;
-import static org.sharedhealth.mci.utils.HttpUtil.CLIENT_ID_KEY;
-import static org.sharedhealth.mci.utils.HttpUtil.FROM_KEY;
+import static org.sharedhealth.mci.utils.HttpUtil.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.setupApprovalsConfig;
 import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.setupLocation;
 import static org.sharedhealth.mci.web.utils.JsonConstants.LAST_MARKER;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@WebAppConfiguration
-@ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
 public class AuthorizationIT extends BaseControllerTest {
+    @Autowired
+    private HealthIdRepository healthIdRepository;
 
     private final String patientClientId = "18558";
     private final String patientEmail = "patient@gmail.com";
@@ -67,8 +65,8 @@ public class AuthorizationIT extends BaseControllerTest {
     private final String mciApproverAccessToken = "40214a6c-e27c-4223-981c-1f837be90f06";
 
     @Before
-    public void setup() throws ParseException {
-        MockitoAnnotations.initMocks(this);
+    public void setUp() throws ParseException {
+        initMocks(this);
         setUpMockMvcBuilder();
         createPatientData();
         setupApprovalsConfig(cassandraOps);
@@ -109,7 +107,6 @@ public class AuthorizationIT extends BaseControllerTest {
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withBody(asString("jsons/userDetails/userDetailForMCIApprover.json"))));
-
     }
 
     @Test
@@ -733,8 +730,8 @@ public class AuthorizationIT extends BaseControllerTest {
 
     @Test
     public void mciApproverShouldUpdatePatientUsingMergerequestApi() throws Exception {
-
         String healthId = createPatient(patientData).getId();
+        patientData.setHealthId(null);
         String targetHealthId = createPatient(patientData).getId();
 
         PatientData patientDataWithActiveInfo = new PatientData();
@@ -742,7 +739,6 @@ public class AuthorizationIT extends BaseControllerTest {
         patientDataWithActiveInfo.setMergedWith(targetHealthId);
 
         String json = mapper.writeValueAsString(patientDataWithActiveInfo);
-
         mockMvc.perform(put(API_END_POINT_FOR_MERGE_REQUEST + "/" + healthId)
                 .header(AUTH_TOKEN_KEY, mciApproverAccessToken)
                 .header(FROM_KEY, mciApproverEmail)

@@ -80,8 +80,10 @@ public class PatientRepositoryIT {
     private String uid = "12345678901";
     private String givenName = "Scott";
     private String householdCode = "12345";
+    private String healthId = "98093779883";
     private PatientData data;
-
+    @Autowired
+    private HealthIdRepository healthIdRepository;
     @SuppressWarnings("SpringJavaAutowiringInspection")
     @Autowired
     @Qualifier("MCICassandraTemplate")
@@ -106,6 +108,7 @@ public class PatientRepositoryIT {
 
     private PatientData buildPatient() {
         PatientData data = initPatientData();
+        data.setHealthId(String.valueOf(new Date().getTime()));
         data.setNationalId(nationalId);
         data.setBirthRegistrationNumber(birthRegistrationNumber);
         data.setUid(uid);
@@ -1148,6 +1151,8 @@ public class PatientRepositoryIT {
         assertNotNull(healthId1);
 
         patient.setGivenName("Jane");
+
+        patient.setHealthId(String.valueOf(new Date().getTime()));
         String healthId2 = patientRepository.create(patient).getId();
         assertNotNull(healthId2);
         assertFalse(healthId1.equals(healthId2));
@@ -1322,6 +1327,7 @@ public class PatientRepositoryIT {
         String healthId1 = patientRepository.create(patient).getId();
         assertNotNull(healthId1);
 
+        patient.setHealthId(String.valueOf(new Date().getTime()));
         String healthId2 = patientRepository.create(patient).getId();
         assertNotNull(healthId2);
 
@@ -1352,8 +1358,10 @@ public class PatientRepositoryIT {
 
         String healthId1 = patientRepository.create(patient).getId();
         assertTrue(isNotBlank(healthId1));
+        patient.setHealthId(String.valueOf(new Date().getTime()));
         String healthId2 = patientRepository.create(patient).getId();
         assertTrue(isNotBlank(healthId2));
+        patient.setHealthId(String.valueOf(new Date().getTime()));
         String healthId3 = patientRepository.create(patient).getId();
         assertTrue(isNotBlank(healthId3));
 
@@ -1371,6 +1379,7 @@ public class PatientRepositoryIT {
         address.setCityCorporationId("40");
 
         for (int i = 1; i <= 5; i++) {
+            patient.setHealthId(String.valueOf(new Date().getTime()));
             address.setUnionOrUrbanWardId("5" + i);
             address.setRuralWardId("6" + i);
             patient.setAddress(address);
@@ -1405,6 +1414,7 @@ public class PatientRepositoryIT {
             address.setUnionOrUrbanWardId("5" + i);
             address.setRuralWardId("6" + i);
             patient.setAddress(address);
+            patient.setHealthId(String.valueOf(new Date().getTime()));
             healthIds.add(patientRepository.create(patient).getId());
             Thread.sleep(0, 10);
         }
@@ -2093,12 +2103,14 @@ public class PatientRepositoryIT {
     private PatientData initPatientData() {
         PatientData patient = new PatientData();
         patient.setRequester(FACILITY, null);
+        patient.setHealthId(String.valueOf(new Date().getTime()));
         return patient;
     }
 
     private PatientData initPatientData(PatientData data) {
         PatientData patient = data;
         patient.setRequester(FACILITY, null);
+        patient.setHealthId(String.valueOf(new Date().getTime()));
         return patient;
     }
 

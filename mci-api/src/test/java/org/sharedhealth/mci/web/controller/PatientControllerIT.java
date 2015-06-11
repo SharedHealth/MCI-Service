@@ -8,12 +8,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
-import org.sharedhealth.mci.web.config.EnvironmentMock;
 import org.sharedhealth.mci.web.dummy.InvalidPatient;
 import org.sharedhealth.mci.web.handler.ErrorHandler;
 import org.sharedhealth.mci.web.handler.MCIError;
 import org.sharedhealth.mci.web.handler.MCIResponse;
-import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
@@ -21,9 +19,7 @@ import org.sharedhealth.mci.web.mapper.Relation;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -31,32 +27,23 @@ import java.text.ParseException;
 import java.util.Collections;
 import java.util.List;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
-import static org.sharedhealth.mci.utils.HttpUtil.AUTH_TOKEN_KEY;
-import static org.sharedhealth.mci.utils.HttpUtil.CLIENT_ID_KEY;
-import static org.sharedhealth.mci.utils.HttpUtil.FROM_KEY;
+import static org.sharedhealth.mci.utils.HttpUtil.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.setupApprovalsConfig;
 import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.setupLocation;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@WebAppConfiguration
-@ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
 public class PatientControllerIT extends BaseControllerTest {
     @Before
     public void setup() throws ParseException {
@@ -65,7 +52,6 @@ public class PatientControllerIT extends BaseControllerTest {
         validClientId = "6";
         validEmail = "some@thoughtworks.com";
         validAccessToken = "2361e0a8-f352-4155-8415-32adfb8c2472";
-
 
 
         setUpMockMvcBuilder();
@@ -91,6 +77,7 @@ public class PatientControllerIT extends BaseControllerTest {
         setupApprovalsConfig(cassandraOps);
         setupLocation(cassandraOps);
     }
+
 
     @Test
     public void shouldCreatePatient() throws Exception {

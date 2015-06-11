@@ -22,6 +22,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -110,6 +111,7 @@ public class PatientAuditRepositoryIT {
 
     private PatientData buildPatient() {
         PatientData patient = new PatientData();
+        patient.setHealthId(String.valueOf(new Date().getTime()));
         patient.setNationalId("1234567890123");
         patient.setBirthRegistrationNumber("12345678901234567");
         patient.setUid("12345678901");

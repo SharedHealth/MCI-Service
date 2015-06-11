@@ -22,6 +22,8 @@ public class EnvironmentMock implements ApplicationContextInitializer<Configurab
 
     @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
+        System.setProperty("log4j.configuration", "log4j.xml");
+        System.setProperty("MCI_LOG_LEVEL", "ERROR");
         Map<String, String> env = mockPropertySources(applicationContext);
         createEmbeddedCassandra(env);
     }

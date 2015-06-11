@@ -905,4 +905,8 @@ public class PatientData implements Diffable<PatientData> {
 
                 .build();
     }
+
+    public void clearHealthId() {
+        this.healthId = null;
+    }
 }

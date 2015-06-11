@@ -16,6 +16,7 @@ import org.sharedhealth.mci.web.mapper.PendingApprovalListResponse;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
 import org.sharedhealth.mci.web.mapper.Requester;
 import org.sharedhealth.mci.web.mapper.SearchQuery;
+import org.sharedhealth.mci.web.model.HealthId;
 import org.sharedhealth.mci.web.model.PatientUpdateLog;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
 
@@ -49,13 +50,40 @@ public class PatientServiceTest {
     FacilityService facilityService;
     @Mock
     SettingService settingService;
+    @Mock
+    PatientHealthIdService patientHealthIdService;
 
     private PatientService patientService;
 
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-        patientService = new PatientService(patientRepository, feedRepository, facilityService, settingService);
+        patientService = new PatientService(patientRepository, feedRepository, facilityService, settingService, patientHealthIdService);
+    }
+
+    @Test
+    public void shouldCreateNewPatient() throws Exception {
+        PatientData existingPatient = new PatientData();
+        HealthId healthId = new HealthId("FUBAR", "MCI", 0);
+        when(patientHealthIdService.getNextHealthId()).thenReturn(healthId);
+        SearchQuery searchByNidQuery = new SearchQuery();
+        searchByNidQuery.setNid("nid-100");
+        when(patientRepository.findAllByQuery(searchByNidQuery)).thenReturn(new ArrayList<PatientData>());
+
+        SearchQuery searchByBrnQuery = new SearchQuery();
+        searchByBrnQuery.setBin_brn("brn-100");
+        when(patientRepository.findAllByQuery(searchByBrnQuery)).thenReturn(new ArrayList<PatientData>());
+
+        existingPatient.setNationalId("nid-100");
+        existingPatient.setBirthRegistrationNumber("brn-100");
+
+        patientService.create(existingPatient);
+        InOrder inOrder = inOrder(patientRepository);
+        inOrder.verify(patientRepository).findAllByQuery(searchByNidQuery);
+        inOrder.verify(patientRepository).findAllByQuery(searchByBrnQuery);
+        inOrder.verify(patientRepository).create(existingPatient);
+
+        verify(patientHealthIdService).getNextHealthId();
     }
 
     @Test

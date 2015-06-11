@@ -13,11 +13,13 @@ import java.util.regex.Pattern;
 @Component
 public class HealthIdService {
     private final Pattern invalidHidPattern;
+    private final MCIProperties mciProperties;
     private HealthIdRepository healthIdRepository;
     private LuhnChecksumGenerator checksumGenerator;
 
     @Autowired
     public HealthIdService(MCIProperties mciProperties, HealthIdRepository healthIdRepository, LuhnChecksumGenerator checksumGenerator) {
+        this.mciProperties = mciProperties;
         this.healthIdRepository = healthIdRepository;
         this.checksumGenerator = checksumGenerator;
         invalidHidPattern = Pattern.compile(mciProperties.getInvalidHidPattern());
@@ -37,7 +39,7 @@ public class HealthIdService {
     }
 
     public synchronized List<HealthId> getNextBlock() {
-        return healthIdRepository.getNextBlock();
+        return healthIdRepository.getNextBlock(mciProperties.getHealthIdBlockSize());
     }
 
     public synchronized List<HealthId> getNextBlock(int blockSize) {

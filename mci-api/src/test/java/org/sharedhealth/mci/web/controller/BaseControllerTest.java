@@ -6,29 +6,36 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Rule;
+import org.sharedhealth.mci.web.config.EnvironmentMock;
 import org.sharedhealth.mci.web.exception.Forbidden;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.handler.MCIResponse;
+import org.sharedhealth.mci.web.infrastructure.persistence.HealthIdRepository;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
 import org.sharedhealth.mci.web.infrastructure.persistence.TestUtil;
+import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PatientSummaryData;
 import org.sharedhealth.mci.web.mapper.Relation;
+import org.sharedhealth.mci.web.model.HealthId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 
 import javax.servlet.Filter;
+import java.util.Date;
 import java.util.List;
 
-import static org.sharedhealth.mci.utils.HttpUtil.AUTH_TOKEN_KEY;
-import static org.sharedhealth.mci.utils.HttpUtil.CLIENT_ID_KEY;
-import static org.sharedhealth.mci.utils.HttpUtil.FROM_KEY;
+import static org.sharedhealth.mci.utils.HttpUtil.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -36,15 +43,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
-
+@WebAppConfiguration
+@ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
+@TestPropertySource(properties = {"HEALTH_ID_REPLENISH_INITIAL_DELAY = 0",
+        "HEALTH_ID_REPLENISH_DELAY = 1",
+        "HEALTH_ID_BLOCK_SIZE = 1",
+        "HEALTH_ID_BLOCK_SIZE_THRESHOLD=1"})
 public class BaseControllerTest {
     protected static final String FACILITY_ID = "1111111";
     protected static final String PROVIDER_ID = "222222";
     protected static final String ADMIN_ID = "333333";
 
+
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(9997);
-
+    @Autowired
+    private HealthIdRepository healthIdRepository;
     @Autowired
     protected WebApplicationContext webApplicationContext;
 
@@ -97,11 +111,16 @@ public class BaseControllerTest {
     }
 
     protected MCIResponse createPatient(PatientData patient) throws Exception {
+        if (null == patient.getHealthId())
+            patient.setHealthId(String.valueOf(new Date().getTime()));
         return patientRepository.create(patient);
     }
+
     protected MCIResponse createPatient(String json) throws Exception {
         PatientData data = getPatientObjectFromString(json);
         data.setRequester(FACILITY_ID, null);
+        if (null == data.getHealthId())
+            data.setHealthId(String.valueOf(new Date().getTime()));
         return createPatient(data);
     }
 
@@ -148,11 +167,28 @@ public class BaseControllerTest {
     }
 
     protected PatientData getPatientObjectFromResponse(ResponseEntity asyncResult) throws Exception {
-        return getPatientObjectFromString(mapper.writeValueAsString((PatientData) asyncResult.getBody()));
+        return getPatientObjectFromString(mapper.writeValueAsString(asyncResult.getBody()));
+    }
+
+    @Before
+    public void setupBase() throws Exception {
+        healthIdRepository.resetLastReservedHealthId();
+        createHealthIds();
+    }
+
+    private void createHealthIds() {
+        for (int i = 0; i < numberOfHealthIdsNeeded(); i++) {
+            healthIdRepository.saveHealthIdSync(new HealthId(String.valueOf(new Date().getTime() + i), "MCI", 0));
+        }
+    }
+
+    protected int numberOfHealthIdsNeeded() {
+        return 10;
     }
 
     @After
-    public void teardown() {
+    public void teardownBase() {
+        healthIdRepository.resetLastReservedHealthId();
         TestUtil.truncateAllColumnFamilies(cassandraOps);
     }
 
