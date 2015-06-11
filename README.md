@@ -44,12 +44,12 @@ touch ~/.vaultpass.txt
 
 
 
-### cd to Identity-Server
+### Build Identity-Server
 * ./gradlew clean dist
 * cp build/distributions/identity-server-0.1-1.noarch.rpm /tmp/
 
 
-### cd to MCI-Service
+### Build MCI-Service
 * ./gradlew clean dist
 * cp mci-api/build/distributions/mci-0.1-1.noarch.rpm /tmp/
 * vagrant up | vagrant provision
@@ -61,7 +61,7 @@ Notes:
 - Stub Identity Server will run in port 8080
 
 ### load some location data in MCI
-* cqlsh 192.168.33.19
+* cqlsh 192.168.33.19 -u cassandra -p c1a2s3s4a5n6d7r8a
 * describe keyspaces;
 * use mci;
 * copy and run the following scripts for some sample location data
@@ -76,8 +76,23 @@ INSERT INTO locations ("code", "name", "active","parent") VALUES ('30','Urban Wa
 INSERT INTO locations ("code", "name", "active","parent") VALUES ('33','Urban Ward No-33 (part) (46)','1','30260225') IF NOT EXISTS;
 ```
 
-NOTES: Before you can post to MCI Service, you need to sign-in with the IdP and get an access token.
+### Generate some IDs
+Before you can create a patient, you have to generate some Health IDs first.
+Example steps:
+* Login to IdP as an MCI Admin
+  * curl http://192.168.33.19:8080/signin -H "X-Auth-Token:41eeda45e711cc6b3e660e4abb2cb863f93ae90815f0edf40a134dffedf6d885" -H "client_id:18548" --form "email=MciAdmin@test.com" --form "password=thoughtworks"
+  * This should return you an access_token for MCI Admin.
 
+* With the above token for MCI Admin, now you can POST to the http://192.168.33.19:8081/api/v1/healthIds/generateRange?start=9800000100&end=9800100200 to generate Health IDs
+  * X-Auth-Token:{the token you received in the previous step}
+  * client_id:18564 { this is client id for the user who signed in}
+  * From: MciAdmin@test.com
+
+* The above should return you count of IDs that it generated.
+
+
+### Create a patient
+Now you can create a patient. Before you can interact with MCI Service, you need to sign-in with the IdP and get an access token. You need to post as a correct user.
 Example steps:
 * Login to IdP and get a token:
   * curl http://192.168.33.19:8080/signin -H "X-Auth-Token:41eeda45e711cc6b3e660e4abb2cb863f93ae90815f0edf40a134dffedf6d885" -H "client_id:18548" --form "email=angshus@thoughtworks.com" --form "password=activation"
@@ -93,7 +108,7 @@ Example steps:
 ```
 Sample json to create a patient:
 {
-    "given_name": "Salman",
+    "given_name": "Pavan",
     "sur_name": "Das",
     "nid": "1666321725072",
     "date_of_birth": "1992-07-14",
@@ -112,11 +127,11 @@ The above should return you a HTTP 201 response with something like the below co
 ```
 {
     "http_status": 201,
-    "id": "98417155622"
+    "id": "98000173958"
 }
 ```
 
-* To view the patient record you just created do a GET to http://192.168.33.19:8081/api/v1/patients/98417155622 with the following headers
+* To view the patient record you just created do a GET to http://192.168.33.19:8081/api/v1/patients/98000173958 with the following headers
   * X-Auth-Token:{the token you received in the previous step}
   * client_id:6 { this is client id for the user who signed in}
   * From: angshus@thoughtworks.com

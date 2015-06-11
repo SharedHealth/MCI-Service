@@ -1,9 +1,11 @@
 package org.sharedhealth.mci.web.infrastructure.security;
 
 import org.sharedhealth.mci.utils.HttpUtil;
+import org.sharedhealth.mci.web.config.MCICacheConfiguration;
 import org.sharedhealth.mci.web.config.MCIProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -33,6 +35,7 @@ public class IdentityServiceClient {
         this.clientAuthenticator = clientAuthenticator;
     }
 
+    @Cacheable(value = MCICacheConfiguration.IDENTITY_CACHE, unless = "#result == null")
     public TokenAuthentication authenticate(UserAuthInfo userAuthInfo, String token) throws AuthenticationException, ExecutionException,
             InterruptedException {
         String userInfoUrl = ensureEndsWithBackSlash(mciProperties.getIdentityServerBaseUrl()) + token;

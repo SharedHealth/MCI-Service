@@ -9,7 +9,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.stereotype.Component;
 
-import static org.sharedhealth.mci.web.config.MCIConfig.MASTER_DATA_CACHE;
+import static org.sharedhealth.mci.web.config.MCICacheConfiguration.MASTER_DATA_CACHE;
 
 @Component
 public class MasterDataRepository extends BaseRepository {

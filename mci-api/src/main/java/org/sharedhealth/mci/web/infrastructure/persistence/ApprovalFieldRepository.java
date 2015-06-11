@@ -10,7 +10,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.stereotype.Component;
 
-import static org.sharedhealth.mci.web.config.MCIConfig.APPROVAL_FIELDS_CACHE;
+import static org.sharedhealth.mci.web.config.MCICacheConfiguration.APPROVAL_FIELDS_CACHE;
 
 @Component
 public class ApprovalFieldRepository extends BaseRepository {
