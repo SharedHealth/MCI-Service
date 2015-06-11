@@ -19,6 +19,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -147,6 +148,15 @@ public class HealthIdServiceTest {
         List<HealthId> nextBlock = healthIdService.getNextBlock();
         verify(healthIdRepository).getNextBlock(mciProperties.getHealthIdBlockSize());
         assertEquals(2, nextBlock.size());
+    }
+
+    @Test
+    public void shouldMarkHidUsed() {
+        HealthId healthId = new HealthId("898998");
+        doNothing().when(healthIdRepository).markUsed(any(HealthId.class));
+        HealthIdService healthIdService = new HealthIdService(mciProperties, healthIdRepository, checksumGenerator);
+        healthIdService.markUsed(healthId);
+        verify(healthIdRepository).markUsed(healthId);
     }
 
 }

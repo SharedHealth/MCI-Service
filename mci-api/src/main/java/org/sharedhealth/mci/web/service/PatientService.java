@@ -14,6 +14,7 @@ import org.sharedhealth.mci.web.mapper.PatientSummaryData;
 import org.sharedhealth.mci.web.mapper.PendingApproval;
 import org.sharedhealth.mci.web.mapper.PendingApprovalListResponse;
 import org.sharedhealth.mci.web.mapper.SearchQuery;
+import org.sharedhealth.mci.web.model.HealthId;
 import org.sharedhealth.mci.web.model.PatientUpdateLog;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
 import org.slf4j.Logger;
@@ -75,8 +76,15 @@ public class PatientService {
         if (existingPatient != null) {
             return this.update(patient, existingPatient.getHealthId());
         }
-        patient.setHealthId(patientHealthIdService.getNextHealthId().getHid());
-        return patientRepository.create(patient);
+        HealthId nextHealthId = patientHealthIdService.getNextHealthId();
+        patient.setHealthId(nextHealthId.getHid());
+        MCIResponse mciResponse = patientRepository.create(patient);
+        if (201 == mciResponse.getHttpStatus()) {
+            patientHealthIdService.markUsed(nextHealthId);
+        } else {
+            patientHealthIdService.putBackHealthId(nextHealthId);
+        }
+        return mciResponse;
     }
 
     PatientData findPatientByMultipleIds(PatientData patient) {

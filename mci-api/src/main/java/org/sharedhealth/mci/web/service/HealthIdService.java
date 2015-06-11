@@ -45,4 +45,8 @@ public class HealthIdService {
     public synchronized List<HealthId> getNextBlock(int blockSize) {
         return healthIdRepository.getNextBlock(blockSize);
     }
+
+    public void markUsed(HealthId nextHealthId) {
+        healthIdRepository.markUsed(nextHealthId);
+    }
 }

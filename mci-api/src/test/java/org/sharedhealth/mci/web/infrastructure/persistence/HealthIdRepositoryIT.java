@@ -18,6 +18,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
@@ -73,6 +74,18 @@ public class HealthIdRepositoryIT {
     }
 
     @Test
+    public void shouldMarkHidUsed() throws ExecutionException, InterruptedException {
+        long prefix = 98190001231L;
+        createHealthIds(prefix);
+        List<HealthId> nextBlock = healthIdRepository.getNextBlock(2);
+        HealthId healthId = nextBlock.remove(0);
+        healthIdRepository.markUsedSync(healthId);
+        HealthId id = healthIdRepository.getHealthId(healthId.getHid());
+        assertEquals(healthId.getHid(), id.getHid());
+        assertEquals("1", String.valueOf(id.getStatus()));
+    }
+
+    @Test
     public void shouldGetANewBlockEveryTime() throws ExecutionException, InterruptedException {
         long prefix = 98190001231L;
         createHealthIds(prefix);
@@ -84,8 +97,6 @@ public class HealthIdRepositoryIT {
         for (HealthId healthId : nextBlock) {
             assertFalse(healthIds.contains(healthId));
         }
-
     }
-
 }
 

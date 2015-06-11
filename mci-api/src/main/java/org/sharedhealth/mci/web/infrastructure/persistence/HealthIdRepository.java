@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.CF_HEALTH_ID;
+import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.HID;
 import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.RESERVED_FOR;
 
 @Component
@@ -40,10 +41,10 @@ public class HealthIdRepository extends BaseRepository{
         logger.debug(String.format(String.format("Getting next block of size : %d", blockSize)));
         Select.Where from = QueryBuilder.select().from(CF_HEALTH_ID)
                 .where(QueryBuilder.eq(RESERVED_FOR, "MCI"));
-        if (null != lastReservedHealthId)
+        if (null != lastReservedHealthId) {
             from = from.and(QueryBuilder.gt("token(hid)",
                     QueryBuilder.raw(String.format("token('%s')", lastReservedHealthId))));
-
+        }
         Select nextBlockQuery = from
                 .and(QueryBuilder.eq("Status", 0))
                 .limit(blockSize).allowFiltering();
@@ -64,5 +65,21 @@ public class HealthIdRepository extends BaseRepository{
 
     public void resetLastReservedHealthId() {
         lastReservedHealthId = null;
+    }
+
+    public void markUsed(HealthId nextHealthId) {
+        nextHealthId.setStatus(1);
+        cassandraOps.updateAsynchronously(nextHealthId);
+    }
+
+    public void markUsedSync(HealthId nextHealthId) {
+        nextHealthId.setStatus(1);
+        cassandraOps.update(nextHealthId);
+    }
+
+    public HealthId getHealthId(String hid) {
+        Select selectHealthId = QueryBuilder.select().from(CF_HEALTH_ID).where(QueryBuilder.eq(HID, hid)).limit(1);
+        List<HealthId> healthIds = cassandraOps.select(selectHealthId, HealthId.class);
+        return healthIds.get(0);
     }
 }

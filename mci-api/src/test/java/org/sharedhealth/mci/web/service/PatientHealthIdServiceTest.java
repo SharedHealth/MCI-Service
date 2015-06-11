@@ -16,6 +16,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -93,4 +96,37 @@ public class PatientHealthIdServiceTest {
         assertEquals(10000, uniqueHealthIds.size());
     }
 
+    @Test
+    public void shouldPutBackHidToHidBlock() throws Exception {
+        ArrayList<HealthId> healthIds = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            healthIds.add(new HealthId(String.valueOf(1213000 + i), "MCI", 0));
+        }
+        when(healthIdService.getNextBlock()).thenReturn(healthIds);
+        final PatientHealthIdService patientHealthIdService = new PatientHealthIdService(healthIdService, mciProperties);
+        patientHealthIdService.replenishIfNeeded();
+        int before = patientHealthIdService.getHealthIdBlockSize();
+        HealthId nextHealthId = patientHealthIdService.getNextHealthId();
+        patientHealthIdService.putBackHealthId(nextHealthId);
+        int after = patientHealthIdService.getHealthIdBlockSize();
+        assertEquals(before, after);
+    }
+
+    @Test
+    public void shouldMarkHidAsUsed() throws Exception {
+        ArrayList<HealthId> healthIds = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            healthIds.add(new HealthId(String.valueOf(1213000 + i), "MCI", 0));
+        }
+        when(healthIdService.getNextBlock()).thenReturn(healthIds);
+        doNothing().when(healthIdService).markUsed(any(HealthId.class));
+        final PatientHealthIdService patientHealthIdService = new PatientHealthIdService(healthIdService, mciProperties);
+        patientHealthIdService.replenishIfNeeded();
+        int before = patientHealthIdService.getHealthIdBlockSize();
+        HealthId nextHealthId = patientHealthIdService.getNextHealthId();
+        patientHealthIdService.markUsed(nextHealthId);
+        int after = patientHealthIdService.getHealthIdBlockSize();
+        assertEquals(before, after + 1);
+        verify(healthIdService, times(1)).markUsed(any(HealthId.class));
+    }
 }

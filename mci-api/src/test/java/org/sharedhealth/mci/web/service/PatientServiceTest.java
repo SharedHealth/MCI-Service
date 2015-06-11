@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.sharedhealth.mci.web.exception.InsufficientPrivilegeException;
+import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientFeedRepository;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
 import org.sharedhealth.mci.web.mapper.Address;
@@ -33,10 +34,7 @@ import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
@@ -52,6 +50,8 @@ public class PatientServiceTest {
     SettingService settingService;
     @Mock
     PatientHealthIdService patientHealthIdService;
+    @Mock
+    MCIResponse mciResponse;
 
     private PatientService patientService;
 
@@ -77,6 +77,9 @@ public class PatientServiceTest {
         existingPatient.setNationalId("nid-100");
         existingPatient.setBirthRegistrationNumber("brn-100");
 
+        when(mciResponse.getHttpStatus()).thenReturn(201);
+        when(patientRepository.create(existingPatient)).thenReturn(mciResponse);
+
         patientService.create(existingPatient);
         InOrder inOrder = inOrder(patientRepository);
         inOrder.verify(patientRepository).findAllByQuery(searchByNidQuery);
@@ -84,6 +87,66 @@ public class PatientServiceTest {
         inOrder.verify(patientRepository).create(existingPatient);
 
         verify(patientHealthIdService).getNextHealthId();
+    }
+
+    @Test
+    public void shouldMarkHidUsedIfCretePatientIsSuccessful() throws Exception {
+        PatientData existingPatient = new PatientData();
+        HealthId healthId = new HealthId("FUBAR", "MCI", 0);
+        when(patientHealthIdService.getNextHealthId()).thenReturn(healthId);
+        SearchQuery searchByNidQuery = new SearchQuery();
+        searchByNidQuery.setNid("nid-100");
+        when(patientRepository.findAllByQuery(searchByNidQuery)).thenReturn(new ArrayList<PatientData>());
+
+        SearchQuery searchByBrnQuery = new SearchQuery();
+        searchByBrnQuery.setBin_brn("brn-100");
+        when(patientRepository.findAllByQuery(searchByBrnQuery)).thenReturn(new ArrayList<PatientData>());
+
+        existingPatient.setNationalId("nid-100");
+        existingPatient.setBirthRegistrationNumber("brn-100");
+
+        when(mciResponse.getHttpStatus()).thenReturn(201);
+        when(patientRepository.create(existingPatient)).thenReturn(mciResponse);
+
+        patientService.create(existingPatient);
+        InOrder inOrder = inOrder(patientRepository);
+        inOrder.verify(patientRepository).findAllByQuery(searchByNidQuery);
+        inOrder.verify(patientRepository).findAllByQuery(searchByBrnQuery);
+        inOrder.verify(patientRepository).create(existingPatient);
+
+        verify(patientHealthIdService).getNextHealthId();
+        verify(patientHealthIdService, times(1)).markUsed(any(HealthId.class));
+        verify(patientHealthIdService, times(0)).putBackHealthId(any(HealthId.class));
+    }
+
+    @Test
+    public void shouldReturnHidToHidBlockIfCretePatientFailed() throws Exception {
+        PatientData existingPatient = new PatientData();
+        HealthId healthId = new HealthId("FUBAR", "MCI", 0);
+        when(patientHealthIdService.getNextHealthId()).thenReturn(healthId);
+        SearchQuery searchByNidQuery = new SearchQuery();
+        searchByNidQuery.setNid("nid-100");
+        when(patientRepository.findAllByQuery(searchByNidQuery)).thenReturn(new ArrayList<PatientData>());
+
+        SearchQuery searchByBrnQuery = new SearchQuery();
+        searchByBrnQuery.setBin_brn("brn-100");
+        when(patientRepository.findAllByQuery(searchByBrnQuery)).thenReturn(new ArrayList<PatientData>());
+
+        existingPatient.setNationalId("nid-100");
+        existingPatient.setBirthRegistrationNumber("brn-100");
+
+        when(mciResponse.getHttpStatus()).thenReturn(403);
+        when(patientRepository.create(existingPatient)).thenReturn(mciResponse);
+
+        patientService.create(existingPatient);
+        InOrder inOrder = inOrder(patientRepository);
+        inOrder.verify(patientRepository).findAllByQuery(searchByNidQuery);
+        inOrder.verify(patientRepository).findAllByQuery(searchByBrnQuery);
+        inOrder.verify(patientRepository).create(existingPatient);
+
+        verify(patientHealthIdService).getNextHealthId();
+        verify(patientHealthIdService, times(0)).markUsed(any(HealthId.class));
+        verify(patientHealthIdService, times(1)).putBackHealthId(any(HealthId.class));
     }
 
     @Test

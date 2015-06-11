@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 @Component
 public class PatientHealthIdService {
 
-    Queue<HealthId> healthIds = new ConcurrentLinkedQueue<>();
+    private Queue<HealthId> healthIds = new ConcurrentLinkedQueue<>();
 
     private HealthIdService healthIdService;
     private final MCIProperties mciProperties;
@@ -26,9 +26,21 @@ public class PatientHealthIdService {
         return healthIds.remove();
     }
 
+    public void putBackHealthId(HealthId healthId) {
+        healthIds.add(healthId);
+    }
+
     public void replenishIfNeeded() {
         if (healthIds.size() < mciProperties.getHealthIdBlockSizeThreshold()) {
             healthIds.addAll(healthIdService.getNextBlock());
         }
+    }
+
+    public void markUsed(HealthId nextHealthId) {
+        healthIdService.markUsed(nextHealthId);
+    }
+
+    public int getHealthIdBlockSize() {
+        return healthIds.size();
     }
 }
