@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.String.format;
+import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.web.utils.MCIConstants.DUPLICATION_ACTION_MERGE;
 import static org.sharedhealth.mci.web.utils.MCIConstants.DUPLICATION_ACTION_RETAIN_ALL;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -49,7 +50,7 @@ public class DuplicatePatientService {
         duplicatePatientData.setHealthId1(duplicatePatient.getHealth_id1());
         duplicatePatientData.setHealthId2(duplicatePatient.getHealth_id2());
         duplicatePatientData.setReasons(duplicatePatient.getReasons());
-        duplicatePatientData.setCreatedAt(DateUtil.toIsoFormat(duplicatePatient.getCreated_at()));
+        duplicatePatientData.setCreatedAt(toIsoFormat(duplicatePatient.getCreated_at()));
         return duplicatePatientData;
     }
 

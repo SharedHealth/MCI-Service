@@ -1,5 +1,6 @@
 package org.sharedhealth.mci.web.mapper;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.HashSet;
@@ -20,6 +21,12 @@ public class DuplicatePatientData {
 
     @JsonProperty(CREATED_AT)
     private String createdAt;
+
+    @JsonIgnore
+    private Catchment catchment1;
+
+    @JsonIgnore
+    private Catchment catchment2;
 
     public DuplicatePatientData() {
     }
@@ -70,26 +77,20 @@ public class DuplicatePatientData {
         this.createdAt = createdAt;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof DuplicatePatientData)) return false;
-
-        DuplicatePatientData that = (DuplicatePatientData) o;
-
-        if (!healthId1.equals(that.healthId1)) return false;
-        if (!healthId2.equals(that.healthId2)) return false;
-        if (!reasons.equals(that.reasons)) return false;
-
-        return true;
+    public Catchment getCatchment1() {
+        return catchment1;
     }
 
-    @Override
-    public int hashCode() {
-        int result = healthId1.hashCode();
-        result = 31 * result + healthId2.hashCode();
-        result = 31 * result + reasons.hashCode();
-        return result;
+    public void setCatchment1(Catchment catchment1) {
+        this.catchment1 = catchment1;
+    }
+
+    public Catchment getCatchment2() {
+        return catchment2;
+    }
+
+    public void setCatchment2(Catchment catchment2) {
+        this.catchment2 = catchment2;
     }
 
     @Override

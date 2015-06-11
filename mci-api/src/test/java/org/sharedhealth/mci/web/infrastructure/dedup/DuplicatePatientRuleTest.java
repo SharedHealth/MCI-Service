@@ -14,8 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.*;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -27,17 +26,19 @@ public class DuplicatePatientRuleTest {
     private PatientRepository patientRepository;
 
     private DuplicatePatientRule duplicatePatientRule;
+    private List<PatientData> patients;
 
     @Before
     public void setUp() throws Exception {
         initMocks(this);
+        patients = buildPatients();
     }
 
     @Test
     public void shouldFindDuplicatesByNid() {
         duplicatePatientRule = new DuplicatePatientNidRule(patientRepository);
         String nationalId = "n100";
-        PatientData patient = new PatientData();
+        PatientData patient = patients.get(0);
         patient.setNationalId(nationalId);
 
         SearchQuery query = new SearchQuery();
@@ -50,7 +51,7 @@ public class DuplicatePatientRuleTest {
     public void shouldFindDuplicatesByUid() {
         duplicatePatientRule = new DuplicatePatientUidRule(patientRepository);
         String uid = "u100";
-        PatientData patient = new PatientData();
+        PatientData patient = patients.get(0);
         patient.setUid(uid);
 
         SearchQuery query = new SearchQuery();
@@ -63,7 +64,7 @@ public class DuplicatePatientRuleTest {
     public void shouldFindDuplicatesByBrn() {
         duplicatePatientRule = new DuplicatePatientBrnRule(patientRepository);
         String brn = "b100";
-        PatientData patient = new PatientData();
+        PatientData patient = patients.get(0);
         patient.setBirthRegistrationNumber(brn);
 
         SearchQuery query = new SearchQuery();
@@ -77,49 +78,84 @@ public class DuplicatePatientRuleTest {
         duplicatePatientRule = new DuplicatePatientNameAndAddressRule(patientRepository);
         String givenName = "John";
         String surname = "Doe";
-        String address = "102030";
-        PatientData patient = new PatientData();
+        PatientData patient = patients.get(0);
         patient.setGivenName(givenName);
         patient.setSurName(surname);
-        patient.setAddress(new Address("10", "20", "30"));
 
         SearchQuery query = new SearchQuery();
         query.setGiven_name(givenName);
         query.setSur_name(surname);
-        query.setPresent_address(address);
+        query.setPresent_address("101112");
 
         shouldFindDuplicates(patient, query, DUPLICATE_REASON_NAME_ADDRESS);
     }
 
-    private void shouldFindDuplicates(PatientData patient, SearchQuery query, String reason) {
-        String healthId = "h100";
-        patient.setHealthId(healthId);
+    private void shouldFindDuplicates(PatientData patient1, SearchQuery query, String reason) {
+        String healthId1 = "h100";
+        patient1.setHealthId(healthId1);
+        patient1.setAddress(new Address("10", "11", "12"));
+        when(patientRepository.findByHealthId(healthId1)).thenReturn(patient1);
 
-        when(patientRepository.findByHealthId(healthId)).thenReturn(patient);
-        when(patientRepository.findAllByQuery(query)).thenReturn(buildPatients());
+        List<PatientData> patients = buildPatients();
+        when(patientRepository.findAllByQuery(query)).thenReturn(patients);
 
         List<DuplicatePatientData> duplicates = new ArrayList<>();
-        duplicatePatientRule.apply(healthId, duplicates);
+        duplicatePatientRule.apply(healthId1, duplicates);
         assertTrue(isNotEmpty(duplicates));
         assertEquals(3, duplicates.size());
 
-        assertEquals(asList(buildDuplicate(healthId, "h200", reason), buildDuplicate(healthId, "h300", reason),
-                buildDuplicate(healthId, "h400", reason)), duplicates);
+        assertDuplicateEquals(asList(buildDuplicate(patients.get(0), patients.get(1), reason),
+                buildDuplicate(patients.get(0), patients.get(2), reason),
+                buildDuplicate(patients.get(0), patients.get(3), reason)), duplicates);
     }
 
-    private DuplicatePatientData buildDuplicate(String healthId1, String healthId2, String reason) {
-        return new DuplicatePatientData(healthId1, healthId2, new HashSet<>(asList(reason)), null);
+    private void assertDuplicateEquals(List<DuplicatePatientData> duplicates1, List<DuplicatePatientData> duplicates2) {
+        assertNotNull(duplicates1);
+        assertNotNull(duplicates2);
+        int size = duplicates1.size();
+        assertEquals(size, duplicates2.size());
+
+        for (int i = 0; i < size - 1; i++) {
+            assertEquals(duplicates1.get(i).getHealthId1(), duplicates2.get(i).getHealthId1());
+            assertEquals(duplicates1.get(i).getHealthId2(), duplicates2.get(i).getHealthId2());
+            assertEquals(duplicates1.get(i).getReasons(), duplicates2.get(i).getReasons());
+            assertEquals(duplicates1.get(i).getCatchment1(), duplicates2.get(i).getCatchment1());
+            assertEquals(duplicates1.get(i).getCatchment2(), duplicates2.get(i).getCatchment2());
+        }
+    }
+
+    private DuplicatePatientData buildDuplicate(PatientData patient1, PatientData patient2, String reason) {
+        DuplicatePatientData patient = new DuplicatePatientData(patient1.getHealthId(), patient2.getHealthId(),
+                new HashSet<>(asList(reason)), null);
+        patient.setCatchment1(patient1.getCatchment());
+        patient.setCatchment2(patient2.getCatchment());
+        return patient;
     }
 
     private List<PatientData> buildPatients() {
         PatientData patient1 = new PatientData();
-        patient1.setHealthId("h100");
+        String healthId1 = "h100";
+        patient1.setHealthId(healthId1);
+        patient1.setAddress(new Address("10", "11", "12"));
+
         PatientData patient2 = new PatientData();
-        patient2.setHealthId("h200");
+        String healthId2 = "h200";
+        patient2.setHealthId(healthId2);
+        patient2.setAddress(new Address("20", "21", "22"));
+        when(patientRepository.findByHealthId(healthId2)).thenReturn(patient2);
+
         PatientData patient3 = new PatientData();
-        patient3.setHealthId("h300");
+        String healthId3 = "h300";
+        patient3.setHealthId(healthId3);
+        patient3.setAddress(new Address("30", "31", "32"));
+        when(patientRepository.findByHealthId(healthId3)).thenReturn(patient3);
+
         PatientData patient4 = new PatientData();
-        patient4.setHealthId("h400");
+        String healthId4 = "h400";
+        patient4.setHealthId(healthId4);
+        patient4.setAddress(new Address("40", "41", "42"));
+        when(patientRepository.findByHealthId(healthId4)).thenReturn(patient4);
+
         return asList(patient1, patient2, patient3, patient4);
     }
 }

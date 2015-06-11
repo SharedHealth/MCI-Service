@@ -2,6 +2,7 @@ package org.sharedhealth.mci.web.infrastructure.dedup;
 
 import org.apache.commons.collections4.Predicate;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
+import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.DuplicatePatientData;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.SearchQuery;
@@ -30,7 +31,7 @@ public abstract class DuplicatePatientRule {
         PatientData patient = patientRepository.findByHealthId(healthId);
         SearchQuery query = buildSearchQuery(patient);
         List<String> healthIds = findDuplicatesBySearchQuery(healthId, query);
-        buildDuplicates(healthId, healthIds, getReason(), duplicates);
+        buildDuplicates(healthId, patient.getCatchment(), healthIds, getReason(), duplicates);
     }
 
     protected abstract SearchQuery buildSearchQuery(PatientData patient);
@@ -48,7 +49,7 @@ public abstract class DuplicatePatientRule {
         return duplicateHealthIds;
     }
 
-    protected void buildDuplicates(final String healthId1, List<String> healthIds, String reason,
+    protected void buildDuplicates(final String healthId1, Catchment catchment1, List<String> healthIds, String reason,
                                    List<DuplicatePatientData> duplicates) {
         for (final String healthId2 : healthIds) {
             DuplicatePatientData duplicate = find(duplicates, new Predicate<DuplicatePatientData>() {
@@ -61,7 +62,12 @@ public abstract class DuplicatePatientRule {
             if (duplicate != null) {
                 duplicate.addReason(reason);
             } else {
-                duplicates.add(new DuplicatePatientData(healthId1, healthId2, new HashSet<>(asList(reason)), null));
+                HashSet<String> reasons = new HashSet<>(asList(reason));
+                DuplicatePatientData patient = new DuplicatePatientData(healthId1, healthId2, reasons, null);
+                patient.setCatchment1(catchment1);
+                PatientData patient2 = patientRepository.findByHealthId(healthId2);
+                patient.setCatchment2(patient2.getCatchment());
+                duplicates.add(patient);
             }
         }
     }

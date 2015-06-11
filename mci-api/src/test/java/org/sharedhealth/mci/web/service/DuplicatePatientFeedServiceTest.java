@@ -15,7 +15,6 @@ import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static java.util.UUID.randomUUID;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.EVENT_TYPE_CREATED;
 import static org.sharedhealth.mci.web.service.DuplicatePatientFeedService.DUPLICATE_PATIENT_MARKER;
 
