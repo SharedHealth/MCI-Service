@@ -41,6 +41,8 @@ public class HealthIdServiceTest {
         mciProperties.setInvalidHidPattern("^[^9]|^.[^89]|(^\\d{0,9}$)|(^\\d{11,}$)|((\\d)\\4{2})\\d*((\\d)\\6{2})|(\\d)\\7{3}");
         mciProperties.setMciStartHid("9800000000");
         mciProperties.setMciEndHid("9999999999");
+        mciProperties.setHealthIdBlockSize("10");
+        mciProperties.setHealthIdBlockSizeThreshold("1");
         initMocks(this);
 
     }
@@ -139,10 +141,11 @@ public class HealthIdServiceTest {
         ArrayList<HealthId> result = new ArrayList<>();
         result.add(new HealthId("898998"));
         result.add(new HealthId("898999"));
-        when(healthIdRepository.getNextBlock()).thenReturn(result);
+        when(healthIdRepository.getNextBlock(mciProperties.getHealthIdBlockSize())).thenReturn(result);
 
         HealthIdService healthIdService = new HealthIdService(mciProperties, healthIdRepository, checksumGenerator);
         List<HealthId> nextBlock = healthIdService.getNextBlock();
+        verify(healthIdRepository).getNextBlock(mciProperties.getHealthIdBlockSize());
         assertEquals(2, nextBlock.size());
     }
 

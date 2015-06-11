@@ -2,24 +2,16 @@ package org.sharedhealth.mci.web.controller;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.sharedhealth.mci.web.config.EnvironmentMock;
-import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.mapper.PatientData;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 
 import static org.junit.Assert.assertEquals;
-import static org.sharedhealth.mci.utils.HttpUtil.AUTH_TOKEN_KEY;
-import static org.sharedhealth.mci.utils.HttpUtil.CLIENT_ID_KEY;
-import static org.sharedhealth.mci.utils.HttpUtil.FROM_KEY;
+import static org.sharedhealth.mci.utils.HttpUtil.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@WebAppConfiguration
-@ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
 public class MergePatientControllerIT extends PatientControllerIT {
 
     @Test

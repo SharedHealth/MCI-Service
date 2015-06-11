@@ -53,8 +53,15 @@ public class MCIProperties {
     private String invalidHidPattern;
     @Value("${MCI_START_HID}")
     private String mciStartHid;
+
     @Value("${MCI_END_HID}")
     private String mciEndHid;
+
+    @Value("${HEALTH_ID_BLOCK_SIZE}")
+    private String healthIdBlockSize;
+
+    @Value("${HEALTH_ID_BLOCK_SIZE_THRESHOLD}")
+    private String healthIdBlockSizeThreshold;
 
 
     public String getCassandraKeySpace() {
@@ -151,5 +158,21 @@ public class MCIProperties {
 
     public void setMciEndHid(String mciEndHid) {
         this.mciEndHid = mciEndHid;
+    }
+
+    public int getHealthIdBlockSize() {
+        return Integer.parseInt(healthIdBlockSize);
+    }
+
+    public int getHealthIdBlockSizeThreshold() {
+        return Integer.parseInt(healthIdBlockSizeThreshold);
+    }
+
+    public void setHealthIdBlockSizeThreshold(String healthIdBlockSizeThreshold) {
+        this.healthIdBlockSizeThreshold = healthIdBlockSizeThreshold;
+    }
+
+    public void setHealthIdBlockSize(String healthIdBlockSize) {
+        this.healthIdBlockSize = healthIdBlockSize;
     }
 }

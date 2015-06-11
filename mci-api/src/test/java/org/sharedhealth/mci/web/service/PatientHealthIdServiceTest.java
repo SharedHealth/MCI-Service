@@ -3,11 +3,12 @@ package org.sharedhealth.mci.web.service;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.sharedhealth.mci.web.config.MCIProperties;
 import org.sharedhealth.mci.web.model.HealthId;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -24,10 +25,13 @@ public class PatientHealthIdServiceTest {
 
     @Mock
     private HealthIdService healthIdService;
+    @Mock
+    MCIProperties mciProperties;
 
     @Before
     public void setUp() throws Exception {
         initMocks(this);
+        when(mciProperties.getHealthIdBlockSizeThreshold()).thenReturn(1);
     }
 
     @Test
@@ -35,7 +39,7 @@ public class PatientHealthIdServiceTest {
         ArrayList<HealthId> healthIds = new ArrayList<>();
         healthIds.add(new HealthId("1213", "MCI", 0));
         when(healthIdService.getNextBlock()).thenReturn(healthIds);
-        PatientHealthIdService patientHealthIdService = new PatientHealthIdService(healthIdService);
+        PatientHealthIdService patientHealthIdService = new PatientHealthIdService(healthIdService, mciProperties);
         patientHealthIdService.replenishIfNeeded();
         verify(healthIdService).getNextBlock();
     }
@@ -45,7 +49,7 @@ public class PatientHealthIdServiceTest {
         ArrayList<HealthId> healthIds = new ArrayList<>();
         healthIds.add(new HealthId("1213", "MCI", 0));
         when(healthIdService.getNextBlock()).thenReturn(healthIds);
-        PatientHealthIdService patientHealthIdService = new PatientHealthIdService(healthIdService);
+        PatientHealthIdService patientHealthIdService = new PatientHealthIdService(healthIdService, mciProperties);
         patientHealthIdService.replenishIfNeeded();
         HealthId healthId = patientHealthIdService.getNextHealthId();
         assertEquals("1213", healthId.getHid());
@@ -55,7 +59,7 @@ public class PatientHealthIdServiceTest {
     public void shouldThrowExceptionIfQueueIsEmpty() throws Exception {
         ArrayList<HealthId> healthIds = new ArrayList<>();
         when(healthIdService.getNextBlock()).thenReturn(healthIds);
-        PatientHealthIdService patientHealthIdService = new PatientHealthIdService(healthIdService);
+        PatientHealthIdService patientHealthIdService = new PatientHealthIdService(healthIdService, mciProperties);
         patientHealthIdService.replenishIfNeeded();
         patientHealthIdService.getNextHealthId();
     }
@@ -67,10 +71,10 @@ public class PatientHealthIdServiceTest {
             healthIds.add(new HealthId(String.valueOf(1213000 + i), "MCI", 0));
         }
         when(healthIdService.getNextBlock()).thenReturn(healthIds);
-        final PatientHealthIdService patientHealthIdService = new PatientHealthIdService(healthIdService);
+        final PatientHealthIdService patientHealthIdService = new PatientHealthIdService(healthIdService, mciProperties);
         patientHealthIdService.replenishIfNeeded();
 
-        ExecutorService executor = Executors.newFixedThreadPool(1000);
+        ExecutorService executor = Executors.newFixedThreadPool(100);
         final Set<Future<HealthId>> eventualHealthIds = new HashSet<>();
         for (int i = 0; i < 10000; i++) {
             Callable<HealthId> nextBlock = new Callable<HealthId>() {
