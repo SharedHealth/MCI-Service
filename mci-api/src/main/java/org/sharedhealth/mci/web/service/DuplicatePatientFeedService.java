@@ -1,7 +1,7 @@
 package org.sharedhealth.mci.web.service;
 
-import org.sharedhealth.mci.web.infrastructure.dedup.DuplicatePatientEventProcessor;
-import org.sharedhealth.mci.web.infrastructure.dedup.DuplicatePatientEventProcessorFactory;
+import org.sharedhealth.mci.web.infrastructure.dedup.event.DuplicatePatientEventProcessor;
+import org.sharedhealth.mci.web.infrastructure.dedup.event.DuplicatePatientEventProcessorFactory;
 import org.sharedhealth.mci.web.infrastructure.persistence.MarkerRepository;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientFeedRepository;
 import org.sharedhealth.mci.web.model.PatientUpdateLog;

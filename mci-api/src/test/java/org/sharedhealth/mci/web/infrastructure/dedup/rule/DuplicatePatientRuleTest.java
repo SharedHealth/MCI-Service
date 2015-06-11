@@ -1,8 +1,9 @@
-package org.sharedhealth.mci.web.infrastructure.dedup;
+package org.sharedhealth.mci.web.infrastructure.dedup.rule;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.sharedhealth.mci.web.infrastructure.dedup.rule.*;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.DuplicatePatientData;
@@ -18,7 +19,7 @@ import static junit.framework.Assert.*;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.sharedhealth.mci.web.infrastructure.dedup.DuplicatePatientRule.*;
+import static org.sharedhealth.mci.web.infrastructure.dedup.rule.DuplicatePatientRule.*;
 
 public class DuplicatePatientRuleTest {
 

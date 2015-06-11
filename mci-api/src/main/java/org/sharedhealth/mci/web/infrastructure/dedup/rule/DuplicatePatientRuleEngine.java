@@ -1,4 +1,4 @@
-package org.sharedhealth.mci.web.infrastructure.dedup;
+package org.sharedhealth.mci.web.infrastructure.dedup.rule;
 
 import org.sharedhealth.mci.web.mapper.DuplicatePatientData;
 import org.springframework.beans.factory.annotation.Autowired;

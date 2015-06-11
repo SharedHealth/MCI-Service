@@ -1,4 +1,4 @@
-package org.sharedhealth.mci.web.infrastructure.dedup;
+package org.sharedhealth.mci.web.infrastructure.dedup.rule;
 
 import org.apache.commons.collections4.Predicate;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;

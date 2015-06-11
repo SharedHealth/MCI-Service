@@ -1,8 +1,10 @@
-package org.sharedhealth.mci.web.infrastructure.dedup;
+package org.sharedhealth.mci.web.infrastructure.dedup.event;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.sharedhealth.mci.web.infrastructure.dedup.rule.DuplicatePatientRuleEngine;
+import org.sharedhealth.mci.web.mapper.DuplicatePatientMapper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,14 +22,16 @@ public class DuplicatePatientEventProcessorFactoryTest {
 
     @Mock
     private DuplicatePatientRuleEngine ruleEngine;
+    @Mock
+    private DuplicatePatientMapper mapper;
 
     @Before
-    public void setup() throws Exception {
-        factory = new DuplicatePatientEventProcessorFactory(ruleEngine);
+    public void setup() {
+        factory = new DuplicatePatientEventProcessorFactory(ruleEngine, mapper);
     }
 
     @Test
-    public void testGetEventProcessor() throws Exception {
+    public void testGetEventProcessor() {
         DuplicatePatientEventProcessor eventProcessor = factory.getEventProcessor(EVENT_TYPE_CREATED, null);
         assertTrue(eventProcessor instanceof DuplicatePatientCreateEventProcessor);
 
@@ -42,19 +46,19 @@ public class DuplicatePatientEventProcessorFactoryTest {
 
     @Test
     public void shouldCheckIfRetired() throws Exception {
-        assertFalse(factory.isRetired(null));
+        assertFalse(factory.isActiveFieldRetired(null));
 
         Map<String, Object> activeFieldDetails = new HashMap<>();
-        assertFalse(factory.isRetired(activeFieldDetails));
+        assertFalse(factory.isActiveFieldRetired(activeFieldDetails));
 
         activeFieldDetails = new HashMap<>();
         activeFieldDetails.put(NEW_VALUE, true);
         activeFieldDetails.put(OLD_VALUE, false);
-        assertFalse(factory.isRetired(activeFieldDetails));
+        assertFalse(factory.isActiveFieldRetired(activeFieldDetails));
 
         activeFieldDetails = new HashMap<>();
         activeFieldDetails.put(NEW_VALUE, false);
         activeFieldDetails.put(OLD_VALUE, true);
-        assertTrue(factory.isRetired(activeFieldDetails));
+        assertTrue(factory.isActiveFieldRetired(activeFieldDetails));
     }
 }

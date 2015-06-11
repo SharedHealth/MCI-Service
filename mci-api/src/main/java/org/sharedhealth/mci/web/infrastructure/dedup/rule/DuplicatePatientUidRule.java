@@ -1,4 +1,4 @@
-package org.sharedhealth.mci.web.infrastructure.dedup;
+package org.sharedhealth.mci.web.infrastructure.dedup.rule;
 
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
 import org.sharedhealth.mci.web.mapper.PatientData;
@@ -7,20 +7,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DuplicatePatientBrnRule extends DuplicatePatientRule {
+public class DuplicatePatientUidRule extends DuplicatePatientRule {
 
     private final String reason;
 
     @Autowired
-    public DuplicatePatientBrnRule(PatientRepository patientRepository) {
+    public DuplicatePatientUidRule(PatientRepository patientRepository) {
         super(patientRepository);
-        this.reason = DUPLICATE_REASON_BRN;
+        this.reason = DUPLICATE_REASON_UID;
     }
 
     @Override
     protected SearchQuery buildSearchQuery(PatientData patient) {
         SearchQuery query = new SearchQuery();
-        query.setBin_brn(patient.getBirthRegistrationNumber());
+        query.setUid(patient.getUid());
         return query;
     }
 

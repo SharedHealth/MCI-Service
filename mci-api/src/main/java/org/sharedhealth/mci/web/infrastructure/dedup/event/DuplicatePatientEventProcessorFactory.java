@@ -1,6 +1,8 @@
-package org.sharedhealth.mci.web.infrastructure.dedup;
+package org.sharedhealth.mci.web.infrastructure.dedup.event;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.sharedhealth.mci.web.infrastructure.dedup.rule.DuplicatePatientRuleEngine;
+import org.sharedhealth.mci.web.mapper.DuplicatePatientMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,15 +19,17 @@ import static org.sharedhealth.mci.web.utils.JsonMapper.readValue;
 public class DuplicatePatientEventProcessorFactory {
 
     private DuplicatePatientRuleEngine ruleEngine;
+    private DuplicatePatientMapper mapper;
 
     @Autowired
-    public DuplicatePatientEventProcessorFactory(DuplicatePatientRuleEngine ruleEngine) {
+    public DuplicatePatientEventProcessorFactory(DuplicatePatientRuleEngine ruleEngine, DuplicatePatientMapper mapper) {
         this.ruleEngine = ruleEngine;
+        this.mapper = mapper;
     }
 
     public DuplicatePatientEventProcessor getEventProcessor(String eventType, String changeSet) {
         if (EVENT_TYPE_CREATED.equals(eventType)) {
-            return new DuplicatePatientCreateEventProcessor(ruleEngine);
+            return new DuplicatePatientCreateEventProcessor(ruleEngine, mapper);
         }
 
         if (EVENT_TYPE_UPDATED.equals(eventType)) {
@@ -33,15 +37,15 @@ public class DuplicatePatientEventProcessorFactory {
                     new TypeReference<Map<String, Map<String, Object>>>() {
                     });
             Map<String, Object> activeField = changeSetMap.get(ACTIVE);
-            if (isRetired(activeField)) {
-                return new DuplicatePatientRetireEventProcessor(ruleEngine);
+            if (isActiveFieldRetired(activeField)) {
+                return new DuplicatePatientRetireEventProcessor(ruleEngine, mapper);
             }
-            return new DuplicatePatientUpdateEventProcessor(ruleEngine);
+            return new DuplicatePatientUpdateEventProcessor(ruleEngine, mapper);
         }
         return null;
     }
 
-    boolean isRetired(Map<String, Object> activeField) {
+    boolean isActiveFieldRetired(Map<String, Object> activeField) {
         if (activeField != null) {
             Object newValue = activeField.get(NEW_VALUE);
             Object oldValue = activeField.get(OLD_VALUE);
