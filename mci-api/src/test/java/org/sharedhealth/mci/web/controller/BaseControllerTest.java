@@ -2,6 +2,7 @@ package org.sharedhealth.mci.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import org.cassandraunit.spring.CassandraUnit;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.junit.After;
@@ -35,7 +36,9 @@ import javax.servlet.Filter;
 import java.util.Date;
 import java.util.List;
 
-import static org.sharedhealth.mci.utils.HttpUtil.*;
+import static org.sharedhealth.mci.utils.HttpUtil.AUTH_TOKEN_KEY;
+import static org.sharedhealth.mci.utils.HttpUtil.CLIENT_ID_KEY;
+import static org.sharedhealth.mci.utils.HttpUtil.FROM_KEY;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -49,6 +52,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
         "HEALTH_ID_REPLENISH_DELAY = 1",
         "HEALTH_ID_BLOCK_SIZE = 1",
         "HEALTH_ID_BLOCK_SIZE_THRESHOLD=1"})
+@CassandraUnit
 public class BaseControllerTest {
     protected static final String FACILITY_ID = "1111111";
     protected static final String PROVIDER_ID = "222222";
