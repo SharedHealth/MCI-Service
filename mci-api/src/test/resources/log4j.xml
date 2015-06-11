@@ -29,17 +29,17 @@
 
 
     <logger name="org.sharedhealth.mci" additivity="false">
-        <level value="${MCI_LOG_LEVEL}"/>
+        <level value="INFO"/>
         <appender-ref ref="VAR_LOG"/>
     </logger>
 
     <logger name="org.sharedhealth.mci.web.controller">
-        <level value="${MCI_LOG_LEVEL}"/>
+        <level value="INFO"/>
         <appender-ref ref="ACCESS_LOG"/>
     </logger>
 
     <root>
-        <level value ="${MCI_LOG_LEVEL}" />
+        <level value ="ERROR" />
         <appender-ref ref="ACCESS_LOG"/>
         <appender-ref ref="VAR_LOG" />
     </root>

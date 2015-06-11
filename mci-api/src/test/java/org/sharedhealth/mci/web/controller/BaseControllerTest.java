@@ -2,6 +2,8 @@ package org.sharedhealth.mci.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import org.cassandraunit.spring.CassandraDataSet;
+import org.cassandraunit.spring.CassandraUnit;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.junit.After;
@@ -47,8 +49,10 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
 @TestPropertySource(properties = {"HEALTH_ID_REPLENISH_INITIAL_DELAY = 0",
         "HEALTH_ID_REPLENISH_DELAY = 1",
-        "HEALTH_ID_BLOCK_SIZE = 1",
-        "HEALTH_ID_BLOCK_SIZE_THRESHOLD=1"})
+        "HEALTH_ID_BLOCK_SIZE = 5",
+        "HEALTH_ID_BLOCK_SIZE_THRESHOLD = 1",
+        "MCI_LOG_LEVEL=ERROR"})
+@CassandraUnit
 public class BaseControllerTest {
     protected static final String FACILITY_ID = "1111111";
     protected static final String PROVIDER_ID = "222222";
