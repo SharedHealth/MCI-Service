@@ -4,6 +4,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.sharedhealth.mci.web.infrastructure.dedup.rule.DuplicatePatientRuleEngine;
+import org.sharedhealth.mci.web.infrastructure.persistence.DuplicatePatientRepository;
+import org.sharedhealth.mci.web.infrastructure.persistence.MarkerRepository;
 import org.sharedhealth.mci.web.mapper.DuplicatePatientData;
 import org.sharedhealth.mci.web.mapper.DuplicatePatientMapper;
 
@@ -20,6 +22,10 @@ public class DuplicatePatientEventProcessorTest {
     private DuplicatePatientRuleEngine ruleEngine;
     @Mock
     private DuplicatePatientMapper mapper;
+    @Mock
+    private DuplicatePatientRepository duplicatePatientRepository;
+    @Mock
+    private MarkerRepository markerRepository;
 
     private DuplicatePatientEventProcessor eventProcessor;
 
@@ -30,7 +36,7 @@ public class DuplicatePatientEventProcessorTest {
 
     @Test
     public void shouldBuildDuplicates() {
-        eventProcessor = new DuplicatePatientCreateEventProcessor(ruleEngine, mapper);
+        eventProcessor = new DuplicatePatientCreateEventProcessor(ruleEngine, mapper, duplicatePatientRepository, markerRepository);
         String healthId = "h100";
 
         List<DuplicatePatientData> duplicates = asList(new DuplicatePatientData());

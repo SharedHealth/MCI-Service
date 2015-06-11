@@ -7,12 +7,15 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.Arrays.asList;
-
 @Component
 public class DuplicatePatientRuleEngine {
 
     private List<DuplicatePatientRule> rules;
+
+    @Autowired
+    public DuplicatePatientRuleEngine(List<DuplicatePatientRule> rules) {
+        this.rules = rules;
+    }
 
     public List<DuplicatePatientData> apply(String healthId) {
         List<DuplicatePatientData> duplicates = new ArrayList<>();
@@ -22,11 +25,5 @@ public class DuplicatePatientRuleEngine {
             }
         }
         return duplicates;
-    }
-
-    @Autowired
-    public void setRules(DuplicatePatientNidRule nidRule, DuplicatePatientUidRule uidRule,
-                         DuplicatePatientBrnRule brnRule, DuplicatePatientNameAndAddressRule nameAndAddressRule) {
-        this.rules = asList(nidRule, uidRule, brnRule, nameAndAddressRule);
     }
 }

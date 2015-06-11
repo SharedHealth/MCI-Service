@@ -1,6 +1,5 @@
 package org.sharedhealth.mci.web.service;
 
-import org.sharedhealth.mci.utils.DateUtil;
 import org.sharedhealth.mci.web.infrastructure.persistence.DuplicatePatientRepository;
 import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.DuplicatePatientData;

@@ -3,7 +3,6 @@ package org.sharedhealth.mci.web.infrastructure.dedup.rule;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.sharedhealth.mci.web.infrastructure.dedup.rule.*;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.DuplicatePatientData;
@@ -31,10 +30,9 @@ public class DuplicatePatientRuleEngineTest {
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-        ruleEngine = new DuplicatePatientRuleEngine();
-        ruleEngine.setRules(new DuplicatePatientNidRule(patientRepository),
+        ruleEngine = new DuplicatePatientRuleEngine(asList(new DuplicatePatientNidRule(patientRepository),
                 new DuplicatePatientUidRule(patientRepository), new DuplicatePatientBrnRule(patientRepository),
-                new DuplicatePatientNameAndAddressRule(patientRepository));
+                new DuplicatePatientNameAndAddressRule(patientRepository)));
     }
 
     @Test

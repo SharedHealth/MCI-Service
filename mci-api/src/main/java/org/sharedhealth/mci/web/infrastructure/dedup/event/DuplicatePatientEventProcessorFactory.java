@@ -1,8 +1,6 @@
 package org.sharedhealth.mci.web.infrastructure.dedup.event;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import org.sharedhealth.mci.web.infrastructure.dedup.rule.DuplicatePatientRuleEngine;
-import org.sharedhealth.mci.web.mapper.DuplicatePatientMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,18 +16,22 @@ import static org.sharedhealth.mci.web.utils.JsonMapper.readValue;
 @Component
 public class DuplicatePatientEventProcessorFactory {
 
-    private DuplicatePatientRuleEngine ruleEngine;
-    private DuplicatePatientMapper mapper;
+    private DuplicatePatientEventProcessor createEventProcessor;
+    private DuplicatePatientEventProcessor updateEventProcessor;
+    private DuplicatePatientEventProcessor retireEventProcessor;
 
     @Autowired
-    public DuplicatePatientEventProcessorFactory(DuplicatePatientRuleEngine ruleEngine, DuplicatePatientMapper mapper) {
-        this.ruleEngine = ruleEngine;
-        this.mapper = mapper;
+    public DuplicatePatientEventProcessorFactory(DuplicatePatientCreateEventProcessor createEventProcessor,
+                                                 DuplicatePatientUpdateEventProcessor updateEventProcessor,
+                                                 DuplicatePatientRetireEventProcessor retireEventProcessor) {
+        this.createEventProcessor = createEventProcessor;
+        this.updateEventProcessor = updateEventProcessor;
+        this.retireEventProcessor = retireEventProcessor;
     }
 
     public DuplicatePatientEventProcessor getEventProcessor(String eventType, String changeSet) {
         if (EVENT_TYPE_CREATED.equals(eventType)) {
-            return new DuplicatePatientCreateEventProcessor(ruleEngine, mapper);
+            return createEventProcessor;
         }
 
         if (EVENT_TYPE_UPDATED.equals(eventType)) {
@@ -38,9 +40,9 @@ public class DuplicatePatientEventProcessorFactory {
                     });
             Map<String, Object> activeField = changeSetMap.get(ACTIVE);
             if (isActiveFieldRetired(activeField)) {
-                return new DuplicatePatientRetireEventProcessor(ruleEngine, mapper);
+                return retireEventProcessor;
             }
-            return new DuplicatePatientUpdateEventProcessor(ruleEngine, mapper);
+            return updateEventProcessor;
         }
         return null;
     }
