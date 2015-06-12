@@ -17,8 +17,10 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.batch;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.timestamp;
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static java.lang.String.format;
+import static java.lang.System.currentTimeMillis;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.sharedhealth.mci.web.infrastructure.persistence.DuplicatePatientQueryBuilder.*;
@@ -31,6 +33,7 @@ import static org.springframework.data.cassandra.core.CassandraTemplate.createIn
 public class DuplicatePatientRepository extends BaseRepository {
 
     private static final Logger logger = getLogger(DuplicatePatientRepository.class);
+    public static final int BATCH_QUERY_EXEC_DELAY = 1;
 
     private PatientRepository patientRepository;
 
@@ -175,6 +178,24 @@ public class DuplicatePatientRepository extends BaseRepository {
         Batch batch = batch();
         buildRetireBatch(patient, batch);
         batch.add(buildCreateMarkerStmt(marker.toString(), cassandraOps.getConverter()));
+        cassandraOps.execute(batch);
+    }
+
+    public void update(String healthId, List<DuplicatePatient> duplicates, UUID marker) {
+        CassandraConverter converter = cassandraOps.getConverter();
+        Batch batch = batch();
+        long batchTimestamp = currentTimeMillis();
+
+        PatientData patient = patientRepository.findByHealthId(healthId);
+        buildRetireBatch(patient, batch);
+
+        for (DuplicatePatient duplicate : duplicates) {
+            Insert insertQuery = createInsertQuery(CF_PATIENT_DUPLICATE, duplicate, null, converter);
+            insertQuery.using(timestamp(batchTimestamp + BATCH_QUERY_EXEC_DELAY));
+            batch.add(insertQuery);
+        }
+
+        batch.add(buildCreateMarkerStmt(marker.toString(), converter));
         cassandraOps.execute(batch);
     }
 

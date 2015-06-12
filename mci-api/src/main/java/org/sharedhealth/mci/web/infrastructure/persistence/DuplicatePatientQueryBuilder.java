@@ -1,6 +1,7 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
 import com.datastax.driver.core.querybuilder.Batch;
+import com.datastax.driver.core.querybuilder.Delete;
 import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.model.DuplicatePatient;
@@ -55,9 +56,11 @@ public class DuplicatePatientQueryBuilder {
         }
     }
 
-    public static void buildDeleteDuplicatesStmt(List<DuplicatePatient> duplicates, CassandraConverter converter, Batch batch) {
+    public static void buildDeleteDuplicatesStmt(List<DuplicatePatient> duplicates, CassandraConverter converter,
+                                                 Batch batch) {
         for (DuplicatePatient duplicate : duplicates) {
-            batch.add(createDeleteQuery(CF_PATIENT_DUPLICATE, duplicate, null, converter));
+            Delete deleteQuery = createDeleteQuery(CF_PATIENT_DUPLICATE, duplicate, null, converter);
+            batch.add(deleteQuery);
         }
     }
 
