@@ -1,25 +1,33 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
 import com.datastax.driver.core.querybuilder.Batch;
+import com.datastax.driver.core.querybuilder.Insert;
 import org.apache.commons.lang3.builder.Diff;
 import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.model.DuplicatePatient;
+import org.sharedhealth.mci.web.model.Marker;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.cassandra.convert.CassandraConverter;
 import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.batch;
+import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static java.lang.String.format;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.sharedhealth.mci.web.infrastructure.persistence.DuplicatePatientQueryBuilder.*;
+import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.*;
 import static org.slf4j.LoggerFactory.getLogger;
+import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertBatchQuery;
+import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
 
 @Component
 public class DuplicatePatientRepository extends BaseRepository {
@@ -124,5 +132,20 @@ public class DuplicatePatientRepository extends BaseRepository {
      */
     public List<DuplicatePatient> findByCatchmentAndHealthId(Catchment catchment, String healthId1) {
         return cassandraOps.select(buildFindByCatchmentAndHealthIdStmt(catchment, healthId1), DuplicatePatient.class);
+    }
+
+    public void create(List<DuplicatePatient> duplicates, UUID marker) {
+        CassandraConverter converter = cassandraOps.getConverter();
+        Batch batch = createInsertBatchQuery(CF_PATIENT_DUPLICATE, duplicates, null, converter);
+        batch.add(buildCreateMarkerStmt(marker.toString(), converter));
+        cassandraOps.execute(batch);
+    }
+
+    private Insert buildCreateMarkerStmt(String value, CassandraConverter converter) {
+        Marker marker = new Marker();
+        marker.setType(DUPLICATE_PATIENT_MARKER);
+        marker.setCreatedAt(timeBased());
+        marker.setMarker(value);
+        return createInsertQuery(CF_MARKER, marker, null, converter);
     }
 }

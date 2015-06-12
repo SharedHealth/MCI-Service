@@ -6,20 +6,20 @@ import org.mockito.Mock;
 import org.sharedhealth.mci.web.infrastructure.dedup.rule.DuplicatePatientRuleEngine;
 import org.sharedhealth.mci.web.infrastructure.persistence.DuplicatePatientRepository;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
-import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.DuplicatePatientData;
 import org.sharedhealth.mci.web.mapper.DuplicatePatientMapper;
-import org.sharedhealth.mci.web.mapper.PatientData;
+import org.sharedhealth.mci.web.model.DuplicatePatient;
 
 import java.util.List;
 import java.util.UUID;
 
 import static java.util.Arrays.asList;
+import static java.util.UUID.randomUUID;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-public class DuplicatePatientEventProcessorTest {
+public class DuplicatePatientCreateEventProcessorTest {
 
     @Mock
     private DuplicatePatientRuleEngine ruleEngine;
@@ -35,12 +35,7 @@ public class DuplicatePatientEventProcessorTest {
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-        eventProcessor = new DuplicatePatientEventProcessor() {
-            @Override
-            public void process(String healthId, UUID marker) {
-
-            }
-        };
+        eventProcessor = new DuplicatePatientCreateEventProcessor();
         eventProcessor.setRuleEngine(ruleEngine);
         eventProcessor.setMapper(mapper);
         eventProcessor.setPatientRepository(patientRepository);
@@ -48,26 +43,15 @@ public class DuplicatePatientEventProcessorTest {
     }
 
     @Test
-    public void shouldBuildDuplicates() {
+    public void shouldProcessCreateEvent() {
         String healthId = "h100";
-        List<DuplicatePatientData> duplicates = asList(new DuplicatePatientData());
-        when(ruleEngine.apply(healthId)).thenReturn(duplicates);
+        UUID marker = randomUUID();
+        List<DuplicatePatientData> duplicateData = asList(new DuplicatePatientData());
+        when(ruleEngine.apply(healthId)).thenReturn(duplicateData);
+        List<DuplicatePatient> duplicates = asList(new DuplicatePatient());
+        when(mapper.map(duplicateData)).thenReturn(duplicates);
 
-        eventProcessor.buildDuplicates(healthId);
-        verify(ruleEngine).apply(healthId);
-        verify(mapper).map(duplicates);
-    }
-
-    @Test
-    public void shouldFindDuplicatesByHealthId1() {
-        String healthId = "h100";
-        PatientData patient = new PatientData();
-        patient.setAddress(new Address("10", "20", "30"));
-
-        when(patientRepository.findByHealthId(healthId)).thenReturn(patient);
-        eventProcessor.findDuplicatesByHealthId1(healthId);
-
-        verify(patientRepository).findByHealthId(healthId);
-        verify(duplicatePatientRepository).findByCatchmentAndHealthId(patient.getCatchment(), healthId);
+        eventProcessor.process(healthId, marker);
+        verify(duplicatePatientRepository).create(duplicates, marker);
     }
 }

@@ -16,7 +16,7 @@ import static java.util.UUID.randomUUID;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.EVENT_TYPE_CREATED;
-import static org.sharedhealth.mci.web.service.DuplicatePatientFeedService.DUPLICATE_PATIENT_MARKER;
+import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.DUPLICATE_PATIENT_MARKER;
 
 public class DuplicatePatientFeedServiceTest {
 

@@ -19,13 +19,13 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
+import static java.util.Arrays.asList;
+import static java.util.UUID.randomUUID;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.junit.Assert.*;
@@ -48,9 +48,12 @@ public class DuplicatePatientRepositoryIT {
     @Autowired
     private PatientRepository patientRepository;
 
+    @Autowired
+    private MarkerRepository markerRepository;
+
     @Test
     public void shouldFindByCatchment() {
-        cassandraOps.update(buildDuplicatePatientsForSearch());
+        buildDuplicatePatientsForSearch();
         List<DuplicatePatient> duplicatePatients1 = duplicatePatientRepository.findByCatchment(new Catchment("182838"));
         assertTrue(isNotEmpty(duplicatePatients1));
         assertEquals(6, duplicatePatients1.size());
@@ -136,32 +139,25 @@ public class DuplicatePatientRepositoryIT {
         assertEquals(isMerged, cassandraOps.select(cql3, DuplicatePatient.class).isEmpty());
     }
 
-    private List<DuplicatePatient> buildDuplicatePatientsForSearch() {
+    private void buildDuplicatePatientsForSearch() {
         List<DuplicatePatient> duplicatePatients = new ArrayList<>();
         String catchmentId1 = "A18B28";
         String catchmentId2 = "A18B28C38";
-
         duplicatePatients.add(new DuplicatePatient(catchmentId1, "100", "101", asSet("nid", "phoneNo"), timeBased()));
         duplicatePatients.add(new DuplicatePatient(catchmentId2, "100", "101", asSet("nid", "phoneNo"), timeBased()));
-
         duplicatePatients.add(new DuplicatePatient(catchmentId1, "102", "103", asSet("nid"), timeBased()));
         duplicatePatients.add(new DuplicatePatient(catchmentId2, "102", "103", asSet("nid"), timeBased()));
-
         duplicatePatients.add(new DuplicatePatient(catchmentId1, "104", "105", asSet("phoneNo"), timeBased()));
         duplicatePatients.add(new DuplicatePatient(catchmentId2, "104", "105", asSet("phoneNo"), timeBased()));
-
         duplicatePatients.add(new DuplicatePatient(catchmentId1, "106", "107", asSet("phoneNo"), timeBased()));
         duplicatePatients.add(new DuplicatePatient(catchmentId2, "106", "107", asSet("phoneNo"), timeBased()));
-
         duplicatePatients.add(new DuplicatePatient(catchmentId1, "108", "109", asSet("nid"), timeBased()));
         duplicatePatients.add(new DuplicatePatient(catchmentId2, "108", "109", asSet("nid"), timeBased()));
-
         duplicatePatients.add(new DuplicatePatient(catchmentId1, "110", "111", asSet("nid"), timeBased()));
         duplicatePatients.add(new DuplicatePatient(catchmentId2, "110", "111", asSet("nid"), timeBased()));
-
         duplicatePatients.add(new DuplicatePatient("A19B29", "111", "110", asSet("nid"), timeBased()));
         duplicatePatients.add(new DuplicatePatient("A19B29C39", "111", "110", asSet("nid"), timeBased()));
-        return duplicatePatients;
+        duplicatePatientRepository.create(duplicatePatients, randomUUID());
     }
 
     private void buildDuplicatePatientsForMerge(PatientData patientData1, PatientData patientData2, PatientData patientData3) {
@@ -188,12 +184,12 @@ public class DuplicatePatientRepositoryIT {
         duplicatePatients.add(new DuplicatePatient(patientData1.getCatchment().getId(), healthId1, healthId2, asSet("nid"), timeBased()));
         duplicatePatients.add(new DuplicatePatient(patientData2.getCatchment().getId(), healthId2, healthId1, asSet("nid"), timeBased()));
         duplicatePatients.add(new DuplicatePatient(patientData1.getCatchment().getId(), healthId1, healthId3, asSet("nid"), timeBased()));
-        cassandraOps.update(duplicatePatients);
+        duplicatePatientRepository.create(duplicatePatients, randomUUID());
     }
 
     @Test
     public void shouldFindByCatchmentAndHealthIds() {
-        cassandraOps.update(buildDuplicatePatientsForSearch());
+        buildDuplicatePatientsForSearch();
         List<DuplicatePatient> duplicatePatients = duplicatePatientRepository.findByCatchmentAndHealthIds(new Catchment("182838"), "102", "103");
         assertNotNull(duplicatePatients);
         assertEquals(2, duplicatePatients.size());
@@ -204,7 +200,7 @@ public class DuplicatePatientRepositoryIT {
 
     @Test
     public void shouldFindByCatchmentAndHealthId() {
-        cassandraOps.update(buildDuplicatePatientsForSearch());
+        buildDuplicatePatientsForSearch();
         List<DuplicatePatient> duplicatePatients = duplicatePatientRepository.findByCatchmentAndHealthId(new Catchment("182838"), "102");
         assertNotNull(duplicatePatients);
         assertEquals(2, duplicatePatients.size());
@@ -218,6 +214,34 @@ public class DuplicatePatientRepositoryIT {
         assertEquals(healthId1, duplicatePatient.getHealth_id1());
         assertEquals(healthId2, duplicatePatient.getHealth_id2());
         assertEquals(catchmentId, duplicatePatient.getCatchment_id());
+    }
+
+    @Test
+    public void shouldCreateDuplicateAndUpdateMarker() {
+        Catchment catchment = new Catchment("192939");
+        String healthId1 = "111";
+        String healthId2 = "110";
+        Set<String> reasons = asSet("nid");
+        UUID createdAt = timeBased();
+        DuplicatePatient duplicate = new DuplicatePatient(catchment.getId(), healthId1, healthId2, reasons, createdAt);
+        UUID marker = randomUUID();
+        duplicatePatientRepository.create(asList(duplicate), marker);
+
+        List<DuplicatePatient> duplicates = duplicatePatientRepository.findByCatchmentAndHealthIds(catchment, healthId1, healthId2);
+        assertTrue(isNotEmpty(duplicates));
+        assertEquals(1, duplicates.size());
+
+        DuplicatePatient actualDuplicate = duplicates.get(0);
+        assertNotNull(actualDuplicate);
+        assertEquals(catchment.getId(), actualDuplicate.getCatchment_id());
+        assertEquals(healthId1, actualDuplicate.getHealth_id1());
+        assertEquals(healthId2, actualDuplicate.getHealth_id2());
+        assertEquals(reasons, actualDuplicate.getReasons());
+        assertEquals(createdAt, actualDuplicate.getCreated_at());
+
+        String actualMarker = markerRepository.find(DUPLICATE_PATIENT_MARKER);
+        assertNotNull(actualMarker);
+        assertEquals(marker.toString(), actualMarker);
     }
 
     @After

@@ -4,6 +4,7 @@ import org.sharedhealth.mci.web.infrastructure.dedup.event.DuplicatePatientEvent
 import org.sharedhealth.mci.web.infrastructure.dedup.event.DuplicatePatientEventProcessorFactory;
 import org.sharedhealth.mci.web.infrastructure.persistence.MarkerRepository;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientFeedRepository;
+import org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants;
 import org.sharedhealth.mci.web.model.PatientUpdateLog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,8 +16,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Component
 public class DuplicatePatientFeedService {
-
-    public static final String DUPLICATE_PATIENT_MARKER = "duplicate_patient_marker";
 
     private PatientFeedRepository feedRepository;
     private MarkerRepository markerRepository;
@@ -31,7 +30,7 @@ public class DuplicatePatientFeedService {
     }
 
     public void processDuplicatePatients() {
-        String markerString = markerRepository.find(DUPLICATE_PATIENT_MARKER);
+        String markerString = markerRepository.find(RepositoryConstants.DUPLICATE_PATIENT_MARKER);
         UUID marker = isNotBlank(markerString) ? fromString(markerString) : null;
         PatientUpdateLog log = feedRepository.findPatientUpdateLog(marker);
         if (log == null) {

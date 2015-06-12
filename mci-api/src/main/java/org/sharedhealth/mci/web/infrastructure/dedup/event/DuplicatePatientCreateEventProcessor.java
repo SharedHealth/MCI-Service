@@ -1,31 +1,17 @@
 package org.sharedhealth.mci.web.infrastructure.dedup.event;
 
-import org.sharedhealth.mci.web.infrastructure.dedup.rule.DuplicatePatientRuleEngine;
-import org.sharedhealth.mci.web.infrastructure.persistence.DuplicatePatientRepository;
-import org.sharedhealth.mci.web.infrastructure.persistence.MarkerRepository;
-import org.sharedhealth.mci.web.mapper.DuplicatePatientMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.sharedhealth.mci.web.model.DuplicatePatient;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.UUID;
 
 @Component
 public class DuplicatePatientCreateEventProcessor extends DuplicatePatientEventProcessor {
 
-    private DuplicatePatientRepository duplicatePatientRepository;
-    private MarkerRepository markerRepository;
-
-    @Autowired
-    public DuplicatePatientCreateEventProcessor(DuplicatePatientRuleEngine ruleEngine, DuplicatePatientMapper mapper,
-                                                DuplicatePatientRepository duplicatePatientRepository,
-                                                MarkerRepository markerRepository) {
-        super(ruleEngine, mapper);
-        this.duplicatePatientRepository = duplicatePatientRepository;
-        this.markerRepository = markerRepository;
-    }
-
     @Override
     public void process(String healthId, UUID marker) {
-
+        List<DuplicatePatient> duplicates = buildDuplicates(healthId);
+        getDuplicatePatientRepository().create(duplicates, marker);
     }
 }
