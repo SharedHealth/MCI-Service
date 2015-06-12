@@ -16,9 +16,7 @@ import java.util.Set;
 
 import static java.util.Arrays.asList;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.junit.rules.ExpectedException.none;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -154,5 +152,22 @@ public class DuplicatePatientRepositoryTest {
         Set<String> reasons = duplicatePatientRepository.findReasonsForDuplicates(duplicatePatients);
         assertNotNull(reasons);
         assertEquals(3, reasons.size());
+    }
+
+    @Test
+    public void shouldFindHealthId2List() {
+        DuplicatePatient duplicate1 = new DuplicatePatient();
+        duplicate1.setHealth_id2("h21");
+        DuplicatePatient duplicate2 = new DuplicatePatient();
+        duplicate2.setHealth_id2("h22");
+        DuplicatePatient duplicate3 = new DuplicatePatient();
+        duplicate3.setHealth_id2("h21");
+        List<DuplicatePatient> duplicates = asList(duplicate1, duplicate2, duplicate3);
+        Set<String> healthId2List = duplicatePatientRepository.findHealthId2List(duplicates);
+        assertTrue(isNotEmpty(healthId2List));
+        assertEquals(2, healthId2List.size());
+        for (String healthId2 : healthId2List) {
+            assertTrue(asList("h21", "h22").contains(healthId2));
+        }
     }
 }

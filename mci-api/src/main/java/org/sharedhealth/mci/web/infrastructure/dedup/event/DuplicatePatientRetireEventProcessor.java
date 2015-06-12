@@ -9,6 +9,6 @@ public class DuplicatePatientRetireEventProcessor extends DuplicatePatientEventP
 
     @Override
     public void process(String healthId, UUID marker) {
-
+        getDuplicatePatientRepository().retire(healthId, marker);
     }
 }

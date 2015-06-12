@@ -14,9 +14,7 @@ import org.springframework.data.cassandra.convert.CassandraConverter;
 import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.batch;
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
@@ -68,15 +66,46 @@ public class DuplicatePatientRepository extends BaseRepository {
             validateMergedData(patientData2, patient2, patient1);
             patientRepository.buildUpdateProcessBatch(patientData1, healthId1, batch);
             patientRepository.buildUpdateProcessBatch(patientData2, healthId2, batch);
-            buildDeleteDuplicatesStmt(patient1, batch);
+            buildRetireBatch(patient1, batch);
 
         } else {
             Set<String> reasons = findReasonsForDuplicates(duplicatePatients);
             buildCreateIgnoreDuplicatesStmt(healthId1, healthId2, reasons, cassandraOps.getConverter(), batch);
+            buildDeleteDuplicatesStmt(patient1, patient2, cassandraOps.getConverter(), batch);
         }
-
-        buildDeleteDuplicatesStmt(patient1, patient2, cassandraOps.getConverter(), batch);
         cassandraOps.execute(batch);
+    }
+
+    private void buildRetireBatch(PatientData patient, Batch batch) {
+        List<DuplicatePatient> duplicates = findDuplicatesByPatient1(patient);
+        Set<String> healthId2List = findHealthId2List(duplicates);
+        duplicates.addAll(findDuplicatesByHealthId2(healthId2List));
+        buildDeleteDuplicatesStmt(duplicates, cassandraOps.getConverter(), batch);
+    }
+
+    private List<DuplicatePatient> findDuplicatesByHealthId1(String healthId) {
+        PatientData patient = patientRepository.findByHealthId(healthId);
+        return findDuplicatesByPatient1(patient);
+    }
+
+    private List<DuplicatePatient> findDuplicatesByPatient1(PatientData patient) {
+        return findByCatchmentAndHealthId(patient.getCatchment(), patient.getHealthId());
+    }
+
+    Set<String> findHealthId2List(List<DuplicatePatient> duplicates) {
+        Set<String> healthIds = new HashSet<>();
+        for (DuplicatePatient duplicate : duplicates) {
+            healthIds.add(duplicate.getHealth_id2());
+        }
+        return healthIds;
+    }
+
+    private List<DuplicatePatient> findDuplicatesByHealthId2(Set<String> healthId2List) {
+        List<DuplicatePatient> duplicates = new ArrayList<>();
+        for (String healthId2 : healthId2List) {
+            duplicates.addAll(findDuplicatesByHealthId1(healthId2));
+        }
+        return duplicates;
     }
 
     private void validateMergedData(PatientData patientData2, PatientData patient2, PatientData patient1) {
@@ -138,6 +167,14 @@ public class DuplicatePatientRepository extends BaseRepository {
         CassandraConverter converter = cassandraOps.getConverter();
         Batch batch = createInsertBatchQuery(CF_PATIENT_DUPLICATE, duplicates, null, converter);
         batch.add(buildCreateMarkerStmt(marker.toString(), converter));
+        cassandraOps.execute(batch);
+    }
+
+    public void retire(String healthId, UUID marker) {
+        PatientData patient = patientRepository.findByHealthId(healthId);
+        Batch batch = batch();
+        buildRetireBatch(patient, batch);
+        batch.add(buildCreateMarkerStmt(marker.toString(), cassandraOps.getConverter()));
         cassandraOps.execute(batch);
     }
 

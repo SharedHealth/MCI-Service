@@ -86,6 +86,11 @@ public class DuplicatePatientRepositoryIT {
         PatientData patient2 = patientRepository.findByHealthId(healthId2);
         assertEquals("B", patient2.getBloodGroup());
 
+        assertIgnoredList(healthId1, healthId2);
+        assertIgnoredList(healthId2, healthId1);
+    }
+
+    private void assertIgnoredList(String healthId1, String healthId2) {
         String cql = select().from(CF_PATIENT_DUPLICATE_IGNORED).where(eq(HEALTH_ID1, healthId1))
                 .and(eq(HEALTH_ID2, healthId2)).toString();
         List<DuplicatePatientIgnored> ignoredList = cassandraOps.select(cql, DuplicatePatientIgnored.class);
@@ -223,9 +228,8 @@ public class DuplicatePatientRepositoryIT {
         String healthId2 = "110";
         Set<String> reasons = asSet("nid");
         UUID createdAt = timeBased();
-        DuplicatePatient duplicate = new DuplicatePatient(catchment.getId(), healthId1, healthId2, reasons, createdAt);
         UUID marker = randomUUID();
-        duplicatePatientRepository.create(asList(duplicate), marker);
+        createDuplicate(catchment, healthId1, healthId2, reasons, createdAt, marker);
 
         List<DuplicatePatient> duplicates = duplicatePatientRepository.findByCatchmentAndHealthIds(catchment, healthId1, healthId2);
         assertTrue(isNotEmpty(duplicates));
@@ -239,9 +243,48 @@ public class DuplicatePatientRepositoryIT {
         assertEquals(reasons, actualDuplicate.getReasons());
         assertEquals(createdAt, actualDuplicate.getCreated_at());
 
+        assertMarker(marker);
+    }
+
+    private void assertMarker(UUID marker) {
         String actualMarker = markerRepository.find(DUPLICATE_PATIENT_MARKER);
         assertNotNull(actualMarker);
         assertEquals(marker.toString(), actualMarker);
+    }
+
+    private void createDuplicate(Catchment catchment, String healthId1, String healthId2, Set<String> reasons, UUID createdAt, UUID marker) {
+        DuplicatePatient duplicate = new DuplicatePatient(catchment.getId(), healthId1, healthId2, reasons, createdAt);
+        duplicatePatientRepository.create(asList(duplicate), marker);
+    }
+
+    @Test
+    public void shouldRetirePatientAndUpdateMarker() {
+        PatientData patient1 = buildPatient(new Address("10", "11", "12"));
+        String healthId1 = patientRepository.create(patient1).getId();
+        PatientData patient2 = buildPatient(new Address("20", "21", "22"));
+        String healthId2 = patientRepository.create(patient2).getId();
+        PatientData patient3 = buildPatient(new Address("30", "31", "32"));
+        String healthId3 = patientRepository.create(patient3).getId();
+        Set<String> reasons = asSet("nid");
+        DuplicatePatient duplicate1 = new DuplicatePatient(patient1.getCatchment().getId(), healthId1, healthId2, reasons, timeBased());
+        DuplicatePatient duplicate2 = new DuplicatePatient(patient2.getCatchment().getId(), healthId2, healthId1, reasons, timeBased());
+        DuplicatePatient duplicate3 = new DuplicatePatient(patient1.getCatchment().getId(), healthId1, healthId3, reasons, timeBased());
+        DuplicatePatient duplicate4 = new DuplicatePatient(patient3.getCatchment().getId(), healthId3, healthId1, reasons, timeBased());
+        duplicatePatientRepository.create(asList(duplicate1, duplicate2, duplicate3, duplicate4), randomUUID());
+
+        UUID marker = randomUUID();
+        duplicatePatientRepository.retire(healthId1, marker);
+
+        List<DuplicatePatient> duplicates = cassandraOps.select(select().from(CF_PATIENT_DUPLICATE), DuplicatePatient.class);
+        assertTrue(isEmpty(duplicates));
+        assertMarker(marker);
+    }
+
+    private PatientData buildPatient(Address address) {
+        PatientData patient = new PatientData();
+        patient.setHealthId(randomUUID().toString());
+        patient.setAddress(address);
+        return patient;
     }
 
     @After

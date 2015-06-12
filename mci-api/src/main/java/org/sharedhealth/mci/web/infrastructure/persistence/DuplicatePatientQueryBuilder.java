@@ -55,18 +55,17 @@ public class DuplicatePatientQueryBuilder {
         }
     }
 
-    public static void buildDeleteDuplicatesStmt(PatientData patient, Batch batch) {
-        String healthId = patient.getHealthId();
-        for (String catchmentId : patient.getCatchment().getAllIds()) {
-            batch.add(delete().from(CF_PATIENT_DUPLICATE)
-                    .where(eq(CATCHMENT_ID, catchmentId))
-                    .and(eq(HEALTH_ID1, healthId)));
+    public static void buildDeleteDuplicatesStmt(List<DuplicatePatient> duplicates, CassandraConverter converter, Batch batch) {
+        for (DuplicatePatient duplicate : duplicates) {
+            batch.add(createDeleteQuery(CF_PATIENT_DUPLICATE, duplicate, null, converter));
         }
     }
 
     public static void buildCreateIgnoreDuplicatesStmt(String healthId1, String healthId2, Set<String> reasons,
                                                        CassandraConverter converter, Batch batch) {
-        DuplicatePatientIgnored duplicateIgnorePatient = new DuplicatePatientIgnored(healthId1, healthId2, reasons);
-        batch.add(createInsertQuery(CF_PATIENT_DUPLICATE_IGNORED, duplicateIgnorePatient, null, converter));
+        DuplicatePatientIgnored duplicateIgnorePatient1 = new DuplicatePatientIgnored(healthId1, healthId2, reasons);
+        DuplicatePatientIgnored duplicateIgnorePatient2 = new DuplicatePatientIgnored(healthId2, healthId1, reasons);
+        batch.add(createInsertQuery(CF_PATIENT_DUPLICATE_IGNORED, duplicateIgnorePatient1, null, converter));
+        batch.add(createInsertQuery(CF_PATIENT_DUPLICATE_IGNORED, duplicateIgnorePatient2, null, converter));
     }
 }
