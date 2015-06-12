@@ -28,9 +28,7 @@ import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.asSet;
 import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.truncateAllColumnFamilies;
@@ -51,13 +49,13 @@ public class DuplicatePatientRepositoryIT {
     private PatientRepository patientRepository;
 
     @Test
-    public void shouldFindAllByCatchment() {
+    public void shouldFindByCatchment() {
         cassandraOps.update(buildDuplicatePatientsForSearch());
-        List<DuplicatePatient> duplicatePatients1 = duplicatePatientRepository.findAllByCatchment(new Catchment("182838"));
+        List<DuplicatePatient> duplicatePatients1 = duplicatePatientRepository.findByCatchment(new Catchment("182838"));
         assertTrue(isNotEmpty(duplicatePatients1));
         assertEquals(6, duplicatePatients1.size());
 
-        List<DuplicatePatient> duplicatePatients2 = duplicatePatientRepository.findAllByCatchment(new Catchment("192939"));
+        List<DuplicatePatient> duplicatePatients2 = duplicatePatientRepository.findByCatchment(new Catchment("192939"));
         assertTrue(isNotEmpty(duplicatePatients2));
         assertEquals(1, duplicatePatients2.size());
     }
@@ -140,14 +138,28 @@ public class DuplicatePatientRepositoryIT {
 
     private List<DuplicatePatient> buildDuplicatePatientsForSearch() {
         List<DuplicatePatient> duplicatePatients = new ArrayList<>();
-        String catchmentId = "A18B28C38";
-        duplicatePatients.add(new DuplicatePatient(catchmentId, "100", "101", asSet("nid"), timeBased()));
-        duplicatePatients.add(new DuplicatePatient(catchmentId, "100", "101", asSet("phoneNo"), timeBased()));
-        duplicatePatients.add(new DuplicatePatient(catchmentId, "102", "103", asSet("nid"), timeBased()));
-        duplicatePatients.add(new DuplicatePatient(catchmentId, "104", "105", asSet("phoneNo"), timeBased()));
-        duplicatePatients.add(new DuplicatePatient(catchmentId, "106", "107", asSet("phoneNo"), timeBased()));
-        duplicatePatients.add(new DuplicatePatient(catchmentId, "108", "109", asSet("nid"), timeBased()));
-        duplicatePatients.add(new DuplicatePatient(catchmentId, "110", "111", asSet("nid"), timeBased()));
+        String catchmentId1 = "A18B28";
+        String catchmentId2 = "A18B28C38";
+
+        duplicatePatients.add(new DuplicatePatient(catchmentId1, "100", "101", asSet("nid", "phoneNo"), timeBased()));
+        duplicatePatients.add(new DuplicatePatient(catchmentId2, "100", "101", asSet("nid", "phoneNo"), timeBased()));
+
+        duplicatePatients.add(new DuplicatePatient(catchmentId1, "102", "103", asSet("nid"), timeBased()));
+        duplicatePatients.add(new DuplicatePatient(catchmentId2, "102", "103", asSet("nid"), timeBased()));
+
+        duplicatePatients.add(new DuplicatePatient(catchmentId1, "104", "105", asSet("phoneNo"), timeBased()));
+        duplicatePatients.add(new DuplicatePatient(catchmentId2, "104", "105", asSet("phoneNo"), timeBased()));
+
+        duplicatePatients.add(new DuplicatePatient(catchmentId1, "106", "107", asSet("phoneNo"), timeBased()));
+        duplicatePatients.add(new DuplicatePatient(catchmentId2, "106", "107", asSet("phoneNo"), timeBased()));
+
+        duplicatePatients.add(new DuplicatePatient(catchmentId1, "108", "109", asSet("nid"), timeBased()));
+        duplicatePatients.add(new DuplicatePatient(catchmentId2, "108", "109", asSet("nid"), timeBased()));
+
+        duplicatePatients.add(new DuplicatePatient(catchmentId1, "110", "111", asSet("nid"), timeBased()));
+        duplicatePatients.add(new DuplicatePatient(catchmentId2, "110", "111", asSet("nid"), timeBased()));
+
+        duplicatePatients.add(new DuplicatePatient("A19B29", "111", "110", asSet("nid"), timeBased()));
         duplicatePatients.add(new DuplicatePatient("A19B29C39", "111", "110", asSet("nid"), timeBased()));
         return duplicatePatients;
     }
@@ -184,11 +196,28 @@ public class DuplicatePatientRepositoryIT {
         cassandraOps.update(buildDuplicatePatientsForSearch());
         List<DuplicatePatient> duplicatePatients = duplicatePatientRepository.findByCatchmentAndHealthIds(new Catchment("182838"), "102", "103");
         assertNotNull(duplicatePatients);
-        assertEquals(1, duplicatePatients.size());
-        DuplicatePatient duplicatePatient = duplicatePatients.get(0);
+        assertEquals(2, duplicatePatients.size());
+
+        assertDuplicate("102", "103", "A18B28", duplicatePatients.get(0));
+        assertDuplicate("102", "103", "A18B28C38", duplicatePatients.get(1));
+    }
+
+    @Test
+    public void shouldFindByCatchmentAndHealthId() {
+        cassandraOps.update(buildDuplicatePatientsForSearch());
+        List<DuplicatePatient> duplicatePatients = duplicatePatientRepository.findByCatchmentAndHealthId(new Catchment("182838"), "102");
+        assertNotNull(duplicatePatients);
+        assertEquals(2, duplicatePatients.size());
+
+        assertDuplicate("102", "103", "A18B28", duplicatePatients.get(0));
+        assertDuplicate("102", "103", "A18B28C38", duplicatePatients.get(1));
+    }
+
+    private void assertDuplicate(String healthId1, String healthId2, String catchmentId, DuplicatePatient duplicatePatient) {
         assertNotNull(duplicatePatient);
-        assertEquals("102", duplicatePatient.getHealth_id1());
-        assertEquals("103", duplicatePatient.getHealth_id2());
+        assertEquals(healthId1, duplicatePatient.getHealth_id1());
+        assertEquals(healthId2, duplicatePatient.getHealth_id2());
+        assertEquals(catchmentId, duplicatePatient.getCatchment_id());
     }
 
     @After

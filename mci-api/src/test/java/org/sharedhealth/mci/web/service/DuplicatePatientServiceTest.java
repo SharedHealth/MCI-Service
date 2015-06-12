@@ -51,7 +51,7 @@ public class DuplicatePatientServiceTest {
     @Test
     public void shouldFindAllByCatchment() {
         Catchment catchment = new Catchment("102030");
-        when(duplicatePatientRepository.findAllByCatchment(catchment)).thenReturn(buildDuplicatePatients());
+        when(duplicatePatientRepository.findByCatchment(catchment)).thenReturn(buildDuplicatePatients());
         List<DuplicatePatientData> duplicatePatientDataList = duplicatePatientService.findAllByCatchment(catchment);
 
         assertTrue(isNotEmpty(duplicatePatientDataList));

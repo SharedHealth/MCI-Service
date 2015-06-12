@@ -35,7 +35,10 @@ public class DuplicatePatientRepository extends BaseRepository {
         this.patientRepository = patientRepository;
     }
 
-    public List<DuplicatePatient> findAllByCatchment(Catchment catchment) {
+    /**
+     * Finds by exact catchment id.
+     */
+    public List<DuplicatePatient> findByCatchment(Catchment catchment) {
         return cassandraOps.select(buildFindByCatchmentStmt(catchment), DuplicatePatient.class);
     }
 
@@ -100,6 +103,10 @@ public class DuplicatePatientRepository extends BaseRepository {
         return null;
     }
 
+    /**
+     * Finds by all possible catchment ids, healthId1 and healthId2.
+     * All possible catchment ids for catchment 1020304050 are 1020, 102030, 10203040, 1020304050.
+     */
     public List<DuplicatePatient> findByCatchmentAndHealthIds(Catchment catchment, String healthId1, String healthId2) {
         return cassandraOps.select(buildFindByCatchmentAndHealthIdsStmt(catchment, healthId1, healthId2), DuplicatePatient.class);
     }
@@ -109,5 +116,13 @@ public class DuplicatePatientRepository extends BaseRepository {
             return duplicatePatients.get(0).getReasons();
         }
         return null;
+    }
+
+    /**
+     * Finds by all possible catchment ids and healthId1.
+     * All possible catchment ids for catchment 1020304050 are 1020, 102030, 10203040, 1020304050.
+     */
+    public List<DuplicatePatient> findByCatchmentAndHealthId(Catchment catchment, String healthId1) {
+        return cassandraOps.select(buildFindByCatchmentAndHealthIdStmt(catchment, healthId1), DuplicatePatient.class);
     }
 }

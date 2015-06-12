@@ -32,7 +32,7 @@ public class DuplicatePatientService {
     }
 
     public List<DuplicatePatientData> findAllByCatchment(Catchment catchment) {
-        List<DuplicatePatient> duplicatePatients = duplicatePatientRepository.findAllByCatchment(catchment);
+        List<DuplicatePatient> duplicatePatients = duplicatePatientRepository.findByCatchment(catchment);
         return buildDuplicatePatientData(duplicatePatients);
     }
 
