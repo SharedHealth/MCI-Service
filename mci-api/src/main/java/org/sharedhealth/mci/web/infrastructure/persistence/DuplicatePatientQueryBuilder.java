@@ -71,4 +71,9 @@ public class DuplicatePatientQueryBuilder {
         batch.add(createInsertQuery(CF_PATIENT_DUPLICATE_IGNORED, duplicateIgnorePatient1, null, converter));
         batch.add(createInsertQuery(CF_PATIENT_DUPLICATE_IGNORED, duplicateIgnorePatient2, null, converter));
     }
+
+    public static String buildFindIgnoreDuplicatesStmt(String healthId1, String healthId2) {
+        return select().from(CF_PATIENT_DUPLICATE_IGNORED)
+                .where(eq(HEALTH_ID1, healthId1)).and(eq(HEALTH_ID2, healthId2)).toString();
+    }
 }

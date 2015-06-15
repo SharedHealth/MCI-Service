@@ -288,6 +288,8 @@ public class DuplicatePatientRepositoryIT {
         String healthId2 = patientRepository.create(patient2).getId();
         PatientData patient3 = buildPatient("h003", new Address("30", "31", "32"));
         String healthId3 = patientRepository.create(patient3).getId();
+        PatientData patient4 = buildPatient("h004", new Address("40", "41", "42"));
+        String healthId4 = patientRepository.create(patient4).getId();
         Set<String> reasons = asSet("nid");
 
         duplicatePatientRepository.create(asList(
@@ -295,11 +297,16 @@ public class DuplicatePatientRepositoryIT {
                         new DuplicatePatient(patient2.getCatchment().getId(), healthId2, healthId1, reasons, timeBased())),
                 randomUUID());
 
+        cassandraOps.insert(new DuplicatePatientIgnored(healthId1, healthId4, reasons));
+        cassandraOps.insert(new DuplicatePatientIgnored(healthId4, healthId1, reasons));
+
         UUID marker = randomUUID();
         duplicatePatientRepository.update(healthId1, asList(
-                        new DuplicatePatient(patient1.getCatchment().getId(), healthId1, healthId3, reasons, timeBased()),
-                        new DuplicatePatient(patient3.getCatchment().getId(), healthId3, healthId1, reasons, timeBased())),
-                marker);
+                new DuplicatePatient(patient1.getCatchment().getId(), healthId1, healthId3, reasons, timeBased()),
+                new DuplicatePatient(patient3.getCatchment().getId(), healthId3, healthId1, reasons, timeBased()),
+                new DuplicatePatient(patient1.getCatchment().getId(), healthId1, healthId4, reasons, timeBased()),
+                new DuplicatePatient(patient4.getCatchment().getId(), healthId4, healthId1, reasons, timeBased())
+        ), marker);
 
         List<DuplicatePatient> duplicates = findAllDuplicates();
         assertTrue(isNotEmpty(duplicates));

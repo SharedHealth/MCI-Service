@@ -6,6 +6,7 @@ import org.apache.commons.lang3.builder.Diff;
 import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.model.DuplicatePatient;
+import org.sharedhealth.mci.web.model.DuplicatePatientIgnored;
 import org.sharedhealth.mci.web.model.Marker;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -189,7 +190,7 @@ public class DuplicatePatientRepository extends BaseRepository {
         PatientData patient = patientRepository.findByHealthId(healthId);
         buildRetireBatch(patient, batch);
 
-        for (DuplicatePatient duplicate : duplicates) {
+        for (DuplicatePatient duplicate : findDuplicatesWithIgnoredRemoved(duplicates)) {
             Insert insertQuery = createInsertQuery(CF_PATIENT_DUPLICATE, duplicate, null, converter);
             insertQuery.using(timestamp(batchTimestamp + BATCH_QUERY_EXEC_DELAY));
             batch.add(insertQuery);
@@ -197,6 +198,23 @@ public class DuplicatePatientRepository extends BaseRepository {
 
         batch.add(buildCreateMarkerStmt(marker.toString(), converter));
         cassandraOps.execute(batch);
+    }
+
+    List<DuplicatePatient> findDuplicatesWithIgnoredRemoved(List<DuplicatePatient> duplicates) {
+        List<DuplicatePatient> duplicatesWithIgnoredRemoved = new ArrayList<>();
+        DuplicatePatientIgnored duplicateIgnored;
+        for (DuplicatePatient duplicate : duplicates) {
+            duplicateIgnored = findIgnoredDuplicates(duplicate.getHealth_id1(), duplicate.getHealth_id2());
+            if (duplicateIgnored == null) {
+                duplicatesWithIgnoredRemoved.add(duplicate);
+            }
+        }
+        return duplicatesWithIgnoredRemoved;
+    }
+
+    private DuplicatePatientIgnored findIgnoredDuplicates(String healthId1, String healthId2) {
+        String cql = buildFindIgnoreDuplicatesStmt(healthId1, healthId2);
+        return cassandraOps.selectOne(cql, DuplicatePatientIgnored.class);
     }
 
     private Insert buildCreateMarkerStmt(String value, CassandraConverter converter) {

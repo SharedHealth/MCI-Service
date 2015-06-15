@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.model.DuplicatePatient;
+import org.sharedhealth.mci.web.model.DuplicatePatientIgnored;
 import org.springframework.data.cassandra.core.CassandraOperations;
 
 import java.util.HashSet;
@@ -22,6 +23,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.sharedhealth.mci.web.infrastructure.persistence.DuplicatePatientQueryBuilder.buildFindIgnoreDuplicatesStmt;
 
 public class DuplicatePatientRepositoryTest {
 
@@ -169,5 +171,26 @@ public class DuplicatePatientRepositoryTest {
         for (String healthId2 : healthId2List) {
             assertTrue(asList("h21", "h22").contains(healthId2));
         }
+    }
+
+    @Test
+    public void shouldFindDuplicatesWithIgnoredRemoved() {
+        List<DuplicatePatient> duplicates = asList(new DuplicatePatient("102030", "h1", "h2"),
+                new DuplicatePatient("112131", "h3", "h4"), new DuplicatePatient("122232", "h5", "h6"));
+        String cql = buildFindIgnoreDuplicatesStmt("h3", "h4");
+        when(cassandraOps.selectOne(cql, DuplicatePatientIgnored.class)).thenReturn(new DuplicatePatientIgnored());
+
+        List<DuplicatePatient> duplicatesWithIgnoredRemoved = duplicatePatientRepository.findDuplicatesWithIgnoredRemoved(duplicates);
+        assertTrue(isNotEmpty(duplicatesWithIgnoredRemoved));
+        assertEquals(2, duplicatesWithIgnoredRemoved.size());
+        assertDuplicate("102030", "h1", "h2", duplicatesWithIgnoredRemoved.get(0));
+        assertDuplicate("122232", "h5", "h6", duplicatesWithIgnoredRemoved.get(1));
+    }
+
+    private void assertDuplicate(String catchment, String healthId1, String healthId2, DuplicatePatient duplicate) {
+        assertNotNull(duplicate);
+        assertEquals(catchment, duplicate.getCatchment_id());
+        assertEquals(healthId1, duplicate.getHealth_id1());
+        assertEquals(healthId2, duplicate.getHealth_id2());
     }
 }
