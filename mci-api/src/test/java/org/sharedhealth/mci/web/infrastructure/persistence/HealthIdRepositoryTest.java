@@ -1,5 +1,6 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
+import com.datastax.driver.core.querybuilder.Insert;
 import com.datastax.driver.core.querybuilder.Select;
 import org.junit.Before;
 import org.junit.Test;
@@ -9,19 +10,16 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.sharedhealth.mci.web.exception.HealthIdExhaustedException;
 import org.sharedhealth.mci.web.model.HealthId;
+import org.springframework.data.cassandra.convert.MappingCassandraConverter;
 import org.springframework.data.cassandra.core.CassandraOperations;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -32,14 +30,14 @@ public class HealthIdRepositoryTest {
     @Before
     public void setUp() throws Exception {
         initMocks(this);
+        when(cqlTemplate.getConverter()).thenReturn(new MappingCassandraConverter());
     }
 
     @Test
     public void shouldSaveHidAsynchronously() {
-        when(cqlTemplate.insertAsynchronously(any(HealthId.class))).thenReturn(HealthId.NULL_HID);
         HealthIdRepository healthIdRepository = new HealthIdRepository(cqlTemplate);
-        healthIdRepository.saveHealthId(new HealthId("9801544016"));
-        verify(cqlTemplate, times(1)).insertAsynchronously(any(HealthId.class));
+        healthIdRepository.saveHealthId(new HealthId("98015440161", "MCI", 0));
+        verify(cqlTemplate, times(1)).executeAsynchronously(any(Insert.class));
     }
 
     @Test
