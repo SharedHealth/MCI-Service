@@ -2,14 +2,18 @@ package org.sharedhealth.mci.web.service;
 
 import org.sharedhealth.mci.web.config.MCIProperties;
 import org.sharedhealth.mci.web.model.HealthId;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 @Component
 public class PatientHealthIdService {
+    private static final Logger logger = getLogger(PatientHealthIdService.class);
 
     private Queue<HealthId> healthIds = new ConcurrentLinkedQueue<>();
 
@@ -23,6 +27,8 @@ public class PatientHealthIdService {
     }
 
     public HealthId getNextHealthId() throws InterruptedException {
+        logger.debug("get: block size :" + healthIds.size());
+        logger.debug(" object id : " + this);
         return healthIds.remove();
     }
 
@@ -31,6 +37,8 @@ public class PatientHealthIdService {
     }
 
     public void replenishIfNeeded() {
+        logger.debug("replenish: block size :" + healthIds.size());
+        logger.debug("replenish: object id : " + this);
         if (healthIds.size() < mciProperties.getHealthIdBlockSizeThreshold()) {
             healthIds.addAll(healthIdService.getNextBlock());
         }
@@ -43,4 +51,5 @@ public class PatientHealthIdService {
     public int getHealthIdBlockSize() {
         return healthIds.size();
     }
+
 }

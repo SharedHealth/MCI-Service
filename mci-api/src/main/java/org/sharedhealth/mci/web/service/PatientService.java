@@ -8,12 +8,7 @@ import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientFeedRepository;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
-import org.sharedhealth.mci.web.mapper.Catchment;
-import org.sharedhealth.mci.web.mapper.PatientData;
-import org.sharedhealth.mci.web.mapper.PatientSummaryData;
-import org.sharedhealth.mci.web.mapper.PendingApproval;
-import org.sharedhealth.mci.web.mapper.PendingApprovalListResponse;
-import org.sharedhealth.mci.web.mapper.SearchQuery;
+import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.model.HealthId;
 import org.sharedhealth.mci.web.model.PatientUpdateLog;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
@@ -24,17 +19,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.FieldError;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.TreeSet;
-import java.util.UUID;
+import java.util.*;
 
 import static java.lang.String.format;
-import static org.apache.commons.collections4.CollectionUtils.intersection;
-import static org.apache.commons.collections4.CollectionUtils.isEmpty;
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-import static org.apache.commons.collections4.CollectionUtils.union;
+import static org.apache.commons.collections4.CollectionUtils.*;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_INVALID;
 import static org.sharedhealth.mci.web.utils.JsonConstants.HID;
@@ -220,7 +208,8 @@ public class PatientService {
     }
 
     public String processPendingApprovals(PatientData requestData, Catchment catchment, boolean shouldAccept) {
-        logger.debug(format("process pending approval for healthId: %s and for catchment: %s", requestData.getHealthId(), catchment.toString()));
+        logger.debug(format("process pending approval for healthId: %s and for catchment: %s", requestData.getHealthId(), catchment
+                .toString()));
         PatientData existingPatient = this.findByHealthId(requestData.getHealthId());
         if (null != existingPatient.isActive() && !existingPatient.isActive()) {
             throw new Forbidden("patient is already marked inactive");
@@ -263,4 +252,6 @@ public class PatientService {
             throw new IllegalArgumentException(MESSAGE_PENDING_APPROVALS_MISMATCH);
         }
     }
+
+
 }

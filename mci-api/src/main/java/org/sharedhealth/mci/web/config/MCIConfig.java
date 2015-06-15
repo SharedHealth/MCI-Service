@@ -3,7 +3,6 @@ package org.sharedhealth.mci.web.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
@@ -18,20 +17,10 @@ import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
 
 @Configuration
 @EnableCaching
-@Import({MCISecurityConfig.class, MCICassandraConfig.class, MCIWebConfig.class, ActuatorConfig.class, MCICacheConfiguration.class})
-@ComponentScan(basePackages = {"org.sharedhealth.mci.web.config",
-        "org.sharedhealth.mci.web.controller",
-        "org.sharedhealth.mci.web.exception",
-        "org.sharedhealth.mci.web.infrastructure",
-        "org.sharedhealth.mci.web.mapper",
-        "org.sharedhealth.mci.web.model",
-        "org.sharedhealth.mci.web.service",
-        "org.sharedhealth.mci.utils",
-        "org.sharedhealth.mci.web.handler",
-        "org.sharedhealth.mci.validation",
-        "org.sharedhealth.mci.web.tasks"})
+@Import({MCICassandraConfig.class,
+        MCICacheConfiguration.class,
+})
 public class MCIConfig {
-
     public static final String PROFILE_DEFAULT = "default";
 
     @Autowired
