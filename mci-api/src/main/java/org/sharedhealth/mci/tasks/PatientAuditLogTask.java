@@ -1,16 +1,14 @@
-package org.sharedhealth.mci.web.tasks;
+package org.sharedhealth.mci.tasks;
 
 import org.sharedhealth.mci.web.service.PatientAuditService;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-@Configuration
-@EnableScheduling
+@Component
 public class PatientAuditLogTask {
 
     private static final Logger logger = getLogger(PatientAuditLogTask.class);

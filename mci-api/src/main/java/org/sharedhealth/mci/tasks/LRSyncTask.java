@@ -1,17 +1,14 @@
-package org.sharedhealth.mci.web.tasks;
+package org.sharedhealth.mci.tasks;
 
 import org.apache.log4j.Logger;
 import org.sharedhealth.mci.web.handler.LocationDataSync;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-
-@Configuration
-@EnableScheduling
+@Component
 public class LRSyncTask {
 
     private final Logger logger = Logger.getLogger(LRSyncTask.class);

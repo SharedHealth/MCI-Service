@@ -13,12 +13,11 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.CF_HEALTH_ID;
-import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.HID;
-import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.RESERVED_FOR;
+import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.*;
+import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
 
 @Component
-public class HealthIdRepository extends BaseRepository{
+public class HealthIdRepository extends BaseRepository {
     private static final Logger logger = LoggerFactory.getLogger(HealthIdRepository.class);
     public static final int BLOCK_SIZE = 10000;
     private String lastReservedHealthId;
@@ -29,16 +28,19 @@ public class HealthIdRepository extends BaseRepository{
     }
 
     public HealthId saveHealthId(HealthId healthId) {
-        return cassandraOps.insertAsynchronously(healthId);
+        logger.debug(String.format("Inserting new hid :%s", healthId.getHid()));
+        cassandraOps.executeAsynchronously(createInsertQuery(CF_HEALTH_ID, healthId, null, cassandraOps.getConverter()).ifNotExists());
+        return healthId;
     }
 
     public HealthId saveHealthIdSync(HealthId healthId) {
         logger.debug(String.format("Inserting new hid :%s", healthId.getHid()));
-        return cassandraOps.insert(healthId);
+        cassandraOps.execute(createInsertQuery(CF_HEALTH_ID, healthId, null, cassandraOps.getConverter()).ifNotExists());
+        return healthId;
     }
 
     public List<HealthId> getNextBlock(int blockSize) {
-        logger.debug(String.format(String.format("Getting next block of size : %d", blockSize)));
+        logger.debug(String.format("Getting next block of size : %d", blockSize));
         Select.Where from = QueryBuilder.select().from(CF_HEALTH_ID)
                 .where(QueryBuilder.eq(RESERVED_FOR, "MCI"));
         if (null != lastReservedHealthId) {
