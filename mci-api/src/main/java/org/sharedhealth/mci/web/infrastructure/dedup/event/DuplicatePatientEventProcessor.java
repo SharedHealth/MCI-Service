@@ -6,6 +6,7 @@ import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
 import org.sharedhealth.mci.web.mapper.DuplicatePatientData;
 import org.sharedhealth.mci.web.mapper.DuplicatePatientMapper;
 import org.sharedhealth.mci.web.mapper.PatientData;
+import org.sharedhealth.mci.web.mapper.PatientUpdateLogData;
 import org.sharedhealth.mci.web.model.DuplicatePatient;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -19,7 +20,7 @@ public abstract class DuplicatePatientEventProcessor {
     private PatientRepository patientRepository;
     private DuplicatePatientRepository duplicatePatientRepository;
 
-    public abstract void process(String healthId, UUID marker);
+    public abstract void process(PatientUpdateLogData log, UUID marker);
 
     protected List<DuplicatePatient> buildDuplicates(String healthId) {
         List<DuplicatePatientData> duplicates = getRuleEngine().apply(healthId);

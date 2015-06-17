@@ -5,6 +5,7 @@ import org.sharedhealth.mci.web.infrastructure.dedup.event.DuplicatePatientEvent
 import org.sharedhealth.mci.web.infrastructure.persistence.MarkerRepository;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientFeedRepository;
 import org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants;
+import org.sharedhealth.mci.web.mapper.PatientUpdateLogMapper;
 import org.sharedhealth.mci.web.model.PatientUpdateLog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,13 +21,16 @@ public class DuplicatePatientFeedService {
     private PatientFeedRepository feedRepository;
     private MarkerRepository markerRepository;
     private DuplicatePatientEventProcessorFactory eventProcessorFactory;
+    private PatientUpdateLogMapper patientUpdateLogMapper;
 
     @Autowired
     public DuplicatePatientFeedService(PatientFeedRepository feedRepository, MarkerRepository markerRepository,
-                                       DuplicatePatientEventProcessorFactory eventProcessorFactory) {
+                                       DuplicatePatientEventProcessorFactory eventProcessorFactory,
+                                       PatientUpdateLogMapper patientUpdateLogMapper) {
         this.feedRepository = feedRepository;
         this.markerRepository = markerRepository;
         this.eventProcessorFactory = eventProcessorFactory;
+        this.patientUpdateLogMapper = patientUpdateLogMapper;
     }
 
     public void processDuplicatePatients() {
@@ -38,6 +42,6 @@ public class DuplicatePatientFeedService {
         }
         DuplicatePatientEventProcessor eventProcessor = eventProcessorFactory
                 .getEventProcessor(log.getEventType(), log.getChangeSet());
-        eventProcessor.process(log.getHealthId(), log.getEventId());
+        eventProcessor.process(patientUpdateLogMapper.map(log), log.getEventId());
     }
 }

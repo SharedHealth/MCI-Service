@@ -8,6 +8,7 @@ import org.sharedhealth.mci.web.infrastructure.persistence.DuplicatePatientRepos
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
 import org.sharedhealth.mci.web.mapper.DuplicatePatientData;
 import org.sharedhealth.mci.web.mapper.DuplicatePatientMapper;
+import org.sharedhealth.mci.web.mapper.PatientUpdateLogData;
 import org.sharedhealth.mci.web.model.DuplicatePatient;
 
 import java.util.List;
@@ -51,7 +52,9 @@ public class DuplicatePatientUpdateEventProcessorTest {
         List<DuplicatePatient> duplicates = asList(new DuplicatePatient());
         when(mapper.map(duplicateData)).thenReturn(duplicates);
 
-        eventProcessor.process(healthId, marker);
+        PatientUpdateLogData log = new PatientUpdateLogData();
+        log.setHealthId(healthId);
+        eventProcessor.process(log, marker);
         verify(duplicatePatientRepository).update(healthId, duplicates, marker);
     }
 }

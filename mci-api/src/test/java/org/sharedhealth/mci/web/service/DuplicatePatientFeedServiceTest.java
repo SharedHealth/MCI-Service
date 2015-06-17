@@ -7,16 +7,18 @@ import org.sharedhealth.mci.web.infrastructure.dedup.event.DuplicatePatientEvent
 import org.sharedhealth.mci.web.infrastructure.dedup.event.DuplicatePatientEventProcessorFactory;
 import org.sharedhealth.mci.web.infrastructure.persistence.MarkerRepository;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientFeedRepository;
+import org.sharedhealth.mci.web.mapper.PatientUpdateLogMapper;
 import org.sharedhealth.mci.web.model.PatientUpdateLog;
 
 import java.util.UUID;
 
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static java.util.UUID.randomUUID;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.EVENT_TYPE_CREATED;
 import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.DUPLICATE_PATIENT_MARKER;
+import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.EVENT_TYPE_CREATED;
 
 public class DuplicatePatientFeedServiceTest {
 
@@ -27,14 +29,16 @@ public class DuplicatePatientFeedServiceTest {
     @Mock
     private DuplicatePatientEventProcessorFactory eventProcessorFactory;
     @Mock
-    DuplicatePatientEventProcessor eventProcessor;
+    private DuplicatePatientEventProcessor eventProcessor;
+    private PatientUpdateLogMapper patientUpdateLogMapper;
 
     private DuplicatePatientFeedService feedService;
 
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-        feedService = new DuplicatePatientFeedService(feedRepository, markerRepository, eventProcessorFactory);
+        patientUpdateLogMapper = new PatientUpdateLogMapper();
+        feedService = new DuplicatePatientFeedService(feedRepository, markerRepository, eventProcessorFactory, patientUpdateLogMapper);
     }
 
     @Test
@@ -49,6 +53,6 @@ public class DuplicatePatientFeedServiceTest {
         when(eventProcessorFactory.getEventProcessor(log.getEventType(), log.getChangeSet())).thenReturn(eventProcessor);
 
         feedService.processDuplicatePatients();
-        verify(eventProcessor).process(log.getHealthId(), log.getEventId());
+        verify(eventProcessor).process(patientUpdateLogMapper.map(log), log.getEventId());
     }
 }

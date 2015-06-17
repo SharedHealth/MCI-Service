@@ -7,6 +7,7 @@ import org.sharedhealth.mci.web.infrastructure.dedup.rule.DuplicatePatientRuleEn
 import org.sharedhealth.mci.web.infrastructure.persistence.DuplicatePatientRepository;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
 import org.sharedhealth.mci.web.mapper.DuplicatePatientMapper;
+import org.sharedhealth.mci.web.mapper.PatientUpdateLogData;
 
 import java.util.UUID;
 
@@ -41,7 +42,9 @@ public class DuplicatePatientRetireEventProcessorTest {
     public void shouldProcessRetireEvent() {
         String healthId = "h100";
         UUID marker = randomUUID();
-        eventProcessor.process(healthId, marker);
+        PatientUpdateLogData log = new PatientUpdateLogData();
+        log.setHealthId(healthId);
+        eventProcessor.process(log, marker);
         verify(duplicatePatientRepository).retire(healthId, marker);
     }
 }

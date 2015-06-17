@@ -6,10 +6,7 @@ import org.mockito.Mock;
 import org.sharedhealth.mci.web.infrastructure.dedup.rule.DuplicatePatientRuleEngine;
 import org.sharedhealth.mci.web.infrastructure.persistence.DuplicatePatientRepository;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
-import org.sharedhealth.mci.web.mapper.Address;
-import org.sharedhealth.mci.web.mapper.DuplicatePatientData;
-import org.sharedhealth.mci.web.mapper.DuplicatePatientMapper;
-import org.sharedhealth.mci.web.mapper.PatientData;
+import org.sharedhealth.mci.web.mapper.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -37,7 +34,7 @@ public class DuplicatePatientEventProcessorTest {
         initMocks(this);
         eventProcessor = new DuplicatePatientEventProcessor() {
             @Override
-            public void process(String healthId, UUID marker) {
+            public void process(PatientUpdateLogData log, UUID marker) {
 
             }
         };
