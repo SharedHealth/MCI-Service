@@ -14,6 +14,6 @@ public class DuplicatePatientUpdateEventProcessor extends DuplicatePatientEventP
     public void process(PatientUpdateLogData log, UUID marker) {
         String healthId = log.getHealthId();
         List<DuplicatePatient> duplicates = buildDuplicates(healthId);
-        getDuplicatePatientRepository().update(healthId, duplicates, marker);
+        getDuplicatePatientRepository().update(healthId, log.getOldCatchmentFromChangeSet(), duplicates, marker);
     }
 }

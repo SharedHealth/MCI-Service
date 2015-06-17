@@ -2,18 +2,18 @@ package org.sharedhealth.mci.web.mapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static java.lang.String.format;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.substring;
+import static org.apache.commons.lang3.StringUtils.*;
+import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
 public class Catchment {
 
     private static final String INVALID_DIVISION_OR_DISTRICT = "Division ID and/or district ID cannot be blank";
     private static final String INVALID_UPAZILA = "Upazila ID cannot be blank";
     private static final String INVALID_CITY_CORP = "City corporation ID cannot be blank";
-    private static final String INVALID_UNION_OR_URBAN_WARD = "Union/Urban ward IDcannot be blank";
+    private static final String INVALID_UNION_OR_URBAN_WARD = "Union/Urban ward ID cannot be blank";
     private String divisionId;
     private String districtId;
     private String upazilaId;
@@ -27,6 +27,12 @@ public class Catchment {
 
     public Catchment(String divisionId, String districtId, String upazilaId) {
         this(divisionId, districtId, upazilaId, null, null, null);
+    }
+
+    public Catchment(Map<String, String> addressMap) {
+        this(addressMap.get(DIVISION_ID), addressMap.get(DISTRICT_ID), addressMap.get(UPAZILA_ID),
+                addressMap.get(CITY_CORPORATION_ID), addressMap.get(UNION_OR_URBAN_WARD_ID),
+                addressMap.get(RURAL_WARD_ID));
     }
 
     public Catchment(String divisionId, String districtId, String upazilaId, String cityCorpId,

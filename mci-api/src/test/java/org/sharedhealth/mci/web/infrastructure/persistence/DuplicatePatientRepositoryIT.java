@@ -301,7 +301,7 @@ public class DuplicatePatientRepositoryIT {
         cassandraOps.insert(new DuplicatePatientIgnored(healthId4, healthId1, reasons));
 
         UUID marker = randomUUID();
-        duplicatePatientRepository.update(healthId1, asList(
+        duplicatePatientRepository.update(healthId1, new Catchment("101112"), asList(
                 new DuplicatePatient(patient1.getCatchment().getId(), healthId1, healthId3, reasons, timeBased()),
                 new DuplicatePatient(patient3.getCatchment().getId(), healthId3, healthId1, reasons, timeBased()),
                 new DuplicatePatient(patient1.getCatchment().getId(), healthId1, healthId4, reasons, timeBased()),

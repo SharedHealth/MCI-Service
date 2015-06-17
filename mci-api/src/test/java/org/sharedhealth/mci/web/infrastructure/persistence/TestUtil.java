@@ -65,4 +65,21 @@ public class TestUtil {
         addAll(set, values);
         return set;
     }
+
+    public static String buildAddressChangeSet() {
+        return "{\n" +
+                "    \"present_address\":{\n" +
+                "        \"old_value\": {\n" +
+                "            \"address_line\":\"test2\",\n" +
+                "            \"division_id\":\"10\",\n" +
+                "            \"district_id\":\"20\",\n" +
+                "            \"upazila_id\":\"30\",\n" +
+                "            \"city_corporation_id\":\"40\",\n" +
+                "            \"union_or_urban_ward_id\":\"50\",\n" +
+                "            \"rural_ward_id\":\"60\",\n" +
+                "            \"country_code\":\"050\"\n" +
+                "        }\n" +
+                "    }\n" +
+                "}";
+    }
 }
