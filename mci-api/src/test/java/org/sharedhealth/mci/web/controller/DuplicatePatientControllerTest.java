@@ -7,12 +7,7 @@ import org.mockito.Mock;
 import org.sharedhealth.mci.web.infrastructure.security.TokenAuthentication;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
 import org.sharedhealth.mci.web.infrastructure.security.UserProfile;
-import org.sharedhealth.mci.web.mapper.Catchment;
-import org.sharedhealth.mci.web.mapper.DuplicatePatientData;
-import org.sharedhealth.mci.web.mapper.DuplicatePatientMergeData;
-import org.sharedhealth.mci.web.mapper.PatientData;
-import org.sharedhealth.mci.web.mapper.Requester;
-import org.sharedhealth.mci.web.mapper.RequesterDetails;
+import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.service.DuplicatePatientService;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -36,12 +31,9 @@ import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
 import static org.sharedhealth.mci.web.utils.MCIConstants.DUPLICATION_ACTION_RETAIN_ALL;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.core.context.SecurityContextHolder.getContext;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class DuplicatePatientControllerTest {
 
@@ -96,13 +88,30 @@ public class DuplicatePatientControllerTest {
                 .andExpect(jsonPath("$.results[4]").exists())
                 .andExpect(jsonPath("$.results[5]").doesNotExist())
 
-                .andExpect(jsonPath("$.results[0].hid1", is("99001")))
-                .andExpect(jsonPath("$.results[0].hid2", is("99002")))
-                .andExpect(jsonPath("$.results[0].reasons", is(asList("PHONE", "NID"))));
+                .andExpect(jsonPath("$.results[0].hid1", is("99002")))
+                .andExpect(jsonPath("$.results[0].hid2", is("99001")))
+                .andExpect(jsonPath("$.results[0].reasons", is(asList("PHONE", "NID"))))
+
+                .andExpect(jsonPath("$.results[1].hid1", is("99003")))
+                .andExpect(jsonPath("$.results[1].hid2", is("99004")))
+                .andExpect(jsonPath("$.results[1].reasons", is(asList("NID"))))
+
+                .andExpect(jsonPath("$.results[2].hid1", is("99005")))
+                .andExpect(jsonPath("$.results[2].hid2", is("99006")))
+                .andExpect(jsonPath("$.results[2].reasons", is(asList("NID"))))
+
+                .andExpect(jsonPath("$.results[3].hid1", is("99007")))
+                .andExpect(jsonPath("$.results[3].hid2", is("99008")))
+                .andExpect(jsonPath("$.results[3].reasons", is(asList("PHONE"))))
+
+                .andExpect(jsonPath("$.results[4].hid1", is("99009")))
+                .andExpect(jsonPath("$.results[4].hid2", is("99010")))
+                .andExpect(jsonPath("$.results[4].reasons", is(asList("PHONE", "NID"))));
     }
 
     private List<DuplicatePatientData> buildDuplicatePatientDataList() {
         return asList(new DuplicatePatientData("99001", "99002", asSet("NID", "PHONE"), timeBased().toString()),
+                new DuplicatePatientData("99002", "99001", asSet("NID", "PHONE"), timeBased().toString()),
                 new DuplicatePatientData("99003", "99004", asSet("NID"), timeBased().toString()),
                 new DuplicatePatientData("99005", "99006", asSet("NID"), timeBased().toString()),
                 new DuplicatePatientData("99007", "99008", asSet("PHONE"), timeBased().toString()),

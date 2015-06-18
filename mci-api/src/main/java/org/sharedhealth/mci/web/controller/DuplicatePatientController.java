@@ -1,5 +1,6 @@
 package org.sharedhealth.mci.web.controller;
 
+import org.apache.commons.collections4.Predicate;
 import org.sharedhealth.mci.web.exception.Forbidden;
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
@@ -22,11 +23,14 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static org.apache.commons.collections4.CollectionUtils.find;
 import static org.sharedhealth.mci.web.infrastructure.security.UserProfile.ADMIN_TYPE;
 import static org.springframework.http.HttpStatus.ACCEPTED;
 import static org.springframework.http.HttpStatus.OK;
@@ -66,7 +70,7 @@ public class DuplicatePatientController extends MciController {
             return deferredResult;
         }
 
-        List<DuplicatePatientData> response = duplicatePatientService.findAllByCatchment(new Catchment(catchmentId));
+        List<DuplicatePatientData> response = findDuplicatesByCatchment(catchmentId);
 
         MCIMultiResponse mciMultiResponse;
         if (response != null) {
@@ -76,6 +80,28 @@ public class DuplicatePatientController extends MciController {
         }
         deferredResult.setResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject));
         return deferredResult;
+    }
+
+    private List<DuplicatePatientData> findDuplicatesByCatchment(String catchmentId) {
+        ArrayList<DuplicatePatientData> duplicates = new ArrayList<>(
+                duplicatePatientService.findAllByCatchment(new Catchment(catchmentId)));
+        DuplicatePatientData duplicate;
+        for (Iterator<DuplicatePatientData> it = duplicates.iterator(); it.hasNext(); ) {
+            duplicate = it.next();
+            if (findDuplicate(duplicate.getHealthId2(), duplicate.getHealthId1(), duplicates)) {
+                it.remove();
+            }
+        }
+        return duplicates;
+    }
+
+    private boolean findDuplicate(final String healthId1, final String healthId2, List<DuplicatePatientData> duplicates) {
+        return find(duplicates, new Predicate<DuplicatePatientData>() {
+            @Override
+            public boolean evaluate(DuplicatePatientData duplicate) {
+                return duplicate.getHealthId1().equals(healthId1) && duplicate.getHealthId2().equals(healthId2);
+            }
+        }) != null;
     }
 
     @PreAuthorize("hasAnyRole('ROLE_MCI Approver')")
