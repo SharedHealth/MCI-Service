@@ -57,9 +57,10 @@ public class DuplicatePatientQueryBuilder {
     }
 
     public static void buildDeleteDuplicatesStmt(List<DuplicatePatient> duplicates, CassandraConverter converter,
-                                                 Batch batch) {
+                                                 Batch batch, long timestamp) {
         for (DuplicatePatient duplicate : duplicates) {
             Delete deleteQuery = createDeleteQuery(CF_PATIENT_DUPLICATE, duplicate, null, converter);
+            deleteQuery.using(timestamp(timestamp));
             batch.add(deleteQuery);
         }
     }

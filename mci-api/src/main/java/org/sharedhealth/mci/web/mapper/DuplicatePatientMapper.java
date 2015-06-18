@@ -28,9 +28,7 @@ public class DuplicatePatientMapper {
         Catchment catchment2 = duplicateData.getCatchment2();
 
         buildDuplicates(catchment1, healthId1, healthId2, reasons, duplicates);
-        if (!catchment1.equals(catchment2)) {
-            buildDuplicates(catchment2, healthId2, healthId1, reasons, duplicates);
-        }
+        buildDuplicates(catchment2, healthId2, healthId1, reasons, duplicates);
         return duplicates;
     }
 

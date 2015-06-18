@@ -21,7 +21,6 @@ import static com.datastax.driver.core.querybuilder.QueryBuilder.batch;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.timestamp;
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static java.lang.String.format;
-import static java.lang.System.currentTimeMillis;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.sharedhealth.mci.web.infrastructure.persistence.DuplicatePatientQueryBuilder.*;
@@ -34,7 +33,7 @@ import static org.springframework.data.cassandra.core.CassandraTemplate.createIn
 public class DuplicatePatientRepository extends BaseRepository {
 
     private static final Logger logger = getLogger(DuplicatePatientRepository.class);
-    public static final int BATCH_QUERY_EXEC_DELAY = 1;
+    public static final int BATCH_QUERY_EXEC_DELAY = 100;
 
     private PatientRepository patientRepository;
 
@@ -80,11 +79,15 @@ public class DuplicatePatientRepository extends BaseRepository {
         cassandraOps.execute(batch);
     }
 
-    private void buildRetireBatch(PatientData patient, Catchment oldCatchment, Batch batch) {
+    private void buildRetireBatch(PatientData patient1, Catchment catchment, Batch batch) {
+        buildRetireBatch(patient1, catchment, batch, getCurrentTimeInMicros());
+    }
+
+    private void buildRetireBatch(PatientData patient, Catchment oldCatchment, Batch batch, long timestamp) {
         List<DuplicatePatient> duplicates = findByCatchmentAndHealthId(oldCatchment, patient.getHealthId());
         Set<String> healthId2List = findHealthId2List(duplicates);
         duplicates.addAll(findDuplicatesByHealthId2(healthId2List));
-        buildDeleteDuplicatesStmt(duplicates, cassandraOps.getConverter(), batch);
+        buildDeleteDuplicatesStmt(duplicates, cassandraOps.getConverter(), batch, timestamp);
     }
 
     Set<String> findHealthId2List(List<DuplicatePatient> duplicates) {
@@ -177,17 +180,17 @@ public class DuplicatePatientRepository extends BaseRepository {
     public void update(String healthId, Catchment oldCatchment, List<DuplicatePatient> newDuplicates, UUID marker) {
         CassandraConverter converter = cassandraOps.getConverter();
         Batch batch = batch();
-        long batchTimestamp = currentTimeMillis();
+        long currentTimeMicros = getCurrentTimeInMicros();
 
         PatientData patient = patientRepository.findByHealthId(healthId);
         if (oldCatchment == null) {
             oldCatchment = patient.getCatchment();
         }
-        buildRetireBatch(patient, oldCatchment, batch);
+        buildRetireBatch(patient, oldCatchment, batch, currentTimeMicros);
 
         for (DuplicatePatient duplicate : findDuplicatesWithIgnoredRemoved(newDuplicates)) {
             Insert insertQuery = createInsertQuery(CF_PATIENT_DUPLICATE, duplicate, null, converter);
-            insertQuery.using(timestamp(batchTimestamp + BATCH_QUERY_EXEC_DELAY));
+            insertQuery.using(timestamp(currentTimeMicros + BATCH_QUERY_EXEC_DELAY));
             batch.add(insertQuery);
         }
 

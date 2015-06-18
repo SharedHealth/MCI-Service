@@ -23,6 +23,7 @@ public class DuplicatePatientFeedTask {
     @Scheduled(initialDelayString = "${DUPLICATE_PATIENT_FEED_INITIAL_DELAY}", fixedDelayString = "${DUPLICATE_PATIENT_FEED_DELAY}")
     public void execute() {
         try {
+            logger.debug("Executing duplicate patient feed task.");
             duplicatePatientFeedService.processDuplicatePatients();
         } catch (Exception e) {
             logger.error("Failed process duplicate patient feed.", e);

@@ -3,6 +3,8 @@ package org.sharedhealth.mci.web.infrastructure.persistence;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.cassandra.core.CassandraOperations;
 
+import static java.lang.System.currentTimeMillis;
+
 public class BaseRepository {
 
     protected static long TIMEOUT_IN_MILLIS = 10;
@@ -16,5 +18,9 @@ public class BaseRepository {
 
     public int getPerPageMaximumLimit() {
         return MAXIMUM_RECORD;
+    }
+
+    public long getCurrentTimeInMicros() {
+        return currentTimeMillis() * 1000;
     }
 }

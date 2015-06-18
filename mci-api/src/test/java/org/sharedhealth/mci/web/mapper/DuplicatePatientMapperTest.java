@@ -75,22 +75,14 @@ public class DuplicatePatientMapperTest {
 
         List<DuplicatePatientData> duplicateDataList = new ArrayList<>();
 
-        DuplicatePatientData duplicateData1 = new DuplicatePatientData();
-        duplicateData1.setHealthId1(healthId1);
-        duplicateData1.setHealthId2(healthId2);
-        duplicateData1.setCatchment1(catchment);
-        duplicateData1.setCatchment2(catchment);
-        duplicateData1.setReasons(reasons);
+        DuplicatePatientData duplicateData = new DuplicatePatientData();
+        duplicateData.setHealthId1(healthId1);
+        duplicateData.setHealthId2(healthId2);
+        duplicateData.setCatchment1(catchment);
+        duplicateData.setCatchment2(catchment);
+        duplicateData.setReasons(reasons);
 
-        DuplicatePatientData duplicateData2 = new DuplicatePatientData();
-        duplicateData2.setHealthId1(healthId1);
-        duplicateData2.setHealthId2(healthId3);
-        duplicateData2.setCatchment1(catchment);
-        duplicateData2.setCatchment2(catchment);
-        duplicateData2.setReasons(reasons);
-
-        duplicateDataList.add(duplicateData1);
-        duplicateDataList.add(duplicateData2);
+        duplicateDataList.add(duplicateData);
 
         List<DuplicatePatient> duplicates = new DuplicatePatientMapper().map(duplicateDataList);
         assertTrue(isNotEmpty(duplicates));
@@ -101,10 +93,10 @@ public class DuplicatePatientMapperTest {
         assertDuplicates(catchment.getAllIds().get(2), healthId1, healthId2, reasons, duplicates.get(2));
         assertDuplicates(catchment.getAllIds().get(3), healthId1, healthId2, reasons, duplicates.get(3));
 
-        assertDuplicates(catchment.getAllIds().get(0), healthId1, healthId3, reasons, duplicates.get(4));
-        assertDuplicates(catchment.getAllIds().get(1), healthId1, healthId3, reasons, duplicates.get(5));
-        assertDuplicates(catchment.getAllIds().get(2), healthId1, healthId3, reasons, duplicates.get(6));
-        assertDuplicates(catchment.getAllIds().get(3), healthId1, healthId3, reasons, duplicates.get(7));
+        assertDuplicates(catchment.getAllIds().get(0), healthId2, healthId1, reasons, duplicates.get(4));
+        assertDuplicates(catchment.getAllIds().get(1), healthId2, healthId1, reasons, duplicates.get(5));
+        assertDuplicates(catchment.getAllIds().get(2), healthId2, healthId1, reasons, duplicates.get(6));
+        assertDuplicates(catchment.getAllIds().get(3), healthId2, healthId1, reasons, duplicates.get(7));
     }
 
     private void assertDuplicates(String catchmentId, String healthId1, String healthId2, Set<String> reasons, DuplicatePatient duplicate) {
