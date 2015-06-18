@@ -268,15 +268,20 @@ public class DuplicatePatientRepositoryIT {
         Set<String> reasons = asSet("nid");
         DuplicatePatient duplicate1 = new DuplicatePatient(patient1.getCatchment().getId(), healthId1, healthId2, reasons, timeBased());
         DuplicatePatient duplicate2 = new DuplicatePatient(patient2.getCatchment().getId(), healthId2, healthId1, reasons, timeBased());
-        DuplicatePatient duplicate3 = new DuplicatePatient(patient1.getCatchment().getId(), healthId1, healthId3, reasons, timeBased());
-        DuplicatePatient duplicate4 = new DuplicatePatient(patient3.getCatchment().getId(), healthId3, healthId1, reasons, timeBased());
-        duplicatePatientRepository.create(asList(duplicate1, duplicate2, duplicate3, duplicate4), randomUUID());
+        DuplicatePatient duplicate3 = new DuplicatePatient(patient2.getCatchment().getId(), healthId2, healthId3, reasons, timeBased());
+        DuplicatePatient duplicate4 = new DuplicatePatient(patient3.getCatchment().getId(), healthId3, healthId2, reasons, timeBased());
+        DuplicatePatient duplicate5 = new DuplicatePatient(patient1.getCatchment().getId(), healthId1, healthId3, reasons, timeBased());
+        DuplicatePatient duplicate6 = new DuplicatePatient(patient3.getCatchment().getId(), healthId3, healthId1, reasons, timeBased());
+        duplicatePatientRepository.create(asList(duplicate1, duplicate2, duplicate3, duplicate4, duplicate5, duplicate6), randomUUID());
 
         UUID marker = randomUUID();
         duplicatePatientRepository.retire(healthId1, marker);
 
         List<DuplicatePatient> duplicates = findAllDuplicates();
-        assertTrue(isEmpty(duplicates));
+        assertTrue(isNotEmpty(duplicates));
+        assertEquals(2, duplicates.size());
+        assertDuplicate(healthId2, healthId3, patient2.getCatchment().getId(), duplicates.get(0));
+        assertDuplicate(healthId3, healthId2, patient3.getCatchment().getId(), duplicates.get(1));
         assertMarker(marker);
     }
 

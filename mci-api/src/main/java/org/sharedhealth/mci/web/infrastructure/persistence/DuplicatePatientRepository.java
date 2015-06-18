@@ -84,9 +84,10 @@ public class DuplicatePatientRepository extends BaseRepository {
     }
 
     private void buildRetireBatch(PatientData patient, Catchment oldCatchment, Batch batch, long timestamp) {
-        List<DuplicatePatient> duplicates = findByCatchmentAndHealthId(oldCatchment, patient.getHealthId());
+        String healthId1 = patient.getHealthId();
+        List<DuplicatePatient> duplicates = findByCatchmentAndHealthId(oldCatchment, healthId1);
         Set<String> healthId2List = findHealthId2List(duplicates);
-        duplicates.addAll(findDuplicatesByHealthId2(healthId2List));
+        duplicates.addAll(findDuplicatesByHealthIds(healthId2List, healthId1));
         buildDeleteDuplicatesStmt(duplicates, cassandraOps.getConverter(), batch, timestamp);
     }
 
@@ -98,11 +99,11 @@ public class DuplicatePatientRepository extends BaseRepository {
         return healthIds;
     }
 
-    private List<DuplicatePatient> findDuplicatesByHealthId2(Set<String> healthId2List) {
+    private List<DuplicatePatient> findDuplicatesByHealthIds(Set<String> healthId1List, String healthId2) {
         List<DuplicatePatient> duplicates = new ArrayList<>();
-        for (String healthId2 : healthId2List) {
-            PatientData patient = patientRepository.findByHealthId(healthId2);
-            duplicates.addAll(findByCatchmentAndHealthId(patient.getCatchment(), healthId2));
+        for (String healthId1 : healthId1List) {
+            PatientData patient = patientRepository.findByHealthId(healthId1);
+            duplicates.addAll(findByCatchmentAndHealthIds(patient.getCatchment(), healthId1, healthId2));
         }
         return duplicates;
     }
