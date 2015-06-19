@@ -123,4 +123,6 @@ public class RepositoryConstants {
     public static final String HID = "hid";
     public static final String RESERVED_FOR = "reserved_for";
     public static final String DUPLICATE_PATIENT_MARKER = "duplicate_patient_marker";
+
+    public static final String AUDIT_MARKER_TYPE = "audit_marker";
 }

@@ -7,7 +7,6 @@ import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.model.DuplicatePatient;
 import org.sharedhealth.mci.web.model.DuplicatePatientIgnored;
-import org.sharedhealth.mci.web.model.Marker;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -19,12 +18,13 @@ import java.util.*;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.batch;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.timestamp;
-import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static java.lang.String.format;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.sharedhealth.mci.web.infrastructure.persistence.DuplicatePatientQueryBuilder.*;
-import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.*;
+import static org.sharedhealth.mci.web.infrastructure.persistence.MarkerRepositoryQueryBuilder.buildUpdateMarkerBatch;
+import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.CF_PATIENT_DUPLICATE;
+import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.DUPLICATE_PATIENT_MARKER;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertBatchQuery;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
@@ -166,7 +166,7 @@ public class DuplicatePatientRepository extends BaseRepository {
     public void create(List<DuplicatePatient> duplicates, UUID marker) {
         CassandraConverter converter = cassandraOps.getConverter();
         Batch batch = createInsertBatchQuery(CF_PATIENT_DUPLICATE, duplicates, null, converter);
-        batch.add(buildCreateMarkerStmt(marker.toString(), converter));
+        buildUpdateMarkerBatch(DUPLICATE_PATIENT_MARKER, marker.toString(), converter, batch);
         cassandraOps.execute(batch);
     }
 
@@ -174,7 +174,7 @@ public class DuplicatePatientRepository extends BaseRepository {
         PatientData patient = patientRepository.findByHealthId(healthId);
         Batch batch = batch();
         buildRetireBatch(patient, patient.getCatchment(), batch);
-        batch.add(buildCreateMarkerStmt(marker.toString(), cassandraOps.getConverter()));
+        buildUpdateMarkerBatch(DUPLICATE_PATIENT_MARKER, marker.toString(), cassandraOps.getConverter(), batch);
         cassandraOps.execute(batch);
     }
 
@@ -195,7 +195,7 @@ public class DuplicatePatientRepository extends BaseRepository {
             batch.add(insertQuery);
         }
 
-        batch.add(buildCreateMarkerStmt(marker.toString(), converter));
+        buildUpdateMarkerBatch(DUPLICATE_PATIENT_MARKER, marker.toString(), converter, batch);
         cassandraOps.execute(batch);
     }
 
@@ -214,13 +214,5 @@ public class DuplicatePatientRepository extends BaseRepository {
     private DuplicatePatientIgnored findIgnoredDuplicates(String healthId1, String healthId2) {
         String cql = buildFindIgnoreDuplicatesStmt(healthId1, healthId2);
         return cassandraOps.selectOne(cql, DuplicatePatientIgnored.class);
-    }
-
-    private Insert buildCreateMarkerStmt(String value, CassandraConverter converter) {
-        Marker marker = new Marker();
-        marker.setType(DUPLICATE_PATIENT_MARKER);
-        marker.setCreatedAt(timeBased());
-        marker.setMarker(value);
-        return createInsertQuery(CF_MARKER, marker, null, converter);
     }
 }

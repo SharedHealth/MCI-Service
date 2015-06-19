@@ -20,10 +20,9 @@ import static java.util.Collections.emptyList;
 import static java.util.UUID.fromString;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientAuditLogQueryBuilder.buildFindByHidStmt;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientAuditLogQueryBuilder.buildFindLatestMarkerStmt;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientAuditLogQueryBuilder.buildSaveOrUpdateBatch;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientAuditLogQueryBuilder.updateMarker;
+import static org.sharedhealth.mci.web.infrastructure.persistence.MarkerRepositoryQueryBuilder.buildUpdateMarkerBatch;
+import static org.sharedhealth.mci.web.infrastructure.persistence.PatientAuditLogQueryBuilder.*;
+import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.AUDIT_MARKER_TYPE;
 
 @Component
 public class PatientAuditRepository extends BaseRepository {
@@ -62,7 +61,8 @@ public class PatientAuditRepository extends BaseRepository {
 
     public void updateMarkerTable(List<PatientAuditLog> logs) {
         Batch batch = batch();
-        updateMarker(logs.get(logs.size() - 1).getEventId().toString(), cassandraOps.getConverter(), batch);
+        String marker = logs.get(logs.size() - 1).getEventId().toString();
+        buildUpdateMarkerBatch(AUDIT_MARKER_TYPE, marker, cassandraOps.getConverter(), batch);
         cassandraOps.execute(batch);
     }
 
