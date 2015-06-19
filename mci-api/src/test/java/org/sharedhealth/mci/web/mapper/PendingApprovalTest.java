@@ -11,16 +11,13 @@ import java.util.UUID;
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static java.util.UUID.fromString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.PRESENT_ADDRESS;
 
 public class PendingApprovalTest {
 
     @Test
-    public void shouldSetDetailsInDescendingOrderOfTimestamps() throws Exception {
+    public void shouldSetDetailsInDescendingOrderOfTimestampsEvenWhenTheUuidsAreInAscendingOrder() {
         PendingApproval pendingApproval = new PendingApproval();
         TreeMap<UUID, PendingApprovalFieldDetails> fieldDetails = new TreeMap<>();
 
@@ -38,9 +35,10 @@ public class PendingApprovalTest {
         UUID uuid1 = iterator.next(); // uuidString2
         UUID uuid2 = iterator.next(); // uuidString1
 
-        // Even though timestamp of uuid1 is earlier than that of uuid2, MSB of uuid1 is lesser than that of uuid2
+        // MSB of uuid1 is lesser than that of uuid2
         assertEquals(-1, uuid1.compareTo(uuid2));
 
+        // Timestamp of uuid1 is later than that of uuid2
         Long timestamp1 = unixTimestamp(uuid1);
         Long timestamp2 = unixTimestamp(uuid2);
         assertEquals(1, timestamp1.compareTo(timestamp2));
@@ -49,7 +47,7 @@ public class PendingApprovalTest {
     }
 
     @Test
-    public void shouldSetDetailsInDescendingOrderOfTimeuuidsWhenTimestampsAreSame() throws Exception {
+    public void shouldSetDetailsInDescendingOrderOfTimestampsOrUuidsForGeneratedUuids() {
         PendingApproval pendingApproval = new PendingApproval();
         TreeMap<UUID, PendingApprovalFieldDetails> fieldDetails = new TreeMap<>();
         for (int i = 0; i < 5; i++) {
@@ -61,15 +59,15 @@ public class PendingApprovalTest {
         Date date1 = null;
         UUID uuid1 = null;
         for (UUID uuid2 : pendingApproval.getFieldDetails().keySet()) {
+            Date date2 = new Date(unixTimestamp(uuid2));
             if (uuid1 != null) {
-                assertEquals(-1, uuid2.compareTo(uuid1));
+                if (date1.equals(date2)) {
+                    assertEquals(1, uuid1.compareTo(uuid2));
+                } else {
+                    assertTrue(date1.after(date2));
+                }
             }
             uuid1 = uuid2;
-
-            Date date2 = new Date(unixTimestamp(uuid2));
-            if (date1 != null) {
-                assertTrue(date1.equals(date2));
-            }
             date1 = date2;
         }
         assertNotNull(uuid1);
