@@ -33,7 +33,7 @@ public class RelationCodeValidatorTest extends BaseCodeValidatorTest<Relation> {
     @Test
     public void shouldFailIfTypeIsNullForNonEmptyRelation() {
         Relation relation = new Relation();
-        relation.setHealthId("1234567890123456789");
+        relation.setHealthId("12345678901");
         Set<ConstraintViolation<Relation>> constraintViolations = getValidator().validate(relation);
         assertEquals(1, constraintViolations.size());
         assertEquals("1001", constraintViolations.iterator().next().getMessage());
