@@ -31,7 +31,7 @@ public class Relation {
 
     @JsonProperty(HID)
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "[\\d]{19}", message = ERROR_CODE_PATTERN)
+    @Pattern(regexp = "[\\d]{11}", message = ERROR_CODE_PATTERN)
     @JsonDeserialize(using = WhiteSpaceRemovalDeserializer.class)
     private String healthId;
 
