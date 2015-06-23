@@ -38,4 +38,13 @@ public class RelationCodeValidatorTest extends BaseCodeValidatorTest<Relation> {
         assertEquals(1, constraintViolations.size());
         assertEquals("1001", constraintViolations.iterator().next().getMessage());
     }
+
+    @Test
+    public void shouldFailIfOnlyTypeGiven() {
+        Relation relation = new Relation();
+        relation.setType("FTH");
+        Set<ConstraintViolation<Relation>> constraintViolations = getValidator().validate(relation);
+        assertEquals(1, constraintViolations.size());
+        assertEquals("1001", constraintViolations.iterator().next().getMessage());
+    }
 }
