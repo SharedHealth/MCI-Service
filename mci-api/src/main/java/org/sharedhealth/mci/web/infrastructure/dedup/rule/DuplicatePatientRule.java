@@ -42,7 +42,7 @@ public abstract class DuplicatePatientRule {
         List<PatientData> duplicatePatients = patientRepository.findAllByQuery(query);
         List<String> duplicateHealthIds = new ArrayList<>();
         for (PatientData patient : duplicatePatients) {
-            if (!healthId.equals(patient.getHealthId())) {
+            if (!healthId.equals(patient.getHealthId()) && !patient.isRetired()) {
                 duplicateHealthIds.add(patient.getHealthId());
             }
         }

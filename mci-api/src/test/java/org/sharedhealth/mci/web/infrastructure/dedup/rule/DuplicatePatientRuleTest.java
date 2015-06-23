@@ -3,7 +3,6 @@ package org.sharedhealth.mci.web.infrastructure.dedup.rule;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.sharedhealth.mci.web.infrastructure.dedup.rule.*;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.DuplicatePatientData;
@@ -103,11 +102,10 @@ public class DuplicatePatientRuleTest {
         List<DuplicatePatientData> duplicates = new ArrayList<>();
         duplicatePatientRule.apply(healthId1, duplicates);
         assertTrue(isNotEmpty(duplicates));
-        assertEquals(3, duplicates.size());
+        assertEquals(2, duplicates.size());
 
         assertDuplicateEquals(asList(buildDuplicate(patients.get(0), patients.get(1), reason),
-                buildDuplicate(patients.get(0), patients.get(2), reason),
-                buildDuplicate(patients.get(0), patients.get(3), reason)), duplicates);
+                buildDuplicate(patients.get(0), patients.get(2), reason)), duplicates);
     }
 
     private void assertDuplicateEquals(List<DuplicatePatientData> duplicates1, List<DuplicatePatientData> duplicates2) {
@@ -155,6 +153,7 @@ public class DuplicatePatientRuleTest {
         String healthId4 = "h400";
         patient4.setHealthId(healthId4);
         patient4.setAddress(new Address("40", "41", "42"));
+        patient4.setActive(false);
         when(patientRepository.findByHealthId(healthId4)).thenReturn(patient4);
 
         return asList(patient1, patient2, patient3, patient4);
