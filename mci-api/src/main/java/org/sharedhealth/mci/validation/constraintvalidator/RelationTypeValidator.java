@@ -21,9 +21,7 @@ public class RelationTypeValidator implements ConstraintValidator<RelationType, 
 
         if (value == null) return true;
 
-        if (value.isEmpty()) return true;
-
-        if (StringUtils.isNotBlank(value.getType())) {
+        if (StringUtils.isNotBlank(value.getType()) && (!value.isEmpty() || StringUtils.isNotBlank(value.getId()))) {
             return true;
         }
 
