@@ -31,6 +31,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 @RequestMapping("/mergerequest")
 public class MergePatientController extends MciController {
     private static final Logger logger = LoggerFactory.getLogger(MergePatientController.class);
+    static final String ERROR_MSG_MERGE_WITH_ITSELF = "Cannot merge with itself";
 
     private PatientService patientService;
 
@@ -59,7 +60,7 @@ public class MergePatientController extends MciController {
         }
 
         if (mergingWithItself(patient.getMergedWith(), healthId)) {
-            throw new Forbidden(format("Cannot merge with itself"));
+            throw new Forbidden(format(ERROR_MSG_MERGE_WITH_ITSELF));
         }
 
         MCIResponse mciResponse = patientService.update(patient, healthId);
