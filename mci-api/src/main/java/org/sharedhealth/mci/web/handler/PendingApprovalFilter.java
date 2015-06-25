@@ -70,7 +70,7 @@ public class PendingApprovalFilter {
         newPatient.setPatientStatus(processPatientStatus(STATUS, existingPatient.getPatientStatus(), updateRequest.getPatientStatus(), requestedBy, newPatient));
         newPatient.setPrimaryContactNumber(processPhoneNumber(PRIMARY_CONTACT_NUMBER, existingPatient.getPrimaryContactNumber(), updateRequest.getPrimaryContactNumber(), requestedBy, newPatient));
         newPatient.setAddress(processAddress(PRESENT_ADDRESS, existingPatient.getAddress(), updateRequest.getAddress(), requestedBy, newPatient));
-        newPatient.setPermanentAddress(processAddress(PERMANENT_ADDRESS, existingPatient.getPermanentAddress(), updateRequest.getPermanentAddress(), requestedBy, newPatient));
+        newPatient.setPermanentAddress(processPermanentAddress(PERMANENT_ADDRESS, existingPatient.getPermanentAddress(), updateRequest.getPermanentAddress(), requestedBy, newPatient));
         newPatient.setHouseholdCode(processString(HOUSEHOLD_CODE, existingPatient.getHouseholdCode(), updateRequest.getHouseholdCode(), requestedBy, newPatient));
         newPatient.setActive((Boolean) process(ACTIVE, existingPatient.isActive(), updateRequest.isActive(), requestedBy, newPatient));
         newPatient.setMergedWith(processString(MERGED_WITH, existingPatient.getMergedWith(), updateRequest.getMergedWith(), requestedBy, newPatient));
@@ -94,6 +94,12 @@ public class PendingApprovalFilter {
         if (newValue != null && !newValue.isEmpty()) {
             newValue.setCountryCode(COUNTRY_CODE_BANGLADESH);
         }
+
+        Object address = process(key, oldValue, newValue, requester, newPatient);
+        return address == null ? null : (Address) address;
+    }
+
+    private Address processPermanentAddress(String key, Address oldValue, Address newValue, Requester requester, PatientData newPatient) {
 
         Object address = process(key, oldValue, newValue, requester, newPatient);
         return address == null ? null : (Address) address;
