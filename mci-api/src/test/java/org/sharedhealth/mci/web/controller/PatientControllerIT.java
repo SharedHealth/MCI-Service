@@ -78,28 +78,6 @@ public class PatientControllerIT extends BaseControllerTest {
         setupLocation(cassandraOps);
     }
 
-
-    @Test
-    public void shouldCreatePatient() throws Exception {
-        String json = mapper.writeValueAsString(patientData);
-
-        MvcResult result = mockMvc.perform(post(API_END_POINT_FOR_PATIENT)
-                .header(AUTH_TOKEN_KEY, validAccessToken)
-                .header(FROM_KEY, validEmail)
-                .header(CLIENT_ID_KEY, validClientId)
-                .accept(APPLICATION_JSON)
-                .content(json)
-                .contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        mockMvc.perform(asyncDispatch(result))
-                .andExpect(status().isCreated())
-                .andExpect(content().contentType(APPLICATION_JSON_UTF8));
-    }
-
     @Test
     public void shouldCreatePatientForAnyPostCodeWithPermanentAddressWhenCountryCodeIsNotBangladesh() throws Exception {
         patientData.getPermanentAddress().setCountryCode("051");

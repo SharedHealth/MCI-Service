@@ -150,7 +150,7 @@ public class PatientServiceTest {
     }
 
     @Test
-    public void shouldUpdateInsteadofCreatingWhenMatchingPatientExists() throws Exception {
+    public void shouldUpdateInsteadOfCreatingWhenMatchingPatientExists() throws Exception {
         PatientData existingPatient = new PatientData();
         existingPatient.setHealthId("hid-100");
         existingPatient.setNationalId("nid-100");

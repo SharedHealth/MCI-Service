@@ -94,30 +94,6 @@ public class PatientControllerTest {
         SecurityContextHolder.getContext().setAuthentication(new TokenAuthentication(getUserInfo(), true));
     }
 
-    private PatientData buildPatient() {
-        PatientData patientData = new PatientData();
-        patientData.setNationalId("1234567890123");
-        patientData.setBirthRegistrationNumber("12345678901234567");
-        patientData.setGivenName("Scott");
-        patientData.setSurName("Tiger");
-        patientData.setGender("M");
-        patientData.setDateOfBirth(toIsoFormat("2014-12-01"));
-        patientData.setHouseholdCode("1234");
-
-        Address address = new Address();
-        address.setAddressLine("house-10");
-        address.setDivisionId("10");
-        address.setDistrictId("04");
-        address.setUpazilaId("09");
-        address.setCityCorporationId("20");
-        address.setRuralWardId("01");
-        address.setVillage("10");
-        address.setCountryCode("050");
-
-        patientData.setAddress(address);
-        return patientData;
-    }
-
     private UserInfo getUserInfo() {
         UserProfile userProfile = new UserProfile("facility", USER_INFO_FACILITY, null);
         return new UserInfo("102", "ABC", "abc@mail", 1, true, "111100", asList(MCI_USER_GROUP), asList(userProfile));
@@ -351,6 +327,30 @@ public class PatientControllerTest {
         assertNotNull(requester.getFacility());
         assertEquals(USER_INFO_FACILITY, requester.getFacility().getId());
         assertNull(requester.getProvider());
+    }
+
+    private PatientData buildPatient() {
+        PatientData patientData = new PatientData();
+        patientData.setNationalId("1234567890123");
+        patientData.setBirthRegistrationNumber("12345678901234567");
+        patientData.setGivenName("Scott");
+        patientData.setSurName("Tiger");
+        patientData.setGender("M");
+        patientData.setDateOfBirth(toIsoFormat("2014-12-01"));
+        patientData.setHouseholdCode("1234");
+
+        Address address = new Address();
+        address.setAddressLine("house-10");
+        address.setDivisionId("10");
+        address.setDistrictId("04");
+        address.setUpazilaId("09");
+        address.setCityCorporationId("20");
+        address.setRuralWardId("01");
+        address.setVillage("10");
+        address.setCountryCode("050");
+
+        patientData.setAddress(address);
+        return patientData;
     }
 
     private String buildEndPointWithHealthId(String healthId) {
