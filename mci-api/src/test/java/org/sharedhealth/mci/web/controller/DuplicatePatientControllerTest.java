@@ -7,7 +7,14 @@ import org.mockito.Mock;
 import org.sharedhealth.mci.web.infrastructure.security.TokenAuthentication;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
 import org.sharedhealth.mci.web.infrastructure.security.UserProfile;
-import org.sharedhealth.mci.web.mapper.*;
+import org.sharedhealth.mci.web.mapper.Address;
+import org.sharedhealth.mci.web.mapper.Catchment;
+import org.sharedhealth.mci.web.mapper.DuplicatePatientData;
+import org.sharedhealth.mci.web.mapper.DuplicatePatientMergeData;
+import org.sharedhealth.mci.web.mapper.PatientData;
+import org.sharedhealth.mci.web.mapper.PatientSummaryData;
+import org.sharedhealth.mci.web.mapper.Requester;
+import org.sharedhealth.mci.web.mapper.RequesterDetails;
 import org.sharedhealth.mci.web.service.DuplicatePatientService;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -31,9 +38,12 @@ import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
 import static org.sharedhealth.mci.web.utils.MCIConstants.DUPLICATION_ACTION_RETAIN_ALL;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.core.context.SecurityContextHolder.getContext;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class DuplicatePatientControllerTest {
 
@@ -89,38 +99,59 @@ public class DuplicatePatientControllerTest {
                 .andExpect(jsonPath("$.results[5]").doesNotExist())
 
                 .andExpect(jsonPath("$.results[0].patient1.hid", is("99002")))
+                .andExpect(jsonPath("$.results[0].patient1.given_name", is("A2")))
+                .andExpect(jsonPath("$.results[0].patient1.sur_name", is("B2")))
                 .andExpect(jsonPath("$.results[0].patient2.hid", is("99001")))
+                .andExpect(jsonPath("$.results[0].patient2.given_name", is("A1")))
+                .andExpect(jsonPath("$.results[0].patient2.sur_name", is("B1")))
                 .andExpect(jsonPath("$.results[0].reasons", is(asList("PHONE", "NID"))))
 
                 .andExpect(jsonPath("$.results[1].patient1.hid", is("99003")))
+                .andExpect(jsonPath("$.results[1].patient1.given_name", is("A3")))
+                .andExpect(jsonPath("$.results[1].patient1.sur_name", is("B3")))
                 .andExpect(jsonPath("$.results[1].patient2.hid", is("99004")))
+                .andExpect(jsonPath("$.results[1].patient2.given_name", is("A4")))
+                .andExpect(jsonPath("$.results[1].patient2.sur_name", is("B4")))
                 .andExpect(jsonPath("$.results[1].reasons", is(asList("NID"))))
 
                 .andExpect(jsonPath("$.results[2].patient1.hid", is("99005")))
+                .andExpect(jsonPath("$.results[2].patient1.given_name", is("A5")))
+                .andExpect(jsonPath("$.results[2].patient1.sur_name", is("B5")))
                 .andExpect(jsonPath("$.results[2].patient2.hid", is("99006")))
+                .andExpect(jsonPath("$.results[2].patient2.given_name", is("A6")))
+                .andExpect(jsonPath("$.results[2].patient2.sur_name", is("B6")))
                 .andExpect(jsonPath("$.results[2].reasons", is(asList("NID"))))
 
                 .andExpect(jsonPath("$.results[3].patient1.hid", is("99007")))
+                .andExpect(jsonPath("$.results[3].patient1.given_name", is("A7")))
+                .andExpect(jsonPath("$.results[3].patient1.sur_name", is("B7")))
                 .andExpect(jsonPath("$.results[3].patient2.hid", is("99008")))
+                .andExpect(jsonPath("$.results[3].patient2.given_name", is("A8")))
+                .andExpect(jsonPath("$.results[3].patient2.sur_name", is("B8")))
                 .andExpect(jsonPath("$.results[3].reasons", is(asList("PHONE"))))
 
                 .andExpect(jsonPath("$.results[4].patient1.hid", is("99009")))
+                .andExpect(jsonPath("$.results[4].patient1.given_name", is("A9")))
+                .andExpect(jsonPath("$.results[4].patient1.sur_name", is("B9")))
                 .andExpect(jsonPath("$.results[4].patient2.hid", is("99010")))
+                .andExpect(jsonPath("$.results[4].patient2.given_name", is("A10")))
+                .andExpect(jsonPath("$.results[4].patient2.sur_name", is("B10")))
                 .andExpect(jsonPath("$.results[4].reasons", is(asList("PHONE", "NID"))));
     }
 
     private List<DuplicatePatientData> buildDuplicatePatientDataList() {
-        Address patientAddress = new Address("10", "20", "30");
-        PatientSummaryData patientSummaryData1 = getPatientSummaryData("99001",patientAddress);
-        PatientSummaryData patientSummaryData2 = getPatientSummaryData("99002", patientAddress);
-        PatientSummaryData patientSummaryData3 = getPatientSummaryData("99003", patientAddress);
-        PatientSummaryData patientSummaryData4 = getPatientSummaryData("99004", patientAddress);
-        PatientSummaryData patientSummaryData5 = getPatientSummaryData("99005", patientAddress);
-        PatientSummaryData patientSummaryData6 = getPatientSummaryData("99006", patientAddress);
-        PatientSummaryData patientSummaryData7 = getPatientSummaryData("99007", patientAddress);
-        PatientSummaryData patientSummaryData8 = getPatientSummaryData("99008", patientAddress);
-        PatientSummaryData patientSummaryData9 = getPatientSummaryData("99009", patientAddress);
-        PatientSummaryData patientSummaryData10 = getPatientSummaryData("99010", patientAddress);
+        Address address = new Address("10", "20", "30");
+        PatientSummaryData patientSummaryData1 = buildPatientSummaryData("99001", "A1", "B1", address);
+        PatientSummaryData patientSummaryData2 = buildPatientSummaryData("99002", "A2", "B2", address);
+        PatientSummaryData patientSummaryData3 = buildPatientSummaryData("99003", "A3", "B3", address);
+        PatientSummaryData patientSummaryData4 = buildPatientSummaryData("99004", "A4", "B4", address);
+        PatientSummaryData patientSummaryData5 = buildPatientSummaryData("99005", "A5", "B5", address);
+        PatientSummaryData patientSummaryData6 = buildPatientSummaryData("99006", "A6", "B6", address);
+        PatientSummaryData patientSummaryData7 = buildPatientSummaryData("99007", "A7", "B7", address);
+        PatientSummaryData patientSummaryData8 = buildPatientSummaryData("99008", "A8", "B8", address);
+        PatientSummaryData patientSummaryData9 = buildPatientSummaryData("99009", "A9", "B9", address);
+        PatientSummaryData patientSummaryData10 = buildPatientSummaryData("99010", "A10", "B10", address);
+
         return asList(new DuplicatePatientData(patientSummaryData1, patientSummaryData2, asSet("NID", "PHONE"), timeBased().toString()),
                 new DuplicatePatientData(patientSummaryData2, patientSummaryData1, asSet("NID", "PHONE"), timeBased().toString()),
                 new DuplicatePatientData(patientSummaryData3, patientSummaryData4, asSet("NID"), timeBased().toString()),
@@ -129,11 +160,13 @@ public class DuplicatePatientControllerTest {
                 new DuplicatePatientData(patientSummaryData9, patientSummaryData10, asSet("NID", "PHONE"), timeBased().toString()));
     }
 
-    private PatientSummaryData getPatientSummaryData(String hid, Address patientAddress) {
-        PatientSummaryData patientSummaryData1 = new PatientSummaryData();
-        patientSummaryData1.setHealthId(hid);
-        patientSummaryData1.setAddress(patientAddress);
-        return patientSummaryData1;
+    private PatientSummaryData buildPatientSummaryData(String hid, String givenName, String surname, Address address) {
+        PatientSummaryData patientSummaryData = new PatientSummaryData();
+        patientSummaryData.setHealthId(hid);
+        patientSummaryData.setGivenName(givenName);
+        patientSummaryData.setSurName(surname);
+        patientSummaryData.setAddress(address);
+        return patientSummaryData;
     }
 
     @Test(expected = Exception.class)

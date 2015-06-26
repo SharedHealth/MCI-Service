@@ -10,16 +10,25 @@ import org.sharedhealth.mci.web.infrastructure.persistence.DuplicatePatientRepos
 import org.sharedhealth.mci.web.infrastructure.persistence.MarkerRepository;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientFeedRepository;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
-import org.sharedhealth.mci.web.mapper.*;
+import org.sharedhealth.mci.web.mapper.Address;
+import org.sharedhealth.mci.web.mapper.Catchment;
+import org.sharedhealth.mci.web.mapper.DuplicatePatientData;
+import org.sharedhealth.mci.web.mapper.DuplicatePatientMapper;
+import org.sharedhealth.mci.web.mapper.DuplicatePatientMergeData;
+import org.sharedhealth.mci.web.mapper.PatientData;
+import org.sharedhealth.mci.web.mapper.PatientMapper;
+import org.sharedhealth.mci.web.mapper.PatientSummaryData;
 import org.sharedhealth.mci.web.model.DuplicatePatient;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static java.util.Arrays.asList;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.rules.ExpectedException.none;
 import static org.mockito.Mockito.verify;
@@ -55,11 +64,34 @@ public class DuplicatePatientServiceTest {
     @Test
     public void shouldFindAllByCatchment() {
         Catchment catchment = new Catchment("102030");
+        Address address = new Address("10", "20", "30");
         when(duplicatePatientRepository.findByCatchment(catchment)).thenReturn(buildDuplicatePatients());
+        when(patientRepository.findByHealthId("99001")).thenReturn(buildPatientData("99001", "A1", "B1", address));
+        when(patientRepository.findByHealthId("99002")).thenReturn(buildPatientData("99002", "A2", "B2", address));
+        when(patientRepository.findByHealthId("99003")).thenReturn(buildPatientData("99003", "A3", "B3", address));
+        when(patientRepository.findByHealthId("99004")).thenReturn(buildPatientData("99004", "A4", "B4", address));
+        when(patientRepository.findByHealthId("99005")).thenReturn(buildPatientData("99005", "A5", "B5", address));
+        when(patientRepository.findByHealthId("99006")).thenReturn(buildPatientData("99006", "A6", "B6", address));
         List<DuplicatePatientData> duplicatePatientDataList = duplicatePatientService.findAllByCatchment(catchment);
 
         assertTrue(isNotEmpty(duplicatePatientDataList));
-        assertEquals(5, duplicatePatientDataList.size());
+        assertEquals(3, duplicatePatientDataList.size());
+
+        assertDuplicateData(duplicatePatientDataList.get(0), buildPatientData("99001", "A1", "B1", address),
+                buildPatientData("99002", "A2", "B2", address), asSet("nid", "phoneNo"));
+        assertDuplicateData(duplicatePatientDataList.get(1), buildPatientData("99003", "A3", "B3", address),
+                buildPatientData("99004", "A4", "B4", address), asSet("phoneNo"));
+        assertDuplicateData(duplicatePatientDataList.get(2), buildPatientData("99005", "A5", "B5", address),
+                buildPatientData("99006", "A6", "B6", address), asSet("nid"));
+    }
+
+    private PatientData buildPatientData(String healthId, String givenName, String surname, Address address) {
+        PatientData patientData = new PatientData();
+        patientData.setHealthId(healthId);
+        patientData.setGivenName(givenName);
+        patientData.setSurName(surname);
+        patientData.setAddress(address);
+        return patientData;
     }
 
     private List<DuplicatePatient> buildDuplicatePatients() {
@@ -67,9 +99,22 @@ public class DuplicatePatientServiceTest {
         duplicatePatients.add(new DuplicatePatient("A102030", "99001", "99002", asSet("nid", "phoneNo"), timeBased()));
         duplicatePatients.add(new DuplicatePatient("A102030", "99003", "99004", asSet("phoneNo"), timeBased()));
         duplicatePatients.add(new DuplicatePatient("A102030", "99005", "99006", asSet("nid"), timeBased()));
-        duplicatePatients.add(new DuplicatePatient("A102030", "99007", "99008", asSet("nid"), timeBased()));
-        duplicatePatients.add(new DuplicatePatient("A102030", "99009", "99010", asSet("nid", "phoneNo"), timeBased()));
         return duplicatePatients;
+    }
+
+    private void assertDuplicateData(DuplicatePatientData duplicatePatient, PatientData patientData1, PatientData patientData2,
+                                     Set<String> reasons) {
+        assertPatient(duplicatePatient.getPatient1(), patientData1);
+        assertPatient(duplicatePatient.getPatient2(), patientData2);
+        assertEquals(reasons, duplicatePatient.getReasons());
+    }
+
+    private void assertPatient(PatientSummaryData expected, PatientData actual) {
+        assertNotNull(actual);
+        assertEquals(expected.getHealthId(), actual.getHealthId());
+        assertEquals(expected.getGivenName(), actual.getGivenName());
+        assertEquals(expected.getSurName(), actual.getSurName());
+        assertEquals(expected.getAddress(), actual.getAddress());
     }
 
     @Test
