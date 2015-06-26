@@ -88,18 +88,21 @@ public class DuplicatePatientController extends MciController {
         DuplicatePatientData duplicate;
         for (Iterator<DuplicatePatientData> it = duplicates.iterator(); it.hasNext(); ) {
             duplicate = it.next();
-            if (findDuplicate(duplicate.getHealthId2(), duplicate.getHealthId1(), duplicates)) {
+            if (findDuplicate(duplicate.getPatient2().getHealthId(),
+                    duplicate.getPatient1().getHealthId(), duplicates)) {
                 it.remove();
             }
         }
         return duplicates;
     }
 
-    private boolean findDuplicate(final String healthId1, final String healthId2, List<DuplicatePatientData> duplicates) {
+    private boolean findDuplicate(final String healthId1, final String healthId2,
+                                  List<DuplicatePatientData> duplicates) {
         return find(duplicates, new Predicate<DuplicatePatientData>() {
             @Override
             public boolean evaluate(DuplicatePatientData duplicate) {
-                return duplicate.getHealthId1().equals(healthId1) && duplicate.getHealthId2().equals(healthId2);
+                return duplicate.getPatient1().getHealthId().equals(healthId1)
+                        && duplicate.getPatient2().getHealthId().equals(healthId2);
             }
         }) != null;
     }

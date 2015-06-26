@@ -52,7 +52,7 @@ public class DuplicatePatientEventProcessorTest {
 
         eventProcessor.buildDuplicates(healthId);
         verify(ruleEngine).apply(healthId);
-        verify(mapper).map(duplicates);
+        verify(mapper).mapToDuplicatePatientList(duplicates);
     }
 
     @Test

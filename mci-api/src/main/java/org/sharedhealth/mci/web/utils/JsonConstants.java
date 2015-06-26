@@ -91,8 +91,8 @@ public class JsonConstants {
     public static final String OLD_VALUE = "old_value";
     public static final String NEW_VALUE = "new_value";
 
-    public static final String HID1 = "hid1";
-    public static final String HID2 = "hid2";
+    public static final String PATIENT1 = "patient1";
+    public static final String PATIENT2 = "patient2";
     public static final String REASONS = "reasons";
     public static final String HEALTH_ID = "health_id";
 }

@@ -88,34 +88,52 @@ public class DuplicatePatientControllerTest {
                 .andExpect(jsonPath("$.results[4]").exists())
                 .andExpect(jsonPath("$.results[5]").doesNotExist())
 
-                .andExpect(jsonPath("$.results[0].hid1", is("99002")))
-                .andExpect(jsonPath("$.results[0].hid2", is("99001")))
+                .andExpect(jsonPath("$.results[0].patient1.hid", is("99002")))
+                .andExpect(jsonPath("$.results[0].patient2.hid", is("99001")))
                 .andExpect(jsonPath("$.results[0].reasons", is(asList("PHONE", "NID"))))
 
-                .andExpect(jsonPath("$.results[1].hid1", is("99003")))
-                .andExpect(jsonPath("$.results[1].hid2", is("99004")))
+                .andExpect(jsonPath("$.results[1].patient1.hid", is("99003")))
+                .andExpect(jsonPath("$.results[1].patient2.hid", is("99004")))
                 .andExpect(jsonPath("$.results[1].reasons", is(asList("NID"))))
 
-                .andExpect(jsonPath("$.results[2].hid1", is("99005")))
-                .andExpect(jsonPath("$.results[2].hid2", is("99006")))
+                .andExpect(jsonPath("$.results[2].patient1.hid", is("99005")))
+                .andExpect(jsonPath("$.results[2].patient2.hid", is("99006")))
                 .andExpect(jsonPath("$.results[2].reasons", is(asList("NID"))))
 
-                .andExpect(jsonPath("$.results[3].hid1", is("99007")))
-                .andExpect(jsonPath("$.results[3].hid2", is("99008")))
+                .andExpect(jsonPath("$.results[3].patient1.hid", is("99007")))
+                .andExpect(jsonPath("$.results[3].patient2.hid", is("99008")))
                 .andExpect(jsonPath("$.results[3].reasons", is(asList("PHONE"))))
 
-                .andExpect(jsonPath("$.results[4].hid1", is("99009")))
-                .andExpect(jsonPath("$.results[4].hid2", is("99010")))
+                .andExpect(jsonPath("$.results[4].patient1.hid", is("99009")))
+                .andExpect(jsonPath("$.results[4].patient2.hid", is("99010")))
                 .andExpect(jsonPath("$.results[4].reasons", is(asList("PHONE", "NID"))));
     }
 
     private List<DuplicatePatientData> buildDuplicatePatientDataList() {
-        return asList(new DuplicatePatientData("99001", "99002", asSet("NID", "PHONE"), timeBased().toString()),
-                new DuplicatePatientData("99002", "99001", asSet("NID", "PHONE"), timeBased().toString()),
-                new DuplicatePatientData("99003", "99004", asSet("NID"), timeBased().toString()),
-                new DuplicatePatientData("99005", "99006", asSet("NID"), timeBased().toString()),
-                new DuplicatePatientData("99007", "99008", asSet("PHONE"), timeBased().toString()),
-                new DuplicatePatientData("99009", "99010", asSet("NID", "PHONE"), timeBased().toString()));
+        Address patientAddress = new Address("10", "20", "30");
+        PatientSummaryData patientSummaryData1 = getPatientSummaryData("99001",patientAddress);
+        PatientSummaryData patientSummaryData2 = getPatientSummaryData("99002", patientAddress);
+        PatientSummaryData patientSummaryData3 = getPatientSummaryData("99003", patientAddress);
+        PatientSummaryData patientSummaryData4 = getPatientSummaryData("99004", patientAddress);
+        PatientSummaryData patientSummaryData5 = getPatientSummaryData("99005", patientAddress);
+        PatientSummaryData patientSummaryData6 = getPatientSummaryData("99006", patientAddress);
+        PatientSummaryData patientSummaryData7 = getPatientSummaryData("99007", patientAddress);
+        PatientSummaryData patientSummaryData8 = getPatientSummaryData("99008", patientAddress);
+        PatientSummaryData patientSummaryData9 = getPatientSummaryData("99009", patientAddress);
+        PatientSummaryData patientSummaryData10 = getPatientSummaryData("99010", patientAddress);
+        return asList(new DuplicatePatientData(patientSummaryData1, patientSummaryData2, asSet("NID", "PHONE"), timeBased().toString()),
+                new DuplicatePatientData(patientSummaryData2, patientSummaryData1, asSet("NID", "PHONE"), timeBased().toString()),
+                new DuplicatePatientData(patientSummaryData3, patientSummaryData4, asSet("NID"), timeBased().toString()),
+                new DuplicatePatientData(patientSummaryData5, patientSummaryData6, asSet("NID"), timeBased().toString()),
+                new DuplicatePatientData(patientSummaryData7, patientSummaryData8, asSet("PHONE"), timeBased().toString()),
+                new DuplicatePatientData(patientSummaryData9, patientSummaryData10, asSet("NID", "PHONE"), timeBased().toString()));
+    }
+
+    private PatientSummaryData getPatientSummaryData(String hid, Address patientAddress) {
+        PatientSummaryData patientSummaryData1 = new PatientSummaryData();
+        patientSummaryData1.setHealthId(hid);
+        patientSummaryData1.setAddress(patientAddress);
+        return patientSummaryData1;
     }
 
     @Test(expected = Exception.class)

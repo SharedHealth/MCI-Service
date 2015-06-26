@@ -104,6 +104,16 @@ public class Address implements Diffable<Address> {
         this.countryCode = COUNTRY_CODE_BANGLADESH;
     }
 
+    public Address(String divisionId, String districtId, String upazilaId, String cityCorporationId,
+                   String unionOrUrbanWardId, String ruralWardId) {
+        this.divisionId = divisionId;
+        this.districtId = districtId;
+        this.upazilaId = upazilaId;
+        this.cityCorporationId = cityCorporationId;
+        this.unionOrUrbanWardId = unionOrUrbanWardId;
+        this.ruralWardId = ruralWardId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

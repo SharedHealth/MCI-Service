@@ -314,14 +314,11 @@ public class PatientMapper {
         patient.setCountryCode(defaultString(address.getCountryCode(), COUNTRY_CODE_BANGLADESH));
     }
 
-    private PatientSummaryData mapSummary(PatientData patient) {
-
+    public PatientSummaryData mapSummary(PatientData patient) {
         if (patient == null) {
             return null;
         }
-
         PatientSummaryData data = new PatientSummaryData();
-
         data.setHealthId(patient.getHealthId());
         data.setNationalId(patient.getNationalId());
         data.setUid(patient.getUid());
@@ -334,7 +331,6 @@ public class PatientMapper {
         data.setPhoneNumber(patient.getPhoneNumber());
         data.setActive(patient.isActive());
         data.setMergedWith(patient.getMergedWith());
-
         return data;
     }
 

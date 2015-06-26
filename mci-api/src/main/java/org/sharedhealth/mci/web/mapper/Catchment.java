@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Map;
 
 import static java.lang.String.format;
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.substring;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
 public class Catchment {
@@ -21,6 +23,11 @@ public class Catchment {
     private String unionOrUrbanWardId;
     private String ruralWardId;
 
+    public Catchment(Address address) {
+        this(address.getDivisionId(), address.getDistrictId(), address.getUpazilaId(), address.getCityCorporationId(),
+                address.getUnionOrUrbanWardId(), address.getRuralWardId());
+    }
+    
     public Catchment(String divisionId, String districtId) {
         this(divisionId, districtId, null);
     }

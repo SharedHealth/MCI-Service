@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.sharedhealth.mci.web.infrastructure.persistence.DuplicatePatientRepository;
 import org.sharedhealth.mci.web.infrastructure.persistence.MarkerRepository;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientFeedRepository;
+import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
 import org.sharedhealth.mci.web.mapper.*;
 import org.sharedhealth.mci.web.model.DuplicatePatient;
 
@@ -39,13 +40,16 @@ public class DuplicatePatientServiceTest {
     private PatientFeedRepository feedRepository;
     @Mock
     private MarkerRepository markerRepository;
+    @Mock
+    private PatientRepository patientRepository;
 
     private DuplicatePatientService duplicatePatientService;
 
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-        duplicatePatientService = new DuplicatePatientService(duplicatePatientRepository);
+        DuplicatePatientMapper duplicatePatientMapper = new DuplicatePatientMapper(patientRepository, new PatientMapper());
+        duplicatePatientService = new DuplicatePatientService(duplicatePatientRepository, duplicatePatientMapper);
     }
 
     @Test

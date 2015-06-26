@@ -50,7 +50,7 @@ public class DuplicatePatientCreateEventProcessorTest {
         List<DuplicatePatientData> duplicateData = asList(new DuplicatePatientData());
         when(ruleEngine.apply(healthId)).thenReturn(duplicateData);
         List<DuplicatePatient> duplicates = asList(new DuplicatePatient());
-        when(mapper.map(duplicateData)).thenReturn(duplicates);
+        when(mapper.mapToDuplicatePatientList(duplicateData)).thenReturn(duplicates);
 
         PatientUpdateLogData log = new PatientUpdateLogData();
         log.setHealthId(healthId);

@@ -5,8 +5,11 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
 import org.sharedhealth.mci.web.mapper.Address;
+import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.DuplicatePatientData;
+import org.sharedhealth.mci.web.mapper.DuplicatePatientMapper;
 import org.sharedhealth.mci.web.mapper.PatientData;
+import org.sharedhealth.mci.web.mapper.PatientMapper;
 import org.sharedhealth.mci.web.mapper.SearchQuery;
 
 import java.util.HashSet;
@@ -18,7 +21,10 @@ import static junit.framework.Assert.assertTrue;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.sharedhealth.mci.web.infrastructure.dedup.rule.DuplicatePatientRule.*;
+import static org.sharedhealth.mci.web.infrastructure.dedup.rule.DuplicatePatientRule.DUPLICATE_REASON_BRN;
+import static org.sharedhealth.mci.web.infrastructure.dedup.rule.DuplicatePatientRule.DUPLICATE_REASON_NAME_ADDRESS;
+import static org.sharedhealth.mci.web.infrastructure.dedup.rule.DuplicatePatientRule.DUPLICATE_REASON_NID;
+import static org.sharedhealth.mci.web.infrastructure.dedup.rule.DuplicatePatientRule.DUPLICATE_REASON_UID;
 
 public class DuplicatePatientRuleEngineTest {
 
@@ -30,9 +36,10 @@ public class DuplicatePatientRuleEngineTest {
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-        ruleEngine = new DuplicatePatientRuleEngine(asList(new DuplicatePatientNidRule(patientRepository),
-                new DuplicatePatientUidRule(patientRepository), new DuplicatePatientBrnRule(patientRepository),
-                new DuplicatePatientNameAndAddressRule(patientRepository)));
+        DuplicatePatientMapper duplicatePatientMapper = new DuplicatePatientMapper(patientRepository, new PatientMapper());
+        ruleEngine = new DuplicatePatientRuleEngine(asList(new DuplicatePatientNidRule(patientRepository, duplicatePatientMapper),
+                new DuplicatePatientUidRule(patientRepository, duplicatePatientMapper), new DuplicatePatientBrnRule(patientRepository, duplicatePatientMapper),
+                new DuplicatePatientNameAndAddressRule(patientRepository, duplicatePatientMapper)));
     }
 
     @Test
@@ -55,13 +62,13 @@ public class DuplicatePatientRuleEngineTest {
         when(patientRepository.findByHealthId(healthId1)).thenReturn(patient1);
 
         String healthId2 = "h200";
-        PatientData patient2 = buildPatient(healthId2, address1);
+        PatientData patient2 = buildPatient(healthId2, nid, brn, uid, address1);
         String healthId3 = "h300";
-        PatientData patient3 = buildPatient(healthId3, new Address("30", "31", "32"));
+        PatientData patient3 = buildPatient(healthId3, nid, brn, uid, new Address("30", "31", "32"));
         String healthId4 = "h400";
-        PatientData patient4 = buildPatient(healthId4, new Address("40", "41", "42"));
+        PatientData patient4 = buildPatient(healthId4, nid, brn, uid, new Address("40", "41", "42"));
         String healthId5 = "h500";
-        PatientData patient5 = buildPatient(healthId5, address1);
+        PatientData patient5 = buildPatient(healthId5, nid, brn, uid, address1);
         when(patientRepository.findByHealthId(healthId2)).thenReturn(patient2);
         when(patientRepository.findByHealthId(healthId3)).thenReturn(patient3);
         when(patientRepository.findByHealthId(healthId4)).thenReturn(patient4);
@@ -96,16 +103,19 @@ public class DuplicatePatientRuleEngineTest {
     }
 
     private void assertDuplicate(PatientData patient1, PatientData patient2, List<String> reasons, DuplicatePatientData duplicate) {
-        assertEquals(patient1.getHealthId(), duplicate.getHealthId1());
-        assertEquals(patient2.getHealthId(), duplicate.getHealthId2());
-        assertEquals(patient1.getCatchment(), duplicate.getCatchment1());
-        assertEquals(patient2.getCatchment(), duplicate.getCatchment2());
+        assertEquals(patient1.getHealthId(), duplicate.getPatient1().getHealthId());
+        assertEquals(patient2.getHealthId(), duplicate.getPatient2().getHealthId());
+        assertEquals(patient1.getCatchment(), new Catchment(duplicate.getPatient1().getAddress()));
+        assertEquals(patient2.getCatchment(), new Catchment(duplicate.getPatient2().getAddress().getGeoCode()));
         assertEquals(new HashSet<>(reasons), duplicate.getReasons());
     }
 
-    private PatientData buildPatient(String healthId, Address address) {
+    private PatientData buildPatient(String healthId, String nid, String brn, String uid, Address address) {
         PatientData patient = new PatientData();
         patient.setHealthId(healthId);
+        patient.setNationalId(nid);
+        patient.setBirthRegistrationNumber(brn);
+        patient.setUid(uid);
         patient.setAddress(address);
         return patient;
     }

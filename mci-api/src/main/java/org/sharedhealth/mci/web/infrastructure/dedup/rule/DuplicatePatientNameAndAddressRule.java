@@ -2,6 +2,7 @@ package org.sharedhealth.mci.web.infrastructure.dedup.rule;
 
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
 import org.sharedhealth.mci.web.mapper.Address;
+import org.sharedhealth.mci.web.mapper.DuplicatePatientMapper;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.SearchQuery;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +16,8 @@ public class DuplicatePatientNameAndAddressRule extends DuplicatePatientRule {
     private final String reason;
 
     @Autowired
-    public DuplicatePatientNameAndAddressRule(PatientRepository patientRepository) {
-        super(patientRepository);
+    public DuplicatePatientNameAndAddressRule(PatientRepository patientRepository, DuplicatePatientMapper duplicatePatientMapper) {
+        super(patientRepository, duplicatePatientMapper);
         this.reason = DUPLICATE_REASON_NAME_ADDRESS;
     }
 

@@ -24,7 +24,7 @@ public abstract class DuplicatePatientEventProcessor {
 
     protected List<DuplicatePatient> buildDuplicates(String healthId) {
         List<DuplicatePatientData> duplicates = getRuleEngine().apply(healthId);
-        return mapper.map(duplicates);
+        return mapper.mapToDuplicatePatientList(duplicates);
     }
 
     protected List<DuplicatePatient> findDuplicatesByHealthId1(String healthId) {

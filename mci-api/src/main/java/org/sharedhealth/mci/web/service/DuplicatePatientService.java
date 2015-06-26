@@ -3,6 +3,7 @@ package org.sharedhealth.mci.web.service;
 import org.sharedhealth.mci.web.infrastructure.persistence.DuplicatePatientRepository;
 import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.DuplicatePatientData;
+import org.sharedhealth.mci.web.mapper.DuplicatePatientMapper;
 import org.sharedhealth.mci.web.mapper.DuplicatePatientMergeData;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.model.DuplicatePatient;
@@ -10,11 +11,9 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.String.format;
-import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.web.utils.MCIConstants.DUPLICATION_ACTION_MERGE;
 import static org.sharedhealth.mci.web.utils.MCIConstants.DUPLICATION_ACTION_RETAIN_ALL;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -25,32 +24,18 @@ public class DuplicatePatientService {
     private static final Logger logger = getLogger(DuplicatePatientService.class);
 
     private DuplicatePatientRepository duplicatePatientRepository;
+    private DuplicatePatientMapper duplicatePatientMapper;
 
     @Autowired
-    public DuplicatePatientService(DuplicatePatientRepository duplicatePatientRepository) {
+    public DuplicatePatientService(DuplicatePatientRepository duplicatePatientRepository,
+                                   DuplicatePatientMapper duplicatePatientMapper) {
+        this.duplicatePatientMapper = duplicatePatientMapper;
         this.duplicatePatientRepository = duplicatePatientRepository;
     }
 
     public List<DuplicatePatientData> findAllByCatchment(Catchment catchment) {
         List<DuplicatePatient> duplicatePatients = duplicatePatientRepository.findByCatchment(catchment);
-        return buildDuplicatePatientData(duplicatePatients);
-    }
-
-    private List<DuplicatePatientData> buildDuplicatePatientData(List<DuplicatePatient> duplicatePatients) {
-        List<DuplicatePatientData> duplicatePatientDataList = new ArrayList<>();
-        for (DuplicatePatient duplicatePatient : duplicatePatients) {
-            duplicatePatientDataList.add(buildDuplicatePatientData(duplicatePatient));
-        }
-        return duplicatePatientDataList;
-    }
-
-    private DuplicatePatientData buildDuplicatePatientData(DuplicatePatient duplicatePatient) {
-        DuplicatePatientData duplicatePatientData = new DuplicatePatientData();
-        duplicatePatientData.setHealthId1(duplicatePatient.getHealth_id1());
-        duplicatePatientData.setHealthId2(duplicatePatient.getHealth_id2());
-        duplicatePatientData.setReasons(duplicatePatient.getReasons());
-        duplicatePatientData.setCreatedAt(toIsoFormat(duplicatePatient.getCreated_at()));
-        return duplicatePatientData;
+        return duplicatePatientMapper.mapToDuplicatePatientDataList(duplicatePatients);
     }
 
     public void processDuplicates(DuplicatePatientMergeData data) {

@@ -2,8 +2,8 @@ package org.sharedhealth.mci.web.infrastructure.dedup.rule;
 
 import org.apache.commons.collections4.Predicate;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
-import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.DuplicatePatientData;
+import org.sharedhealth.mci.web.mapper.DuplicatePatientMapper;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.SearchQuery;
 
@@ -22,16 +22,19 @@ public abstract class DuplicatePatientRule {
     protected static final String DUPLICATE_REASON_NAME_ADDRESS = "DUPLICATE_REASON_NAME_ADDRESS";
 
     private PatientRepository patientRepository;
+    private DuplicatePatientMapper duplicatePatientMapper;
 
-    protected DuplicatePatientRule(PatientRepository patientRepository) {
+    protected DuplicatePatientRule(PatientRepository patientRepository,
+                                   DuplicatePatientMapper duplicatePatientMapper) {
         this.patientRepository = patientRepository;
+        this.duplicatePatientMapper = duplicatePatientMapper;
     }
 
     public void apply(String healthId, List<DuplicatePatientData> duplicates) {
         PatientData patient = patientRepository.findByHealthId(healthId);
         SearchQuery query = buildSearchQuery(patient);
         List<String> healthIds = findDuplicatesBySearchQuery(healthId, query);
-        buildDuplicates(healthId, patient.getCatchment(), healthIds, getReason(), duplicates);
+        buildDuplicates(patient, healthIds, getReason(), duplicates);
     }
 
     protected abstract SearchQuery buildSearchQuery(PatientData patient);
@@ -49,25 +52,23 @@ public abstract class DuplicatePatientRule {
         return duplicateHealthIds;
     }
 
-    protected void buildDuplicates(final String healthId1, Catchment catchment1, List<String> healthIds, String reason,
+    protected void buildDuplicates(final PatientData patient1, List<String> healthIds, String reason,
                                    List<DuplicatePatientData> duplicates) {
         for (final String healthId2 : healthIds) {
             DuplicatePatientData duplicate = find(duplicates, new Predicate<DuplicatePatientData>() {
                 @Override
                 public boolean evaluate(DuplicatePatientData d) {
-                    return healthId1.equals(d.getHealthId1()) && healthId2.equals(d.getHealthId2());
+                    return patient1.getHealthId().equals(d.getPatient1().getHealthId())
+                            && healthId2.equals(d.getPatient2().getHealthId());
                 }
             });
 
             if (duplicate != null) {
                 duplicate.addReason(reason);
             } else {
-                HashSet<String> reasons = new HashSet<>(asList(reason));
-                DuplicatePatientData patient = new DuplicatePatientData(healthId1, healthId2, reasons, null);
-                patient.setCatchment1(catchment1);
                 PatientData patient2 = patientRepository.findByHealthId(healthId2);
-                patient.setCatchment2(patient2.getCatchment());
-                duplicates.add(patient);
+                HashSet<String> reasons = new HashSet<>(asList(reason));
+                duplicates.add(duplicatePatientMapper.mapToDuplicatePatientData(patient1, patient2, reasons));
             }
         }
     }

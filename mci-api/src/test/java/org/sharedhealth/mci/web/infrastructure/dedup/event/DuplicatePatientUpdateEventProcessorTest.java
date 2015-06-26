@@ -54,7 +54,7 @@ public class DuplicatePatientUpdateEventProcessorTest {
         List<DuplicatePatientData> duplicateData = asList(new DuplicatePatientData());
         when(ruleEngine.apply(healthId)).thenReturn(duplicateData);
         List<DuplicatePatient> duplicates = asList(new DuplicatePatient());
-        when(duplicatePatientMapper.map(duplicateData)).thenReturn(duplicates);
+        when(duplicatePatientMapper.mapToDuplicatePatientList(duplicateData)).thenReturn(duplicates);
 
         PatientUpdateLogData log = new PatientUpdateLogData();
         log.setHealthId(healthId);
