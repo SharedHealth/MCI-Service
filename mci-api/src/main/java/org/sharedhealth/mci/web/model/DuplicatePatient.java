@@ -17,17 +17,17 @@ public class DuplicatePatient {
     @PrimaryKeyColumn(name = CATCHMENT_ID, ordinal = 0, type = PARTITIONED)
     private String catchment_id;
 
-    @PrimaryKeyColumn(name = HEALTH_ID1, ordinal = 1, type = CLUSTERED)
+    @PrimaryKeyColumn(name = CREATED_AT, ordinal = 1, type = CLUSTERED)
+    private UUID created_at;
+
+    @Column(HEALTH_ID1)
     private String health_id1;
 
-    @PrimaryKeyColumn(name = HEALTH_ID2, ordinal = 2, type = CLUSTERED)
+    @Column(HEALTH_ID2)
     private String health_id2;
 
     @Column(REASONS)
     private Set<String> reasons;
-
-    @Column(CREATED_AT)
-    private UUID created_at;
 
     public DuplicatePatient() {
     }

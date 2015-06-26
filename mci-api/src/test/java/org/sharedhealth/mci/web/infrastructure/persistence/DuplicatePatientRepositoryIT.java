@@ -19,7 +19,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
@@ -28,7 +32,9 @@ import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.asSet;
 import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.truncateAllColumnFamilies;
@@ -131,16 +137,13 @@ public class DuplicatePatientRepositoryIT {
     }
 
     private void assertDuplicatesDeleted(String healthId1, String healthId2, String healthId3, boolean isMerged) {
-        String cql1 = select().from(CF_PATIENT_DUPLICATE).where(eq(CATCHMENT_ID, "A10B20C30"))
-                .and(eq(HEALTH_ID1, healthId1)).and(eq(HEALTH_ID2, healthId2)).toString();
+        String cql1 = DuplicatePatientQueryBuilder.buildFindByCatchmentAndHealthIdsStmt("A10B20C30", healthId1, healthId2);
         assertTrue(isEmpty(cassandraOps.select(cql1, DuplicatePatient.class)));
 
-        String cql2 = select().from(CF_PATIENT_DUPLICATE).where(eq(CATCHMENT_ID, "A11B22C33"))
-                .and(eq(HEALTH_ID1, healthId2)).and(eq(HEALTH_ID2, healthId1)).toString();
+        String cql2 = DuplicatePatientQueryBuilder.buildFindByCatchmentAndHealthIdsStmt("A11B22C33", healthId2, healthId1);
         assertTrue(isEmpty(cassandraOps.select(cql2, DuplicatePatient.class)));
 
-        String cql3 = select().from(CF_PATIENT_DUPLICATE).where(eq(CATCHMENT_ID, "A10B20C30"))
-                .and(eq(HEALTH_ID1, healthId1)).and(eq(HEALTH_ID2, healthId3)).toString();
+        String cql3 = DuplicatePatientQueryBuilder.buildFindByCatchmentAndHealthIdsStmt("A10B20C30", healthId1, healthId3);
         assertEquals(isMerged, cassandraOps.select(cql3, DuplicatePatient.class).isEmpty());
     }
 
