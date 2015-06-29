@@ -2,6 +2,7 @@ package org.sharedhealth.mci.web.infrastructure.persistence;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.junit.After;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
@@ -37,6 +38,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.asSet;
+import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.buildTimeUuids;
 import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.truncateAllColumnFamilies;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -57,16 +59,26 @@ public class DuplicatePatientRepositoryIT {
     @Autowired
     private MarkerRepository markerRepository;
 
-    @Test
-    public void shouldFindByCatchment() {
-        buildDuplicatePatientsForSearch();
-        List<DuplicatePatient> duplicatePatients1 = duplicatePatientRepository.findByCatchment(new Catchment("182838"));
-        assertTrue(isNotEmpty(duplicatePatients1));
-        assertEquals(6, duplicatePatients1.size());
+    private static List<UUID> timeUuids;
 
-        List<DuplicatePatient> duplicatePatients2 = duplicatePatientRepository.findByCatchment(new Catchment("192939"));
-        assertTrue(isNotEmpty(duplicatePatients2));
-        assertEquals(1, duplicatePatients2.size());
+    @BeforeClass
+    public static void setUp() throws Exception {
+        timeUuids = buildTimeUuids();
+    }
+
+    @Test
+    public void shouldFindByCatchmentInDescOrderBasedOnCreatedAtTime() {
+        buildDuplicatePatientsForSearch();
+        List<DuplicatePatient> duplicatePatients = duplicatePatientRepository.findByCatchment(new Catchment("182838"));
+        assertTrue(isNotEmpty(duplicatePatients));
+        assertEquals(6, duplicatePatients.size());
+
+        assertDuplicate("110", "111", "A18B28C38", duplicatePatients.get(0));
+        assertDuplicate("108", "109", "A18B28C38", duplicatePatients.get(1));
+        assertDuplicate("106", "107", "A18B28C38", duplicatePatients.get(2));
+        assertDuplicate("104", "105", "A18B28C38", duplicatePatients.get(3));
+        assertDuplicate("102", "103", "A18B28C38", duplicatePatients.get(4));
+        assertDuplicate("100", "101", "A18B28C38", duplicatePatients.get(5));
     }
 
     @Test
@@ -151,20 +163,20 @@ public class DuplicatePatientRepositoryIT {
         List<DuplicatePatient> duplicatePatients = new ArrayList<>();
         String catchmentId1 = "A18B28";
         String catchmentId2 = "A18B28C38";
-        duplicatePatients.add(new DuplicatePatient(catchmentId1, "100", "101", asSet("nid", "phoneNo"), timeBased()));
-        duplicatePatients.add(new DuplicatePatient(catchmentId2, "100", "101", asSet("nid", "phoneNo"), timeBased()));
-        duplicatePatients.add(new DuplicatePatient(catchmentId1, "102", "103", asSet("nid"), timeBased()));
-        duplicatePatients.add(new DuplicatePatient(catchmentId2, "102", "103", asSet("nid"), timeBased()));
-        duplicatePatients.add(new DuplicatePatient(catchmentId1, "104", "105", asSet("phoneNo"), timeBased()));
-        duplicatePatients.add(new DuplicatePatient(catchmentId2, "104", "105", asSet("phoneNo"), timeBased()));
-        duplicatePatients.add(new DuplicatePatient(catchmentId1, "106", "107", asSet("phoneNo"), timeBased()));
-        duplicatePatients.add(new DuplicatePatient(catchmentId2, "106", "107", asSet("phoneNo"), timeBased()));
-        duplicatePatients.add(new DuplicatePatient(catchmentId1, "108", "109", asSet("nid"), timeBased()));
-        duplicatePatients.add(new DuplicatePatient(catchmentId2, "108", "109", asSet("nid"), timeBased()));
-        duplicatePatients.add(new DuplicatePatient(catchmentId1, "110", "111", asSet("nid"), timeBased()));
-        duplicatePatients.add(new DuplicatePatient(catchmentId2, "110", "111", asSet("nid"), timeBased()));
-        duplicatePatients.add(new DuplicatePatient("A19B29", "111", "110", asSet("nid"), timeBased()));
-        duplicatePatients.add(new DuplicatePatient("A19B29C39", "111", "110", asSet("nid"), timeBased()));
+        duplicatePatients.add(new DuplicatePatient(catchmentId1, "100", "101", asSet("nid", "phoneNo"), timeUuids.get(0)));
+        duplicatePatients.add(new DuplicatePatient(catchmentId2, "100", "101", asSet("nid", "phoneNo"), timeUuids.get(1)));
+        duplicatePatients.add(new DuplicatePatient(catchmentId1, "102", "103", asSet("nid"), timeUuids.get(2)));
+        duplicatePatients.add(new DuplicatePatient(catchmentId2, "102", "103", asSet("nid"), timeUuids.get(3)));
+        duplicatePatients.add(new DuplicatePatient(catchmentId1, "104", "105", asSet("phoneNo"), timeUuids.get(4)));
+        duplicatePatients.add(new DuplicatePatient(catchmentId2, "104", "105", asSet("phoneNo"), timeUuids.get(5)));
+        duplicatePatients.add(new DuplicatePatient(catchmentId1, "106", "107", asSet("phoneNo"), timeUuids.get(6)));
+        duplicatePatients.add(new DuplicatePatient(catchmentId2, "106", "107", asSet("phoneNo"), timeUuids.get(7)));
+        duplicatePatients.add(new DuplicatePatient(catchmentId1, "108", "109", asSet("nid"), timeUuids.get(8)));
+        duplicatePatients.add(new DuplicatePatient(catchmentId2, "108", "109", asSet("nid"), timeUuids.get(9)));
+        duplicatePatients.add(new DuplicatePatient(catchmentId1, "110", "111", asSet("nid"), timeUuids.get(10)));
+        duplicatePatients.add(new DuplicatePatient(catchmentId2, "110", "111", asSet("nid"), timeUuids.get(11)));
+        duplicatePatients.add(new DuplicatePatient("A19B29", "111", "110", asSet("nid"), timeUuids.get(12)));
+        duplicatePatients.add(new DuplicatePatient("A19B29C39", "111", "110", asSet("nid"), timeUuids.get(13)));
         duplicatePatientRepository.create(duplicatePatients, randomUUID());
     }
 

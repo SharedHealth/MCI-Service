@@ -1,13 +1,17 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
+import com.datastax.driver.core.utils.UUIDs;
 import org.springframework.data.cassandra.core.CassandraOperations;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.addAll;
+import static java.util.Collections.unmodifiableList;
 import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.*;
 
 public class TestUtil {
@@ -81,5 +85,14 @@ public class TestUtil {
                 "        }\n" +
                 "    }\n" +
                 "}";
+    }
+
+    public static List<UUID> buildTimeUuids() throws InterruptedException {
+        List<UUID> timeUuids = new ArrayList<>();
+        for (int i = 1; i <= 20; i++) {
+            timeUuids.add(UUIDs.timeBased());
+            Thread.sleep(1);
+        }
+        return unmodifiableList(timeUuids);
     }
 }
