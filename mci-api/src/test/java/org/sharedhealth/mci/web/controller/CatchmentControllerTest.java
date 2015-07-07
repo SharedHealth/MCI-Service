@@ -75,8 +75,8 @@ public class CatchmentControllerTest {
 
     private static final String API_END_POINT = "catchments";
     private static final int MAX_PAGE_SIZE = 3;
-    public static final String SERVER_URL = "https://mci.dghs.com";
-    public static final String REQUEST_URL = "http://mci.dghs.com:8081";
+    private static final String SERVER_URL = "https://mci.dghs.com";
+    private static final String REQUEST_URL = "http://mci.dghs.com:8081";
 
     private static final String FACILITY_ID = "100067";
     private static final String PROVIDER_ID = "100068";
@@ -257,7 +257,7 @@ public class CatchmentControllerTest {
         when(patientService.findPendingApprovalList(catchment, null, before, MAX_PAGE_SIZE + 1)).thenReturn(pendingApprovals);
 
         String nextUrl = fromUriString(format("%s/%s/%s/approvals", SERVER_URL, API_END_POINT, "102030"))
-                .queryParam("after", pendingApprovals.get(3).getLastUpdated()).build().toString();
+                .queryParam("after", pendingApprovals.get(2).getLastUpdated()).build().toString();
 
         String url = buildPendingApprovalUrl("102030");
         MvcResult mvcResult = mockMvc.perform(get(url + "?" + BEFORE + "=" + before))
@@ -713,7 +713,7 @@ public class CatchmentControllerTest {
         List<PendingApprovalListResponse> approvalListResponse = asList(buildPendingApprovalListResponse(1),
                 buildPendingApprovalListResponse(2), buildPendingApprovalListResponse(3), buildPendingApprovalListResponse(4));
 
-        MCIMultiResponse response = catchmentController.buildPendingApprovalResponse(httpRequest, approvalListResponse, null, null);
+        MCIMultiResponse response = catchmentController.buildPaginatedResponse(httpRequest, approvalListResponse, null, null, 3);
 
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();
@@ -728,15 +728,14 @@ public class CatchmentControllerTest {
         List<PendingApprovalListResponse> approvalListResponse = asList(buildPendingApprovalListResponse(1),
                 buildPendingApprovalListResponse(2));
 
-        MCIMultiResponse response = catchmentController.buildPendingApprovalResponse(httpRequest, approvalListResponse,
-                approvalListResponse.get(1).getLastUpdated(), null);
+        MCIMultiResponse response = catchmentController.buildPaginatedResponse(httpRequest, approvalListResponse,
+                approvalListResponse.get(1).getLastUpdated(), null, 3);
 
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();
         assertTrue(additionalInfo != null && additionalInfo.size() == 1);
         assertEquals(SERVER_URL + "/catchments/201915/approvals?before=" + approvalListResponse.get(0).getLastUpdated(),
                 additionalInfo.get(PREVIOUS));
-
     }
 
     @Test
@@ -745,8 +744,8 @@ public class CatchmentControllerTest {
         List<PendingApprovalListResponse> approvalListResponse = asList(buildPendingApprovalListResponse(1),
                 buildPendingApprovalListResponse(2), buildPendingApprovalListResponse(3), buildPendingApprovalListResponse(4));
 
-        MCIMultiResponse response = catchmentController.buildPendingApprovalResponse(httpRequest, approvalListResponse,
-                approvalListResponse.get(2).getLastUpdated(), null);
+        MCIMultiResponse response = catchmentController.buildPaginatedResponse(httpRequest, approvalListResponse,
+                approvalListResponse.get(2).getLastUpdated(), null, 3);
 
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();
@@ -763,7 +762,7 @@ public class CatchmentControllerTest {
         List<PendingApprovalListResponse> approvalListResponse = asList(buildPendingApprovalListResponse(1),
                 buildPendingApprovalListResponse(2), buildPendingApprovalListResponse(3));
 
-        MCIMultiResponse response = catchmentController.buildPendingApprovalResponse(httpRequest, approvalListResponse, null, null);
+        MCIMultiResponse response = catchmentController.buildPaginatedResponse(httpRequest, approvalListResponse, null, null, 3);
 
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();
@@ -776,7 +775,7 @@ public class CatchmentControllerTest {
         List<PendingApprovalListResponse> approvalListResponse = asList(buildPendingApprovalListResponse(1),
                 buildPendingApprovalListResponse(2), buildPendingApprovalListResponse(3));
 
-        MCIMultiResponse response = catchmentController.buildPendingApprovalResponse(httpRequest, approvalListResponse, null, approvalListResponse.get(0).getLastUpdated());
+        MCIMultiResponse response = catchmentController.buildPaginatedResponse(httpRequest, approvalListResponse, null, approvalListResponse.get(0).getLastUpdated(), 3);
 
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();
@@ -791,8 +790,8 @@ public class CatchmentControllerTest {
         List<PendingApprovalListResponse> approvalListResponse = asList(buildPendingApprovalListResponse(1),
                 buildPendingApprovalListResponse(2), buildPendingApprovalListResponse(3));
 
-        MCIMultiResponse response = catchmentController.buildPendingApprovalResponse(httpRequest,
-                approvalListResponse, approvalListResponse.get(0).getLastUpdated(), approvalListResponse.get(2).getLastUpdated());
+        MCIMultiResponse response = catchmentController.buildPaginatedResponse(httpRequest,
+                approvalListResponse, approvalListResponse.get(0).getLastUpdated(), approvalListResponse.get(2).getLastUpdated(), 3);
 
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();
@@ -805,7 +804,7 @@ public class CatchmentControllerTest {
         List<PendingApprovalListResponse> approvalListResponse = asList(buildPendingApprovalListResponse(1),
                 buildPendingApprovalListResponse(2), buildPendingApprovalListResponse(3));
 
-        MCIMultiResponse response = catchmentController.buildPendingApprovalResponse(httpRequest, approvalListResponse, null, approvalListResponse.get(2).getLastUpdated());
+        MCIMultiResponse response = catchmentController.buildPaginatedResponse(httpRequest, approvalListResponse, null, approvalListResponse.get(2).getLastUpdated(), 3);
 
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();

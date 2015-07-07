@@ -65,14 +65,14 @@ public class DuplicatePatientServiceTest {
     public void shouldFindAllByCatchment() {
         Catchment catchment = new Catchment("102030");
         Address address = new Address("10", "20", "30");
-        when(duplicatePatientRepository.findByCatchment(catchment)).thenReturn(buildDuplicatePatients());
+        when(duplicatePatientRepository.findByCatchment(catchment, null, null, 25)).thenReturn(buildDuplicatePatients());
         when(patientRepository.findByHealthId("99001")).thenReturn(buildPatientData("99001", "A1", "B1", address));
         when(patientRepository.findByHealthId("99002")).thenReturn(buildPatientData("99002", "A2", "B2", address));
         when(patientRepository.findByHealthId("99003")).thenReturn(buildPatientData("99003", "A3", "B3", address));
         when(patientRepository.findByHealthId("99004")).thenReturn(buildPatientData("99004", "A4", "B4", address));
         when(patientRepository.findByHealthId("99005")).thenReturn(buildPatientData("99005", "A5", "B5", address));
         when(patientRepository.findByHealthId("99006")).thenReturn(buildPatientData("99006", "A6", "B6", address));
-        List<DuplicatePatientData> duplicatePatientDataList = duplicatePatientService.findAllByCatchment(catchment);
+        List<DuplicatePatientData> duplicatePatientDataList = duplicatePatientService.findAllByCatchment(catchment, null, null, 25);
 
         assertTrue(isNotEmpty(duplicatePatientDataList));
         assertEquals(3, duplicatePatientDataList.size());

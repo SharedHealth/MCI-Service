@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.UUID;
 
 import static java.lang.String.format;
 import static org.sharedhealth.mci.web.utils.MCIConstants.DUPLICATION_ACTION_MERGE;
@@ -33,8 +34,8 @@ public class DuplicatePatientService {
         this.duplicatePatientRepository = duplicatePatientRepository;
     }
 
-    public List<DuplicatePatientData> findAllByCatchment(Catchment catchment) {
-        List<DuplicatePatient> duplicatePatients = duplicatePatientRepository.findByCatchment(catchment);
+    public List<DuplicatePatientData> findAllByCatchment(Catchment catchment, UUID after, UUID before, int limit) {
+        List<DuplicatePatient> duplicatePatients = duplicatePatientRepository.findByCatchment(catchment, after, before, limit);
         return duplicatePatientMapper.mapToDuplicatePatientDataList(duplicatePatients);
     }
 

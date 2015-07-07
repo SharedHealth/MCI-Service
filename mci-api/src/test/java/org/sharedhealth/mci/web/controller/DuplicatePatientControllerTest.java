@@ -4,6 +4,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.sharedhealth.mci.web.config.MCIProperties;
+import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.infrastructure.security.TokenAuthentication;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
 import org.sharedhealth.mci.web.infrastructure.security.UserProfile;
@@ -16,24 +18,36 @@ import org.sharedhealth.mci.web.mapper.PatientSummaryData;
 import org.sharedhealth.mci.web.mapper.Requester;
 import org.sharedhealth.mci.web.mapper.RequesterDetails;
 import org.sharedhealth.mci.web.service.DuplicatePatientService;
+import org.sharedhealth.mci.web.service.SettingService;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
+import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static junit.framework.Assert.assertEquals;
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.asSet;
+import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.buildTimeUuids;
 import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.*;
+import static org.sharedhealth.mci.web.utils.JsonConstants.AFTER;
+import static org.sharedhealth.mci.web.utils.JsonConstants.BEFORE;
+import static org.sharedhealth.mci.web.utils.JsonConstants.NEXT;
+import static org.sharedhealth.mci.web.utils.JsonConstants.PREVIOUS;
 import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
 import static org.sharedhealth.mci.web.utils.MCIConstants.DUPLICATION_ACTION_RETAIN_ALL;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -50,23 +64,34 @@ public class DuplicatePatientControllerTest {
     private static final String FACILITY_ID = "100067";
     private static final String PROVIDER_ID = "100068";
     private static final String ADMIN_ID = "102";
+    private static final String API_END_POINT = "/patients/duplicates/catchments/";
+    private static final String REQUEST_URL = "http://mci.dghs.com:8081";
 
     @Mock
     private LocalValidatorFactoryBean validatorFactory;
     @Mock
     private DuplicatePatientService duplicatePatientService;
+    @Mock
+    private SettingService settingService;
+    @Mock
+    private MCIProperties properties;
 
+    private DuplicatePatientController duplicatePatientController;
     private MockMvc mockMvc;
+    private List<UUID> uuids;
 
     @Before
-    public void setup() throws ParseException {
+    public void setup() throws ParseException, InterruptedException {
         initMocks(this);
-        DuplicatePatientController duplicatePatientController = new DuplicatePatientController(duplicatePatientService);
+        duplicatePatientController = new DuplicatePatientController(duplicatePatientService, settingService, properties);
         mockMvc = MockMvcBuilders
                 .standaloneSetup(duplicatePatientController)
                 .setValidator(validatorFactory)
                 .build();
+        when(settingService.getSettingAsStringByKey("PER_PAGE_MAXIMUM_LIMIT_NOTE")).thenReturn("5");
+        when(properties.getServerUrl()).thenReturn(REQUEST_URL);
         getContext().setAuthentication(new TokenAuthentication(getUserInfo(), true));
+        uuids = buildTimeUuids();
     }
 
     private UserInfo getUserInfo() {
@@ -81,7 +106,7 @@ public class DuplicatePatientControllerTest {
 
     @Test
     public void shouldFindDuplicatesByCatchment() throws Exception {
-        when(duplicatePatientService.findAllByCatchment(new Catchment("102030"))).thenReturn(buildDuplicatePatientDataList());
+        when(duplicatePatientService.findAllByCatchment(new Catchment("102030"), null, null, 18)).thenReturn(buildDuplicatePatientDataList());
 
         String url = "/patients/duplicates/catchments/102030";
         MvcResult mvcResult = mockMvc.perform(get(url).contentType(APPLICATION_JSON))
@@ -152,12 +177,12 @@ public class DuplicatePatientControllerTest {
         PatientSummaryData patientSummaryData9 = buildPatientSummaryData("99009", "A9", "B9", address);
         PatientSummaryData patientSummaryData10 = buildPatientSummaryData("99010", "A10", "B10", address);
 
-        return asList(new DuplicatePatientData(patientSummaryData1, patientSummaryData2, asSet("NID", "PHONE"), timeBased().toString()),
-                new DuplicatePatientData(patientSummaryData2, patientSummaryData1, asSet("NID", "PHONE"), timeBased().toString()),
-                new DuplicatePatientData(patientSummaryData3, patientSummaryData4, asSet("NID"), timeBased().toString()),
-                new DuplicatePatientData(patientSummaryData5, patientSummaryData6, asSet("NID"), timeBased().toString()),
-                new DuplicatePatientData(patientSummaryData7, patientSummaryData8, asSet("PHONE"), timeBased().toString()),
-                new DuplicatePatientData(patientSummaryData9, patientSummaryData10, asSet("NID", "PHONE"), timeBased().toString()));
+        return asList(new DuplicatePatientData(patientSummaryData1, patientSummaryData2, asSet("NID", "PHONE"), uuids.get(0)),
+                new DuplicatePatientData(patientSummaryData2, patientSummaryData1, asSet("NID", "PHONE"), uuids.get(1)),
+                new DuplicatePatientData(patientSummaryData3, patientSummaryData4, asSet("NID"), uuids.get(2)),
+                new DuplicatePatientData(patientSummaryData5, patientSummaryData6, asSet("NID"), uuids.get(3)),
+                new DuplicatePatientData(patientSummaryData7, patientSummaryData8, asSet("PHONE"), uuids.get(4)),
+                new DuplicatePatientData(patientSummaryData9, patientSummaryData10, asSet("NID", "PHONE"), uuids.get(5)));
     }
 
     private PatientSummaryData buildPatientSummaryData(String hid, String givenName, String surname, Address address) {
@@ -203,5 +228,118 @@ public class DuplicatePatientControllerTest {
         assertEquals(DUPLICATION_ACTION_RETAIN_ALL, argValue.getAction());
         assertEquals(requester, argValue.getPatient1().getRequester());
         assertEquals(requester, argValue.getPatient2().getRequester());
+    }
+
+    @Test
+    public void shouldFindPendingApprovalsAfterGivenTime() throws Exception {
+        Catchment catchment = new Catchment("10", "20", "30");
+        UUID after = timeBased();
+        when(duplicatePatientService.findAllByCatchment(catchment, after, null, 18)).thenReturn(new ArrayList<DuplicatePatientData>());
+
+        String url = buildPendingApprovalUrl("102030");
+        MvcResult mvcResult = mockMvc.perform(get(url + "?" + AFTER + "=" + after))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isOk());
+
+        verify(duplicatePatientService).findAllByCatchment(catchment, after, null, 18);
+    }
+
+    @Test
+    public void shouldFindPendingApprovalsBeforeGivenTime() throws Exception {
+        Catchment catchment = new Catchment("10", "20", "30");
+        UUID before = timeBased();
+        when(duplicatePatientService.findAllByCatchment(catchment, null, before, 18)).thenReturn(new ArrayList<DuplicatePatientData>());
+
+        String url = buildPendingApprovalUrl("102030");
+        MvcResult mvcResult = mockMvc.perform(get(url + "?" + BEFORE + "=" + before))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isOk());
+
+        verify(duplicatePatientService).findAllByCatchment(catchment, null, before, 18);
+    }
+
+    @Test
+    public void shouldFindPendingApprovalsBeforeAndAfterGivenTime() throws Exception {
+        Catchment catchment = new Catchment("10", "20", "30");
+        UUID after = timeBased();
+        Thread.sleep(10);
+        UUID before = timeBased();
+        when(duplicatePatientService.findAllByCatchment(catchment, after, before, 18)).thenReturn(new ArrayList<DuplicatePatientData>());
+
+        String url = buildPendingApprovalUrl("102030");
+        MvcResult mvcResult = mockMvc.perform(get(url + "?" + AFTER + "=" + after + "&" + BEFORE + "=" + before))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isOk());
+
+        verify(duplicatePatientService).findAllByCatchment(catchment, after, before, 18);
+    }
+
+    @Test
+    public void shouldBuildPendingApprovalNextUrl() throws Exception {
+        MockHttpServletRequest httpRequest = buildDuplicatePatientHttpRequest();
+        List<DuplicatePatientData> duplicatePatientDataList = buildDuplicatePatientDataList();
+
+        MCIMultiResponse response = duplicatePatientController.buildPaginatedResponse(httpRequest, duplicatePatientDataList, null, null, 3);
+
+        assertEquals(response.getHttpStatus(), 200);
+        HashMap additionalInfo = response.getAdditionalInfo();
+        assertTrue(additionalInfo != null && additionalInfo.size() == 1);
+        assertEquals(REQUEST_URL + API_END_POINT + "?after=" + duplicatePatientDataList.get(2).getModifiedAt(),
+                additionalInfo.get(NEXT));
+    }
+
+    @Test
+    public void shouldBuildPendingApprovalPreviousUrl() throws Exception {
+        MockHttpServletRequest httpRequest = buildDuplicatePatientHttpRequest();
+        List<DuplicatePatientData> duplicatePatientDataList = buildDuplicatePatientDataList();
+
+        MCIMultiResponse response = duplicatePatientController.buildPaginatedResponse(httpRequest, duplicatePatientDataList,
+                duplicatePatientDataList.get(4).getModifiedAt(), null, 6);
+
+        assertEquals(response.getHttpStatus(), 200);
+        HashMap additionalInfo = response.getAdditionalInfo();
+        assertTrue(additionalInfo != null && additionalInfo.size() == 1);
+        assertEquals(REQUEST_URL + API_END_POINT + "?before=" + duplicatePatientDataList.get(0).getModifiedAt(),
+                additionalInfo.get(PREVIOUS));
+    }
+
+    @Test
+    public void shouldBuildPendingApprovalNextAndPreviousUrl() throws Exception {
+        MockHttpServletRequest httpRequest = buildDuplicatePatientHttpRequest();
+        List<DuplicatePatientData> duplicatePatientDataList = buildDuplicatePatientDataList();
+
+        MCIMultiResponse response = duplicatePatientController.buildPaginatedResponse(httpRequest, duplicatePatientDataList,
+                duplicatePatientDataList.get(2).getModifiedAt(), null, 3);
+
+        assertEquals(response.getHttpStatus(), 200);
+        HashMap additionalInfo = response.getAdditionalInfo();
+        assertTrue(additionalInfo != null && additionalInfo.size() == 2);
+        assertEquals(REQUEST_URL + API_END_POINT + "?before=" + duplicatePatientDataList.get(0).getModifiedAt(),
+                additionalInfo.get(PREVIOUS));
+        assertEquals(REQUEST_URL + API_END_POINT + "?after=" + duplicatePatientDataList.get(2).getModifiedAt(),
+                additionalInfo.get(NEXT));
+    }
+
+    private String buildPendingApprovalUrl(String catchmentId) {
+        return format("%s%s%s", REQUEST_URL, API_END_POINT, catchmentId);
+    }
+
+    private MockHttpServletRequest buildDuplicatePatientHttpRequest() throws UnsupportedEncodingException {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setScheme("http");
+        request.setServerName("mci.dghs.com");
+        request.setServerPort(8081);
+        request.setMethod("GET");
+        request.setRequestURI(API_END_POINT);
+        return request;
     }
 }

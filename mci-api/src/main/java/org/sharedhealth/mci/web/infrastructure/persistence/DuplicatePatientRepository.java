@@ -51,8 +51,8 @@ public class DuplicatePatientRepository extends BaseRepository {
     /**
      * Finds by exact catchment id.
      */
-    public List<DuplicatePatient> findByCatchment(Catchment catchment) {
-        return cassandraOps.select(buildFindByCatchmentStmt(catchment), DuplicatePatient.class);
+    public List<DuplicatePatient> findByCatchment(Catchment catchment, UUID after, UUID before, int limit) {
+        return cassandraOps.select(buildFindByCatchmentStmt(catchment, after, before, limit), DuplicatePatient.class);
     }
 
     public void processDuplicates(PatientData patientData1, PatientData patientData2, boolean isMerged) {

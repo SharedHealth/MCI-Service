@@ -9,16 +9,14 @@ import java.util.List;
 
 import static java.lang.String.format;
 import static org.sharedhealth.mci.web.config.MCIConfig.getSupportedRequestUris;
-import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
 
 public class FeedController extends MciController {
 
     protected PatientService patientService;
-    protected MCIProperties properties;
 
     public FeedController(PatientService patientService, MCIProperties properties) {
+        super(properties);
         this.patientService = patientService;
-        this.properties = properties;
     }
 
     protected String buildFeedUrl(HttpServletRequest request) {
@@ -37,8 +35,8 @@ public class FeedController extends MciController {
 
     private String buildPatientRequestUri(HttpServletRequest request) {
         String requestUri = request.getRequestURI();
-        List<String> supportedRequestUris = getSupportedRequestUris(properties.getApiVersion(),
-                properties.isLatestApiVersion());
+        List<String> supportedRequestUris = getSupportedRequestUris(getProperties().getApiVersion(),
+                getProperties().isLatestApiVersion());
 
         for (String mapping : supportedRequestUris) {
             if (requestUri.startsWith(mapping)) {
@@ -47,18 +45,5 @@ public class FeedController extends MciController {
         }
         // should never happen
         return "";
-    }
-
-    protected String buildUrl(HttpServletRequest request) {
-        return format("%s%s", buildServerUrl(request), request.getRequestURI());
-    }
-
-    String buildServerUrl(HttpServletRequest request) {
-        String url = properties.getServerUrl();
-        String host = fromHttpUrl(url).build().getHost();
-        if (host.equals(request.getServerName())) {
-            return url;
-        }
-        return format("%s://%s:%s", request.getScheme(), request.getServerName(), request.getServerPort());
     }
 }

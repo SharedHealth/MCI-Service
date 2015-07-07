@@ -34,7 +34,6 @@ import javax.validation.groups.Default;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -101,7 +100,7 @@ public class CatchmentController extends FeedController {
 
         MCIMultiResponse mciMultiResponse;
         if (response != null) {
-            mciMultiResponse = buildPendingApprovalResponse(request, response, after, before);
+            mciMultiResponse = buildPaginatedResponse(request, response, after, before, patientService.getPerPageMaximumLimit());
         } else {
             mciMultiResponse = new MCIMultiResponse(emptyList(), null, OK);
         }
@@ -283,51 +282,5 @@ public class CatchmentController extends FeedController {
             entries.add(entry);
         }
         return entries;
-    }
-
-    MCIMultiResponse buildPendingApprovalResponse(HttpServletRequest request,
-                                                  List<PendingApprovalListResponse> response,
-                                                  UUID after, UUID before) {
-
-        HashMap<String, String> additionalInfo = new HashMap<>();
-        int limit = patientService.getPerPageMaximumLimit();
-
-        if (response.size() > 0) {
-            if (after == null && before == null && response.size() > limit) {
-                response = response.subList(0, response.size() - 1);
-                additionalInfo.put(NEXT, buildPendingApprovalNextUrl(request, response.get(response.size() - 1).getLastUpdated()));
-            } else if (after != null && before == null && response.size() > 0) {
-                if (response.size() > limit) {
-                    response = response.subList(0, response.size() - 1);
-                    additionalInfo.put(NEXT, buildPendingApprovalNextUrl(request, response.get(response.size() - 1).getLastUpdated()));
-                    additionalInfo.put(PREVIOUS, buildPendingApprovalPreviousUrl(request, response.get(0).getLastUpdated()));
-                } else {
-                    additionalInfo.put(PREVIOUS, buildPendingApprovalPreviousUrl(request, response.get(0).getLastUpdated()));
-                }
-            } else if (before != null && after == null) {
-
-                if (response.size() > limit) {
-                    response = response.subList(1, response.size());
-                    additionalInfo.put(PREVIOUS, buildPendingApprovalPreviousUrl(request, response.get(0).getLastUpdated()));
-                    additionalInfo.put(NEXT, buildPendingApprovalNextUrl(request, response.get(response.size() - 1).getLastUpdated()));
-                } else {
-                    additionalInfo.put(NEXT, buildPendingApprovalNextUrl(request, response.get(response.size() - 1).getLastUpdated()));
-                }
-            }
-        }
-
-        return new MCIMultiResponse(response, additionalInfo, OK);
-    }
-
-    private String buildPendingApprovalNextUrl(HttpServletRequest request, UUID lastUUID) {
-        return fromUriString(buildUrl(request))
-                .queryParam(AFTER, lastUUID)
-                .build().toString();
-    }
-
-    private String buildPendingApprovalPreviousUrl(HttpServletRequest request, UUID lastUUID) {
-        return fromUriString(buildUrl(request))
-                .queryParam(BEFORE, lastUUID)
-                .build().toString();
     }
 }

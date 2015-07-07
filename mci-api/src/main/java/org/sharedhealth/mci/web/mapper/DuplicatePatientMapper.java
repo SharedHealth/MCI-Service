@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Set;
 
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
-import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 
 @Component
 public class DuplicatePatientMapper {
@@ -65,7 +64,7 @@ public class DuplicatePatientMapper {
         duplicatePatientData.setPatient1(buildPatientSummary(duplicatePatient.getHealth_id1()));
         duplicatePatientData.setPatient2(buildPatientSummary(duplicatePatient.getHealth_id2()));
         duplicatePatientData.setReasons(duplicatePatient.getReasons());
-        duplicatePatientData.setCreatedAt(toIsoFormat(duplicatePatient.getCreated_at()));
+        duplicatePatientData.setCreatedAt(duplicatePatient.getCreated_at());
         return duplicatePatientData;
     }
 

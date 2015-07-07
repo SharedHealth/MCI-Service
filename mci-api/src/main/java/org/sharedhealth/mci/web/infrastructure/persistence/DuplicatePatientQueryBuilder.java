@@ -2,6 +2,7 @@ package org.sharedhealth.mci.web.infrastructure.persistence;
 
 import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.Delete;
+import com.datastax.driver.core.querybuilder.Select;
 import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.model.DuplicatePatient;
 import org.sharedhealth.mci.web.model.DuplicatePatientIgnored;
@@ -9,18 +10,27 @@ import org.springframework.data.cassandra.convert.CassandraConverter;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
-import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.timestamp;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.*;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createDeleteQuery;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
 
 public class DuplicatePatientQueryBuilder {
 
-    public static String buildFindByCatchmentStmt(Catchment catchment) {
-        return select().from(CF_PATIENT_DUPLICATE).where(eq(CATCHMENT_ID, catchment.getId())).toString();
+    public static String buildFindByCatchmentStmt(Catchment catchment, UUID after, UUID before, int limit) {
+        Select.Where where = select().from(CF_PATIENT_DUPLICATE).where(eq(CATCHMENT_ID, catchment.getId()));
+
+        if (after != null) {
+            where.and(lt(CREATED_AT, after));
+        }
+
+        if (before != null) {
+            where.and(gt(CREATED_AT, before));
+        }
+
+        return where.limit(limit).toString();
     }
 
     public static String buildFindByCatchmentAndHealthIdsStmt(String catchmentId, String healthId1, String healthId2) {

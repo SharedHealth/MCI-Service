@@ -9,7 +9,7 @@ import static org.sharedhealth.mci.web.utils.JsonConstants.HID;
 import static org.sharedhealth.mci.web.utils.JsonConstants.LAST_UPDATED;
 import static org.sharedhealth.mci.web.utils.JsonConstants.SUR_NAME;
 
-public class PendingApprovalListResponse {
+public class PendingApprovalListResponse implements ResponseWithAdditionalInfo {
 
     @JsonProperty(HID)
     private String healthId;
@@ -53,5 +53,10 @@ public class PendingApprovalListResponse {
 
     public void setLastUpdated(UUID lastUpdated) {
         this.lastUpdated = lastUpdated;
+    }
+
+    @Override
+    public UUID getModifiedAt() {
+        return getLastUpdated();
     }
 }

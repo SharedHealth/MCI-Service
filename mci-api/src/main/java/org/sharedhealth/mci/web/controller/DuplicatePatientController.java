@@ -1,6 +1,7 @@
 package org.sharedhealth.mci.web.controller;
 
 import org.apache.commons.collections4.Predicate;
+import org.sharedhealth.mci.web.config.MCIProperties;
 import org.sharedhealth.mci.web.exception.Forbidden;
 import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
@@ -10,6 +11,7 @@ import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.DuplicatePatientData;
 import org.sharedhealth.mci.web.mapper.DuplicatePatientMergeData;
 import org.sharedhealth.mci.web.service.DuplicatePatientService;
+import org.sharedhealth.mci.web.service.SettingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,19 +21,24 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.apache.commons.collections4.CollectionUtils.find;
 import static org.sharedhealth.mci.web.infrastructure.security.UserProfile.ADMIN_TYPE;
+import static org.sharedhealth.mci.web.utils.JsonConstants.AFTER;
+import static org.sharedhealth.mci.web.utils.JsonConstants.BEFORE;
 import static org.springframework.http.HttpStatus.ACCEPTED;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -43,17 +50,26 @@ import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 public class DuplicatePatientController extends MciController {
 
     private static final Logger logger = LoggerFactory.getLogger(DuplicatePatientController.class);
+    public static final String PER_PAGE_MAXIMUM_LIMIT_NOTE = "PER_PAGE_MAXIMUM_LIMIT_NOTE";
 
     private DuplicatePatientService duplicatePatientService;
+    private SettingService settingService;
+    private static final int PER_PAGE_MAXIMUM_LIMIT = 25;
 
     @Autowired
-    public DuplicatePatientController(DuplicatePatientService duplicatePatientService) {
+    public DuplicatePatientController(DuplicatePatientService duplicatePatientService, SettingService settingService, MCIProperties properties) {
+        super(properties);
         this.duplicatePatientService = duplicatePatientService;
+        this.settingService = settingService;
     }
 
     @PreAuthorize("hasAnyRole('ROLE_MCI Approver')")
     @RequestMapping(value = "/catchments/{catchmentId}", method = GET, produces = APPLICATION_JSON_VALUE)
-    public DeferredResult<ResponseEntity<MCIMultiResponse>> findAllByCatchment(@PathVariable String catchmentId) {
+    public DeferredResult<ResponseEntity<MCIMultiResponse>> findAllByCatchment(
+            @PathVariable String catchmentId,
+            @RequestParam(value = AFTER, required = false) UUID after,
+            @RequestParam(value = BEFORE, required = false) UUID before,
+            HttpServletRequest request) {
 
         UserInfo userInfo = getUserInfo();
         String message = format("Find list of patient duplicates for catchment %s", catchmentId);
@@ -69,12 +85,10 @@ public class DuplicatePatientController extends MciController {
             logger.debug(errorMessage);
             return deferredResult;
         }
-
-        List<DuplicatePatientData> response = findDuplicatesByCatchment(catchmentId);
-
+        List<DuplicatePatientData> response = findDuplicatesByCatchment(catchmentId, after, before);
         MCIMultiResponse mciMultiResponse;
         if (response != null) {
-            mciMultiResponse = new MCIMultiResponse(response, null, OK);
+            mciMultiResponse = buildPaginatedResponse(request, response, after, before, getPerPageMaximumLimit());
         } else {
             mciMultiResponse = new MCIMultiResponse(emptyList(), null, OK);
         }
@@ -82,9 +96,9 @@ public class DuplicatePatientController extends MciController {
         return deferredResult;
     }
 
-    private List<DuplicatePatientData> findDuplicatesByCatchment(String catchmentId) {
+    private List<DuplicatePatientData> findDuplicatesByCatchment(String catchmentId, UUID after, UUID before) {
         ArrayList<DuplicatePatientData> duplicates = new ArrayList<>(
-                duplicatePatientService.findAllByCatchment(new Catchment(catchmentId)));
+                duplicatePatientService.findAllByCatchment(new Catchment(catchmentId), after, before, (1 + getPerPageMaximumLimit()) * 3));
         DuplicatePatientData duplicate;
         for (Iterator<DuplicatePatientData> it = duplicates.iterator(); it.hasNext(); ) {
             duplicate = it.next();
@@ -137,5 +151,13 @@ public class DuplicatePatientController extends MciController {
         UserInfo.UserInfoProperties properties = userInfo.getProperties();
         data.getPatient1().setRequester(properties);
         data.getPatient2().setRequester(properties);
+    }
+
+    public int getPerPageMaximumLimit() {
+        try {
+            return Integer.parseInt(settingService.getSettingAsStringByKey(PER_PAGE_MAXIMUM_LIMIT_NOTE));
+        } catch (Exception e) {
+            return PER_PAGE_MAXIMUM_LIMIT;
+        }
     }
 }
