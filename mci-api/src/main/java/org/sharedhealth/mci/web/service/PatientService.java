@@ -8,7 +8,12 @@ import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientFeedRepository;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
-import org.sharedhealth.mci.web.mapper.*;
+import org.sharedhealth.mci.web.mapper.Catchment;
+import org.sharedhealth.mci.web.mapper.PatientData;
+import org.sharedhealth.mci.web.mapper.PatientSummaryData;
+import org.sharedhealth.mci.web.mapper.PendingApproval;
+import org.sharedhealth.mci.web.mapper.PendingApprovalListResponse;
+import org.sharedhealth.mci.web.mapper.SearchQuery;
 import org.sharedhealth.mci.web.model.HealthId;
 import org.sharedhealth.mci.web.model.PatientUpdateLog;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
@@ -19,14 +24,23 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.FieldError;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.TreeSet;
+import java.util.UUID;
 
 import static java.lang.String.format;
-import static org.apache.commons.collections4.CollectionUtils.*;
+import static org.apache.commons.collections4.CollectionUtils.intersection;
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static org.apache.commons.collections4.CollectionUtils.union;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_INVALID;
 import static org.sharedhealth.mci.web.utils.JsonConstants.HID;
 import static org.sharedhealth.mci.web.utils.JsonConstants.RELATIONS;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Component
 public class PatientService {
@@ -65,13 +79,19 @@ public class PatientService {
         if (existingPatient != null) {
             return this.update(patient, existingPatient.getHealthId());
         }
-        HealthId nextHealthId = patientHealthIdService.getNextHealthId();
-        patient.setHealthId(nextHealthId.getHid());
-        MCIResponse mciResponse = patientRepository.create(patient);
-        if (CREATED == mciResponse.getHttpStatus()) {
-            patientHealthIdService.markUsed(nextHealthId);
-        } else {
-            patientHealthIdService.putBackHealthId(nextHealthId);
+
+        MCIResponse mciResponse;
+        try {
+            HealthId nextHealthId = patientHealthIdService.getNextHealthId();
+            patient.setHealthId(nextHealthId.getHid());
+            mciResponse = patientRepository.create(patient);
+            if (CREATED == mciResponse.getHttpStatus()) {
+                patientHealthIdService.markUsed(nextHealthId);
+            } else {
+                patientHealthIdService.putBackHealthId(nextHealthId);
+            }
+        } catch (NoSuchElementException e) {
+            mciResponse = new MCIResponse("Can not create patient as there is no hid available in MCI to assign", BAD_REQUEST);
         }
         return mciResponse;
     }
