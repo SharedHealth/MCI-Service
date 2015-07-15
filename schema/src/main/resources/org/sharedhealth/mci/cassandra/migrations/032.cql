@@ -6,6 +6,6 @@ CREATE TABLE IF NOT EXISTS patient_duplicate (
     health_id1 varchar,
     health_id2 varchar,
     reasons set<text>,
-    PRIMARY KEY (catchment_id, created_at)) WITH CLUSTERING ORDER BY (created_at DESC);
+    PRIMARY KEY (catchment_id, created_at));
 
 CREATE INDEX idx_patient_duplicate_health_id1 on patient_duplicate(health_id1);

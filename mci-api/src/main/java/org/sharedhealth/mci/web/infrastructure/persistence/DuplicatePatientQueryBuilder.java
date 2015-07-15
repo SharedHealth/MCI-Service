@@ -23,11 +23,11 @@ public class DuplicatePatientQueryBuilder {
         Select.Where where = select().from(CF_PATIENT_DUPLICATE).where(eq(CATCHMENT_ID, catchment.getId()));
 
         if (after != null) {
-            where.and(lt(CREATED_AT, after));
+            where.and(gt(CREATED_AT, after));
         }
 
         if (before != null) {
-            where.and(gt(CREATED_AT, before));
+            where.and(lt(CREATED_AT, before));
         }
 
         return where.limit(limit).toString();

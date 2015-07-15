@@ -67,67 +67,65 @@ public class DuplicatePatientRepositoryIT {
     }
 
     @Test
-    public void shouldFindByCatchmentInDescOrderBasedOnCreatedAtTime() {
+    public void shouldFindByCatchmentInAscOrderBasedOnCreatedAtTime() {
         buildDuplicatePatientsForSearch();
         List<DuplicatePatient> duplicatePatients = duplicatePatientRepository.findByCatchment(new Catchment("182838"), null, null, 25);
         assertTrue(isNotEmpty(duplicatePatients));
         assertEquals(6, duplicatePatients.size());
 
-        assertDuplicate("110", "111", "A18B28C38", duplicatePatients.get(0));
-        assertDuplicate("108", "109", "A18B28C38", duplicatePatients.get(1));
-        assertDuplicate("106", "107", "A18B28C38", duplicatePatients.get(2));
-        assertDuplicate("104", "105", "A18B28C38", duplicatePatients.get(3));
-        assertDuplicate("102", "103", "A18B28C38", duplicatePatients.get(4));
-        assertDuplicate("100", "101", "A18B28C38", duplicatePatients.get(5));
+        assertDuplicate("100", "101", "A18B28C38", duplicatePatients.get(0));
+        assertDuplicate("102", "103", "A18B28C38", duplicatePatients.get(1));
+        assertDuplicate("104", "105", "A18B28C38", duplicatePatients.get(2));
+        assertDuplicate("106", "107", "A18B28C38", duplicatePatients.get(3));
+        assertDuplicate("108", "109", "A18B28C38", duplicatePatients.get(4));
+        assertDuplicate("110", "111", "A18B28C38", duplicatePatients.get(5));
     }
 
     @Test
     public void shouldFindDuplicatesBeforeAndAfterCertainTimeStampWithLimit() throws Exception {
         buildDuplicatePatientsForSearch();
         Catchment catchment = new Catchment("182838");
-        List<DuplicatePatient> duplicatePatients = duplicatePatientRepository.findByCatchment(catchment, null, timeUuids.get(3), 25);
+        List<DuplicatePatient> duplicatePatients = duplicatePatientRepository.findByCatchment(catchment, null, timeUuids.get(9), 25);
         assertTrue(isNotEmpty(duplicatePatients));
         assertEquals(4, duplicatePatients.size());
-        assertDuplicate("110", "111", "A18B28C38", duplicatePatients.get(0));
-        assertDuplicate("108", "109", "A18B28C38", duplicatePatients.get(1));
-        assertDuplicate("106", "107", "A18B28C38", duplicatePatients.get(2));
-        assertDuplicate("104", "105", "A18B28C38", duplicatePatients.get(3));
+        assertDuplicate("100", "101", "A18B28C38", duplicatePatients.get(0));
+        assertDuplicate("102", "103", "A18B28C38", duplicatePatients.get(1));
+        assertDuplicate("104", "105", "A18B28C38", duplicatePatients.get(2));
+        assertDuplicate("106", "107", "A18B28C38", duplicatePatients.get(3));
 
-        duplicatePatients = duplicatePatientRepository.findByCatchment(catchment, null, timeUuids.get(3), 3);
+        duplicatePatients = duplicatePatientRepository.findByCatchment(catchment, null, timeUuids.get(9), 3);
         assertTrue(isNotEmpty(duplicatePatients));
         assertEquals(3, duplicatePatients.size());
-        assertDuplicate("110", "111", "A18B28C38", duplicatePatients.get(0));
-        assertDuplicate("108", "109", "A18B28C38", duplicatePatients.get(1));
-        assertDuplicate("106", "107", "A18B28C38", duplicatePatients.get(2));
-
-        duplicatePatients = duplicatePatientRepository.findByCatchment(catchment, timeUuids.get(13), null, 25);
-        assertTrue(isNotEmpty(duplicatePatients));
-        assertEquals(6, duplicatePatients.size());
-        assertDuplicate("110", "111", "A18B28C38", duplicatePatients.get(0));
-        assertDuplicate("108", "109", "A18B28C38", duplicatePatients.get(1));
-        assertDuplicate("106", "107", "A18B28C38", duplicatePatients.get(2));
-        assertDuplicate("104", "105", "A18B28C38", duplicatePatients.get(3));
-        assertDuplicate("102", "103", "A18B28C38", duplicatePatients.get(4));
-        assertDuplicate("100", "101", "A18B28C38", duplicatePatients.get(5));
-
-        duplicatePatients = duplicatePatientRepository.findByCatchment(catchment, timeUuids.get(11), null, 3);
-        assertTrue(isNotEmpty(duplicatePatients));
-        assertEquals(3, duplicatePatients.size());
-        assertDuplicate("108", "109", "A18B28C38", duplicatePatients.get(0));
-        assertDuplicate("106", "107", "A18B28C38", duplicatePatients.get(1));
+        assertDuplicate("100", "101", "A18B28C38", duplicatePatients.get(0));
+        assertDuplicate("102", "103", "A18B28C38", duplicatePatients.get(1));
         assertDuplicate("104", "105", "A18B28C38", duplicatePatients.get(2));
 
-        duplicatePatients = duplicatePatientRepository.findByCatchment(catchment, timeUuids.get(11), timeUuids.get(3), 25);
+        duplicatePatients = duplicatePatientRepository.findByCatchment(catchment, timeUuids.get(3), null, 25);
+        assertTrue(isNotEmpty(duplicatePatients));
+        assertEquals(4, duplicatePatients.size());
+        assertDuplicate("104", "105", "A18B28C38", duplicatePatients.get(0));
+        assertDuplicate("106", "107", "A18B28C38", duplicatePatients.get(1));
+        assertDuplicate("108", "109", "A18B28C38", duplicatePatients.get(2));
+        assertDuplicate("110", "111", "A18B28C38", duplicatePatients.get(3));
+
+        duplicatePatients = duplicatePatientRepository.findByCatchment(catchment, timeUuids.get(3), null, 3);
         assertTrue(isNotEmpty(duplicatePatients));
         assertEquals(3, duplicatePatients.size());
-        assertDuplicate("108", "109", "A18B28C38", duplicatePatients.get(0));
+        assertDuplicate("104", "105", "A18B28C38", duplicatePatients.get(0));
         assertDuplicate("106", "107", "A18B28C38", duplicatePatients.get(1));
-        assertDuplicate("104", "105", "A18B28C38", duplicatePatients.get(2));
+        assertDuplicate("108", "109", "A18B28C38", duplicatePatients.get(2));
 
-        duplicatePatients = duplicatePatientRepository.findByCatchment(catchment, timeUuids.get(11), timeUuids.get(3), 2);
+        duplicatePatients = duplicatePatientRepository.findByCatchment(catchment, timeUuids.get(3), timeUuids.get(11), 25);
+        assertTrue(isNotEmpty(duplicatePatients));
+        assertEquals(3, duplicatePatients.size());
+        assertDuplicate("104", "105", "A18B28C38", duplicatePatients.get(0));
+        assertDuplicate("106", "107", "A18B28C38", duplicatePatients.get(1));
+        assertDuplicate("108", "109", "A18B28C38", duplicatePatients.get(2));
+
+        duplicatePatients = duplicatePatientRepository.findByCatchment(catchment, timeUuids.get(3), timeUuids.get(11), 2);
         assertTrue(isNotEmpty(duplicatePatients));
         assertEquals(2, duplicatePatients.size());
-        assertDuplicate("108", "109", "A18B28C38", duplicatePatients.get(0));
+        assertDuplicate("104", "105", "A18B28C38", duplicatePatients.get(0));
         assertDuplicate("106", "107", "A18B28C38", duplicatePatients.get(1));
     }
 
