@@ -288,7 +288,7 @@ public class DuplicatePatientControllerTest {
         MockHttpServletRequest httpRequest = buildDuplicatePatientHttpRequest();
         List<DuplicatePatientData> duplicatePatientDataList = buildDuplicatePatientDataList();
 
-        MCIMultiResponse response = duplicatePatientController.buildPaginatedResponse(httpRequest, duplicatePatientDataList, null, null, 3);
+        MCIMultiResponse response = duplicatePatientController.buildPaginatedResponse(httpRequest, duplicatePatientDataList, null, null, 3, null);
 
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();
@@ -303,7 +303,7 @@ public class DuplicatePatientControllerTest {
         List<DuplicatePatientData> duplicatePatientDataList = buildDuplicatePatientDataList();
 
         MCIMultiResponse response = duplicatePatientController.buildPaginatedResponse(httpRequest, duplicatePatientDataList,
-                duplicatePatientDataList.get(4).getModifiedAt(), null, 6);
+                duplicatePatientDataList.get(4).getModifiedAt(), null, 6, null);
 
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();
@@ -318,7 +318,7 @@ public class DuplicatePatientControllerTest {
         List<DuplicatePatientData> duplicatePatientDataList = buildDuplicatePatientDataList();
 
         MCIMultiResponse response = duplicatePatientController.buildPaginatedResponse(httpRequest, duplicatePatientDataList,
-                duplicatePatientDataList.get(2).getModifiedAt(), null, 3);
+                duplicatePatientDataList.get(2).getModifiedAt(), null, 3, null);
 
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();

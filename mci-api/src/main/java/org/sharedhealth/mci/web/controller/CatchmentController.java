@@ -100,7 +100,7 @@ public class CatchmentController extends FeedController {
 
         MCIMultiResponse mciMultiResponse;
         if (response != null) {
-            mciMultiResponse = buildPaginatedResponse(request, response, after, before, patientService.getPerPageMaximumLimit());
+            mciMultiResponse = buildPaginatedResponse(request, response, after, before, patientService.getPerPageMaximumLimit(), null);
         } else {
             mciMultiResponse = new MCIMultiResponse(emptyList(), null, OK);
         }

@@ -59,7 +59,7 @@ public class HealthIdServiceIT {
 
     @Test
     public void shouldGenerateUniqueBlock() throws Exception {
-        ExecutorService executor = Executors.newFixedThreadPool(5);
+        ExecutorService executor = Executors.newFixedThreadPool(10);
         final Set<Future<List<HealthId>>> eventualHealthIds = new HashSet<>();
         for (int i = 0; i < 100; i++) {
             Callable<List<HealthId>> nextBlock = new Callable<List<HealthId>>() {

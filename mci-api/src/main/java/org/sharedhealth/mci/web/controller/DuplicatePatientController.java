@@ -85,10 +85,12 @@ public class DuplicatePatientController extends MciController {
             logger.debug(errorMessage);
             return deferredResult;
         }
-        List<DuplicatePatientData> response = findDuplicatesByCatchment(catchmentId, after, before);
+        List<DuplicatePatientData> responseWithDuplicateEntries = duplicatePatientService.findAllByCatchment(new Catchment(catchmentId), after, before, (1 + getPerPageMaximumLimit()) * 3);
+        UUID previousMarker = responseWithDuplicateEntries.isEmpty() ? null : responseWithDuplicateEntries.get(0).getModifiedAt();
+        List<DuplicatePatientData> response = removeDuplicateMappings(responseWithDuplicateEntries);
         MCIMultiResponse mciMultiResponse;
         if (response != null) {
-            mciMultiResponse = buildPaginatedResponse(request, response, after, before, getPerPageMaximumLimit());
+            mciMultiResponse = buildPaginatedResponse(request, response, after, before, getPerPageMaximumLimit(), previousMarker);
         } else {
             mciMultiResponse = new MCIMultiResponse(emptyList(), null, OK);
         }
@@ -96,9 +98,14 @@ public class DuplicatePatientController extends MciController {
         return deferredResult;
     }
 
-    private List<DuplicatePatientData> findDuplicatesByCatchment(String catchmentId, UUID after, UUID before) {
-        ArrayList<DuplicatePatientData> duplicates = new ArrayList<>(
-                duplicatePatientService.findAllByCatchment(new Catchment(catchmentId), after, before, (1 + getPerPageMaximumLimit()) * 3));
+//    private List<DuplicatePatientData> findDuplicatesByCatchment(String catchmentId, UUID after, UUID before) {
+//        ArrayList<DuplicatePatientData> duplicates = new ArrayList<>(
+//                duplicatePatientService.findAllByCatchment(new Catchment(catchmentId), after, before, (1 + getPerPageMaximumLimit()) * 3));
+//        return removeDuplicateMappings(duplicates);
+//    }
+
+    private List<DuplicatePatientData> removeDuplicateMappings(List<DuplicatePatientData> duplicatePatientDataList) {
+        ArrayList<DuplicatePatientData> duplicates = new ArrayList<>(duplicatePatientDataList);
         DuplicatePatientData duplicate;
         for (Iterator<DuplicatePatientData> it = duplicates.iterator(); it.hasNext(); ) {
             duplicate = it.next();

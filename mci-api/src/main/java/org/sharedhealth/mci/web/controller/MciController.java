@@ -46,11 +46,12 @@ public class MciController {
 
     protected MCIMultiResponse buildPaginatedResponse(HttpServletRequest request,
                                                       List<? extends ResponseWithAdditionalInfo> response,
-                                                      UUID after, UUID before, int limit) {
+                                                      UUID after, UUID before, int limit, UUID previousMarker) {
 
         HashMap<String, String> additionalInfo = new HashMap<>();
 
         if (response.size() > 0) {
+            previousMarker = null == previousMarker ? response.get(0).getModifiedAt() : previousMarker;
             if (after == null && before == null && response.size() > limit) {
                 response = response.subList(0, limit);
                 additionalInfo.put(NEXT, buildNextUrl(request, response.get(response.size() - 1).getModifiedAt()));
@@ -58,14 +59,14 @@ public class MciController {
                 if (response.size() > limit) {
                     response = response.subList(0, limit);
                     additionalInfo.put(NEXT, buildNextUrl(request, response.get(response.size() - 1).getModifiedAt()));
-                    additionalInfo.put(PREVIOUS, buildPreviousUrl(request, response.get(0).getModifiedAt()));
+                    additionalInfo.put(PREVIOUS, buildPreviousUrl(request, previousMarker));
                 } else {
-                    additionalInfo.put(PREVIOUS, buildPreviousUrl(request, response.get(0).getModifiedAt()));
+                    additionalInfo.put(PREVIOUS, buildPreviousUrl(request, previousMarker));
                 }
             } else if (before != null && after == null) {
                 if (response.size() > limit) {
                     response = response.subList(response.size() - limit, limit);
-                    additionalInfo.put(PREVIOUS, buildPreviousUrl(request, response.get(0).getModifiedAt()));
+                    additionalInfo.put(PREVIOUS, buildPreviousUrl(request, previousMarker));
                     additionalInfo.put(NEXT, buildNextUrl(request, response.get(response.size() - 1).getModifiedAt()));
                 } else {
                     additionalInfo.put(NEXT, buildNextUrl(request, response.get(response.size() - 1).getModifiedAt()));
