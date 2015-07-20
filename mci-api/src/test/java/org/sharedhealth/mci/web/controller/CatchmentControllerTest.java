@@ -257,7 +257,7 @@ public class CatchmentControllerTest {
         when(patientService.findPendingApprovalList(catchment, null, before, MAX_PAGE_SIZE + 1)).thenReturn(pendingApprovals);
 
         String nextUrl = fromUriString(format("%s/%s/%s/approvals", SERVER_URL, API_END_POINT, "102030"))
-                .queryParam("after", pendingApprovals.get(2).getLastUpdated()).build().toString();
+                .queryParam("after", pendingApprovals.get(3).getLastUpdated()).build().toString();
 
         String url = buildPendingApprovalUrl("102030");
         MvcResult mvcResult = mockMvc.perform(get(url + "?" + BEFORE + "=" + before))

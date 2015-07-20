@@ -27,7 +27,7 @@ public class DuplicatePatientQueryBuilder {
         }
 
         if (before != null) {
-            where.and(lt(CREATED_AT, before));
+            where.and(lt(CREATED_AT, before)).orderBy(desc(CREATED_AT));
         }
 
         return where.limit(limit).toString();

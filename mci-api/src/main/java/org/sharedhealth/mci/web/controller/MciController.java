@@ -65,7 +65,7 @@ public class MciController {
                 }
             } else if (before != null && after == null) {
                 if (response.size() > limit) {
-                    response = response.subList(response.size() - limit, limit);
+                    response = response.subList(response.size() - limit, response.size());
                     additionalInfo.put(PREVIOUS, buildPreviousUrl(request, previousMarker));
                     additionalInfo.put(NEXT, buildNextUrl(request, response.get(response.size() - 1).getModifiedAt()));
                 } else {
