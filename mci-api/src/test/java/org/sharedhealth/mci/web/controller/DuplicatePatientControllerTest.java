@@ -106,7 +106,7 @@ public class DuplicatePatientControllerTest {
 
     @Test
     public void shouldFindDuplicatesByCatchment() throws Exception {
-        when(duplicatePatientService.findAllByCatchment(new Catchment("102030"), null, null, 18)).thenReturn(buildDuplicatePatientDataList());
+        when(duplicatePatientService.findAllByCatchment(new Catchment("102030"), null, null, 6)).thenReturn(buildDuplicatePatientDataList());
 
         String url = "/patients/duplicates/catchments/102030";
         MvcResult mvcResult = mockMvc.perform(get(url).contentType(APPLICATION_JSON))
@@ -123,12 +123,12 @@ public class DuplicatePatientControllerTest {
                 .andExpect(jsonPath("$.results[4]").exists())
                 .andExpect(jsonPath("$.results[5]").doesNotExist())
 
-                .andExpect(jsonPath("$.results[0].patient1.hid", is("99002")))
-                .andExpect(jsonPath("$.results[0].patient1.given_name", is("A2")))
-                .andExpect(jsonPath("$.results[0].patient1.sur_name", is("B2")))
-                .andExpect(jsonPath("$.results[0].patient2.hid", is("99001")))
-                .andExpect(jsonPath("$.results[0].patient2.given_name", is("A1")))
-                .andExpect(jsonPath("$.results[0].patient2.sur_name", is("B1")))
+                .andExpect(jsonPath("$.results[0].patient1.hid", is("99001")))
+                .andExpect(jsonPath("$.results[0].patient1.given_name", is("A1")))
+                .andExpect(jsonPath("$.results[0].patient1.sur_name", is("B1")))
+                .andExpect(jsonPath("$.results[0].patient2.hid", is("99002")))
+                .andExpect(jsonPath("$.results[0].patient2.given_name", is("A2")))
+                .andExpect(jsonPath("$.results[0].patient2.sur_name", is("B2")))
                 .andExpect(jsonPath("$.results[0].reasons", is(asList("PHONE", "NID"))))
 
                 .andExpect(jsonPath("$.results[1].patient1.hid", is("99003")))
@@ -178,11 +178,10 @@ public class DuplicatePatientControllerTest {
         PatientSummaryData patientSummaryData10 = buildPatientSummaryData("99010", "A10", "B10", address);
 
         return asList(new DuplicatePatientData(patientSummaryData1, patientSummaryData2, asSet("NID", "PHONE"), uuids.get(0)),
-                new DuplicatePatientData(patientSummaryData2, patientSummaryData1, asSet("NID", "PHONE"), uuids.get(1)),
-                new DuplicatePatientData(patientSummaryData3, patientSummaryData4, asSet("NID"), uuids.get(2)),
-                new DuplicatePatientData(patientSummaryData5, patientSummaryData6, asSet("NID"), uuids.get(3)),
-                new DuplicatePatientData(patientSummaryData7, patientSummaryData8, asSet("PHONE"), uuids.get(4)),
-                new DuplicatePatientData(patientSummaryData9, patientSummaryData10, asSet("NID", "PHONE"), uuids.get(5)));
+                new DuplicatePatientData(patientSummaryData3, patientSummaryData4, asSet("NID"), uuids.get(1)),
+                new DuplicatePatientData(patientSummaryData5, patientSummaryData6, asSet("NID"), uuids.get(2)),
+                new DuplicatePatientData(patientSummaryData7, patientSummaryData8, asSet("PHONE"), uuids.get(3)),
+                new DuplicatePatientData(patientSummaryData9, patientSummaryData10, asSet("NID", "PHONE"), uuids.get(4)));
     }
 
     private PatientSummaryData buildPatientSummaryData(String hid, String givenName, String surname, Address address) {
@@ -234,7 +233,7 @@ public class DuplicatePatientControllerTest {
     public void shouldFindPendingApprovalsAfterGivenTime() throws Exception {
         Catchment catchment = new Catchment("10", "20", "30");
         UUID after = timeBased();
-        when(duplicatePatientService.findAllByCatchment(catchment, after, null, 18)).thenReturn(new ArrayList<DuplicatePatientData>());
+        when(duplicatePatientService.findAllByCatchment(catchment, after, null, 6)).thenReturn(new ArrayList<DuplicatePatientData>());
 
         String url = buildPendingApprovalUrl("102030");
         MvcResult mvcResult = mockMvc.perform(get(url + "?" + AFTER + "=" + after))
@@ -244,14 +243,14 @@ public class DuplicatePatientControllerTest {
         mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk());
 
-        verify(duplicatePatientService).findAllByCatchment(catchment, after, null, 18);
+        verify(duplicatePatientService).findAllByCatchment(catchment, after, null, 6);
     }
 
     @Test
     public void shouldFindPendingApprovalsBeforeGivenTime() throws Exception {
         Catchment catchment = new Catchment("10", "20", "30");
         UUID before = timeBased();
-        when(duplicatePatientService.findAllByCatchment(catchment, null, before, 18)).thenReturn(new ArrayList<DuplicatePatientData>());
+        when(duplicatePatientService.findAllByCatchment(catchment, null, before, 6)).thenReturn(new ArrayList<DuplicatePatientData>());
 
         String url = buildPendingApprovalUrl("102030");
         MvcResult mvcResult = mockMvc.perform(get(url + "?" + BEFORE + "=" + before))
@@ -261,7 +260,7 @@ public class DuplicatePatientControllerTest {
         mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk());
 
-        verify(duplicatePatientService).findAllByCatchment(catchment, null, before, 18);
+        verify(duplicatePatientService).findAllByCatchment(catchment, null, before, 6);
     }
 
     @Test
@@ -270,7 +269,7 @@ public class DuplicatePatientControllerTest {
         UUID after = timeBased();
         Thread.sleep(10);
         UUID before = timeBased();
-        when(duplicatePatientService.findAllByCatchment(catchment, after, before, 18)).thenReturn(new ArrayList<DuplicatePatientData>());
+        when(duplicatePatientService.findAllByCatchment(catchment, after, before, 6)).thenReturn(new ArrayList<DuplicatePatientData>());
 
         String url = buildPendingApprovalUrl("102030");
         MvcResult mvcResult = mockMvc.perform(get(url + "?" + AFTER + "=" + after + "&" + BEFORE + "=" + before))
@@ -280,7 +279,7 @@ public class DuplicatePatientControllerTest {
         mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk());
 
-        verify(duplicatePatientService).findAllByCatchment(catchment, after, before, 18);
+        verify(duplicatePatientService).findAllByCatchment(catchment, after, before, 6);
     }
 
     @Test
@@ -288,7 +287,7 @@ public class DuplicatePatientControllerTest {
         MockHttpServletRequest httpRequest = buildDuplicatePatientHttpRequest();
         List<DuplicatePatientData> duplicatePatientDataList = buildDuplicatePatientDataList();
 
-        MCIMultiResponse response = duplicatePatientController.buildPaginatedResponse(httpRequest, duplicatePatientDataList, null, null, 3, null);
+        MCIMultiResponse response = duplicatePatientController.buildPaginatedResponse(httpRequest, duplicatePatientDataList, null, null, 3);
 
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();
@@ -303,7 +302,7 @@ public class DuplicatePatientControllerTest {
         List<DuplicatePatientData> duplicatePatientDataList = buildDuplicatePatientDataList();
 
         MCIMultiResponse response = duplicatePatientController.buildPaginatedResponse(httpRequest, duplicatePatientDataList,
-                duplicatePatientDataList.get(4).getModifiedAt(), null, 6, null);
+                duplicatePatientDataList.get(4).getModifiedAt(), null, 6);
 
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();
@@ -318,7 +317,7 @@ public class DuplicatePatientControllerTest {
         List<DuplicatePatientData> duplicatePatientDataList = buildDuplicatePatientDataList();
 
         MCIMultiResponse response = duplicatePatientController.buildPaginatedResponse(httpRequest, duplicatePatientDataList,
-                duplicatePatientDataList.get(2).getModifiedAt(), null, 3, null);
+                duplicatePatientDataList.get(2).getModifiedAt(), null, 3);
 
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();

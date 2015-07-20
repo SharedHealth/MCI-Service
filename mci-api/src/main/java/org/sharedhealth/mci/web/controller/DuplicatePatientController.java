@@ -26,7 +26,6 @@ import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -83,72 +82,20 @@ public class DuplicatePatientController extends MciController {
             logger.debug(errorMessage);
             return deferredResult;
         }
-        List<DuplicatePatientData> responseWithDuplicateEntries = duplicatePatientService.findAllByCatchment
-                (new Catchment(catchmentId), after, before, (1 + getPerPageMaximumLimit()) * 3);
+        List<DuplicatePatientData> response = duplicatePatientService.findAllByCatchment
+                (new Catchment(catchmentId), after, before, getPerPageMaximumLimit() + 1);
 
-        List<DuplicatePatientData> response = removeDuplicateMappings(responseWithDuplicateEntries);
         if (null != before) {
             Collections.reverse(response);
-            Collections.reverse(responseWithDuplicateEntries);
         }
-        UUID previousMarker = getPreviousMarker(responseWithDuplicateEntries, response, after, before);
         MCIMultiResponse mciMultiResponse;
         if (response != null) {
-            mciMultiResponse = buildPaginatedResponse(request, response, after, before, getPerPageMaximumLimit(), previousMarker);
+            mciMultiResponse = buildPaginatedResponse(request, response, after, before, getPerPageMaximumLimit());
         } else {
             mciMultiResponse = new MCIMultiResponse(emptyList(), null, OK);
         }
         deferredResult.setResult(new ResponseEntity<>(mciMultiResponse, mciMultiResponse.httpStatusObject));
         return deferredResult;
-    }
-
-    private UUID getPreviousMarker(List<DuplicatePatientData> responseWithDuplicateEntries, List<DuplicatePatientData> response, UUID after, UUID before) {
-        UUID marker = null;
-        if (null == before) {
-            marker = responseWithDuplicateEntries.isEmpty() ? null : responseWithDuplicateEntries.get(0).getModifiedAt();
-        } else if (null == after && null != before && !responseWithDuplicateEntries.isEmpty()) {
-            if (response.size() <= getPerPageMaximumLimit()) {
-                int index = responseWithDuplicateEntries.indexOf(response.get(0));
-                marker = getMarker(responseWithDuplicateEntries, index);
-            } else {
-                int index = responseWithDuplicateEntries.indexOf(response.get(response.size() - getPerPageMaximumLimit()));
-                marker = getMarker(responseWithDuplicateEntries, index);
-            }
-        }
-        return marker;
-    }
-
-    private UUID getMarker(List<DuplicatePatientData> responseWithDuplicateEntries, int index) {
-        UUID marker;
-        if (hasReverseMapping(responseWithDuplicateEntries.get(index), responseWithDuplicateEntries.get(index + 1))) {
-            marker = responseWithDuplicateEntries.get(index).getCreatedAt();
-        } else {
-            marker = responseWithDuplicateEntries.get(index).getCreatedAt();
-        }
-        return marker;
-    }
-
-    private List<DuplicatePatientData> removeDuplicateMappings(List<DuplicatePatientData> responseWithDuplicateEntries) {
-        List<DuplicatePatientData> listWithoutDuplicates = new ArrayList<>();
-        for (int i = 0; i < responseWithDuplicateEntries.size() - 1; i++) {
-            if (hasReverseMapping(responseWithDuplicateEntries.get(i), responseWithDuplicateEntries.get(i + 1))) {
-                listWithoutDuplicates.add(responseWithDuplicateEntries.get(++i));
-            } else {
-                listWithoutDuplicates.add(responseWithDuplicateEntries.get(i));
-            }
-            if (listWithoutDuplicates.size() > getPerPageMaximumLimit()) {
-                return listWithoutDuplicates;
-            }
-        }
-        if (!responseWithDuplicateEntries.isEmpty()) {
-            listWithoutDuplicates.add(responseWithDuplicateEntries.get(responseWithDuplicateEntries.size() - 1));
-        }
-        return listWithoutDuplicates;
-    }
-
-    private boolean hasReverseMapping(DuplicatePatientData patientData1, DuplicatePatientData patientData2) {
-        return patientData1.getPatient1().getHealthId().equals(patientData2.getPatient2().getHealthId()) &&
-                patientData1.getPatient2().getHealthId().equals(patientData2.getPatient1().getHealthId());
     }
 
     @PreAuthorize("hasAnyRole('ROLE_MCI Approver')")

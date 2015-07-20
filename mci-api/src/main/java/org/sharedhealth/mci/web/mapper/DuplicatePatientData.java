@@ -97,28 +97,4 @@ public class DuplicatePatientData implements ResponseWithAdditionalInfo {
     public UUID getModifiedAt() {
         return getCreatedAt();
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof DuplicatePatientData)) return false;
-
-        DuplicatePatientData that = (DuplicatePatientData) o;
-
-        if (!createdAt.equals(that.createdAt)) return false;
-        if (!patient1.equals(that.patient1)) return false;
-        if (!patient2.equals(that.patient2)) return false;
-        if (!reasons.equals(that.reasons)) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = patient1.hashCode();
-        result = 31 * result + patient2.hashCode();
-        result = 31 * result + reasons.hashCode();
-        result = 31 * result + createdAt.hashCode();
-        return result;
-    }
 }

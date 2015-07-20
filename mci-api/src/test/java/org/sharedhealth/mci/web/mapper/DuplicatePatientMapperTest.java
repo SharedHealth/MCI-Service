@@ -90,7 +90,7 @@ public class DuplicatePatientMapperTest {
     }
 
     @Test
-    public void shouldMapDuplicatesWhenCatchmentsAreSame() {
+    public void shouldNotMapDuplicatesWhenCatchmentsAreSame() {
         Address address = new Address("10", "11", "12", "13", "14", null);
         PatientSummaryData patientSummaryData1 = buildPatientSummaryData("healthId1", address);
         PatientSummaryData patientSummaryData2 = buildPatientSummaryData("healthId2", address);
@@ -103,18 +103,13 @@ public class DuplicatePatientMapperTest {
 
         List<DuplicatePatient> duplicates = duplicatePatientMapper.mapToDuplicatePatientList(asList(duplicateData));
         assertTrue(isNotEmpty(duplicates));
-        assertEquals(8, duplicates.size());
+        assertEquals(4, duplicates.size());
 
         Catchment catchment = new Catchment(address);
         assertDuplicates(catchment.getAllIds().get(0), patientSummaryData1, patientSummaryData2, reasons, duplicates.get(0));
         assertDuplicates(catchment.getAllIds().get(1), patientSummaryData1, patientSummaryData2, reasons, duplicates.get(1));
         assertDuplicates(catchment.getAllIds().get(2), patientSummaryData1, patientSummaryData2, reasons, duplicates.get(2));
         assertDuplicates(catchment.getAllIds().get(3), patientSummaryData1, patientSummaryData2, reasons, duplicates.get(3));
-
-        assertDuplicates(catchment.getAllIds().get(0), patientSummaryData2, patientSummaryData1, reasons, duplicates.get(4));
-        assertDuplicates(catchment.getAllIds().get(1), patientSummaryData2, patientSummaryData1, reasons, duplicates.get(5));
-        assertDuplicates(catchment.getAllIds().get(2), patientSummaryData2, patientSummaryData1, reasons, duplicates.get(6));
-        assertDuplicates(catchment.getAllIds().get(3), patientSummaryData2, patientSummaryData1, reasons, duplicates.get(7));
     }
 
     private PatientSummaryData buildPatientSummaryData(String healthId, Address address) {
