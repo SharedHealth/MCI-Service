@@ -96,6 +96,11 @@ public class PatientData implements Diffable<PatientData> {
     @JsonDeserialize(using = DateStringDeserializer.class)
     private String dateOfBirth;
 
+    @JsonProperty(DOB_TYPE)
+    @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "[123]", message = ERROR_CODE_INVALID)
+    private String dobType;
+
     @JsonProperty(GENDER)
     @JsonInclude(NON_EMPTY)
     @NotBlank(message = ERROR_CODE_REQUIRED, groups = RequiredGroup.class)
@@ -264,6 +269,14 @@ public class PatientData implements Diffable<PatientData> {
 
     public void setDateOfBirth(String dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
+    }
+
+    public String getDobType() {
+        return dobType;
+    }
+
+    public void setDobType(String dobType) {
+        this.dobType = dobType;
     }
 
     public Address getAddress() {
@@ -591,6 +604,7 @@ public class PatientData implements Diffable<PatientData> {
         if (confidential != null ? !confidential.equals(that.confidential) : that.confidential != null) return false;
         if (createdAt != null ? !createdAt.equals(that.createdAt) : that.createdAt != null) return false;
         if (dateOfBirth != null ? !dateOfBirth.equals(that.dateOfBirth) : that.dateOfBirth != null) return false;
+        if (dobType != null ? !dobType.equals(that.dobType) : that.dobType != null) return false;
         if (disability != null ? !disability.equals(that.disability) : that.disability != null) return false;
         if (educationLevel != null ? !educationLevel.equals(that.educationLevel) : that.educationLevel != null)
             return false;
@@ -638,6 +652,7 @@ public class PatientData implements Diffable<PatientData> {
         result = 31 * result + (givenName != null ? givenName.hashCode() : 0);
         result = 31 * result + (surName != null ? surName.hashCode() : 0);
         result = 31 * result + (dateOfBirth != null ? dateOfBirth.hashCode() : 0);
+        result = 31 * result + (dobType != null ? dobType.hashCode() : 0);
         result = 31 * result + (gender != null ? gender.hashCode() : 0);
         result = 31 * result + (occupation != null ? occupation.hashCode() : 0);
         result = 31 * result + (educationLevel != null ? educationLevel.hashCode() : 0);
@@ -676,6 +691,7 @@ public class PatientData implements Diffable<PatientData> {
         sb.append(", givenName='").append(givenName).append('\'');
         sb.append(", surName='").append(surName).append('\'');
         sb.append(", dateOfBirth='").append(dateOfBirth).append('\'');
+        sb.append(", dobType='").append(dobType).append('\'');
         sb.append(", gender='").append(gender).append('\'');
         sb.append(", occupation='").append(occupation).append('\'');
         sb.append(", educationLevel='").append(educationLevel).append('\'');
@@ -878,6 +894,7 @@ public class PatientData implements Diffable<PatientData> {
                 .append(GIVEN_NAME, this.givenName, that.givenName)
                 .append(SUR_NAME, this.surName, that.surName)
                 .append(DATE_OF_BIRTH, this.dateOfBirth, that.dateOfBirth)
+                .append(DOB_TYPE, this.dobType, that.dobType)
                 .append(GENDER, this.gender, that.gender)
                 .append(OCCUPATION, this.occupation, that.occupation)
                 .append(EDU_LEVEL, this.educationLevel, that.educationLevel)

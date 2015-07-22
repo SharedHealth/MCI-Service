@@ -115,6 +115,7 @@ public class PatientRepositoryIT {
         data.setGivenName(givenName);
         data.setSurName(surname);
         data.setDateOfBirth(toIsoFormat("2014-12-01"));
+        data.setDobType("1");
         data.setGender("M");
         data.setOccupation("03");
         data.setEducationLevel("BA");

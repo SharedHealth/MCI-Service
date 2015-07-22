@@ -65,7 +65,7 @@ public class PatientController extends MciController {
         }
 
         UserInfo userInfo = getUserInfo();
-        logAccessDetails(userInfo, format("Creating a new patient : %s", patient.getHealthId()));
+        logAccessDetails(userInfo, format("Creating a new patient : %s %s", patient.getGender(), patient.getSurName()));
 
         patient.setRequester(userInfo.getProperties());
 

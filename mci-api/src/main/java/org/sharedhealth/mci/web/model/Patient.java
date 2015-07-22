@@ -47,6 +47,9 @@ public class Patient {
     @Column(DATE_OF_BIRTH)
     private Date dateOfBirth;
 
+    @Column(DOB_TYPE)
+    private String dobType;
+
     @Column(GENDER)
     private String gender;
 
@@ -287,6 +290,7 @@ public class Patient {
         if (createdAt != null ? !createdAt.equals(patient.createdAt) : patient.createdAt != null) return false;
         if (createdBy != null ? !createdBy.equals(patient.createdBy) : patient.createdBy != null) return false;
         if (dateOfBirth != null ? !dateOfBirth.equals(patient.dateOfBirth) : patient.dateOfBirth != null) return false;
+        if (dobType != null ? !dobType.equals(patient.dobType) : patient.dobType != null) return false;
         if (dateOfDeath != null ? !dateOfDeath.equals(patient.dateOfDeath) : patient.dateOfDeath != null) return false;
         if (disability != null ? !disability.equals(patient.disability) : patient.disability != null) return false;
         if (districtId != null ? !districtId.equals(patient.districtId) : patient.districtId != null) return false;
@@ -403,6 +407,7 @@ public class Patient {
         result = 31 * result + (givenName != null ? givenName.hashCode() : 0);
         result = 31 * result + (surName != null ? surName.hashCode() : 0);
         result = 31 * result + (dateOfBirth != null ? dateOfBirth.hashCode() : 0);
+        result = 31 * result + (dobType != null ? dobType.hashCode() : 0);
         result = 31 * result + (gender != null ? gender.hashCode() : 0);
         result = 31 * result + (occupation != null ? occupation.hashCode() : 0);
         result = 31 * result + (educationLevel != null ? educationLevel.hashCode() : 0);
@@ -519,6 +524,15 @@ public class Patient {
 
     public void setDateOfBirth(String dateOfBirth) {
         this.dateOfBirth = parseDate(dateOfBirth);
+    }
+
+
+    public String getDobType() {
+        return dobType;
+    }
+
+    public void setDobType(String dobType) {
+        this.dobType = dobType;
     }
 
     public String getGender() {

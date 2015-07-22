@@ -26,6 +26,7 @@ public class RepositoryConstants {
     public static final String GIVEN_NAME = "given_name";
     public static final String SUR_NAME = "sur_name";
     public static final String DATE_OF_BIRTH = "date_of_birth";
+    public static final String DOB_TYPE = "dob_type";
     public static final String GENDER = "gender";
     public static final String OCCUPATION = "occupation";
     public static final String EDU_LEVEL = "edu_level";

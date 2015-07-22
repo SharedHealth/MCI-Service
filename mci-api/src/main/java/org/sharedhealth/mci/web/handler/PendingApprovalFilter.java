@@ -50,6 +50,7 @@ public class PendingApprovalFilter {
         newPatient.setGivenName(processString(GIVEN_NAME, existingPatient.getGivenName(), updateRequest.getGivenName(), requestedBy, newPatient));
         newPatient.setSurName(processString(SUR_NAME, existingPatient.getSurName(), updateRequest.getSurName(), requestedBy, newPatient));
         newPatient.setDateOfBirth(processString(DATE_OF_BIRTH, existingPatient.getDateOfBirth(), updateRequest.getDateOfBirth(), requestedBy, newPatient));
+        newPatient.setDobType(processString(DOB_TYPE, existingPatient.getDobType(), updateRequest.getDobType(), requestedBy, newPatient));
         newPatient.setGender(processString(GENDER, existingPatient.getGender(), updateRequest.getGender(), requestedBy, newPatient));
         newPatient.setOccupation(processString(OCCUPATION, existingPatient.getOccupation(), updateRequest.getOccupation(), requestedBy, newPatient));
         newPatient.setEducationLevel(processString(EDU_LEVEL, existingPatient.getEducationLevel(), updateRequest.getEducationLevel(), requestedBy, newPatient));

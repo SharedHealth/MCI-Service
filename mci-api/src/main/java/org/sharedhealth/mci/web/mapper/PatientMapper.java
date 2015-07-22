@@ -31,6 +31,7 @@ import static org.sharedhealth.mci.web.utils.MCIConstants.STRING_YES;
 @Component
 public class PatientMapper {
 
+    public static final String DEFAULT_DOB_TYPE = "1";
     private ObjectMapper objectMapper = new ObjectMapper();
 
     public List<PatientData> map(List<Patient> patients) {
@@ -82,6 +83,7 @@ public class PatientMapper {
         if (patient.getDateOfBirth() != null) {
             data.setDateOfBirth(toIsoFormat(patient.getDateOfBirth()));
         }
+        data.setDobType(getDobType(patient.getDobType()));
         data.setGender(patient.getGender());
         data.setOccupation(patient.getOccupation());
         data.setEducationLevel(patient.getEducationLevel());
@@ -201,6 +203,7 @@ public class PatientMapper {
         patient.setGivenName(StringUtils.trim(data.getGivenName()));
         patient.setSurName(StringUtils.trim(data.getSurName()));
         patient.setDateOfBirth(data.getDateOfBirth());
+        patient.setDobType(getDobType(data.getDobType()));
         patient.setGender(data.getGender());
         patient.setOccupation(data.getOccupation());
         patient.setEducationLevel(data.getEducationLevel());
@@ -246,6 +249,10 @@ public class PatientMapper {
         patient.setHouseholdCode(data.getHouseholdCode());
 
         return patient;
+    }
+
+    private String getDobType(String dobType) {
+        return null == dobType ? DEFAULT_DOB_TYPE : dobType;
     }
 
     private void mapPrimaryContactNumber(Patient patient, PhoneNumber primaryContactNumber) {

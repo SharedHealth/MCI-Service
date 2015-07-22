@@ -6,6 +6,7 @@
     "given_name":"Zaman Zaman",
     "sur_name":"AymaanAymaan",
     "date_of_birth":"1990-02-27T18:00:00.000Z",
+    "dob_type":"1",
     "gender":"F",
     "occupation":"03",
     "edu_level":"16",
