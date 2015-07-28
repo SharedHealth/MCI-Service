@@ -17,7 +17,7 @@ import org.sharedhealth.mci.web.mapper.PendingApprovalListResponse;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
 import org.sharedhealth.mci.web.mapper.Requester;
 import org.sharedhealth.mci.web.mapper.SearchQuery;
-import org.sharedhealth.mci.web.model.HealthId;
+import org.sharedhealth.mci.web.model.MciHealthId;
 import org.sharedhealth.mci.web.model.PatientUpdateLog;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
 
@@ -64,8 +64,8 @@ public class PatientServiceTest {
     @Test
     public void shouldCreateNewPatient() throws Exception {
         PatientData existingPatient = new PatientData();
-        HealthId healthId = new HealthId("FUBAR", "MCI", 0);
-        when(patientHealthIdService.getNextHealthId()).thenReturn(healthId);
+        MciHealthId MciHealthId = new MciHealthId("FUBAR");
+        when(patientHealthIdService.getNextHealthId()).thenReturn(MciHealthId);
         SearchQuery searchByNidQuery = new SearchQuery();
         searchByNidQuery.setNid("nid-100");
         when(patientRepository.findAllByQuery(searchByNidQuery)).thenReturn(new ArrayList<PatientData>());
@@ -92,8 +92,8 @@ public class PatientServiceTest {
     @Test
     public void shouldMarkHidUsedIfCretePatientIsSuccessful() throws Exception {
         PatientData existingPatient = new PatientData();
-        HealthId healthId = new HealthId("FUBAR", "MCI", 0);
-        when(patientHealthIdService.getNextHealthId()).thenReturn(healthId);
+        MciHealthId MciHealthId = new MciHealthId("FUBAR");
+        when(patientHealthIdService.getNextHealthId()).thenReturn(MciHealthId);
         SearchQuery searchByNidQuery = new SearchQuery();
         searchByNidQuery.setNid("nid-100");
         when(patientRepository.findAllByQuery(searchByNidQuery)).thenReturn(new ArrayList<PatientData>());
@@ -115,15 +115,15 @@ public class PatientServiceTest {
         inOrder.verify(patientRepository).create(existingPatient);
 
         verify(patientHealthIdService).getNextHealthId();
-        verify(patientHealthIdService, times(1)).markUsed(any(HealthId.class));
-        verify(patientHealthIdService, times(0)).putBackHealthId(any(HealthId.class));
+        verify(patientHealthIdService, times(1)).markUsed(any(MciHealthId.class));
+        verify(patientHealthIdService, times(0)).putBackHealthId(any(MciHealthId.class));
     }
 
     @Test
     public void shouldReturnHidToHidBlockIfCretePatientFailed() throws Exception {
         PatientData existingPatient = new PatientData();
-        HealthId healthId = new HealthId("FUBAR", "MCI", 0);
-        when(patientHealthIdService.getNextHealthId()).thenReturn(healthId);
+        MciHealthId MciHealthId = new MciHealthId("FUBAR");
+        when(patientHealthIdService.getNextHealthId()).thenReturn(MciHealthId);
         SearchQuery searchByNidQuery = new SearchQuery();
         searchByNidQuery.setNid("nid-100");
         when(patientRepository.findAllByQuery(searchByNidQuery)).thenReturn(new ArrayList<PatientData>());
@@ -145,8 +145,8 @@ public class PatientServiceTest {
         inOrder.verify(patientRepository).create(existingPatient);
 
         verify(patientHealthIdService).getNextHealthId();
-        verify(patientHealthIdService, times(0)).markUsed(any(HealthId.class));
-        verify(patientHealthIdService, times(1)).putBackHealthId(any(HealthId.class));
+        verify(patientHealthIdService, times(0)).markUsed(any(MciHealthId.class));
+        verify(patientHealthIdService, times(1)).putBackHealthId(any(MciHealthId.class));
     }
 
     @Test

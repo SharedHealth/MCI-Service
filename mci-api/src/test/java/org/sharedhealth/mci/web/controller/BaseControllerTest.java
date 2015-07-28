@@ -20,7 +20,7 @@ import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.mapper.PatientSummaryData;
 import org.sharedhealth.mci.web.mapper.Relation;
-import org.sharedhealth.mci.web.model.HealthId;
+import org.sharedhealth.mci.web.model.MciHealthId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.cassandra.core.CassandraOperations;
@@ -174,7 +174,7 @@ public class BaseControllerTest {
 
     private void createHealthIds() {
         for (int i = 0; i < numberOfHealthIdsNeeded(); i++) {
-            healthIdRepository.saveHealthIdSync(new HealthId(String.valueOf(new Date().getTime() + i), "MCI", 0));
+            healthIdRepository.saveHealthIdSync(new MciHealthId(String.valueOf(new Date().getTime() + i)));
         }
     }
 

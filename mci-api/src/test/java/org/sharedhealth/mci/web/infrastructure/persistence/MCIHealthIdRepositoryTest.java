@@ -9,7 +9,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.sharedhealth.mci.web.exception.HealthIdExhaustedException;
-import org.sharedhealth.mci.web.model.HealthId;
+import org.sharedhealth.mci.web.model.MciHealthId;
 import org.springframework.data.cassandra.convert.MappingCassandraConverter;
 import org.springframework.data.cassandra.core.CassandraOperations;
 
@@ -23,7 +23,7 @@ import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 @RunWith(MockitoJUnitRunner.class)
-public class HealthIdRepositoryTest {
+public class MCIHealthIdRepositoryTest {
     @Mock
     CassandraOperations cqlTemplate;
 
@@ -36,26 +36,26 @@ public class HealthIdRepositoryTest {
     @Test
     public void shouldSaveHidAsynchronously() {
         HealthIdRepository healthIdRepository = new HealthIdRepository(cqlTemplate);
-        healthIdRepository.saveHealthId(new HealthId("98015440161", "MCI", 0));
+        healthIdRepository.saveHealthId(new MciHealthId("98015440161"));
         verify(cqlTemplate, times(1)).executeAsynchronously(any(Insert.class));
     }
 
     @Test
     public void shouldBlockIdsForMCIService() {
-        ArrayList<HealthId> result = new ArrayList<>();
-        result.add(new HealthId("898998"));
-        result.add(new HealthId("898999"));
-        when(cqlTemplate.select(any(Select.class), eq(HealthId.class))).thenReturn(result);
+        ArrayList<MciHealthId> result = new ArrayList<>();
+        result.add(new MciHealthId("898998"));
+        result.add(new MciHealthId("898999"));
+        when(cqlTemplate.select(any(Select.class), eq(MciHealthId.class))).thenReturn(result);
         HealthIdRepository healthIdRepository = new HealthIdRepository(cqlTemplate);
 
-        List<HealthId> nextBlock = healthIdRepository.getNextBlock();
+        List<MciHealthId> nextBlock = healthIdRepository.getNextBlock();
 
         ArgumentCaptor<Select> selectArgumentCaptor = ArgumentCaptor.forClass(Select.class);
         ArgumentCaptor<Class> classArgumentCaptor = ArgumentCaptor.forClass(Class.class);
         assertEquals(2, nextBlock.size());
         verify(cqlTemplate, times(1)).select(selectArgumentCaptor.capture(), classArgumentCaptor.capture());
         assertFalse(selectArgumentCaptor.getValue().toString().contains("token"));
-        assertEquals("898999", healthIdRepository.getLastReservedHealthId());
+        assertEquals("898999", healthIdRepository.getLastTakenHidMarker());
 
         healthIdRepository.getNextBlock();
 

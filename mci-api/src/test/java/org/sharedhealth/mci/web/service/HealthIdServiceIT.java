@@ -7,7 +7,7 @@ import org.junit.runner.RunWith;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
 import org.sharedhealth.mci.web.infrastructure.persistence.HealthIdRepository;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
-import org.sharedhealth.mci.web.model.HealthId;
+import org.sharedhealth.mci.web.model.MciHealthId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,43 +47,42 @@ public class HealthIdServiceIT {
 
     @Before
     public void setUp() throws ExecutionException, InterruptedException {
-        cqlTemplate.execute("truncate healthId");
+        cqlTemplate.execute("truncate mci_healthId");
         healthIdRepository.resetLastReservedHealthId();
         createHealthIds(9800000000L);
     }
 
     @After
     public void cleanIp() throws Exception {
-        cqlTemplate.execute("truncate healthId");
+        cqlTemplate.execute("truncate mci_healthId");
     }
 
     @Test
     public void shouldGenerateUniqueBlock() throws Exception {
         ExecutorService executor = Executors.newFixedThreadPool(10);
-        final Set<Future<List<HealthId>>> eventualHealthIds = new HashSet<>();
+        final Set<Future<List<MciHealthId>>> eventualHealthIds = new HashSet<>();
         for (int i = 0; i < 100; i++) {
-            Callable<List<HealthId>> nextBlock = new Callable<List<HealthId>>() {
+            Callable<List<MciHealthId>> nextBlock = new Callable<List<MciHealthId>>() {
                 @Override
-                public List<HealthId> call() throws Exception {
+                public List<MciHealthId> call() throws Exception {
                     return healthIdService.getNextBlock(2);
                 }
             };
-            Future<List<HealthId>> eventualHealthId = executor.submit(nextBlock);
+            Future<List<MciHealthId>> eventualHealthId = executor.submit(nextBlock);
             eventualHealthIds.add(eventualHealthId);
         }
-        Set<HealthId> uniqueHealthIds = new HashSet<>();
+        Set<MciHealthId> uniqueMciHealthIds = new HashSet<>();
 
-        for (Future<List<HealthId>> eventualHealthId : eventualHealthIds) {
-            uniqueHealthIds.addAll(eventualHealthId.get());
+        for (Future<List<MciHealthId>> eventualHealthId : eventualHealthIds) {
+            uniqueMciHealthIds.addAll(eventualHealthId.get());
         }
-        assertEquals(200, uniqueHealthIds.size());
+        assertEquals(200, uniqueMciHealthIds.size());
     }
 
     private void createHealthIds(long prefix) {
         logger.debug("generating health Id for test");
         for (int i = 0; i < 200; i++) {
-            healthIdRepository.saveHealthIdSync(new HealthId(
-                    String.valueOf(prefix + i), "MCI", 0));
+            healthIdRepository.saveHealthIdSync(new MciHealthId(String.valueOf(prefix + i)));
         }
     }
 }

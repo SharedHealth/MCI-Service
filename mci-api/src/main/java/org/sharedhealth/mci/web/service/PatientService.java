@@ -14,7 +14,7 @@ import org.sharedhealth.mci.web.mapper.PatientSummaryData;
 import org.sharedhealth.mci.web.mapper.PendingApproval;
 import org.sharedhealth.mci.web.mapper.PendingApprovalListResponse;
 import org.sharedhealth.mci.web.mapper.SearchQuery;
-import org.sharedhealth.mci.web.model.HealthId;
+import org.sharedhealth.mci.web.model.MciHealthId;
 import org.sharedhealth.mci.web.model.PatientUpdateLog;
 import org.sharedhealth.mci.web.model.PendingApprovalMapping;
 import org.slf4j.Logger;
@@ -82,13 +82,13 @@ public class PatientService {
 
         MCIResponse mciResponse;
         try {
-            HealthId nextHealthId = patientHealthIdService.getNextHealthId();
-            patient.setHealthId(nextHealthId.getHid());
+            MciHealthId nextMciHealthId = patientHealthIdService.getNextHealthId();
+            patient.setHealthId(nextMciHealthId.getHid());
             mciResponse = patientRepository.create(patient);
             if (CREATED == mciResponse.getHttpStatus()) {
-                patientHealthIdService.markUsed(nextHealthId);
+                patientHealthIdService.markUsed(nextMciHealthId);
             } else {
-                patientHealthIdService.putBackHealthId(nextHealthId);
+                patientHealthIdService.putBackHealthId(nextMciHealthId);
             }
         } catch (NoSuchElementException e) {
             mciResponse = new MCIResponse("Can not create patient as there is no hid available in MCI to assign", BAD_REQUEST);

@@ -3,7 +3,7 @@ package org.sharedhealth.mci.web.service;
 import org.sharedhealth.mci.utils.LuhnChecksumGenerator;
 import org.sharedhealth.mci.web.config.MCIProperties;
 import org.sharedhealth.mci.web.infrastructure.persistence.HealthIdRepository;
-import org.sharedhealth.mci.web.model.HealthId;
+import org.sharedhealth.mci.web.model.MciHealthId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,21 +32,21 @@ public class HealthIdService {
             if (!invalidHidPattern.matcher(possibleHid).find()) {
                 numberOfValidHids += 1;
                 String newHealthId = possibleHid + checksumGenerator.generate(possibleHid.substring(1));
-                healthIdRepository.saveHealthId(new HealthId(newHealthId));
+                healthIdRepository.saveHealthId(new MciHealthId(newHealthId));
             }
         }
         return numberOfValidHids;
     }
 
-    public synchronized List<HealthId> getNextBlock() {
+    public synchronized List<MciHealthId> getNextBlock() {
         return healthIdRepository.getNextBlock(mciProperties.getHealthIdBlockSize());
     }
 
-    public synchronized List<HealthId> getNextBlock(int blockSize) {
+    public synchronized List<MciHealthId> getNextBlock(int blockSize) {
         return healthIdRepository.getNextBlock(blockSize);
     }
 
-    public void markUsed(HealthId nextHealthId) {
-        healthIdRepository.markUsed(nextHealthId);
+    public void markUsed(MciHealthId nextMciHealthId) {
+        healthIdRepository.removedUsedHid(nextMciHealthId);
     }
 }

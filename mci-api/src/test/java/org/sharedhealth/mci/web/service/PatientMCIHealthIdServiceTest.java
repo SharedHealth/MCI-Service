@@ -4,7 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.sharedhealth.mci.web.config.MCIProperties;
-import org.sharedhealth.mci.web.model.HealthId;
+import org.sharedhealth.mci.web.model.MciHealthId;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -23,7 +23,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-public class PatientHealthIdServiceTest {
+public class PatientMCIHealthIdServiceTest {
 
     @Mock
     private HealthIdService healthIdService;
@@ -38,9 +38,9 @@ public class PatientHealthIdServiceTest {
 
     @Test
     public void shouldReplenishIfNeeded() throws Exception {
-        ArrayList<HealthId> healthIds = new ArrayList<>();
-        healthIds.add(new HealthId("1213", "MCI", 0));
-        when(healthIdService.getNextBlock()).thenReturn(healthIds);
+        ArrayList<MciHealthId> MciHealthIds = new ArrayList<>();
+        MciHealthIds.add(new MciHealthId("1213"));
+        when(healthIdService.getNextBlock()).thenReturn(MciHealthIds);
         PatientHealthIdService patientHealthIdService = new PatientHealthIdService(healthIdService, mciProperties);
         patientHealthIdService.replenishIfNeeded();
         verify(healthIdService).getNextBlock();
@@ -48,19 +48,19 @@ public class PatientHealthIdServiceTest {
 
     @Test
     public void shouldGetNextBlockIfNoHIDLeft() throws Exception {
-        ArrayList<HealthId> healthIds = new ArrayList<>();
-        healthIds.add(new HealthId("1213", "MCI", 0));
-        when(healthIdService.getNextBlock()).thenReturn(healthIds);
+        ArrayList<MciHealthId> MciHealthIds = new ArrayList<>();
+        MciHealthIds.add(new MciHealthId("1213"));
+        when(healthIdService.getNextBlock()).thenReturn(MciHealthIds);
         PatientHealthIdService patientHealthIdService = new PatientHealthIdService(healthIdService, mciProperties);
         patientHealthIdService.replenishIfNeeded();
-        HealthId healthId = patientHealthIdService.getNextHealthId();
-        assertEquals("1213", healthId.getHid());
+        MciHealthId MciHealthId = patientHealthIdService.getNextHealthId();
+        assertEquals("1213", MciHealthId.getHid());
     }
 
     @Test(expected = NoSuchElementException.class)
     public void shouldThrowExceptionIfQueueIsEmpty() throws Exception {
-        ArrayList<HealthId> healthIds = new ArrayList<>();
-        when(healthIdService.getNextBlock()).thenReturn(healthIds);
+        ArrayList<MciHealthId> MciHealthIds = new ArrayList<>();
+        when(healthIdService.getNextBlock()).thenReturn(MciHealthIds);
         PatientHealthIdService patientHealthIdService = new PatientHealthIdService(healthIdService, mciProperties);
         patientHealthIdService.replenishIfNeeded();
         patientHealthIdService.getNextHealthId();
@@ -68,65 +68,65 @@ public class PatientHealthIdServiceTest {
 
     @Test
     public void shouldAllocateNewHealthIdEveryTime() throws Exception {
-        ArrayList<HealthId> healthIds = new ArrayList<>();
+        ArrayList<MciHealthId> MciHealthIds = new ArrayList<>();
         for (int i = 0; i < 10000; i++) {
-            healthIds.add(new HealthId(String.valueOf(1213000 + i), "MCI", 0));
+            MciHealthIds.add(new MciHealthId(String.valueOf(1213000 + i)));
         }
-        when(healthIdService.getNextBlock()).thenReturn(healthIds);
+        when(healthIdService.getNextBlock()).thenReturn(MciHealthIds);
         final PatientHealthIdService patientHealthIdService = new PatientHealthIdService(healthIdService, mciProperties);
         patientHealthIdService.replenishIfNeeded();
 
         ExecutorService executor = Executors.newFixedThreadPool(100);
-        final Set<Future<HealthId>> eventualHealthIds = new HashSet<>();
+        final Set<Future<MciHealthId>> eventualHealthIds = new HashSet<>();
         for (int i = 0; i < 10000; i++) {
-            Callable<HealthId> nextBlock = new Callable<HealthId>() {
+            Callable<MciHealthId> nextBlock = new Callable<MciHealthId>() {
                 @Override
-                public HealthId call() throws Exception {
+                public MciHealthId call() throws Exception {
                     return patientHealthIdService.getNextHealthId();
                 }
             };
-            Future<HealthId> eventualHealthId = executor.submit(nextBlock);
+            Future<MciHealthId> eventualHealthId = executor.submit(nextBlock);
             eventualHealthIds.add(eventualHealthId);
         }
-        Set<HealthId> uniqueHealthIds = new HashSet<>();
+        Set<MciHealthId> uniqueMciHealthIds = new HashSet<>();
 
-        for (Future<HealthId> eventualHealthId : eventualHealthIds) {
-            uniqueHealthIds.add(eventualHealthId.get());
+        for (Future<MciHealthId> eventualHealthId : eventualHealthIds) {
+            uniqueMciHealthIds.add(eventualHealthId.get());
         }
-        assertEquals(10000, uniqueHealthIds.size());
+        assertEquals(10000, uniqueMciHealthIds.size());
     }
 
     @Test
     public void shouldPutBackHidToHidBlock() throws Exception {
-        ArrayList<HealthId> healthIds = new ArrayList<>();
+        ArrayList<MciHealthId> MciHealthIds = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
-            healthIds.add(new HealthId(String.valueOf(1213000 + i), "MCI", 0));
+            MciHealthIds.add(new MciHealthId(String.valueOf(1213000 + i)));
         }
-        when(healthIdService.getNextBlock()).thenReturn(healthIds);
+        when(healthIdService.getNextBlock()).thenReturn(MciHealthIds);
         final PatientHealthIdService patientHealthIdService = new PatientHealthIdService(healthIdService, mciProperties);
         patientHealthIdService.replenishIfNeeded();
         int before = patientHealthIdService.getHealthIdBlockSize();
-        HealthId nextHealthId = patientHealthIdService.getNextHealthId();
-        patientHealthIdService.putBackHealthId(nextHealthId);
+        MciHealthId nextMciHealthId = patientHealthIdService.getNextHealthId();
+        patientHealthIdService.putBackHealthId(nextMciHealthId);
         int after = patientHealthIdService.getHealthIdBlockSize();
         assertEquals(before, after);
     }
 
     @Test
     public void shouldMarkHidAsUsed() throws Exception {
-        ArrayList<HealthId> healthIds = new ArrayList<>();
+        ArrayList<MciHealthId> MciHealthIds = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
-            healthIds.add(new HealthId(String.valueOf(1213000 + i), "MCI", 0));
+            MciHealthIds.add(new MciHealthId(String.valueOf(1213000 + i)));
         }
-        when(healthIdService.getNextBlock()).thenReturn(healthIds);
-        doNothing().when(healthIdService).markUsed(any(HealthId.class));
+        when(healthIdService.getNextBlock()).thenReturn(MciHealthIds);
+        doNothing().when(healthIdService).markUsed(any(MciHealthId.class));
         final PatientHealthIdService patientHealthIdService = new PatientHealthIdService(healthIdService, mciProperties);
         patientHealthIdService.replenishIfNeeded();
         int before = patientHealthIdService.getHealthIdBlockSize();
-        HealthId nextHealthId = patientHealthIdService.getNextHealthId();
-        patientHealthIdService.markUsed(nextHealthId);
+        MciHealthId nextMciHealthId = patientHealthIdService.getNextHealthId();
+        patientHealthIdService.markUsed(nextMciHealthId);
         int after = patientHealthIdService.getHealthIdBlockSize();
         assertEquals(before, after + 1);
-        verify(healthIdService, times(1)).markUsed(any(HealthId.class));
+        verify(healthIdService, times(1)).markUsed(any(MciHealthId.class));
     }
 }

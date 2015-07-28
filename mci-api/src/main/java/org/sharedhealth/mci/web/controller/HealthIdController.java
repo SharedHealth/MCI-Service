@@ -2,7 +2,7 @@ package org.sharedhealth.mci.web.controller;
 
 import org.sharedhealth.mci.web.config.MCIProperties;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
-import org.sharedhealth.mci.web.model.HealthId;
+import org.sharedhealth.mci.web.model.MciHealthId;
 import org.sharedhealth.mci.web.service.HealthIdService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +41,7 @@ public class HealthIdController extends MciController {
         final DeferredResult<String> deferredResult = new DeferredResult<>();
         long numberOfValidHids = healthIdService.generate(properties.getMciStartHid(), properties.getMciEndHid());
         deferredResult.setResult(String.format("GENERATED %s Ids", numberOfValidHids));
+        logger.info(String.format("%s healthIds generated", numberOfValidHids));
         return deferredResult;
     }
 
@@ -53,12 +54,13 @@ public class HealthIdController extends MciController {
         final DeferredResult<String> deferredResult = new DeferredResult<>();
         long numberOfValidHids = healthIdService.generate(start, end);
         deferredResult.setResult(String.format("GENERATED %s Ids", numberOfValidHids));
+        logger.info(String.format("%s healthIds generated", numberOfValidHids));
         return deferredResult;
     }
 
     @PreAuthorize("hasAnyRole('ROLE_MCI Admin')")
     @RequestMapping(method = GET, value = "/nextBlock")
-    public List<HealthId> nextBlock() {
+    public List<MciHealthId> nextBlock() {
         return healthIdService.getNextBlock();
     }
 }

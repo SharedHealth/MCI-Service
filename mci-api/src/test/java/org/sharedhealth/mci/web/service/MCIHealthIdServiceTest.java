@@ -9,7 +9,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.sharedhealth.mci.utils.LuhnChecksumGenerator;
 import org.sharedhealth.mci.web.config.MCIProperties;
 import org.sharedhealth.mci.web.infrastructure.persistence.HealthIdRepository;
-import org.sharedhealth.mci.web.model.HealthId;
+import org.sharedhealth.mci.web.model.MciHealthId;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +26,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 @RunWith(MockitoJUnitRunner.class)
-public class HealthIdServiceTest {
+public class MCIHealthIdServiceTest {
 
     MCIProperties mciProperties;
 
@@ -111,7 +111,7 @@ public class HealthIdServiceTest {
 
     @Test
     public void shouldSaveValidHids() {
-        when(healthIdRepository.saveHealthId(any(HealthId.class))).thenReturn(HealthId.NULL_HID);
+        when(healthIdRepository.saveHealthId(any(MciHealthId.class))).thenReturn(MciHealthId.NULL_HID);
         when(checksumGenerator.generate(any(String.class))).thenReturn(1);
 
         MCIProperties testProperties = new MCIProperties();
@@ -121,7 +121,7 @@ public class HealthIdServiceTest {
         HealthIdService healthIdService = new HealthIdService(testProperties, healthIdRepository, checksumGenerator);
         assertEquals(78, healthIdService.generate(0, 99));
 
-        ArgumentCaptor<HealthId> healthIdArgumentCaptor = ArgumentCaptor.forClass(HealthId.class);
+        ArgumentCaptor<MciHealthId> healthIdArgumentCaptor = ArgumentCaptor.forClass(MciHealthId.class);
         verify(healthIdRepository, times(78)).saveHealthId(healthIdArgumentCaptor.capture());
         verify(checksumGenerator, times(78)).generate(any(String.class));
         assertTrue(String.valueOf(healthIdArgumentCaptor.getValue().getHid()).endsWith("1"));
@@ -139,24 +139,24 @@ public class HealthIdServiceTest {
 
     @Test
     public void should10kBlockIdsForMCIService() {
-        ArrayList<HealthId> result = new ArrayList<>();
-        result.add(new HealthId("898998"));
-        result.add(new HealthId("898999"));
+        ArrayList<MciHealthId> result = new ArrayList<>();
+        result.add(new MciHealthId("898998"));
+        result.add(new MciHealthId("898999"));
         when(healthIdRepository.getNextBlock(mciProperties.getHealthIdBlockSize())).thenReturn(result);
 
         HealthIdService healthIdService = new HealthIdService(mciProperties, healthIdRepository, checksumGenerator);
-        List<HealthId> nextBlock = healthIdService.getNextBlock();
+        List<MciHealthId> nextBlock = healthIdService.getNextBlock();
         verify(healthIdRepository).getNextBlock(mciProperties.getHealthIdBlockSize());
         assertEquals(2, nextBlock.size());
     }
 
     @Test
     public void shouldMarkHidUsed() {
-        HealthId healthId = new HealthId("898998");
-        doNothing().when(healthIdRepository).markUsed(any(HealthId.class));
+        MciHealthId MciHealthId = new MciHealthId("898998");
+        doNothing().when(healthIdRepository).removedUsedHid(any(MciHealthId.class));
         HealthIdService healthIdService = new HealthIdService(mciProperties, healthIdRepository, checksumGenerator);
-        healthIdService.markUsed(healthId);
-        verify(healthIdRepository).markUsed(healthId);
+        healthIdService.markUsed(MciHealthId);
+        verify(healthIdRepository).removedUsedHid(MciHealthId);
     }
 
 }

@@ -8,7 +8,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.sharedhealth.mci.web.config.MCIProperties;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
 import org.sharedhealth.mci.web.infrastructure.security.UserProfile;
-import org.sharedhealth.mci.web.model.HealthId;
+import org.sharedhealth.mci.web.model.MciHealthId;
 import org.sharedhealth.mci.web.service.HealthIdService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 @RunWith(MockitoJUnitRunner.class)
-public class HealthIdControllerTest {
+public class MCIHealthIdControllerTest {
     @Mock
     HealthIdService service;
 
@@ -65,12 +65,12 @@ public class HealthIdControllerTest {
         verify(service, times(1)).getNextBlock();
     }
 
-    private ArrayList<HealthId> getNextBlock() {
-        ArrayList<HealthId> healthIds = new ArrayList<>();
-        healthIds.add(new HealthId("123","MCI",0));
-        healthIds.add(new HealthId("124","MCI",0));
-        healthIds.add(new HealthId("125","MCI",0));
-        return healthIds;
+    private ArrayList<MciHealthId> getNextBlock() {
+        ArrayList<MciHealthId> MciHealthIds = new ArrayList<>();
+        MciHealthIds.add(new MciHealthId("123"));
+        MciHealthIds.add(new MciHealthId("124"));
+        MciHealthIds.add(new MciHealthId("125"));
+        return MciHealthIds;
     }
 
     @Test

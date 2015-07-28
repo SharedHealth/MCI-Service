@@ -12,7 +12,7 @@ import org.junit.runner.RunWith;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
 import org.sharedhealth.mci.web.exception.HealthIdExhaustedException;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
-import org.sharedhealth.mci.web.model.HealthId;
+import org.sharedhealth.mci.web.model.MciHealthId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cassandra.core.ResultSetExtractor;
@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.*;
-import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.CF_HEALTH_ID;
+import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.CF_MCI_HEALTH_ID;
 import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.HID;
 import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.RESERVED_FOR;
 
@@ -46,22 +46,21 @@ public class HealthIdRepositoryIT {
 
     @Before
     public void setUp() throws ExecutionException, InterruptedException {
-        cqlTemplate.execute("truncate healthId");
+        cqlTemplate.execute("truncate mci_healthId");
         healthIdRepository.resetLastReservedHealthId();
     }
 
     @After
     public void tearDown() {
-        cqlTemplate.execute("truncate healthId");
+        cqlTemplate.execute("truncate mci_healthId");
     }
 
-    private List<HealthId> createHealthIds(long prefix) {
-        List<HealthId> healthIds = new ArrayList<>();
+    private List<MciHealthId> createHealthIds(long prefix) {
+        List<MciHealthId> MciHealthIds = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
-            healthIds.add(healthIdRepository.saveHealthIdSync(new HealthId(
-                    String.valueOf(prefix + i), "MCI", 0)));
+            MciHealthIds.add(healthIdRepository.saveHealthIdSync(new MciHealthId(String.valueOf(prefix + i))));
         }
-        return healthIds;
+        return MciHealthIds;
     }
 
     @Test(expected = HealthIdExhaustedException.class)
@@ -85,54 +84,27 @@ public class HealthIdRepositoryIT {
     }
 
     @Test
-    public void shouldMarkHidUsed() throws ExecutionException, InterruptedException {
+    public void shouldRemoveUsedHid() throws ExecutionException, InterruptedException {
         long prefix = 98190001231L;
         createHealthIds(prefix);
-        List<HealthId> nextBlock = healthIdRepository.getNextBlock(2);
-        HealthId healthId = nextBlock.remove(0);
-        healthIdRepository.markUsedSync(healthId);
-        HealthId id = healthIdRepository.getHealthId(healthId.getHid());
-        assertEquals(healthId.getHid(), id.getHid());
-        assertEquals("1", String.valueOf(id.getStatus()));
-    }
-
-    @Test
-    public void shouldNotUpdateExistingHealthId() throws Exception {
-        long prefix = 98190001231L;
-        HealthId healthId = createHealthIds(prefix).get(0);
-        Select select = QueryBuilder.select().all().from("mci", CF_HEALTH_ID).where(QueryBuilder.eq(HID, healthId.getHid())).limit(1);
-        cqlTemplate.query(select, new ResultSetExtractor<HealthId>() {
-            @Override
-            public HealthId extractData(ResultSet rs) throws DriverException, DataAccessException {
-                Row row = rs.one();
-                assertEquals("MCI", row.getString(RESERVED_FOR));
-                return null;
-            }
-        });
-        cqlTemplate.execute(QueryBuilder.update("mci", CF_HEALTH_ID).with(QueryBuilder.set(RESERVED_FOR, "foo")).where(QueryBuilder.eq
-                (HID, healthId.getHid())));
-        createHealthIds(prefix);
-        cqlTemplate.query(select, new ResultSetExtractor<HealthId>() {
-            @Override
-            public HealthId extractData(ResultSet rs) throws DriverException, DataAccessException {
-                Row row = rs.one();
-                assertEquals("foo", row.getString(RESERVED_FOR));
-                return null;
-            }
-        });
+        List<MciHealthId> nextBlock = healthIdRepository.getNextBlock(2);
+        MciHealthId MciHealthId = nextBlock.remove(0);
+        healthIdRepository.removeUsedHidSync(MciHealthId);
+        MciHealthId id = healthIdRepository.getHealthId(MciHealthId.getHid());
+        assertNull(id);
     }
 
     @Test
     public void shouldGetANewBlockEveryTime() throws ExecutionException, InterruptedException {
         long prefix = 98190001231L;
         createHealthIds(prefix);
-        List<HealthId> healthIds = healthIdRepository.getNextBlock(2);
-        String lastReservedHealthId = healthIdRepository.getLastReservedHealthId();
+        List<MciHealthId> MciHealthIds = healthIdRepository.getNextBlock(2);
+        String lastReservedHealthId = healthIdRepository.getLastTakenHidMarker();
         assertFalse(lastReservedHealthId == null);
-        List<HealthId> nextBlock = healthIdRepository.getNextBlock(2);
-        assertFalse(lastReservedHealthId == healthIdRepository.getLastReservedHealthId());
-        for (HealthId healthId : nextBlock) {
-            assertFalse(healthIds.contains(healthId));
+        List<MciHealthId> nextBlock = healthIdRepository.getNextBlock(2);
+        assertFalse(lastReservedHealthId == healthIdRepository.getLastTakenHidMarker());
+        for (MciHealthId MciHealthId : nextBlock) {
+            assertFalse(MciHealthIds.contains(MciHealthId));
         }
     }
 }
