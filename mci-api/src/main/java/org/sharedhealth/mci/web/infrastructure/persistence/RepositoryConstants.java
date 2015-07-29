@@ -21,6 +21,7 @@ public class RepositoryConstants {
     public static final String CF_GENERATED_HID_RANGE = "generated_hid_range";
 
     public static final String HEALTH_ID = "health_id";
+    public static final String ASSIGNED_BY = "assigned_by";
     public static final String LAST_UPDATED = "last_updated";
     public static final String NATIONAL_ID = "national_id";
     public static final String FULL_NAME_BANGLA = "full_name_bangla";

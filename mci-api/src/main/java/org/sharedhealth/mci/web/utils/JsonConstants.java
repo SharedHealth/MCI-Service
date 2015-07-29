@@ -2,6 +2,7 @@ package org.sharedhealth.mci.web.utils;
 
 public class JsonConstants {
     public static final String HID = "hid";
+    public static final String ASSIGNED_BY = "assigned_by";
     public static final String NID = "nid";
     public static final String NAME_BANGLA = "name_bangla";
     public static final String BIN_BRN = "bin_brn";

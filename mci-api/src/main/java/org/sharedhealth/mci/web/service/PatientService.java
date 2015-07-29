@@ -82,6 +82,7 @@ public class PatientService {
 
         MCIResponse mciResponse;
         try {
+            setHealthIdAssignor(patient);
             MciHealthId nextMciHealthId = patientHealthIdService.getNextHealthId();
             patient.setHealthId(nextMciHealthId.getHid());
             mciResponse = patientRepository.create(patient);
@@ -94,6 +95,12 @@ public class PatientService {
             mciResponse = new MCIResponse("Can not create patient as there is no hid available in MCI to assign", BAD_REQUEST);
         }
         return mciResponse;
+    }
+
+    private void setHealthIdAssignor(PatientData patient) {
+        if (null == patient.getHealthId()) {
+            patient.setAssignedBy("MCI");
+        }
     }
 
     PatientData findPatientByMultipleIds(PatientData patient) {

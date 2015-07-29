@@ -29,6 +29,9 @@ public class Patient {
     @PrimaryKey(HEALTH_ID)
     private String healthId;
 
+    @Column(ASSIGNED_BY)
+    private String assignedBy;
+
     @Column(NATIONAL_ID)
     private String nationalId;
 
@@ -1185,5 +1188,9 @@ public class Patient {
 
     public void setHouseholdCode(String householdCode) {
         this.householdCode = householdCode;
+    }
+
+    public void setAssignedBy(String assignedBy) {
+        this.assignedBy = assignedBy;
     }
 }

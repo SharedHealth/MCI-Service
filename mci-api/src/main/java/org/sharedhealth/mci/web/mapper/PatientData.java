@@ -56,6 +56,10 @@ public class PatientData implements Diffable<PatientData> {
     @JsonInclude(NON_EMPTY)
     private String healthId;
 
+    @JsonProperty(ASSIGNED_BY)
+    @JsonInclude(NON_EMPTY)
+    private String assignedBy;
+
     @JsonProperty(NID)
     @JsonInclude(NON_EMPTY)
     @Pattern(regexp = "^|[\\d]{13}|[\\d]{17}", message = ERROR_CODE_PATTERN)
@@ -395,6 +399,13 @@ public class PatientData implements Diffable<PatientData> {
         this.permanentAddress = permanentAddress;
     }
 
+    public String getAssignedBy() {
+        return assignedBy;
+    }
+
+    public void setAssignedBy(String assignedBy) {
+        this.assignedBy = assignedBy;
+    }
 
     public List<Relation> getRelations() {
         return relations;

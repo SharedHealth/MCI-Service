@@ -194,6 +194,7 @@ public class PatientMapper {
         PhoneNumber primaryContactNumber = data.getPrimaryContactNumber();
 
         patient.setHealthId(data.getHealthId());
+        patient.setAssignedBy(data.getAssignedBy());
         patient.setNationalId(data.getNationalId());
         patient.setBirthRegistrationNumber(data.getBirthRegistrationNumber());
         patient.setFullNameBangla(StringUtils.trim(data.getNameBangla()));
