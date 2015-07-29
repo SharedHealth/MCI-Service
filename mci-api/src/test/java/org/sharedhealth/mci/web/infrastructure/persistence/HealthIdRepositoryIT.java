@@ -1,10 +1,5 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
-import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.Row;
-import com.datastax.driver.core.exceptions.DriverException;
-import com.datastax.driver.core.querybuilder.QueryBuilder;
-import com.datastax.driver.core.querybuilder.Select;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,8 +10,6 @@ import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.model.MciHealthId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cassandra.core.ResultSetExtractor;
-import org.springframework.dao.DataAccessException;
 import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -26,10 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.Assert.*;
-import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.CF_MCI_HEALTH_ID;
-import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.HID;
-import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.RESERVED_FOR;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration

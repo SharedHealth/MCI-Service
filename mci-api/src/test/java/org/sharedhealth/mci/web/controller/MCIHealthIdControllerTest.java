@@ -8,7 +8,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.sharedhealth.mci.web.config.MCIProperties;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
 import org.sharedhealth.mci.web.infrastructure.security.UserProfile;
+import org.sharedhealth.mci.web.model.GeneratedHidRange;
 import org.sharedhealth.mci.web.model.MciHealthId;
+import org.sharedhealth.mci.web.service.GeneratedHidRangeService;
 import org.sharedhealth.mci.web.service.HealthIdService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,7 +27,10 @@ import static org.mockito.MockitoAnnotations.initMocks;
 @RunWith(MockitoJUnitRunner.class)
 public class MCIHealthIdControllerTest {
     @Mock
-    HealthIdService service;
+    HealthIdService healthIdService;
+
+    @Mock
+    GeneratedHidRangeService generatedHidRangeService;
 
     MCIProperties mciProperties;
 
@@ -51,18 +56,18 @@ public class MCIHealthIdControllerTest {
     @Test
     public void testGenerate() {
         long start = mciProperties.getMciStartHid(), end = mciProperties.getMciEndHid();
-        when(service.generate(start, end)).thenReturn(100L);
-        HealthIdController healthIdController = new HealthIdController(service, mciProperties);
+        when(healthIdService.generate(start, end)).thenReturn(100L);
+        HealthIdController healthIdController = new HealthIdController(healthIdService, generatedHidRangeService, mciProperties);
         assertEquals("GENERATED 100 Ids", healthIdController.generate().getResult());
-        verify(service, times(1)).generate(start, end);
+        verify(healthIdService, times(1)).generate(start, end);
     }
 
     @Test
     public void testGetNextBlock() {
-        when(service.getNextBlock()).thenReturn(getNextBlock());
-        HealthIdController healthIdController = new HealthIdController(service, mciProperties);
+        when(healthIdService.getNextBlock()).thenReturn(getNextBlock());
+        HealthIdController healthIdController = new HealthIdController(healthIdService, generatedHidRangeService, mciProperties);
         assertEquals(3, healthIdController.nextBlock().size());
-        verify(service, times(1)).getNextBlock();
+        verify(healthIdService, times(1)).getNextBlock();
     }
 
     private ArrayList<MciHealthId> getNextBlock() {
@@ -76,9 +81,22 @@ public class MCIHealthIdControllerTest {
     @Test
     public void testGenerateRange() {
         long start = 9800100100L, end = 9800100200L;
-        when(service.generate(start, end)).thenReturn(100L);
-        HealthIdController healthIdController = new HealthIdController(service, mciProperties);
+        when(healthIdService.generate(start, end)).thenReturn(100L);
+        HealthIdController healthIdController = new HealthIdController(healthIdService, generatedHidRangeService, mciProperties);
         assertEquals("GENERATED 100 Ids", healthIdController.generateRange(start, end).getResult());
-        verify(service, times(1)).generate(start, end);
+        verify(healthIdService, times(1)).generate(start, end);
+    }
+
+    @Test
+    public void shouldNotGenerateOverlappingHids() throws Exception {
+        long start = 9800100100L, end = 9800100200L;
+        when(healthIdService.generate(start, end)).thenReturn(100L);
+        HealthIdController healthIdController = new HealthIdController(healthIdService, generatedHidRangeService, mciProperties);
+        assertEquals("GENERATED 100 Ids", healthIdController.generateRange(start, end).getResult());
+        verify(healthIdService, times(1)).generate(start, end);
+        when(generatedHidRangeService.getPreGeneratedHidRanges()).thenReturn(asList(new GeneratedHidRange(start, end)));
+        assertEquals("Range overlaps with pregenerated healthIds", healthIdController.generateRange(start, end).getResult());
+        assertEquals("Range overlaps with pregenerated healthIds", healthIdController.generateRange(end, 9800100202L).getResult());
+        assertEquals("Range overlaps with pregenerated healthIds", healthIdController.generateRange(9800100000L, start).getResult());
     }
 }

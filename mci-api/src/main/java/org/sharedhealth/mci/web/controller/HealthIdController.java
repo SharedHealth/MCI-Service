@@ -2,7 +2,9 @@ package org.sharedhealth.mci.web.controller;
 
 import org.sharedhealth.mci.web.config.MCIProperties;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
+import org.sharedhealth.mci.web.model.GeneratedHidRange;
 import org.sharedhealth.mci.web.model.MciHealthId;
+import org.sharedhealth.mci.web.service.GeneratedHidRangeService;
 import org.sharedhealth.mci.web.service.HealthIdService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,11 +27,13 @@ public class HealthIdController extends MciController {
     private static final Logger logger = LoggerFactory.getLogger(HealthIdController.class);
 
     private HealthIdService healthIdService;
+    private GeneratedHidRangeService generatedHidRangeService;
     private MCIProperties properties;
 
     @Autowired
-    public HealthIdController(HealthIdService healthIdService, MCIProperties properties) {
+    public HealthIdController(HealthIdService healthIdService, GeneratedHidRangeService generatedHidRangeService, MCIProperties properties) {
         this.healthIdService = healthIdService;
+        this.generatedHidRangeService = generatedHidRangeService;
         this.properties = properties;
     }
 
@@ -37,11 +41,19 @@ public class HealthIdController extends MciController {
     @RequestMapping(method = POST, value = "/generate")
     public DeferredResult<String> generate(){
         UserInfo userInfo = getUserInfo();
-        logAccessDetails(userInfo, format("Generating new hids"));
         final DeferredResult<String> deferredResult = new DeferredResult<>();
-        long numberOfValidHids = healthIdService.generate(properties.getMciStartHid(), properties.getMciEndHid());
-        deferredResult.setResult(String.format("GENERATED %s Ids", numberOfValidHids));
-        logger.info(String.format("%s healthIds generated", numberOfValidHids));
+        Long start = properties.getMciStartHid();
+        Long end = properties.getMciEndHid();
+        if (hasOverlappingRange(generatedHidRangeService.getPreGeneratedHidRanges(), start, end)) {
+            deferredResult.setErrorResult(String.format("Range overlaps with pregenerated healthIds"));
+        } else {
+            logAccessDetails(userInfo, format("Generating new hids"));
+            long numberOfValidHids = healthIdService.generate(start, end);
+            generatedHidRangeService.saveGeneratedHidRange(new GeneratedHidRange(start, end));
+            deferredResult.setResult(String.format("GENERATED %s Ids", numberOfValidHids));
+            logger.info(String.format("%s healthIds generated", numberOfValidHids));
+
+        }
         return deferredResult;
     }
 
@@ -50,12 +62,36 @@ public class HealthIdController extends MciController {
     public DeferredResult<String> generateRange(@RequestParam(value = "start") long start,
                                            @RequestParam(value = "end") long end){
         UserInfo userInfo = getUserInfo();
-        logAccessDetails(userInfo, format("Generating new hids"));
         final DeferredResult<String> deferredResult = new DeferredResult<>();
-        long numberOfValidHids = healthIdService.generate(start, end);
-        deferredResult.setResult(String.format("GENERATED %s Ids", numberOfValidHids));
-        logger.info(String.format("%s healthIds generated", numberOfValidHids));
+        if (hasOverlappingRange(generatedHidRangeService.getPreGeneratedHidRanges(), start, end)) {
+            deferredResult.setErrorResult(String.format("Range overlaps with pregenerated healthIds"));
+        } else {
+            logAccessDetails(userInfo, format("Generating new hids"));
+            long numberOfValidHids = healthIdService.generate(start, end);
+            generatedHidRangeService.saveGeneratedHidRange(new GeneratedHidRange(start, end));
+            deferredResult.setResult(String.format("GENERATED %s Ids", numberOfValidHids));
+            logger.info(String.format("%s healthIds generated", numberOfValidHids));
+        }
         return deferredResult;
+    }
+
+    private boolean hasOverlappingRange(List<GeneratedHidRange> preGeneratedHidRanges, long start, long end) {
+        for (GeneratedHidRange preGeneratedHidRange : preGeneratedHidRanges) {
+            if (isOverlapping(preGeneratedHidRange, start, end)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isOverlapping(GeneratedHidRange preGeneratedHidRange, long start, long end) {
+        if (preGeneratedHidRange.getBeginsAt() <= start && start <= preGeneratedHidRange.getEndsAt()) {
+            return true;
+        }
+        if (preGeneratedHidRange.getBeginsAt() <= end && end <= preGeneratedHidRange.getEndsAt()) {
+            return true;
+        }
+        return false;
     }
 
     @PreAuthorize("hasAnyRole('ROLE_MCI Admin')")

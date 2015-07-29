@@ -18,6 +18,7 @@ public class RepositoryConstants {
     public static final String CF_PATIENT_DUPLICATE = "patient_duplicate";
     public static final String CF_PATIENT_DUPLICATE_IGNORED = "patient_duplicate_ignored";
     public static final String CF_MCI_HEALTH_ID = "mci_healthId";
+    public static final String CF_GENERATED_HID_RANGE = "generated_hid_range";
 
     public static final String HEALTH_ID = "health_id";
     public static final String LAST_UPDATED = "last_updated";
@@ -116,6 +117,8 @@ public class RepositoryConstants {
     public static final String EVENT_TYPE = "event_type";
     public static final String EVENT_TYPE_CREATED = "created";
     public static final String EVENT_TYPE_UPDATED = "updated";
+    public static final String BEGINS_AT = "begins_at";
+    public static final String ENDS_AT = "ends_at";
 
     public static final String HEALTH_ID1 = "health_id1";
     public static final String HEALTH_ID2 = "health_id2";
