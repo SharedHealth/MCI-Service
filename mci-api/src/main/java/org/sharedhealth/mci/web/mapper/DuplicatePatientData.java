@@ -7,11 +7,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
-import static org.sharedhealth.mci.web.utils.JsonConstants.CREATED_AT;
-import static org.sharedhealth.mci.web.utils.JsonConstants.PATIENT1;
-import static org.sharedhealth.mci.web.utils.JsonConstants.PATIENT2;
-import static org.sharedhealth.mci.web.utils.JsonConstants.REASONS;
+import static org.sharedhealth.mci.utils.DateUtil.toIsoMillisFormat;
+import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
 public class DuplicatePatientData implements ResponseWithAdditionalInfo {
 
@@ -79,7 +76,7 @@ public class DuplicatePatientData implements ResponseWithAdditionalInfo {
 
     @JsonProperty(CREATED_AT)
     public String getCreatedAtDateString() {
-        return toIsoFormat(getCreatedAt());
+        return toIsoMillisFormat(getCreatedAt());
     }
 
     @Override

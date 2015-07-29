@@ -5,27 +5,32 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.sharedhealth.mci.web.exception.NonUpdatableFieldUpdateException;
-import org.sharedhealth.mci.web.mapper.*;
+import org.sharedhealth.mci.web.mapper.Address;
+import org.sharedhealth.mci.web.mapper.LocationData;
+import org.sharedhealth.mci.web.mapper.PatientData;
+import org.sharedhealth.mci.web.mapper.PendingApproval;
+import org.sharedhealth.mci.web.mapper.PendingApprovalFieldDetails;
+import org.sharedhealth.mci.web.mapper.PhoneNumber;
+import org.sharedhealth.mci.web.mapper.Relation;
+import org.sharedhealth.mci.web.mapper.Requester;
 import org.sharedhealth.mci.web.service.ApprovalFieldService;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
-import java.util.List;
 
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static java.util.Arrays.asList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
+import static org.sharedhealth.mci.utils.DateUtil.parseDate;
+import static org.sharedhealth.mci.utils.DateUtil.toIsoMillisFormat;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
 public class PendingApprovalFilterTest {
@@ -189,10 +194,10 @@ public class PendingApprovalFilterTest {
         setUpApprovalFieldServiceFor(DATE_OF_BIRTH, "NU");
 
         PatientData existingPatient = buildPatientData();
-        existingPatient.setDateOfBirth(toIsoFormat("2000-02-10"));
+        existingPatient.setDateOfBirth(parseDate("2000-02-10"));
 
         PatientData updateRequest = buildPatientData();
-        updateRequest.setDateOfBirth(toIsoFormat("2000-02-11"));
+        updateRequest.setDateOfBirth(parseDate("2000-02-11"));
 
         pendingApprovalFilter.filter(existingPatient, updateRequest);
 
@@ -204,10 +209,10 @@ public class PendingApprovalFilterTest {
         setUpApprovalFieldServiceFor(DATE_OF_BIRTH, "NU");
 
         PatientData existingPatient = buildPatientData();
-        existingPatient.setDateOfBirth(toIsoFormat("2000-02-10"));
+        existingPatient.setDateOfBirth(parseDate("2000-02-10"));
 
         PatientData updateRequest = buildPatientData();
-        updateRequest.setDateOfBirth(toIsoFormat("2000-02-10"));
+        updateRequest.setDateOfBirth(parseDate("2000-02-10"));
 
         PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
 
@@ -219,17 +224,18 @@ public class PendingApprovalFilterTest {
 
     @Test
     public void shouldUpdateFieldsThatAreNeitherMarkedForApprovalNorMarkedAsNonUpdatable() throws ParseException {
-
         PatientData existingPatient = buildPatientData();
-        existingPatient.setDateOfBirth(toIsoFormat("2000-02-10"));
+        String oldDateOfBirth = "2000-02-10T12:10:18.382+06:00";
+        existingPatient.setDateOfBirth(parseDate(oldDateOfBirth));
 
         PatientData updateRequest = buildPatientData();
-        updateRequest.setDateOfBirth(toIsoFormat("2001-02-10"));
+        String newDateOfBith = "2001-02-10T12:10:18.382+06:00";
+        updateRequest.setDateOfBirth(parseDate(newDateOfBith));
 
         PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
 
         assertTrue(isEmpty(newPatient.getPendingApprovals()));
-        assertEquals(toIsoFormat("2001-02-10"), newPatient.getDateOfBirth());
+        assertEquals(toIsoMillisFormat(newDateOfBith), toIsoMillisFormat(newPatient.getDateOfBirth()));
 
         verify(approvalFieldService, atLeastOnce()).getProperty(Mockito.anyString());
     }
@@ -280,7 +286,7 @@ public class PendingApprovalFilterTest {
         assertEquals(value, fieldDetails.getValue());
         assertEquals(requestedBy, fieldDetails.getRequestedBy());
         long expectedCreatedAt = unixTimestamp(fieldDetailsMap.keySet().iterator().next());
-        assertEquals(toIsoFormat(expectedCreatedAt), fieldDetails.getCreatedAt());
+        assertEquals(toIsoMillisFormat(expectedCreatedAt), fieldDetails.getCreatedAt());
     }
 
     private PatientData buildPatientData() throws ParseException {
@@ -290,7 +296,7 @@ public class PendingApprovalFilterTest {
         patient.setGivenName("Scott");
         patient.setSurName("Tiger");
         patient.setGender("M");
-        patient.setDateOfBirth(toIsoFormat("2014-12-01"));
+        patient.setDateOfBirth(parseDate("2014-12-01"));
 
         Address address = new Address();
         address.setAddressLine("house-10");
@@ -413,7 +419,7 @@ public class PendingApprovalFilterTest {
         assertEquals(value.getType(), relations.get(0).getType());
         assertEquals(requestedBy, fieldDetails.getRequestedBy());
         long expectedCreatedAt = unixTimestamp(fieldDetailsMap.keySet().iterator().next());
-        assertEquals(toIsoFormat(expectedCreatedAt), fieldDetails.getCreatedAt());
+        assertEquals(toIsoMillisFormat(expectedCreatedAt), fieldDetails.getCreatedAt());
     }
 
     private List<Relation> getRelations() {

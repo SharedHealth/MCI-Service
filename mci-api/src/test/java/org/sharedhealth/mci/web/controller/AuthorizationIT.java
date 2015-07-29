@@ -20,7 +20,7 @@ import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static java.lang.String.format;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
+import static org.sharedhealth.mci.utils.DateUtil.parseDate;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
 import static org.sharedhealth.mci.utils.HttpUtil.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.setupApprovalsConfig;
@@ -146,12 +146,13 @@ public class AuthorizationIT extends BaseControllerTest {
     public void facilityShouldUpdatePatient() throws Exception {
         String healthId = createPatient(patientData).getId();
 
+        String content = mapper.writeValueAsString(patientData);
         mockMvc.perform(put(API_END_POINT_FOR_PATIENT + "/" + healthId)
                 .header(AUTH_TOKEN_KEY, facilityAccessToken)
                 .header(FROM_KEY, facilityEmail)
                 .header(CLIENT_ID_KEY, facilityClientId)
                 .accept(APPLICATION_JSON)
-                .content(mapper.writeValueAsString(patientData))
+                .content(content)
                 .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -755,7 +756,7 @@ public class AuthorizationIT extends BaseControllerTest {
         patientData.setGivenName("Scott");
         patientData.setSurName("Tiger");
         patientData.setGender("M");
-        patientData.setDateOfBirth(toIsoFormat("2014-12-01"));
+        patientData.setDateOfBirth(parseDate("2014-12-01"));
         patientData.setEducationLevel("01");
         patientData.setOccupation("02");
         patientData.setMaritalStatus("1");

@@ -1,5 +1,6 @@
 package org.sharedhealth.mci.utils;
 
+import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 
 import java.text.DateFormat;
@@ -59,23 +60,24 @@ public class DateUtil {
         return null;
     }
 
-    public static String toIsoFormat(UUID uuid) {
-        return toIsoFormat(unixTimestamp(uuid));
+    public static String toIsoMillisFormat(UUID uuid) {
+        return toIsoMillisFormat(unixTimestamp(uuid));
     }
 
-    public static String toIsoFormat(long date) {
-        return toIsoFormat(new Date(date));
+    public static String toIsoMillisFormat(long date) {
+        return toIsoMillisFormat(new Date(date));
     }
 
-    public static String toIsoFormat(String dateString) {
+    public static String toIsoMillisFormat(String dateString) {
         if (dateString == null) {
             return null;
         }
-        Date date = parseDate(dateString);
-        return date == null ? null : toIsoFormat(date);
+        Date date = null;
+        date = parseDate(dateString);
+        return date == null ? null : toIsoMillisFormat(date);
     }
 
-    public static String toIsoFormat(Date date) {
+    public static String toIsoMillisFormat(Date date) {
         DateFormat dateFormat = new SimpleDateFormat(ISO_DATE_TIME_TILL_MILLIS_FORMAT3);
         return dateFormat.format(date);
     }
@@ -103,5 +105,14 @@ public class DateUtil {
             years.add(i);
         }
         return years;
+    }
+
+    public static boolean isEqualTo(Date date1, Date date2) {
+        if (date1 != null && date2 != null) {
+            Date truncatedDate1 = DateUtils.setMilliseconds(date1, 0);
+            Date truncatedDate2 = DateUtils.setMilliseconds(date2, 0);
+            return truncatedDate1.equals(truncatedDate2);
+        }
+        return date1 == null && date2 == null;
     }
 }

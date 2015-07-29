@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
+import static org.sharedhealth.mci.utils.DateUtil.toIsoMillisFormat;
 import static org.sharedhealth.mci.web.utils.JsonMapper.readValue;
 
 @Component
@@ -25,7 +25,7 @@ public class PatientUpdateLogMapper {
     public PatientUpdateLogData map(PatientUpdateLog log) {
         PatientUpdateLogData data = new PatientUpdateLogData();
         data.setHealthId(log.getHealthId());
-        data.setEventTime(toIsoFormat(log.getEventId()));
+        data.setEventTime(toIsoMillisFormat(log.getEventId()));
         data.setChangeSet(buildChangeSet(log.getChangeSet()));
 
         String requestedBy = log.getRequestedBy();

@@ -1,5 +1,6 @@
 package org.sharedhealth.mci.web.mapper;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -7,13 +8,16 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.sharedhealth.mci.utils.DateStringDeserializer;
 
 import javax.validation.constraints.Pattern;
+import java.util.Date;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
-import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
+import static org.sharedhealth.mci.utils.DateUtil.parseDate;
+import static org.sharedhealth.mci.utils.DateUtil.toIsoMillisFormat;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_PATTERN;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class PatientSummaryData {
 
     @JsonProperty(HID)
@@ -97,12 +101,12 @@ public class PatientSummaryData {
         this.surName = surName;
     }
 
-    public String getDateOfBirth() {
-        return dateOfBirth;
+    public Date getDateOfBirth() {
+        return dateOfBirth == null ? null : parseDate(dateOfBirth);
     }
 
-    public void setDateOfBirth(String dateOfBirth) {
-        this.dateOfBirth = toIsoFormat(dateOfBirth);
+    public void setDateOfBirth(Date dateOfBirth) {
+        this.dateOfBirth = dateOfBirth == null ? null : toIsoMillisFormat(dateOfBirth);
     }
 
     public Address getAddress() {

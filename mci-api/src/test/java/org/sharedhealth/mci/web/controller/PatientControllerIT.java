@@ -30,7 +30,7 @@ import java.util.List;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static org.junit.Assert.*;
-import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
+import static org.sharedhealth.mci.utils.DateUtil.parseDate;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
 import static org.sharedhealth.mci.utils.HttpUtil.*;
 import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.setupApprovalsConfig;
@@ -250,7 +250,7 @@ public class PatientControllerIT extends BaseControllerTest {
     }
 
     @Test
-    public void ShouldPassIFAddressIsValidTillUpazilaLevel() throws Exception {
+    public void shouldPassIFAddressIsValidTillUpazilaLevel() throws Exception {
         patientData.getAddress().setRuralWardId(null);
         patientData.getAddress().setCityCorporationId(null);
         patientData.getAddress().setUnionOrUrbanWardId(null);
@@ -930,7 +930,7 @@ public class PatientControllerIT extends BaseControllerTest {
         patientData.setGivenName("Scott");
         patientData.setSurName("Tiger");
         patientData.setGender("M");
-        patientData.setDateOfBirth(toIsoFormat("2014-12-01"));
+        patientData.setDateOfBirth(parseDate("2014-12-01"));
         patientData.setEducationLevel("01");
         patientData.setOccupation("02");
         patientData.setMaritalStatus("1");

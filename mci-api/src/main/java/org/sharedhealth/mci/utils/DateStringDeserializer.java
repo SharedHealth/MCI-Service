@@ -12,7 +12,7 @@ public class DateStringDeserializer extends JsonDeserializer<String> {
     @Override
     public String deserialize(JsonParser jp, DeserializationContext ctxt) {
         final String trimmedValue = getTrimmedValue(jp);
-        final String dateString = DateUtil.toIsoFormat(trimmedValue);
+        final String dateString = DateUtil.toIsoMillisFormat(trimmedValue);
 
         return (dateString == null) ? trimmedValue : dateString;
     }

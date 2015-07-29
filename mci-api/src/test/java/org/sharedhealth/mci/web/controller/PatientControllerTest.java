@@ -47,20 +47,14 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
+import static org.sharedhealth.mci.utils.DateUtil.parseDate;
 import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.MCI_USER_GROUP;
 import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
-import static org.springframework.http.HttpStatus.ACCEPTED;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PatientControllerTest {
@@ -270,7 +264,6 @@ public class PatientControllerTest {
                 .andExpect(jsonPath("$.results[0].nid", is(patient1.getNationalId())))
                 .andExpect(jsonPath("$.results[0].given_name", is(patient1.getGivenName())))
                 .andExpect(jsonPath("$.results[0].sur_name", is(patient1.getSurName())))
-
                 .andExpect(jsonPath("$.results[1]").doesNotExist())
                 .andExpect(jsonPath("$.additional_info.note", is(note)));
 
@@ -336,7 +329,7 @@ public class PatientControllerTest {
         patientData.setGivenName("Scott");
         patientData.setSurName("Tiger");
         patientData.setGender("M");
-        patientData.setDateOfBirth(toIsoFormat("2014-12-01"));
+        patientData.setDateOfBirth(parseDate("2014-12-01"));
         patientData.setHouseholdCode("1234");
 
         Address address = new Address();

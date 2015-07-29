@@ -21,12 +21,9 @@ import java.util.UUID;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_INVALID;
 import static org.sharedhealth.mci.web.utils.JsonConstants.RELATIONS;
-import static org.sharedhealth.mci.web.utils.MCIConstants.COUNTRY_CODE_BANGLADESH;
-import static org.sharedhealth.mci.web.utils.MCIConstants.PATIENT_STATUS_ALIVE;
-import static org.sharedhealth.mci.web.utils.MCIConstants.STRING_YES;
+import static org.sharedhealth.mci.web.utils.MCIConstants.*;
 
 @Component
 public class PatientMapper {
@@ -81,7 +78,7 @@ public class PatientMapper {
         data.setSurName(patient.getSurName());
 
         if (patient.getDateOfBirth() != null) {
-            data.setDateOfBirth(toIsoFormat(patient.getDateOfBirth()));
+            data.setDateOfBirth(patient.getDateOfBirth());
         }
         data.setDobType(getDobType(patient.getDobType()));
         data.setGender(patient.getGender());
@@ -94,7 +91,7 @@ public class PatientMapper {
         PatientStatus patientStatus = new PatientStatus();
         patientStatus.setType(patient.getStatus());
         if (isPatientDeadAndHasDateOfDeath(patient)) {
-            patientStatus.setDateOfDeath(toIsoFormat(patient.getDateOfDeath()));
+            patientStatus.setDateOfDeath(patient.getDateOfDeath());
         }
 
         if(!patientStatus.isEmpty()) {
@@ -271,7 +268,7 @@ public class PatientMapper {
 
     private void mapPatientStatus(Patient patient, PatientStatus patientStatus) {
         patient.setStatus(defaultString(patientStatus.getType(), PATIENT_STATUS_ALIVE));
-        patient.setDateOfDeath(defaultString(patientStatus.getDateOfDeath()));
+        patient.setDateOfDeath(patientStatus.getDateOfDeath());
     }
 
     private void mapPatientActivation(Patient patient, PatientData patientData) {

@@ -1,5 +1,6 @@
 package org.sharedhealth.mci.web.handler;
 
+import org.sharedhealth.mci.utils.DateUtil;
 import org.sharedhealth.mci.web.exception.NonUpdatableFieldUpdateException;
 import org.sharedhealth.mci.web.mapper.Address;
 import org.sharedhealth.mci.web.mapper.PatientData;
@@ -7,15 +8,16 @@ import org.sharedhealth.mci.web.mapper.PatientStatus;
 import org.sharedhealth.mci.web.mapper.PendingApproval;
 import org.sharedhealth.mci.web.mapper.PendingApprovalFieldDetails;
 import org.sharedhealth.mci.web.mapper.PhoneNumber;
-import org.sharedhealth.mci.web.mapper.Requester;
 import org.sharedhealth.mci.web.mapper.Relation;
+import org.sharedhealth.mci.web.mapper.Requester;
 import org.sharedhealth.mci.web.service.ApprovalFieldService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
+import java.util.List;
 import java.util.TreeMap;
 import java.util.UUID;
-import java.util.List;
 
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
@@ -49,7 +51,7 @@ public class PendingApprovalFilter {
         newPatient.setBirthRegistrationNumber(processString(BIN_BRN, existingPatient.getBirthRegistrationNumber(), updateRequest.getBirthRegistrationNumber(), requestedBy, newPatient));
         newPatient.setGivenName(processString(GIVEN_NAME, existingPatient.getGivenName(), updateRequest.getGivenName(), requestedBy, newPatient));
         newPatient.setSurName(processString(SUR_NAME, existingPatient.getSurName(), updateRequest.getSurName(), requestedBy, newPatient));
-        newPatient.setDateOfBirth(processString(DATE_OF_BIRTH, existingPatient.getDateOfBirth(), updateRequest.getDateOfBirth(), requestedBy, newPatient));
+        newPatient.setDateOfBirth(processDate(DATE_OF_BIRTH, existingPatient.getDateOfBirth(), updateRequest.getDateOfBirth(), requestedBy, newPatient));
         newPatient.setDobType(processString(DOB_TYPE, existingPatient.getDobType(), updateRequest.getDobType(), requestedBy, newPatient));
         newPatient.setGender(processString(GENDER, existingPatient.getGender(), updateRequest.getGender(), requestedBy, newPatient));
         newPatient.setOccupation(processString(OCCUPATION, existingPatient.getOccupation(), updateRequest.getOccupation(), requestedBy, newPatient));
@@ -77,6 +79,11 @@ public class PendingApprovalFilter {
         newPatient.setMergedWith(processString(MERGED_WITH, existingPatient.getMergedWith(), updateRequest.getMergedWith(), requestedBy, newPatient));
 
         return newPatient;
+    }
+
+    private Date processDate(String key, Date oldDate, Date newDate, Requester requestedBy, PatientData newPatient) {
+        Object date = process(key, oldDate, newDate, requestedBy, newPatient);
+        return date == null ? null : (Date) date;
     }
 
     private List<Relation> processRelations(String key, List<Relation> oldRelations, List<Relation> newRelations, Requester requester, PatientData newPatient) {
@@ -131,23 +138,50 @@ public class PendingApprovalFilter {
         }
         String property = properties.getProperty(key);
         if (property != null) {
-            if (property.equals(NON_UPDATABLE)) {
-                if (!newValue.equals(oldValue)) {
-                    throw new NonUpdatableFieldUpdateException("Cannot update non-updatable field: " + key);
-                }
-                return oldValue;
-            }
+            if (isNonUpdateable(key, oldValue, newValue, property)) return oldValue;
 
-            if (requester != null && requester.getAdmin() != null) {
-                return newValue;
-            }
+            if (isUpdatedByAdmin(requester)) return newValue;
 
-            if (property.equals(NEEDS_APPROVAL) && !newValue.equals(oldValue)) {
+            if (needsApproval(key, oldValue, newValue, requester, newPatient, property)) {
                 newPatient.addPendingApproval(buildPendingApproval(key, newValue, requester));
                 return oldValue;
             }
         }
         return newValue;
+    }
+
+    private boolean needsApproval(String key, Object oldValue, Object newValue, Requester requester, PatientData newPatient, String property) {
+        if (property.equals(NEEDS_APPROVAL)) {
+            if (!isEqual(oldValue, newValue)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isEqual(Object oldValue, Object newValue) {
+        if(oldValue instanceof Date) {
+            return DateUtil.isEqualTo((Date) oldValue, (Date) newValue);
+        }
+        return newValue.equals(oldValue);
+    }
+
+    private boolean isUpdatedByAdmin(Requester requester) {
+        Object newValue;
+        if (requester != null && requester.getAdmin() != null) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isNonUpdateable(String key, Object oldValue, Object newValue, String property) {
+        if (property.equals(NON_UPDATABLE)) {
+            if (!isEqual(oldValue, newValue)) {
+                throw new NonUpdatableFieldUpdateException("Cannot update non-updatable field: " + key);
+            }
+            return true;
+        }
+        return false;
     }
 
     private PendingApproval buildPendingApproval(String key, Object newValue, Requester requester) {

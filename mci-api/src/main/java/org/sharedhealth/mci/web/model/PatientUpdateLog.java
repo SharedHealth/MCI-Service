@@ -88,12 +88,12 @@ public class PatientUpdateLog {
     @JsonProperty(UPDATED_AT)
     public String getEventTimeAsString() {
         if (this.eventId == null) return null;
-        return DateUtil.toIsoFormat(eventId);
+        return DateUtil.toIsoMillisFormat(eventId);
     }
 
     public String getEventTime() {
         if (this.eventId == null) return null;
-        return DateUtil.toIsoFormat(eventId);
+        return DateUtil.toIsoMillisFormat(eventId);
     }
 
 

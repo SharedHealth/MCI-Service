@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.sharedhealth.mci.utils.DateUtil;
 import org.sharedhealth.mci.web.config.MCIProperties;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.infrastructure.security.TokenAuthentication;
@@ -57,18 +58,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.utils.DateUtil.parseDate;
-import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
 import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 public class CatchmentControllerTest {
@@ -331,7 +327,7 @@ public class CatchmentControllerTest {
                 .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".requested_by.provider.name", is(nullValue())))
 
                 .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".value", is("some value")))
-                .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".created_at", is(toIsoFormat(unixTimestamp(timeuuid)))));
+                .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".created_at", is(DateUtil.toIsoMillisFormat(unixTimestamp(timeuuid)))));
 
         verify(patientService).findPendingApprovalDetails(healthId, catchment);
     }

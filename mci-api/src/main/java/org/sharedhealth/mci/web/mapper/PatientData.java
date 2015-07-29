@@ -1,5 +1,6 @@
 package org.sharedhealth.mci.web.mapper;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -8,6 +9,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.constraints.NotBlank;
 import org.sharedhealth.mci.utils.DateStringDeserializer;
+import org.sharedhealth.mci.utils.DateUtil;
 import org.sharedhealth.mci.utils.WhiteSpaceRemovalDeserializer;
 import org.sharedhealth.mci.validation.constraints.Code;
 import org.sharedhealth.mci.validation.constraints.Date;
@@ -36,20 +38,14 @@ import java.util.UUID;
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static java.lang.String.valueOf;
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.substringAfterLast;
-import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
-import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_DEPENDENT;
-import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_INVALID;
-import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_PATTERN;
-import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_REQUIRED;
+import static org.apache.commons.lang3.StringUtils.*;
+import static org.sharedhealth.mci.web.utils.ErrorConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 import static org.sharedhealth.mci.web.utils.MCIConstants.COUNTRY_CODE_BANGLADESH;
 
 @MaritalRelation(message = ERROR_CODE_DEPENDENT, field = "maritalStatus")
 @JsonIgnoreProperties(ignoreUnknown = true, value = {"created_at"})
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class PatientData implements Diffable<PatientData> {
 
     private static final String INVALID_CATCHMENT = "invalid.catchment";
@@ -203,8 +199,15 @@ public class PatientData implements Diffable<PatientData> {
     private String householdCode;
 
     private UUID createdAt;
+
+    @JsonProperty(CREATED_BY)
+    @JsonInclude(NON_EMPTY)
     private Requester createdBy;
+
     private UUID updatedAt;
+
+    @JsonProperty(UPDATED_BY)
+    @JsonInclude(NON_EMPTY)
     private Requester updatedBy;
 
     @JsonProperty(STATUS)
@@ -263,12 +266,12 @@ public class PatientData implements Diffable<PatientData> {
         this.surName = surName;
     }
 
-    public String getDateOfBirth() {
-        return dateOfBirth;
+    public java.util.Date getDateOfBirth() {
+        return dateOfBirth == null ? null : DateUtil.parseDate(dateOfBirth);
     }
 
-    public void setDateOfBirth(String dateOfBirth) {
-        this.dateOfBirth = dateOfBirth;
+    public void setDateOfBirth(java.util.Date dateOfBirth) {
+        this.dateOfBirth = dateOfBirth == null ? null : DateUtil.toIsoMillisFormat(dateOfBirth);
     }
 
     public String getDobType() {
@@ -452,7 +455,7 @@ public class PatientData implements Diffable<PatientData> {
     @JsonProperty(CREATED)
     @JsonInclude(NON_EMPTY)
     public String getCreatedAtAsString() {
-        return this.createdAt != null ? toIsoFormat(unixTimestamp(this.createdAt)) : null;
+        return this.createdAt != null ? DateUtil.toIsoMillisFormat(unixTimestamp(this.createdAt)) : null;
     }
 
     @JsonProperty(CREATED)
@@ -473,7 +476,7 @@ public class PatientData implements Diffable<PatientData> {
     @JsonProperty(MODIFIED)
     @JsonInclude(NON_EMPTY)
     public String getUpdatedAtAsString() {
-        return this.updatedAt != null ? toIsoFormat(unixTimestamp(this.updatedAt)) : null;
+        return this.updatedAt != null ? DateUtil.toIsoMillisFormat(unixTimestamp(this.updatedAt)) : null;
     }
 
     @JsonProperty(MODIFIED)
@@ -602,8 +605,7 @@ public class PatientData implements Diffable<PatientData> {
             return false;
         if (bloodGroup != null ? !bloodGroup.equals(that.bloodGroup) : that.bloodGroup != null) return false;
         if (confidential != null ? !confidential.equals(that.confidential) : that.confidential != null) return false;
-        if (createdAt != null ? !createdAt.equals(that.createdAt) : that.createdAt != null) return false;
-        if (dateOfBirth != null ? !dateOfBirth.equals(that.dateOfBirth) : that.dateOfBirth != null) return false;
+        if (dateOfBirth != null ? !DateUtil.isEqualTo(getDateOfBirth(), that.getDateOfBirth()) : that.dateOfBirth != null) return false;
         if (dobType != null ? !dobType.equals(that.dobType) : that.dobType != null) return false;
         if (disability != null ? !disability.equals(that.disability) : that.disability != null) return false;
         if (educationLevel != null ? !educationLevel.equals(that.educationLevel) : that.educationLevel != null)
@@ -634,7 +636,6 @@ public class PatientData implements Diffable<PatientData> {
         if (religion != null ? !religion.equals(that.religion) : that.religion != null) return false;
         if (surName != null ? !surName.equals(that.surName) : that.surName != null) return false;
         if (uid != null ? !uid.equals(that.uid) : that.uid != null) return false;
-        if (updatedAt != null ? !updatedAt.equals(that.updatedAt) : that.updatedAt != null) return false;
         if (householdCode != null ? !householdCode.equals(that.householdCode) : that.householdCode != null)
             return false;
         if (active != null ? !active.equals(that.active) : that.active != null) return false;
@@ -831,8 +832,6 @@ public class PatientData implements Diffable<PatientData> {
         return requester;
     }
 
-    @JsonProperty(CREATED_BY)
-    @JsonInclude(NON_EMPTY)
     public Requester getCreatedBy() {
         return createdBy;
     }
@@ -871,8 +870,6 @@ public class PatientData implements Diffable<PatientData> {
         this.mergedWith = mergedWith;
     }
 
-    @JsonProperty(UPDATED_BY)
-    @JsonInclude(NON_EMPTY)
     public Requester getUpdatedBy() {
         return updatedBy;
     }

@@ -43,10 +43,7 @@ import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -56,9 +53,7 @@ import static org.sharedhealth.mci.web.utils.JsonConstants.SINCE;
 import static org.springframework.http.MediaType.APPLICATION_ATOM_XML_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 public class UpdateFeedControllerTest {
@@ -130,7 +125,7 @@ public class UpdateFeedControllerTest {
                 .andExpect(jsonPath("$.nextUrl", is(nextUrl)))
 
                 .andExpect(jsonPath("$.entries.[0].id", is(uuid1.toString())))
-                .andExpect(jsonPath("$.entries.[0].publishedDate", is(DateUtil.toIsoFormat(uuid1))))
+                .andExpect(jsonPath("$.entries.[0].publishedDate", is(DateUtil.toIsoMillisFormat(uuid1))))
                 .andExpect(jsonPath("$.entries.[0].title", is("patient updated: h100")))
                 .andExpect(jsonPath("$.entries.[0].link", is(SERVER_URL + "/patients/h100")))
                 .andExpect(jsonPath("$.entries.[0].categories[0]", is("patient")))
@@ -169,7 +164,7 @@ public class UpdateFeedControllerTest {
                 .andExpect(jsonPath("$.nextUrl", is(nextUrl)))
 
                 .andExpect(jsonPath("$.entries.[0].id", is(uuid2.toString())))
-                .andExpect(jsonPath("$.entries.[0].publishedDate", is(DateUtil.toIsoFormat(uuid2))))
+                .andExpect(jsonPath("$.entries.[0].publishedDate", is(DateUtil.toIsoMillisFormat(uuid2))))
                 .andExpect(jsonPath("$.entries.[0].title", is("patient updated: h200")))
                 .andExpect(jsonPath("$.entries.[0].link", is(SERVER_URL + "/patients/h200")))
                 .andExpect(jsonPath("$.entries.[0].categories[0]", is("patient")))
@@ -301,7 +296,7 @@ public class UpdateFeedControllerTest {
                 .andExpect(jsonPath("$.prevUrl", is(nullValue())))
 
                 .andExpect(jsonPath("$.entries.[0].id", is(uuid1.toString())))
-                .andExpect(jsonPath("$.entries.[0].publishedDate", is(DateUtil.toIsoFormat(uuid1))))
+                .andExpect(jsonPath("$.entries.[0].publishedDate", is(DateUtil.toIsoMillisFormat(uuid1))))
                 .andExpect(jsonPath("$.entries.[0].title", is("patient updated: h100")))
                 .andExpect(jsonPath("$.entries.[0].link", is(SERVER_URL + "/patients/h100")))
                 .andExpect(jsonPath("$.entries.[0].categories", is(asList("patient"))))

@@ -1,12 +1,14 @@
 package org.sharedhealth.mci.web.mapper;
 
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.sharedhealth.mci.utils.DateStringDeserializer;
+import org.sharedhealth.mci.utils.DateUtil;
 import org.sharedhealth.mci.validation.constraints.Code;
 import org.sharedhealth.mci.validation.constraints.Date;
 import org.sharedhealth.mci.web.builder.DiffBuilder;
@@ -16,11 +18,10 @@ import org.sharedhealth.mci.web.builder.Diffable;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_INVALID;
 import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_PATTERN;
-import static org.sharedhealth.mci.web.utils.JsonConstants.DATE_OF_DEATH;
-import static org.sharedhealth.mci.web.utils.JsonConstants.STATUS;
-import static org.sharedhealth.mci.web.utils.JsonConstants.TYPE;
+import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class PatientStatus implements Diffable<PatientStatus> {
 
     @JsonProperty(TYPE)
@@ -34,12 +35,12 @@ public class PatientStatus implements Diffable<PatientStatus> {
     @JsonDeserialize(using = DateStringDeserializer.class)
     private String dateOfDeath;
 
-    public String getDateOfDeath() {
-        return this.dateOfDeath;
+    public java.util.Date getDateOfDeath() {
+        return this.dateOfDeath == null ? null : DateUtil.parseDate(this.dateOfDeath);
     }
 
-    public void setDateOfDeath(String dateOfDeath) {
-        this.dateOfDeath = dateOfDeath;
+    public void setDateOfDeath(java.util.Date dateOfDeath) {
+        this.dateOfDeath = dateOfDeath == null ? null : DateUtil.toIsoMillisFormat(dateOfDeath);
     }
 
     public String getType() {
@@ -53,11 +54,15 @@ public class PatientStatus implements Diffable<PatientStatus> {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof PatientStatus)) return false;
 
         PatientStatus that = (PatientStatus) o;
 
-        if (dateOfDeath != null ? !dateOfDeath.equals(that.dateOfDeath) : that.dateOfDeath != null) return false;
+        if (dateOfDeath == null) {
+            if (that.dateOfDeath != null) return false;
+        } else {
+            if (!DateUtil.isEqualTo(getDateOfDeath(), that.getDateOfDeath())) return false;
+        }
         if (type != null ? !type.equals(that.type) : that.type != null) return false;
 
         return true;
@@ -90,6 +95,4 @@ public class PatientStatus implements Diffable<PatientStatus> {
                 .append(DATE_OF_DEATH, this.dateOfDeath, that.dateOfDeath)
                 .build();
     }
-
-
 }

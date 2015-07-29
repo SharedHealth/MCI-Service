@@ -1,6 +1,5 @@
 package org.sharedhealth.mci.validation.constraintvalidator;
 
-import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.validation.constraints.PatientStatusBlock;
 import org.sharedhealth.mci.web.mapper.PatientStatus;
 
@@ -20,7 +19,7 @@ public class PatientStatusBlockValidator implements ConstraintValidator<PatientS
 
         if (value == null) return true;
 
-        if (StringUtils.isEmpty(value.getDateOfDeath())) return true;
+        if (value.getDateOfDeath() == null) return true;
 
         if (isDead(value.getType())) {
             return true;

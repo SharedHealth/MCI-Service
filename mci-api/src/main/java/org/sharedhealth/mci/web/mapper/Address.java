@@ -1,5 +1,6 @@
 package org.sharedhealth.mci.web.mapper;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -21,6 +22,7 @@ import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 import static org.sharedhealth.mci.web.utils.MCIConstants.COUNTRY_CODE_BANGLADESH;
 
 @JsonIgnoreProperties(ignoreUnknown = true, value = {"geoCode"})
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class Address implements Diffable<Address> {
 
     @JsonInclude(NON_EMPTY)

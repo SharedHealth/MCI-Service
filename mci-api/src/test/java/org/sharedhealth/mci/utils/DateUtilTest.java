@@ -8,12 +8,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.sharedhealth.mci.utils.DateUtil.ISO_DATE_TIME_TILL_MILLIS_FORMAT3;
-import static org.sharedhealth.mci.utils.DateUtil.parseDate;
-import static org.sharedhealth.mci.utils.DateUtil.toIsoFormat;
+import static org.junit.Assert.*;
+import static org.sharedhealth.mci.utils.DateUtil.*;
 import static org.sharedhealth.mci.utils.TimeUid.fromString;
 
 public class DateUtilTest {
@@ -70,7 +66,7 @@ public class DateUtilTest {
     @Test
     public void shouldFormatTimeUuidToIsoDateString() throws Exception {
         UUID uuid = fromString("6d713100-a7a3-11e4-8319-5fcb9978cb86");
-        String isoDate = toIsoFormat(uuid);
+        String isoDate = toIsoMillisFormat(uuid);
 
         DateFormat dateFormat = new SimpleDateFormat(ISO_DATE_TIME_TILL_MILLIS_FORMAT3);
         assertEquals(dateFormat.format(parseDate("2015-01-29T10:41:48.560Z")), isoDate);
@@ -96,5 +92,24 @@ public class DateUtilTest {
     public void shouldReturnCurrentYear() throws Exception {
         DateTime date = new DateTime(new Date());
         assertEquals(DateUtil.getCurrentYear(), date.getYear());
+    }
+
+    @Test
+    public void shouldIgnoreMillisecondsWhileComparingDates() throws Exception {
+        Date date1 = parseDate("2015-01-29T10:41:48.560+06:00");
+        Date date2 = parseDate("2015-01-29T10:41:47.401+06:00");
+        assertFalse(DateUtil.isEqualTo(date1, date2));
+
+        date1 = parseDate("2015-01-29T10:41:48.560+06:00");
+        date2 = parseDate("2015-01-29T10:41:48.401+06:00");
+        assertTrue(DateUtil.isEqualTo(date1, date2));
+
+        date1 = parseDate("2015-01-29T10:41:48.560+06:00");
+        date2 = null;
+        assertFalse(DateUtil.isEqualTo(date1, date2));
+
+        date1 = null;
+        date2 = null;
+        assertTrue(DateUtil.isEqualTo(date1, date2));
     }
 }
