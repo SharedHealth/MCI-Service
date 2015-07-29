@@ -1,7 +1,5 @@
-CREATE TABLE IF NOT EXISTS locations (
-    code text,
-    name text,
-    parent text,
-    active varchar,
-    PRIMARY KEY (parent, code)
+CREATE TABLE IF NOT EXISTS lr_markers (
+    type varchar,
+    last_feed_url varchar,
+    PRIMARY KEY (type)
 );

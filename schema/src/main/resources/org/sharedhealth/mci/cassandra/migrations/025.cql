@@ -1,1 +1,5 @@
-DELETE FROM approval_fields WHERE FIELD='date_of_birth';
+CREATE TABLE IF NOT EXISTS generated_hid_range (
+    begins_at bigint,
+    ends_at bigint,
+    PRIMARY KEY (begins_at)
+);

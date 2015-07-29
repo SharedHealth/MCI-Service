@@ -1,4 +1,7 @@
-CREATE TABLE IF NOT EXISTS approval_fields (
-  field text  PRIMARY KEY,
-  option text
+CREATE TABLE IF NOT EXISTS locations (
+    code text,
+    name text,
+    parent text,
+    active varchar,
+    PRIMARY KEY (parent, code)
 );

@@ -1,1 +1,0 @@
-ALTER TABLE patient ADD assigned_by varchar;

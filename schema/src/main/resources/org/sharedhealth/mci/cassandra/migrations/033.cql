@@ -1,1 +1,0 @@
-ALTER TABLE patient ADD dob_type varchar;

@@ -1,8 +1,7 @@
-CREATE TABLE IF NOT EXISTS patient_audit_log (
-    health_id varchar,
-    event_id timeuuid,
-    change_set varchar,
-    requested_by varchar,
-    approved_by varchar,
-    PRIMARY KEY (health_id, event_id)
-) WITH CLUSTERING ORDER BY (event_id ASC);
+INSERT INTO approval_fields ("field", "option") VALUES ('gender', 'NA');
+INSERT INTO approval_fields ("field", "option") VALUES ('given_name', 'NA');
+INSERT INTO approval_fields ("field", "option") VALUES ('occupation', 'NA');
+INSERT INTO approval_fields ("field", "option") VALUES ('phone_number', 'NA');
+INSERT INTO approval_fields ("field", "option") VALUES ('present_address', 'NA');
+INSERT INTO approval_fields ("field", "option") VALUES ('status', 'NA');
+INSERT INTO approval_fields ("field", "option") VALUES ('date_of_death', 'NA');

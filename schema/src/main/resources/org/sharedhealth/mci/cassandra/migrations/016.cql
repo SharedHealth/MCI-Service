@@ -1,4 +1,6 @@
-CREATE TABLE IF NOT EXISTS settings (
-  key text  PRIMARY KEY,
-  settings text
+CREATE TABLE IF NOT EXISTS master_data (
+  type text,
+  key text,
+  value text,
+  PRIMARY KEY (type, key)
 );

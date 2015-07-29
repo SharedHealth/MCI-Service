@@ -1,8 +1,2 @@
-INSERT INTO approval_fields ("field", "option") VALUES ('gender', 'NA');
-INSERT INTO approval_fields ("field", "option") VALUES ('given_name', 'NA');
-INSERT INTO approval_fields ("field", "option") VALUES ('occupation', 'NA');
-INSERT INTO approval_fields ("field", "option") VALUES ('date_of_birth', 'NU');
-INSERT INTO approval_fields ("field", "option") VALUES ('phone_number', 'NA');
-INSERT INTO approval_fields ("field", "option") VALUES ('present_address', 'NA');
-INSERT INTO approval_fields ("field", "option") VALUES ('status', 'NA');
-INSERT INTO approval_fields ("field", "option") VALUES ('date_of_death', 'NA');
+INSERT INTO settings ("key", "settings") VALUES ('PER_PAGE_MAXIMUM_LIMIT', '25');
+INSERT INTO settings ("key", "settings") VALUES ('PER_PAGE_MAXIMUM_LIMIT_NOTE', 'There are more record for this search criteria. Please narrow down your search');

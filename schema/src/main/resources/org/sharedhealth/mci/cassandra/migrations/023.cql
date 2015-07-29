@@ -1,5 +1,3 @@
-drop table if exists patient_duplicate;
-
 CREATE TABLE IF NOT EXISTS patient_duplicate (
     catchment_id varchar,
     created_at timeuuid,
@@ -8,4 +6,4 @@ CREATE TABLE IF NOT EXISTS patient_duplicate (
     reasons set<text>,
     PRIMARY KEY (catchment_id, created_at));
 
-CREATE INDEX idx_patient_duplicate_health_id1 on patient_duplicate(health_id1);
+CREATE INDEX IF NOT EXISTS idx_patient_duplicate_health_id1 on patient_duplicate(health_id1);

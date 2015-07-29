@@ -1,1 +1,4 @@
-CREATE INDEX idx_pending_approval_mapping_health_id on pending_approval_mapping(health_id);
+CREATE TABLE IF NOT EXISTS approval_fields (
+  field text  PRIMARY KEY,
+  option text
+);

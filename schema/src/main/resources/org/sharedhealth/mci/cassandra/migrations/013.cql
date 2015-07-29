@@ -1,5 +1,6 @@
-CREATE TABLE IF NOT EXISTS lr_markers (
+CREATE TABLE IF NOT EXISTS marker (
     type varchar,
-    last_feed_url varchar,
-    PRIMARY KEY (type)
-);
+    created_at timeuuid,
+    marker varchar,
+    PRIMARY KEY (type, created_at)
+)  WITH CLUSTERING ORDER BY (created_at DESC);

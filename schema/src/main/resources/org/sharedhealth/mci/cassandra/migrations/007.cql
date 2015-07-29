@@ -1,4 +1,4 @@
-CREATE TABLE catchment_mapping (
+CREATE TABLE IF NOT EXISTS catchment_mapping (
     catchment_id varchar,
     last_updated timeuuid,
     health_id varchar,
