@@ -96,6 +96,7 @@ public class MCIHealthIdControllerTest {
         verify(healthIdService, times(1)).generate(start, end);
         when(generatedHidRangeService.getPreGeneratedHidRanges()).thenReturn(asList(new GeneratedHidRange(start, end)));
         assertEquals("Range overlaps with pregenerated healthIds", healthIdController.generateRange(start, end).getResult());
+        assertEquals("Range overlaps with pregenerated healthIds", healthIdController.generateRange(start - 1, end + 1).getResult());
         assertEquals("Range overlaps with pregenerated healthIds", healthIdController.generateRange(end, 9800100202L).getResult());
         assertEquals("Range overlaps with pregenerated healthIds", healthIdController.generateRange(9800100000L, start).getResult());
     }

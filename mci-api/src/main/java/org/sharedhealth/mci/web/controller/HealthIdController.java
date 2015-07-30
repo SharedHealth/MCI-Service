@@ -49,10 +49,11 @@ public class HealthIdController extends MciController {
         } else {
             logAccessDetails(userInfo, format("Generating new hids"));
             long numberOfValidHids = healthIdService.generate(start, end);
-            generatedHidRangeService.saveGeneratedHidRange(new GeneratedHidRange(start, end));
+            if (numberOfValidHids > 0) {
+                generatedHidRangeService.saveGeneratedHidRange(new GeneratedHidRange(start, end));
+            }
             deferredResult.setResult(String.format("GENERATED %s Ids", numberOfValidHids));
             logger.info(String.format("%s healthIds generated", numberOfValidHids));
-
         }
         return deferredResult;
     }
@@ -68,7 +69,9 @@ public class HealthIdController extends MciController {
         } else {
             logAccessDetails(userInfo, format("Generating new hids"));
             long numberOfValidHids = healthIdService.generate(start, end);
-            generatedHidRangeService.saveGeneratedHidRange(new GeneratedHidRange(start, end));
+            if (numberOfValidHids > 0) {
+                generatedHidRangeService.saveGeneratedHidRange(new GeneratedHidRange(start, end));
+            }
             deferredResult.setResult(String.format("GENERATED %s Ids", numberOfValidHids));
             logger.info(String.format("%s healthIds generated", numberOfValidHids));
         }
@@ -89,6 +92,12 @@ public class HealthIdController extends MciController {
             return true;
         }
         if (preGeneratedHidRange.getBeginsAt() <= end && end <= preGeneratedHidRange.getEndsAt()) {
+            return true;
+        }
+        if (start <= preGeneratedHidRange.getBeginsAt() && preGeneratedHidRange.getBeginsAt() <= end) {
+            return true;
+        }
+        if (start <= preGeneratedHidRange.getEndsAt() && preGeneratedHidRange.getEndsAt() <= end) {
             return true;
         }
         return false;
