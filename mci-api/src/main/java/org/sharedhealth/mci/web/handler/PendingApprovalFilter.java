@@ -142,7 +142,7 @@ public class PendingApprovalFilter {
 
             if (isUpdatedByAdmin(requester)) return newValue;
 
-            if (needsApproval(key, oldValue, newValue, requester, newPatient, property)) {
+            if (needsApproval(oldValue, newValue, property)) {
                 newPatient.addPendingApproval(buildPendingApproval(key, newValue, requester));
                 return oldValue;
             }
@@ -150,24 +150,21 @@ public class PendingApprovalFilter {
         return newValue;
     }
 
-    private boolean needsApproval(String key, Object oldValue, Object newValue, Requester requester, PatientData newPatient, String property) {
-        if (property.equals(NEEDS_APPROVAL)) {
-            if (!isEqual(oldValue, newValue)) {
-                return true;
-            }
+    private boolean needsApproval(Object oldValue, Object newValue, String property) {
+        if (property.equals(NEEDS_APPROVAL) && !isEqual(oldValue, newValue)) {
+            return true;
         }
         return false;
     }
 
     private boolean isEqual(Object oldValue, Object newValue) {
-        if(oldValue instanceof Date) {
+        if (oldValue instanceof Date) {
             return DateUtil.isEqualTo((Date) oldValue, (Date) newValue);
         }
         return newValue.equals(oldValue);
     }
 
     private boolean isUpdatedByAdmin(Requester requester) {
-        Object newValue;
         if (requester != null && requester.getAdmin() != null) {
             return true;
         }

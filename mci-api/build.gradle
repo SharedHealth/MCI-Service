@@ -22,6 +22,14 @@ repositories {
     }
 }
 
+compileJava {
+    options.encoding = 'UTF-8'
+}
+
+compileTestJava {
+    options.encoding = 'UTF-8'
+}
+
 dependencies {
     compile(libraries.spring_boot_web) {
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
