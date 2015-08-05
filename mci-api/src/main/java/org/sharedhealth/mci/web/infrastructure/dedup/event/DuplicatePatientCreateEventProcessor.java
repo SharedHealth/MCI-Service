@@ -1,5 +1,6 @@
 package org.sharedhealth.mci.web.infrastructure.dedup.event;
 
+import org.sharedhealth.mci.web.infrastructure.persistence.DuplicatePatientRepository;
 import org.sharedhealth.mci.web.mapper.PatientUpdateLogData;
 import org.sharedhealth.mci.web.model.DuplicatePatient;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,10 @@ public class DuplicatePatientCreateEventProcessor extends DuplicatePatientEventP
     @Override
     public void process(PatientUpdateLogData log, UUID marker) {
         List<DuplicatePatient> duplicates = buildDuplicates(log.getHealthId());
-        getDuplicatePatientRepository().create(duplicates, marker);
+        DuplicatePatientRepository duplicatePatientRepository = getDuplicatePatientRepository();
+        duplicates = filterPersistentDuplicates(duplicatePatientRepository, duplicates);
+        duplicatePatientRepository.create(duplicates, marker);
     }
+
+
 }

@@ -49,7 +49,7 @@ public class DuplicatePatientCreateEventProcessorTest {
         UUID marker = randomUUID();
         List<DuplicatePatientData> duplicateData = asList(new DuplicatePatientData());
         when(ruleEngine.apply(healthId)).thenReturn(duplicateData);
-        List<DuplicatePatient> duplicates = asList(new DuplicatePatient());
+        List<DuplicatePatient> duplicates = asList(new DuplicatePatient("A10B20C30", "hid1", "hid2"));
         when(mapper.mapToDuplicatePatientList(duplicateData)).thenReturn(duplicates);
 
         PatientUpdateLogData log = new PatientUpdateLogData();
