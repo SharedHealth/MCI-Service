@@ -4,10 +4,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.sharedhealth.mci.domain.exception.NonUpdatableFieldUpdateException;
 import org.sharedhealth.mci.domain.model.*;
 import org.sharedhealth.mci.domain.service.ApprovalFieldService;
 import org.sharedhealth.mci.domain.service.PendingApprovalFilter;
-import org.sharedhealth.mci.web.exception.NonUpdatableFieldUpdateException;
 
 import java.text.ParseException;
 import java.util.*;
@@ -179,7 +179,7 @@ public class PendingApprovalFilterTest {
         assertEquals(existingPatient.getPermanentAddress(), newPatient.getPermanentAddress());
     }
 
-    @Test(expected = NonUpdatableFieldUpdateException.class)
+        @Test(expected = NonUpdatableFieldUpdateException.class)
     public void shouldThrowExceptionWhenTryingToUpdateNonUpdatableField() throws ParseException {
         setUpApprovalFieldServiceFor(DATE_OF_BIRTH, "NU");
 
@@ -393,7 +393,7 @@ public class PendingApprovalFilterTest {
         assertEquals(2, fieldDetailsMap.size());
 
         PendingApprovalFieldDetails fieldDetails = fieldDetailsMap.values().iterator().next();
-        List<Relation> relations  = (List<Relation>) fieldDetails.getValue();
+        List<Relation> relations = (List<Relation>) fieldDetails.getValue();
 
         assertEquals("SPS", relations.get(0).getType());
 
@@ -404,7 +404,7 @@ public class PendingApprovalFilterTest {
         assertNotNull(fieldDetailsMap);
         assertEquals(1, fieldDetailsMap.size());
         PendingApprovalFieldDetails fieldDetails = fieldDetailsMap.values().iterator().next();
-        List<Relation> relations  = (List<Relation>) fieldDetails.getValue();
+        List<Relation> relations = (List<Relation>) fieldDetails.getValue();
 
         assertEquals(value.getType(), relations.get(0).getType());
         assertEquals(requestedBy, fieldDetails.getRequestedBy());

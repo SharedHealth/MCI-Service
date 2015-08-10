@@ -5,6 +5,7 @@ import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
@@ -22,6 +23,7 @@ import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
 @Import({MCICassandraConfig.class,
         MCICacheConfiguration.class,
 })
+@ComponentScan(basePackages = "org.sharedhealth.mci")
 public class MCIConfig {
     public static final String PROFILE_DEFAULT = "default";
 
