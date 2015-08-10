@@ -1,15 +1,15 @@
 package org.sharedhealth.mci.web.controller;
 
-import org.sharedhealth.mci.web.config.MCIProperties;
-import org.sharedhealth.mci.web.exception.Forbidden;
-import org.sharedhealth.mci.web.exception.ValidationException;
+import org.sharedhealth.mci.deduplication.model.DuplicatePatientData;
+import org.sharedhealth.mci.deduplication.model.DuplicatePatientMergeData;
+import org.sharedhealth.mci.deduplication.service.DuplicatePatientService;
+import org.sharedhealth.mci.domain.config.MCIProperties;
+import org.sharedhealth.mci.domain.exception.Forbidden;
+import org.sharedhealth.mci.domain.exception.ValidationException;
+import org.sharedhealth.mci.domain.model.Catchment;
+import org.sharedhealth.mci.domain.model.MCIResponse;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
-import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
-import org.sharedhealth.mci.web.mapper.Catchment;
-import org.sharedhealth.mci.web.mapper.DuplicatePatientData;
-import org.sharedhealth.mci.web.mapper.DuplicatePatientMergeData;
-import org.sharedhealth.mci.web.service.DuplicatePatientService;
 import org.sharedhealth.mci.web.service.SettingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,11 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.servlet.http.HttpServletRequest;
@@ -33,9 +29,9 @@ import java.util.UUID;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.AFTER;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.BEFORE;
 import static org.sharedhealth.mci.web.infrastructure.security.UserProfile.ADMIN_TYPE;
-import static org.sharedhealth.mci.web.utils.JsonConstants.AFTER;
-import static org.sharedhealth.mci.web.utils.JsonConstants.BEFORE;
 import static org.springframework.http.HttpStatus.ACCEPTED;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -54,7 +50,8 @@ public class DuplicatePatientController extends MciController {
     private static final int PER_PAGE_MAXIMUM_LIMIT = 25;
 
     @Autowired
-    public DuplicatePatientController(DuplicatePatientService duplicatePatientService, SettingService settingService, MCIProperties properties) {
+    public DuplicatePatientController(DuplicatePatientService duplicatePatientService, SettingService settingService, MCIProperties
+            properties) {
         super(properties);
         this.duplicatePatientService = duplicatePatientService;
         this.settingService = settingService;
@@ -126,8 +123,11 @@ public class DuplicatePatientController extends MciController {
 
     private void setRequester(DuplicatePatientMergeData data, UserInfo userInfo) {
         UserInfo.UserInfoProperties properties = userInfo.getProperties();
-        data.getPatient1().setRequester(properties);
-        data.getPatient2().setRequester(properties);
+        data.getPatient1().setRequester(
+                properties.getFacilityId(), properties.getProviderId(), properties.getAdminId()
+                , properties.getName());
+        data.getPatient2().setRequester(properties.getFacilityId(), properties.getProviderId(), properties.getAdminId()
+                , properties.getName());
     }
 
     public int getPerPageMaximumLimit() {

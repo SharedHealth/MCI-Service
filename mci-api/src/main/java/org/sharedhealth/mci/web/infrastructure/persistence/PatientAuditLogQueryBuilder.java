@@ -7,8 +7,8 @@ import org.springframework.data.cassandra.convert.CassandraConverter;
 import java.util.List;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
-import static org.sharedhealth.mci.web.infrastructure.persistence.MarkerRepositoryQueryBuilder.buildUpdateMarkerBatch;
-import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.*;
+import static org.sharedhealth.mci.domain.constant.RepositoryConstants.*;
+import static org.sharedhealth.mci.domain.repository.MarkerRepositoryQueryBuilder.buildUpdateMarkerBatch;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
 
 public class PatientAuditLogQueryBuilder {

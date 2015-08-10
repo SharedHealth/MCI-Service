@@ -2,7 +2,7 @@ package org.sharedhealth.mci.web.model;
 
 
 import org.apache.commons.lang3.StringUtils;
-import org.sharedhealth.mci.web.mapper.Catchment;
+import org.sharedhealth.mci.domain.model.Catchment;
 import org.springframework.data.cassandra.mapping.Column;
 import org.springframework.data.cassandra.mapping.PrimaryKey;
 import org.springframework.data.cassandra.mapping.Table;

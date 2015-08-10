@@ -1,12 +1,13 @@
 package org.sharedhealth.mci.web.mapper;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.sharedhealth.mci.domain.model.Requester;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static org.sharedhealth.mci.web.utils.JsonConstants.*;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.*;
 
 public class PatientAuditLogData {
 

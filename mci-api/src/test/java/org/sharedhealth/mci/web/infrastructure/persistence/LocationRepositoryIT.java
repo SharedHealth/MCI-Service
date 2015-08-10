@@ -4,11 +4,12 @@ import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.sharedhealth.mci.domain.model.LocationData;
+import org.sharedhealth.mci.domain.model.LocationRepositoryMarker;
+import org.sharedhealth.mci.domain.repository.LocationCriteria;
+import org.sharedhealth.mci.domain.repository.LocationRepository;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
-import org.sharedhealth.mci.web.mapper.LocationCriteria;
-import org.sharedhealth.mci.web.mapper.LocationData;
-import org.sharedhealth.mci.web.model.LRMarker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.cassandra.core.CassandraOperations;
@@ -99,13 +100,13 @@ public class LocationRepositoryIT {
         locationRepository.saveOrUpdateLRMarkerData("DIVISION", "2015-02-08");
         locationRepository.saveOrUpdateLRMarkerData("DISTRICT", "2015-02-08");
 
-        LRMarker lrMarker = locationRepository.getLRMarkerData("DIVISION");
+        LocationRepositoryMarker lrMarker = locationRepository.getLRMarkerData("DIVISION");
         assertEquals("2015-02-08", lrMarker.getLastFeedUrl());
-        LRMarker lrMarker1 = locationRepository.getLRMarkerData("UPAZILA");
+        LocationRepositoryMarker lrMarker1 = locationRepository.getLRMarkerData("UPAZILA");
         Assert.assertNull(lrMarker1);
 
         locationRepository.saveOrUpdateLRMarkerData("DIVISION", "2015-02-09");
-        LRMarker lrMarker2 = locationRepository.getLRMarkerData("DIVISION");
+        LocationRepositoryMarker lrMarker2 = locationRepository.getLRMarkerData("DIVISION");
         assertEquals("2015-02-09", lrMarker2.getLastFeedUrl());
 
     }

@@ -1,13 +1,13 @@
 package org.sharedhealth.mci.web.controller;
 
+import org.sharedhealth.mci.domain.constant.JsonConstants;
+import org.sharedhealth.mci.domain.model.PatientData;
+import org.sharedhealth.mci.domain.model.Requester;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
 import org.sharedhealth.mci.web.mapper.PatientAuditLogData;
-import org.sharedhealth.mci.web.mapper.PatientData;
-import org.sharedhealth.mci.web.mapper.Requester;
 import org.sharedhealth.mci.web.service.PatientAuditService;
 import org.sharedhealth.mci.web.service.PatientService;
 import org.sharedhealth.mci.web.service.RequesterService;
-import org.sharedhealth.mci.web.utils.JsonConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.sharedhealth.mci.web.utils.JsonConstants.CREATED_AT;
-import static org.sharedhealth.mci.web.utils.JsonConstants.CREATED_BY;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.CREATED_AT;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.CREATED_BY;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 

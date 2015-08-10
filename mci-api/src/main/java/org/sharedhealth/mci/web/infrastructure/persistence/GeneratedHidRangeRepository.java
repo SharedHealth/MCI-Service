@@ -3,6 +3,7 @@ package org.sharedhealth.mci.web.infrastructure.persistence;
 
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
+import org.sharedhealth.mci.domain.repository.BaseRepository;
 import org.sharedhealth.mci.web.model.GeneratedHidRange;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.CF_GENERATED_HID_RANGE;
+import static org.sharedhealth.mci.domain.constant.RepositoryConstants.CF_GENERATED_HID_RANGE;
 
 @Component
 public class GeneratedHidRangeRepository extends BaseRepository {

@@ -2,12 +2,8 @@ package org.sharedhealth.mci.utils;
 
 import org.junit.Test;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
-import static org.sharedhealth.mci.utils.StringUtil.containsMultipleGroupsOfRepeatingDigits;
-import static org.sharedhealth.mci.utils.StringUtil.containsRepeatingDigits;
-import static org.sharedhealth.mci.utils.StringUtil.ensureSuffix;
+import static junit.framework.Assert.*;
+import static org.sharedhealth.mci.domain.util.StringUtil.*;
 
 public class StringUtilTest {
 

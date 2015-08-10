@@ -4,10 +4,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.sharedhealth.mci.web.config.MCIProperties;
+import org.sharedhealth.mci.domain.config.MCIProperties;
+import org.sharedhealth.mci.domain.model.Catchment;
 import org.sharedhealth.mci.web.infrastructure.persistence.FacilityRepository;
 import org.sharedhealth.mci.web.infrastructure.registry.FacilityRegistryClient;
-import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.FacilityResponse;
 import org.sharedhealth.mci.web.model.Facility;
 
@@ -16,9 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class FacilityServiceTest {

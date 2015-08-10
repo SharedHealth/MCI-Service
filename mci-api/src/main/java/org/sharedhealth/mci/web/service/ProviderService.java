@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
-import static org.sharedhealth.mci.web.config.MCICacheConfiguration.PROVIDER_CACHE;
+import static org.sharedhealth.mci.domain.config.MCICacheConfiguration.PROVIDER_CACHE;
 
 @Component
 public class ProviderService {

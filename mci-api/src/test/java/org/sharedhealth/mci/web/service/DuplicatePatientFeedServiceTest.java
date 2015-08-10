@@ -3,12 +3,13 @@ package org.sharedhealth.mci.web.service;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.sharedhealth.mci.web.infrastructure.dedup.event.DuplicatePatientEventProcessor;
-import org.sharedhealth.mci.web.infrastructure.dedup.event.DuplicatePatientEventProcessorFactory;
-import org.sharedhealth.mci.web.infrastructure.persistence.MarkerRepository;
-import org.sharedhealth.mci.web.infrastructure.persistence.PatientFeedRepository;
-import org.sharedhealth.mci.web.mapper.PatientUpdateLogMapper;
-import org.sharedhealth.mci.web.model.PatientUpdateLog;
+import org.sharedhealth.mci.deduplication.event.DuplicatePatientEventProcessor;
+import org.sharedhealth.mci.deduplication.event.DuplicatePatientEventProcessorFactory;
+import org.sharedhealth.mci.deduplication.service.DuplicatePatientFeedService;
+import org.sharedhealth.mci.domain.model.PatientUpdateLog;
+import org.sharedhealth.mci.domain.model.PatientUpdateLogMapper;
+import org.sharedhealth.mci.domain.repository.MarkerRepository;
+import org.sharedhealth.mci.domain.repository.PatientFeedRepository;
 
 import java.util.UUID;
 
@@ -17,8 +18,8 @@ import static java.util.UUID.randomUUID;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.DUPLICATE_PATIENT_MARKER;
-import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.EVENT_TYPE_CREATED;
+import static org.sharedhealth.mci.domain.constant.RepositoryConstants.DUPLICATE_PATIENT_MARKER;
+import static org.sharedhealth.mci.domain.constant.RepositoryConstants.EVENT_TYPE_CREATED;
 
 public class DuplicatePatientFeedServiceTest {
 

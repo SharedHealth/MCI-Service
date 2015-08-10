@@ -4,29 +4,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.sharedhealth.mci.domain.model.*;
+import org.sharedhealth.mci.domain.repository.PatientFeedRepository;
+import org.sharedhealth.mci.domain.repository.PatientRepository;
 import org.sharedhealth.mci.web.exception.InsufficientPrivilegeException;
-import org.sharedhealth.mci.web.handler.MCIResponse;
-import org.sharedhealth.mci.web.infrastructure.persistence.PatientFeedRepository;
-import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
-import org.sharedhealth.mci.web.mapper.Address;
-import org.sharedhealth.mci.web.mapper.Catchment;
-import org.sharedhealth.mci.web.mapper.PatientData;
-import org.sharedhealth.mci.web.mapper.PendingApproval;
-import org.sharedhealth.mci.web.mapper.PendingApprovalFieldDetails;
 import org.sharedhealth.mci.web.mapper.PendingApprovalListResponse;
-import org.sharedhealth.mci.web.mapper.PhoneNumber;
-import org.sharedhealth.mci.web.mapper.Requester;
-import org.sharedhealth.mci.web.mapper.SearchQuery;
 import org.sharedhealth.mci.web.model.MciHealthId;
-import org.sharedhealth.mci.web.model.PatientUpdateLog;
-import org.sharedhealth.mci.web.model.PendingApprovalMapping;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.UUID;
+import java.util.*;
 
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
@@ -36,7 +21,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.sharedhealth.mci.web.utils.JsonConstants.*;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.*;
 
 public class PatientServiceTest {
 

@@ -2,6 +2,7 @@ package org.sharedhealth.mci.utils;
 
 import org.joda.time.DateTime;
 import org.junit.Test;
+import org.sharedhealth.mci.domain.util.DateUtil;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -9,7 +10,7 @@ import java.util.Date;
 import java.util.UUID;
 
 import static org.junit.Assert.*;
-import static org.sharedhealth.mci.utils.DateUtil.*;
+import static org.sharedhealth.mci.domain.util.DateUtil.*;
 import static org.sharedhealth.mci.utils.TimeUid.fromString;
 
 public class DateUtilTest {

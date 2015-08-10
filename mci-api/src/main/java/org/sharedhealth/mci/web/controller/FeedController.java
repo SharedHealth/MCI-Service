@@ -1,7 +1,7 @@
 package org.sharedhealth.mci.web.controller;
 
 import org.apache.commons.lang3.StringUtils;
-import org.sharedhealth.mci.web.config.MCIProperties;
+import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.sharedhealth.mci.web.service.PatientService;
 
 import javax.servlet.http.HttpServletRequest;

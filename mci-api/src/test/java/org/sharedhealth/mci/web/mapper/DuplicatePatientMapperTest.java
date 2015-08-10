@@ -3,20 +3,20 @@ package org.sharedhealth.mci.web.mapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
-import org.sharedhealth.mci.web.model.DuplicatePatient;
+import org.sharedhealth.mci.deduplication.model.DuplicatePatient;
+import org.sharedhealth.mci.deduplication.model.DuplicatePatientData;
+import org.sharedhealth.mci.deduplication.model.DuplicatePatientMapper;
+import org.sharedhealth.mci.domain.model.Address;
+import org.sharedhealth.mci.domain.model.Catchment;
+import org.sharedhealth.mci.domain.model.PatientMapper;
+import org.sharedhealth.mci.domain.model.PatientSummaryData;
+import org.sharedhealth.mci.domain.repository.PatientRepository;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class DuplicatePatientMapperTest {

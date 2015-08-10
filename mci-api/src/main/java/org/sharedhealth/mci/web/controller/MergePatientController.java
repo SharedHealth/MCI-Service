@@ -1,12 +1,12 @@
 package org.sharedhealth.mci.web.controller;
 
 import org.apache.commons.lang3.StringUtils;
-import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
-import org.sharedhealth.mci.web.exception.Forbidden;
-import org.sharedhealth.mci.web.exception.ValidationException;
-import org.sharedhealth.mci.web.handler.MCIResponse;
+import org.sharedhealth.mci.domain.exception.Forbidden;
+import org.sharedhealth.mci.domain.exception.ValidationException;
+import org.sharedhealth.mci.domain.model.MCIResponse;
+import org.sharedhealth.mci.domain.model.PatientData;
+import org.sharedhealth.mci.domain.validation.group.RequiredOnUpdateGroup;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
-import org.sharedhealth.mci.web.mapper.PatientData;
 import org.sharedhealth.mci.web.service.PatientService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +50,9 @@ public class MergePatientController extends MciController {
         UserInfo userInfo = getUserInfo();
         logAccessDetails(userInfo, format("Updating patient (healthId): %s", healthId));
 
-        patient.setRequester(userInfo.getProperties());
+        UserInfo.UserInfoProperties properties = userInfo.getProperties();
+        patient.setRequester(properties.getFacilityId(), properties.getProviderId(),
+                properties.getAdminId(), properties.getName());
 
         logger.debug(" Health id [" + healthId + "]");
         final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();

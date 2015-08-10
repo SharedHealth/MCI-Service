@@ -3,6 +3,7 @@ package org.sharedhealth.mci.web.mapper;
 import org.hibernate.validator.HibernateValidator;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.sharedhealth.mci.domain.model.PhoneNumber;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;

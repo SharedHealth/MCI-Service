@@ -17,8 +17,8 @@ import java.util.Map;
 
 import static java.lang.Integer.valueOf;
 import static java.lang.System.getenv;
+import static org.sharedhealth.mci.domain.config.MCIProperties.DIAGNOSTICS_SERVLET_PATH;
 import static org.sharedhealth.mci.web.config.MCIConfig.getSupportedServletMappings;
-import static org.sharedhealth.mci.web.config.MCIProperties.DIAGNOSTICS_SERVLET_PATH;
 
 @Import(WebMvcConfig.class)
 public class Main {

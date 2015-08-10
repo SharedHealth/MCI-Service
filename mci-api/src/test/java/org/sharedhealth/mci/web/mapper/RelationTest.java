@@ -2,6 +2,7 @@ package org.sharedhealth.mci.web.mapper;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
+import org.sharedhealth.mci.domain.model.Relation;
 
 import javax.validation.ConstraintViolation;
 import java.util.Set;

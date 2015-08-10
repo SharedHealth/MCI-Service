@@ -1,7 +1,7 @@
 package org.sharedhealth.mci.web.service;
 
+import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.sharedhealth.mci.utils.LuhnChecksumGenerator;
-import org.sharedhealth.mci.web.config.MCIProperties;
 import org.sharedhealth.mci.web.infrastructure.persistence.HealthIdRepository;
 import org.sharedhealth.mci.web.model.MciHealthId;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -4,18 +4,17 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.sharedhealth.mci.web.infrastructure.persistence.LocationRepository;
-import org.sharedhealth.mci.web.mapper.LocationCriteria;
-import org.sharedhealth.mci.web.mapper.LocationData;
-import org.sharedhealth.mci.web.model.LRMarker;
+import org.sharedhealth.mci.domain.model.LocationData;
+import org.sharedhealth.mci.domain.model.LocationRepositoryMarker;
+import org.sharedhealth.mci.domain.repository.LocationCriteria;
+import org.sharedhealth.mci.domain.repository.LocationRepository;
+import org.sharedhealth.mci.domain.service.LocationService;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class LocationServiceTest {
@@ -81,7 +80,7 @@ public class LocationServiceTest {
     @Test
     public void shouldReturnLRMarkerDataIfExist() throws Exception {
 
-        LRMarker lrMarker = new LRMarker();
+        LocationRepositoryMarker lrMarker = new LocationRepositoryMarker();
         lrMarker.setLastFeedUrl("2015-03-04");
         lrMarker.setType("DIVISION");
 
@@ -99,7 +98,7 @@ public class LocationServiceTest {
 
         Mockito.when(locationRepository.getLRMarkerData("DIVSION")).thenReturn(null);
 
-        LRMarker lrMarker = locationService.getLRMarkerData("DIVSION");
+        LocationRepositoryMarker lrMarker = locationService.getLRMarkerData("DIVSION");
         assertNull(lrMarker);
 
     }

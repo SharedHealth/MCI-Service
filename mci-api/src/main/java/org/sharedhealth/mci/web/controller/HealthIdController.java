@@ -1,6 +1,6 @@
 package org.sharedhealth.mci.web.controller;
 
-import org.sharedhealth.mci.web.config.MCIProperties;
+import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
 import org.sharedhealth.mci.web.model.GeneratedHidRange;
 import org.sharedhealth.mci.web.model.MciHealthId;

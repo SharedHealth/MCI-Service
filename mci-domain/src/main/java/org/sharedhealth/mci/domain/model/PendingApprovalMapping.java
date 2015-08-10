@@ -1,0 +1,50 @@
+package org.sharedhealth.mci.domain.model;
+
+
+import org.springframework.data.cassandra.mapping.Column;
+import org.springframework.data.cassandra.mapping.PrimaryKeyColumn;
+import org.springframework.data.cassandra.mapping.Table;
+
+import java.util.UUID;
+
+import static org.sharedhealth.mci.domain.constant.JsonConstants.CATCHMENT_ID;
+import static org.sharedhealth.mci.domain.constant.RepositoryConstants.*;
+import static org.springframework.cassandra.core.PrimaryKeyType.CLUSTERED;
+import static org.springframework.cassandra.core.PrimaryKeyType.PARTITIONED;
+
+@Table(value = CF_PENDING_APPROVAL_MAPPING)
+public class PendingApprovalMapping {
+
+    @PrimaryKeyColumn(name = CATCHMENT_ID, ordinal = 0, type = PARTITIONED)
+    private String catchment_id;
+
+    @PrimaryKeyColumn(name = LAST_UPDATED, ordinal = 1, type = CLUSTERED)
+    private UUID last_updated;
+
+    @Column(HEALTH_ID)
+    private String health_id;
+
+    public String getCatchmentId() {
+        return catchment_id;
+    }
+
+    public void setCatchmentId(String catchmentId) {
+        this.catchment_id = catchmentId;
+    }
+
+    public UUID getLastUpdated() {
+        return last_updated;
+    }
+
+    public void setLastUpdated(UUID lastUpdated) {
+        this.last_updated = lastUpdated;
+    }
+
+    public String getHealthId() {
+        return health_id;
+    }
+
+    public void setHealthId(String health_id) {
+        this.health_id = health_id;
+    }
+}

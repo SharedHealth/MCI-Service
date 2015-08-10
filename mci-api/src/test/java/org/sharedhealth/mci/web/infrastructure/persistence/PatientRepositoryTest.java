@@ -2,33 +2,17 @@ package org.sharedhealth.mci.web.infrastructure.persistence;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.sharedhealth.mci.web.mapper.Address;
-import org.sharedhealth.mci.web.mapper.PatientData;
-import org.sharedhealth.mci.web.mapper.PendingApproval;
-import org.sharedhealth.mci.web.mapper.PendingApprovalFieldDetails;
-import org.sharedhealth.mci.web.mapper.PhoneNumber;
-import org.sharedhealth.mci.web.mapper.Requester;
-import org.sharedhealth.mci.web.mapper.SearchQuery;
+import org.sharedhealth.mci.domain.model.*;
+import org.sharedhealth.mci.domain.repository.PatientRepository;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.UUID;
+import java.util.*;
 
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.sharedhealth.mci.web.utils.JsonConstants.GENDER;
-import static org.sharedhealth.mci.web.utils.JsonConstants.GIVEN_NAME;
-import static org.sharedhealth.mci.web.utils.JsonConstants.OCCUPATION;
-import static org.sharedhealth.mci.web.utils.JsonConstants.PRESENT_ADDRESS;
+import static org.junit.Assert.*;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.*;
 
 public class PatientRepositoryTest {
 

@@ -1,6 +1,6 @@
 package org.sharedhealth.mci.utils;
 
-import org.sharedhealth.mci.web.config.MCIProperties;
+import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.springframework.http.HttpHeaders;
 
 public class HttpUtil {

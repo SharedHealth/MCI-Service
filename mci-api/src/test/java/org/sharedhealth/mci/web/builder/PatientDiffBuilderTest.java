@@ -1,10 +1,11 @@
 package org.sharedhealth.mci.web.builder;
 
 import org.junit.Test;
-import org.sharedhealth.mci.web.mapper.Address;
-import org.sharedhealth.mci.web.mapper.PatientData;
-import org.sharedhealth.mci.web.mapper.PhoneNumber;
-import org.sharedhealth.mci.web.mapper.Relation;
+import org.sharedhealth.mci.domain.diff.PatientDiffBuilder;
+import org.sharedhealth.mci.domain.model.Address;
+import org.sharedhealth.mci.domain.model.PatientData;
+import org.sharedhealth.mci.domain.model.PhoneNumber;
+import org.sharedhealth.mci.domain.model.Relation;
 
 import java.util.List;
 import java.util.Map;
@@ -12,8 +13,8 @@ import java.util.Map;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.sharedhealth.mci.web.builder.PatientDiffBuilder.EMPTY_VALUE;
-import static org.sharedhealth.mci.web.utils.JsonConstants.*;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.*;
+import static org.sharedhealth.mci.domain.diff.PatientDiffBuilder.EMPTY_VALUE;
 
 public class PatientDiffBuilderTest {
 

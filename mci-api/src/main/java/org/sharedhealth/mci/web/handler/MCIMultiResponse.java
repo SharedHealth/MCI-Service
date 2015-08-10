@@ -11,8 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
-import static org.sharedhealth.mci.web.utils.JsonConstants.ADDITIONAL_INFO;
-import static org.sharedhealth.mci.web.utils.JsonConstants.HTTP_STATUS;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.ADDITIONAL_INFO;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.HTTP_STATUS;
 
 @JsonIgnoreProperties(value = {"httpStatusObject"})
 @JsonPropertyOrder({HTTP_STATUS, "results", ADDITIONAL_INFO})

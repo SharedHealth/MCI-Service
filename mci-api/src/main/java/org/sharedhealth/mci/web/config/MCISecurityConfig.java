@@ -1,5 +1,6 @@
 package org.sharedhealth.mci.web.config;
 
+import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.sharedhealth.mci.web.infrastructure.security.TokenAuthenticationFilter;
 import org.sharedhealth.mci.web.infrastructure.security.TokenAuthenticationProvider;
 import org.slf4j.Logger;

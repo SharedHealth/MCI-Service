@@ -1,9 +1,9 @@
 package org.sharedhealth.mci.web.controller;
 
-import org.sharedhealth.mci.web.config.MCIProperties;
+import org.sharedhealth.mci.domain.config.MCIProperties;
+import org.sharedhealth.mci.domain.model.ResponseWithAdditionalInfo;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
-import org.sharedhealth.mci.web.mapper.ResponseWithAdditionalInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,10 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static java.lang.String.format;
-import static org.sharedhealth.mci.web.utils.JsonConstants.AFTER;
-import static org.sharedhealth.mci.web.utils.JsonConstants.BEFORE;
-import static org.sharedhealth.mci.web.utils.JsonConstants.NEXT;
-import static org.sharedhealth.mci.web.utils.JsonConstants.PREVIOUS;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.*;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;

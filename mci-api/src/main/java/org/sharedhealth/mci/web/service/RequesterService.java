@@ -1,8 +1,8 @@
 package org.sharedhealth.mci.web.service;
 
+import org.sharedhealth.mci.domain.model.Requester;
+import org.sharedhealth.mci.domain.model.RequesterDetails;
 import org.sharedhealth.mci.web.mapper.ProviderResponse;
-import org.sharedhealth.mci.web.mapper.Requester;
-import org.sharedhealth.mci.web.mapper.RequesterDetails;
 import org.sharedhealth.mci.web.model.Facility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

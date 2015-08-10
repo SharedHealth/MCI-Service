@@ -3,6 +3,7 @@ package org.sharedhealth.mci.web.infrastructure.persistence;
 import com.datastax.driver.core.querybuilder.Insert;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
+import org.sharedhealth.mci.domain.repository.BaseRepository;
 import org.sharedhealth.mci.web.model.Facility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

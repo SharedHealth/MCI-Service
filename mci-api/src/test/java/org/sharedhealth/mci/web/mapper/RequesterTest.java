@@ -1,7 +1,9 @@
 package org.sharedhealth.mci.web.mapper;
 
 import org.junit.Test;
-import org.sharedhealth.mci.web.exception.InvalidRequesterException;
+import org.sharedhealth.mci.domain.exception.InvalidRequesterException;
+import org.sharedhealth.mci.domain.model.Requester;
+import org.sharedhealth.mci.domain.model.RequesterDetails;
 
 import java.util.HashSet;
 import java.util.Set;

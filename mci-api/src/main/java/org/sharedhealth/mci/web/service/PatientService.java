@@ -2,21 +2,14 @@ package org.sharedhealth.mci.web.service;
 
 
 import org.apache.commons.lang3.StringUtils;
-import org.sharedhealth.mci.web.exception.Forbidden;
+import org.sharedhealth.mci.domain.exception.Forbidden;
+import org.sharedhealth.mci.domain.exception.ValidationException;
+import org.sharedhealth.mci.domain.model.*;
+import org.sharedhealth.mci.domain.repository.PatientFeedRepository;
+import org.sharedhealth.mci.domain.repository.PatientRepository;
 import org.sharedhealth.mci.web.exception.InsufficientPrivilegeException;
-import org.sharedhealth.mci.web.exception.ValidationException;
-import org.sharedhealth.mci.web.handler.MCIResponse;
-import org.sharedhealth.mci.web.infrastructure.persistence.PatientFeedRepository;
-import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
-import org.sharedhealth.mci.web.mapper.Catchment;
-import org.sharedhealth.mci.web.mapper.PatientData;
-import org.sharedhealth.mci.web.mapper.PatientSummaryData;
-import org.sharedhealth.mci.web.mapper.PendingApproval;
 import org.sharedhealth.mci.web.mapper.PendingApprovalListResponse;
-import org.sharedhealth.mci.web.mapper.SearchQuery;
 import org.sharedhealth.mci.web.model.MciHealthId;
-import org.sharedhealth.mci.web.model.PatientUpdateLog;
-import org.sharedhealth.mci.web.model.PendingApprovalMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,22 +17,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.DirectFieldBindingResult;
 import org.springframework.validation.FieldError;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.TreeSet;
-import java.util.UUID;
+import java.util.*;
 
 import static java.lang.String.format;
-import static org.apache.commons.collections4.CollectionUtils.intersection;
-import static org.apache.commons.collections4.CollectionUtils.isEmpty;
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-import static org.apache.commons.collections4.CollectionUtils.union;
+import static org.apache.commons.collections4.CollectionUtils.*;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.sharedhealth.mci.web.utils.ErrorConstants.ERROR_CODE_INVALID;
-import static org.sharedhealth.mci.web.utils.JsonConstants.HID;
-import static org.sharedhealth.mci.web.utils.JsonConstants.RELATIONS;
+import static org.sharedhealth.mci.domain.constant.ErrorConstants.ERROR_CODE_INVALID;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.HID;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.RELATIONS;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Component

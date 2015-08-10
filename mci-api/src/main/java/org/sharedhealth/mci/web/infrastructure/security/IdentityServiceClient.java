@@ -1,8 +1,8 @@
 package org.sharedhealth.mci.web.infrastructure.security;
 
+import org.sharedhealth.mci.domain.config.MCICacheConfiguration;
+import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.sharedhealth.mci.utils.HttpUtil;
-import org.sharedhealth.mci.web.config.MCICacheConfiguration;
-import org.sharedhealth.mci.web.config.MCIProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;

@@ -17,9 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
-import static org.sharedhealth.mci.utils.HttpUtil.AUTH_TOKEN_KEY;
-import static org.sharedhealth.mci.utils.HttpUtil.CLIENT_ID_KEY;
-import static org.sharedhealth.mci.utils.HttpUtil.FROM_KEY;
+import static org.sharedhealth.mci.utils.HttpUtil.*;
 import static org.springframework.util.StringUtils.isEmpty;
 
 

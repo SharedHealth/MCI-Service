@@ -3,16 +3,12 @@ package org.sharedhealth.mci.web.infrastructure.persistence;
 import com.datastax.driver.core.utils.UUIDs;
 import org.springframework.data.cassandra.core.CassandraOperations;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.addAll;
 import static java.util.Collections.unmodifiableList;
-import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.*;
+import static org.sharedhealth.mci.domain.constant.RepositoryConstants.*;
 
 public class TestUtil {
 

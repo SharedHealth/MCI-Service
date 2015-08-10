@@ -6,22 +6,18 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.sharedhealth.mci.utils.DateUtil;
-import org.sharedhealth.mci.web.config.MCIProperties;
+import org.sharedhealth.mci.domain.config.MCIProperties;
+import org.sharedhealth.mci.domain.constant.JsonConstants;
+import org.sharedhealth.mci.domain.model.*;
+import org.sharedhealth.mci.domain.util.DateUtil;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.infrastructure.security.TokenAuthentication;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
 import org.sharedhealth.mci.web.infrastructure.security.UserProfile;
-import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.Feed;
 import org.sharedhealth.mci.web.mapper.FeedEntry;
-import org.sharedhealth.mci.web.mapper.PatientData;
-import org.sharedhealth.mci.web.mapper.PendingApproval;
-import org.sharedhealth.mci.web.mapper.PendingApprovalFieldDetails;
 import org.sharedhealth.mci.web.mapper.PendingApprovalListResponse;
-import org.sharedhealth.mci.web.mapper.Requester;
 import org.sharedhealth.mci.web.service.PatientService;
-import org.sharedhealth.mci.web.utils.JsonConstants;
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -33,13 +29,7 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.UUID;
+import java.util.*;
 
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
@@ -57,9 +47,9 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.sharedhealth.mci.utils.DateUtil.parseDate;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.*;
+import static org.sharedhealth.mci.domain.util.DateUtil.parseDate;
 import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.*;
-import static org.sharedhealth.mci.web.utils.JsonConstants.*;
 import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -327,7 +317,8 @@ public class CatchmentControllerTest {
                 .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".requested_by.provider.name", is(nullValue())))
 
                 .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".value", is("some value")))
-                .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".created_at", is(DateUtil.toIsoMillisFormat(unixTimestamp(timeuuid)))));
+                .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".created_at", is(DateUtil.toIsoMillisFormat(unixTimestamp
+                        (timeuuid)))));
 
         verify(patientService).findPendingApprovalDetails(healthId, catchment);
     }

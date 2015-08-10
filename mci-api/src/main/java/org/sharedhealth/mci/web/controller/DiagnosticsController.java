@@ -1,11 +1,7 @@
 package org.sharedhealth.mci.web.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.endpoint.DumpEndpoint;
-import org.springframework.boot.actuate.endpoint.EnvironmentEndpoint;
-import org.springframework.boot.actuate.endpoint.SystemPublicMetrics;
-import org.springframework.boot.actuate.endpoint.TomcatPublicMetrics;
-import org.springframework.boot.actuate.endpoint.TraceEndpoint;
+import org.springframework.boot.actuate.endpoint.*;
 import org.springframework.boot.actuate.health.ApplicationHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.metrics.Metric;

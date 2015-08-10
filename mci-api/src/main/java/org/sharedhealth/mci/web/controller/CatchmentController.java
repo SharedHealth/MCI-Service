@@ -1,18 +1,18 @@
 package org.sharedhealth.mci.web.controller;
 
+import org.sharedhealth.mci.domain.config.MCIProperties;
+import org.sharedhealth.mci.domain.exception.Forbidden;
+import org.sharedhealth.mci.domain.exception.ValidationException;
+import org.sharedhealth.mci.domain.model.Catchment;
+import org.sharedhealth.mci.domain.model.MCIResponse;
+import org.sharedhealth.mci.domain.model.PatientData;
+import org.sharedhealth.mci.domain.model.PendingApproval;
+import org.sharedhealth.mci.domain.validation.group.RequiredOnUpdateGroup;
 import org.sharedhealth.mci.utils.TimeUid;
-import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
-import org.sharedhealth.mci.web.config.MCIProperties;
-import org.sharedhealth.mci.web.exception.Forbidden;
-import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
-import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
-import org.sharedhealth.mci.web.mapper.Catchment;
 import org.sharedhealth.mci.web.mapper.Feed;
 import org.sharedhealth.mci.web.mapper.FeedEntry;
-import org.sharedhealth.mci.web.mapper.PatientData;
-import org.sharedhealth.mci.web.mapper.PendingApproval;
 import org.sharedhealth.mci.web.mapper.PendingApprovalListResponse;
 import org.sharedhealth.mci.web.service.PatientService;
 import org.slf4j.Logger;
@@ -22,21 +22,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.groups.Default;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.TreeSet;
-import java.util.UUID;
+import java.util.*;
 
 import static java.lang.String.format;
 import static java.net.URLEncoder.encode;
@@ -44,17 +36,13 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.sharedhealth.mci.utils.DateUtil.parseDate;
-import static org.sharedhealth.mci.web.infrastructure.security.UserProfile.ADMIN_TYPE;
-import static org.sharedhealth.mci.web.infrastructure.security.UserProfile.FACILITY_TYPE;
-import static org.sharedhealth.mci.web.infrastructure.security.UserProfile.PROVIDER_TYPE;
-import static org.sharedhealth.mci.web.utils.JsonConstants.*;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.*;
+import static org.sharedhealth.mci.domain.util.DateUtil.parseDate;
+import static org.sharedhealth.mci.web.infrastructure.security.UserProfile.*;
 import static org.springframework.http.HttpStatus.ACCEPTED;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.PUT;
+import static org.springframework.web.bind.annotation.RequestMethod.*;
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 @RestController
@@ -156,7 +144,9 @@ public class CatchmentController extends FeedController {
         logAccessDetails(userInfo, String.format("Accepting (PUT) pending approval for patient (Health Id) : %s, catchment: %s",
                 healthId, catchmentId));
 
-        patient.setRequester(userInfo.getProperties());
+        UserInfo.UserInfoProperties properties = userInfo.getProperties();
+        patient.setRequester(properties.getFacilityId(), properties.getProviderId(),
+                properties.getAdminId(), properties.getName());
 
         logger.debug("Accepting pending approvals. Health ID : " + healthId);
         return processPendingApprovals(catchmentId, healthId, patient, userInfo, bindingResult, true);
@@ -174,7 +164,9 @@ public class CatchmentController extends FeedController {
         logAccessDetails(userInfo, String.format("Accepting(DELETE) pending approval for patient (Health Id) : %s, catchment: %s",
                 healthId, catchmentId));
 
-        patient.setRequester(userInfo.getProperties());
+        UserInfo.UserInfoProperties properties = userInfo.getProperties();
+        patient.setRequester(properties.getFacilityId(), properties.getProviderId(),
+                properties.getAdminId(), properties.getName());
         
         logger.debug("Accepting pending approvals. Health ID : " + healthId);
         return processPendingApprovals(catchmentId, healthId, patient, userInfo, bindingResult, false);

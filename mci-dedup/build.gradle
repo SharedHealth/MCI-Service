@@ -1,0 +1,91 @@
+apply plugin: 'java'
+apply plugin: 'idea'
+
+repositories {
+    mavenCentral()
+}
+
+repositories {
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+    mavenCentral()
+    flatDir {
+        dirs "${rootDir}/lib"
+    }
+}
+
+compileJava {
+    options.encoding = 'UTF-8'
+}
+
+compileTestJava {
+    options.encoding = 'UTF-8'
+}
+
+dependencies {
+    compile(libraries.spring_boot_web) {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    }
+
+    compile(libraries.spring_boot_security) {
+    }
+    compile(libraries.spring_boot_actuator) {
+    }
+
+    compile libraries.spring_boot_logging, libraries.snappy, libraries.spring_context_support,
+            libraries.spring_data_cassandra, libraries.hibernate_validator,
+            libraries.apache_collections, libraries.apache_lang,
+            libraries.apache_bean_utils, libraries.commons_codec, libraries.commons_validator,
+            libraries.spring_security, libraries.rome, libraries.joda_time, libraries.ehcache_core
+
+    compile project(":mci-domain")
+
+    testCompile project(":schema")
+    testCompile(testLibraries.netty) {
+        force = 'true'
+    }
+    testCompile('org.cassandraunit:cassandra-unit-spring:2.0.2.2') {
+        exclude group: 'com.datastax.cassandra', module: 'cassandra-driver-core'
+    }
+    testCompile testLibraries.mockito, testLibraries.junit, testLibraries.spring_test, testLibraries.http_client, testLibraries.wiremock
+}
+
+test {
+    testLogging {
+        exceptionFormat "full" // default is "short"
+        events "passed", "skipped", "failed"
+    }
+
+    beforeTest { descriptor ->
+        logger.lifecycle("Running test: " + descriptor)
+    }
+    // set heap size for the test JVM(s)
+    minHeapSize = "512m"
+    maxHeapSize = "1024m"
+
+    // set JVM arguments for the test JVM(s)
+    jvmArgs '-XX:MaxPermSize=256m'
+
+//    onOutput { descriptor, event ->
+//        logger.lifecycle("Test: " + descriptor + " produced standard out/err: " + event.message )
+//    }
+}
+
+configurations {
+    all*.exclude group: 'ch.qos.logback', module: "logback-classic"
+    all*.exclude group: 'ch.qos.logback', module: "logback-core"
+    all*.exclude group: 'org.slf4j', module: "log4j-over-slf4j"
+    migration {
+        extendsFrom compile
+    }
+}
+
+jar {
+    baseName = 'mci-dedup'
+    version = '0.2-SNAPSHOT'
+}
+
+private Properties loadConfig() {
+    Properties properties = new Properties()
+    properties.load(new FileInputStream(file("${projectDir}/../env/local.properties")));
+    properties
+}

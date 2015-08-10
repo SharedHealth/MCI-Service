@@ -1,6 +1,7 @@
 package org.sharedhealth.mci.web.mapper;
 
 import org.junit.Test;
+import org.sharedhealth.mci.domain.model.Catchment;
 
 import java.util.List;
 

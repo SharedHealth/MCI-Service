@@ -1,10 +1,10 @@
 package org.sharedhealth.mci.web.handler;
 
 import org.apache.log4j.Logger;
-import org.sharedhealth.mci.web.config.MCIProperties;
-import org.sharedhealth.mci.web.mapper.LocationData;
-import org.sharedhealth.mci.web.model.LRMarker;
-import org.sharedhealth.mci.web.service.LocationService;
+import org.sharedhealth.mci.domain.config.MCIProperties;
+import org.sharedhealth.mci.domain.model.LocationData;
+import org.sharedhealth.mci.domain.model.LocationRepositoryMarker;
+import org.sharedhealth.mci.domain.service.LocationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
@@ -125,10 +125,10 @@ public class LocationDataSync {
 
     private String getLastFeedUri(String type) {
 
-        LRMarker lrMarker = locationService.getLRMarkerData(type);
+        LocationRepositoryMarker locationRepositoryMarker = locationService.getLRMarkerData(type);
 
-        if (lrMarker != null) {
-            return lrMarker.getLastFeedUrl();
+        if (locationRepositoryMarker != null) {
+            return locationRepositoryMarker.getLastFeedUrl();
         }
         return null;
     }

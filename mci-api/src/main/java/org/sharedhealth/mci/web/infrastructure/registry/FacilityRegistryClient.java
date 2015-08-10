@@ -1,6 +1,6 @@
 package org.sharedhealth.mci.web.infrastructure.registry;
 
-import org.sharedhealth.mci.web.config.MCIProperties;
+import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.sharedhealth.mci.web.infrastructure.WebClient;
 import org.sharedhealth.mci.web.mapper.FacilityResponse;
 import org.slf4j.Logger;

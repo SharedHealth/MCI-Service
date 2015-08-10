@@ -1,12 +1,7 @@
 package org.sharedhealth.mci.web.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sun.syndication.feed.atom.Category;
-import com.sun.syndication.feed.atom.Content;
-import com.sun.syndication.feed.atom.Entry;
-import com.sun.syndication.feed.atom.Generator;
-import com.sun.syndication.feed.atom.Link;
-import com.sun.syndication.feed.atom.Person;
+import com.sun.syndication.feed.atom.*;
 import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.WireFeedOutput;
 import org.apache.commons.lang3.StringUtils;
@@ -25,13 +20,9 @@ import java.io.Writer;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
-import static org.sharedhealth.mci.utils.DateUtil.ISO_DATE_TIME_TILL_MILLIS_FORMAT1;
+import static org.sharedhealth.mci.domain.util.DateUtil.ISO_DATE_TIME_TILL_MILLIS_FORMAT1;
 
 public class FeedMessageConverter extends AbstractHttpMessageConverter<Feed> {
     private static final String ATOM_MEDIA_TYPE = "application/atom+xml";

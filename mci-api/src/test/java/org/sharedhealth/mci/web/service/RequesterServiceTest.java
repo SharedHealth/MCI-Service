@@ -3,8 +3,8 @@ package org.sharedhealth.mci.web.service;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.sharedhealth.mci.domain.model.Requester;
 import org.sharedhealth.mci.web.mapper.ProviderResponse;
-import org.sharedhealth.mci.web.mapper.Requester;
 import org.sharedhealth.mci.web.model.Facility;
 
 import static junit.framework.Assert.assertEquals;

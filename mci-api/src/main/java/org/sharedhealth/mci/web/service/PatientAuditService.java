@@ -1,22 +1,18 @@
 package org.sharedhealth.mci.web.service;
 
 import org.apache.commons.lang3.StringUtils;
+import org.sharedhealth.mci.domain.model.PatientUpdateLog;
+import org.sharedhealth.mci.domain.model.Requester;
+import org.sharedhealth.mci.domain.repository.PatientFeedRepository;
 import org.sharedhealth.mci.web.infrastructure.persistence.PatientAuditRepository;
-import org.sharedhealth.mci.web.infrastructure.persistence.PatientFeedRepository;
 import org.sharedhealth.mci.web.mapper.PatientAuditLogData;
-import org.sharedhealth.mci.web.mapper.Requester;
 import org.sharedhealth.mci.web.model.PatientAuditLog;
-import org.sharedhealth.mci.web.model.PatientUpdateLog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;

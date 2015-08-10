@@ -1,11 +1,11 @@
 package org.sharedhealth.mci.web.controller;
 
-import org.sharedhealth.mci.web.exception.ValidationException;
+import org.sharedhealth.mci.domain.exception.ValidationException;
+import org.sharedhealth.mci.domain.model.LocationData;
+import org.sharedhealth.mci.domain.repository.LocationCriteria;
+import org.sharedhealth.mci.domain.service.LocationService;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
-import org.sharedhealth.mci.web.mapper.LocationCriteria;
-import org.sharedhealth.mci.web.mapper.LocationData;
-import org.sharedhealth.mci.web.service.LocationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

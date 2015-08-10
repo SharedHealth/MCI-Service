@@ -1,6 +1,6 @@
 package org.sharedhealth.mci.web.service;
 
-import org.sharedhealth.mci.web.config.MCIProperties;
+import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.sharedhealth.mci.web.infrastructure.persistence.FacilityRepository;
 import org.sharedhealth.mci.web.infrastructure.registry.FacilityRegistryClient;
 import org.sharedhealth.mci.web.mapper.FacilityResponse;

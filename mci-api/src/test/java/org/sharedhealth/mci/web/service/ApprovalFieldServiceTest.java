@@ -4,15 +4,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.sharedhealth.mci.web.infrastructure.persistence.ApprovalFieldRepository;
-import org.sharedhealth.mci.web.model.ApprovalField;
+import org.sharedhealth.mci.domain.model.ApprovalField;
+import org.sharedhealth.mci.domain.repository.ApprovalFieldRepository;
+import org.sharedhealth.mci.domain.service.ApprovalFieldService;
 
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.sharedhealth.mci.web.utils.JsonConstants.GENDER;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.GENDER;
 
 public class ApprovalFieldServiceTest {
 

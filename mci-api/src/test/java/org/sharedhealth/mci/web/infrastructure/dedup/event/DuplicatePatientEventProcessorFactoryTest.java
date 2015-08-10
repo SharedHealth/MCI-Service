@@ -3,6 +3,7 @@ package org.sharedhealth.mci.web.infrastructure.dedup.event;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.sharedhealth.mci.deduplication.event.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,10 +11,10 @@ import java.util.Map;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.EVENT_TYPE_CREATED;
-import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.EVENT_TYPE_UPDATED;
-import static org.sharedhealth.mci.web.utils.JsonConstants.NEW_VALUE;
-import static org.sharedhealth.mci.web.utils.JsonConstants.OLD_VALUE;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.NEW_VALUE;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.OLD_VALUE;
+import static org.sharedhealth.mci.domain.constant.RepositoryConstants.EVENT_TYPE_CREATED;
+import static org.sharedhealth.mci.domain.constant.RepositoryConstants.EVENT_TYPE_UPDATED;
 
 public class DuplicatePatientEventProcessorFactoryTest {
 

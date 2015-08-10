@@ -1,6 +1,6 @@
 package org.sharedhealth.mci.web.service;
 
-import org.sharedhealth.mci.web.config.MCIProperties;
+import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.sharedhealth.mci.web.model.MciHealthId;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

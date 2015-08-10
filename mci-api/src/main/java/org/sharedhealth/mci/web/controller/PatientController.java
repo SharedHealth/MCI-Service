@@ -1,17 +1,17 @@
 package org.sharedhealth.mci.web.controller;
 
-import org.sharedhealth.mci.validation.group.RequiredGroup;
-import org.sharedhealth.mci.validation.group.RequiredOnUpdateGroup;
-import org.sharedhealth.mci.web.exception.Forbidden;
+import org.sharedhealth.mci.domain.exception.Forbidden;
+import org.sharedhealth.mci.domain.exception.ValidationException;
+import org.sharedhealth.mci.domain.model.MCIResponse;
+import org.sharedhealth.mci.domain.model.PatientData;
+import org.sharedhealth.mci.domain.model.PatientSummaryData;
+import org.sharedhealth.mci.domain.model.SearchQuery;
+import org.sharedhealth.mci.domain.validation.group.RequiredGroup;
+import org.sharedhealth.mci.domain.validation.group.RequiredOnUpdateGroup;
 import org.sharedhealth.mci.web.exception.HealthIdExistsException;
 import org.sharedhealth.mci.web.exception.SearchQueryParameterException;
-import org.sharedhealth.mci.web.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
-import org.sharedhealth.mci.web.handler.MCIResponse;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
-import org.sharedhealth.mci.web.mapper.PatientData;
-import org.sharedhealth.mci.web.mapper.PatientSummaryData;
-import org.sharedhealth.mci.web.mapper.SearchQuery;
 import org.sharedhealth.mci.web.service.PatientService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,9 +37,7 @@ import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-import static org.springframework.web.bind.annotation.RequestMethod.PUT;
+import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 @RestController
 @RequestMapping("/patients")
@@ -67,7 +65,10 @@ public class PatientController extends MciController {
         UserInfo userInfo = getUserInfo();
         logAccessDetails(userInfo, format("Creating a new patient : %s %s", patient.getGender(), patient.getSurName()));
 
-        patient.setRequester(userInfo.getProperties());
+        UserInfo.UserInfoProperties properties = userInfo.getProperties();
+        patient.setRequester(
+                properties.getFacilityId(), properties.getProviderId(), properties.getAdminId()
+                , properties.getName());
 
         logger.debug("Trying to create patient.");
         final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
@@ -152,7 +153,10 @@ public class PatientController extends MciController {
         UserInfo userInfo = getUserInfo();
         logAccessDetails(userInfo, format("Updating patient (healthId): %s", healthId));
 
-        patient.setRequester(userInfo.getProperties());
+        UserInfo.UserInfoProperties properties = userInfo.getProperties();
+        patient.setRequester(
+                properties.getFacilityId(), properties.getProviderId(), properties.getAdminId()
+                , properties.getName());
 
         logger.debug(" Health id [" + healthId + "]");
         final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();

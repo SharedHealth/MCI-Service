@@ -3,9 +3,10 @@ package org.sharedhealth.mci.web.infrastructure.persistence;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.sharedhealth.mci.domain.model.MasterData;
+import org.sharedhealth.mci.domain.repository.MasterDataRepository;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
-import org.sharedhealth.mci.web.model.MasterData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.cassandra.core.CassandraOperations;
@@ -15,9 +16,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration

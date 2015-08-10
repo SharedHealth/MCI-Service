@@ -1,13 +1,11 @@
 package org.sharedhealth.mci.web.mapper;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.sharedhealth.mci.domain.model.ResponseWithAdditionalInfo;
 
 import java.util.UUID;
 
-import static org.sharedhealth.mci.web.utils.JsonConstants.GIVEN_NAME;
-import static org.sharedhealth.mci.web.utils.JsonConstants.HID;
-import static org.sharedhealth.mci.web.utils.JsonConstants.LAST_UPDATED;
-import static org.sharedhealth.mci.web.utils.JsonConstants.SUR_NAME;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.*;
 
 public class PendingApprovalListResponse implements ResponseWithAdditionalInfo {
 

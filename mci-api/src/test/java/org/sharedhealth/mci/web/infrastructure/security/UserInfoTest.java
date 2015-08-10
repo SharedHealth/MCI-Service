@@ -8,10 +8,7 @@ import static java.util.Arrays.asList;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.*;
-import static org.sharedhealth.mci.web.infrastructure.security.UserProfile.ADMIN_TYPE;
-import static org.sharedhealth.mci.web.infrastructure.security.UserProfile.FACILITY_TYPE;
-import static org.sharedhealth.mci.web.infrastructure.security.UserProfile.PATIENT_TYPE;
-import static org.sharedhealth.mci.web.infrastructure.security.UserProfile.PROVIDER_TYPE;
+import static org.sharedhealth.mci.web.infrastructure.security.UserProfile.*;
 
 public class UserInfoTest {
 

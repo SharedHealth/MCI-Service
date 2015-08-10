@@ -3,10 +3,10 @@ package org.sharedhealth.mci.web.handler;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
+import org.sharedhealth.mci.domain.exception.ValidationException;
+import org.sharedhealth.mci.domain.model.PatientData;
 import org.sharedhealth.mci.utils.FieldPropertyNameReader;
 import org.sharedhealth.mci.web.exception.SearchQueryParameterException;
-import org.sharedhealth.mci.web.exception.ValidationException;
-import org.sharedhealth.mci.web.mapper.PatientData;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 

@@ -1,6 +1,7 @@
 package org.sharedhealth.mci.web.mapper;
 
 import org.junit.Test;
+import org.sharedhealth.mci.domain.model.SearchQuery;
 
 import static org.junit.Assert.assertEquals;
 

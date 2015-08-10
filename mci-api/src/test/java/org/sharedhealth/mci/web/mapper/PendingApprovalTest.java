@@ -2,6 +2,9 @@ package org.sharedhealth.mci.web.mapper;
 
 import com.datastax.driver.core.utils.UUIDs;
 import org.junit.Test;
+import org.sharedhealth.mci.domain.model.Address;
+import org.sharedhealth.mci.domain.model.PendingApproval;
+import org.sharedhealth.mci.domain.model.PendingApprovalFieldDetails;
 
 import java.util.Date;
 import java.util.Iterator;
@@ -12,7 +15,7 @@ import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static java.util.UUID.fromString;
 import static org.junit.Assert.*;
-import static org.sharedhealth.mci.web.utils.JsonConstants.PRESENT_ADDRESS;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.PRESENT_ADDRESS;
 
 public class PendingApprovalTest {
 

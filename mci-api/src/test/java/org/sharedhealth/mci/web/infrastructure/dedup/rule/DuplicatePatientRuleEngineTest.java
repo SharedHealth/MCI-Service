@@ -3,14 +3,11 @@ package org.sharedhealth.mci.web.infrastructure.dedup.rule;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.sharedhealth.mci.web.infrastructure.persistence.PatientRepository;
-import org.sharedhealth.mci.web.mapper.Address;
-import org.sharedhealth.mci.web.mapper.Catchment;
-import org.sharedhealth.mci.web.mapper.DuplicatePatientData;
-import org.sharedhealth.mci.web.mapper.DuplicatePatientMapper;
-import org.sharedhealth.mci.web.mapper.PatientData;
-import org.sharedhealth.mci.web.mapper.PatientMapper;
-import org.sharedhealth.mci.web.mapper.SearchQuery;
+import org.sharedhealth.mci.deduplication.model.DuplicatePatientData;
+import org.sharedhealth.mci.deduplication.model.DuplicatePatientMapper;
+import org.sharedhealth.mci.deduplication.rule.*;
+import org.sharedhealth.mci.domain.model.*;
+import org.sharedhealth.mci.domain.repository.PatientRepository;
 
 import java.util.HashSet;
 import java.util.List;
@@ -21,10 +18,7 @@ import static junit.framework.Assert.assertTrue;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.sharedhealth.mci.web.infrastructure.dedup.rule.DuplicatePatientRule.DUPLICATE_REASON_BRN;
-import static org.sharedhealth.mci.web.infrastructure.dedup.rule.DuplicatePatientRule.DUPLICATE_REASON_NAME_ADDRESS;
-import static org.sharedhealth.mci.web.infrastructure.dedup.rule.DuplicatePatientRule.DUPLICATE_REASON_NID;
-import static org.sharedhealth.mci.web.infrastructure.dedup.rule.DuplicatePatientRule.DUPLICATE_REASON_UID;
+import static org.sharedhealth.mci.deduplication.rule.DuplicatePatientRule.*;
 
 public class DuplicatePatientRuleEngineTest {
 

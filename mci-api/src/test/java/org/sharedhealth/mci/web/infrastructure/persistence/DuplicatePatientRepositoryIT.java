@@ -5,14 +5,18 @@ import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.sharedhealth.mci.deduplication.model.DuplicatePatient;
+import org.sharedhealth.mci.deduplication.model.DuplicatePatientIgnored;
+import org.sharedhealth.mci.deduplication.repository.DuplicatePatientQueryBuilder;
+import org.sharedhealth.mci.deduplication.repository.DuplicatePatientRepository;
+import org.sharedhealth.mci.domain.model.Address;
+import org.sharedhealth.mci.domain.model.Catchment;
+import org.sharedhealth.mci.domain.model.PatientData;
+import org.sharedhealth.mci.domain.model.Requester;
+import org.sharedhealth.mci.domain.repository.MarkerRepository;
+import org.sharedhealth.mci.domain.repository.PatientRepository;
 import org.sharedhealth.mci.web.config.EnvironmentMock;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
-import org.sharedhealth.mci.web.mapper.Address;
-import org.sharedhealth.mci.web.mapper.Catchment;
-import org.sharedhealth.mci.web.mapper.PatientData;
-import org.sharedhealth.mci.web.mapper.Requester;
-import org.sharedhealth.mci.web.model.DuplicatePatient;
-import org.sharedhealth.mci.web.model.DuplicatePatientIgnored;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.cassandra.core.CassandraOperations;
@@ -20,11 +24,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
@@ -33,13 +33,9 @@ import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.*;
-import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.asSet;
-import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.buildTimeUuids;
-import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.truncateAllColumnFamilies;
+import static org.junit.Assert.*;
+import static org.sharedhealth.mci.domain.constant.RepositoryConstants.*;
+import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration

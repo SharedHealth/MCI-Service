@@ -2,7 +2,8 @@ package org.sharedhealth.mci.web.mapper;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
-import org.sharedhealth.mci.validation.group.RequiredGroup;
+import org.sharedhealth.mci.domain.model.*;
+import org.sharedhealth.mci.domain.validation.group.RequiredGroup;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
 import org.sharedhealth.mci.web.infrastructure.security.UserProfile;
 
@@ -12,17 +13,10 @@ import java.util.List;
 import java.util.Set;
 
 import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.*;
 import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.MCI_USER_GROUP;
-import static org.sharedhealth.mci.web.infrastructure.security.UserProfile.ADMIN_TYPE;
-import static org.sharedhealth.mci.web.infrastructure.security.UserProfile.FACILITY_TYPE;
-import static org.sharedhealth.mci.web.infrastructure.security.UserProfile.PROVIDER_TYPE;
-import static org.sharedhealth.mci.web.utils.JsonConstants.GIVEN_NAME;
-import static org.sharedhealth.mci.web.utils.JsonConstants.PRESENT_ADDRESS;
-import static org.sharedhealth.mci.web.utils.JsonConstants.SUR_NAME;
+import static org.sharedhealth.mci.web.infrastructure.security.UserProfile.*;
 
 public class PatientDataTest extends ValidationAwareMapper {
 
@@ -317,7 +311,10 @@ public class PatientDataTest extends ValidationAwareMapper {
 
         PatientData patient = new PatientData();
         patient.setProvider("p000");
-        patient.setRequester(userInfo.getProperties());
+        UserInfo.UserInfoProperties properties = userInfo.getProperties();
+        patient.setRequester(
+                properties.getFacilityId(), properties.getProviderId(), properties.getAdminId()
+                , properties.getName());
 
         Requester requester = patient.getRequester();
         assertNotNull(requester);

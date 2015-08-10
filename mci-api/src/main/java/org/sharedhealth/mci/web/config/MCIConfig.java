@@ -1,5 +1,7 @@
 package org.sharedhealth.mci.web.config;
 
+import org.sharedhealth.mci.domain.config.MCICacheConfiguration;
+import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;

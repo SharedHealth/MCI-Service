@@ -4,23 +4,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.sharedhealth.mci.domain.model.*;
+import org.sharedhealth.mci.domain.service.ApprovalFieldService;
+import org.sharedhealth.mci.domain.service.PendingApprovalFilter;
 import org.sharedhealth.mci.web.exception.NonUpdatableFieldUpdateException;
-import org.sharedhealth.mci.web.mapper.Address;
-import org.sharedhealth.mci.web.mapper.LocationData;
-import org.sharedhealth.mci.web.mapper.PatientData;
-import org.sharedhealth.mci.web.mapper.PendingApproval;
-import org.sharedhealth.mci.web.mapper.PendingApprovalFieldDetails;
-import org.sharedhealth.mci.web.mapper.PhoneNumber;
-import org.sharedhealth.mci.web.mapper.Relation;
-import org.sharedhealth.mci.web.mapper.Requester;
-import org.sharedhealth.mci.web.service.ApprovalFieldService;
 
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.UUID;
+import java.util.*;
 
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static java.util.Arrays.asList;
@@ -29,9 +19,9 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.sharedhealth.mci.utils.DateUtil.parseDate;
-import static org.sharedhealth.mci.utils.DateUtil.toIsoMillisFormat;
-import static org.sharedhealth.mci.web.utils.JsonConstants.*;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.*;
+import static org.sharedhealth.mci.domain.util.DateUtil.parseDate;
+import static org.sharedhealth.mci.domain.util.DateUtil.toIsoMillisFormat;
 
 public class PendingApprovalFilterTest {
 

@@ -1,2 +1,4 @@
-include 'mci-api'
 include 'schema'
+include 'mci-domain'
+include 'mci-dedup'
+include 'mci-api'

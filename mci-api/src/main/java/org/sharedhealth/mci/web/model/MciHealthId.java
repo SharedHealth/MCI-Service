@@ -3,8 +3,8 @@ package org.sharedhealth.mci.web.model;
 import org.springframework.data.cassandra.mapping.PrimaryKeyColumn;
 import org.springframework.data.cassandra.mapping.Table;
 
-import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.CF_MCI_HEALTH_ID;
-import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.HID;
+import static org.sharedhealth.mci.domain.constant.RepositoryConstants.CF_MCI_HEALTH_ID;
+import static org.sharedhealth.mci.domain.constant.RepositoryConstants.HID;
 import static org.springframework.cassandra.core.PrimaryKeyType.PARTITIONED;
 
 @Table(value = CF_MCI_HEALTH_ID)

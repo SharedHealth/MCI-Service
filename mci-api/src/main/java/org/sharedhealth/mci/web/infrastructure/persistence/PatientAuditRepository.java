@@ -1,9 +1,10 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
 import com.datastax.driver.core.querybuilder.Batch;
+import org.sharedhealth.mci.domain.model.Marker;
+import org.sharedhealth.mci.domain.repository.BaseRepository;
 import org.sharedhealth.mci.web.mapper.PatientAuditLogData;
 import org.sharedhealth.mci.web.mapper.PatientAuditLogMapper;
-import org.sharedhealth.mci.web.model.Marker;
 import org.sharedhealth.mci.web.model.PatientAuditLog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +21,9 @@ import static java.util.Collections.emptyList;
 import static java.util.UUID.fromString;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-import static org.sharedhealth.mci.web.infrastructure.persistence.MarkerRepositoryQueryBuilder.buildUpdateMarkerBatch;
+import static org.sharedhealth.mci.domain.constant.RepositoryConstants.AUDIT_MARKER_TYPE;
+import static org.sharedhealth.mci.domain.repository.MarkerRepositoryQueryBuilder.buildUpdateMarkerBatch;
 import static org.sharedhealth.mci.web.infrastructure.persistence.PatientAuditLogQueryBuilder.*;
-import static org.sharedhealth.mci.web.infrastructure.persistence.RepositoryConstants.AUDIT_MARKER_TYPE;
 
 @Component
 public class PatientAuditRepository extends BaseRepository {
