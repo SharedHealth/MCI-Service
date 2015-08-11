@@ -1,11 +1,6 @@
 apply plugin: 'java'
 apply plugin: 'idea'
 
-repositories {
-    mavenCentral()
-}
-
-
 idea {
     project {
         jdkName = '1.7'
@@ -14,12 +9,31 @@ idea {
     }
 }
 
-
 repositories {
     maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
     mavenCentral()
     flatDir {
         dirs "${rootDir}/lib"
+    }
+}
+
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/java'
+        }
+        resources {
+            srcDir 'src/resources'
+        }
+    }
+    test {
+        java {
+            srcDir 'test/java'
+        }
+        resources {
+            srcDir 'test/resources'
+        }
     }
 }
 
@@ -64,19 +78,14 @@ test {
         events "passed", "skipped", "failed"
     }
 
-    beforeTest { descriptor ->
-        logger.lifecycle("Running test: " + descriptor)
+    beforeTest {
+        descriptor -> logger.lifecycle("Running test: " + descriptor)
     }
-    // set heap size for the test JVM(s)
     minHeapSize = "512m"
     maxHeapSize = "1024m"
 
-    // set JVM arguments for the test JVM(s)
     jvmArgs '-XX:MaxPermSize=256m'
 
-//    onOutput { descriptor, event ->
-//        logger.lifecycle("Test: " + descriptor + " produced standard out/err: " + event.message )
-//    }
 }
 
 configurations {
@@ -93,8 +102,17 @@ jar {
     version = '0.2-SNAPSHOT'
 }
 
-private Properties loadConfig() {
-    Properties properties = new Properties()
-    properties.load(new FileInputStream(file("${projectDir}/../env/local.properties")));
-    properties
+
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url "http://repo.spring.io/snapshot" }
+        maven { url "http://repo.spring.io/milestone" }
+        jcenter()
+    }
+    dependencies {
+        classpath(
+                'org.springframework.boot:spring-boot-gradle-plugin:1.0.2.RELEASE'
+        )
+    }
 }

@@ -22,6 +22,26 @@ repositories {
     }
 }
 
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/java'
+        }
+        resources {
+            srcDir 'src/resources'
+        }
+    }
+    test {
+        java {
+            srcDir 'test/java'
+        }
+        resources {
+            srcDir 'test/resources'
+        }
+    }
+}
+
 compileJava {
     options.encoding = 'UTF-8'
 }
@@ -49,8 +69,10 @@ dependencies {
     compile project(":mci-domain")
     compile project(":mci-dedup")
 
-    testCompile(":schema")
-    
+    testCompile project(":schema")
+
+    testCompile project(":mci-domain").sourceSets.test.output
+
     testCompile(testLibraries.netty) {
         force = 'true'
     }
@@ -195,8 +217,7 @@ buildscript {
     dependencies {
         classpath(
                 'org.springframework.boot:spring-boot-gradle-plugin:1.0.2.RELEASE',
-                'com.netflix.nebula:gradle-ospackage-plugin:1.9.1+',
-                'net.saliman:gradle-cobertura-plugin:2.2.4'
+                'com.netflix.nebula:gradle-ospackage-plugin:1.9.1+'
         )
     }
 }

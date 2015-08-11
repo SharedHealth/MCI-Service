@@ -3,8 +3,8 @@ package org.sharedhealth.mci.tasks;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.sharedhealth.mci.deduplication.service.DuplicatePatientFeedService;
-import org.sharedhealth.mci.deduplication.task.DuplicatePatientFeedTask;
+import org.sharedhealth.mci.deduplication.config.service.DuplicatePatientFeedService;
+import org.sharedhealth.mci.deduplication.config.task.DuplicatePatientFeedTask;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;

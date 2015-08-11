@@ -3,29 +3,15 @@ package org.sharedhealth.mci.domain.repository;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.sharedhealth.mci.domain.config.EnvironmentMock;
-import org.sharedhealth.mci.domain.config.TestCassandraConfig;
 import org.sharedhealth.mci.domain.model.ApprovalField;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.cassandra.core.CassandraOperations;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.*;
 import static org.sharedhealth.mci.domain.constant.JsonConstants.GENDER;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(initializers = EnvironmentMock.class, classes = TestCassandraConfig.class)
-public class ApprovalFieldRepositoryIT {
-
-    @SuppressWarnings("SpringJavaAutowiringInspection")
-    @Autowired
-    @Qualifier("MCICassandraTemplate")
-    private CassandraOperations cqlTemplate;
+public class ApprovalFieldRepositoryIT extends BaseRepositoryIT {
 
     @Autowired
     private ApprovalFieldRepository approvalFieldRepository;

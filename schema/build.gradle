@@ -23,6 +23,25 @@ configurations.all {
 }
 
 
+sourceSets {
+    main {
+        java {
+            srcDir 'src/java'
+        }
+        resources {
+            srcDir 'src/resources'
+        }
+    }
+    test {
+        java {
+            srcDir 'test/java'
+        }
+        resources {
+            srcDir 'test/resources'
+        }
+    }
+}
+
 def mainClassName = "org.sharedhealth.mci.web.launch.Migrations"
 
 jar {

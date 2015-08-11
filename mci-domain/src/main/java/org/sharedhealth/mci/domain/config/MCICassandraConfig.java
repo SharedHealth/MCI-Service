@@ -14,7 +14,7 @@ import org.springframework.data.cassandra.core.CassandraTemplate;
 import org.springframework.data.cassandra.repository.config.EnableCassandraRepositories;
 
 @Configuration
-@EnableCassandraRepositories(basePackages = "org.sharedhealth.mci")
+@EnableCassandraRepositories(basePackages = "org.sharedhealth.mci.domain.repository")
 public class MCICassandraConfig extends AbstractCassandraConfiguration {
 
     @Autowired

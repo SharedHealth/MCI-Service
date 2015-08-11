@@ -13,6 +13,25 @@ repositories {
     }
 }
 
+sourceSets {
+    main {
+        java {
+            srcDir 'src/java'
+        }
+        resources {
+            srcDir 'src/resources'
+        }
+    }
+    test {
+        java {
+            srcDir 'test/java'
+        }
+        resources {
+            srcDir 'test/resources'
+        }
+    }
+}
+
 compileJava {
     options.encoding = 'UTF-8'
 }
@@ -40,6 +59,8 @@ dependencies {
     compile project(":mci-domain")
 
     testCompile project(":schema")
+    testCompile project(":mci-domain").sourceSets.test.output
+
     testCompile(testLibraries.netty) {
         force = 'true'
     }
