@@ -1,13 +1,10 @@
 package org.sharedhealth.mci.domain.repository;
 
-import com.datastax.driver.core.utils.UUIDs;
 import org.springframework.data.cassandra.core.CassandraOperations;
 
-import java.util.*;
+import java.util.List;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.addAll;
-import static java.util.Collections.unmodifiableList;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.*;
 
 public class TestUtil {

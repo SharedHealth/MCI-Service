@@ -6,8 +6,6 @@ import org.junit.Test;
 import org.sharedhealth.mci.domain.model.LocationData;
 import org.sharedhealth.mci.domain.model.LocationRepositoryMarker;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.cassandra.core.CassandraOperations;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -7,8 +7,6 @@ import org.junit.Test;
 import org.sharedhealth.mci.domain.constant.JsonConstants;
 import org.sharedhealth.mci.domain.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.cassandra.core.CassandraOperations;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -16,9 +14,9 @@ import java.util.concurrent.ExecutionException;
 import static org.junit.Assert.*;
 import static org.sharedhealth.mci.domain.constant.JsonConstants.NEW_VALUE;
 import static org.sharedhealth.mci.domain.constant.JsonConstants.OLD_VALUE;
-import static org.sharedhealth.mci.domain.util.DateUtil.parseDate;
 import static org.sharedhealth.mci.domain.repository.TestUtil.setupApprovalsConfig;
 import static org.sharedhealth.mci.domain.repository.TestUtil.truncateAllColumnFamilies;
+import static org.sharedhealth.mci.domain.util.DateUtil.parseDate;
 import static org.sharedhealth.mci.domain.util.JsonMapper.readValue;
 import static org.sharedhealth.mci.domain.util.JsonMapper.writeValueAsString;
 

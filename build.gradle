@@ -1,5 +1,14 @@
 apply plugin: 'idea'
 
+
+idea {
+    project {
+        vcs = 'git'
+        jdkName = '1.7'
+        languageLevel = '1.7'
+    }
+}
+
 subprojects {
 
     apply plugin: 'java'
@@ -31,7 +40,7 @@ subprojects {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.1'
+    gradleVersion = '2.6'
 }
 
 ext.libraries = [

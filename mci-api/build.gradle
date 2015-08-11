@@ -15,26 +15,6 @@ repositories {
     }
 }
 
-
-sourceSets {
-    main {
-        java {
-            srcDir 'src/main/java'
-        }
-        resources {
-            srcDir 'src/main/resources'
-        }
-    }
-    test {
-        java {
-            srcDir 'src/test/java'
-        }
-        resources {
-            srcDir 'src/test/resources'
-        }
-    }
-}
-
 compileJava {
     options.encoding = 'UTF-8'
 }
@@ -128,7 +108,11 @@ task exportProperties(dependsOn: 'assembly') << {
     }
 }
 
-task dist(dependsOn: [project(":schema").tasks.build, 'exportProperties'], type: Rpm) {
+task dist(dependsOn: [
+        project(":schema").tasks.build,
+        project(":mci-domain").tasks.build,
+        project(":mci-dedup").tasks.build,
+        'exportProperties'], type: Rpm) {
     packageName = 'mci'
     version = '0.2'
     release = project.hasProperty('release') ? project.release : '1'
@@ -143,26 +127,26 @@ task dist(dependsOn: [project(":schema").tasks.build, 'exportProperties'], type:
 
     from("${buildDir}/etc") {
         fileMode = 0755
-        createDirectoryEntry  true
+        createDirectoryEntry true
         into 'etc'
     }
 
     from("scripts/rpm") {
         fileMode = 0755
-        createDirectoryEntry  true
+        createDirectoryEntry true
         exclude 'placeholder'
         into 'bin'
     }
 
     from("${buildDir}/libs") {
         fileMode = 0755
-        createDirectoryEntry  true
+        createDirectoryEntry true
         into 'lib'
     }
 
     from("scripts/rpm") {
         fileMode = 0755
-        createDirectoryEntry  true
+        createDirectoryEntry true
         exclude 'mci'
         exclude 'start.sh'
         into 'var'
@@ -174,6 +158,16 @@ task dist(dependsOn: [project(":schema").tasks.build, 'exportProperties'], type:
     }
 
     from("${rootDir}/schema/build/libs") {
+        fileMode = 0755
+        into 'lib'
+    }
+
+    from("${rootDir}/mci-domain/build/libs") {
+        fileMode = 0755
+        into 'lib'
+    }
+
+    from("${rootDir}/mci-dedup/build/libs") {
         fileMode = 0755
         into 'lib'
     }
@@ -210,7 +204,7 @@ buildscript {
     dependencies {
         classpath(
                 'org.springframework.boot:spring-boot-gradle-plugin:1.0.2.RELEASE',
-                'com.netflix.nebula:gradle-ospackage-plugin:1.9.1+'
+                'com.netflix.nebula:gradle-ospackage-plugin:2.2.+'
         )
     }
 }

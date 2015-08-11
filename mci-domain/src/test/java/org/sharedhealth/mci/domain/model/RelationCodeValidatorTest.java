@@ -1,12 +1,6 @@
 package org.sharedhealth.mci.domain.model;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.sharedhealth.mci.domain.config.EnvironmentMock;
-import org.sharedhealth.mci.domain.config.TestWebMvcConfig;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 
 import javax.validation.ConstraintViolation;
 import java.util.Set;
