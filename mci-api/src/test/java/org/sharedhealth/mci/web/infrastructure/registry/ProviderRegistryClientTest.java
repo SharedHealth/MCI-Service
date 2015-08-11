@@ -4,7 +4,7 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.sharedhealth.mci.web.config.EnvironmentMock;
+import org.sharedhealth.mci.domain.config.EnvironmentMock;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.mapper.ProviderResponse;
 import org.springframework.beans.factory.annotation.Autowired;

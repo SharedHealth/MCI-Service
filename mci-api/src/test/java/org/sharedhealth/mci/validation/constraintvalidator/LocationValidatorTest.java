@@ -5,7 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sharedhealth.mci.domain.model.Address;
 import org.sharedhealth.mci.domain.model.PatientData;
-import org.sharedhealth.mci.web.config.EnvironmentMock;
+import org.sharedhealth.mci.domain.config.EnvironmentMock;
 import org.sharedhealth.mci.web.config.WebMvcConfigTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

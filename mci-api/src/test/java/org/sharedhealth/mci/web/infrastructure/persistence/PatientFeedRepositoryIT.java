@@ -9,7 +9,7 @@ import org.sharedhealth.mci.domain.constant.JsonConstants;
 import org.sharedhealth.mci.domain.model.*;
 import org.sharedhealth.mci.domain.repository.PatientFeedRepository;
 import org.sharedhealth.mci.domain.repository.PatientRepository;
-import org.sharedhealth.mci.web.config.EnvironmentMock;
+import org.sharedhealth.mci.domain.config.EnvironmentMock;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

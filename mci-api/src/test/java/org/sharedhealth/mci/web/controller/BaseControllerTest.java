@@ -15,7 +15,7 @@ import org.sharedhealth.mci.domain.model.PatientData;
 import org.sharedhealth.mci.domain.model.PatientSummaryData;
 import org.sharedhealth.mci.domain.model.Relation;
 import org.sharedhealth.mci.domain.repository.PatientRepository;
-import org.sharedhealth.mci.web.config.EnvironmentMock;
+import org.sharedhealth.mci.domain.config.EnvironmentMock;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.infrastructure.persistence.HealthIdRepository;
 import org.sharedhealth.mci.web.infrastructure.persistence.TestUtil;

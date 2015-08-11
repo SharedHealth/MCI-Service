@@ -1,4 +1,4 @@
-package org.sharedhealth.mci.web.config;
+package org.sharedhealth.mci.domain.config;
 
 import org.cassandraunit.utils.EmbeddedCassandraServerHelper;
 import org.slf4j.Logger;

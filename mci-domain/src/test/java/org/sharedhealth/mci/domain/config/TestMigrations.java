@@ -1,4 +1,4 @@
-package org.sharedhealth.mci.web.config;
+package org.sharedhealth.mci.domain.config;
 
 import com.datastax.driver.core.*;
 import com.datastax.driver.core.policies.ConstantReconnectionPolicy;

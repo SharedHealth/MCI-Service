@@ -49,7 +49,8 @@ dependencies {
     compile project(":mci-domain")
     compile project(":mci-dedup")
 
-    testCompile project(":schema")
+    testCompile(":schema")
+    
     testCompile(testLibraries.netty) {
         force = 'true'
     }

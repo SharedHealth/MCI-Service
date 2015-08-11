@@ -1,4 +1,4 @@
-package org.sharedhealth.mci.web.config;
+package org.sharedhealth.mci.domain.config;
 
 import com.datastax.driver.core.AuthProvider;
 import com.datastax.driver.core.PlainTextAuthProvider;
@@ -6,6 +6,7 @@ import com.datastax.driver.core.SocketOptions;
 import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.cassandra.config.java.AbstractCassandraConfiguration;
 import org.springframework.data.cassandra.core.CassandraOperations;

@@ -47,6 +47,8 @@ dependencies {
             libraries.apache_bean_utils, libraries.commons_codec, libraries.commons_validator,
             libraries.spring_security, libraries.rome, libraries.joda_time, libraries.ehcache_core
 
+    testCompile project(":schema")
+    
     testCompile(testLibraries.netty) {
         force = 'true'
     }

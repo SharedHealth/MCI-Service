@@ -8,7 +8,7 @@ import org.sharedhealth.mci.domain.model.LocationData;
 import org.sharedhealth.mci.domain.model.LocationRepositoryMarker;
 import org.sharedhealth.mci.domain.repository.LocationCriteria;
 import org.sharedhealth.mci.domain.repository.LocationRepository;
-import org.sharedhealth.mci.web.config.EnvironmentMock;
+import org.sharedhealth.mci.domain.config.EnvironmentMock;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
