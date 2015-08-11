@@ -6,13 +6,6 @@ apply plugin: 'idea'
 
 mainClassName = "org.sharedhealth.mci.web.launch.Main"
 
-idea {
-    project {
-        jdkName = '1.7'
-        languageLevel = '1.7'
-
-    }
-}
 
 repositories {
     maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
@@ -26,18 +19,18 @@ repositories {
 sourceSets {
     main {
         java {
-            srcDir 'src/java'
+            srcDir 'src/main/java'
         }
         resources {
-            srcDir 'src/resources'
+            srcDir 'src/main/resources'
         }
     }
     test {
         java {
-            srcDir 'test/java'
+            srcDir 'src/test/java'
         }
         resources {
-            srcDir 'test/resources'
+            srcDir 'src/test/resources'
         }
     }
 }
@@ -150,26 +143,26 @@ task dist(dependsOn: [project(":schema").tasks.build, 'exportProperties'], type:
 
     from("${buildDir}/etc") {
         fileMode = 0755
-        createDirectoryEntry = true
+        createDirectoryEntry  true
         into 'etc'
     }
 
     from("scripts/rpm") {
         fileMode = 0755
-        createDirectoryEntry = true
+        createDirectoryEntry  true
         exclude 'placeholder'
         into 'bin'
     }
 
     from("${buildDir}/libs") {
         fileMode = 0755
-        createDirectoryEntry = true
+        createDirectoryEntry  true
         into 'lib'
     }
 
     from("scripts/rpm") {
         fileMode = 0755
-        createDirectoryEntry = true
+        createDirectoryEntry  true
         exclude 'mci'
         exclude 'start.sh'
         into 'var'

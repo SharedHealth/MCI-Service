@@ -16,21 +16,22 @@ repositories {
 sourceSets {
     main {
         java {
-            srcDir 'src/java'
+            srcDir 'src/main/java'
         }
         resources {
-            srcDir 'src/resources'
+            srcDir 'src/main/resources'
         }
     }
     test {
         java {
-            srcDir 'test/java'
+            srcDir 'src/test/java'
         }
         resources {
-            srcDir 'test/resources'
+            srcDir 'src/test/resources'
         }
     }
 }
+
 
 compileJava {
     options.encoding = 'UTF-8'

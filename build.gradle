@@ -1,12 +1,5 @@
 apply plugin: 'idea'
 
-idea {
-    project {
-        jdkName = '1.7'
-        languageLevel = '1.7'
-    }
-}
-
 subprojects {
 
     apply plugin: 'java'
@@ -38,7 +31,7 @@ subprojects {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '1.12'
+    gradleVersion = '2.1'
 }
 
 ext.libraries = [

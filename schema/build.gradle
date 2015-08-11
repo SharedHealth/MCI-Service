@@ -26,18 +26,18 @@ configurations.all {
 sourceSets {
     main {
         java {
-            srcDir 'src/java'
+            srcDir 'src/main/java'
         }
         resources {
-            srcDir 'src/resources'
+            srcDir 'src/main/resources'
         }
     }
     test {
         java {
-            srcDir 'test/java'
+            srcDir 'src/test/java'
         }
         resources {
-            srcDir 'test/resources'
+            srcDir 'src/test/resources'
         }
     }
 }
@@ -46,7 +46,7 @@ def mainClassName = "org.sharedhealth.mci.web.launch.Migrations"
 
 jar {
     baseName = 'mci-schema'
-    release = project.hasProperty('release') ? project.release : '1'
+//    release = project.hasProperty('release') ? project.release : '1'
     version = '0.2-SNAPSHOT'
     from {
         configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
