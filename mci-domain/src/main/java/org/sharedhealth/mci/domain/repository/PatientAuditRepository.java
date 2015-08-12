@@ -1,11 +1,9 @@
-package org.sharedhealth.mci.web.infrastructure.persistence;
+package org.sharedhealth.mci.domain.repository;
 
 import com.datastax.driver.core.querybuilder.Batch;
-import org.sharedhealth.mci.domain.model.Marker;
-import org.sharedhealth.mci.domain.repository.BaseRepository;
-import org.sharedhealth.mci.web.mapper.PatientAuditLogData;
-import org.sharedhealth.mci.web.mapper.PatientAuditLogMapper;
-import org.sharedhealth.mci.web.model.PatientAuditLog;
+import org.sharedhealth.mci.domain.model.PatientAuditLog;
+import org.sharedhealth.mci.domain.model.PatientAuditLogData;
+import org.sharedhealth.mci.domain.model.PatientAuditLogMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,16 +12,11 @@ import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.UUID;
 
-import static com.datastax.driver.core.querybuilder.QueryBuilder.batch;
 import static java.util.Collections.emptyList;
-import static java.util.UUID.fromString;
-import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-import static org.sharedhealth.mci.domain.constant.RepositoryConstants.AUDIT_MARKER_TYPE;
-import static org.sharedhealth.mci.domain.repository.MarkerRepositoryQueryBuilder.buildUpdateMarkerBatch;
-import static org.sharedhealth.mci.web.infrastructure.persistence.PatientAuditLogQueryBuilder.*;
+import static org.sharedhealth.mci.domain.repository.PatientAuditLogQueryBuilder.buildFindByHidStmt;
+import static org.sharedhealth.mci.domain.repository.PatientAuditLogQueryBuilder.buildSaveOrUpdateBatch;
 
 @Component
 public class PatientAuditRepository extends BaseRepository {
@@ -47,24 +40,11 @@ public class PatientAuditRepository extends BaseRepository {
         return emptyList();
     }
 
-    public UUID findLatestMarker() {
-        List<Marker> markers = cassandraOps.select(buildFindLatestMarkerStmt(), Marker.class);
-        if (isEmpty(markers)) {
-            return null;
-        }
-        return fromString(markers.get(0).getMarker());
-    }
-
+    //only for tests
     public void saveOrUpdate(List<PatientAuditLog> logs) {
         Batch batch = buildSaveOrUpdateBatch(logs, cassandraOps.getConverter());
         cassandraOps.execute(batch);
     }
 
-    public void updateMarkerTable(List<PatientAuditLog> logs) {
-        Batch batch = batch();
-        String marker = logs.get(logs.size() - 1).getEventId().toString();
-        buildUpdateMarkerBatch(AUDIT_MARKER_TYPE, marker, cassandraOps.getConverter(), batch);
-        cassandraOps.execute(batch);
-    }
 
 }

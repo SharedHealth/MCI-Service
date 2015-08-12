@@ -29,6 +29,7 @@ import static org.sharedhealth.mci.domain.constant.MCIConstants.PATIENT_STATUS_A
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.*;
 import static org.sharedhealth.mci.domain.repository.PatientQueryBuilder.*;
 import static org.sharedhealth.mci.domain.repository.PatientUpdateLogQueryBuilder.buildCreateUpdateLogStmt;
+import static org.sharedhealth.mci.domain.repository.PatientAuditLogQueryBuilder.buildCreateAuditLogStmt;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createDeleteQuery;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
 
@@ -77,6 +78,8 @@ public class PatientRepository extends BaseRepository {
         buildRequestedBy(requestedBy, ALL_FIELDS, requester);
 
         Batch batch = buildSaveBatch(patient, cassandraOps.getConverter());
+
+        buildCreateAuditLogStmt(patientData, requestedBy, cassandraOps.getConverter(), batch);
         addToPatientUpdateLogStmt(patient, requestedBy, cassandraOps.getConverter(), batch);
 
         cassandraOps.execute(batch);
@@ -98,7 +101,7 @@ public class PatientRepository extends BaseRepository {
         PatientData existingPatientData = this.findByHealthId(healthId);
         if (!shouldUpdatePatient(updateRequest, existingPatientData)) {
             if (null == existingPatientData.getMergedWith()) {
-                throw new Forbidden(String.format("Cannot update inactive patient"));
+                throw new Forbidden("Cannot update inactive patient");
             } else {
                 throw new Forbidden(String.format("Cannot update inactive patient, already merged with %s",
                         existingPatientData.getMergedWith()));
@@ -117,10 +120,11 @@ public class PatientRepository extends BaseRepository {
 
         buildUpdatePendingApprovalsBatch(newPatient, existingPatientData, batch);
         buildUpdateBatch(newPatient, existingPatientData, cassandraOps.getConverter(), batch);
-
         Map<String, Set<Requester>> requestedBy = new HashMap<>();
         buildRequestedBy(requestedBy, ALL_FIELDS, requester);
         buildCreateUpdateLogStmt(newPatientData, existingPatientData, requestedBy, null, cassandraOps.getConverter(), batch);
+        PatientAuditLogQueryBuilder.buildUpdateAuditLogStmt(newPatientData, existingPatientData, requestedBy, null, cassandraOps
+                .getConverter(), batch);
     }
 
     private void clearPendingApprovalsIfRequired(PatientData updateRequest, PatientData existingPatientData, Batch batch) {
@@ -402,6 +406,7 @@ public class PatientRepository extends BaseRepository {
             newPatient = mapper.map(requestData, existingPatientData);
             Map<String, Set<Requester>> requestedBy = findRequestedBy(existingPendingApprovals, requestData);
             buildCreateUpdateLogStmt(requestData, existingPatientData, requestedBy, approver, cassandraOps.getConverter(), batch);
+            PatientAuditLogQueryBuilder.buildUpdateAuditLogStmt(requestData, existingPatientData, requestedBy, approver, cassandraOps.getConverter(), batch);
 
         } else {
             newPatient = new Patient();

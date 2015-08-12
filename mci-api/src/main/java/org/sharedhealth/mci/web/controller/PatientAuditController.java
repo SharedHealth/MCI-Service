@@ -1,10 +1,10 @@
 package org.sharedhealth.mci.web.controller;
 
 import org.sharedhealth.mci.domain.constant.JsonConstants;
+import org.sharedhealth.mci.domain.model.PatientAuditLogData;
 import org.sharedhealth.mci.domain.model.PatientData;
 import org.sharedhealth.mci.domain.model.Requester;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
-import org.sharedhealth.mci.web.mapper.PatientAuditLogData;
 import org.sharedhealth.mci.web.service.PatientAuditService;
 import org.sharedhealth.mci.web.service.PatientService;
 import org.sharedhealth.mci.web.service.RequesterService;

@@ -1,24 +1,13 @@
-package org.sharedhealth.mci.web.infrastructure.persistence;
+package org.sharedhealth.mci.domain.repository;
 
 
+import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.sharedhealth.mci.domain.model.*;
-import org.sharedhealth.mci.domain.repository.PatientFeedRepository;
-import org.sharedhealth.mci.domain.repository.PatientRepository;
-import org.sharedhealth.mci.domain.config.EnvironmentMock;
-import org.sharedhealth.mci.web.launch.WebMvcConfig;
-import org.sharedhealth.mci.web.mapper.PatientAuditLogData;
-import org.sharedhealth.mci.web.model.PatientAuditLog;
-import org.sharedhealth.mci.web.service.PatientAuditService;
+import org.sharedhealth.mci.domain.util.JsonMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.cassandra.core.CassandraOperations;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.util.*;
 
@@ -28,35 +17,19 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static org.sharedhealth.mci.domain.constant.JsonConstants.*;
 import static org.sharedhealth.mci.domain.util.DateUtil.parseDate;
-import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.setupApprovalsConfig;
-import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.truncateAllColumnFamilies;
-import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@WebAppConfiguration
-@ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
-public class PatientAuditRepositoryIT {
+public class PatientAuditRepositoryIT extends BaseRepositoryIT {
 
-
-    @Autowired
-    @Qualifier("MCICassandraTemplate")
-    private CassandraOperations cassandraOps;
 
     @Autowired
     private PatientRepository patientRepository;
 
     @Autowired
-    private PatientAuditService auditService;
-
-    @Autowired
     private PatientAuditRepository auditRepository;
-
-    @Autowired
-    private PatientFeedRepository feedRepository;
 
     @Before
     public void setUp() throws Exception {
-        setupApprovalsConfig(cassandraOps);
+        TestUtil.setupApprovalsConfig(cqlTemplate);
     }
 
     @Test
@@ -82,23 +55,23 @@ public class PatientAuditRepositoryIT {
         updateRequest.setRequester(facility, provider);
         patientRepository.update(updateRequest, healthId);
 
-        auditService.sync();
-
         List<PatientAuditLogData> logs = auditRepository.findByHealthId(healthId);
         assertNotNull(logs);
-        assertEquals(3, logs.size());
+        assertEquals(4, logs.size());
 
-        assertChangeSet(GIVEN_NAME, patientCreateData.getGivenName(), "John", logs.get(0).getChangeSet());
-        assertChangeSet(EDU_LEVEL, patientCreateData.getOccupation(), "02", logs.get(1).getChangeSet());
-        assertChangeSet(PERMANENT_ADDRESS, patientCreateData.getAddress(), address, logs.get(2).getChangeSet());
+        assertChangeSet(GIVEN_NAME, patientCreateData.getGivenName(), "John", logs.get(1).getChangeSet());
+        assertChangeSet(EDU_LEVEL, patientCreateData.getOccupation(), "02", logs.get(2).getChangeSet());
+        assertChangeSet(PERMANENT_ADDRESS, patientCreateData.getAddress(), address, logs.get(3).getChangeSet());
     }
 
     private void assertChangeSet(String fieldName, Object oldValue, Object newValue, Map<String, Map<String, Object>> changeSet) {
         assertNotNull(changeSet);
         assertEquals(1, changeSet.size());
         assertNotNull(changeSet.get(fieldName));
-        assertEquals(writeValueAsString(oldValue), writeValueAsString(changeSet.get(fieldName).get(OLD_VALUE)));
-        assertEquals(writeValueAsString(newValue), writeValueAsString(changeSet.get(fieldName).get(NEW_VALUE)));
+        Assert.assertEquals(JsonMapper.writeValueAsString(oldValue), JsonMapper.writeValueAsString(changeSet.get(fieldName).get
+                (OLD_VALUE)));
+        Assert.assertEquals(JsonMapper.writeValueAsString(newValue), JsonMapper.writeValueAsString(changeSet.get(fieldName).get
+                (NEW_VALUE)));
     }
 
     private PatientData buildPatient() {
@@ -121,28 +94,6 @@ public class PatientAuditRepositoryIT {
         patient.setPermanentAddress(new Address("10", "20", "30"));
         patient.setRequester("Bahmni", null);
         return patient;
-    }
-
-    @Test
-    public void shouldFindLatestMarker() {
-        PatientData patientCreateData = buildPatient();
-        String healthId = patientRepository.create(patientCreateData).getId();
-
-        PatientData updateRequest = new PatientData();
-        updateRequest.setGivenName("John");
-        updateRequest.setSurName("Doe");
-        updateRequest.setRequester("Bahmni", "Dr. Monika");
-        patientRepository.update(updateRequest, healthId);
-
-        auditService.sync();
-
-        List<PatientUpdateLog> feeds = feedRepository.findPatientsUpdatedSince(null, 10);
-        assertNotNull(feeds);
-        assertEquals(2, feeds.size());
-
-        UUID marker = auditRepository.findLatestMarker();
-        assertNotNull(marker);
-        assertEquals(feeds.get(1).getEventId(), marker);
     }
 
     @Test
@@ -173,11 +124,11 @@ public class PatientAuditRepositoryIT {
         Set<Requester> requester = new HashSet<>();
         requester.add(new Requester("CHW"));
         requestedBy.put("ALL_FIELDS", requester);
-        return writeValueAsString(requestedBy);
+        return JsonMapper.writeValueAsString(requestedBy);
     }
 
     @After
     public void tearDown() {
-        truncateAllColumnFamilies(cassandraOps);
+        TestUtil.truncateAllColumnFamilies(cqlTemplate);
     }
 }

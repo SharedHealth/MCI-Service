@@ -4,6 +4,7 @@ import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.Select;
 import com.datastax.driver.core.utils.UUIDs;
 import org.sharedhealth.mci.domain.diff.PatientDiffBuilder;
+import org.sharedhealth.mci.domain.model.PatientAuditLog;
 import org.sharedhealth.mci.domain.model.PatientData;
 import org.sharedhealth.mci.domain.model.PatientUpdateLog;
 import org.sharedhealth.mci.domain.model.Requester;
@@ -37,6 +38,7 @@ public class PatientUpdateLogQueryBuilder {
             batch.add(createInsertQuery(CF_PATIENT_UPDATE_LOG, patientUpdateLog, null, converter));
         }
     }
+
 
     private static String getChangeSet(PatientData newData, PatientData oldData) {
         Map<String, Map<String, Object>> diff = new PatientDiffBuilder(oldData, newData).build();

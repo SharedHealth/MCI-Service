@@ -44,20 +44,25 @@ public class PatientQueryBuilder {
     static void addToPatientUpdateLogStmt(Patient patient,
                                           Map<String, Set<Requester>> requestedBy,
                                           CassandraConverter converter, Batch batch) {
+        PatientUpdateLog patientUpdateLog = getPatientUpdateLog(patient, requestedBy);
+        if (patientUpdateLog != null)
+            batch.add(createInsertQuery(CF_PATIENT_UPDATE_LOG, patientUpdateLog, null, converter));
+    }
+
+    public static PatientUpdateLog getPatientUpdateLog(Patient patient, Map<String, Set<Requester>> requestedBy) {
         PatientUpdateLog patientUpdateLog = new PatientUpdateLog();
         PatientData patientDataBlank = new PatientData();
         PatientData patientDataWithHid = new PatientData();
         patientDataWithHid.setHealthId(patient.getHealthId());
         String changeSet = getChangeSet(patientDataWithHid, patientDataBlank);
 
-        if (changeSet != null) {
-            patientUpdateLog.setEventId(timeBased());
-            patientUpdateLog.setHealthId(patient.getHealthId());
-            patientUpdateLog.setChangeSet(changeSet);
-            patientUpdateLog.setRequestedBy(writeValueAsString(requestedBy));
-            patientUpdateLog.setEventType(EVENT_TYPE_CREATED);
-            batch.add(createInsertQuery(CF_PATIENT_UPDATE_LOG, patientUpdateLog, null, converter));
-        }
+        if (changeSet == null) return null;
+        patientUpdateLog.setEventId(timeBased());
+        patientUpdateLog.setHealthId(patient.getHealthId());
+        patientUpdateLog.setChangeSet(changeSet);
+        patientUpdateLog.setRequestedBy(writeValueAsString(requestedBy));
+        patientUpdateLog.setEventType(EVENT_TYPE_CREATED);
+        return patientUpdateLog;
     }
 
     private static String getChangeSet(PatientData newData, PatientData oldData) {

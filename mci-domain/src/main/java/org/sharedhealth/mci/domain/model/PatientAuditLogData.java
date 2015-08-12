@@ -1,7 +1,6 @@
-package org.sharedhealth.mci.web.mapper;
+package org.sharedhealth.mci.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.sharedhealth.mci.domain.model.Requester;
 
 import java.util.HashMap;
 import java.util.Map;

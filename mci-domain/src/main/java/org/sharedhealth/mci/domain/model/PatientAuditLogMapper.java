@@ -1,8 +1,6 @@
-package org.sharedhealth.mci.web.mapper;
+package org.sharedhealth.mci.domain.model;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import org.sharedhealth.mci.domain.model.Requester;
-import org.sharedhealth.mci.web.model.PatientAuditLog;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -11,7 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.sharedhealth.mci.domain.util.DateUtil.toIsoMillisFormat;
-import static org.sharedhealth.mci.web.utils.JsonMapper.readValue;
+import static org.sharedhealth.mci.domain.util.JsonMapper.readValue;
 
 @Component
 public class PatientAuditLogMapper {

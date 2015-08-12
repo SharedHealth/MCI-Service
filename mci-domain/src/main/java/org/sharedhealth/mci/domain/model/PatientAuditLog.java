@@ -1,4 +1,4 @@
-package org.sharedhealth.mci.web.model;
+package org.sharedhealth.mci.domain.model;
 
 import org.springframework.data.cassandra.mapping.Column;
 import org.springframework.data.cassandra.mapping.PrimaryKeyColumn;
@@ -27,6 +27,16 @@ public class PatientAuditLog {
 
     @Column(APPROVED_BY)
     private String approvedBy;
+
+    public static PatientAuditLog toPatientAuditLog(PatientUpdateLog feed) {
+        PatientAuditLog log = new PatientAuditLog();
+        log.setHealthId(feed.getHealthId());
+        log.setEventId(feed.getEventId());
+        log.setChangeSet(feed.getChangeSet());
+        log.setRequestedBy(feed.getRequestedBy());
+        log.setApprovedBy(feed.getApprovedBy());
+        return log;
+    }
 
     public String getHealthId() {
         return healthId;
