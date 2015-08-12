@@ -1,8 +1,6 @@
 package org.sharedhealth.mci.web.service;
 
-import org.sharedhealth.mci.domain.model.PatientAuditLog;
 import org.sharedhealth.mci.domain.model.PatientAuditLogData;
-import org.sharedhealth.mci.domain.model.PatientUpdateLog;
 import org.sharedhealth.mci.domain.model.Requester;
 import org.sharedhealth.mci.domain.repository.PatientAuditRepository;
 import org.slf4j.Logger;
@@ -10,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,15 +43,6 @@ public class PatientAuditService {
             }
             requesterService.populateRequesterDetails(log.getApprovedBy());
         }
-    }
-
-    List<PatientAuditLog> map(List<PatientUpdateLog> feeds) {
-        List<PatientAuditLog> logs = new ArrayList<>();
-        for (PatientUpdateLog feed : feeds) {
-            PatientAuditLog log = PatientAuditLog.toPatientAuditLog(feed);
-            logs.add(log);
-        }
-        return logs;
     }
 
 }
