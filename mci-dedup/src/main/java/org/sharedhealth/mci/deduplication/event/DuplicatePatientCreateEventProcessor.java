@@ -1,7 +1,7 @@
-package org.sharedhealth.mci.deduplication.config.event;
+package org.sharedhealth.mci.deduplication.event;
 
-import org.sharedhealth.mci.deduplication.config.model.DuplicatePatient;
-import org.sharedhealth.mci.deduplication.config.repository.DuplicatePatientRepository;
+import org.sharedhealth.mci.deduplication.model.DuplicatePatient;
+import org.sharedhealth.mci.deduplication.repository.DuplicatePatientRepository;
 import org.sharedhealth.mci.domain.model.PatientUpdateLogData;
 import org.springframework.stereotype.Component;
 

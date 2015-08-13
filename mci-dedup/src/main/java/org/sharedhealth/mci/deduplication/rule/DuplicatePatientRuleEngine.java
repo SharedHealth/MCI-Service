@@ -1,6 +1,6 @@
-package org.sharedhealth.mci.deduplication.config.rule;
+package org.sharedhealth.mci.deduplication.rule;
 
-import org.sharedhealth.mci.deduplication.config.model.DuplicatePatientData;
+import org.sharedhealth.mci.deduplication.model.DuplicatePatientData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

@@ -1,10 +1,10 @@
-package org.sharedhealth.mci.deduplication.config.repository;
+package org.sharedhealth.mci.deduplication.repository;
 
 import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.Delete;
 import com.datastax.driver.core.querybuilder.Select;
-import org.sharedhealth.mci.deduplication.config.model.DuplicatePatient;
-import org.sharedhealth.mci.deduplication.config.model.DuplicatePatientIgnored;
+import org.sharedhealth.mci.deduplication.model.DuplicatePatient;
+import org.sharedhealth.mci.deduplication.model.DuplicatePatientIgnored;
 import org.sharedhealth.mci.domain.model.Catchment;
 import org.springframework.data.cassandra.convert.CassandraConverter;
 

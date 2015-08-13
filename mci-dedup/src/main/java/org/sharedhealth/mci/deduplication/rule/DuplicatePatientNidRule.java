@@ -1,6 +1,6 @@
-package org.sharedhealth.mci.deduplication.config.rule;
+package org.sharedhealth.mci.deduplication.rule;
 
-import org.sharedhealth.mci.deduplication.config.model.DuplicatePatientMapper;
+import org.sharedhealth.mci.deduplication.model.DuplicatePatientMapper;
 import org.sharedhealth.mci.domain.model.PatientData;
 import org.sharedhealth.mci.domain.model.SearchQuery;
 import org.sharedhealth.mci.domain.repository.PatientRepository;

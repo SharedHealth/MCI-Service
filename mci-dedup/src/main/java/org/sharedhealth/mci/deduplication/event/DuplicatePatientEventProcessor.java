@@ -1,10 +1,10 @@
-package org.sharedhealth.mci.deduplication.config.event;
+package org.sharedhealth.mci.deduplication.event;
 
-import org.sharedhealth.mci.deduplication.config.model.DuplicatePatient;
-import org.sharedhealth.mci.deduplication.config.model.DuplicatePatientData;
-import org.sharedhealth.mci.deduplication.config.repository.DuplicatePatientRepository;
-import org.sharedhealth.mci.deduplication.config.rule.DuplicatePatientRuleEngine;
-import org.sharedhealth.mci.deduplication.config.model.DuplicatePatientMapper;
+import org.sharedhealth.mci.deduplication.model.DuplicatePatient;
+import org.sharedhealth.mci.deduplication.model.DuplicatePatientData;
+import org.sharedhealth.mci.deduplication.repository.DuplicatePatientRepository;
+import org.sharedhealth.mci.deduplication.rule.DuplicatePatientRuleEngine;
+import org.sharedhealth.mci.deduplication.model.DuplicatePatientMapper;
 import org.sharedhealth.mci.domain.model.Catchment;
 import org.sharedhealth.mci.domain.model.PatientData;
 import org.sharedhealth.mci.domain.model.PatientUpdateLogData;

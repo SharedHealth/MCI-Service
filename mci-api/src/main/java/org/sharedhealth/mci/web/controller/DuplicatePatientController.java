@@ -1,8 +1,8 @@
 package org.sharedhealth.mci.web.controller;
 
-import org.sharedhealth.mci.deduplication.config.model.DuplicatePatientData;
-import org.sharedhealth.mci.deduplication.config.model.DuplicatePatientMergeData;
-import org.sharedhealth.mci.deduplication.config.service.DuplicatePatientService;
+import org.sharedhealth.mci.deduplication.model.DuplicatePatientData;
+import org.sharedhealth.mci.deduplication.model.DuplicatePatientMergeData;
+import org.sharedhealth.mci.deduplication.service.DuplicatePatientService;
 import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.sharedhealth.mci.domain.exception.Forbidden;
 import org.sharedhealth.mci.domain.exception.ValidationException;

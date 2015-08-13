@@ -3,11 +3,9 @@ package org.sharedhealth.mci.deduplication.event;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.sharedhealth.mci.deduplication.config.event.DuplicatePatientEventProcessor;
-import org.sharedhealth.mci.deduplication.config.event.DuplicatePatientRetireEventProcessor;
-import org.sharedhealth.mci.deduplication.config.model.DuplicatePatientMapper;
-import org.sharedhealth.mci.deduplication.config.repository.DuplicatePatientRepository;
-import org.sharedhealth.mci.deduplication.config.rule.DuplicatePatientRuleEngine;
+import org.sharedhealth.mci.deduplication.model.DuplicatePatientMapper;
+import org.sharedhealth.mci.deduplication.repository.DuplicatePatientRepository;
+import org.sharedhealth.mci.deduplication.rule.DuplicatePatientRuleEngine;
 import org.sharedhealth.mci.domain.model.PatientUpdateLogData;
 import org.sharedhealth.mci.domain.repository.PatientRepository;
 

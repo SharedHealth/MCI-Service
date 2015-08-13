@@ -3,9 +3,8 @@ package org.sharedhealth.mci.deduplication.rule;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.sharedhealth.mci.deduplication.config.model.DuplicatePatientData;
-import org.sharedhealth.mci.deduplication.config.model.DuplicatePatientMapper;
-import org.sharedhealth.mci.deduplication.config.rule.*;
+import org.sharedhealth.mci.deduplication.model.DuplicatePatientData;
+import org.sharedhealth.mci.deduplication.model.DuplicatePatientMapper;
 import org.sharedhealth.mci.domain.model.Address;
 import org.sharedhealth.mci.domain.model.PatientData;
 import org.sharedhealth.mci.domain.model.PatientMapper;
@@ -21,7 +20,7 @@ import static junit.framework.Assert.*;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.sharedhealth.mci.deduplication.config.rule.DuplicatePatientRule.*;
+import static org.sharedhealth.mci.deduplication.rule.DuplicatePatientRule.*;
 
 public class DuplicatePatientRuleTest {
 

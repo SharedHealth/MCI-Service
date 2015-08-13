@@ -1,4 +1,4 @@
-package org.sharedhealth.mci.deduplication.config.model;
+package org.sharedhealth.mci.deduplication.model;
 
 import org.springframework.data.cassandra.mapping.Column;
 import org.springframework.data.cassandra.mapping.PrimaryKeyColumn;

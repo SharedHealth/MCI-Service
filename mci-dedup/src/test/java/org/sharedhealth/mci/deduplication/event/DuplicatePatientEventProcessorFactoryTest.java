@@ -3,7 +3,6 @@ package org.sharedhealth.mci.deduplication.event;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.sharedhealth.mci.deduplication.config.event.*;
 
 import java.util.HashMap;
 import java.util.Map;

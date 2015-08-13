@@ -1,4 +1,4 @@
-package org.sharedhealth.mci.deduplication.config.model;
+package org.sharedhealth.mci.deduplication.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;

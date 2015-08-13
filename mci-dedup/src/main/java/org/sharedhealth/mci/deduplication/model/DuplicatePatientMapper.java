@@ -1,4 +1,4 @@
-package org.sharedhealth.mci.deduplication.config.model;
+package org.sharedhealth.mci.deduplication.model;
 
 import org.sharedhealth.mci.domain.model.Catchment;
 import org.sharedhealth.mci.domain.model.PatientData;

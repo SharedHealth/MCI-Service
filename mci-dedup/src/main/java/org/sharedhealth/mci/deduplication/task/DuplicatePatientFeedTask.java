@@ -1,6 +1,6 @@
-package org.sharedhealth.mci.deduplication.config.task;
+package org.sharedhealth.mci.deduplication.task;
 
-import org.sharedhealth.mci.deduplication.config.service.DuplicatePatientFeedService;
+import org.sharedhealth.mci.deduplication.service.DuplicatePatientFeedService;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;

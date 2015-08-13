@@ -5,9 +5,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
-import org.sharedhealth.mci.deduplication.config.model.DuplicatePatient;
-import org.sharedhealth.mci.deduplication.config.model.DuplicatePatientIgnored;
-import org.sharedhealth.mci.deduplication.config.repository.DuplicatePatientRepository;
+import org.sharedhealth.mci.deduplication.model.DuplicatePatient;
+import org.sharedhealth.mci.deduplication.model.DuplicatePatientIgnored;
 import org.sharedhealth.mci.domain.model.Address;
 import org.sharedhealth.mci.domain.model.PatientData;
 import org.sharedhealth.mci.domain.repository.PatientRepository;
@@ -25,7 +24,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.sharedhealth.mci.deduplication.config.repository.DuplicatePatientQueryBuilder.buildFindIgnoreDuplicatesStmt;
+import static org.sharedhealth.mci.deduplication.repository.DuplicatePatientQueryBuilder.buildFindIgnoreDuplicatesStmt;
 
 public class DuplicatePatientRepositoryTest {
 

@@ -1,4 +1,4 @@
-package org.sharedhealth.mci.deduplication.config.model;
+package org.sharedhealth.mci.deduplication.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.sharedhealth.mci.domain.model.PatientData;

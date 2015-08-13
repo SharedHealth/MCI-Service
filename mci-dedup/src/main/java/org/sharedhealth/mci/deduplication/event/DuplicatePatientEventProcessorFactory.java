@@ -1,4 +1,4 @@
-package org.sharedhealth.mci.deduplication.config.event;
+package org.sharedhealth.mci.deduplication.event;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,10 +1,10 @@
-package org.sharedhealth.mci.deduplication.config.repository;
+package org.sharedhealth.mci.deduplication.repository;
 
 import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.Insert;
 import org.apache.commons.lang3.builder.Diff;
-import org.sharedhealth.mci.deduplication.config.model.DuplicatePatient;
-import org.sharedhealth.mci.deduplication.config.model.DuplicatePatientIgnored;
+import org.sharedhealth.mci.deduplication.model.DuplicatePatient;
+import org.sharedhealth.mci.deduplication.model.DuplicatePatientIgnored;
 import org.sharedhealth.mci.domain.model.Catchment;
 import org.sharedhealth.mci.domain.model.PatientData;
 import org.sharedhealth.mci.domain.repository.BaseRepository;
@@ -23,7 +23,6 @@ import static com.datastax.driver.core.querybuilder.QueryBuilder.timestamp;
 import static java.lang.String.format;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-import static org.sharedhealth.mci.deduplication.config.repository.DuplicatePatientQueryBuilder.*;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.CF_PATIENT_DUPLICATE;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.DUPLICATE_PATIENT_MARKER;
 import static org.sharedhealth.mci.domain.repository.MarkerRepositoryQueryBuilder.buildUpdateMarkerBatch;
@@ -50,7 +49,7 @@ public class DuplicatePatientRepository extends BaseRepository {
      * Finds by exact catchment id.
      */
     public List<DuplicatePatient> findByCatchment(Catchment catchment, UUID after, UUID before, int limit) {
-        return cassandraOps.select(buildFindByCatchmentStmt(catchment, after, before, limit), DuplicatePatient.class);
+        return cassandraOps.select(DuplicatePatientQueryBuilder.buildFindByCatchmentStmt(catchment, after, before, limit), DuplicatePatient.class);
     }
 
     public void processDuplicates(PatientData patientData1, PatientData patientData2, boolean isMerged) {
@@ -75,7 +74,7 @@ public class DuplicatePatientRepository extends BaseRepository {
 
         } else {
             Set<String> reasons = findReasonsForDuplicates(duplicatePatients);
-            buildCreateIgnoreDuplicatesStmt(healthId1, healthId2, reasons, cassandraOps.getConverter(), batch);
+            DuplicatePatientQueryBuilder.buildCreateIgnoreDuplicatesStmt(healthId1, healthId2, reasons, cassandraOps.getConverter(), batch);
             buildDeleteDuplicatesStmt(patient1, patient2, cassandraOps.getConverter(), batch);
         }
         cassandraOps.execute(batch);
@@ -166,7 +165,7 @@ public class DuplicatePatientRepository extends BaseRepository {
         String cql;
         List<DuplicatePatient> duplicates = new ArrayList<>();
         for (String catchmentId : catchment.getAllIds()) {
-            cql = buildFindByCatchmentAndHealthIdsStmt(catchmentId, healthId1, healthId2);
+            cql = DuplicatePatientQueryBuilder.buildFindByCatchmentAndHealthIdsStmt(catchmentId, healthId1, healthId2);
             duplicates.addAll(cassandraOps.select(cql, DuplicatePatient.class));
         }
         return duplicates;
@@ -187,7 +186,7 @@ public class DuplicatePatientRepository extends BaseRepository {
         String cql;
         List<DuplicatePatient> duplicates = new ArrayList<>();
         for (String catchmentId : catchment.getAllIds()) {
-            cql = buildFindByCatchmentAndHealthIdStmt(catchmentId, healthId1);
+            cql = DuplicatePatientQueryBuilder.buildFindByCatchmentAndHealthIdStmt(catchmentId, healthId1);
             duplicates.addAll(cassandraOps.select(cql, DuplicatePatient.class));
         }
         return duplicates;
@@ -242,7 +241,7 @@ public class DuplicatePatientRepository extends BaseRepository {
     }
 
     private DuplicatePatientIgnored findIgnoredDuplicates(String healthId1, String healthId2) {
-        String cql = buildFindIgnoreDuplicatesStmt(healthId1, healthId2);
+        String cql = DuplicatePatientQueryBuilder.buildFindIgnoreDuplicatesStmt(healthId1, healthId2);
         return cassandraOps.selectOne(cql, DuplicatePatientIgnored.class);
     }
 }

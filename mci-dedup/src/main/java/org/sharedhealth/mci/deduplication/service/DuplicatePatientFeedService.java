@@ -1,7 +1,7 @@
-package org.sharedhealth.mci.deduplication.config.service;
+package org.sharedhealth.mci.deduplication.service;
 
-import org.sharedhealth.mci.deduplication.config.event.DuplicatePatientEventProcessor;
-import org.sharedhealth.mci.deduplication.config.event.DuplicatePatientEventProcessorFactory;
+import org.sharedhealth.mci.deduplication.event.DuplicatePatientEventProcessor;
+import org.sharedhealth.mci.deduplication.event.DuplicatePatientEventProcessorFactory;
 import org.sharedhealth.mci.domain.constant.RepositoryConstants;
 import org.sharedhealth.mci.domain.model.PatientUpdateLog;
 import org.sharedhealth.mci.domain.model.PatientUpdateLogMapper;
