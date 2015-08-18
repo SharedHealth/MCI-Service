@@ -130,4 +130,5 @@ public class RepositoryConstants {
     public static final String DUPLICATE_PATIENT_MARKER = "duplicate_patient_marker";
 
     public static final String AUDIT_MARKER_TYPE = "audit_marker";
+    public static final String SEARCH_MAPPING_MARKER_TYPE = "search_mapping_marker";
 }

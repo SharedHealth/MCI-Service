@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.cassandra.convert.CassandraConverter;
 import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -27,9 +28,9 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.domain.constant.MCIConstants.PATIENT_STATUS_ALIVE;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.*;
+import static org.sharedhealth.mci.domain.repository.PatientAuditLogQueryBuilder.buildCreateAuditLogStmt;
 import static org.sharedhealth.mci.domain.repository.PatientQueryBuilder.*;
 import static org.sharedhealth.mci.domain.repository.PatientUpdateLogQueryBuilder.buildCreateUpdateLogStmt;
-import static org.sharedhealth.mci.domain.repository.PatientAuditLogQueryBuilder.buildCreateAuditLogStmt;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createDeleteQuery;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
 
@@ -77,10 +78,13 @@ public class PatientRepository extends BaseRepository {
         Map<String, Set<Requester>> requestedBy = new HashMap<>();
         buildRequestedBy(requestedBy, ALL_FIELDS, requester);
 
-        Batch batch = buildSaveBatch(patient, cassandraOps.getConverter());
+        CassandraConverter converter = cassandraOps.getConverter();
 
-        buildCreateAuditLogStmt(patientData, requestedBy, cassandraOps.getConverter(), batch);
-        addToPatientUpdateLogStmt(patient, requestedBy, cassandraOps.getConverter(), batch);
+        Batch batch = batch();
+
+        batch.add(createInsertQuery(CF_PATIENT, patient, null, converter));
+        buildCreateAuditLogStmt(patientData, requestedBy, converter, batch);
+        addToPatientUpdateLogStmt(patient, requestedBy, converter, batch);
 
         cassandraOps.execute(batch);
         return new MCIResponse(patient.getHealthId(), HttpStatus.CREATED);

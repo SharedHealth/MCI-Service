@@ -16,22 +16,24 @@ public class MCIProperties {
     private String cassandraHost;
     @Value("${CASSANDRA_PORT}")
     private int cassandraPort;
+
     @Value("${CASSANDRA_USER}")
     private String cassandraUser;
+
     @Value("${CASSANDRA_PASSWORD}")
     private String cassandraPassword;
     @Value("${CASSANDRA_TIMEOUT}")
     private int cassandraTimeout;
     @Value("${REST_POOL_SIZE}")
     private int restPoolSize;
-
     @Value("${API_VERSION}")
     private String apiVersion;
+
     @Value("${IS_LATEST_API_VERSION}")
     private String isLatestApiVersion;
-
     @Value("${FR_URL}")
     private String frUrl;
+
     @Value("${LR_URL}")
     private String LrUrl;
     @Value("${IDENTITY_SERVER_BASE_URL}")
@@ -48,12 +50,11 @@ public class MCIProperties {
     private String serverUrl;
     @Value("${PR_URL}")
     private String providerRegistryUrl;
-
     @Value("${INVALID_HID_PATTERN}")
     private String invalidHidPattern;
+
     @Value("${MCI_START_HID}")
     private String mciStartHid;
-
     @Value("${MCI_END_HID}")
     private String mciEndHid;
 
@@ -63,10 +64,13 @@ public class MCIProperties {
     @Value("${HEALTH_ID_BLOCK_SIZE_THRESHOLD}")
     private String healthIdBlockSizeThreshold;
 
+    @Value("${SEARCH_MAPPING_TASK_BLOCK_SIZE}")
+    private String searchMappingTaskBlockSize;
 
     public String getCassandraKeySpace() {
         return cassandraKeySpace;
     }
+
 
     public String getContactPoints() {
         return cassandraHost;
@@ -174,5 +178,9 @@ public class MCIProperties {
 
     public void setHealthIdBlockSize(String healthIdBlockSize) {
         this.healthIdBlockSize = healthIdBlockSize;
+    }
+
+    public int getSearchMappingTaskBlockSize() {
+        return Integer.parseInt(searchMappingTaskBlockSize);
     }
 }

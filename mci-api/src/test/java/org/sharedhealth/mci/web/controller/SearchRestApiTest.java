@@ -7,14 +7,10 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.sharedhealth.mci.domain.model.Address;
-import org.sharedhealth.mci.domain.model.PatientData;
-import org.sharedhealth.mci.domain.model.PatientSummaryData;
-import org.sharedhealth.mci.domain.model.PhoneNumber;
-import org.sharedhealth.mci.domain.service.LocationService;
+import org.sharedhealth.mci.domain.model.*;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
+import org.sharedhealth.mci.web.infrastructure.persistence.PatientSearchMappingRepository;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,11 +19,13 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 
+import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static junit.framework.Assert.assertEquals;
 import static org.sharedhealth.mci.domain.util.DateUtil.parseDate;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
 import static org.sharedhealth.mci.utils.HttpUtil.*;
+import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.setupLocation;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -37,8 +35,9 @@ public class SearchRestApiTest extends BaseControllerTest {
     @Autowired
     protected WebApplicationContext webApplicationContext;
 
-    @Mock
-    private LocationService locationService;
+    @Autowired
+    private PatientSearchMappingRepository searchMappingRepository;
+
 
     private static final String PER_PAGE_MAXIMUM_LIMIT_NOTE = "There are more record for this search criteria. Please" +
             " narrow down your search";
@@ -63,6 +62,7 @@ public class SearchRestApiTest extends BaseControllerTest {
                         .withHeader("Content-Type", "application/json")
                         .withBody(asString("jsons/userDetails/userDetailsWithAllRoles.json"))));
         createPatientData();
+        setupLocation(cassandraOps);
     }
 
     @Test
@@ -138,9 +138,14 @@ public class SearchRestApiTest extends BaseControllerTest {
     @Test
     public void shouldReturnPatientIfGivenNameAndAddressMatchWithAnyPatient() throws Exception {
         String json = asString("jsons/patient/full_payload.json");
-
         PatientSummaryData original = getPatientSummaryObjectFromString(json);
         MvcResult mvcResult = postPatient(json);
+
+        PatientData data = getPatientObjectFromString(json);
+        data.setHealthId(getMciResponse(mvcResult).getId());
+        data.setUpdatedAt(timeBased());
+        searchMappingRepository.saveMappings(data);
+
         assertEquals(mvcResult.getResponse().getStatus(), HttpStatus.OK.value());
         String present_address = original.getAddress().getDivisionId() +
                 original.getAddress().getDistrictId() + original.getAddress().getUpazilaId();
@@ -169,6 +174,12 @@ public class SearchRestApiTest extends BaseControllerTest {
         PatientSummaryData original = getPatientSummaryObjectFromString(json);
 
         MvcResult mvcResult = postPatient(json);
+
+        PatientData data = getPatientObjectFromString(json);
+        data.setHealthId(getMciResponse(mvcResult).getId());
+        data.setUpdatedAt(timeBased());
+        searchMappingRepository.saveMappings(data);
+
         assertEquals(mvcResult.getResponse().getStatus(), HttpStatus.OK.value());
         String present_address = original.getAddress().getDivisionId() +
                 original.getAddress().getDistrictId() + original.getAddress().getUpazilaId();
@@ -310,9 +321,9 @@ public class SearchRestApiTest extends BaseControllerTest {
         String present_address = patientData.getAddress().getDivisionId() +
                 patientData.getAddress().getDistrictId() + patientData.getAddress().getUpazilaId();
 
-        createPatient(patientData);
-        createPatient(patientData);
-        createPatient(patientData);
+        createPatientAndMappings();
+        createPatientAndMappings();
+        createPatientAndMappings();
 
         MvcResult result = mockMvc.perform(get(API_END_POINT_FOR_PATIENT +
                 "?phone_no=1716528608&country_code=880&present_address=" + present_address)
@@ -328,5 +339,13 @@ public class SearchRestApiTest extends BaseControllerTest {
         PatientSummaryData patientData1 = (PatientSummaryData) body.getResults().iterator().next();
         Assert.assertEquals("1716528608", patientData1.getPhoneNumber().getNumber());
         Assert.assertEquals(200, body.getHttpStatus());
+    }
+
+    private MCIResponse createPatientAndMappings() throws Exception {
+        MCIResponse patient = createPatient(patientData);
+        patientData.setHealthId(patient.getId());
+        patientData.setUpdatedAt(timeBased());
+        searchMappingRepository.saveMappings(patientData);
+        return patient;
     }
 }

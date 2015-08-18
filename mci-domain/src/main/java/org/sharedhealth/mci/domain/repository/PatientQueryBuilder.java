@@ -1,7 +1,6 @@
 package org.sharedhealth.mci.domain.repository;
 
 import com.datastax.driver.core.querybuilder.Batch;
-import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Update;
 import com.datastax.driver.core.utils.UUIDs;
 import org.sharedhealth.mci.domain.diff.PatientDiffBuilder;
@@ -23,23 +22,6 @@ import static org.sharedhealth.mci.domain.util.JsonMapper.writeValueAsString;
 import static org.springframework.data.cassandra.core.CassandraTemplate.*;
 
 public class PatientQueryBuilder {
-
-    static Batch buildSaveBatch(Patient patient, CassandraConverter converter) {
-        String healthId = patient.getHealthId();
-        Batch batch = QueryBuilder.batch();
-
-        batch.add(createInsertQuery(CF_PATIENT, patient, null, converter));
-
-        buildCreateMappingStmt(healthId, patient.getNationalId(), CF_NID_MAPPING, converter, batch);
-        buildCreateMappingStmt(healthId, patient.getBirthRegistrationNumber(), CF_BRN_MAPPING, converter, batch);
-        buildCreateMappingStmt(healthId, patient.getUid(), CF_UID_MAPPING, converter, batch);
-        buildCreateMappingStmt(healthId, patient.getCellNo(), CF_PHONE_NUMBER_MAPPING, converter, batch);
-        buildCreateMappingStmt(healthId, patient.getHouseholdCode(), CF_HOUSEHOLD_CODE_MAPPING, converter, batch);
-
-        buildCreateNameMappingStmt(patient, converter, batch);
-        buildCreateCatchmentMappingsStmt(patient.getCatchment(), patient.getUpdatedAt(), patient.getHealthId(), converter, batch);
-        return batch;
-    }
 
     static void addToPatientUpdateLogStmt(Patient patient,
                                           Map<String, Set<Requester>> requestedBy,

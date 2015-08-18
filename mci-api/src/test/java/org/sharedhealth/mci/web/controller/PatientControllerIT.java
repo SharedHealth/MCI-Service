@@ -12,8 +12,10 @@ import org.sharedhealth.mci.domain.model.*;
 import org.sharedhealth.mci.web.dummy.InvalidPatient;
 import org.sharedhealth.mci.web.handler.ErrorHandler;
 import org.sharedhealth.mci.web.handler.MCIError;
+import org.sharedhealth.mci.web.infrastructure.persistence.PatientSearchMappingRepository;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MvcResult;
@@ -23,6 +25,7 @@ import java.text.ParseException;
 import java.util.Collections;
 import java.util.List;
 
+import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static org.junit.Assert.*;
@@ -41,6 +44,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringJUnit4ClassRunner.class)
 public class PatientControllerIT extends BaseControllerTest {
+    @Autowired
+    private PatientSearchMappingRepository searchMappingRepository;
+
     @Before
     public void setup() throws ParseException {
         MockitoAnnotations.initMocks(this);
@@ -353,14 +359,17 @@ public class PatientControllerIT extends BaseControllerTest {
     @Test
     public void shouldGoToUpdateFlowIfCreatePatientRequestWithSimilarPatientData() throws Exception {
         String json = asString("jsons/patient/full_payload.json");
-
-        PatientData original = getPatientObjectFromString(json);
-
         MvcResult firstTimeResponse = postPatient(json);
 
         final MCIResponse body1 = getMciResponse(firstTimeResponse);
         String healthId = body1.getId();
 
+        PatientData patientData = getPatientObjectFromString(json);
+        patientData.setHealthId(healthId);
+        patientData.setUpdatedAt(timeBased());
+        searchMappingRepository.saveMappings(patientData);
+
+        PatientData original = getPatientObjectFromString(json);
         original.setGivenName("Updated Given Name");
 
         MvcResult result = postPatient(mapper.writeValueAsString(original));
