@@ -19,7 +19,7 @@ import javax.validation.Validator;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
-import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.setupLocation;
+import static org.sharedhealth.mci.domain.repository.TestUtil.setupLocation;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration

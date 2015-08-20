@@ -18,7 +18,7 @@ import org.sharedhealth.mci.domain.repository.PatientRepository;
 import org.sharedhealth.mci.domain.config.EnvironmentMock;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.infrastructure.persistence.HealthIdRepository;
-import org.sharedhealth.mci.web.infrastructure.persistence.TestUtil;
+import org.sharedhealth.mci.domain.repository.TestUtil;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.model.MciHealthId;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -4,6 +4,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.sharedhealth.mci.domain.repository.TestUtil;
 import org.sharedhealth.mci.domain.config.EnvironmentMock;
 import org.sharedhealth.mci.domain.model.*;
 import org.sharedhealth.mci.domain.repository.BaseRepositoryIT;

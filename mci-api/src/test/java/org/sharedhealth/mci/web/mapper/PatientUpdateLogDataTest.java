@@ -8,7 +8,7 @@ import org.sharedhealth.mci.domain.model.PatientUpdateLogMapper;
 
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static org.junit.Assert.assertEquals;
-import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.buildAddressChangeSet;
+import static org.sharedhealth.mci.domain.repository.TestUtil.buildAddressChangeSet;
 
 public class PatientUpdateLogDataTest {
 

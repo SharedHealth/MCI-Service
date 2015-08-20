@@ -25,7 +25,7 @@ import static junit.framework.Assert.assertEquals;
 import static org.sharedhealth.mci.domain.util.DateUtil.parseDate;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
 import static org.sharedhealth.mci.utils.HttpUtil.*;
-import static org.sharedhealth.mci.web.infrastructure.persistence.TestUtil.setupLocation;
+import static org.sharedhealth.mci.domain.repository.TestUtil.setupLocation;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;

@@ -27,7 +27,7 @@ import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.junit.Assert.*;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.*;
-import static org.sharedhealth.mci.deduplication.repository.TestUtil.*;
+import static org.sharedhealth.mci.domain.repository.TestUtil.*;
 
 public class DuplicatePatientRepositoryIT extends BaseRepositoryIT {
 
