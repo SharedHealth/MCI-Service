@@ -1,4 +1,4 @@
-package org.sharedhealth.mci.web.infrastructure.persistence;
+package org.sharedhealth.mci.searchmapping.repository;
 
 import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.QueryBuilder;

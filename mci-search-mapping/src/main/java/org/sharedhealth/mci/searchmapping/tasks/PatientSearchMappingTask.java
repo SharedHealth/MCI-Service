@@ -1,7 +1,7 @@
-package org.sharedhealth.mci.tasks;
+package org.sharedhealth.mci.searchmapping.tasks;
 
 import org.apache.log4j.Logger;
-import org.sharedhealth.mci.web.service.PatientSearchMappingService;
+import org.sharedhealth.mci.searchmapping.services.PatientSearchMappingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;

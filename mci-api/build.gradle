@@ -41,6 +41,7 @@ dependencies {
 
     compile project(":mci-domain")
     compile project(":mci-dedup")
+    compile project(":mci-search-mapping")
 
     testCompile project(":schema")
 
@@ -112,6 +113,7 @@ task dist(dependsOn: [
         project(":schema").tasks.build,
         project(":mci-domain").tasks.build,
         project(":mci-dedup").tasks.build,
+        project(":mci-search-mapping").tasks.build,
         'exportProperties'], type: Rpm) {
     packageName = 'mci'
     version = '0.2'
@@ -168,6 +170,11 @@ task dist(dependsOn: [
     }
 
     from("${rootDir}/mci-dedup/build/libs") {
+        fileMode = 0755
+        into 'lib'
+    }
+    
+    from("${rootDir}/mci-search-mapping/build/libs") {
         fileMode = 0755
         into 'lib'
     }

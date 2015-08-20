@@ -1,4 +1,4 @@
-package org.sharedhealth.mci.web.service;
+package org.sharedhealth.mci.searchmapping.services;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -8,7 +8,7 @@ import org.sharedhealth.mci.domain.model.PatientData;
 import org.sharedhealth.mci.domain.model.PatientUpdateLog;
 import org.sharedhealth.mci.domain.repository.PatientFeedRepository;
 import org.sharedhealth.mci.domain.repository.PatientRepository;
-import org.sharedhealth.mci.web.infrastructure.persistence.PatientSearchMappingRepository;
+import org.sharedhealth.mci.searchmapping.repository.PatientSearchMappingRepository;
 
 import java.util.ArrayList;
 import java.util.List;

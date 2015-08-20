@@ -1,4 +1,4 @@
-package org.sharedhealth.mci.web.service;
+package org.sharedhealth.mci.searchmapping.services;
 
 import org.apache.log4j.Logger;
 import org.sharedhealth.mci.domain.config.MCIProperties;
@@ -7,7 +7,7 @@ import org.sharedhealth.mci.domain.model.PatientData;
 import org.sharedhealth.mci.domain.model.PatientUpdateLog;
 import org.sharedhealth.mci.domain.repository.PatientFeedRepository;
 import org.sharedhealth.mci.domain.repository.PatientRepository;
-import org.sharedhealth.mci.web.infrastructure.persistence.PatientSearchMappingRepository;
+import org.sharedhealth.mci.searchmapping.repository.PatientSearchMappingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

@@ -850,38 +850,7 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
         assertEquals(healthId2, patients.get(1).getHealthId());
         assertEquals(healthId3, patients.get(2).getHealthId());
     }
-
-    @Test
-    public void shouldFindAllPatientsByCatchmentWithLastMarkerParam() throws Exception {
-        List<String> healthIds = new ArrayList<>();
-        PatientData patient = buildPatient();
-        Address address = createAddress("10", "20", "30");
-        address.setCityCorporationId("40");
-
-        for (int i = 1; i <= 5; i++) {
-            address.setUnionOrUrbanWardId("5" + i);
-            address.setRuralWardId("6" + i);
-            patient.setAddress(address);
-            patient.setHealthId(String.valueOf(new Date().getTime()));
-            healthIds.add(patientRepository.create(patient).getId());
-            Thread.sleep(0, 10);
-        }
-
-
-        Catchment catchment = new Catchment("10", "20", "30");
-        catchment.setCityCorpId("40");
-        UUID updatedAt = cqlTemplate.selectOneById(Patient.class, healthIds.get(0)).getUpdatedAt();
-        assertNotNull(updatedAt);
-        int limit = 3;
-        List<PatientData> patients = patientRepository.findAllByCatchment(catchment, null, updatedAt, limit);
-
-        assertTrue(isNotEmpty(patients));
-        assertEquals(limit, patients.size());
-        assertEquals(healthIds.get(1), patients.get(0).getHealthId());
-        assertEquals(healthIds.get(2), patients.get(1).getHealthId());
-        assertEquals(healthIds.get(3), patients.get(2).getHealthId());
-    }
-
+    
     @Test
     public void shouldReturnEmptyCollectionIfNoPatientFoundInCatchment() {
         Catchment catchment = new Catchment("10", "20", "30");
