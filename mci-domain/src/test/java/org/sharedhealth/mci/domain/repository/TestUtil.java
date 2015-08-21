@@ -60,7 +60,8 @@ public class TestUtil {
                 CF_LOCATIONS,
                 CF_MCI_HEALTH_ID,
                 CF_GENERATED_HID_RANGE,
-                CF_MARKER
+                CF_MARKER,
+                CF_FAILED_EVENTS
         );
     }
 

@@ -40,7 +40,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
 
     @Before
     public void setUp() throws Exception {
-        TestUtil.setupApprovalsConfig(cqlTemplate);
+        TestUtil.setupApprovalsConfig(cassandraOps);
     }
 
     @Test
@@ -85,7 +85,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
 
         Catchment catchment = new Catchment("10", "20", "30");
         catchment.setCityCorpId("40");
-        UUID updatedAt = cqlTemplate.selectOneById(Patient.class, healthIds.get(0)).getUpdatedAt();
+        UUID updatedAt = cassandraOps.selectOneById(Patient.class, healthIds.get(0)).getUpdatedAt();
         assertNotNull(updatedAt);
         int limit = 3;
         List<PatientData> patients = patientRepository.findAllByCatchment(catchment, null, updatedAt, limit);
@@ -119,7 +119,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
 
         Catchment catchment = new Catchment("10", "20", "30");
         catchment.setCityCorpId("40");
-        UUID updatedAt = cqlTemplate.selectOneById(Patient.class, healthIds.get(0)).getUpdatedAt();
+        UUID updatedAt = cassandraOps.selectOneById(Patient.class, healthIds.get(0)).getUpdatedAt();
         assertNotNull(updatedAt);
         int limit = 3;
         Date since = new Date(unixTimestamp(updatedAt));
@@ -220,7 +220,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
         assertEquals(newUid, updatedPatient.getUid());
         assertTrue(isEmpty(updatedPatient.getPendingApprovals()));
 
-        assertTrue(isEmpty(cqlTemplate.select(select().from(CF_PENDING_APPROVAL_MAPPING).toString(), PendingApprovalMapping.class)));
+        assertTrue(isEmpty(cassandraOps.select(select().from(CF_PENDING_APPROVAL_MAPPING).toString(), PendingApprovalMapping.class)));
 
         assertThat(getNidMappings(existingNid, healthId).size(), is(1));
         assertThat(getBrnMappings(existingBrn, healthId).size(), is(1));
@@ -281,7 +281,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
         assertEquals(existingUid, updatedPatient.getUid());
         assertTrue(isEmpty(updatedPatient.getPendingApprovals()));
 
-        assertTrue(isEmpty(cqlTemplate.select(select().from(CF_PENDING_APPROVAL_MAPPING).toString(), PendingApprovalMapping.class)));
+        assertTrue(isEmpty(cassandraOps.select(select().from(CF_PENDING_APPROVAL_MAPPING).toString(), PendingApprovalMapping.class)));
 
         assertThat(getNidMappings(existingNid, healthId).size(), is(1));
         assertThat(getBrnMappings(existingBrn, healthId).size(), is(1));
@@ -410,7 +410,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
 
         assertTrue(isEmpty(patientRepository.findAllByCatchment(patientData.getCatchment(), null, null, 100)));
 
-        List<CatchmentMapping> catchmentMappings = cqlTemplate.select
+        List<CatchmentMapping> catchmentMappings = cassandraOps.select
                 (buildFindCatchmentMappingsStmt(patientRepository.findByHealthId(healthId)), CatchmentMapping.class);
         assertTrue(isNotEmpty(catchmentMappings));
         assertEquals(2, catchmentMappings.size());
@@ -639,15 +639,15 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
     }
 
     private List<NidMapping> getNidMappings(String nid, String healthId) {
-        return cqlTemplate.select(select().from(CF_NID_MAPPING).where(eq(NATIONAL_ID, nid)).and(eq(HEALTH_ID, healthId)).toString(), NidMapping.class);
+        return cassandraOps.select(select().from(CF_NID_MAPPING).where(eq(NATIONAL_ID, nid)).and(eq(HEALTH_ID, healthId)).toString(), NidMapping.class);
     }
 
     private List<BrnMapping> getBrnMappings(String brn, String healthId) {
-        return cqlTemplate.select(select().from(CF_BRN_MAPPING).where(eq(BIN_BRN, brn)).and(eq(HEALTH_ID, healthId)).toString(), BrnMapping.class);
+        return cassandraOps.select(select().from(CF_BRN_MAPPING).where(eq(BIN_BRN, brn)).and(eq(HEALTH_ID, healthId)).toString(), BrnMapping.class);
     }
 
     private List<UidMapping> getUidMappings(String uid, String healthId) {
-        return cqlTemplate.select(select().from(CF_UID_MAPPING).where(eq(UID, uid)).and(eq(HEALTH_ID, healthId)).toString(), UidMapping.class);
+        return cassandraOps.select(select().from(CF_UID_MAPPING).where(eq(UID, uid)).and(eq(HEALTH_ID, healthId)).toString(), UidMapping.class);
     }
 
     private List<PatientData> getPatientsByPhoneNumber(PhoneNumber phoneNumber) {
@@ -658,7 +658,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
     }
 
     private List<HouseholdCodeMapping> getHouseholdCodeMappings(String householdCode, String healthId) {
-        return cqlTemplate.select(select().from(CF_HOUSEHOLD_CODE_MAPPING).where(eq(HOUSEHOLD_CODE, householdCode)).and(eq(HEALTH_ID, healthId)).toString(), HouseholdCodeMapping.class);
+        return cassandraOps.select(select().from(CF_HOUSEHOLD_CODE_MAPPING).where(eq(HOUSEHOLD_CODE, householdCode)).and(eq(HEALTH_ID, healthId)).toString(), HouseholdCodeMapping.class);
     }
 
     private PatientData initPatientData() {
@@ -700,6 +700,6 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
 
     @After
     public void tearDown() throws InterruptedException {
-        TestUtil.truncateAllColumnFamilies(cqlTemplate);
+        TestUtil.truncateAllColumnFamilies(cassandraOps);
     }
 }

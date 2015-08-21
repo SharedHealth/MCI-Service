@@ -16,6 +16,6 @@ public abstract class BaseRepositoryIT {
     @SuppressWarnings("SpringJavaAutowiringInspection")
     @Autowired
     @Qualifier("MCICassandraTemplate")
-    protected CassandraOperations cqlTemplate;
+    protected CassandraOperations cassandraOps;
 
 }

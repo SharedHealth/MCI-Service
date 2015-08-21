@@ -156,7 +156,7 @@ public class LocationRepositoryIT extends BaseRepositoryIT {
     }
 
     private void truncateLocationCFs() {
-        cqlTemplate.execute("truncate locations");
-        cqlTemplate.execute("truncate lr_markers");
+        cassandraOps.execute("truncate locations");
+        cassandraOps.execute("truncate lr_markers");
     }
 }

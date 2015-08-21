@@ -16,5 +16,6 @@ public class PatientSearchMappingTask {
     @Scheduled(initialDelayString = "${SEARCH_MAPPING_TASK_INITIAL_DELAY}", fixedDelayString = "${SEARCH_MAPPING_TASK_DELAY}")
     public void map() {
         searchMappingService.map();
+        searchMappingService.mapFailedEvents();
     }
 }

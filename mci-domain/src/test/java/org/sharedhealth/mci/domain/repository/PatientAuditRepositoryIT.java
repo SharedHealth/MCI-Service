@@ -29,7 +29,7 @@ public class PatientAuditRepositoryIT extends BaseRepositoryIT {
 
     @Before
     public void setUp() throws Exception {
-        TestUtil.setupApprovalsConfig(cqlTemplate);
+        TestUtil.setupApprovalsConfig(cassandraOps);
     }
 
     @Test
@@ -129,6 +129,6 @@ public class PatientAuditRepositoryIT extends BaseRepositoryIT {
 
     @After
     public void tearDown() {
-        TestUtil.truncateAllColumnFamilies(cqlTemplate);
+        TestUtil.truncateAllColumnFamilies(cassandraOps);
     }
 }

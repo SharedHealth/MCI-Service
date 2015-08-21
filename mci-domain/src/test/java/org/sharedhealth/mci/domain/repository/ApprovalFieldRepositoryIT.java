@@ -43,7 +43,7 @@ public class ApprovalFieldRepositoryIT extends BaseRepositoryIT {
         approvalFieldRepository.save(approvalField);
         ApprovalField fieldData = approvalFieldRepository.findByField(field);
         assertEquals(approvalField, fieldData);
-        cqlTemplate.execute("INSERT INTO approval_fields (\"field\", \"option\") VALUES ('gender', 'NU')");
+        cassandraOps.execute("INSERT INTO approval_fields (\"field\", \"option\") VALUES ('gender', 'NU')");
         fieldData = approvalFieldRepository.findByField(field);
         assertEquals(approvalField, fieldData);
 
@@ -54,7 +54,7 @@ public class ApprovalFieldRepositoryIT extends BaseRepositoryIT {
 
     @After
     public void tearDown() throws ExecutionException, InterruptedException {
-        cqlTemplate.execute("truncate approval_fields");
+        cassandraOps.execute("truncate approval_fields");
         approvalFieldRepository.resetAllCache();
     }
 }

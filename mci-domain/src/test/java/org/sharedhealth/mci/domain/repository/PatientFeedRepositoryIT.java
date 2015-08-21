@@ -32,7 +32,7 @@ public class PatientFeedRepositoryIT extends BaseRepositoryIT {
     @Before
     public void setup() throws ExecutionException, InterruptedException {
         data = createPatient();
-        setupApprovalsConfig(cqlTemplate);
+        setupApprovalsConfig(cassandraOps);
     }
 
     private PatientData createPatient() {
@@ -259,6 +259,6 @@ public class PatientFeedRepositoryIT extends BaseRepositoryIT {
 
     @After
     public void tearDown() {
-        truncateAllColumnFamilies(cqlTemplate);
+        truncateAllColumnFamilies(cassandraOps);
     }
 }

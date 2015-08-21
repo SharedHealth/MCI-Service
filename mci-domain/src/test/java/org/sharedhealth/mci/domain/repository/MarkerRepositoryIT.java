@@ -10,7 +10,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.sharedhealth.mci.domain.repository.TestUtil.truncateAllColumnFamilies;
 
-public class MarkerRepositoryIT  extends BaseRepositoryIT {
+public class MarkerRepositoryIT extends BaseRepositoryIT {
 
     @Autowired
     private MarkerRepository markerRepository;
@@ -23,7 +23,7 @@ public class MarkerRepositoryIT  extends BaseRepositoryIT {
         marker.setType(type);
         marker.setCreatedAt(timeBased());
         marker.setMarker("marker_1");
-        cqlTemplate.update(marker);
+        cassandraOps.update(marker);
 
         String value = markerRepository.find(type);
         assertNotNull(value);
@@ -32,6 +32,6 @@ public class MarkerRepositoryIT  extends BaseRepositoryIT {
 
     @After
     public void tearDown() {
-        truncateAllColumnFamilies(cqlTemplate);
+        truncateAllColumnFamilies(cassandraOps);
     }
 }

@@ -42,7 +42,6 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
     private String uid = "12345678901";
     private String givenName = "Scott";
     private String householdCode = "12345";
-    private String healthId = "98093779883";
     private PatientData data;
 
 
@@ -52,7 +51,7 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
     @Before
     public void setup() throws ExecutionException, InterruptedException {
         data = buildPatient();
-        setupApprovalsConfig(cqlTemplate);
+        setupApprovalsConfig(cassandraOps);
     }
 
     private PatientData buildPatient() {
@@ -131,7 +130,7 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
         assertNotNull(patientRepository.create(patient).getId());
 
         String cql = select().from(CF_PHONE_NUMBER_MAPPING).toString();
-        assertTrue(isEmpty(cqlTemplate.select(cql, PhoneNumberMapping.class)));
+        assertTrue(isEmpty(cassandraOps.select(cql, PhoneNumberMapping.class)));
     }
 
     @Test
@@ -263,7 +262,7 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
         assertEquals(newPhoneNumber, updatedPatient.getPhoneNumber());
 
         assertTrue(isEmpty(updatedPatient.getPendingApprovals()));
-        assertTrue(isEmpty(cqlTemplate.select(select().from(CF_PENDING_APPROVAL_MAPPING).toString(), PendingApprovalMapping.class)));
+        assertTrue(isEmpty(cassandraOps.select(select().from(CF_PENDING_APPROVAL_MAPPING).toString(), PendingApprovalMapping.class)));
 
         assertIdAndPhoneNumberMappingsEmpty();
     }
@@ -525,7 +524,7 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
         assertEquals(existingPhoneNumber, updatedPatient.getPhoneNumber());
         assertTrue(isEmpty(updatedPatient.getPendingApprovals()));
 
-        assertTrue(isEmpty(cqlTemplate.select(select().from(CF_PENDING_APPROVAL_MAPPING).toString(), PendingApprovalMapping.class)));
+        assertTrue(isEmpty(cassandraOps.select(select().from(CF_PENDING_APPROVAL_MAPPING).toString(), PendingApprovalMapping.class)));
         assertIdAndPhoneNumberMappingsEmpty();
     }
 
@@ -581,7 +580,7 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
         assertEquals(existingUid, updatedPatient.getUid());
         assertTrue(isEmpty(updatedPatient.getPendingApprovals()));
 
-        assertTrue(isEmpty(cqlTemplate.select(select().from(CF_PENDING_APPROVAL_MAPPING).toString(), PendingApprovalMapping.class)));
+        assertTrue(isEmpty(cassandraOps.select(select().from(CF_PENDING_APPROVAL_MAPPING).toString(), PendingApprovalMapping.class)));
         assertIdAndPhoneNumberMappingsEmpty();
     }
 
@@ -650,26 +649,26 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
     }
 
     private void assertIdAndPhoneNumberMappingsEmpty() {
-        assertTrue(isEmpty(cqlTemplate.select(select().from(CF_NID_MAPPING).toString(), NidMapping.class)));
-        assertTrue(isEmpty(cqlTemplate.select(select().from(CF_BRN_MAPPING).toString(), BrnMapping.class)));
-        assertTrue(isEmpty(cqlTemplate.select(select().from(CF_UID_MAPPING).toString(), UidMapping.class)));
-        assertTrue(isEmpty(cqlTemplate.select(select().from(CF_PHONE_NUMBER_MAPPING).toString(), PhoneNumberMapping.class)));
+        assertTrue(isEmpty(cassandraOps.select(select().from(CF_NID_MAPPING).toString(), NidMapping.class)));
+        assertTrue(isEmpty(cassandraOps.select(select().from(CF_BRN_MAPPING).toString(), BrnMapping.class)));
+        assertTrue(isEmpty(cassandraOps.select(select().from(CF_UID_MAPPING).toString(), UidMapping.class)));
+        assertTrue(isEmpty(cassandraOps.select(select().from(CF_PHONE_NUMBER_MAPPING).toString(), PhoneNumberMapping.class)));
     }
 
     private void assertIdAndPhoneNumberMappingsExist() {
-        List<NidMapping> nidMappings = cqlTemplate.select(select().from(CF_NID_MAPPING).toString(), NidMapping.class);
+        List<NidMapping> nidMappings = cassandraOps.select(select().from(CF_NID_MAPPING).toString(), NidMapping.class);
         assertTrue(isNotEmpty(nidMappings));
         assertEquals(1, nidMappings.size());
 
-        List<BrnMapping> brnMappings = cqlTemplate.select(select().from(CF_BRN_MAPPING).toString(), BrnMapping.class);
+        List<BrnMapping> brnMappings = cassandraOps.select(select().from(CF_BRN_MAPPING).toString(), BrnMapping.class);
         assertTrue(isNotEmpty(brnMappings));
         assertEquals(1, brnMappings.size());
 
-        List<UidMapping> uidMappings = cqlTemplate.select(select().from(CF_UID_MAPPING).toString(), UidMapping.class);
+        List<UidMapping> uidMappings = cassandraOps.select(select().from(CF_UID_MAPPING).toString(), UidMapping.class);
         assertTrue(isNotEmpty(uidMappings));
         assertEquals(1, uidMappings.size());
 
-        List<PhoneNumberMapping> phoneNumberMappings = cqlTemplate.select(select().from(CF_PHONE_NUMBER_MAPPING).toString(),
+        List<PhoneNumberMapping> phoneNumberMappings = cassandraOps.select(select().from(CF_PHONE_NUMBER_MAPPING).toString(),
                 PhoneNumberMapping.class);
         assertTrue(isNotEmpty(phoneNumberMappings));
         assertEquals(1, phoneNumberMappings.size());
@@ -850,7 +849,7 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
         assertEquals(healthId2, patients.get(1).getHealthId());
         assertEquals(healthId3, patients.get(2).getHealthId());
     }
-    
+
     @Test
     public void shouldReturnEmptyCollectionIfNoPatientFoundInCatchment() {
         Catchment catchment = new Catchment("10", "20", "30");
@@ -891,7 +890,7 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
         patientData.setGender("F");
         patientRepository.update(patientData, healthId);
 
-        Patient patient = cqlTemplate.selectOneById(Patient.class, healthId);
+        Patient patient = cassandraOps.selectOneById(Patient.class, healthId);
         TreeSet<PendingApproval> pendingApprovals = patient.getPendingApprovals();
         assertNotNull(pendingApprovals);
         assertEquals(1, pendingApprovals.size());
@@ -915,7 +914,7 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
     }
 
     private List<PendingApprovalMapping> findAllPendingApprovalMappings() {
-        return cqlTemplate.select(select().from(CF_PENDING_APPROVAL_MAPPING), PendingApprovalMapping.class);
+        return cassandraOps.select(select().from(CF_PENDING_APPROVAL_MAPPING), PendingApprovalMapping.class);
     }
 
     private Catchment buildCatchment(Address address) {
@@ -928,7 +927,7 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
 
     @Test
     public void shouldFindAllPendingApprovalMappingsInAscendingOrderOfLastUpdated() throws Exception {
-        cqlTemplate.insert(asList(buildPendingApprovalMapping("31", "h101"),
+        cassandraOps.insert(asList(buildPendingApprovalMapping("31", "h101"),
                 buildPendingApprovalMapping("30", "h102"),
                 buildPendingApprovalMapping("30", "h103"),
                 buildPendingApprovalMapping("32", "h104"),
@@ -960,7 +959,7 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
                 buildPendingApprovalMapping("30", "h103"),
                 buildPendingApprovalMapping("30", "h104"),
                 buildPendingApprovalMapping("30", "h105"));
-        cqlTemplate.insert(entities);
+        cassandraOps.insert(entities);
 
         UUID after = entities.get(1).getLastUpdated();
         List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(new Catchment("10", "20", "30"), after,
@@ -978,7 +977,7 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
                 buildPendingApprovalMapping("30", "h103"),
                 buildPendingApprovalMapping("30", "h104"),
                 buildPendingApprovalMapping("30", "h105"));
-        cqlTemplate.insert(entities);
+        cassandraOps.insert(entities);
 
         UUID before = entities.get(4).getLastUpdated();
         List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(new Catchment("10", "20", "30"), null,
@@ -996,7 +995,7 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
                 buildPendingApprovalMapping("30", "h103"),
                 buildPendingApprovalMapping("30", "h104"),
                 buildPendingApprovalMapping("30", "h105"));
-        cqlTemplate.insert(entities);
+        cassandraOps.insert(entities);
 
         UUID after = entities.get(0).getLastUpdated();
         UUID before = entities.get(4).getLastUpdated();
@@ -1015,7 +1014,7 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
                 buildPendingApprovalMapping("30", "h103"),
                 buildPendingApprovalMapping("30", "h104"),
                 buildPendingApprovalMapping("30", "h105"));
-        cqlTemplate.insert(entities);
+        cassandraOps.insert(entities);
         List<PendingApprovalMapping> mappings = patientRepository.findPendingApprovalMapping(new Catchment("10", "20", "30"), null, null,
                 5);
         assertEquals(5, mappings.size());
@@ -1039,7 +1038,7 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
         patientData.setGender("F");
         patientData.setRequester("Bahmni", "Dr. Monika");
         patientRepository.update(patientData, healthId);
-        Patient patient = cqlTemplate.selectOneById(Patient.class, healthId);
+        Patient patient = cassandraOps.selectOneById(Patient.class, healthId);
 
         TreeSet<PendingApproval> pendingApprovals = patient.getPendingApprovals();
         assertNotNull(pendingApprovals);
@@ -1080,7 +1079,7 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
         updateRequest.setGender("O");
         updateRequest.setRequester(FACILITY, "Dr. Seuss");
         patientRepository.update(updateRequest, healthId);
-        Patient patient = cqlTemplate.selectOneById(Patient.class, healthId);
+        Patient patient = cassandraOps.selectOneById(Patient.class, healthId);
 
         TreeSet<PendingApproval> pendingApprovals = patient.getPendingApprovals();
         assertNotNull(pendingApprovals);
@@ -1127,7 +1126,7 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
 
         patientRepository.update(patientData, healthId);
 
-        Patient patient = cqlTemplate.selectOneById(Patient.class, healthId);
+        Patient patient = cassandraOps.selectOneById(Patient.class, healthId);
 
         TreeSet<PendingApproval> pendingApprovals = patient.getPendingApprovals();
         assertNotNull(pendingApprovals);
@@ -1143,7 +1142,7 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
     public void shouldBeAbleToAcceptPendingApprovalsWhenPatientHasOnePendingApproval() {
         String healthId = processPendingApprovalsWhenPatientHasOnePendingApproval(true);
 
-        Patient patient = cqlTemplate.selectOneById(Patient.class, healthId);
+        Patient patient = cassandraOps.selectOneById(Patient.class, healthId);
         assertEquals("F", patient.getGender());
         assertTrue(isEmpty(patient.getPendingApprovals()));
 
@@ -1154,7 +1153,7 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
     public void shouldBeAbleToRejectPendingApprovalsWhenPatientHasOnePendingApproval() throws Exception {
         String healthId = processPendingApprovalsWhenPatientHasOnePendingApproval(false);
 
-        Patient patient = cqlTemplate.selectOneById(Patient.class, healthId);
+        Patient patient = cassandraOps.selectOneById(Patient.class, healthId);
         assertEquals(data.getGender(), patient.getGender());
         assertTrue(isEmpty(patient.getPendingApprovals()));
 
@@ -1168,7 +1167,7 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
         patientData.setGender("F");
         patientRepository.update(patientData, healthId);
 
-        Patient patient = cqlTemplate.selectOneById(Patient.class, healthId);
+        Patient patient = cassandraOps.selectOneById(Patient.class, healthId);
 
         TreeSet<PendingApproval> pendingApprovals = patient.getPendingApprovals();
         assertNotNull(pendingApprovals);
@@ -1198,7 +1197,7 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
     public void shouldBeAbleToAcceptPendingApprovalsWhenPatientHasOnePendingApprovalEachForMultipleFields() {
         String healthId = processPendingApprovalsWhenPatientHasOnePendingApprovalEachForMultipleFields(true);
 
-        Patient patient = cqlTemplate.selectOneById(Patient.class, healthId);
+        Patient patient = cassandraOps.selectOneById(Patient.class, healthId);
         assertEquals("F", patient.getGender());
         assertEquals(data.getOccupation(), patient.getOccupation());
         assertEquals("22334455", patient.getCellNo());
@@ -1222,7 +1221,7 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
     public void shouldBeAbleToRejectPendingApprovalsWhenPatientHasOnePendingApprovalEachForMultipleFields() {
         String healthId = processPendingApprovalsWhenPatientHasOnePendingApprovalEachForMultipleFields(false);
 
-        Patient patient = cqlTemplate.selectOneById(Patient.class, healthId);
+        Patient patient = cassandraOps.selectOneById(Patient.class, healthId);
         assertEquals(data.getGender(), patient.getGender());
         assertEquals(data.getOccupation(), patient.getOccupation());
         assertEquals(data.getPhoneNumber().getNumber(), patient.getCellNo());
@@ -1252,7 +1251,7 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
         patientData.setPhoneNumber(phoneNumber);
         patientRepository.update(patientData, healthId);
 
-        Patient patient = cqlTemplate.selectOneById(Patient.class, healthId);
+        Patient patient = cassandraOps.selectOneById(Patient.class, healthId);
 
         TreeSet<PendingApproval> pendingApprovals = patient.getPendingApprovals();
         assertNotNull(pendingApprovals);
@@ -1272,7 +1271,7 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
     public void shouldBeAbleToAcceptPendingApprovalsWhenPatientHasMultiplePendingApprovalsForMultipleFields() throws Exception {
         String healthId = processPendingApprovalsWhenPatientHasMultiplePendingApprovalsForMultipleFields(true);
 
-        Patient patient = cqlTemplate.selectOneById(Patient.class, healthId);
+        Patient patient = cassandraOps.selectOneById(Patient.class, healthId);
         assertEquals("F", patient.getGender());
         assertEquals(data.getOccupation(), patient.getOccupation());
 
@@ -1291,7 +1290,7 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
     public void shouldBeAbleToRejectPendingApprovalsWhenPatientHasMultiplePendingApprovalsForMultipleFields() throws Exception {
         String healthId = processPendingApprovalsWhenPatientHasMultiplePendingApprovalsForMultipleFields(false);
 
-        Patient patient = cqlTemplate.selectOneById(Patient.class, healthId);
+        Patient patient = cassandraOps.selectOneById(Patient.class, healthId);
         assertEquals(data.getGender(), patient.getGender());
         assertEquals(data.getOccupation(), patient.getOccupation());
 
@@ -1338,7 +1337,7 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
         patientData.setOccupation("06");
         patientRepository.update(patientData, healthId);
 
-        Patient patient = cqlTemplate.selectOneById(Patient.class, healthId);
+        Patient patient = cassandraOps.selectOneById(Patient.class, healthId);
 
         TreeSet<PendingApproval> pendingApprovals = patient.getPendingApprovals();
         assertNotNull(pendingApprovals);
@@ -1363,7 +1362,7 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
     public void shouldBeAbleToAcceptPendingApprovalsWhenPatientHasBlockPendingApprovals() {
         String healthId = processPendingApprovalsWhenPatientHasBlockPendingApprovals(true);
 
-        Patient patient = cqlTemplate.selectOneById(Patient.class, healthId);
+        Patient patient = cassandraOps.selectOneById(Patient.class, healthId);
         assertEquals("", defaultString(patient.getPhoneNumberCountryCode()));
         assertEquals("011", defaultString(patient.getPhoneNumberAreaCode()));
         assertEquals("10002001", defaultString(patient.getCellNo()));
@@ -1377,7 +1376,7 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
     public void shouldBeAbleToRejectPendingApprovalsWhenPatientHasBlockPendingApprovals() {
         String healthId = processPendingApprovalsWhenPatientHasBlockPendingApprovals(false);
 
-        Patient patient = cqlTemplate.selectOneById(Patient.class, healthId);
+        Patient patient = cassandraOps.selectOneById(Patient.class, healthId);
         assertEquals("91", patient.getPhoneNumberCountryCode());
         assertEquals("080", patient.getPhoneNumberAreaCode());
         assertEquals("10002000", patient.getCellNo());
@@ -1405,7 +1404,7 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
         patientData.setPhoneNumber(phoneNumber);
         patientRepository.update(patientData, healthId);
 
-        Patient patient = cqlTemplate.selectOneById(Patient.class, healthId);
+        Patient patient = cassandraOps.selectOneById(Patient.class, healthId);
 
         TreeSet<PendingApproval> pendingApprovals = patient.getPendingApprovals();
         assertNotNull(pendingApprovals);
@@ -1490,7 +1489,7 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
     }
 
     private void assertHouseholdCodeMappingEmpty() {
-        assertTrue(isEmpty(cqlTemplate.select(select().from(CF_HOUSEHOLD_CODE_MAPPING).toString(), HouseholdCodeMapping.class)));
+        assertTrue(isEmpty(cassandraOps.select(select().from(CF_HOUSEHOLD_CODE_MAPPING).toString(), HouseholdCodeMapping.class)));
     }
 
     private PatientData initPatientData() {
@@ -1509,6 +1508,6 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
 
     @After
     public void tearDown() {
-        truncateAllColumnFamilies(cqlTemplate);
+        truncateAllColumnFamilies(cassandraOps);
     }
 }
