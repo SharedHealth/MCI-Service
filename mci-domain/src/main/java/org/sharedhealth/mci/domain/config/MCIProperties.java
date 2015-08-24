@@ -67,14 +67,20 @@ public class MCIProperties {
     @Value("${SEARCH_MAPPING_TASK_BLOCK_SIZE}")
     private String searchMappingTaskBlockSize;
 
+    @Value("${MAX_FAILED_EVENTS}")
+    private String maxFailedEvents;
+
+    @Value("${FAILED_EVENT_RETRY_LIMIT}")
+    private String failedEventRetryLimit;
+
     public String getCassandraKeySpace() {
         return cassandraKeySpace;
     }
 
-
     public String getContactPoints() {
         return cassandraHost;
     }
+
 
     public int getCassandraPort() {
         return cassandraPort;
@@ -182,5 +188,13 @@ public class MCIProperties {
 
     public int getSearchMappingTaskBlockSize() {
         return Integer.parseInt(searchMappingTaskBlockSize);
+    }
+
+    public int getMaxFailedEvents() {
+        return Integer.parseInt(maxFailedEvents);
+    }
+
+    public int getFailedEventRetryLimit() {
+        return Integer.parseInt(failedEventRetryLimit);
     }
 }

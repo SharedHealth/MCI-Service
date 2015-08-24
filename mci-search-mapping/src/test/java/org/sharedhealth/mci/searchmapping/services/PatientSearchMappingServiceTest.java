@@ -23,7 +23,6 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.*;
-import static org.sharedhealth.mci.searchmapping.services.PatientSearchMappingService.SEARCH_MAPPING_RETRY_BLOCK_SIZE;
 
 public class PatientSearchMappingServiceTest {
     @Mock
@@ -53,6 +52,7 @@ public class PatientSearchMappingServiceTest {
         List<PatientUpdateLog> updateLogs = asList(patientUpdateLog);
         PatientData patientData = new PatientData();
 
+        when(mciProperties.getMaxFailedEvents()).thenReturn(2);
         when(searchMappingRepository.findLatestMarker()).thenReturn(marker);
         when(feedRepository.findPatientsUpdatedSince(marker, mciProperties.getSearchMappingTaskBlockSize())).thenReturn(updateLogs);
         when(patientRepository.findByHealthId(healthId)).thenReturn(patientData);
@@ -70,6 +70,7 @@ public class PatientSearchMappingServiceTest {
     public void shouldNotMapWhenThereAreNoLogs() throws Exception {
         UUID marker = UUID.randomUUID();
 
+        when(mciProperties.getMaxFailedEvents()).thenReturn(2);
         when(searchMappingRepository.findLatestMarker()).thenReturn(marker);
         when(feedRepository.findPatientsUpdatedSince(marker, mciProperties.getSearchMappingTaskBlockSize())).thenReturn(new ArrayList<PatientUpdateLog>());
 
@@ -90,6 +91,7 @@ public class PatientSearchMappingServiceTest {
         UUID marker = UUID.randomUUID();
         List<PatientUpdateLog> updateLogs = asList(getPatientUpdateLog(healthId1, EVENT_TYPE_CREATED, timeBased()), getPatientUpdateLog(healthId2, EVENT_TYPE_CREATED, timeBased()));
 
+        when(mciProperties.getMaxFailedEvents()).thenReturn(2);
         when(searchMappingRepository.findLatestMarker()).thenReturn(marker);
         when(feedRepository.findPatientsUpdatedSince(marker, mciProperties.getSearchMappingTaskBlockSize())).thenReturn(updateLogs);
         when(patientRepository.findByHealthId(healthId1)).thenReturn(new PatientData());
@@ -111,6 +113,7 @@ public class PatientSearchMappingServiceTest {
         List<PatientUpdateLog> updateLogs = asList(getPatientUpdateLog(healthId1, EVENT_TYPE_UPDATED, timeBased()), getPatientUpdateLog(healthId2, EVENT_TYPE_CREATED, timeBased()));
         PatientData patientData = new PatientData();
 
+        when(mciProperties.getMaxFailedEvents()).thenReturn(2);
         when(searchMappingRepository.findLatestMarker()).thenReturn(marker);
         when(feedRepository.findPatientsUpdatedSince(marker, mciProperties.getSearchMappingTaskBlockSize())).thenReturn(updateLogs);
         when(patientRepository.findByHealthId(healthId2)).thenReturn(patientData);
@@ -135,6 +138,7 @@ public class PatientSearchMappingServiceTest {
         List<PatientUpdateLog> updateLogs = asList(patientUpdateLog);
         PatientData patientData = new PatientData();
 
+        when(mciProperties.getMaxFailedEvents()).thenReturn(2);
         when(searchMappingRepository.findLatestMarker()).thenReturn(marker);
         when(feedRepository.findPatientsUpdatedSince(marker, mciProperties.getSearchMappingTaskBlockSize())).thenReturn(updateLogs);
         when(patientRepository.findByHealthId(healthId)).thenReturn(patientData);
@@ -157,14 +161,16 @@ public class PatientSearchMappingServiceTest {
         FailedEvent failedEvent = new FailedEvent(FAILURE_TYPE_SEARCH_MAPPING, eventId, "Some Error");
         PatientData patientData = new PatientData();
 
-        when(failedEventsRepository.getFailedEvents(FAILURE_TYPE_SEARCH_MAPPING, SEARCH_MAPPING_RETRY_BLOCK_SIZE)).thenReturn(asList(failedEvent));
-        when(feedRepository.findPatientUpdateLog(eventId)).thenReturn(getPatientUpdateLog(healthId, EVENT_TYPE_CREATED, eventId));
+        when(mciProperties.getMaxFailedEvents()).thenReturn(2);
+        when(mciProperties.getFailedEventRetryLimit()).thenReturn(2);
+        when(failedEventsRepository.getFailedEvents(FAILURE_TYPE_SEARCH_MAPPING, mciProperties.getMaxFailedEvents())).thenReturn(asList(failedEvent));
+        when(feedRepository.findPatientUpdateLogByEventId(eventId)).thenReturn(getPatientUpdateLog(healthId, EVENT_TYPE_CREATED, eventId));
         when(patientRepository.findByHealthId(healthId)).thenReturn(patientData);
 
         searchMappingService.mapFailedEvents();
 
-        verify(failedEventsRepository, times(1)).getFailedEvents(FAILURE_TYPE_SEARCH_MAPPING, SEARCH_MAPPING_RETRY_BLOCK_SIZE);
-        verify(feedRepository, times(1)).findPatientUpdateLog(eventId);
+        verify(failedEventsRepository, times(1)).getFailedEvents(FAILURE_TYPE_SEARCH_MAPPING, mciProperties.getMaxFailedEvents());
+        verify(feedRepository, times(1)).findPatientUpdateLogByEventId(eventId);
         verify(patientRepository, times(1)).findByHealthId(healthId);
         verify(searchMappingRepository, times(1)).saveMappings(patientData);
         verify(failedEventsRepository, times(1)).deleteFailedEvent(FAILURE_TYPE_SEARCH_MAPPING, eventId);
@@ -172,22 +178,19 @@ public class PatientSearchMappingServiceTest {
 
     @Test
     public void shouldMapAllFailedEvent() throws Exception {
-        String healthId1 = "h100";
-        String healthId2 = "h101";
-        UUID eventId1 = timeBased();
-        UUID eventId2 = timeBased();
-        FailedEvent failedEvent1 = new FailedEvent(FAILURE_TYPE_SEARCH_MAPPING, eventId1, "Some Error");
-        FailedEvent failedEvent2 = new FailedEvent(FAILURE_TYPE_SEARCH_MAPPING, eventId2, "Some Error");
+        FailedEvent failedEvent1 = new FailedEvent(FAILURE_TYPE_SEARCH_MAPPING, timeBased(), "Some Error");
+        FailedEvent failedEvent2 = new FailedEvent(FAILURE_TYPE_SEARCH_MAPPING, timeBased(), "Some Error");
 
-        when(failedEventsRepository.getFailedEvents(FAILURE_TYPE_SEARCH_MAPPING, SEARCH_MAPPING_RETRY_BLOCK_SIZE)).thenReturn(asList(failedEvent1, failedEvent2));
-        when(feedRepository.findPatientUpdateLog(eventId1)).thenReturn(getPatientUpdateLog(healthId1, EVENT_TYPE_CREATED, eventId1));
-        when(feedRepository.findPatientUpdateLog(eventId2)).thenReturn(getPatientUpdateLog(healthId2, EVENT_TYPE_CREATED, eventId2));
+        when(mciProperties.getMaxFailedEvents()).thenReturn(2);
+        when(mciProperties.getFailedEventRetryLimit()).thenReturn(2);
+        when(failedEventsRepository.getFailedEvents(FAILURE_TYPE_SEARCH_MAPPING, mciProperties.getMaxFailedEvents())).thenReturn(asList(failedEvent1, failedEvent2));
+        when(feedRepository.findPatientUpdateLogByEventId(any(UUID.class))).thenReturn(new PatientUpdateLog());
         when(patientRepository.findByHealthId(anyString())).thenReturn(new PatientData());
 
         searchMappingService.mapFailedEvents();
 
-        verify(failedEventsRepository, times(1)).getFailedEvents(FAILURE_TYPE_SEARCH_MAPPING, SEARCH_MAPPING_RETRY_BLOCK_SIZE);
-        verify(feedRepository, times(2)).findPatientUpdateLog(any(UUID.class));
+        verify(failedEventsRepository, times(1)).getFailedEvents(FAILURE_TYPE_SEARCH_MAPPING, mciProperties.getMaxFailedEvents());
+        verify(feedRepository, times(2)).findPatientUpdateLogByEventId(any(UUID.class));
         verify(patientRepository, times(2)).findByHealthId(anyString());
         verify(searchMappingRepository, times(2)).saveMappings(any(PatientData.class));
         verify(failedEventsRepository, times(2)).deleteFailedEvent(anyString(), any(UUID.class));
@@ -200,18 +203,76 @@ public class PatientSearchMappingServiceTest {
         FailedEvent failedEvent = new FailedEvent(FAILURE_TYPE_SEARCH_MAPPING, eventId, "Some Error");
         PatientData patientData = new PatientData();
 
-        when(failedEventsRepository.getFailedEvents(FAILURE_TYPE_SEARCH_MAPPING, SEARCH_MAPPING_RETRY_BLOCK_SIZE)).thenReturn(asList(failedEvent));
-        when(feedRepository.findPatientUpdateLog(eventId)).thenReturn(getPatientUpdateLog(healthId, EVENT_TYPE_CREATED, eventId));
+        when(mciProperties.getMaxFailedEvents()).thenReturn(2);
+        when(mciProperties.getFailedEventRetryLimit()).thenReturn(2);
+        when(failedEventsRepository.getFailedEvents(FAILURE_TYPE_SEARCH_MAPPING, mciProperties.getMaxFailedEvents())).thenReturn(asList(failedEvent));
+        when(feedRepository.findPatientUpdateLogByEventId(eventId)).thenReturn(getPatientUpdateLog(healthId, EVENT_TYPE_CREATED, eventId));
         when(patientRepository.findByHealthId(healthId)).thenReturn(patientData);
         doThrow(new RuntimeException()).when(searchMappingRepository).saveMappings(patientData);
 
         searchMappingService.mapFailedEvents();
 
-        verify(failedEventsRepository, times(1)).getFailedEvents(FAILURE_TYPE_SEARCH_MAPPING, SEARCH_MAPPING_RETRY_BLOCK_SIZE);
-        verify(feedRepository, times(1)).findPatientUpdateLog(eventId);
+        verify(failedEventsRepository, times(1)).getFailedEvents(FAILURE_TYPE_SEARCH_MAPPING, mciProperties.getMaxFailedEvents());
+        verify(feedRepository, times(1)).findPatientUpdateLogByEventId(eventId);
         verify(patientRepository, times(1)).findByHealthId(healthId);
         verify(searchMappingRepository, times(1)).saveMappings(patientData);
         verify(failedEventsRepository, times(1)).writeToFailedEvents(eq(FAILURE_TYPE_SEARCH_MAPPING), eq(eventId), anyString());
+    }
+
+    @Test
+    public void shouldNotRetryIfRetriesHasReachedTheLimit() throws Exception {
+        String healthId = "h100";
+        UUID eventId = timeBased();
+        PatientData patientData = new PatientData();
+
+        when(mciProperties.getMaxFailedEvents()).thenReturn(2);
+        when(failedEventsRepository.getFailedEvents(FAILURE_TYPE_SEARCH_MAPPING, mciProperties.getMaxFailedEvents()))
+                .thenReturn(getFailedEventsWithRetry(eventId, 0))
+                .thenReturn(getFailedEventsWithRetry(eventId, 1))
+                .thenReturn(getFailedEventsWithRetry(eventId, 2));
+
+        when(mciProperties.getFailedEventRetryLimit()).thenReturn(2);
+        when(feedRepository.findPatientUpdateLogByEventId(eventId)).thenReturn(getPatientUpdateLog(healthId, EVENT_TYPE_CREATED, eventId));
+        when(patientRepository.findByHealthId(healthId)).thenReturn(patientData);
+        doThrow(new RuntimeException()).when(searchMappingRepository).saveMappings(patientData);
+
+        searchMappingService.mapFailedEvents();
+        searchMappingService.mapFailedEvents();
+        searchMappingService.mapFailedEvents();
+
+        verify(failedEventsRepository, times(2)).getFailedEvents(FAILURE_TYPE_SEARCH_MAPPING, mciProperties.getMaxFailedEvents());
+        verify(feedRepository, times(2)).findPatientUpdateLogByEventId(eventId);
+        verify(patientRepository, times(2)).findByHealthId(healthId);
+        verify(searchMappingRepository, times(2)).saveMappings(patientData);
+        verify(failedEventsRepository, times(2)).writeToFailedEvents(eq(FAILURE_TYPE_SEARCH_MAPPING), eq(eventId), anyString());
+    }
+
+    @Test
+    public void shouldNotMapIfFailedEventsReachedItsLimit() throws Exception {
+        String healthId = "h100";
+        UUID marker = UUID.randomUUID();
+        PatientUpdateLog patientUpdateLog = getPatientUpdateLog(healthId, EVENT_TYPE_CREATED, timeBased());
+        List<PatientUpdateLog> updateLogs = asList(patientUpdateLog);
+        PatientData patientData = new PatientData();
+
+        when(mciProperties.getMaxFailedEvents()).thenReturn(2);
+        when(failedEventsRepository.getFailedEvents(FAILURE_TYPE_SEARCH_MAPPING, 2)).thenReturn(asList(new FailedEvent(), new FailedEvent()));
+        when(searchMappingRepository.findLatestMarker()).thenReturn(marker);
+        when(feedRepository.findPatientsUpdatedSince(marker, mciProperties.getSearchMappingTaskBlockSize())).thenReturn(updateLogs);
+        when(patientRepository.findByHealthId(healthId)).thenReturn(patientData);
+
+        searchMappingService.map();
+
+        verify(failedEventsRepository, times(1)).getFailedEvents(FAILURE_TYPE_SEARCH_MAPPING, 2);
+        verify(searchMappingRepository, never()).findLatestMarker();
+        verify(feedRepository, never()).findPatientsUpdatedSince(marker, mciProperties.getSearchMappingTaskBlockSize());
+        verify(patientRepository, never()).findByHealthId(healthId);
+        verify(searchMappingRepository, never()).saveMappings(patientData);
+        verify(searchMappingRepository, never()).updateMarkerTable(any(PatientUpdateLog.class));
+    }
+
+    private List<FailedEvent> getFailedEventsWithRetry(UUID eventId, int retries) {
+        return asList(new FailedEvent(FAILURE_TYPE_SEARCH_MAPPING, eventId, "Some Error", retries));
     }
 
     private PatientUpdateLog getPatientUpdateLog(String healthId, String eventType, UUID eventId) {

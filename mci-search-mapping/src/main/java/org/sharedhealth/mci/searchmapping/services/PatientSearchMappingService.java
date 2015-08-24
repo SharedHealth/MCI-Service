@@ -24,8 +24,6 @@ import static org.sharedhealth.mci.domain.constant.RepositoryConstants.FAILURE_T
 public class PatientSearchMappingService {
     private final Logger logger = Logger.getLogger(PatientSearchMappingService.class);
 
-    public static final int SEARCH_MAPPING_RETRY_BLOCK_SIZE = 5;
-
     private PatientSearchMappingRepository searchMappingRepository;
     private FailedEventsRepository failedEventsRepository;
     private PatientFeedRepository feedRepository;
@@ -43,6 +41,12 @@ public class PatientSearchMappingService {
     }
 
     public void map() {
+        List<FailedEvent> failedEvents = failedEventsRepository.getFailedEvents(FAILURE_TYPE_SEARCH_MAPPING, mciProperties.getMaxFailedEvents());
+        if (failedEvents.size() >= mciProperties.getMaxFailedEvents()) {
+            logger.warn("Not creating mappings because failed events have reached to failed event limit");
+            return;
+        }
+
         UUID marker = searchMappingRepository.findLatestMarker();
         List<PatientUpdateLog> updateLogs = feedRepository.findPatientsUpdatedSince(marker, mciProperties.getSearchMappingTaskBlockSize());
         List<PatientUpdateLog> createLogs = getCreateLogs(updateLogs);
@@ -62,9 +66,13 @@ public class PatientSearchMappingService {
     }
 
     public void mapFailedEvents() {
-        List<FailedEvent> failedEvents = failedEventsRepository.getFailedEvents(FAILURE_TYPE_SEARCH_MAPPING, SEARCH_MAPPING_RETRY_BLOCK_SIZE);
+        List<FailedEvent> failedEvents = failedEventsRepository.getFailedEvents(FAILURE_TYPE_SEARCH_MAPPING, mciProperties.getMaxFailedEvents());
         for (FailedEvent failedEvent : failedEvents) {
-            PatientUpdateLog patientUpdateLog = feedRepository.findPatientUpdateLog(failedEvent.getEventId());
+            if (failedEvent.getRetries() >= mciProperties.getFailedEventRetryLimit()) {
+                logger.warn(String.format("Not creating mappings for failed event with event-id %s because it has reached the retry limit", failedEvent.getEventId()));
+                continue;
+            }
+            PatientUpdateLog patientUpdateLog = feedRepository.findPatientUpdateLogByEventId(failedEvent.getEventId());
             try {
                 logger.debug(String.format("Creating search Mappings for patient %s from failed events", patientUpdateLog.getHealthId()));
                 createMappingForPatient(patientUpdateLog);
