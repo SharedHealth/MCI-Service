@@ -5,6 +5,5 @@ CREATE TABLE IF NOT EXISTS patient_update_log (
     change_set varchar,
     requested_by varchar,
     approved_by varchar,
-    event_type varchar,
     PRIMARY KEY (year, event_id, health_id)
 ) WITH CLUSTERING ORDER BY (event_id ASC);

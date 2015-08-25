@@ -1,6 +1,5 @@
 CREATE TABLE IF NOT EXISTS patient (
   health_id varchar,
-  assigned_by varchar,
   national_id varchar,
   uid varchar,
   bin_brn varchar,
@@ -59,7 +58,6 @@ CREATE TABLE IF NOT EXISTS patient (
 
   blood_group varchar,
   date_of_birth timestamp,
-  dob_type varchar,
   disability varchar,
   ethnicity varchar,
   edu_level varchar,
@@ -70,8 +68,6 @@ CREATE TABLE IF NOT EXISTS patient (
   relations varchar,
   religion varchar,
   primary_contact varchar,
-  active boolean,
-  merged_with varchar,
 
   phone_no varchar,
   phone_number_area_code varchar,
