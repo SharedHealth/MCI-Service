@@ -137,7 +137,7 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public ErrorHandler handleInvalidRequesterException(InvalidRequesterException e) {
         logger.debug("Handling InvalidRequesterException. ", e);
-        return new ErrorHandler(BAD_REQUEST.value(), MESSAGE_INVALID_REQUESTER);
+        return new ErrorHandler(BAD_REQUEST.value(), e.getMessage());
     }
 
     @ResponseStatus(value = CONFLICT)

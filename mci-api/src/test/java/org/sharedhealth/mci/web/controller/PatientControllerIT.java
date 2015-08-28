@@ -793,7 +793,7 @@ public class PatientControllerIT extends BaseControllerTest {
                 .andExpect(status().isBadRequest())
                 .andReturn();
         String content = mvcResult.getResponse().getContentAsString();
-        JSONAssert.assertEquals(asString("jsons/response/error_cannot_update_403.json"), content, JSONCompareMode.STRICT);
+        JSONAssert.assertEquals(asString("jsons/response/error_cannot_update_400.json"), content, JSONCompareMode.STRICT);
     }
 
     @Test
@@ -816,7 +816,7 @@ public class PatientControllerIT extends BaseControllerTest {
                 .andExpect(status().isBadRequest())
                 .andReturn();
         String content = mvcResult.getResponse().getContentAsString();
-        JSONAssert.assertEquals(asString("jsons/response/error_cannot_update_403.json"), content, JSONCompareMode.STRICT);
+        JSONAssert.assertEquals(asString("jsons/response/error_cannot_update_400.json"), content, JSONCompareMode.STRICT);
     }
 
     @Test

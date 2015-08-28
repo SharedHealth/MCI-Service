@@ -162,13 +162,13 @@ public class PatientController extends MciController {
         patient.setRequester(properties.getFacilityId(), properties.getProviderId(),
                 properties.getAdminId(), properties.getName());
 
+        if (null != patient.isActive() || null != patient.getMergedWith()) {
+            throw new InvalidRequesterException(format("Cannot update active field or merge with other patient"));
+        }
+
         if (bindingResult.hasErrors()) {
             logger.debug(format("Validation error while updating patient (healthId): %s", healthId));
             throw new ValidationException(bindingResult);
-        }
-
-        if (null != patient.isActive() || null != patient.getMergedWith()) {
-            throw new InvalidRequesterException(format("Cannot update active field or merge with other patient"));
         }
 
         final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
