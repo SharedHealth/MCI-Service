@@ -4,6 +4,7 @@ import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.Delete;
 import com.datastax.driver.core.querybuilder.Insert;
 import org.sharedhealth.mci.domain.exception.Forbidden;
+import org.sharedhealth.mci.domain.exception.InvalidRequesterException;
 import org.sharedhealth.mci.domain.exception.PatientNotFoundException;
 import org.sharedhealth.mci.domain.model.*;
 import org.sharedhealth.mci.domain.service.PendingApprovalFilter;
@@ -103,15 +104,12 @@ public class PatientRepository extends BaseRepository {
         Requester requester = updateRequest.getRequester();
 
         PatientData existingPatientData = this.findByHealthId(healthId);
-        if (!shouldUpdatePatient(updateRequest, existingPatientData)) {
-            if (null == existingPatientData.getMergedWith()) {
-                throw new Forbidden("Cannot update inactive patient");
-            } else {
-                throw new Forbidden(String.format("Cannot update inactive patient, already merged with %s",
-                        existingPatientData.getMergedWith()));
-            }
-        }
 
+        if (Boolean.FALSE.equals(existingPatientData.isActive())) {
+            String mergedWith = existingPatientData.getMergedWith();
+            String errorMessage = mergedWith != null ? String.format("Cannot update inactive patient, already merged with %s", mergedWith) : "Cannot update inactive patient";
+            throw new InvalidRequesterException(errorMessage);
+        }
 
         checkIfTryingToMergeWithNonExistingOrInactiveHid(updateRequest.getMergedWith());
         clearPendingApprovalsIfRequired(updateRequest, existingPatientData, batch);
@@ -154,31 +152,6 @@ public class PatientRepository extends BaseRepository {
             throw new Forbidden("Cannot merge with inactive patient");
         }
         return false;
-    }
-
-    protected boolean shouldUpdatePatient(PatientData updateRequest, PatientData existingPatientData) {
-        if (existingPatientData.isActive()) {
-            return true;
-        }
-        if (checkIfTryingToUpdateFieldsOtherThanMergedWith(updateRequest)) {
-            return false;
-        }
-        if (isTryingToActivateInactivePatient(updateRequest)) {
-            return false;
-        }
-        return true;
-    }
-
-    private boolean isTryingToActivateInactivePatient(PatientData updateRequest) {
-        return null != updateRequest.isActive() && updateRequest.isActive();
-    }
-
-    private boolean checkIfTryingToUpdateFieldsOtherThanMergedWith(PatientData updateRequest) {
-        List<String> nonEmptyFieldNames = updateRequest.findNonEmptyFieldNames();
-        nonEmptyFieldNames.remove("hid");
-        nonEmptyFieldNames.remove(ACTIVE);
-        nonEmptyFieldNames.remove(MERGED_WITH);
-        return !nonEmptyFieldNames.isEmpty();
     }
 
     private Batch buildUpdatePendingApprovalsBatch(Patient newPatient, PatientData existingPatientData, Batch batch) {

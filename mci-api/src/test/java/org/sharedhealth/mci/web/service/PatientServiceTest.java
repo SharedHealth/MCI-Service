@@ -43,7 +43,7 @@ public class PatientServiceTest {
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-        patientService = new PatientService(patientRepository, feedRepository, facilityService, settingService, patientHealthIdService);
+        patientService = new PatientService(patientRepository, feedRepository, settingService, patientHealthIdService);
     }
 
     @Test

@@ -1,6 +1,8 @@
 package org.sharedhealth.mci.web.controller;
 
+import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.domain.exception.Forbidden;
+import org.sharedhealth.mci.domain.exception.InvalidRequesterException;
 import org.sharedhealth.mci.domain.exception.ValidationException;
 import org.sharedhealth.mci.domain.model.MCIResponse;
 import org.sharedhealth.mci.domain.model.PatientData;
@@ -35,6 +37,8 @@ import java.util.List;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.sharedhealth.mci.domain.constant.ErrorConstants.ERROR_CODE_INVALID;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.HID;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.*;
@@ -74,7 +78,7 @@ public class PatientController extends MciController {
         final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
 
         if (null != patient.getMergedWith()) {
-            throw new Forbidden(format("Cannot merge with another patient on creation"));
+            throw new InvalidRequesterException(format("Cannot merge with another patient on creation"));
         }
 
         if (bindingResult.hasErrors()) {
@@ -146,25 +150,28 @@ public class PatientController extends MciController {
             @Validated({RequiredOnUpdateGroup.class, Default.class}) @RequestBody PatientData patient,
             BindingResult bindingResult) {
 
+        if (patient.getHealthId() != null && !StringUtils.equals(patient.getHealthId(), healthId)) {
+            bindingResult.addError(new FieldError("patient", HID, ERROR_CODE_INVALID));
+            throw new ValidationException(bindingResult);
+        }
+
         UserInfo userInfo = getUserInfo();
         logAccessDetails(userInfo, format("Updating patient (healthId): %s", healthId));
 
         UserInfo.UserInfoProperties properties = userInfo.getProperties();
-        patient.setRequester(
-                properties.getFacilityId(), properties.getProviderId(), properties.getAdminId()
-                , properties.getName());
-
-        logger.debug(" Health id [" + healthId + "]");
-        final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
+        patient.setRequester(properties.getFacilityId(), properties.getProviderId(),
+                properties.getAdminId(), properties.getName());
 
         if (bindingResult.hasErrors()) {
             logger.debug(format("Validation error while updating patient (healthId): %s", healthId));
             throw new ValidationException(bindingResult);
         }
+
         if (null != patient.isActive() || null != patient.getMergedWith()) {
-            throw new Forbidden(format("Cannot update active field or merge with other patient"));
+            throw new InvalidRequesterException(format("Cannot update active field or merge with other patient"));
         }
 
+        final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
         MCIResponse mciResponse = patientService.update(patient, healthId);
         deferredResult.setResult(new ResponseEntity<>(mciResponse, mciResponse.httpStatusObject));
         return deferredResult;

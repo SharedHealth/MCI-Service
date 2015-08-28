@@ -775,23 +775,6 @@ public class PatientControllerIT extends BaseControllerTest {
     }
 
     @Test
-    public void shouldNotCreateInactivePatient() throws Exception {
-        patientData.setActive(false);
-        String json = mapper.writeValueAsString(patientData);
-        patientData.setActive(null);
-
-        mockMvc.perform(post(API_END_POINT_FOR_PATIENT)
-                .header(AUTH_TOKEN_KEY, validAccessToken)
-                .header(FROM_KEY, validEmail)
-                .header(CLIENT_ID_KEY, validClientId)
-                .accept(APPLICATION_JSON)
-                .content(json)
-                .contentType(APPLICATION_JSON))
-                .andExpect(status().isForbidden())
-                .andReturn();
-    }
-
-    @Test
     public void shouldNotUpdateActiveFieldUsingUpdateApi() throws Exception {
         String healthId = createPatient(patientData).getId();
 
@@ -807,7 +790,7 @@ public class PatientControllerIT extends BaseControllerTest {
                 .accept(APPLICATION_JSON).content
                         (json).contentType
                         (APPLICATION_JSON))
-                .andExpect(status().isForbidden())
+                .andExpect(status().isBadRequest())
                 .andReturn();
         String content = mvcResult.getResponse().getContentAsString();
         JSONAssert.assertEquals(asString("jsons/response/error_cannot_update_403.json"), content, JSONCompareMode.STRICT);
@@ -830,7 +813,7 @@ public class PatientControllerIT extends BaseControllerTest {
                 .accept(APPLICATION_JSON).content
                         (json).contentType
                         (APPLICATION_JSON))
-                .andExpect(status().isForbidden())
+                .andExpect(status().isBadRequest())
                 .andReturn();
         String content = mvcResult.getResponse().getContentAsString();
         JSONAssert.assertEquals(asString("jsons/response/error_cannot_update_403.json"), content, JSONCompareMode.STRICT);
@@ -863,7 +846,7 @@ public class PatientControllerIT extends BaseControllerTest {
                 .accept(APPLICATION_JSON)
                 .content(json)
                 .contentType(APPLICATION_JSON))
-                .andExpect(status().isForbidden())
+                .andExpect(status().isBadRequest())
                 .andReturn();
     }
 
@@ -890,7 +873,7 @@ public class PatientControllerIT extends BaseControllerTest {
                 .accept(APPLICATION_JSON)
                 .content(json)
                 .contentType(APPLICATION_JSON))
-                .andExpect(status().isForbidden())
+                .andExpect(status().isBadRequest())
                 .andReturn();
     }
 

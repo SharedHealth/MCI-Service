@@ -22,8 +22,6 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.junit.Assert.*;
 import static org.sharedhealth.mci.domain.constant.JsonConstants.PHONE_NUMBER;
-import static org.sharedhealth.mci.domain.constant.MCIConstants.PATIENT_STATUS_ALIVE;
-import static org.sharedhealth.mci.domain.constant.MCIConstants.STRING_NO;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.*;
 import static org.sharedhealth.mci.domain.repository.TestUtil.setupApprovalsConfig;
 import static org.sharedhealth.mci.domain.repository.TestUtil.truncateAllColumnFamilies;
@@ -135,39 +133,11 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
     @Test
     public void shouldFindPatientWithMatchingGeneratedHealthId() throws ExecutionException, InterruptedException {
         PatientData createData = initPatientData(data);
-
         MCIResponse mciResponse = patientRepository.create(createData);
-        PatientData p = patientRepository.findByHealthId(mciResponse.id);
+        PatientData savedPatient = patientRepository.findByHealthId(mciResponse.id);
 
-        assertNotNull(p);
-        createData.setHealthId(mciResponse.id);
-        createData.setCreatedAt(p.getCreatedAt());
-        createData.setUpdatedAt(p.getUpdatedAt());
-        PatientStatus patientStatus = p.getPatientStatus();
-        patientStatus.setType(PATIENT_STATUS_ALIVE);
-        createData.setPatientStatus(patientStatus);
-        createData.setConfidential(STRING_NO);
-
-        Address address = p.getAddress();
-        address.setHoldingNumber(null);
-        address.setStreet(null);
-        address.setVillage(null);
-        address.setPostCode(null);
-        address.setPostOffice(null);
-        address.setAreaMouja(null);
-        p.setAddress(address);
-
-        PhoneNumber phoneNumber = p.getPhoneNumber();
-        phoneNumber.setAreaCode(null);
-        phoneNumber.setExtension(null);
-        phoneNumber.setCountryCode(null);
-        p.setPhoneNumber(phoneNumber);
-
-        assertEquals(createData, p);
-        assertNotNull(p.getCreatedBy());
-        assertEquals(createData.getRequester(), p.getCreatedBy());
-        assertNotNull(p.getCreatedAt());
-        assertNotNull(p.getCreatedAt());
+        assertNotNull(savedPatient);
+        assertPatient(savedPatient,createData);
     }
 
     @Test(expected = PatientNotFoundException.class)

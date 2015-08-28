@@ -1,9 +1,7 @@
 package org.sharedhealth.mci.web.service;
 
 
-import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.domain.exception.Forbidden;
-import org.sharedhealth.mci.domain.exception.ValidationException;
 import org.sharedhealth.mci.domain.model.*;
 import org.sharedhealth.mci.domain.repository.PatientFeedRepository;
 import org.sharedhealth.mci.domain.repository.PatientRepository;
@@ -14,15 +12,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.validation.DirectFieldBindingResult;
-import org.springframework.validation.FieldError;
 
 import java.util.*;
 
 import static java.lang.String.format;
 import static org.apache.commons.collections4.CollectionUtils.*;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.sharedhealth.mci.domain.constant.ErrorConstants.ERROR_CODE_INVALID;
 import static org.sharedhealth.mci.domain.constant.JsonConstants.HID;
 import static org.sharedhealth.mci.domain.constant.JsonConstants.RELATIONS;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -41,19 +36,16 @@ public class PatientService {
 
     private PatientRepository patientRepository;
     private PatientFeedRepository feedRepository;
-    private FacilityService facilityService;
     private SettingService settingService;
     private PatientHealthIdService patientHealthIdService;
 
     @Autowired
     public PatientService(PatientRepository patientRepository,
                           PatientFeedRepository feedRepository,
-                          FacilityService facilityService,
                           SettingService settingService,
                           PatientHealthIdService patientHealthIdService) {
         this.patientRepository = patientRepository;
         this.feedRepository = feedRepository;
-        this.facilityService = facilityService;
         this.settingService = settingService;
         this.patientHealthIdService = patientHealthIdService;
     }
@@ -136,12 +128,6 @@ public class PatientService {
     }
 
     public MCIResponse update(PatientData patient, String healthId) {
-        logger.debug(format("Update patient healthId: (%s)", healthId));
-        if (patient.getHealthId() != null && !StringUtils.equals(patient.getHealthId(), healthId)) {
-            DirectFieldBindingResult bindingResult = new DirectFieldBindingResult(patient, "patient");
-            bindingResult.addError(new FieldError("patient", HID, ERROR_CODE_INVALID));
-            throw new ValidationException(bindingResult);
-        }
         return patientRepository.update(patient, healthId);
     }
 
