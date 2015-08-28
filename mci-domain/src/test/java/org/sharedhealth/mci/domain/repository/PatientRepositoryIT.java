@@ -76,7 +76,6 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
         data.setAddress(address);
 
         data.setRequester(FACILITY, null);
-        data.setActive(true);
 
         return data;
     }
@@ -182,10 +181,23 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
     }
 
     @Test
-    public void shouldUpdatePatient() throws Exception {
+    public void shouldCreateActivePatients() throws Exception {
         PatientData data = buildPatient();
         MCIResponse mciResponseForCreate = patientRepository.create(data);
         assertEquals(201, mciResponseForCreate.getHttpStatus());
+
+        String healthId = mciResponseForCreate.getId();
+
+        PatientData savedPatient = patientRepository.findByHealthId(healthId);
+        assertPatient(savedPatient, data);
+        assertTrue(savedPatient.isActive());
+
+    }
+
+    @Test
+    public void shouldUpdatePatient() throws Exception {
+        PatientData data = buildPatient();
+        MCIResponse mciResponseForCreate = patientRepository.create(data);
         String healthId = mciResponseForCreate.getId();
         data.setHealthId(healthId);
         data.setGivenName("Danny");

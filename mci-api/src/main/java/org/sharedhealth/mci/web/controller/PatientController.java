@@ -73,10 +73,6 @@ public class PatientController extends MciController {
         logger.debug("Trying to create patient.");
         final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
 
-        if (null != patient.isActive() && !patient.isActive()) {
-            throw new Forbidden(format("Cannot create inactive patient"));
-        }
-
         if (null != patient.getMergedWith()) {
             throw new Forbidden(format("Cannot merge with another patient on creation"));
         }
