@@ -130,6 +130,32 @@ public class PatientSearchMappingServiceTest {
     }
 
     @Test
+    public void shouldUpdateMarkersTableIfThereAreNoCreateLogs() throws Exception {
+        String healthId1 = "h101";
+        String healthId2 = "h102";
+        UUID marker = UUID.randomUUID();
+        List<PatientUpdateLog> updateLogs = asList(getPatientUpdateLog(healthId1, EVENT_TYPE_UPDATED, timeBased()),
+                                            getPatientUpdateLog(healthId2, EVENT_TYPE_UPDATED, timeBased()));
+        PatientData patientData = new PatientData();
+
+        when(mciProperties.getMaxFailedEvents()).thenReturn(2);
+        when(searchMappingRepository.findLatestMarker()).thenReturn(marker);
+        when(feedRepository.findPatientsUpdatedSince(marker, mciProperties.getSearchMappingTaskBlockSize())).thenReturn(updateLogs);
+        when(patientRepository.findByHealthId(healthId2)).thenReturn(patientData);
+
+        searchMappingService.map();
+
+        verify(searchMappingRepository, times(1)).findLatestMarker();
+        verify(feedRepository, times(1)).findPatientsUpdatedSince(marker, mciProperties.getSearchMappingTaskBlockSize());
+        verify(searchMappingRepository, never()).saveMappings(patientData);
+
+        verify(patientRepository, never()).findByHealthId(healthId2);
+        verify(patientRepository, never()).findByHealthId(healthId1);
+        verify(searchMappingRepository, times(1)).updateMarkerTable(any(PatientUpdateLog.class));
+
+    }
+
+    @Test
     public void shouldWriteToFailedEventsIfFailsToMap() throws Exception {
         String healthId = "h100";
         UUID marker = UUID.randomUUID();

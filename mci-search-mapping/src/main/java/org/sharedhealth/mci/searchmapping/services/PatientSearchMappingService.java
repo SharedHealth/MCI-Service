@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.FAILURE_TYPE_SEARCH_MAPPING;
 
 @Component
@@ -50,9 +49,7 @@ public class PatientSearchMappingService {
         UUID marker = searchMappingRepository.findLatestMarker();
         List<PatientUpdateLog> updateLogs = feedRepository.findPatientsUpdatedSince(marker, mciProperties.getSearchMappingTaskBlockSize());
         List<PatientUpdateLog> createLogs = getCreateLogs(updateLogs);
-        if (isEmpty(createLogs)) {
-            return;
-        }
+
         for (PatientUpdateLog createLog : createLogs) {
             try {
                 logger.debug(String.format("Creating search Mappings for patient %s", createLog.getHealthId()));
@@ -62,7 +59,8 @@ public class PatientSearchMappingService {
                 logger.error(String.format("Failed to create search Mappings for patient %s", createLog.getHealthId()));
             }
         }
-        searchMappingRepository.updateMarkerTable(createLogs.get(createLogs.size() - 1));
+        if(updateLogs.size() > 0)
+            searchMappingRepository.updateMarkerTable(updateLogs.get(updateLogs.size() - 1));
     }
 
     public void mapFailedEvents() {
