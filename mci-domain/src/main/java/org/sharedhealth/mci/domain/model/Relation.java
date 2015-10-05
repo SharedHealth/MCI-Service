@@ -19,7 +19,9 @@ import static org.sharedhealth.mci.domain.constant.JsonConstants.*;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class Relation {
 
+    @JsonIgnore
     private final String RELATION_TYPE = "type";
+    @JsonIgnore
     private final String RELATIONS_CODE_TYPE = "relations";
 
     @JsonProperty(RELATION_TYPE)
