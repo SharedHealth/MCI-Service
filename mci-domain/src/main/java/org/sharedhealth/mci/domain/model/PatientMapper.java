@@ -5,19 +5,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.domain.constant.MCIConstants;
 import org.sharedhealth.mci.domain.exception.InvalidRequesterException;
-import org.sharedhealth.mci.domain.exception.ValidationException;
 import org.sharedhealth.mci.domain.util.DateUtil;
 import org.springframework.stereotype.Component;
-import org.springframework.validation.DirectFieldBindingResult;
-import org.springframework.validation.FieldError;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.sharedhealth.mci.domain.constant.ErrorConstants.ERROR_CODE_INVALID;
-import static org.sharedhealth.mci.domain.constant.JsonConstants.RELATIONS;
 import static org.sharedhealth.mci.domain.constant.MCIConstants.*;
 
 @Component
@@ -89,7 +88,7 @@ public class PatientMapper {
             patientStatus.setDateOfDeath(patient.getDateOfDeath());
         }
 
-        if(!patientStatus.isEmpty()) {
+        if (!patientStatus.isEmpty()) {
             data.setPatientStatus(patientStatus);
         }
 
@@ -227,7 +226,7 @@ public class PatientMapper {
             mapPhoneNumber(patient, phoneNumber);
         }
 
-        if(patientStatus != null) {
+        if (patientStatus != null) {
             mapPatientStatus(patient, patientStatus);
         }
 
@@ -376,11 +375,13 @@ public class PatientMapper {
 
         List<Relation> relations = existingPatient.getRelations();
 
-        if (!isValidRelationBlock(r, relations)) {
-            DirectFieldBindingResult bindingResult = new DirectFieldBindingResult(patient, "patient");
-            bindingResult.addError(new FieldError("patient", RELATIONS, ERROR_CODE_INVALID));
-            throw new ValidationException(bindingResult);
-        }
+//      Removing this check. This is a temporary fix so that client can send the relation id while create.
+//      Please DO NOT REMOVE THIS CODE
+//        if (!isValidRelationBlock(r, relations)) {
+//            DirectFieldBindingResult bindingResult = new DirectFieldBindingResult(patient, "patient");
+//            bindingResult.addError(new FieldError("patient", RELATIONS, ERROR_CODE_INVALID));
+//            throw new ValidationException(bindingResult);
+//        }
 
         if (relations == null) {
             return;
@@ -460,6 +461,8 @@ public class PatientMapper {
         }
     }
 
+//    This is a temporary fix so that client can send the relation id while create.
+//    Please DO NOT REMOVE THIS UNUSED FUNCTION
     private Boolean isValidRelationBlock(List<Relation> relations, List<Relation> existing) {
         for (Relation relation : relations) {
             if (isNotBlank(relation.getId()) && !relationExistWithId(existing, relation.getId())) {
