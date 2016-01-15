@@ -24,6 +24,7 @@ public class HealthIdController extends MciController {
     private static final Logger logger = LoggerFactory.getLogger(HealthIdController.class);
     public static final String GENERATE_ALL_URI = "/generate";
     public static final String GENERATE_RANGE_URI = "/generateRange";
+    public static final String NEXT_BLOCK_URI = "/nextBlock";
 
     private HealthIdService healthIdService;
 
@@ -59,7 +60,7 @@ public class HealthIdController extends MciController {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_MCI Admin')")
-    @RequestMapping(method = GET, value = "/nextBlock")
+    @RequestMapping(method = GET, value = NEXT_BLOCK_URI)
     public List<MciHealthId> nextBlock() {
         return healthIdService.getNextBlock();
     }

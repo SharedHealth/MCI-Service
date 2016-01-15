@@ -17,6 +17,7 @@ import static org.sharedhealth.mci.utils.FileUtil.asString;
 import static org.sharedhealth.mci.utils.HttpUtil.*;
 import static org.sharedhealth.mci.web.controller.HealthIdController.GENERATE_ALL_URI;
 import static org.sharedhealth.mci.web.controller.HealthIdController.GENERATE_RANGE_URI;
+import static org.sharedhealth.mci.web.controller.HealthIdController.NEXT_BLOCK_URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -115,7 +116,7 @@ public class HealthIdControllerIT extends BaseControllerTest {
                         .withBody(asString("jsons/userDetails/userDetailForMCIAdmin.json"))));
 
 
-        mockMvc.perform(get(API_END_POINT + "/nextBlock")
+        mockMvc.perform(get(API_END_POINT + NEXT_BLOCK_URI)
                 .accept(APPLICATION_JSON)
                 .header(AUTH_TOKEN_KEY, validAccessToken)
                 .header(FROM_KEY, validEmail)
@@ -169,7 +170,7 @@ public class HealthIdControllerIT extends BaseControllerTest {
                         .withHeader("Content-Type", "application/json")
                         .withBody(asString("jsons/userDetails/userDetailForFacility.json"))));
 
-        mockMvc.perform(get(API_END_POINT + "/nextBlock")
+        mockMvc.perform(get(API_END_POINT + NEXT_BLOCK_URI)
                 .accept(APPLICATION_JSON)
                 .header(AUTH_TOKEN_KEY, validAccessToken)
                 .header(FROM_KEY, validEmail)

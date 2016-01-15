@@ -119,8 +119,11 @@ public class RepositoryConstants {
     public static final String EVENT_TYPE = "event_type";
     public static final String EVENT_TYPE_CREATED = "created";
     public static final String EVENT_TYPE_UPDATED = "updated";
+    public static final String BLOCK_BEGINS_AT = "block_begins_at";
     public static final String BEGINS_AT = "begins_at";
     public static final String ENDS_AT = "ends_at";
+    public static final String ALLOCATED_FOR = "allocated_for";
+    public static final String ALLOCATED_AT = "allocated_at";
     public static final String FAILURE_TYPE = "failure_type";
     public static final String FAILURE_TYPE_SEARCH_MAPPING = "search_mapping_failure";
     public static final String ERROR_MESSAGE = "error_message";
