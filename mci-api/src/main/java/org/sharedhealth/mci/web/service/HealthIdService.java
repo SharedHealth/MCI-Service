@@ -1,5 +1,6 @@
 package org.sharedhealth.mci.web.service;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.sharedhealth.mci.utils.LuhnChecksumGenerator;
 import org.sharedhealth.mci.web.infrastructure.persistence.HealthIdRepository;
@@ -13,7 +14,7 @@ import java.util.regex.Pattern;
 
 @Component
 public class HealthIdService {
-    private static final String MCI_ORG_CODE = "MCI";
+    static final String MCI_ORG_CODE = "MCI";
 
     private final Pattern invalidHidPattern;
     private final MCIProperties mciProperties;
@@ -44,11 +45,12 @@ public class HealthIdService {
 
     public long generateBlock(long start, long blockSize) {
         long numberOfValidHids = 0L;
+        long startForRange = identifyStartForRange(start);
         int i;
         for (i = 0; numberOfValidHids < blockSize; i++) {
-            numberOfValidHids = saveIfValidHID(numberOfValidHids, start + i);
+            numberOfValidHids = saveIfValidHID(numberOfValidHids, startForRange + i);
         }
-        saveGeneratedRange(start, start + i - 1 , numberOfValidHids);
+        saveGeneratedRange(startForRange, startForRange + i - 1, numberOfValidHids);
         return numberOfValidHids;
     }
 
@@ -74,11 +76,30 @@ public class HealthIdService {
         return numberOfValidHids;
     }
 
-    private void saveGeneratedRange(Long start, Long end, long numberOfValidHids) {
+    private void saveGeneratedRange(Long startForRange, Long endForRange, long numberOfValidHids) {
         if (numberOfValidHids > 0) {
-            long blockBeginsAt = Long.parseLong(String.valueOf(start).substring(0, 2));
-            GeneratedHidRange generatedHidRange = new GeneratedHidRange(blockBeginsAt, start, end, MCI_ORG_CODE, null);
+            long blockBeginsAt = extractBlockPartitionPart(startForRange);
+            GeneratedHidRange generatedHidRange = new GeneratedHidRange(blockBeginsAt, startForRange, endForRange, MCI_ORG_CODE, null);
             generatedHidRangeService.saveGeneratedHidRange(generatedHidRange);
         }
+    }
+
+    private long identifyStartForRange(long start) {
+        long endsAt = 0L;
+        long blockBeginsAt = extractBlockPartitionPart(start);
+        List<GeneratedHidRange> preGeneratedHidRanges = generatedHidRangeService.getPreGeneratedHidRanges(blockBeginsAt);
+        if (CollectionUtils.isEmpty(preGeneratedHidRanges)) {
+            return start;
+        }
+        for (GeneratedHidRange preGeneratedHidRange : preGeneratedHidRanges) {
+            if (endsAt < preGeneratedHidRange.getEndsAt()) {
+                endsAt = preGeneratedHidRange.getEndsAt();
+            }
+        }
+        return endsAt + 1;
+    }
+
+    private long extractBlockPartitionPart(Long start) {
+        return Long.parseLong(String.valueOf(start).substring(0, 2));
     }
 }

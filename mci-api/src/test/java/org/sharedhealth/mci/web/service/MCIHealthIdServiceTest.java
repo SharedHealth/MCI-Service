@@ -16,10 +16,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.sharedhealth.mci.web.service.HealthIdService.MCI_ORG_CODE;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MCIHealthIdServiceTest {
@@ -233,7 +235,35 @@ public class MCIHealthIdServiceTest {
         assertEquals(10, passedHidRange.getBlockBeginsAt().longValue());
         assertEquals(start, passedHidRange.getBeginsAt().longValue());
         assertEquals(1069, passedHidRange.getEndsAt().longValue());
-        assertEquals("MCI", passedHidRange.getAllocatedFor());
+        assertEquals(MCI_ORG_CODE, passedHidRange.getAllocatedFor());
+        assertNull(passedHidRange.getRequestedBy());
+    }
+
+    @Test
+    public void shouldIdentifyStartOfRangeFromPreGeneratedRange() throws Exception {
+        long start = 1000;
+        long blockSize = 20;
+        MCIProperties testProperties = new MCIProperties();
+        testProperties.setInvalidHidPattern("^(105|104)\\d*$");
+        GeneratedHidRange generatedHidRange = new GeneratedHidRange(10L, 1000L, 1069L, MCI_ORG_CODE, null);
+        
+        when(generatedHidRangeService.getPreGeneratedHidRanges(10L)).thenReturn(asList(generatedHidRange));
+        when(healthIdRepository.saveHealthId(any(MciHealthId.class))).thenReturn(MciHealthId.NULL_HID);
+        when(checksumGenerator.generate(any(String.class))).thenReturn(1);
+        when(generatedHidRangeService.saveGeneratedHidRange(any(GeneratedHidRange.class))).thenReturn(null);
+
+        HealthIdService healthIdService = new HealthIdService(testProperties, healthIdRepository, checksumGenerator, generatedHidRangeService);
+        healthIdService.generateBlock(start, blockSize);
+
+        verify(generatedHidRangeService,times(1)).getPreGeneratedHidRanges(10L);
+        ArgumentCaptor<GeneratedHidRange> argument = ArgumentCaptor.forClass(GeneratedHidRange.class);
+        verify(generatedHidRangeService, times(1)).saveGeneratedHidRange(argument.capture());
+        GeneratedHidRange passedHidRange = argument.getValue();
+
+        assertEquals(10, passedHidRange.getBlockBeginsAt().longValue());
+        assertEquals(1070, passedHidRange.getBeginsAt().longValue());
+        assertEquals(1089, passedHidRange.getEndsAt().longValue());
+        assertEquals(MCI_ORG_CODE, passedHidRange.getAllocatedFor());
         assertNull(passedHidRange.getRequestedBy());
     }
 

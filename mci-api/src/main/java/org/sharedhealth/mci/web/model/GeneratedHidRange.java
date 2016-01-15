@@ -64,4 +64,33 @@ public class GeneratedHidRange {
     public String getRequestedBy() {
         return requestedBy;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        GeneratedHidRange that = (GeneratedHidRange) o;
+
+        if (allocatedAt != null ? !allocatedAt.equals(that.allocatedAt) : that.allocatedAt != null) return false;
+        if (allocatedFor != null ? !allocatedFor.equals(that.allocatedFor) : that.allocatedFor != null) return false;
+        if (beginsAt != null ? !beginsAt.equals(that.beginsAt) : that.beginsAt != null) return false;
+        if (blockBeginsAt != null ? !blockBeginsAt.equals(that.blockBeginsAt) : that.blockBeginsAt != null)
+            return false;
+        if (endsAt != null ? !endsAt.equals(that.endsAt) : that.endsAt != null) return false;
+        if (requestedBy != null ? !requestedBy.equals(that.requestedBy) : that.requestedBy != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = blockBeginsAt != null ? blockBeginsAt.hashCode() : 0;
+        result = 31 * result + (beginsAt != null ? beginsAt.hashCode() : 0);
+        result = 31 * result + (endsAt != null ? endsAt.hashCode() : 0);
+        result = 31 * result + (allocatedFor != null ? allocatedFor.hashCode() : 0);
+        result = 31 * result + (allocatedAt != null ? allocatedAt.hashCode() : 0);
+        result = 31 * result + (requestedBy != null ? requestedBy.hashCode() : 0);
+        return result;
+    }
 }

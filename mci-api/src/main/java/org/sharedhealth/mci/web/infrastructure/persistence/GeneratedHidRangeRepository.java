@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
+import static org.sharedhealth.mci.domain.constant.RepositoryConstants.BLOCK_BEGINS_AT;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.CF_GENERATED_HID_RANGE;
 
 @Component
@@ -22,9 +24,10 @@ public class GeneratedHidRangeRepository extends BaseRepository {
         super(cassandraOps);
     }
 
-    public List<GeneratedHidRange> getPreGeneratedHidRanges() {
-        Select from = QueryBuilder.select().from(CF_GENERATED_HID_RANGE);
-        return cassandraOps.select(from, GeneratedHidRange.class);
+    public List<GeneratedHidRange> getPreGeneratedHidRanges(long blockBiginsAt) {
+        Select selectHIDRanges = QueryBuilder.select().from(CF_GENERATED_HID_RANGE);
+        selectHIDRanges.where(eq(BLOCK_BEGINS_AT, blockBiginsAt));
+        return cassandraOps.select(selectHIDRanges, GeneratedHidRange.class);
     }
 
     public GeneratedHidRange saveGeneratedHidRange(GeneratedHidRange generatedHidRange) {

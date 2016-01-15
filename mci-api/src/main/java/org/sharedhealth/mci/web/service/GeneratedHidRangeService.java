@@ -17,8 +17,8 @@ public class GeneratedHidRangeService {
         this.generatedHidRangeRepository = generatedHidRangeRepository;
     }
 
-    public List<GeneratedHidRange> getPreGeneratedHidRanges() {
-        return generatedHidRangeRepository.getPreGeneratedHidRanges();
+    public List<GeneratedHidRange> getPreGeneratedHidRanges(long blockBeginsAt) {
+        return generatedHidRangeRepository.getPreGeneratedHidRanges(blockBeginsAt);
     }
 
     public GeneratedHidRange saveGeneratedHidRange(GeneratedHidRange generatedHidRange) {
