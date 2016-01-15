@@ -46,17 +46,17 @@ public class HealthIdServiceIT {
     public void setUp() throws ExecutionException, InterruptedException {
         cqlTemplate.execute("truncate mci_healthId");
         healthIdRepository.resetLastReservedHealthId();
-        createHealthIds(9800000000L);
     }
 
     @After
-    public void cleanIp() throws Exception {
+    public void tearDown() throws Exception {
         cqlTemplate.execute("truncate mci_healthId");
     }
 
     @Ignore
     @Test
     public void shouldGenerateUniqueBlock() throws Exception {
+        createHealthIds(9800000000L);
         ExecutorService executor = Executors.newFixedThreadPool(5);
         final Set<Future<List<MciHealthId>>> eventualHealthIds = new HashSet<>();
         for (int i = 0; i < 100; i++) {

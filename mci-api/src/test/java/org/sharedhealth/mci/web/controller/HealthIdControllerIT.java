@@ -15,6 +15,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
 import static org.sharedhealth.mci.utils.HttpUtil.*;
+import static org.sharedhealth.mci.web.controller.HealthIdController.GENERATE_ALL_URI;
+import static org.sharedhealth.mci.web.controller.HealthIdController.GENERATE_RANGE_URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -55,7 +57,7 @@ public class HealthIdControllerIT extends BaseControllerTest {
                         .withBody(asString("jsons/userDetails/userDetailForMCIAdmin.json"))));
 
 
-        mockMvc.perform(post(API_END_POINT + "/generate")
+        mockMvc.perform(post(API_END_POINT + GENERATE_ALL_URI)
                 .accept(APPLICATION_JSON)
                 .header(AUTH_TOKEN_KEY, validAccessToken)
                 .header(FROM_KEY, validEmail)
@@ -84,7 +86,7 @@ public class HealthIdControllerIT extends BaseControllerTest {
                         .withBody(asString("jsons/userDetails/userDetailForMCIAdmin.json"))));
 
 
-        mockMvc.perform(post(API_END_POINT + "/generateRange?start=9800100100&end=9800100200")
+        mockMvc.perform(post(API_END_POINT + GENERATE_RANGE_URI +"?start=9800100100&count=1000")
                 .accept(APPLICATION_JSON)
                 .header(AUTH_TOKEN_KEY, validAccessToken)
                 .header(FROM_KEY, validEmail)
@@ -140,7 +142,7 @@ public class HealthIdControllerIT extends BaseControllerTest {
                         .withHeader("Content-Type", "application/json")
                         .withBody(asString("jsons/userDetails/userDetailForFacility.json"))));
 
-        mockMvc.perform(post(API_END_POINT + "/generate")
+        mockMvc.perform(post(API_END_POINT + GENERATE_ALL_URI)
                 .accept(APPLICATION_JSON)
                 .header(AUTH_TOKEN_KEY, validAccessToken)
                 .header(FROM_KEY, validEmail)

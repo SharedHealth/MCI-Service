@@ -8,9 +8,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
 import org.sharedhealth.mci.web.infrastructure.security.UserProfile;
-import org.sharedhealth.mci.web.model.GeneratedHidRange;
 import org.sharedhealth.mci.web.model.MciHealthId;
-import org.sharedhealth.mci.web.service.GeneratedHidRangeService;
 import org.sharedhealth.mci.web.service.HealthIdService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,9 +24,6 @@ import static org.mockito.MockitoAnnotations.initMocks;
 public class MCIHealthIdControllerTest {
     @Mock
     HealthIdService healthIdService;
-
-    @Mock
-    GeneratedHidRangeService generatedHidRangeService;
 
     MCIProperties mciProperties;
 
@@ -54,16 +49,16 @@ public class MCIHealthIdControllerTest {
     @Test
     public void testGenerate() {
         long start = mciProperties.getMciStartHid(), end = mciProperties.getMciEndHid();
-        when(healthIdService.generate(start, end)).thenReturn(100L);
-        HealthIdController healthIdController = new HealthIdController(healthIdService, generatedHidRangeService, mciProperties);
+        when(healthIdService.generateAll()).thenReturn(100L);
+        HealthIdController healthIdController = new HealthIdController(healthIdService);
         assertEquals("GENERATED 100 Ids", healthIdController.generate().getResult());
-        verify(healthIdService, times(1)).generate(start, end);
+        verify(healthIdService, times(1)).generateAll();
     }
 
     @Test
     public void testGetNextBlock() {
         when(healthIdService.getNextBlock()).thenReturn(getNextBlock());
-        HealthIdController healthIdController = new HealthIdController(healthIdService, generatedHidRangeService, mciProperties);
+        HealthIdController healthIdController = new HealthIdController(healthIdService);
         assertEquals(3, healthIdController.nextBlock().size());
         verify(healthIdService, times(1)).getNextBlock();
     }
@@ -78,24 +73,10 @@ public class MCIHealthIdControllerTest {
 
     @Test
     public void testGenerateRange() {
-        long start = 9800100100L, end = 9800100200L;
-        when(healthIdService.generate(start, end)).thenReturn(100L);
-        HealthIdController healthIdController = new HealthIdController(healthIdService, generatedHidRangeService, mciProperties);
-        assertEquals("GENERATED 100 Ids", healthIdController.generateRange(start, end).getResult());
-        verify(healthIdService, times(1)).generate(start, end);
-    }
-
-    @Test
-    public void shouldNotGenerateOverlappingHids() throws Exception {
-        long start = 9800100100L, end = 9800100200L;
-        when(healthIdService.generate(start, end)).thenReturn(100L);
-        HealthIdController healthIdController = new HealthIdController(healthIdService, generatedHidRangeService, mciProperties);
-        assertEquals("GENERATED 100 Ids", healthIdController.generateRange(start, end).getResult());
-        verify(healthIdService, times(1)).generate(start, end);
-        when(generatedHidRangeService.getPreGeneratedHidRanges()).thenReturn(asList(new GeneratedHidRange(start, end)));
-        assertEquals("Range overlaps with pregenerated healthIds", healthIdController.generateRange(start, end).getResult());
-        assertEquals("Range overlaps with pregenerated healthIds", healthIdController.generateRange(start - 1, end + 1).getResult());
-        assertEquals("Range overlaps with pregenerated healthIds", healthIdController.generateRange(end, 9800100202L).getResult());
-        assertEquals("Range overlaps with pregenerated healthIds", healthIdController.generateRange(9800100000L, start).getResult());
+        long start = 9800100100L, total = 100L;
+        when(healthIdService.generateBlock(start, total)).thenReturn(100L);
+        HealthIdController healthIdController = new HealthIdController(healthIdService);
+        assertEquals("GENERATED 100 Ids", healthIdController.generateRange(start, total).getResult());
+        verify(healthIdService, times(1)).generateBlock(start, total);
     }
 }
