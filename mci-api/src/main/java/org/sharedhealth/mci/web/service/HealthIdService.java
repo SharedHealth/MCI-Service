@@ -40,24 +40,28 @@ public class HealthIdService {
     public long generateAll(UserInfo userInfo) {
         Long start = mciProperties.getMciStartHid();
         Long end = mciProperties.getMciEndHid();
-        long numberOfValidHids = 0L;
+        long numberOfValidHIDs = 0L;
         for (long i = start; i <= end; i++) {
-            numberOfValidHids = saveIfValidHID(numberOfValidHids, i);
+            numberOfValidHIDs = saveIfValidHID(numberOfValidHIDs, i);
         }
-        saveGeneratedBlock(start, end, numberOfValidHids, userInfo);
-        return numberOfValidHids;
+        saveGeneratedBlock(start, end, numberOfValidHIDs, userInfo);
+        return numberOfValidHIDs;
     }
 
     public long generateBlock(long start, long totalHIDs, UserInfo userInfo) {
-        long numberOfValidHids = 0L;
+        long numberOfValidHIDs = 0L;
         long seriesNo = identifySeriesNo(start);
         long startForBlock = identifyStartInSeries(seriesNo);
         int i;
-        for (i = 0; numberOfValidHids < totalHIDs; i++) {
-            numberOfValidHids = saveIfValidHID(numberOfValidHids, startForBlock + i);
+        for (i = 0; numberOfValidHIDs < totalHIDs; i++) {
+            long possibleHID = startForBlock + i;
+            if (!isPartOfSeries(seriesNo, possibleHID)) {
+                break;
+            }
+            numberOfValidHIDs = saveIfValidHID(numberOfValidHIDs, possibleHID);
         }
-        saveGeneratedBlock(startForBlock, startForBlock + i - 1, numberOfValidHids, userInfo);
-        return numberOfValidHids;
+        saveGeneratedBlock(startForBlock, startForBlock + i - 1, numberOfValidHIDs, userInfo);
+        return numberOfValidHIDs;
     }
 
     public synchronized List<MciHealthId> getNextBlock() {
@@ -97,6 +101,10 @@ public class HealthIdService {
             return new RequesterDetails(properties.getAdminId());
         }
         return null;
+    }
+
+    private boolean isPartOfSeries(long seriesNo, long possibleHID) {
+        return identifySeriesNo(possibleHID) == seriesNo;
     }
 
     private long identifyStartInSeries(long seriesNo) {

@@ -17,11 +17,11 @@ public class GeneratedHIDBlock {
     @PrimaryKeyColumn(name = SERIES_NO, ordinal = 0, type = PARTITIONED)
     private Long seriesNo;
 
-    @PrimaryKeyColumn(name = ALLOCATED_FOR, ordinal = 1, type = CLUSTERED)
-    private String allocatedFor;
+    @PrimaryKeyColumn(name = GENERATED_FOR, ordinal = 1, type = CLUSTERED)
+    private String generatedFor;
 
-    @PrimaryKeyColumn(name = ALLOCATED_AT, ordinal = 2, type = CLUSTERED)
-    private UUID allocatedAt;
+    @PrimaryKeyColumn(name = GENERATED_AT, ordinal = 2, type = CLUSTERED)
+    private UUID generatedAt;
 
     @Column(BEGINS_AT)
     private Long beginsAt;
@@ -35,14 +35,14 @@ public class GeneratedHIDBlock {
     @Column(REQUESTED_BY)
     private String requestedBy;
 
-    public GeneratedHIDBlock(Long seriesNo, String allocatedFor, Long beginsAt, Long endsAt,
+    public GeneratedHIDBlock(Long seriesNo, String generatedFor, Long beginsAt, Long endsAt,
                              Long totalHIDs, String requestedBy) {
         this.seriesNo = seriesNo;
         this.beginsAt = beginsAt;
         this.endsAt = endsAt;
-        this.allocatedFor = allocatedFor;
+        this.generatedFor = generatedFor;
         this.totalHIDs = totalHIDs;
-        this.allocatedAt = timeBased();
+        this.generatedAt = timeBased();
         this.requestedBy = requestedBy;
     }
 
@@ -58,12 +58,12 @@ public class GeneratedHIDBlock {
         return endsAt;
     }
 
-    public String getAllocatedFor() {
-        return allocatedFor;
+    public String getGeneratedFor() {
+        return generatedFor;
     }
 
-    public UUID getAllocatedAt() {
-        return allocatedAt;
+    public UUID getGeneratedAt() {
+        return generatedAt;
     }
 
     public Long getTotalHIDs() {
@@ -82,8 +82,8 @@ public class GeneratedHIDBlock {
         GeneratedHIDBlock that = (GeneratedHIDBlock) o;
 
         if (seriesNo != null ? !seriesNo.equals(that.seriesNo) : that.seriesNo != null) return false;
-        if (allocatedFor != null ? !allocatedFor.equals(that.allocatedFor) : that.allocatedFor != null) return false;
-        if (allocatedAt != null ? !allocatedAt.equals(that.allocatedAt) : that.allocatedAt != null) return false;
+        if (generatedFor != null ? !generatedFor.equals(that.generatedFor) : that.generatedFor != null) return false;
+        if (generatedAt != null ? !generatedAt.equals(that.generatedAt) : that.generatedAt != null) return false;
         if (beginsAt != null ? !beginsAt.equals(that.beginsAt) : that.beginsAt != null) return false;
         if (endsAt != null ? !endsAt.equals(that.endsAt) : that.endsAt != null) return false;
         if (totalHIDs != null ? !totalHIDs.equals(that.totalHIDs) : that.totalHIDs != null) return false;
@@ -94,8 +94,8 @@ public class GeneratedHIDBlock {
     @Override
     public int hashCode() {
         int result = seriesNo != null ? seriesNo.hashCode() : 0;
-        result = 31 * result + (allocatedFor != null ? allocatedFor.hashCode() : 0);
-        result = 31 * result + (allocatedAt != null ? allocatedAt.hashCode() : 0);
+        result = 31 * result + (generatedFor != null ? generatedFor.hashCode() : 0);
+        result = 31 * result + (generatedAt != null ? generatedAt.hashCode() : 0);
         result = 31 * result + (beginsAt != null ? beginsAt.hashCode() : 0);
         result = 31 * result + (endsAt != null ? endsAt.hashCode() : 0);
         result = 31 * result + (totalHIDs != null ? totalHIDs.hashCode() : 0);

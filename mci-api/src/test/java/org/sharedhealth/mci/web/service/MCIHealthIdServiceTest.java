@@ -15,7 +15,6 @@ import org.sharedhealth.mci.web.model.GeneratedHIDBlock;
 import org.sharedhealth.mci.web.model.MciHealthId;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -27,7 +26,6 @@ import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.domain.util.JsonMapper.readValue;
 import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.*;
-import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.PROVIDER_GROUP;
 import static org.sharedhealth.mci.web.service.HealthIdService.MCI_ORG_CODE;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -154,7 +152,7 @@ public class MCIHealthIdServiceTest {
         GeneratedHIDBlock passedHidBlock = argument.getValue();
         assertEquals(1000, passedHidBlock.getSeriesNo().longValue());
         assertEquals(1000, passedHidBlock.getBeginsAt().longValue());
-        assertEquals("MCI", passedHidBlock.getAllocatedFor());
+        assertEquals("MCI", passedHidBlock.getGeneratedFor());
         assertEquals(1099, passedHidBlock.getEndsAt().longValue());
         assertEquals(80, passedHidBlock.getTotalHIDs().longValue());
         assertRequestedBy(passedHidBlock);
@@ -244,7 +242,7 @@ public class MCIHealthIdServiceTest {
         assertEquals(1000, passedHidBlock.getSeriesNo().longValue());
         assertEquals(start, passedHidBlock.getBeginsAt().longValue());
         assertEquals(1069, passedHidBlock.getEndsAt().longValue());
-        assertEquals(MCI_ORG_CODE, passedHidBlock.getAllocatedFor());
+        assertEquals(MCI_ORG_CODE, passedHidBlock.getGeneratedFor());
         assertEquals(50, passedHidBlock.getTotalHIDs().longValue());
         assertRequestedBy(passedHidBlock);
     }
@@ -273,7 +271,7 @@ public class MCIHealthIdServiceTest {
         assertEquals(1000, passedHidBlock.getSeriesNo().longValue());
         assertEquals(1070, passedHidBlock.getBeginsAt().longValue());
         assertEquals(1089, passedHidBlock.getEndsAt().longValue());
-        assertEquals(MCI_ORG_CODE, passedHidBlock.getAllocatedFor());
+        assertEquals(MCI_ORG_CODE, passedHidBlock.getGeneratedFor());
         assertEquals(20, passedHidBlock.getTotalHIDs().longValue());
         assertRequestedBy(passedHidBlock);
     }
@@ -323,9 +321,39 @@ public class MCIHealthIdServiceTest {
         assertEquals(1000, passedHidBlock.getSeriesNo().longValue());
         assertEquals(1000, passedHidBlock.getBeginsAt().longValue());
         assertEquals(1069, passedHidBlock.getEndsAt().longValue());
-        assertEquals(MCI_ORG_CODE, passedHidBlock.getAllocatedFor());
+        assertEquals(MCI_ORG_CODE, passedHidBlock.getGeneratedFor());
         assertEquals(50, passedHidBlock.getTotalHIDs().longValue());
         assertRequestedBy(passedHidBlock);
+    }
+
+    @Test
+    public void shouldGenerateHIDsOnlyInGivenSeries() throws Exception {
+        long start = 1040;
+        long totalHIDs = 20;
+        MCIProperties testProperties = new MCIProperties();
+        testProperties.setInvalidHidPattern("^(105|104)\\d*$");
+        GeneratedHIDBlock generatedHIDBlock = new GeneratedHIDBlock(1000L, MCI_ORG_CODE, 1000L, 1089L, 80L, null);
+
+        when(generatedHidBlockService.getPreGeneratedHidBlocks(1000L)).thenReturn(asList(generatedHIDBlock));
+        when(healthIdRepository.saveHealthId(any(MciHealthId.class))).thenReturn(MciHealthId.NULL_HID);
+        when(checksumGenerator.generate(any(String.class))).thenReturn(1);
+        when(generatedHidBlockService.saveGeneratedHidBlock(any(GeneratedHIDBlock.class))).thenReturn(null);
+
+        HealthIdService healthIdService = new HealthIdService(testProperties, healthIdRepository, checksumGenerator, generatedHidBlockService);
+        healthIdService.generateBlock(start, totalHIDs, getUserInfo());
+
+        verify(generatedHidBlockService, times(1)).getPreGeneratedHidBlocks(1000L);
+        ArgumentCaptor<GeneratedHIDBlock> argument = ArgumentCaptor.forClass(GeneratedHIDBlock.class);
+        verify(generatedHidBlockService, times(1)).saveGeneratedHidBlock(argument.capture());
+        GeneratedHIDBlock passedHidBlock = argument.getValue();
+
+        assertEquals(1000, passedHidBlock.getSeriesNo().longValue());
+        assertEquals(1090, passedHidBlock.getBeginsAt().longValue());
+        assertEquals(1099, passedHidBlock.getEndsAt().longValue());
+        assertEquals(MCI_ORG_CODE, passedHidBlock.getGeneratedFor());
+        assertEquals(10, passedHidBlock.getTotalHIDs().longValue());
+        assertRequestedBy(passedHidBlock);
+
     }
 
     @Test

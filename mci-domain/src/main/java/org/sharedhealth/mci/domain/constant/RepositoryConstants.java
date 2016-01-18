@@ -121,8 +121,8 @@ public class RepositoryConstants {
     public static final String EVENT_TYPE_CREATED = "created";
     public static final String EVENT_TYPE_UPDATED = "updated";
     public static final String SERIES_NO = "series_no";
-    public static final String ALLOCATED_FOR = "allocated_for";
-    public static final String ALLOCATED_AT = "allocated_at";
+    public static final String GENERATED_FOR = "generated_for";
+    public static final String GENERATED_AT = "generated_at";
     public static final String BEGINS_AT = "begins_at";
     public static final String ENDS_AT = "ends_at";
     public static final String TOTAL_HIDS = "total_hids";

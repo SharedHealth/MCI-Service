@@ -48,7 +48,6 @@ public class MCIHealthIdControllerTest {
 
     @Test
     public void testGenerate() {
-        long start = mciProperties.getMciStartHid(), end = mciProperties.getMciEndHid();
         when(healthIdService.generateAll(any(UserInfo.class))).thenReturn(100L);
         HealthIdController healthIdController = new HealthIdController(healthIdService);
         assertEquals("GENERATED 100 Ids", healthIdController.generate().getResult());
@@ -74,9 +73,9 @@ public class MCIHealthIdControllerTest {
     @Test
     public void testGenerateRange() {
         long start = 9800100100L, total = 100L;
-        when(healthIdService.generateBlock(start, total,getUserInfo())).thenReturn(100L);
+        when(healthIdService.generateBlock(eq(start), eq(total), any(UserInfo.class))).thenReturn(100L);
         HealthIdController healthIdController = new HealthIdController(healthIdService);
         assertEquals("GENERATED 100 Ids", healthIdController.generateRange(start, total).getResult());
-        verify(healthIdService, times(1)).generateBlock(start, total, getUserInfo());
+        verify(healthIdService, times(1)).generateBlock(eq(start), eq(total), any(UserInfo.class));
     }
 }
