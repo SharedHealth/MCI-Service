@@ -5,9 +5,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sharedhealth.mci.domain.config.EnvironmentMock;
+import org.sharedhealth.mci.domain.constant.RepositoryConstants;
 import org.sharedhealth.mci.web.exception.HealthIdExhaustedException;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.model.MciHealthId;
+import org.sharedhealth.mci.web.model.OrgHealthId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.cassandra.core.CassandraOperations;
@@ -19,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
 import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -96,6 +99,18 @@ public class HealthIdRepositoryIT {
         for (MciHealthId MciHealthId : nextBlock) {
             assertFalse(MciHealthIds.contains(MciHealthId));
         }
+    }
+
+    @Test
+    public void shouldSaveAHIDForGivenOrganization() throws Exception {
+        OrgHealthId orgHealthId = new OrgHealthId("9110", "OTHER-ORG", null);
+
+        healthIdRepository.saveHealthIdSync(orgHealthId);
+
+        String select = select().all().from(RepositoryConstants.CF_ORG_HEALTH_ID).toString();
+        List<OrgHealthId> insertedHIDs = cqlTemplate.select(select, OrgHealthId.class);
+        assertEquals(1, insertedHIDs.size());
+        assertEquals(orgHealthId, insertedHIDs.get(0));
     }
 }
 

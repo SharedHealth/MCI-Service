@@ -1,10 +1,12 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
+import com.datastax.driver.core.querybuilder.Insert;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
 import org.sharedhealth.mci.domain.repository.BaseRepository;
 import org.sharedhealth.mci.web.exception.HealthIdExhaustedException;
 import org.sharedhealth.mci.web.model.MciHealthId;
+import org.sharedhealth.mci.web.model.OrgHealthId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.CF_MCI_HEALTH_ID;
+import static org.sharedhealth.mci.domain.constant.RepositoryConstants.CF_ORG_HEALTH_ID;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.HID;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
 
@@ -29,16 +32,28 @@ public class HealthIdRepository extends BaseRepository {
         super(cassandraOps);
     }
 
-    public MciHealthId saveHealthId(MciHealthId MciHealthId) {
-        logger.debug(String.format("Inserting new hid :%s", MciHealthId.getHid()));
-        cassandraOps.executeAsynchronously(createInsertQuery(CF_MCI_HEALTH_ID, MciHealthId, null, cassandraOps.getConverter()).ifNotExists());
-        return MciHealthId;
+    public MciHealthId saveHealthId(MciHealthId mciHealthId) {
+        Insert insertQuery = getInsertQuery(mciHealthId);
+        cassandraOps.executeAsynchronously(insertQuery.ifNotExists());
+        return mciHealthId;
     }
 
-    public MciHealthId saveHealthIdSync(MciHealthId MciHealthId) {
-        logger.debug(String.format("Inserting new hid :%s", MciHealthId.getHid()));
-        cassandraOps.execute(createInsertQuery(CF_MCI_HEALTH_ID, MciHealthId, null, cassandraOps.getConverter()).ifNotExists());
-        return MciHealthId;
+    public MciHealthId saveHealthIdSync(MciHealthId mciHealthId) {
+        Insert insertQuery = getInsertQuery(mciHealthId);
+        cassandraOps.execute(insertQuery.ifNotExists());
+        return mciHealthId;
+    }
+
+    public OrgHealthId saveHealthId(OrgHealthId orgHealthId) {
+        Insert insertQuery = getInsertQuery(orgHealthId);
+        cassandraOps.executeAsynchronously(insertQuery.ifNotExists());
+        return orgHealthId;
+    }
+
+    public OrgHealthId saveHealthIdSync(OrgHealthId orgHealthId) {
+        Insert insertQuery = getInsertQuery(orgHealthId);
+        cassandraOps.execute(insertQuery.ifNotExists());
+        return orgHealthId;
     }
 
     public List<MciHealthId> getNextBlock(int blockSize) {
@@ -79,5 +94,15 @@ public class HealthIdRepository extends BaseRepository {
         Select selectHealthId = QueryBuilder.select().from(CF_MCI_HEALTH_ID).where(QueryBuilder.eq(HID, hid)).limit(1);
         List<MciHealthId> MciHealthIds = cassandraOps.select(selectHealthId, MciHealthId.class);
         return MciHealthIds.isEmpty() ? null : MciHealthIds.get(0);
+    }
+
+    private Insert getInsertQuery(MciHealthId mciHealthId) {
+        logger.debug(String.format("Inserting new hid for MCI :%s", mciHealthId.getHid()));
+        return createInsertQuery(CF_MCI_HEALTH_ID, mciHealthId, null, cassandraOps.getConverter());
+    }
+
+    private Insert getInsertQuery(OrgHealthId orgHealthId) {
+        logger.debug(String.format("Inserting new hid for organization %s :%s", orgHealthId.getAllocatedFor(), orgHealthId.getHealthId()));
+        return createInsertQuery(CF_ORG_HEALTH_ID, orgHealthId, null, cassandraOps.getConverter());
     }
 }

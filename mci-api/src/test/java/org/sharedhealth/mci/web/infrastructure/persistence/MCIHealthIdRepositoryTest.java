@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.sharedhealth.mci.web.exception.HealthIdExhaustedException;
 import org.sharedhealth.mci.web.model.MciHealthId;
+import org.sharedhealth.mci.web.model.OrgHealthId;
 import org.springframework.data.cassandra.convert.MappingCassandraConverter;
 import org.springframework.data.cassandra.core.CassandraOperations;
 
@@ -34,7 +35,7 @@ public class MCIHealthIdRepositoryTest {
     }
 
     @Test
-    public void shouldSaveHidAsynchronously() {
+    public void shouldSaveMCIHidAsynchronously() {
         HealthIdRepository healthIdRepository = new HealthIdRepository(cqlTemplate);
         healthIdRepository.saveHealthId(new MciHealthId("98015440161"));
         verify(cqlTemplate, times(1)).executeAsynchronously(any(Insert.class));
@@ -64,6 +65,13 @@ public class MCIHealthIdRepositoryTest {
         assertEquals(2, nextBlock.size());
         verify(cqlTemplate, times(2)).select(selectArgumentCaptor.capture(), classArgumentCaptor.capture());
         assertTrue(selectArgumentCaptor.getValue().toString().contains("token"));
+    }
+
+    @Test
+    public void shouldSaveOrgHidAsynchronously() {
+        HealthIdRepository healthIdRepository = new HealthIdRepository(cqlTemplate);
+        healthIdRepository.saveHealthId(new OrgHealthId("98015440161", "other-org", null));
+        verify(cqlTemplate, times(1)).executeAsynchronously(any(Insert.class));
     }
 
     @Test(expected = HealthIdExhaustedException.class)

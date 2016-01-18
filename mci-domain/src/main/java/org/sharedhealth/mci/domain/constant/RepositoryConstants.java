@@ -20,6 +20,7 @@ public class RepositoryConstants {
     public static final String CF_MCI_HEALTH_ID = "mci_healthId";
     public static final String CF_GENERATED_HID_RANGE = "generated_hid_range";
     public static final String CF_GENERATED_HID_BLOCKS = "generated_hid_blocks";
+    public static final String CF_ORG_HEALTH_ID = "org_healthid";
     public static final String CF_FAILED_EVENTS = "failed_events";
 
     public static final String HEALTH_ID = "health_id";
@@ -131,6 +132,9 @@ public class RepositoryConstants {
     public static final String ERROR_MESSAGE = "error_message";
     public static final String FAILED_AT = "failed_at";
     public static final String RETRIES = "retries";
+    public static final String ALLOCATED_FOR = "allocated_for";
+    public static final String IS_AVAILABLE = "is_available";
+    public static final String USED_AT = "used_at";
 
     public static final String HEALTH_ID1 = "health_id1";
     public static final String HEALTH_ID2 = "health_id2";
