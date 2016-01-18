@@ -9,11 +9,15 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.sharedhealth.mci.utils.LuhnChecksumGenerator;
 import org.sharedhealth.mci.web.infrastructure.persistence.HealthIdRepository;
+import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
+import org.sharedhealth.mci.web.infrastructure.security.UserProfile;
 import org.sharedhealth.mci.web.model.GeneratedHIDBlock;
 import org.sharedhealth.mci.web.model.MciHealthId;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import static java.util.Arrays.asList;
@@ -21,6 +25,9 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.sharedhealth.mci.domain.util.JsonMapper.readValue;
+import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.*;
+import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.PROVIDER_GROUP;
 import static org.sharedhealth.mci.web.service.HealthIdService.MCI_ORG_CODE;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -93,7 +100,7 @@ public class MCIHealthIdServiceTest {
         // and we will mark it as invalid
         testProperties.setInvalidHidPattern("^(105|104)\\d*$");
         HealthIdService healthIdService = new HealthIdService(testProperties, healthIdRepository, checksumGenerator, generatedHidBlockService);
-        assertEquals(80, healthIdService.generateAll());
+        assertEquals(80, healthIdService.generateAll(getUserInfo()));
     }
 
     @Test
@@ -105,7 +112,7 @@ public class MCIHealthIdServiceTest {
         // and we will mark it as invalid
         testProperties.setInvalidHidPattern("^[^9]|^.[^89]|(^\\d{0,9}$)|(^\\d{11,}$)|((\\d)\\4{2})\\d*((\\d)\\6{2})|(\\d)\\7{3}");
         HealthIdService healthIdService = new HealthIdService(testProperties, healthIdRepository, checksumGenerator, generatedHidBlockService);
-        assertEquals(0, healthIdService.generateAll());
+        assertEquals(0, healthIdService.generateAll(getUserInfo()));
     }
 
     @Test
@@ -120,7 +127,7 @@ public class MCIHealthIdServiceTest {
         // and we will mark it as invalid
         testProperties.setInvalidHidPattern("^(105|104)\\d*$");
         HealthIdService healthIdService = new HealthIdService(testProperties, healthIdRepository, checksumGenerator, generatedHidBlockService);
-        assertEquals(80, healthIdService.generateAll());
+        assertEquals(80, healthIdService.generateAll(getUserInfo()));
 
         ArgumentCaptor<MciHealthId> healthIdArgumentCaptor = ArgumentCaptor.forClass(MciHealthId.class);
         verify(healthIdRepository, times(80)).saveHealthId(healthIdArgumentCaptor.capture());
@@ -129,7 +136,7 @@ public class MCIHealthIdServiceTest {
     }
 
     @Test
-    public void shouldSaveTheGeneratedRangeFromGivenRange() throws Exception {
+    public void shouldSaveTheGeneratedBlockFromGivenBlock() throws Exception {
         MCIProperties testProperties = new MCIProperties();
         testProperties.setInvalidHidPattern("^(105|104)\\d*$");
         testProperties.setMciStartHid("1000");
@@ -137,23 +144,24 @@ public class MCIHealthIdServiceTest {
 
         when(healthIdRepository.saveHealthId(any(MciHealthId.class))).thenReturn(MciHealthId.NULL_HID);
         when(checksumGenerator.generate(any(String.class))).thenReturn(1);
-        when(generatedHidBlockService.saveGeneratedHidRange(any(GeneratedHIDBlock.class))).thenReturn(null);
+        when(generatedHidBlockService.saveGeneratedHidBlock(any(GeneratedHIDBlock.class))).thenReturn(null);
 
         HealthIdService healthIdService = new HealthIdService(testProperties, healthIdRepository, checksumGenerator, generatedHidBlockService);
-        healthIdService.generateAll();
+        healthIdService.generateAll(getUserInfo());
 
         ArgumentCaptor<GeneratedHIDBlock> argument = ArgumentCaptor.forClass(GeneratedHIDBlock.class);
-        verify(generatedHidBlockService, times(1)).saveGeneratedHidRange(argument.capture());
-        GeneratedHIDBlock passedHidRange = argument.getValue();
-        assertEquals(10, passedHidRange.getSeriesNo().longValue());
-        assertEquals(1000, passedHidRange.getBeginsAt().longValue());
-        assertEquals("MCI", passedHidRange.getAllocatedFor());
-        assertEquals(1099, passedHidRange.getEndsAt().longValue());
-        assertNull(passedHidRange.getRequestedBy());
+        verify(generatedHidBlockService, times(1)).saveGeneratedHidBlock(argument.capture());
+        GeneratedHIDBlock passedHidBlock = argument.getValue();
+        assertEquals(1000, passedHidBlock.getSeriesNo().longValue());
+        assertEquals(1000, passedHidBlock.getBeginsAt().longValue());
+        assertEquals("MCI", passedHidBlock.getAllocatedFor());
+        assertEquals(1099, passedHidBlock.getEndsAt().longValue());
+        assertEquals(80, passedHidBlock.getTotalHIDs().longValue());
+        assertRequestedBy(passedHidBlock);
     }
 
     @Test
-    public void shouldNotSaveRangeIfNoHIDsAreGenerated() throws Exception {
+    public void shouldNotSaveBlockIfNoHIDsAreGenerated() throws Exception {
         MCIProperties testProperties = new MCIProperties();
         testProperties.setInvalidHidPattern("^(105|104)\\d*$");
         testProperties.setMciStartHid("1040");
@@ -163,9 +171,9 @@ public class MCIHealthIdServiceTest {
         when(checksumGenerator.generate(any(String.class))).thenReturn(1);
 
         HealthIdService healthIdService = new HealthIdService(testProperties, healthIdRepository, checksumGenerator, generatedHidBlockService);
-        healthIdService.generateAll();
+        healthIdService.generateAll(getUserInfo());
 
-        verify(generatedHidBlockService, never()).saveGeneratedHidRange(any(GeneratedHIDBlock.class));
+        verify(generatedHidBlockService, never()).saveGeneratedHidBlock(any(GeneratedHIDBlock.class));
     }
 
     @Test
@@ -177,7 +185,7 @@ public class MCIHealthIdServiceTest {
         // and we will mark it as invalid
         testProperties.setInvalidHidPattern("^(105|104)\\d*$");
         HealthIdService healthIdService = new HealthIdService(testProperties, healthIdRepository, checksumGenerator, generatedHidBlockService);
-        assertEquals(0, healthIdService.generateAll());
+        assertEquals(0, healthIdService.generateAll(getUserInfo()));
     }
 
     @Test
@@ -194,9 +202,9 @@ public class MCIHealthIdServiceTest {
     }
 
     @Test
-    public void shouldGenerateValidHealthIdsForGivenBlockSize() throws Exception {
+    public void shouldGenerateValidHealthIdsForGiventotalHIDs() throws Exception {
         long start = 1000;
-        long blockSize = 100;
+        long totalHIDs = 100;
         MCIProperties testProperties = new MCIProperties();
         testProperties.setInvalidHidPattern("^(105|104)\\d*$");
 
@@ -204,7 +212,7 @@ public class MCIHealthIdServiceTest {
         when(checksumGenerator.generate(any(String.class))).thenReturn(1);
 
         HealthIdService healthIdService = new HealthIdService(testProperties, healthIdRepository, checksumGenerator, generatedHidBlockService);
-        healthIdService.generateBlock(start, blockSize);
+        healthIdService.generateBlock(start, totalHIDs, getUserInfo());
 
         verify(healthIdRepository, times(100)).saveHealthId(any(MciHealthId.class));
         verify(checksumGenerator, times(100)).generate(any(String.class));
@@ -216,61 +224,70 @@ public class MCIHealthIdServiceTest {
     }
 
     @Test
-    public void shouldCalculateRangeAtSaveForGivenBlock() throws Exception {
+    public void shouldCalculateBlockEndAt() throws Exception {
         long start = 1000;
-        long blockSize = 50;
+        long totalHIDs = 50;
         MCIProperties testProperties = new MCIProperties();
         testProperties.setInvalidHidPattern("^(105|104)\\d*$");
 
+        when(generatedHidBlockService.getPreGeneratedHidBlocks(1000L)).thenReturn(new ArrayList<GeneratedHIDBlock>());
         when(healthIdRepository.saveHealthId(any(MciHealthId.class))).thenReturn(MciHealthId.NULL_HID);
         when(checksumGenerator.generate(any(String.class))).thenReturn(1);
-        when(generatedHidBlockService.saveGeneratedHidRange(any(GeneratedHIDBlock.class))).thenReturn(null);
+        when(generatedHidBlockService.saveGeneratedHidBlock(any(GeneratedHIDBlock.class))).thenReturn(null);
 
         HealthIdService healthIdService = new HealthIdService(testProperties, healthIdRepository, checksumGenerator, generatedHidBlockService);
-        healthIdService.generateBlock(start, blockSize);
+        healthIdService.generateBlock(start, totalHIDs, getUserInfo());
 
         ArgumentCaptor<GeneratedHIDBlock> argument = ArgumentCaptor.forClass(GeneratedHIDBlock.class);
-        verify(generatedHidBlockService, times(1)).saveGeneratedHidRange(argument.capture());
-        GeneratedHIDBlock passedHidRange = argument.getValue();
-        assertEquals(10, passedHidRange.getSeriesNo().longValue());
-        assertEquals(start, passedHidRange.getBeginsAt().longValue());
-        assertEquals(1069, passedHidRange.getEndsAt().longValue());
-        assertEquals(MCI_ORG_CODE, passedHidRange.getAllocatedFor());
-        assertNull(passedHidRange.getRequestedBy());
+        verify(generatedHidBlockService, times(1)).saveGeneratedHidBlock(argument.capture());
+        GeneratedHIDBlock passedHidBlock = argument.getValue();
+        assertEquals(1000, passedHidBlock.getSeriesNo().longValue());
+        assertEquals(start, passedHidBlock.getBeginsAt().longValue());
+        assertEquals(1069, passedHidBlock.getEndsAt().longValue());
+        assertEquals(MCI_ORG_CODE, passedHidBlock.getAllocatedFor());
+        assertEquals(50, passedHidBlock.getTotalHIDs().longValue());
+        assertRequestedBy(passedHidBlock);
     }
 
     @Test
-    public void shouldIdentifyStartOfRangeFromPreGeneratedRange() throws Exception {
+    public void shouldIdentifyStartOfBlockFromPreGeneratedBlock() throws Exception {
         long start = 1000;
-        long blockSize = 20;
+        long totalHIDs = 20;
         MCIProperties testProperties = new MCIProperties();
         testProperties.setInvalidHidPattern("^(105|104)\\d*$");
-        GeneratedHIDBlock generatedHIDBlock = new GeneratedHIDBlock(10L, MCI_ORG_CODE, 1000L, 1069L, 20L, null);
-        
-        when(generatedHidBlockService.getPreGeneratedHidRanges(10L)).thenReturn(asList(generatedHIDBlock));
+        GeneratedHIDBlock generatedHIDBlock = new GeneratedHIDBlock(1000L, MCI_ORG_CODE, 1000L, 1069L, 20L, null);
+
+        when(generatedHidBlockService.getPreGeneratedHidBlocks(1000L)).thenReturn(asList(generatedHIDBlock));
         when(healthIdRepository.saveHealthId(any(MciHealthId.class))).thenReturn(MciHealthId.NULL_HID);
         when(checksumGenerator.generate(any(String.class))).thenReturn(1);
-        when(generatedHidBlockService.saveGeneratedHidRange(any(GeneratedHIDBlock.class))).thenReturn(null);
+        when(generatedHidBlockService.saveGeneratedHidBlock(any(GeneratedHIDBlock.class))).thenReturn(null);
 
         HealthIdService healthIdService = new HealthIdService(testProperties, healthIdRepository, checksumGenerator, generatedHidBlockService);
-        healthIdService.generateBlock(start, blockSize);
+        healthIdService.generateBlock(start, totalHIDs, getUserInfo());
 
-        verify(generatedHidBlockService,times(1)).getPreGeneratedHidRanges(10L);
+        verify(generatedHidBlockService, times(1)).getPreGeneratedHidBlocks(1000L);
         ArgumentCaptor<GeneratedHIDBlock> argument = ArgumentCaptor.forClass(GeneratedHIDBlock.class);
-        verify(generatedHidBlockService, times(1)).saveGeneratedHidRange(argument.capture());
-        GeneratedHIDBlock passedHidRange = argument.getValue();
+        verify(generatedHidBlockService, times(1)).saveGeneratedHidBlock(argument.capture());
+        GeneratedHIDBlock passedHidBlock = argument.getValue();
 
-        assertEquals(10, passedHidRange.getSeriesNo().longValue());
-        assertEquals(1070, passedHidRange.getBeginsAt().longValue());
-        assertEquals(1089, passedHidRange.getEndsAt().longValue());
-        assertEquals(MCI_ORG_CODE, passedHidRange.getAllocatedFor());
-        assertNull(passedHidRange.getRequestedBy());
+        assertEquals(1000, passedHidBlock.getSeriesNo().longValue());
+        assertEquals(1070, passedHidBlock.getBeginsAt().longValue());
+        assertEquals(1089, passedHidBlock.getEndsAt().longValue());
+        assertEquals(MCI_ORG_CODE, passedHidBlock.getAllocatedFor());
+        assertEquals(20, passedHidBlock.getTotalHIDs().longValue());
+        assertRequestedBy(passedHidBlock);
+    }
+
+    private void assertRequestedBy(GeneratedHIDBlock passedHidBlock) {
+        String requestedBy = passedHidBlock.getRequestedBy();
+        Map requesterDetails = readValue(requestedBy, Map.class);
+        assertEquals("102", requesterDetails.get("id"));
     }
 
     @Test
-    public void shouldNotSaveRangeIfNoHIDsGeneratedInBlock() throws Exception {
+    public void shouldNotSaveBlockIfNoHIDsGeneratedInBlock() throws Exception {
         long start = 1040;
-        long blockSize = 0;
+        long totalHIDs = 0;
         MCIProperties testProperties = new MCIProperties();
         testProperties.setInvalidHidPattern("^(105|104)\\d*$");
 
@@ -278,9 +295,37 @@ public class MCIHealthIdServiceTest {
         when(checksumGenerator.generate(any(String.class))).thenReturn(1);
 
         HealthIdService healthIdService = new HealthIdService(testProperties, healthIdRepository, checksumGenerator, generatedHidBlockService);
-        healthIdService.generateBlock(start, blockSize);
+        healthIdService.generateBlock(start, totalHIDs, getUserInfo());
 
-        verify(generatedHidBlockService, never()).saveGeneratedHidRange(any(GeneratedHIDBlock.class));
+        verify(generatedHidBlockService, never()).saveGeneratedHidBlock(any(GeneratedHIDBlock.class));
+    }
+
+    @Test
+    public void shouldAssignBlockFromStartOfSeriesNo() throws Exception {
+        long start = 1040;
+        long totalHIDs = 50;
+        MCIProperties testProperties = new MCIProperties();
+        testProperties.setInvalidHidPattern("^(105|104)\\d*$");
+
+        when(generatedHidBlockService.getPreGeneratedHidBlocks(1000L)).thenReturn(new ArrayList<GeneratedHIDBlock>());
+        when(healthIdRepository.saveHealthId(any(MciHealthId.class))).thenReturn(MciHealthId.NULL_HID);
+        when(checksumGenerator.generate(any(String.class))).thenReturn(1);
+        when(generatedHidBlockService.saveGeneratedHidBlock(any(GeneratedHIDBlock.class))).thenReturn(null);
+
+        HealthIdService healthIdService = new HealthIdService(testProperties, healthIdRepository, checksumGenerator, generatedHidBlockService);
+        healthIdService.generateBlock(start, totalHIDs, getUserInfo());
+
+        verify(generatedHidBlockService, times(1)).getPreGeneratedHidBlocks(1000L);
+        ArgumentCaptor<GeneratedHIDBlock> argument = ArgumentCaptor.forClass(GeneratedHIDBlock.class);
+        verify(generatedHidBlockService, times(1)).saveGeneratedHidBlock(argument.capture());
+        GeneratedHIDBlock passedHidBlock = argument.getValue();
+
+        assertEquals(1000, passedHidBlock.getSeriesNo().longValue());
+        assertEquals(1000, passedHidBlock.getBeginsAt().longValue());
+        assertEquals(1069, passedHidBlock.getEndsAt().longValue());
+        assertEquals(MCI_ORG_CODE, passedHidBlock.getAllocatedFor());
+        assertEquals(50, passedHidBlock.getTotalHIDs().longValue());
+        assertRequestedBy(passedHidBlock);
     }
 
     @Test
@@ -292,4 +337,11 @@ public class MCIHealthIdServiceTest {
         verify(healthIdRepository).removedUsedHid(MciHealthId);
     }
 
+    private UserInfo getUserInfo() {
+        UserProfile adminProfile = new UserProfile("mci-supervisor", "102", asList("10"));
+
+        return new UserInfo("102", "ABC", "abc@mail", 1, true, "111100",
+                new ArrayList<>(asList(MCI_USER_GROUP, MCI_ADMIN, MCI_APPROVER, FACILITY_GROUP, PROVIDER_GROUP)),
+                asList(adminProfile));
+    }
 }

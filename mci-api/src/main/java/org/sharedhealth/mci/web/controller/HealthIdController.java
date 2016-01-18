@@ -40,7 +40,7 @@ public class HealthIdController extends MciController {
         final DeferredResult<String> deferredResult = new DeferredResult<>();
 
         logAccessDetails(userInfo, format("Generating new hids"));
-        long numberOfValidHids = healthIdService.generateAll();
+        long numberOfValidHids = healthIdService.generateAll(userInfo);
         deferredResult.setResult(String.format("GENERATED %s Ids", numberOfValidHids));
         logger.info(String.format("%s healthIds generated", numberOfValidHids));
         return deferredResult;
@@ -53,7 +53,7 @@ public class HealthIdController extends MciController {
         UserInfo userInfo = getUserInfo();
         final DeferredResult<String> deferredResult = new DeferredResult<>();
         logAccessDetails(userInfo, "Generating new hids");
-        long numberOfValidHids = healthIdService.generateBlock(start, totalHIDs);
+        long numberOfValidHids = healthIdService.generateBlock(start, totalHIDs, userInfo );
         deferredResult.setResult(String.format("GENERATED %s Ids", numberOfValidHids));
         logger.info(String.format("%s healthIds generated", numberOfValidHids));
         return deferredResult;

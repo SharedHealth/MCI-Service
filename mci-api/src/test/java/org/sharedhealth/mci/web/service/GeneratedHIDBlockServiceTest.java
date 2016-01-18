@@ -39,4 +39,9 @@ public class GeneratedHIDBlockServiceTest {
         hidBlockService.getPreGeneratedHidBlocks(seriesNo);
         verify(generatedHidBlockRepository, times(1)).getPreGeneratedHidBlocks(seriesNo);
     }
+
+    @Test
+    public void shouldIdentifyStartForAGivenSeries() throws Exception {
+
+    }
 }
