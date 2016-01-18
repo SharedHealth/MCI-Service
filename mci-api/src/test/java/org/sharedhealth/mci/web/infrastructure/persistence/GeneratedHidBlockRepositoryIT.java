@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sharedhealth.mci.domain.config.EnvironmentMock;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
-import org.sharedhealth.mci.web.model.GeneratedHidRange;
+import org.sharedhealth.mci.web.model.GeneratedHIDBlock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.cassandra.core.CassandraOperations;
@@ -19,13 +19,13 @@ import java.util.List;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
 import static java.util.Arrays.asList;
 import static junit.framework.Assert.assertEquals;
-import static org.sharedhealth.mci.domain.constant.RepositoryConstants.CF_GENERATED_HID_RANGE;
+import static org.sharedhealth.mci.domain.constant.RepositoryConstants.CF_GENERATED_HID_BLOCKS;
 import static org.sharedhealth.mci.domain.repository.TestUtil.truncateAllColumnFamilies;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 @ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
-public class GeneratedHidRangeRepositoryIT {
+public class GeneratedHidBlockRepositoryIT {
 
     @SuppressWarnings("SpringJavaAutowiringInspection")
     @Autowired
@@ -33,7 +33,7 @@ public class GeneratedHidRangeRepositoryIT {
     private CassandraOperations cqlTemplate;
 
     @Autowired
-    private GeneratedHidRangeRepository hidRangeRepository;
+    private GeneratedHidBlockRepository hidBlockRepository;
 
     @Before
     public void setUp() throws Exception {
@@ -45,27 +45,27 @@ public class GeneratedHidRangeRepositoryIT {
     }
 
     @Test
-    public void shouldInsertAHIDRange() throws Exception {
-        GeneratedHidRange hidRangeToInsert = new GeneratedHidRange(91L, 9100L, 9150L, "MCI", null);
-        hidRangeRepository.saveGeneratedHidRange(hidRangeToInsert);
+    public void shouldInsertAHIDBlock() throws Exception {
+        GeneratedHIDBlock hidBlockToInsert = new GeneratedHIDBlock(91L, "MCI", 9100L, 9150L, 10L, null);
+        hidBlockRepository.saveGeneratedHidBlock(hidBlockToInsert);
 
-        String cql = select().all().from(CF_GENERATED_HID_RANGE).toString();
-        List<GeneratedHidRange> hidRanges = cqlTemplate.select(cql, GeneratedHidRange.class);
-        assertEquals(1, hidRanges.size());
-        assertEquals(hidRangeToInsert, hidRanges.get(0));
+        String cql = select().all().from(CF_GENERATED_HID_BLOCKS).toString();
+        List<GeneratedHIDBlock> hidBlocks = cqlTemplate.select(cql, GeneratedHIDBlock.class);
+        assertEquals(1, hidBlocks.size());
+        assertEquals(hidBlockToInsert, hidBlocks.get(0));
     }
 
     @Test
-    public void shouldRetrieveAHIDRangeByBlockBiginKey() throws Exception {
-        GeneratedHidRange hidRange1 = new GeneratedHidRange(91L, 9100L, 9150L, "MCI", null);
-        GeneratedHidRange hidRange2 = new GeneratedHidRange(92L, 9200L, 9250L, "MCI", null);
-        GeneratedHidRange hidRange3 = new GeneratedHidRange(91L, 9151L, 9199L, "MCI", null);
-        cqlTemplate.insert(asList(hidRange1, hidRange2, hidRange3));
+    public void shouldRetrieveAHIDBlockBySeriesNo() throws Exception {
+        GeneratedHIDBlock hidBlock1 = new GeneratedHIDBlock(91L, "MCI", 9100L, 9150L, 10L, null);
+        GeneratedHIDBlock hidBlock2 = new GeneratedHIDBlock(92L, "MCI", 9200L, 9250L, 10L, null);
+        GeneratedHIDBlock hidBlock3 = new GeneratedHIDBlock(91L, "MCI", 9151L, 9199L, 10L, null);
+        cqlTemplate.insert(asList(hidBlock1, hidBlock2, hidBlock3));
 
-        List<GeneratedHidRange> hidRanges = hidRangeRepository.getPreGeneratedHidRanges(91L);
+        List<GeneratedHIDBlock> hidBlocks = hidBlockRepository.getPreGeneratedHidBlocks(91L);
 
-        assertEquals(2, hidRanges.size());
-        assertEquals(hidRange1, hidRanges.get(0));
-        assertEquals(hidRange3, hidRanges.get(1));
+        assertEquals(2, hidBlocks.size());
+        assertEquals(hidBlock1, hidBlocks.get(0));
+        assertEquals(hidBlock3, hidBlocks.get(1));
     }
 }

@@ -49,11 +49,11 @@ public class HealthIdController extends MciController {
     @PreAuthorize("hasAnyRole('ROLE_MCI Admin')")
     @RequestMapping(method = POST, value = GENERATE_RANGE_URI)
     public DeferredResult<String> generateRange(@RequestParam(value = "start") long start,
-                                                @RequestParam(value = "blockSize") long blockSize) {
+                                                @RequestParam(value = "totalHIDs") long totalHIDs) {
         UserInfo userInfo = getUserInfo();
         final DeferredResult<String> deferredResult = new DeferredResult<>();
-        logAccessDetails(userInfo, format("Generating new hids"));
-        long numberOfValidHids = healthIdService.generateBlock(start, blockSize);
+        logAccessDetails(userInfo, "Generating new hids");
+        long numberOfValidHids = healthIdService.generateBlock(start, totalHIDs);
         deferredResult.setResult(String.format("GENERATED %s Ids", numberOfValidHids));
         logger.info(String.format("%s healthIds generated", numberOfValidHids));
         return deferredResult;

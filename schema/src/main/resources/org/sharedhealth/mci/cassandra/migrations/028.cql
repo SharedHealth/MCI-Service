@@ -1,11 +1,10 @@
-DROP TABLE generated_hid_range;
-
-CREATE TABLE IF NOT EXISTS generated_hid_range (
-    block_begins_at bigint,
-    begins_at bigint,
-    ends_at bigint,
+CREATE TABLE IF NOT EXISTS generated_hid_blocks (
+    series_no bigint,
     allocated_for varchar,
     allocated_at timeuuid,
+    begins_at bigint,
+    ends_at bigint,
+    total_hids bigint,
     requested_by varchar,
-    PRIMARY KEY (block_begins_at, begins_at)
+    PRIMARY KEY ((series_no), allocated_for, allocated_at)
 );
