@@ -33,7 +33,8 @@ public class MCIHealthIdControllerTest {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken(getUserInfo(), null));
         mciProperties = new MCIProperties();
-        mciProperties.setInvalidHidPattern("^[^9]|^.[^89]|(^\\d{0,9}$)|(^\\d{11,}$)|((\\d)\\4{2})\\d*((\\d)\\6{2})|(\\d)\\7{3}");
+        mciProperties.setMciInvalidHidPattern("^[^9]|^.[^89]|(^\\d{0,9}$)|(^\\d{11,}$)|((\\d)\\4{2})\\d*((\\d)\\6{2})|(\\d)\\7{3}");
+        mciProperties.setOrgInvalidHidPattern("^[^9]|^.[^1-7]|(^\\d{0,9}$)|(^\\d{11,}$)|((\\d)\\4{2})\\d*((\\d)\\6{2})|(\\d)\\7{3}");
         mciProperties.setMciStartHid("9800000000");
         mciProperties.setMciEndHid("9999999999");
 

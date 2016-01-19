@@ -32,25 +32,25 @@ public class HealthIdRepository extends BaseRepository {
         super(cassandraOps);
     }
 
-    public MciHealthId saveHealthId(MciHealthId mciHealthId) {
+    public MciHealthId saveMciHealthId(MciHealthId mciHealthId) {
         Insert insertQuery = getInsertQuery(mciHealthId);
         cassandraOps.executeAsynchronously(insertQuery.ifNotExists());
         return mciHealthId;
     }
 
-    public MciHealthId saveHealthIdSync(MciHealthId mciHealthId) {
+    public MciHealthId saveMciHealthIdSync(MciHealthId mciHealthId) {
         Insert insertQuery = getInsertQuery(mciHealthId);
         cassandraOps.execute(insertQuery.ifNotExists());
         return mciHealthId;
     }
 
-    public OrgHealthId saveHealthId(OrgHealthId orgHealthId) {
+    public OrgHealthId saveOrgHealthId(OrgHealthId orgHealthId) {
         Insert insertQuery = getInsertQuery(orgHealthId);
         cassandraOps.executeAsynchronously(insertQuery.ifNotExists());
         return orgHealthId;
     }
 
-    public OrgHealthId saveHealthIdSync(OrgHealthId orgHealthId) {
+    public OrgHealthId saveOrgHealthIdSync(OrgHealthId orgHealthId) {
         Insert insertQuery = getInsertQuery(orgHealthId);
         cassandraOps.execute(insertQuery.ifNotExists());
         return orgHealthId;

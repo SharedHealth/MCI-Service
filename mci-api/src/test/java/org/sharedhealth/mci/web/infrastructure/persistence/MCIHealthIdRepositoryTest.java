@@ -37,7 +37,7 @@ public class MCIHealthIdRepositoryTest {
     @Test
     public void shouldSaveMCIHidAsynchronously() {
         HealthIdRepository healthIdRepository = new HealthIdRepository(cqlTemplate);
-        healthIdRepository.saveHealthId(new MciHealthId("98015440161"));
+        healthIdRepository.saveMciHealthId(new MciHealthId("98015440161"));
         verify(cqlTemplate, times(1)).executeAsynchronously(any(Insert.class));
     }
 
@@ -70,7 +70,7 @@ public class MCIHealthIdRepositoryTest {
     @Test
     public void shouldSaveOrgHidAsynchronously() {
         HealthIdRepository healthIdRepository = new HealthIdRepository(cqlTemplate);
-        healthIdRepository.saveHealthId(new OrgHealthId("98015440161", "other-org", null));
+        healthIdRepository.saveOrgHealthId(new OrgHealthId("98015440161", "other-org", null));
         verify(cqlTemplate, times(1)).executeAsynchronously(any(Insert.class));
     }
 

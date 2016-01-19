@@ -51,7 +51,7 @@ public class HealthIdRepositoryIT {
     private List<MciHealthId> createHealthIds(long prefix) {
         List<MciHealthId> MciHealthIds = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
-            MciHealthIds.add(healthIdRepository.saveHealthIdSync(new MciHealthId(String.valueOf(prefix + i))));
+            MciHealthIds.add(healthIdRepository.saveMciHealthIdSync(new MciHealthId(String.valueOf(prefix + i))));
         }
         return MciHealthIds;
     }
@@ -105,7 +105,7 @@ public class HealthIdRepositoryIT {
     public void shouldSaveAHIDForGivenOrganization() throws Exception {
         OrgHealthId orgHealthId = new OrgHealthId("9110", "OTHER-ORG", null);
 
-        healthIdRepository.saveHealthIdSync(orgHealthId);
+        healthIdRepository.saveOrgHealthIdSync(orgHealthId);
 
         String select = select().all().from(RepositoryConstants.CF_ORG_HEALTH_ID).toString();
         List<OrgHealthId> insertedHIDs = cqlTemplate.select(select, OrgHealthId.class);
