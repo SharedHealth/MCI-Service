@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
+import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -111,6 +112,15 @@ public class HealthIdRepositoryIT {
         List<OrgHealthId> insertedHIDs = cqlTemplate.select(select, OrgHealthId.class);
         assertEquals(1, insertedHIDs.size());
         assertEquals(orgHealthId, insertedHIDs.get(0));
+    }
+
+    @Test
+    public void shouldFindOrgHIDByGivenHID() throws Exception {
+        OrgHealthId hid = new OrgHealthId("1234", "XYZ", null);
+        cqlTemplate.insert(asList(hid, new OrgHealthId("1134", "ABC", null)));
+
+        OrgHealthId orgHealthId = healthIdRepository.findOrgHealthId("1234");
+        assertEquals(hid, orgHealthId);
     }
 }
 

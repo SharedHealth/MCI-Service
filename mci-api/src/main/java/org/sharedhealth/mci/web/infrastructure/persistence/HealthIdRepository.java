@@ -16,9 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static org.sharedhealth.mci.domain.constant.RepositoryConstants.CF_MCI_HEALTH_ID;
-import static org.sharedhealth.mci.domain.constant.RepositoryConstants.CF_ORG_HEALTH_ID;
-import static org.sharedhealth.mci.domain.constant.RepositoryConstants.HID;
+import static org.sharedhealth.mci.domain.constant.RepositoryConstants.*;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
 
 @Component
@@ -92,8 +90,8 @@ public class HealthIdRepository extends BaseRepository {
 
     public MciHealthId getHealthId(String hid) {
         Select selectHealthId = QueryBuilder.select().from(CF_MCI_HEALTH_ID).where(QueryBuilder.eq(HID, hid)).limit(1);
-        List<MciHealthId> MciHealthIds = cassandraOps.select(selectHealthId, MciHealthId.class);
-        return MciHealthIds.isEmpty() ? null : MciHealthIds.get(0);
+        List<MciHealthId> mciHealthIds = cassandraOps.select(selectHealthId, MciHealthId.class);
+        return mciHealthIds.isEmpty() ? null : mciHealthIds.get(0);
     }
 
     private Insert getInsertQuery(MciHealthId mciHealthId) {
@@ -105,4 +103,10 @@ public class HealthIdRepository extends BaseRepository {
         logger.debug(String.format("Inserting new hid for organization %s :%s", orgHealthId.getAllocatedFor(), orgHealthId.getHealthId()));
         return createInsertQuery(CF_ORG_HEALTH_ID, orgHealthId, null, cassandraOps.getConverter());
     }
+
+
+    public OrgHealthId findOrgHealthId(String healthId) {
+        Select selectHealthId = QueryBuilder.select().from(CF_ORG_HEALTH_ID).where(QueryBuilder.eq(HEALTH_ID, healthId)).limit(1);
+        List<OrgHealthId> orgHealthIds = cassandraOps.select(selectHealthId, OrgHealthId.class);
+        return orgHealthIds.isEmpty() ? null : orgHealthIds.get(0);    }
 }

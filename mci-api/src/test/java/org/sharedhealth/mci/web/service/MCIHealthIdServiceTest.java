@@ -262,6 +262,7 @@ public class MCIHealthIdServiceTest {
         when(healthIdRepository.saveMciHealthId(any(MciHealthId.class))).thenReturn(MciHealthId.NULL_HID);
         when(checksumGenerator.generate(any(String.class))).thenReturn(1);
         when(generatedHidBlockService.saveGeneratedHidBlock(any(GeneratedHIDBlock.class))).thenReturn(null);
+        when(healthIdRepository.findOrgHealthId(anyString())).thenReturn(null);
 
         HealthIdService healthIdService = new HealthIdService(testProperties, healthIdRepository, checksumGenerator, generatedHidBlockService);
         healthIdService.generateBlock(start, totalHIDs, getUserInfo());
@@ -291,6 +292,7 @@ public class MCIHealthIdServiceTest {
         when(healthIdRepository.saveMciHealthId(any(MciHealthId.class))).thenReturn(MciHealthId.NULL_HID);
         when(checksumGenerator.generate(any(String.class))).thenReturn(1);
         when(generatedHidBlockService.saveGeneratedHidBlock(any(GeneratedHIDBlock.class))).thenReturn(null);
+        when(healthIdRepository.findOrgHealthId(anyString())).thenReturn(null);
 
         HealthIdService healthIdService = new HealthIdService(testProperties, healthIdRepository, checksumGenerator, generatedHidBlockService);
         healthIdService.generateBlock(start, totalHIDs, getUserInfo());
@@ -345,6 +347,7 @@ public class MCIHealthIdServiceTest {
         when(healthIdRepository.saveMciHealthId(any(MciHealthId.class))).thenReturn(MciHealthId.NULL_HID);
         when(checksumGenerator.generate(any(String.class))).thenReturn(1);
         when(generatedHidBlockService.saveGeneratedHidBlock(any(GeneratedHIDBlock.class))).thenReturn(null);
+        when(healthIdRepository.findOrgHealthId(anyString())).thenReturn(null);
 
         HealthIdService healthIdService = new HealthIdService(testProperties, healthIdRepository, checksumGenerator, generatedHidBlockService);
         healthIdService.generateBlock(start, totalHIDs, getUserInfo());
@@ -377,6 +380,7 @@ public class MCIHealthIdServiceTest {
         when(healthIdRepository.saveMciHealthId(any(MciHealthId.class))).thenReturn(MciHealthId.NULL_HID);
         when(checksumGenerator.generate(any(String.class))).thenReturn(1);
         when(generatedHidBlockService.saveGeneratedHidBlock(any(GeneratedHIDBlock.class))).thenReturn(null);
+        when(healthIdRepository.findOrgHealthId(anyString())).thenReturn(null);
 
         HealthIdService healthIdService = new HealthIdService(testProperties, healthIdRepository, checksumGenerator, generatedHidBlockService);
         healthIdService.generateBlock(start, totalHIDs, getUserInfo());
@@ -444,6 +448,28 @@ public class MCIHealthIdServiceTest {
         assertEquals(10119, passedHidBlock.getEndsAt().longValue());
         assertEquals(100, passedHidBlock.getTotalHIDs().longValue());
         assertRequestedBy(passedHidBlock);
+    }
+
+    @Test
+    public void shouldNotGenerateHIDIfAlreadyExist() throws Exception {
+        long start = 10000;
+        long totalHIDs = 100;
+        String orgCode = "OTHER-ORG";
+        MCIProperties testProperties = new MCIProperties();
+        testProperties.setMciInvalidHidPattern("^(105|104)\\d*$");
+        testProperties.setOrgInvalidHidPattern("^(1005|1004)\\d*$");
+        testProperties.setHidStoragePath("test-hid");
+
+        when(checksumGenerator.generate(any(String.class))).thenReturn(1);
+        when(healthIdRepository.findOrgHealthId(anyString())).thenReturn(null, new OrgHealthId("100011", "XYZ", null), null);
+
+        HealthIdService healthIdService = new HealthIdService(testProperties, healthIdRepository, checksumGenerator, generatedHidBlockService);
+        healthIdService.generateBlockForOrg(start, totalHIDs, orgCode, getUserInfo());
+
+        verify(healthIdRepository, times(101)).findOrgHealthId(anyString());
+        verify(checksumGenerator, times(101)).generate(anyString());
+        verify(healthIdRepository, times(100)).saveOrgHealthId(any(OrgHealthId.class));
+
     }
 
     @Test

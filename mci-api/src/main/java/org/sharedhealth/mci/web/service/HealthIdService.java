@@ -84,14 +84,20 @@ public class HealthIdService {
             }
             String possibleHid = String.valueOf(possibleHID);
             if (!invalidHidPattern.matcher(possibleHid).find()) {
-                numberOfValidHIDs += 1;
                 String newHealthId = possibleHid + checksumGenerator.generate(possibleHid.substring(1));
-                hidSave.saveHID(newHealthId, orgCode);
-                FileUtil.addHidToFile(hidFile, newHealthId);
+                if (shouldSaveHID(orgCode, newHealthId)) {
+                    numberOfValidHIDs += 1;
+                    hidSave.saveHID(newHealthId, orgCode);
+                    FileUtil.addHidToFile(hidFile, newHealthId);
+                }
             }
         }
         saveGeneratedBlock(startForBlock, startForBlock + i - 1, numberOfValidHIDs, orgCode, userInfo);
         return numberOfValidHIDs;
+    }
+
+    private boolean shouldSaveHID(String orgCode, String newHealthId) {
+        return MCI_ORG_CODE.equals(orgCode) || healthIdRepository.findOrgHealthId(newHealthId) == null;
     }
 
     private File createFileForOrg(String orgCode) {
