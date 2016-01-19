@@ -17,6 +17,7 @@ public class DateUtil {
     private static final Logger logger = getLogger(DateUtil.class);
 
     public static final String ISO_DATE_FORMAT = "yyyy-MM-dd";
+    public static final String SIMPLE_DATE_WITH_SECS_FORMAT = "yyyy-MM-dd'T'HH:mm:ss"; //2015-02-17 11:35:36
 
     public static final String ISO_DATE_TIME_TILL_MINS_FORMAT1 = "yyyy-MM-dd'T'HH:mmX"; // Z for UTC
     public static final String ISO_DATE_TIME_TILL_MINS_FORMAT2 = "yyyy-MM-dd'T'HH:mmXX"; // +0530
@@ -32,6 +33,7 @@ public class DateUtil {
 
     public static final String[] DATE_FORMATS = new String[]{
             ISO_DATE_FORMAT,
+            SIMPLE_DATE_WITH_SECS_FORMAT,
 
             ISO_DATE_TIME_TILL_MINS_FORMAT1,
             ISO_DATE_TIME_TILL_MINS_FORMAT2,
@@ -75,6 +77,11 @@ public class DateUtil {
 
     public static String toIsoMillisFormat(Date date) {
         DateFormat dateFormat = new SimpleDateFormat(ISO_DATE_TIME_TILL_MILLIS_FORMAT3);
+        return dateFormat.format(date);
+    }
+
+    public static String toDateString(Date date, String format) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(format);
         return dateFormat.format(date);
     }
 

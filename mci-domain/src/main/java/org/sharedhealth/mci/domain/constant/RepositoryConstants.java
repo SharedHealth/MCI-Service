@@ -133,7 +133,7 @@ public class RepositoryConstants {
     public static final String FAILED_AT = "failed_at";
     public static final String RETRIES = "retries";
     public static final String ALLOCATED_FOR = "allocated_for";
-    public static final String IS_AVAILABLE = "is_available";
+    public static final String IS_USED = "is_used";
     public static final String USED_AT = "used_at";
 
     public static final String HEALTH_ID1 = "health_id1";

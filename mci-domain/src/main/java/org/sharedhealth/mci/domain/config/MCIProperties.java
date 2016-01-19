@@ -54,6 +54,8 @@ public class MCIProperties {
     private String mciInvalidHidPattern;
     @Value("${ORG_INVALID_HID_PATTERN}")
     private String orgInvalidHidPattern;
+    @Value("${HID_STORAGE_PATH}")
+    private String hidStoragePath;
 
     @Value("${MCI_START_HID}")
     private String mciStartHid;
@@ -206,6 +208,13 @@ public class MCIProperties {
 
     public void setOrgInvalidHidPattern(String orgInvalidHidPattern) {
         this.orgInvalidHidPattern = orgInvalidHidPattern;
+    }
+    public String getHidStoragePath() {
+        return hidStoragePath;
+    }
+
+    public void setHidStoragePath(String hidStoragePath) {
+        this.hidStoragePath = hidStoragePath;
     }
 
 

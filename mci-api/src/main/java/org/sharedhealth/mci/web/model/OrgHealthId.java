@@ -20,15 +20,15 @@ public class OrgHealthId {
     @Column(USED_AT)
     private String usedAt;
 
-    @Column(IS_AVAILABLE)
-    private boolean isAvailable;
+    @Column(IS_USED)
+    private boolean isUsed;
 
 
     public OrgHealthId(String healthId, String allocatedFor, String usedAt) {
         this.healthId = healthId;
         this.allocatedFor = allocatedFor;
         this.usedAt = usedAt;
-        this.isAvailable = true;
+        this.isUsed = false;
     }
 
     public String getHealthId() {
@@ -43,8 +43,8 @@ public class OrgHealthId {
         return usedAt;
     }
 
-    public boolean isAvailable() {
-        return isAvailable;
+    public boolean isUsed() {
+        return isUsed;
     }
 
     @Override
@@ -54,7 +54,7 @@ public class OrgHealthId {
 
         OrgHealthId that = (OrgHealthId) o;
 
-        if (isAvailable != that.isAvailable) return false;
+        if (isUsed != that.isUsed) return false;
         if (healthId != null ? !healthId.equals(that.healthId) : that.healthId != null) return false;
         if (allocatedFor != null ? !allocatedFor.equals(that.allocatedFor) : that.allocatedFor != null) return false;
         return !(usedAt != null ? !usedAt.equals(that.usedAt) : that.usedAt != null);
@@ -66,7 +66,7 @@ public class OrgHealthId {
         int result = healthId != null ? healthId.hashCode() : 0;
         result = 31 * result + (allocatedFor != null ? allocatedFor.hashCode() : 0);
         result = 31 * result + (usedAt != null ? usedAt.hashCode() : 0);
-        result = 31 * result + (isAvailable ? 1 : 0);
+        result = 31 * result + (isUsed ? 1 : 0);
         return result;
     }
 }
