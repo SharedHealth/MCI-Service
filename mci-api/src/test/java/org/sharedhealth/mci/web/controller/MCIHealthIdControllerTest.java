@@ -79,4 +79,14 @@ public class MCIHealthIdControllerTest {
         assertEquals("GENERATED 100 Ids", healthIdController.generateRange(start, total).getResult());
         verify(healthIdService, times(1)).generateBlock(eq(start), eq(total), any(UserInfo.class));
     }
+
+    @Test
+    public void testGenerateBlockForOrg() throws Exception {
+        long start = 9100100100L, total = 100L;
+        when(healthIdService.generateBlockForOrg(eq(start), eq(total), eq("other"), any(UserInfo.class))).thenReturn(100L);
+        HealthIdController healthIdController = new HealthIdController(healthIdService);
+        assertEquals("GENERATED 100 Ids", healthIdController.generateRangeForOrg("other", start, total).getResult());
+        verify(healthIdService, times(1)).generateBlockForOrg(eq(start), eq(total), eq("other"), any(UserInfo.class));
+
+    }
 }

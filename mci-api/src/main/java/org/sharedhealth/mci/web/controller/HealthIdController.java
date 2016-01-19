@@ -24,6 +24,7 @@ public class HealthIdController extends MciController {
     private static final Logger logger = LoggerFactory.getLogger(HealthIdController.class);
     public static final String GENERATE_ALL_URI = "/generate";
     public static final String GENERATE_RANGE_URI = "/generateRange";
+    public static final String GENERATE_RANGE_FOR_ORG_URI = "/generateRangeForOrg";
     public static final String NEXT_BLOCK_URI = "/nextBlock";
 
     private HealthIdService healthIdService;
@@ -53,7 +54,21 @@ public class HealthIdController extends MciController {
         UserInfo userInfo = getUserInfo();
         final DeferredResult<String> deferredResult = new DeferredResult<>();
         logAccessDetails(userInfo, "Generating new hids");
-        long numberOfValidHids = healthIdService.generateBlock(start, totalHIDs, userInfo );
+        long numberOfValidHids = healthIdService.generateBlock(start, totalHIDs, userInfo);
+        deferredResult.setResult(String.format("GENERATED %s Ids", numberOfValidHids));
+        logger.info(String.format("%s healthIds generated", numberOfValidHids));
+        return deferredResult;
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_MCI Admin')")
+    @RequestMapping(method = POST, value = GENERATE_RANGE_FOR_ORG_URI)
+    public DeferredResult<String> generateRangeForOrg(@RequestParam(value = "org") String orgCode,
+                                                      @RequestParam(value = "start") long start,
+                                                @RequestParam(value = "totalHIDs") long totalHIDs) {
+        UserInfo userInfo = getUserInfo();
+        final DeferredResult<String> deferredResult = new DeferredResult<>();
+        logAccessDetails(userInfo, "Generating new hids");
+        long numberOfValidHids = healthIdService.generateBlockForOrg(start, totalHIDs, orgCode, userInfo );
         deferredResult.setResult(String.format("GENERATED %s Ids", numberOfValidHids));
         logger.info(String.format("%s healthIds generated", numberOfValidHids));
         return deferredResult;

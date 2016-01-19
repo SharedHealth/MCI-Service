@@ -45,39 +45,39 @@ public class HealthIdService {
         Long end = mciProperties.getMciEndHid();
         long numberOfValidHIDs = 0L;
         for (long i = start; i <= end; i++) {
-            numberOfValidHIDs = saveIfValidMciHID(numberOfValidHIDs, i);
+            String possibleHid = String.valueOf(i);
+            if (!mciInvalidHidPattern.matcher(possibleHid).find()) {
+                numberOfValidHIDs += 1;
+                String newHealthId = possibleHid + checksumGenerator.generate(possibleHid.substring(1));
+                healthIdRepository.saveMciHealthId(new MciHealthId(newHealthId));
+            }
         }
         saveGeneratedBlock(start, end, numberOfValidHIDs, MCI_ORG_CODE, userInfo);
         return numberOfValidHIDs;
     }
 
     public long generateBlock(long start, long totalHIDs, UserInfo userInfo) {
-        long numberOfValidHIDs = 0L;
-        long seriesNo = identifySeriesNo(start);
-        long startForBlock = identifyStartInSeries(seriesNo);
-        int i;
-        for (i = 0; numberOfValidHIDs < totalHIDs; i++) {
-            long possibleHID = startForBlock + i;
-            if (!isPartOfSeries(seriesNo, possibleHID)) {
-                break;
-            }
-            numberOfValidHIDs = saveIfValidMciHID(numberOfValidHIDs, possibleHID);
-        }
-        saveGeneratedBlock(startForBlock, startForBlock + i - 1, numberOfValidHIDs, MCI_ORG_CODE, userInfo);
-        return numberOfValidHIDs;
+        return generateBlockForOrg(start, totalHIDs, MCI_ORG_CODE, userInfo);
     }
 
     public long generateBlockForOrg(long start, long totalHIDs, String orgCode, UserInfo userInfo) {
         long numberOfValidHIDs = 0L;
         long seriesNo = identifySeriesNo(start);
         long startForBlock = identifyStartInSeries(seriesNo);
-        int i;
+        Pattern invalidHidPattern = getPattern(orgCode);
+        HIDSave hidSave = getHIDSaveMethod(orgCode);
+        long i;
         for (i = 0; numberOfValidHIDs < totalHIDs; i++) {
             long possibleHID = startForBlock + i;
             if (!isPartOfSeries(seriesNo, possibleHID)) {
                 break;
             }
-            numberOfValidHIDs = saveIfValidOrgHID(numberOfValidHIDs, possibleHID, orgCode);
+            String possibleHid = String.valueOf(possibleHID);
+            if (!invalidHidPattern.matcher(possibleHid).find()) {
+                numberOfValidHIDs += 1;
+                String newHealthId = possibleHid + checksumGenerator.generate(possibleHid.substring(1));
+                hidSave.saveHID(newHealthId, orgCode);
+            }
         }
         saveGeneratedBlock(startForBlock, startForBlock + i - 1, numberOfValidHIDs, orgCode, userInfo);
         return numberOfValidHIDs;
@@ -93,26 +93,6 @@ public class HealthIdService {
 
     public void markUsed(MciHealthId nextMciHealthId) {
         healthIdRepository.removedUsedHid(nextMciHealthId);
-    }
-
-    private long saveIfValidMciHID(long numberOfValidHids, long currentNumber) {
-        String possibleHid = String.valueOf(currentNumber);
-        if (!mciInvalidHidPattern.matcher(possibleHid).find()) {
-            numberOfValidHids += 1;
-            String newHealthId = possibleHid + checksumGenerator.generate(possibleHid.substring(1));
-            healthIdRepository.saveMciHealthId(new MciHealthId(newHealthId));
-        }
-        return numberOfValidHids;
-    }
-
-    private long saveIfValidOrgHID(long numberOfValidHIDs, long currentNumber, String orgCode) {
-        String possibleHid = String.valueOf(currentNumber);
-        if (!orgInvalidHidPattern.matcher(possibleHid).find()) {
-            numberOfValidHIDs += 1;
-            String newHealthId = possibleHid + checksumGenerator.generate(possibleHid.substring(1));
-            healthIdRepository.saveOrgHealthId(new OrgHealthId(newHealthId, orgCode, null));
-        }
-        return numberOfValidHIDs;
     }
 
     private void saveGeneratedBlock(Long start, Long end, Long numberOfValidHids, String orgCode, UserInfo userInfo) {
@@ -155,5 +135,32 @@ public class HealthIdService {
         String startPrefix = startAsText.substring(0, DIGITS_FOR_BLOCK_SEPARATION);
         String startSuffix = startAsText.substring(DIGITS_FOR_BLOCK_SEPARATION, startAsText.length());
         return Long.parseLong(String.valueOf(startPrefix + startSuffix.replaceAll(".", "0")));
+    }
+
+    private Pattern getPattern(String orgCode) {
+        return MCI_ORG_CODE.equals(orgCode) ? mciInvalidHidPattern : orgInvalidHidPattern;
+    }
+
+    //this is an interface, implementation will decide which save method to call
+    private interface HIDSave {
+        void saveHID(String hid, String allocatedFor);
+    }
+
+    private HIDSave getHIDSaveMethod(final String orgCode) {
+        if (MCI_ORG_CODE.equals(orgCode)) {
+            return new HIDSave() {
+                @Override
+                public void saveHID(String hid, String allocatedFor) {
+                    healthIdRepository.saveMciHealthId(new MciHealthId(hid));
+                }
+            };
+        } else {
+            return new HIDSave() {
+                @Override
+                public void saveHID(String hid, String allocatedFor) {
+                    healthIdRepository.saveOrgHealthId(new OrgHealthId(hid, allocatedFor, null));
+                }
+            };
+        }
     }
 }

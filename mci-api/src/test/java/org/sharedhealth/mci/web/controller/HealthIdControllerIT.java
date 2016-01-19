@@ -15,9 +15,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
 import static org.sharedhealth.mci.utils.HttpUtil.*;
-import static org.sharedhealth.mci.web.controller.HealthIdController.GENERATE_ALL_URI;
-import static org.sharedhealth.mci.web.controller.HealthIdController.GENERATE_RANGE_URI;
-import static org.sharedhealth.mci.web.controller.HealthIdController.NEXT_BLOCK_URI;
+import static org.sharedhealth.mci.web.controller.HealthIdController.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -178,5 +176,34 @@ public class HealthIdControllerIT extends BaseControllerTest {
                 .contentType(APPLICATION_JSON))
                 .andExpect(status().isForbidden())
                 .andReturn();
+    }
+
+    @Test
+    public void testGenerateRangeForOrg() throws Exception {
+        validAccessToken = "85HoExoxghh1pislg65hUM0q3wM9kfzcMdpYS0ixPD";
+        validClientId = "18564";
+        validEmail = "MciAdmin@test.com";
+
+        mockMvc = MockMvcBuilders
+                .webAppContextSetup(webApplicationContext)
+                .addFilters(springSecurityFilterChain)
+                .build();
+
+        givenThat(WireMock.get(urlEqualTo("/token/" + validAccessToken))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(asString("jsons/userDetails/userDetailForMCIAdmin.json"))));
+
+
+        mockMvc.perform(post(API_END_POINT + GENERATE_RANGE_FOR_ORG_URI + "?org=OTHER&start=9800100100&totalHIDs=1000")
+                .accept(APPLICATION_JSON)
+                .header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId)
+                .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
     }
 }
