@@ -61,6 +61,7 @@ public class TestUtil {
                 CF_MCI_HEALTH_ID,
                 CF_GENERATED_HID_RANGE,
                 CF_GENERATED_HID_BLOCKS,
+                CF_ORG_HEALTH_ID,
                 CF_MARKER,
                 CF_FAILED_EVENTS
         );

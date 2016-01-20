@@ -33,7 +33,7 @@ import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.*;
 import static org.sharedhealth.mci.web.service.HealthIdService.MCI_ORG_CODE;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MCIHealthIdServiceTest {
+public class HealthIdServiceTest {
     private MCIProperties mciProperties;
     @Mock
     private HealthIdRepository healthIdRepository;

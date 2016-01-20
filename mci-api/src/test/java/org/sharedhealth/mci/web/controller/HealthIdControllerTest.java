@@ -21,9 +21,9 @@ import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MCIHealthIdControllerTest {
+public class HealthIdControllerTest {
     @Mock
-    HealthIdService healthIdService;
+    private HealthIdService healthIdService;
 
 
     @Before
