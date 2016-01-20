@@ -1,6 +1,7 @@
 package org.sharedhealth.mci.web.controller;
 
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
+import org.sharedhealth.mci.web.model.GeneratedHIDBlock;
 import org.sharedhealth.mci.web.model.MciHealthId;
 import org.sharedhealth.mci.web.service.HealthIdService;
 import org.slf4j.Logger;
@@ -14,7 +15,6 @@ import org.springframework.web.context.request.async.DeferredResult;
 
 import java.util.List;
 
-import static java.lang.String.format;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
@@ -23,8 +23,8 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 public class HealthIdController extends MciController {
     private static final Logger logger = LoggerFactory.getLogger(HealthIdController.class);
     public static final String GENERATE_ALL_URI = "/generate";
-    public static final String GENERATE_RANGE_URI = "/generateRange";
-    public static final String GENERATE_RANGE_FOR_ORG_URI = "/generateRangeForOrg";
+    public static final String GENERATE_BLOCK_URI = "/generateBlock";
+    public static final String GENERATE_BLOCK_FOR_ORG_URI = "/generateBlockForOrg";
     public static final String NEXT_BLOCK_URI = "/nextBlock";
 
     private HealthIdService healthIdService;
@@ -38,45 +38,53 @@ public class HealthIdController extends MciController {
     @RequestMapping(method = POST, value = GENERATE_ALL_URI)
     public DeferredResult<String> generate() {
         UserInfo userInfo = getUserInfo();
-        final DeferredResult<String> deferredResult = new DeferredResult<>();
 
-        logAccessDetails(userInfo, format("Generating new hids"));
-        long numberOfValidHids = healthIdService.generateAll(userInfo);
-        deferredResult.setResult(String.format("GENERATED %s Ids", numberOfValidHids));
-        logger.info(String.format("%s healthIds generated", numberOfValidHids));
+        logAccessDetails(userInfo, "Generating new hids");
+        GeneratedHIDBlock generatedHIDBlock = healthIdService.generateAll(userInfo);
+        final DeferredResult<String> deferredResult = new DeferredResult<>();
+        String message = String.format("Generated %s HIDs.", generatedHIDBlock.getTotalHIDs());
+        deferredResult.setResult(message);
+        logger.info(message);
         return deferredResult;
     }
 
     @PreAuthorize("hasAnyRole('ROLE_MCI Admin')")
-    @RequestMapping(method = POST, value = GENERATE_RANGE_URI)
-    public DeferredResult<String> generateRange(@RequestParam(value = "start") long start,
+    @RequestMapping(method = POST, value = GENERATE_BLOCK_URI)
+    public DeferredResult<String> generateBlock(@RequestParam(value = "start") long start,
                                                 @RequestParam(value = "totalHIDs") long totalHIDs) {
         UserInfo userInfo = getUserInfo();
-        final DeferredResult<String> deferredResult = new DeferredResult<>();
         logAccessDetails(userInfo, "Generating new hids");
-        long numberOfValidHids = healthIdService.generateBlock(start, totalHIDs, userInfo);
-        deferredResult.setResult(String.format("GENERATED %s Ids", numberOfValidHids));
-        logger.info(String.format("%s healthIds generated", numberOfValidHids));
-        return deferredResult;
+        GeneratedHIDBlock generatedHIDBlock = healthIdService.generateBlock(start, totalHIDs, userInfo);
+        return getResult(generatedHIDBlock, totalHIDs);
     }
 
     @PreAuthorize("hasAnyRole('ROLE_MCI Admin')")
-    @RequestMapping(method = POST, value = GENERATE_RANGE_FOR_ORG_URI)
-    public DeferredResult<String> generateRangeForOrg(@RequestParam(value = "org") String orgCode,
+    @RequestMapping(method = POST, value = GENERATE_BLOCK_FOR_ORG_URI)
+    public DeferredResult<String> generateBlockForOrg(@RequestParam(value = "org") String orgCode,
                                                       @RequestParam(value = "start") long start,
-                                                @RequestParam(value = "totalHIDs") long totalHIDs) {
+                                                      @RequestParam(value = "totalHIDs") long totalHIDs) {
         UserInfo userInfo = getUserInfo();
-        final DeferredResult<String> deferredResult = new DeferredResult<>();
         logAccessDetails(userInfo, "Generating new hids");
-        long numberOfValidHids = healthIdService.generateBlockForOrg(start, totalHIDs, orgCode, userInfo );
-        deferredResult.setResult(String.format("GENERATED %s Ids", numberOfValidHids));
-        logger.info(String.format("%s healthIds generated", numberOfValidHids));
-        return deferredResult;
+        GeneratedHIDBlock generatedHIDBlock = healthIdService.generateBlockForOrg(start, totalHIDs, orgCode, userInfo);
+        return getResult(generatedHIDBlock, totalHIDs);
     }
 
     @PreAuthorize("hasAnyRole('ROLE_MCI Admin')")
     @RequestMapping(method = GET, value = NEXT_BLOCK_URI)
     public List<MciHealthId> nextBlock() {
         return healthIdService.getNextBlock();
+    }
+
+    private DeferredResult<String> getResult(GeneratedHIDBlock generatedHIDBlock, long totalHIDs) {
+        final DeferredResult<String> deferredResult = new DeferredResult<>();
+        String message;
+        if (generatedHIDBlock.getTotalHIDs() < totalHIDs) {
+            message = String.format("Can generate only %s HIDs, because series exhausted. Use another series.", generatedHIDBlock.getTotalHIDs());
+        } else {
+            message = String.format("Generated %s HIDs.", generatedHIDBlock.getTotalHIDs());
+        }
+        deferredResult.setResult(message);
+        logger.info(message);
+        return deferredResult;
     }
 }

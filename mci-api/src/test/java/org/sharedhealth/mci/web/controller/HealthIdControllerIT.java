@@ -85,7 +85,7 @@ public class HealthIdControllerIT extends BaseControllerTest {
                         .withBody(asString("jsons/userDetails/userDetailForMCIAdmin.json"))));
 
 
-        mockMvc.perform(post(API_END_POINT + GENERATE_RANGE_URI +"?start=9800100100&totalHIDs=1000")
+        mockMvc.perform(post(API_END_POINT + GENERATE_BLOCK_URI +"?start=9800100100&totalHIDs=1000")
                 .accept(APPLICATION_JSON)
                 .header(AUTH_TOKEN_KEY, validAccessToken)
                 .header(FROM_KEY, validEmail)
@@ -196,7 +196,7 @@ public class HealthIdControllerIT extends BaseControllerTest {
                         .withBody(asString("jsons/userDetails/userDetailForMCIAdmin.json"))));
 
 
-        mockMvc.perform(post(API_END_POINT + GENERATE_RANGE_FOR_ORG_URI + "?org=OTHER&start=9800100100&totalHIDs=1000")
+        mockMvc.perform(post(API_END_POINT + GENERATE_BLOCK_FOR_ORG_URI + "?org=OTHER&start=9800100100&totalHIDs=1000")
                 .accept(APPLICATION_JSON)
                 .header(AUTH_TOKEN_KEY, validAccessToken)
                 .header(FROM_KEY, validEmail)
