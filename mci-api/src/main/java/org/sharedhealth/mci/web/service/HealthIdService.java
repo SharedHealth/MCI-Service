@@ -53,27 +53,33 @@ public class HealthIdService {
         Long end = mciProperties.getMciEndHid();
         long numberOfValidHIDs = 0L;
         for (long i = start; i <= end; i++) {
-            String possibleHid = String.valueOf(i);
-            if (!mciInvalidHidPattern.matcher(possibleHid).find()) {
-                numberOfValidHIDs += 1;
-                String newHealthId = possibleHid + checksumGenerator.generate(possibleHid.substring(1));
-                healthIdRepository.saveMciHealthId(new MciHealthId(newHealthId));
-            }
+            numberOfValidHIDs = saveIfValidMciHID(numberOfValidHIDs, i);
         }
         saveGeneratedBlock(start, end, numberOfValidHIDs, MCI_ORG_CODE, userInfo);
         return numberOfValidHIDs;
     }
 
     public long generateBlock(long start, long totalHIDs, UserInfo userInfo) {
-        return generateBlockForOrg(start, totalHIDs, MCI_ORG_CODE, userInfo);
+        long numberOfValidHIDs = 0L;
+        long seriesNo = identifySeriesNo(start);
+        long startForBlock = identifyStartInSeries(seriesNo);
+        int i;
+        for (i = 0; numberOfValidHIDs < totalHIDs; i++) {
+            long possibleHID = startForBlock + i;
+            if (!isPartOfSeries(seriesNo, possibleHID)) {
+                break;
+            }
+            numberOfValidHIDs = saveIfValidMciHID(numberOfValidHIDs, possibleHID);
+        }
+        long end = startForBlock + i - 1;
+        saveGeneratedBlock(startForBlock, end, numberOfValidHIDs, MCI_ORG_CODE, userInfo);
+        return numberOfValidHIDs;
     }
 
     public long generateBlockForOrg(long start, long totalHIDs, String orgCode, UserInfo userInfo) {
         long numberOfValidHIDs = 0L;
         long seriesNo = identifySeriesNo(start);
         long startForBlock = identifyStartInSeries(seriesNo);
-        Pattern invalidHidPattern = getPattern(orgCode);
-        HIDSave hidSave = getHIDSaveMethod(orgCode);
         File hidFile = createFileForOrg(orgCode);
         logger.info(String.format("Saving HIDs to file %s ", hidFile.getAbsolutePath()));
         long i;
@@ -83,29 +89,17 @@ public class HealthIdService {
                 break;
             }
             String possibleHid = String.valueOf(possibleHID);
-            if (!invalidHidPattern.matcher(possibleHid).find()) {
+            if (!orgInvalidHidPattern.matcher(possibleHid).find()) {
                 String newHealthId = possibleHid + checksumGenerator.generate(possibleHid.substring(1));
-                if (shouldSaveHID(orgCode, newHealthId)) {
+                if (shouldSaveHID(newHealthId)) {
                     numberOfValidHIDs += 1;
-                    hidSave.saveHID(newHealthId, orgCode);
+                    healthIdRepository.saveOrgHealthId(new OrgHealthId(newHealthId, orgCode, null));
                     FileUtil.addHidToFile(hidFile, newHealthId);
                 }
             }
         }
         saveGeneratedBlock(startForBlock, startForBlock + i - 1, numberOfValidHIDs, orgCode, userInfo);
         return numberOfValidHIDs;
-    }
-
-    private boolean shouldSaveHID(String orgCode, String newHealthId) {
-        return MCI_ORG_CODE.equals(orgCode) || healthIdRepository.findOrgHealthId(newHealthId) == null;
-    }
-
-    private File createFileForOrg(String orgCode) {
-        String hidStorageDirPath = mciProperties.getHidStoragePath();
-        File outputDir = new File(hidStorageDirPath);
-        outputDir.mkdirs();
-        String fileName = String.format("%s-%s", orgCode, toDateString(new Date(), SIMPLE_DATE_WITH_SECS_FORMAT));
-        return new File(outputDir, fileName);
     }
 
     public synchronized List<MciHealthId> getNextBlock() {
@@ -118,6 +112,28 @@ public class HealthIdService {
 
     public void markUsed(MciHealthId nextMciHealthId) {
         healthIdRepository.removedUsedHid(nextMciHealthId);
+    }
+
+    private long saveIfValidMciHID(long numberOfValidHids, long currentNumber) {
+        String possibleHid = String.valueOf(currentNumber);
+        if (!mciInvalidHidPattern.matcher(possibleHid).find()) {
+            numberOfValidHids += 1;
+            String newHealthId = possibleHid + checksumGenerator.generate(possibleHid.substring(1));
+            healthIdRepository.saveMciHealthId(new MciHealthId(newHealthId));
+        }
+        return numberOfValidHids;
+    }
+
+    private boolean shouldSaveHID(String newHealthId) {
+        return healthIdRepository.findOrgHealthId(newHealthId) == null;
+    }
+
+    private File createFileForOrg(String orgCode) {
+        String hidStorageDirPath = mciProperties.getHidStoragePath();
+        File outputDir = new File(hidStorageDirPath);
+        outputDir.mkdirs();
+        String fileName = String.format("%s-%s", orgCode, toDateString(new Date(), SIMPLE_DATE_WITH_SECS_FORMAT));
+        return new File(outputDir, fileName);
     }
 
     private void saveGeneratedBlock(Long start, Long end, Long numberOfValidHids, String orgCode, UserInfo userInfo) {
@@ -160,32 +176,5 @@ public class HealthIdService {
         String startPrefix = startAsText.substring(0, DIGITS_FOR_BLOCK_SEPARATION);
         String startSuffix = startAsText.substring(DIGITS_FOR_BLOCK_SEPARATION, startAsText.length());
         return Long.parseLong(String.valueOf(startPrefix + startSuffix.replaceAll(".", "0")));
-    }
-
-    private Pattern getPattern(String orgCode) {
-        return MCI_ORG_CODE.equals(orgCode) ? mciInvalidHidPattern : orgInvalidHidPattern;
-    }
-
-    //this is an interface, implementation will decide which save method to call
-    private interface HIDSave {
-        void saveHID(String hid, String allocatedFor);
-    }
-
-    private HIDSave getHIDSaveMethod(final String orgCode) {
-        if (MCI_ORG_CODE.equals(orgCode)) {
-            return new HIDSave() {
-                @Override
-                public void saveHID(String hid, String allocatedFor) {
-                    healthIdRepository.saveMciHealthId(new MciHealthId(hid));
-                }
-            };
-        } else {
-            return new HIDSave() {
-                @Override
-                public void saveHID(String hid, String allocatedFor) {
-                    healthIdRepository.saveOrgHealthId(new OrgHealthId(hid, allocatedFor, null));
-                }
-            };
-        }
     }
 }
