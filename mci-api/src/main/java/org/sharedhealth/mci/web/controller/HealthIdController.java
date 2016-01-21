@@ -1,10 +1,11 @@
 package org.sharedhealth.mci.web.controller;
 
-import org.apache.commons.lang3.StringUtils;
+import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.sharedhealth.mci.domain.exception.InvalidRequestException;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
 import org.sharedhealth.mci.web.model.GeneratedHIDBlock;
 import org.sharedhealth.mci.web.model.MciHealthId;
+import org.sharedhealth.mci.web.service.FacilityService;
 import org.sharedhealth.mci.web.service.HealthIdService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,10 +32,14 @@ public class HealthIdController extends MciController {
     private static final long HID_GENERATION_LIMIT = 2000000;
 
     private HealthIdService healthIdService;
+    private FacilityService facilityService;
+    private MCIProperties mciProperties;
 
     @Autowired
-    public HealthIdController(HealthIdService healthIdService) {
+    public HealthIdController(HealthIdService healthIdService, FacilityService facilityService, MCIProperties mciProperties) {
         this.healthIdService = healthIdService;
+        this.facilityService = facilityService;
+        this.mciProperties = mciProperties;
     }
 
     @PreAuthorize("hasAnyRole('ROLE_MCI Admin')")
@@ -55,6 +60,9 @@ public class HealthIdController extends MciController {
     @RequestMapping(method = POST, value = GENERATE_BLOCK_URI)
     public DeferredResult<String> generateBlock(@RequestParam(value = "start") long start,
                                                 @RequestParam(value = "totalHIDs") long totalHIDs) {
+        if(mciProperties.getMciStartHid() > start || mciProperties.getMciEndHid() < start) {
+            throw new InvalidRequestException(String.format("%s not for MCI", start));
+        }
         UserInfo userInfo = getUserInfo();
         logAccessDetails(userInfo, "Generating new hids");
         GeneratedHIDBlock generatedHIDBlock = healthIdService.generateBlock(start, totalHIDs, userInfo);
@@ -66,7 +74,6 @@ public class HealthIdController extends MciController {
     public DeferredResult<String> generateBlockForOrg(@RequestParam(value = "org") String orgCode,
                                                       @RequestParam(value = "start") long start,
                                                       @RequestParam(value = "totalHIDs") long totalHIDs) {
-
         if (totalHIDs > HID_GENERATION_LIMIT) {
             throw new InvalidRequestException(String.format("Total HIDs should not be more than %s", HID_GENERATION_LIMIT));
         }
@@ -99,7 +106,6 @@ public class HealthIdController extends MciController {
     }
 
     private boolean isInvalidOrg(String orgCode) {
-        //todo: verify the orgcode with HRM
-        return StringUtils.isBlank(orgCode);
+        return facilityService.find(orgCode) == null;
     }
 }

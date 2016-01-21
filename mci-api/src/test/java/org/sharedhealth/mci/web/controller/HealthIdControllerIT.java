@@ -1,6 +1,7 @@
 package org.sharedhealth.mci.web.controller;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
+import org.apache.http.HttpStatus;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -85,7 +86,7 @@ public class HealthIdControllerIT extends BaseControllerTest {
                         .withBody(asString("jsons/userDetails/userDetailForMCIAdmin.json"))));
 
 
-        mockMvc.perform(post(API_END_POINT + GENERATE_BLOCK_URI +"?start=9800100100&totalHIDs=1000")
+        mockMvc.perform(post(API_END_POINT + GENERATE_BLOCK_URI + "?start=9800100100&totalHIDs=1000")
                 .accept(APPLICATION_JSON)
                 .header(AUTH_TOKEN_KEY, validAccessToken)
                 .header(FROM_KEY, validEmail)
@@ -189,6 +190,15 @@ public class HealthIdControllerIT extends BaseControllerTest {
                 .addFilters(springSecurityFilterChain)
                 .build();
 
+        givenThat(WireMock.get(urlEqualTo("/api/1.0/facilities/1234.json"))
+                .withHeader(CLIENT_ID_KEY, equalTo("18554"))
+                .withHeader(AUTH_TOKEN_KEY, equalTo("b43d2b284fa678fb8248b7cc3ab391f9c21e5d7f8e88f815a9ef4346e426bd33"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(asString("jsons/facility.json"))));
+
+
         givenThat(WireMock.get(urlEqualTo("/token/" + validAccessToken))
                 .willReturn(aResponse()
                         .withStatus(200)
@@ -196,7 +206,7 @@ public class HealthIdControllerIT extends BaseControllerTest {
                         .withBody(asString("jsons/userDetails/userDetailForMCIAdmin.json"))));
 
 
-        mockMvc.perform(post(API_END_POINT + GENERATE_BLOCK_FOR_ORG_URI + "?org=OTHER&start=9800100100&totalHIDs=1000")
+        mockMvc.perform(post(API_END_POINT + GENERATE_BLOCK_FOR_ORG_URI + "?org=1234&start=9800100100&totalHIDs=1000")
                 .accept(APPLICATION_JSON)
                 .header(AUTH_TOKEN_KEY, validAccessToken)
                 .header(FROM_KEY, validEmail)
