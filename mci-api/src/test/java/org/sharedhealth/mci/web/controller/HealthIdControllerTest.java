@@ -153,7 +153,7 @@ public class HealthIdControllerTest {
     }
 
     @Test
-    public void shouldNotGenerateBlockWhenInvalidStart() throws Exception {
+    public void shouldNotGenerateBlockWhenInvalidStartForMci() throws Exception {
         long start = 1000L, total = 2000001L;
         MCIProperties testProperties = new MCIProperties();
         testProperties.setMciStartHid("2000");
@@ -166,5 +166,39 @@ public class HealthIdControllerTest {
         healthIdController.generateBlock(start, total);
 
         verify(healthIdService, never()).generateBlock(anyLong(), anyLong(), any(UserInfo.class));
+    }
+
+    @Test
+    public void shouldNotGenerateBlockForOrgIfOrgIsMci() throws Exception {
+        long start = 2000L, total = 20L;
+        String mciFacilityId = "1234";
+        MCIProperties testProperties = new MCIProperties();
+        testProperties.setMciOrgCode("1234");
+        expectedEx.expect(InvalidRequestException.class);
+        expectedEx.expectMessage("This endpoint is not for MCI. To generate HIDs for MCI use /generateBlock endpoint");
+
+        HealthIdController healthIdController = new HealthIdController(healthIdService, facilityService, testProperties);
+        healthIdController.generateBlockForOrg(mciFacilityId, start, total);
+        verify(healthIdService, never()).generateBlockForOrg(eq(start), eq(total), eq(mciFacilityId), any(UserInfo.class));
+    }
+
+    @Test
+    public void shouldNotGenerateBlockWhenInvalidStartForOrg() throws Exception {
+        long start = 2500L, total = 20L;
+        MCIProperties testProperties = new MCIProperties();
+        testProperties.setMciStartHid("2000");
+        testProperties.setMciEndHid("3000");
+        String facilityID = "12345";
+        Facility facility = new Facility(facilityID, "ABC", "UHC", "1024", "some");
+
+        when(facilityService.find(facilityID)).thenReturn(facility);
+
+        expectedEx.expect(InvalidRequestException.class);
+        expectedEx.expectMessage("2500 series is reserved for MCI");
+
+        HealthIdController healthIdController = new HealthIdController(healthIdService, facilityService, testProperties);
+        healthIdController.generateBlockForOrg(facilityID, start, total);
+
+        verify(healthIdService, never()).generateBlockForOrg(anyLong(), anyLong(), anyString(), any(UserInfo.class));
     }
 }

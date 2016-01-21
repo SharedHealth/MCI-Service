@@ -1,7 +1,6 @@
 package org.sharedhealth.mci.web.controller;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
-import org.apache.http.HttpStatus;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -86,7 +85,7 @@ public class HealthIdControllerIT extends BaseControllerTest {
                         .withBody(asString("jsons/userDetails/userDetailForMCIAdmin.json"))));
 
 
-        mockMvc.perform(post(API_END_POINT + GENERATE_BLOCK_URI + "?start=9800100100&totalHIDs=1000")
+        mockMvc.perform(post(API_END_POINT + GENERATE_BLOCK_URI + "?start=9800000050&totalHIDs=1000")
                 .accept(APPLICATION_JSON)
                 .header(AUTH_TOKEN_KEY, validAccessToken)
                 .header(FROM_KEY, validEmail)

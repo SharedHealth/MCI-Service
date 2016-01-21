@@ -61,6 +61,8 @@ public class MCIProperties {
     private String mciStartHid;
     @Value("${MCI_END_HID}")
     private String mciEndHid;
+    @Value("${MCI_ORG_CODE}")
+    private String mciOrgCode;
 
     @Value("${HEALTH_ID_BLOCK_SIZE}")
     private String healthIdBlockSize;
@@ -216,6 +218,15 @@ public class MCIProperties {
     public void setHidStoragePath(String hidStoragePath) {
         this.hidStoragePath = hidStoragePath;
     }
+
+    public String getMciOrgCode() {
+        return mciOrgCode;
+    }
+
+    public void setMciOrgCode(String mciOrgCode) {
+        this.mciOrgCode = mciOrgCode;
+    }
+
 
 
 }

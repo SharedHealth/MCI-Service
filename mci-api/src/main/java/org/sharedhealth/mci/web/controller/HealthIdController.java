@@ -60,7 +60,7 @@ public class HealthIdController extends MciController {
     @RequestMapping(method = POST, value = GENERATE_BLOCK_URI)
     public DeferredResult<String> generateBlock(@RequestParam(value = "start") long start,
                                                 @RequestParam(value = "totalHIDs") long totalHIDs) {
-        if(mciProperties.getMciStartHid() > start || mciProperties.getMciEndHid() < start) {
+        if (isStartInvalidForMCI(start)) {
             throw new InvalidRequestException(String.format("%s not for MCI", start));
         }
         UserInfo userInfo = getUserInfo();
@@ -74,6 +74,12 @@ public class HealthIdController extends MciController {
     public DeferredResult<String> generateBlockForOrg(@RequestParam(value = "org") String orgCode,
                                                       @RequestParam(value = "start") long start,
                                                       @RequestParam(value = "totalHIDs") long totalHIDs) {
+        if (orgCode.equals(mciProperties.getMciOrgCode())) {
+            throw new InvalidRequestException(String.format("This endpoint is not for MCI. To generate HIDs for MCI use %s endpoint", GENERATE_BLOCK_URI));
+        }
+        if (!isStartInvalidForMCI(start)) {
+            throw new InvalidRequestException(String.format("%s series is reserved for MCI", start));
+        }
         if (totalHIDs > HID_GENERATION_LIMIT) {
             throw new InvalidRequestException(String.format("Total HIDs should not be more than %s", HID_GENERATION_LIMIT));
         }
@@ -107,5 +113,9 @@ public class HealthIdController extends MciController {
 
     private boolean isInvalidOrg(String orgCode) {
         return facilityService.find(orgCode) == null;
+    }
+
+    private boolean isStartInvalidForMCI(long start) {
+        return mciProperties.getMciStartHid() > start || mciProperties.getMciEndHid() < start;
     }
 }
