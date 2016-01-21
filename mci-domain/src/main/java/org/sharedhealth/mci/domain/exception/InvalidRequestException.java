@@ -1,15 +1,15 @@
 package org.sharedhealth.mci.domain.exception;
 
-public class InvalidRequesterException extends RuntimeException {
+public class InvalidRequestException extends RuntimeException {
     private String errorMessage;
 
 
-    public InvalidRequesterException(String message) {
+    public InvalidRequestException(String message) {
         super();
         this.errorMessage = message;
     }
 
-    public InvalidRequesterException(String message, Throwable cause) {
+    public InvalidRequestException(String message, Throwable cause) {
         super(message, cause);
     }
 

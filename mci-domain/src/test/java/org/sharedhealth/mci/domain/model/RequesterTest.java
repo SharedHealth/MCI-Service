@@ -1,7 +1,7 @@
 package org.sharedhealth.mci.domain.model;
 
 import org.junit.Test;
-import org.sharedhealth.mci.domain.exception.InvalidRequesterException;
+import org.sharedhealth.mci.domain.exception.InvalidRequestException;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -51,12 +51,12 @@ public class RequesterTest {
         assertTrue(requesters.contains(requester8));
     }
 
-    @Test(expected = InvalidRequesterException.class)
+    @Test(expected = InvalidRequestException.class)
     public void shouldThrowExceptionWhenFacilityProviderAndAdminAreEmpty() {
         new Requester(null, "");
     }
 
-    @Test(expected = InvalidRequesterException.class)
+    @Test(expected = InvalidRequestException.class)
     public void shouldThrowExceptionWhenRequesterDetailsIdNotPresent() {
         new RequesterDetails("");
     }

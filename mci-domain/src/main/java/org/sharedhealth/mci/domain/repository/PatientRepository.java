@@ -4,7 +4,7 @@ import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.Delete;
 import com.datastax.driver.core.querybuilder.Insert;
 import org.sharedhealth.mci.domain.exception.Forbidden;
-import org.sharedhealth.mci.domain.exception.InvalidRequesterException;
+import org.sharedhealth.mci.domain.exception.InvalidRequestException;
 import org.sharedhealth.mci.domain.exception.PatientNotFoundException;
 import org.sharedhealth.mci.domain.model.*;
 import org.sharedhealth.mci.domain.service.PendingApprovalFilter;
@@ -108,7 +108,7 @@ public class PatientRepository extends BaseRepository {
         if (Boolean.FALSE.equals(existingPatientData.isActive())) {
             String mergedWith = existingPatientData.getMergedWith();
             String errorMessage = mergedWith != null ? String.format("Cannot update inactive patient, already merged with %s", mergedWith) : "Cannot update inactive patient";
-            throw new InvalidRequesterException(errorMessage);
+            throw new InvalidRequestException(errorMessage);
         }
 
         checkIfTryingToMergeWithNonExistingOrInactiveHid(updateRequest.getMergedWith());

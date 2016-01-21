@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.domain.constant.JsonConstants;
 import org.sharedhealth.mci.domain.exception.Forbidden;
-import org.sharedhealth.mci.domain.exception.InvalidRequesterException;
+import org.sharedhealth.mci.domain.exception.InvalidRequestException;
 import org.sharedhealth.mci.domain.exception.PatientNotFoundException;
 import org.sharedhealth.mci.domain.exception.ValidationException;
 import org.sharedhealth.mci.web.handler.ErrorHandler;
@@ -133,9 +133,9 @@ public class GlobalExceptionHandler {
     }
 
     @ResponseStatus(value = BAD_REQUEST)
-    @ExceptionHandler(InvalidRequesterException.class)
+    @ExceptionHandler(InvalidRequestException.class)
     @ResponseBody
-    public ErrorHandler handleInvalidRequesterException(InvalidRequesterException e) {
+    public ErrorHandler handleInvalidRequesterException(InvalidRequestException e) {
         logger.debug("Handling InvalidRequesterException. ", e);
         return new ErrorHandler(BAD_REQUEST.value(), e.getMessage());
     }

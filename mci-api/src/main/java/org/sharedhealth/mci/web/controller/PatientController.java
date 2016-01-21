@@ -2,7 +2,7 @@ package org.sharedhealth.mci.web.controller;
 
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.domain.exception.Forbidden;
-import org.sharedhealth.mci.domain.exception.InvalidRequesterException;
+import org.sharedhealth.mci.domain.exception.InvalidRequestException;
 import org.sharedhealth.mci.domain.exception.ValidationException;
 import org.sharedhealth.mci.domain.model.MCIResponse;
 import org.sharedhealth.mci.domain.model.PatientData;
@@ -78,7 +78,7 @@ public class PatientController extends MciController {
         final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
 
         if (null != patient.getMergedWith()) {
-            throw new InvalidRequesterException(format("Cannot merge with another patient on creation"));
+            throw new InvalidRequestException(format("Cannot merge with another patient on creation"));
         }
 
         if (bindingResult.hasErrors()) {
@@ -163,7 +163,7 @@ public class PatientController extends MciController {
                 properties.getAdminId(), properties.getName());
 
         if (null != patient.isActive() || null != patient.getMergedWith()) {
-            throw new InvalidRequesterException(format("Cannot update active field or merge with other patient"));
+            throw new InvalidRequestException(format("Cannot update active field or merge with other patient"));
         }
 
         if (bindingResult.hasErrors()) {

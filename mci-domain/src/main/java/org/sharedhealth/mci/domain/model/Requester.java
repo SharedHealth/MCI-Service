@@ -1,7 +1,7 @@
 package org.sharedhealth.mci.domain.model;
 
 
-import org.sharedhealth.mci.domain.exception.InvalidRequesterException;
+import org.sharedhealth.mci.domain.exception.InvalidRequestException;
 
 public class Requester {
 
@@ -22,7 +22,7 @@ public class Requester {
 
     public Requester(RequesterDetails facility, RequesterDetails provider, RequesterDetails admin) {
         if (facility == null && provider == null && admin == null) {
-            throw new InvalidRequesterException("All of facility, provider and admin cannot be empty");
+            throw new InvalidRequestException("All of facility, provider and admin cannot be empty");
         }
         this.facility = facility;
         this.provider = provider;

@@ -31,4 +31,10 @@ public class FileUtil {
             e.printStackTrace();
         }
     }
+
+    public static File createHIDFile(String hidStorageDirPath, String fileName) {
+        File outputDir = new File(hidStorageDirPath);
+        outputDir.mkdirs();
+        return new File(outputDir, fileName);
+    }
 }

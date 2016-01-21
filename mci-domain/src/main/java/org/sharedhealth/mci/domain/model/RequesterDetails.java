@@ -1,7 +1,7 @@
 package org.sharedhealth.mci.domain.model;
 
 
-import org.sharedhealth.mci.domain.exception.InvalidRequesterException;
+import org.sharedhealth.mci.domain.exception.InvalidRequestException;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -19,7 +19,7 @@ public class RequesterDetails {
 
     public RequesterDetails(String id, String name) {
         if (isBlank(id)) {
-            throw new InvalidRequesterException("Requester details id cannot be empty.");
+            throw new InvalidRequestException("Requester details id cannot be empty.");
         }
         this.id = id;
         this.name = name;

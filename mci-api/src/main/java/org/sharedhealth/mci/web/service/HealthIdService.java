@@ -135,13 +135,11 @@ public class HealthIdService {
 
     private File createFileForOrg(String orgCode) {
         String hidStorageDirPath = mciProperties.getHidStoragePath();
-        if(StringUtils.isBlank(hidStorageDirPath)){
+        if (StringUtils.isBlank(hidStorageDirPath)) {
             hidStorageDirPath = DEFAULT_HID_STORAGE_PATH;
         }
-        File outputDir = new File(hidStorageDirPath);
-        outputDir.mkdirs();
         String fileName = String.format("%s-%s", orgCode, toDateString(new Date(), SIMPLE_DATE_WITH_SECS_FORMAT));
-        return new File(outputDir, fileName);
+        return FileUtil.createHIDFile(hidStorageDirPath, fileName);
     }
 
     private GeneratedHIDBlock saveGeneratedBlock(Long start, Long end, Long numberOfValidHids, String orgCode, UserInfo userInfo) {

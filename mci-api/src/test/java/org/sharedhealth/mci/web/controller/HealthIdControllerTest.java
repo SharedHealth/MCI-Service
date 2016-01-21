@@ -1,10 +1,13 @@
 package org.sharedhealth.mci.web.controller;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.sharedhealth.mci.domain.exception.InvalidRequestException;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
 import org.sharedhealth.mci.web.infrastructure.security.UserProfile;
 import org.sharedhealth.mci.web.model.GeneratedHIDBlock;
@@ -24,6 +27,9 @@ import static org.mockito.MockitoAnnotations.initMocks;
 public class HealthIdControllerTest {
     @Mock
     private HealthIdService healthIdService;
+
+    @Rule
+    public ExpectedException expectedEx = ExpectedException.none();
 
 
     @Before
@@ -93,5 +99,26 @@ public class HealthIdControllerTest {
         HealthIdController healthIdController = new HealthIdController(healthIdService);
         assertEquals("Can generate only 100 HIDs, because series exhausted. Use another series.", healthIdController.generateBlockForOrg("other", start, total).getResult());
         verify(healthIdService, times(1)).generateBlockForOrg(eq(start), eq(total), eq("other"), any(UserInfo.class));
+    }
+
+    @Test
+    public void testNotGenerateBlockForOrgWhenGivenOrganizationIsInvalid() throws Exception {
+        expectedEx.expect(InvalidRequestException.class);
+        expectedEx.expectMessage("Invalid Organization:- ");
+
+        long start = 1000L, total = 150L;
+        HealthIdController healthIdController = new HealthIdController(healthIdService);
+        healthIdController.generateBlockForOrg("", start, total);
+        verify(healthIdService, never()).generateBlockForOrg(anyLong(), anyLong(), anyString(), any(UserInfo.class));
+    }
+
+    @Test
+    public void testNotGenerateBlockWhenTotalHIDsAreMoreThanTwoMillion() throws Exception {
+        expectedEx.expect(InvalidRequestException.class);
+        expectedEx.expectMessage("Total HIDs should not be more than 2000000");
+        long start = 1000L, total = 2000001L;
+        HealthIdController healthIdController = new HealthIdController(healthIdService);
+        healthIdController.generateBlockForOrg("", start, total);
+        verify(healthIdService, never()).generateBlockForOrg(anyLong(), anyLong(), anyString(), any(UserInfo.class));
     }
 }

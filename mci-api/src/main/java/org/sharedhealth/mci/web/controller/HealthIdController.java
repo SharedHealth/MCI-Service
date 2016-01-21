@@ -1,5 +1,7 @@
 package org.sharedhealth.mci.web.controller;
 
+import org.apache.commons.lang3.StringUtils;
+import org.sharedhealth.mci.domain.exception.InvalidRequestException;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
 import org.sharedhealth.mci.web.model.GeneratedHIDBlock;
 import org.sharedhealth.mci.web.model.MciHealthId;
@@ -26,6 +28,7 @@ public class HealthIdController extends MciController {
     public static final String GENERATE_BLOCK_URI = "/generateBlock";
     public static final String GENERATE_BLOCK_FOR_ORG_URI = "/generateBlockForOrg";
     public static final String NEXT_BLOCK_URI = "/nextBlock";
+    private static final long HID_GENERATION_LIMIT = 2000000;
 
     private HealthIdService healthIdService;
 
@@ -63,6 +66,13 @@ public class HealthIdController extends MciController {
     public DeferredResult<String> generateBlockForOrg(@RequestParam(value = "org") String orgCode,
                                                       @RequestParam(value = "start") long start,
                                                       @RequestParam(value = "totalHIDs") long totalHIDs) {
+
+        if (totalHIDs > HID_GENERATION_LIMIT) {
+            throw new InvalidRequestException(String.format("Total HIDs should not be more than %s", HID_GENERATION_LIMIT));
+        }
+        if (isInvalidOrg(orgCode)) {
+            throw new InvalidRequestException(String.format("Invalid Organization:- %s", orgCode));
+        }
         UserInfo userInfo = getUserInfo();
         logAccessDetails(userInfo, "Generating new hids");
         GeneratedHIDBlock generatedHIDBlock = healthIdService.generateBlockForOrg(start, totalHIDs, orgCode, userInfo);
@@ -86,5 +96,10 @@ public class HealthIdController extends MciController {
         deferredResult.setResult(message);
         logger.info(message);
         return deferredResult;
+    }
+
+    private boolean isInvalidOrg(String orgCode) {
+        //todo: verify the orgcode with HRM
+        return StringUtils.isBlank(orgCode);
     }
 }

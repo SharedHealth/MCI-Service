@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.domain.constant.MCIConstants;
-import org.sharedhealth.mci.domain.exception.InvalidRequesterException;
+import org.sharedhealth.mci.domain.exception.InvalidRequestException;
 import org.sharedhealth.mci.domain.util.DateUtil;
 import org.springframework.stereotype.Component;
 
@@ -268,7 +268,7 @@ public class PatientMapper {
 
     private void mapPatientActivation(Patient patient, PatientData patientData) {
         if (null != patientData.isActive() && patientData.isActive() && StringUtils.isNotBlank(patientData.getMergedWith())) {
-            throw new InvalidRequesterException("Active Patient cannot be merged with other patient");
+            throw new InvalidRequestException("Active Patient cannot be merged with other patient");
         }
         patient.setActive(patientData.isActive());
         patient.setMergedWith(patientData.getMergedWith());
