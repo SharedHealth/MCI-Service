@@ -1,6 +1,8 @@
 package org.sharedhealth.mci.web.controller;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,6 +12,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import javax.servlet.Filter;
+
+import java.io.File;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -38,11 +42,20 @@ public class HealthIdControllerIT extends BaseControllerTest {
         setUpMockMvcBuilder();
     }
 
+    @After
+    public void tearDown() throws Exception {
+        File file = new File("test-hid");
+        if (file.exists()) {
+            FileUtils.cleanDirectory(file);
+            file.delete();
+        }
+    }
+
     @Test
     public void testGenerate() throws Exception {
         validAccessToken = "85HoExoxghh1pislg65hUM0q3wM9kfzcMdpYS0ixPD";
-        validClientId = "18564";
-        validEmail = "MciAdmin@test.com";
+        validClientId = "18570";
+        validEmail = "shrsystemadmin@test.com";
 
         mockMvc = MockMvcBuilders
                 .webAppContextSetup(webApplicationContext)
@@ -53,7 +66,7 @@ public class HealthIdControllerIT extends BaseControllerTest {
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody(asString("jsons/userDetails/userDetailForMCIAdmin.json"))));
+                        .withBody(asString("jsons/userDetails/userDetailForSHRSystemAdmin.json"))));
 
 
         mockMvc.perform(post(API_END_POINT + GENERATE_ALL_URI)
@@ -70,8 +83,8 @@ public class HealthIdControllerIT extends BaseControllerTest {
     @Test
     public void testGenerateRange() throws Exception {
         validAccessToken = "85HoExoxghh1pislg65hUM0q3wM9kfzcMdpYS0ixPD";
-        validClientId = "18564";
-        validEmail = "MciAdmin@test.com";
+        validClientId = "18570";
+        validEmail = "shrsystemadmin@test.com";
 
         mockMvc = MockMvcBuilders
                 .webAppContextSetup(webApplicationContext)
@@ -82,7 +95,7 @@ public class HealthIdControllerIT extends BaseControllerTest {
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody(asString("jsons/userDetails/userDetailForMCIAdmin.json"))));
+                        .withBody(asString("jsons/userDetails/userDetailForSHRSystemAdmin.json"))));
 
 
         mockMvc.perform(post(API_END_POINT + GENERATE_BLOCK_URI + "?start=9800000050&totalHIDs=1000")
@@ -99,8 +112,8 @@ public class HealthIdControllerIT extends BaseControllerTest {
     @Test
     public void testGetNextBlock() throws Exception {
         validAccessToken = "85HoExoxghh1pislg65hUM0q3wM9kfzcMdpYS0ixPD";
-        validClientId = "18564";
-        validEmail = "MciAdmin@test.com";
+        validClientId = "18570";
+        validEmail = "shrsystemadmin@test.com";
 
         mockMvc = MockMvcBuilders
                 .webAppContextSetup(webApplicationContext)
@@ -111,7 +124,7 @@ public class HealthIdControllerIT extends BaseControllerTest {
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody(asString("jsons/userDetails/userDetailForMCIAdmin.json"))));
+                        .withBody(asString("jsons/userDetails/userDetailForSHRSystemAdmin.json"))));
 
 
         mockMvc.perform(get(API_END_POINT + NEXT_BLOCK_URI)
@@ -125,7 +138,7 @@ public class HealthIdControllerIT extends BaseControllerTest {
     }
 
     @Test
-    public void testGenerateOnlyForAdmins() throws Exception {
+    public void testGenerateOnlyForShrSystemAdmin() throws Exception {
         validAccessToken = "40214a6c-e27c-4223-981c-1f837be90f02";
         validClientId = "18548";
         validEmail = "facility@gmail.com";
@@ -181,8 +194,8 @@ public class HealthIdControllerIT extends BaseControllerTest {
     @Test
     public void testGenerateRangeForOrg() throws Exception {
         validAccessToken = "85HoExoxghh1pislg65hUM0q3wM9kfzcMdpYS0ixPD";
-        validClientId = "18564";
-        validEmail = "MciAdmin@test.com";
+        validClientId = "18570";
+        validEmail = "shrsystemadmin@test.com";
 
         mockMvc = MockMvcBuilders
                 .webAppContextSetup(webApplicationContext)
@@ -202,10 +215,10 @@ public class HealthIdControllerIT extends BaseControllerTest {
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody(asString("jsons/userDetails/userDetailForMCIAdmin.json"))));
+                        .withBody(asString("jsons/userDetails/userDetailForSHRSystemAdmin.json"))));
 
 
-        mockMvc.perform(post(API_END_POINT + GENERATE_BLOCK_FOR_ORG_URI + "?org=1234&start=9800100100&totalHIDs=1000")
+        mockMvc.perform(post(API_END_POINT + GENERATE_BLOCK_FOR_ORG_URI + "?org=1234&start=9200100100&totalHIDs=1000")
                 .accept(APPLICATION_JSON)
                 .header(AUTH_TOKEN_KEY, validAccessToken)
                 .header(FROM_KEY, validEmail)

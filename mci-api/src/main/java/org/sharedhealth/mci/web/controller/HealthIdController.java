@@ -42,7 +42,7 @@ public class HealthIdController extends MciController {
         this.mciProperties = mciProperties;
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_MCI Admin')")
+    @PreAuthorize("hasAnyRole('ROLE_SHR System Admin')")
     @RequestMapping(method = POST, value = GENERATE_ALL_URI)
     public DeferredResult<String> generate() {
         UserInfo userInfo = getUserInfo();
@@ -56,7 +56,7 @@ public class HealthIdController extends MciController {
         return deferredResult;
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_MCI Admin')")
+    @PreAuthorize("hasAnyRole('ROLE_SHR System Admin')")
     @RequestMapping(method = POST, value = GENERATE_BLOCK_URI)
     public DeferredResult<String> generateBlock(@RequestParam(value = "start") long start,
                                                 @RequestParam(value = "totalHIDs") long totalHIDs) {
@@ -69,30 +69,19 @@ public class HealthIdController extends MciController {
         return getResult(generatedHIDBlock, totalHIDs);
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_MCI Admin')")
+    @PreAuthorize("hasAnyRole('ROLE_SHR System Admin')")
     @RequestMapping(method = POST, value = GENERATE_BLOCK_FOR_ORG_URI)
     public DeferredResult<String> generateBlockForOrg(@RequestParam(value = "org") String orgCode,
                                                       @RequestParam(value = "start") long start,
                                                       @RequestParam(value = "totalHIDs") long totalHIDs) {
-        if (orgCode.equals(mciProperties.getMciOrgCode())) {
-            throw new InvalidRequestException(String.format("This endpoint is not for MCI. To generate HIDs for MCI use %s endpoint", GENERATE_BLOCK_URI));
-        }
-        if (!isStartInvalidForMCI(start)) {
-            throw new InvalidRequestException(String.format("%s series is reserved for MCI", start));
-        }
-        if (totalHIDs > HID_GENERATION_LIMIT) {
-            throw new InvalidRequestException(String.format("Total HIDs should not be more than %s", HID_GENERATION_LIMIT));
-        }
-        if (isInvalidOrg(orgCode)) {
-            throw new InvalidRequestException(String.format("Invalid Organization:- %s", orgCode));
-        }
+        validateRequest(orgCode, start, totalHIDs);
         UserInfo userInfo = getUserInfo();
         logAccessDetails(userInfo, "Generating new hids");
         GeneratedHIDBlock generatedHIDBlock = healthIdService.generateBlockForOrg(start, totalHIDs, orgCode, userInfo);
         return getResult(generatedHIDBlock, totalHIDs);
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_MCI Admin')")
+    @PreAuthorize("hasAnyRole('ROLE_SHR System Admin')")
     @RequestMapping(method = GET, value = NEXT_BLOCK_URI)
     public List<MciHealthId> nextBlock() {
         return healthIdService.getNextBlock();
@@ -117,5 +106,24 @@ public class HealthIdController extends MciController {
 
     private boolean isStartInvalidForMCI(long start) {
         return mciProperties.getMciStartHid() > start || mciProperties.getMciEndHid() < start;
+    }
+
+    private void validateRequest(String orgCode, long start, long totalHIDs) {
+        if (orgCode.equals(mciProperties.getMciOrgCode())) {
+            throw new InvalidRequestException(String.format("This endpoint is not for MCI. To generate HIDs for MCI use %s endpoint", GENERATE_BLOCK_URI));
+        }
+        if (isStartInvalidForOtherOrg(start)) {
+            throw new InvalidRequestException(String.format("%s series is not valid.", start));
+        }
+        if (totalHIDs > HID_GENERATION_LIMIT) {
+            throw new InvalidRequestException(String.format("Total HIDs should not be more than %s", HID_GENERATION_LIMIT));
+        }
+        if (isInvalidOrg(orgCode)) {
+            throw new InvalidRequestException(String.format("Invalid Organization:- %s", orgCode));
+        }
+    }
+
+    private boolean isStartInvalidForOtherOrg(long start) {
+        return mciProperties.getOtherOrgStartHid() > start || mciProperties.getOtherOrgEndHid() < start;
     }
 }

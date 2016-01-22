@@ -48,7 +48,7 @@ public class HealthIdService {
         this.checksumGenerator = checksumGenerator;
         this.generatedHidBlockService = generatedHidBlockService;
         this.mciInvalidHidPattern = Pattern.compile(mciProperties.getMciInvalidHidPattern());
-        this.orgInvalidHidPattern = Pattern.compile(mciProperties.getOrgInvalidHidPattern());
+        this.orgInvalidHidPattern = Pattern.compile(mciProperties.getOtherOrgInvalidHidPattern());
     }
 
     public GeneratedHIDBlock generateAll(UserInfo userInfo) {
@@ -154,10 +154,7 @@ public class HealthIdService {
 
     private RequesterDetails getRequesterDetails(UserInfo userInfo) {
         UserInfo.UserInfoProperties properties = userInfo.getProperties();
-        if (properties.getAdminId() != null) {
-            return new RequesterDetails(properties.getAdminId());
-        }
-        return null;
+        return new RequesterDetails(properties.getId());
     }
 
     private boolean isPartOfSeries(long seriesNo, long possibleHID) {

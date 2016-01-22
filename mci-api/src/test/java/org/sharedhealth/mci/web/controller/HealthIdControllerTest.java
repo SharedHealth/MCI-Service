@@ -184,17 +184,17 @@ public class HealthIdControllerTest {
 
     @Test
     public void shouldNotGenerateBlockWhenInvalidStartForOrg() throws Exception {
-        long start = 2500L, total = 20L;
+        long start = 4000L, total = 20L;
         MCIProperties testProperties = new MCIProperties();
-        testProperties.setMciStartHid("2000");
-        testProperties.setMciEndHid("3000");
+        testProperties.setOtherOrgStartHid("2000");
+        testProperties.setOtherOrgEndHid("3000");
         String facilityID = "12345";
         Facility facility = new Facility(facilityID, "ABC", "UHC", "1024", "some");
 
         when(facilityService.find(facilityID)).thenReturn(facility);
 
         expectedEx.expect(InvalidRequestException.class);
-        expectedEx.expectMessage("2500 series is reserved for MCI");
+        expectedEx.expectMessage("4000 series is not valid.");
 
         HealthIdController healthIdController = new HealthIdController(healthIdService, facilityService, testProperties);
         healthIdController.generateBlockForOrg(facilityID, start, total);

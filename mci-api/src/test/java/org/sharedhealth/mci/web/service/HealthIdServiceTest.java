@@ -46,7 +46,7 @@ public class HealthIdServiceTest {
     public void setUp() throws Exception {
         mciProperties = new MCIProperties();
         mciProperties.setMciInvalidHidPattern("^[^9]|^.[^89]|(^\\d{0,9}$)|(^\\d{11,}$)|((\\d)\\4{2})\\d*((\\d)\\6{2})|(\\d)\\7{3}");
-        mciProperties.setOrgInvalidHidPattern("^[^9]|^.[^1-7]|(^\\d{0,9}$)|(^\\d{11,}$)|((\\d)\\4{2})\\d*((\\d)\\6{2})|(\\d)\\7{3}");
+        mciProperties.setOtherOrgInvalidHidPattern("^[^9]|^.[^1-7]|(^\\d{0,9}$)|(^\\d{11,}$)|((\\d)\\4{2})\\d*((\\d)\\6{2})|(\\d)\\7{3}");
         mciProperties.setMciStartHid("9800000000");
         mciProperties.setMciEndHid("9999999999");
         mciProperties.setHealthIdBlockSize("10");
@@ -112,7 +112,7 @@ public class HealthIdServiceTest {
         // This regex will match any number starting with 4 or 5
         // and we will mark it as invalid
         testProperties.setMciInvalidHidPattern("^(105|104)\\d*$");
-        testProperties.setOrgInvalidHidPattern("^(1005|1004)\\d*$");
+        testProperties.setOtherOrgInvalidHidPattern("^(1005|1004)\\d*$");
         HealthIdService healthIdService = new HealthIdService(testProperties, healthIdRepository, checksumGenerator, generatedHidBlockService);
         GeneratedHIDBlock hidBlock = healthIdService.generateAll(getUserInfo());
         assertEquals(80, hidBlock.getTotalHIDs().longValue());
@@ -127,7 +127,7 @@ public class HealthIdServiceTest {
         // This regex will match any number starting with 4 or 5
         // and we will mark it as invalid
         testProperties.setMciInvalidHidPattern("^[^9]|^.[^89]|(^\\d{0,9}$)|(^\\d{11,}$)|((\\d)\\4{2})\\d*((\\d)\\6{2})|(\\d)\\7{3}");
-        testProperties.setOrgInvalidHidPattern("^(1005|1004)\\d*$");
+        testProperties.setOtherOrgInvalidHidPattern("^(1005|1004)\\d*$");
         HealthIdService healthIdService = new HealthIdService(testProperties, healthIdRepository, checksumGenerator, generatedHidBlockService);
         GeneratedHIDBlock hidBlock = healthIdService.generateAll(getUserInfo());
         assertEquals(0, hidBlock.getTotalHIDs().longValue());
@@ -145,7 +145,7 @@ public class HealthIdServiceTest {
         // This regex will match any number starting with 4 or 5
         // and we will mark it as invalid
         testProperties.setMciInvalidHidPattern("^(105|104)\\d*$");
-        testProperties.setOrgInvalidHidPattern("^(1005|1004)\\d*$");
+        testProperties.setOtherOrgInvalidHidPattern("^(1005|1004)\\d*$");
         HealthIdService healthIdService = new HealthIdService(testProperties, healthIdRepository, checksumGenerator, generatedHidBlockService);
         GeneratedHIDBlock hidBlock = healthIdService.generateAll(getUserInfo());
         assertEquals(80, hidBlock.getTotalHIDs().longValue());
@@ -160,7 +160,7 @@ public class HealthIdServiceTest {
     public void shouldSaveTheGeneratedBlock() throws Exception {
         MCIProperties testProperties = new MCIProperties();
         testProperties.setMciInvalidHidPattern("^(105|104)\\d*$");
-        testProperties.setOrgInvalidHidPattern("^(1005|1004)\\d*$");
+        testProperties.setOtherOrgInvalidHidPattern("^(1005|1004)\\d*$");
         testProperties.setMciStartHid("1000");
         testProperties.setMciEndHid("1099");
         testProperties.setHidStoragePath("test-hid");
@@ -187,7 +187,7 @@ public class HealthIdServiceTest {
     public void shouldNotSaveBlockIfNoHIDsAreGenerated() throws Exception {
         MCIProperties testProperties = new MCIProperties();
         testProperties.setMciInvalidHidPattern("^(105|104)\\d*$");
-        testProperties.setOrgInvalidHidPattern("^(1005|1004)\\d*$");
+        testProperties.setOtherOrgInvalidHidPattern("^(1005|1004)\\d*$");
         testProperties.setMciStartHid("1040");
         testProperties.setMciEndHid("1050");
         testProperties.setHidStoragePath("test-hid");
@@ -210,7 +210,7 @@ public class HealthIdServiceTest {
         // This regex will match any number starting with 4 or 5
         // and we will mark it as invalid
         testProperties.setMciInvalidHidPattern("^(105|104)\\d*$");
-        testProperties.setOrgInvalidHidPattern("^(1005|1004)\\d*$");
+        testProperties.setOtherOrgInvalidHidPattern("^(1005|1004)\\d*$");
         HealthIdService healthIdService = new HealthIdService(testProperties, healthIdRepository, checksumGenerator, generatedHidBlockService);
         GeneratedHIDBlock hidBlock = healthIdService.generateAll(getUserInfo());
         assertEquals(0, hidBlock.getTotalHIDs().longValue());
@@ -235,7 +235,7 @@ public class HealthIdServiceTest {
         long totalHIDs = 100;
         MCIProperties testProperties = new MCIProperties();
         testProperties.setMciInvalidHidPattern("^(1005|1004)\\d*$");
-        testProperties.setOrgInvalidHidPattern("^(105|104)\\d*$");
+        testProperties.setOtherOrgInvalidHidPattern("^(105|104)\\d*$");
         testProperties.setHidStoragePath("test-hid");
 
         when(healthIdRepository.saveMciHealthId(any(MciHealthId.class))).thenReturn(MciHealthId.NULL_HID);
@@ -259,7 +259,7 @@ public class HealthIdServiceTest {
         long totalHIDs = 50;
         MCIProperties testProperties = new MCIProperties();
         testProperties.setMciInvalidHidPattern("^(105|104)\\d*$");
-        testProperties.setOrgInvalidHidPattern("^(1005|1004)\\d*$");
+        testProperties.setOtherOrgInvalidHidPattern("^(1005|1004)\\d*$");
         testProperties.setHidStoragePath("test-hid");
 
         when(generatedHidBlockService.getPreGeneratedHidBlocks(1000L)).thenReturn(new ArrayList<GeneratedHIDBlock>());
@@ -288,7 +288,7 @@ public class HealthIdServiceTest {
         long totalHIDs = 20;
         MCIProperties testProperties = new MCIProperties();
         testProperties.setMciInvalidHidPattern("^(105|104)\\d*$");
-        testProperties.setOrgInvalidHidPattern("^(1005|1004)\\d*$");
+        testProperties.setOtherOrgInvalidHidPattern("^(1005|1004)\\d*$");
         testProperties.setHidStoragePath("test-hid");
         GeneratedHIDBlock generatedHIDBlock = new GeneratedHIDBlock(1000L, MCI_ORG_CODE, 1000L, 1069L, 20L, null);
 
@@ -326,7 +326,7 @@ public class HealthIdServiceTest {
         long totalHIDs = 0;
         MCIProperties testProperties = new MCIProperties();
         testProperties.setMciInvalidHidPattern("^(105|104)\\d*$");
-        testProperties.setOrgInvalidHidPattern("^(1005|1004)\\d*$");
+        testProperties.setOtherOrgInvalidHidPattern("^(1005|1004)\\d*$");
         testProperties.setHidStoragePath("test-hid");
 
         when(healthIdRepository.saveMciHealthId(any(MciHealthId.class))).thenReturn(MciHealthId.NULL_HID);
@@ -344,7 +344,7 @@ public class HealthIdServiceTest {
         long totalHIDs = 50;
         MCIProperties testProperties = new MCIProperties();
         testProperties.setMciInvalidHidPattern("^(105|104)\\d*$");
-        testProperties.setOrgInvalidHidPattern("^(1005|1004)\\d*$");
+        testProperties.setOtherOrgInvalidHidPattern("^(1005|1004)\\d*$");
         testProperties.setHidStoragePath("test-hid");
 
         when(generatedHidBlockService.getPreGeneratedHidBlocks(1000L)).thenReturn(new ArrayList<GeneratedHIDBlock>());
@@ -375,7 +375,7 @@ public class HealthIdServiceTest {
         long totalHIDs = 20;
         MCIProperties testProperties = new MCIProperties();
         testProperties.setMciInvalidHidPattern("^(105|104)\\d*$");
-        testProperties.setOrgInvalidHidPattern("^(1005|1004)\\d*$");
+        testProperties.setOtherOrgInvalidHidPattern("^(1005|1004)\\d*$");
         testProperties.setHidStoragePath("test-hid");
 
         GeneratedHIDBlock generatedHIDBlock = new GeneratedHIDBlock(1000L, MCI_ORG_CODE, 1000L, 1089L, 80L, null);
@@ -409,7 +409,7 @@ public class HealthIdServiceTest {
         String orgCode = "OTHER-ORG";
         MCIProperties testProperties = new MCIProperties();
         testProperties.setMciInvalidHidPattern("^(105|104)\\d*$");
-        testProperties.setOrgInvalidHidPattern("^(1005|1004)\\d*$");
+        testProperties.setOtherOrgInvalidHidPattern("^(1005|1004)\\d*$");
         testProperties.setHidStoragePath("test-hid");
 
         when(checksumGenerator.generate(any(String.class))).thenReturn(1);
@@ -433,7 +433,7 @@ public class HealthIdServiceTest {
         String orgCode = "OTHER-ORG";
         MCIProperties testProperties = new MCIProperties();
         testProperties.setMciInvalidHidPattern("^(105|104)\\d*$");
-        testProperties.setOrgInvalidHidPattern("^(1005|1004)\\d*$");
+        testProperties.setOtherOrgInvalidHidPattern("^(1005|1004)\\d*$");
         testProperties.setHidStoragePath("test-hid");
 
         when(checksumGenerator.generate(any(String.class))).thenReturn(1);
@@ -461,7 +461,7 @@ public class HealthIdServiceTest {
         String orgCode = "OTHER-ORG";
         MCIProperties testProperties = new MCIProperties();
         testProperties.setMciInvalidHidPattern("^(105|104)\\d*$");
-        testProperties.setOrgInvalidHidPattern("^(1005|1004)\\d*$");
+        testProperties.setOtherOrgInvalidHidPattern("^(1005|1004)\\d*$");
         testProperties.setHidStoragePath("test-hid");
 
         when(checksumGenerator.generate(any(String.class))).thenReturn(1);

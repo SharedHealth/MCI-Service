@@ -50,12 +50,16 @@ public class MCIProperties {
     private String serverUrl;
     @Value("${PR_URL}")
     private String providerRegistryUrl;
-    @Value("${MCI_INVALID_HID_PATTERN}")
-    private String mciInvalidHidPattern;
-    @Value("${ORG_INVALID_HID_PATTERN}")
-    private String orgInvalidHidPattern;
     @Value("${HID_STORAGE_PATH}")
     private String hidStoragePath;
+
+    @Value("${OTHER_ORG_INVALID_HID_PATTERN}")
+    private String otherOrgInvalidHidPattern;
+    @Value("${OTHER_ORG_START_HID}")
+    private String otherOrgStartHid;
+    @Value("${OTHER_ORG_END_HID}")
+    private String otherOrgEndHid;
+
 
     @Value("${MCI_START_HID}")
     private String mciStartHid;
@@ -63,6 +67,8 @@ public class MCIProperties {
     private String mciEndHid;
     @Value("${MCI_ORG_CODE}")
     private String mciOrgCode;
+    @Value("${MCI_INVALID_HID_PATTERN}")
+    private String mciInvalidHidPattern;
 
     @Value("${HEALTH_ID_BLOCK_SIZE}")
     private String healthIdBlockSize;
@@ -204,12 +210,12 @@ public class MCIProperties {
         return Integer.parseInt(failedEventRetryLimit);
     }
 
-    public String getOrgInvalidHidPattern() {
-        return orgInvalidHidPattern;
+    public String getOtherOrgInvalidHidPattern() {
+        return otherOrgInvalidHidPattern;
     }
 
-    public void setOrgInvalidHidPattern(String orgInvalidHidPattern) {
-        this.orgInvalidHidPattern = orgInvalidHidPattern;
+    public void setOtherOrgInvalidHidPattern(String otherOrgInvalidHidPattern) {
+        this.otherOrgInvalidHidPattern = otherOrgInvalidHidPattern;
     }
     public String getHidStoragePath() {
         return hidStoragePath;
@@ -225,6 +231,22 @@ public class MCIProperties {
 
     public void setMciOrgCode(String mciOrgCode) {
         this.mciOrgCode = mciOrgCode;
+    }
+
+    public Long getOtherOrgEndHid() {
+        return Long.valueOf(otherOrgEndHid);
+    }
+
+    public Long getOtherOrgStartHid() {
+        return Long.valueOf(otherOrgStartHid);
+    }
+
+    public void setOtherOrgStartHid(String otherOrgStartHid) {
+        this.otherOrgStartHid = otherOrgStartHid;
+    }
+
+    public void setOtherOrgEndHid(String otherOrgEndHid) {
+        this.otherOrgEndHid = otherOrgEndHid;
     }
 
 
