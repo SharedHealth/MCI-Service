@@ -99,11 +99,14 @@ public class HealthIdControllerTest {
         String facilityID = "12345";
         Facility facility = new Facility(facilityID, "ABC", "UHC", "1024", "some");
         GeneratedHIDBlock hidBlock = new GeneratedHIDBlock(1000L, facilityID, 1000L, 1099L, 100L, "");
-
+        MCIProperties testProperties = new MCIProperties();
+        testProperties.setOtherOrgStartHid("1000");
+        testProperties.setOtherOrgEndHid("3000");
+        when(facilityService.find(facilityID)).thenReturn(facility);
         when(facilityService.find(facilityID)).thenReturn(facility);
         when(healthIdService.generateBlockForOrg(eq(start), eq(total), eq(facilityID), any(UserInfo.class))).thenReturn(hidBlock);
 
-        HealthIdController healthIdController = new HealthIdController(healthIdService, facilityService, mciProperties);
+        HealthIdController healthIdController = new HealthIdController(healthIdService, facilityService, testProperties);
         DeferredResult<String> result = healthIdController.generateBlockForOrg(facilityID, start, total);
 
         assertEquals("Generated 100 HIDs.", result.getResult());
@@ -116,11 +119,15 @@ public class HealthIdControllerTest {
         String facilityID = "12345";
         Facility facility = new Facility(facilityID, "ABC", "UHC", "1024", "some");
         GeneratedHIDBlock hidBlock = new GeneratedHIDBlock(1000L, facilityID, 1000L, 1099L, 100L, "");
+        MCIProperties testProperties = new MCIProperties();
+        testProperties.setOtherOrgStartHid("1000");
+        testProperties.setOtherOrgEndHid("3000");
+
 
         when(facilityService.find(facilityID)).thenReturn(facility);
         when(healthIdService.generateBlockForOrg(eq(start), eq(total), eq(facilityID), any(UserInfo.class))).thenReturn(hidBlock);
 
-        HealthIdController healthIdController = new HealthIdController(healthIdService, facilityService, mciProperties);
+        HealthIdController healthIdController = new HealthIdController(healthIdService, facilityService, testProperties);
         DeferredResult<String> result = healthIdController.generateBlockForOrg(facilityID, start, total);
 
         assertEquals("Can generate only 100 HIDs, because series exhausted. Use another series.", result.getResult());
@@ -135,9 +142,12 @@ public class HealthIdControllerTest {
         expectedEx.expectMessage("Invalid Organization:- 12345");
 
         String facilityId = "12345";
+        MCIProperties testProperties = new MCIProperties();
+        testProperties.setOtherOrgStartHid("1000");
+        testProperties.setOtherOrgEndHid("3000");
         when(facilityService.find(facilityId)).thenReturn(null);
 
-        HealthIdController healthIdController = new HealthIdController(healthIdService, facilityService, mciProperties);
+        HealthIdController healthIdController = new HealthIdController(healthIdService, facilityService, testProperties);
         healthIdController.generateBlockForOrg(facilityId, start, total);
         verify(healthIdService, never()).generateBlockForOrg(anyLong(), anyLong(), anyString(), any(UserInfo.class));
     }
@@ -146,9 +156,18 @@ public class HealthIdControllerTest {
     public void shouldNotGenerateBlockWhenTotalHIDsAreMoreThanTwoMillion() throws Exception {
         expectedEx.expect(InvalidRequestException.class);
         expectedEx.expectMessage("Total HIDs should not be more than 2000000");
+
         long start = 1000L, total = 2000001L;
-        HealthIdController healthIdController = new HealthIdController(healthIdService, facilityService, mciProperties);
-        healthIdController.generateBlockForOrg("", start, total);
+        String facilityID = "12345";
+        Facility facility = new Facility(facilityID, "ABC", "UHC", "1024", "some");
+        MCIProperties testProperties = new MCIProperties();
+        testProperties.setOtherOrgStartHid("1000");
+        testProperties.setOtherOrgEndHid("3000");
+        when(facilityService.find(facilityID)).thenReturn(facility);
+
+        HealthIdController healthIdController = new HealthIdController(healthIdService, facilityService, testProperties);
+        healthIdController.generateBlockForOrg(facilityID, start, total);
+
         verify(healthIdService, never()).generateBlockForOrg(anyLong(), anyLong(), anyString(), any(UserInfo.class));
     }
 
