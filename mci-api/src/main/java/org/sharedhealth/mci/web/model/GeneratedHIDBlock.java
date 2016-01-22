@@ -6,7 +6,6 @@ import org.springframework.data.cassandra.mapping.Table;
 
 import java.util.UUID;
 
-import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.*;
 import static org.springframework.cassandra.core.PrimaryKeyType.CLUSTERED;
 import static org.springframework.cassandra.core.PrimaryKeyType.PARTITIONED;
@@ -36,13 +35,13 @@ public class GeneratedHIDBlock {
     private String requestedBy;
 
     public GeneratedHIDBlock(Long seriesNo, String generatedFor, Long beginsAt, Long endsAt,
-                             Long totalHIDs, String requestedBy) {
+                             Long totalHIDs, String requestedBy, UUID generatedAt) {
         this.seriesNo = seriesNo;
         this.beginsAt = beginsAt;
         this.endsAt = endsAt;
         this.generatedFor = generatedFor;
         this.totalHIDs = totalHIDs;
-        this.generatedAt = timeBased();
+        this.generatedAt = generatedAt;
         this.requestedBy = requestedBy;
     }
 

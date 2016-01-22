@@ -4,6 +4,8 @@ import org.springframework.data.cassandra.mapping.Column;
 import org.springframework.data.cassandra.mapping.PrimaryKeyColumn;
 import org.springframework.data.cassandra.mapping.Table;
 
+import java.util.UUID;
+
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.*;
 import static org.springframework.cassandra.core.PrimaryKeyType.PARTITIONED;
 
@@ -13,6 +15,9 @@ public class OrgHealthId {
 
     @PrimaryKeyColumn(name = HEALTH_ID, ordinal = 0, type = PARTITIONED)
     private String healthId;
+
+    @Column(GENERATED_AT)
+    private UUID generatedAt;
 
     @Column(ALLOCATED_FOR)
     private String allocatedFor;
@@ -24,9 +29,10 @@ public class OrgHealthId {
     private boolean isUsed;
 
 
-    public OrgHealthId(String healthId, String allocatedFor, String usedAt) {
+    public OrgHealthId(String healthId, String allocatedFor, UUID generatedAt, String usedAt) {
         this.healthId = healthId;
         this.allocatedFor = allocatedFor;
+        this.generatedAt = generatedAt;
         this.usedAt = usedAt;
         this.isUsed = false;
     }
@@ -56,6 +62,7 @@ public class OrgHealthId {
 
         if (isUsed != that.isUsed) return false;
         if (healthId != null ? !healthId.equals(that.healthId) : that.healthId != null) return false;
+        if (generatedAt != null ? !generatedAt.equals(that.generatedAt) : that.generatedAt != null) return false;
         if (allocatedFor != null ? !allocatedFor.equals(that.allocatedFor) : that.allocatedFor != null) return false;
         return !(usedAt != null ? !usedAt.equals(that.usedAt) : that.usedAt != null);
 
@@ -64,6 +71,7 @@ public class OrgHealthId {
     @Override
     public int hashCode() {
         int result = healthId != null ? healthId.hashCode() : 0;
+        result = 31 * result + (generatedAt != null ? generatedAt.hashCode() : 0);
         result = 31 * result + (allocatedFor != null ? allocatedFor.hashCode() : 0);
         result = 31 * result + (usedAt != null ? usedAt.hashCode() : 0);
         result = 31 * result + (isUsed ? 1 : 0);

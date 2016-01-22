@@ -6,6 +6,7 @@ import org.mockito.Mock;
 import org.sharedhealth.mci.web.infrastructure.persistence.GeneratedHidBlockRepository;
 import org.sharedhealth.mci.web.model.GeneratedHIDBlock;
 
+import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -23,7 +24,7 @@ public class GeneratedHIDBlockServiceTest {
 
     @Test
     public void shouldAskRepositoryToSaveGivenHIDBlock() throws Exception {
-        GeneratedHIDBlock hidBlock = new GeneratedHIDBlock(91L, "MCI", 9100L, 9165L, 20L, null);
+        GeneratedHIDBlock hidBlock = new GeneratedHIDBlock(91L, "MCI", 9100L, 9165L, 20L, null, timeBased());
         when(generatedHidBlockRepository.saveGeneratedHidBlock(hidBlock)).thenReturn(null);
 
         hidBlockService.saveGeneratedHidBlock(hidBlock);

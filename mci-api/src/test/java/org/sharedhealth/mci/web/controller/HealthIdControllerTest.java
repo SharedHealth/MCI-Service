@@ -22,6 +22,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 
 import java.util.ArrayList;
 
+import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
@@ -56,7 +57,7 @@ public class HealthIdControllerTest {
 
     @Test
     public void testGenerate() {
-        GeneratedHIDBlock hidBlock = new GeneratedHIDBlock(1000L, "MCI", 1000L, 1099L, 100L, "");
+        GeneratedHIDBlock hidBlock = new GeneratedHIDBlock(1000L, "MCI", 1000L, 1099L, 100L, "", timeBased());
         when(healthIdService.generateAll(any(UserInfo.class))).thenReturn(hidBlock);
         HealthIdController healthIdController = new HealthIdController(healthIdService, facilityService, mciProperties);
         assertEquals("Generated 100 HIDs.", healthIdController.generate().getResult());
@@ -82,7 +83,7 @@ public class HealthIdControllerTest {
     @Test
     public void testGenerateRange() {
         long start = 1000L, total = 100L;
-        GeneratedHIDBlock hidBlock = new GeneratedHIDBlock(1000L, "MCI", 1000L, 1099L, 100L, "");
+        GeneratedHIDBlock hidBlock = new GeneratedHIDBlock(1000L, "MCI", 1000L, 1099L, 100L, "",  timeBased());
         MCIProperties testProperties = new MCIProperties();
         testProperties.setMciStartHid("1000");
         testProperties.setMciEndHid("3000");
@@ -98,7 +99,7 @@ public class HealthIdControllerTest {
         long start = 1000L, total = 100L;
         String facilityID = "12345";
         Facility facility = new Facility(facilityID, "ABC", "UHC", "1024", "some");
-        GeneratedHIDBlock hidBlock = new GeneratedHIDBlock(1000L, facilityID, 1000L, 1099L, 100L, "");
+        GeneratedHIDBlock hidBlock = new GeneratedHIDBlock(1000L, facilityID, 1000L, 1099L, 100L, "",  timeBased());
         MCIProperties testProperties = new MCIProperties();
         testProperties.setOtherOrgStartHid("1000");
         testProperties.setOtherOrgEndHid("3000");
@@ -118,7 +119,7 @@ public class HealthIdControllerTest {
         long start = 1000L, total = 150L;
         String facilityID = "12345";
         Facility facility = new Facility(facilityID, "ABC", "UHC", "1024", "some");
-        GeneratedHIDBlock hidBlock = new GeneratedHIDBlock(1000L, facilityID, 1000L, 1099L, 100L, "");
+        GeneratedHIDBlock hidBlock = new GeneratedHIDBlock(1000L, facilityID, 1000L, 1099L, 100L, "",  timeBased());
         MCIProperties testProperties = new MCIProperties();
         testProperties.setOtherOrgStartHid("1000");
         testProperties.setOtherOrgEndHid("3000");

@@ -19,8 +19,10 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
+import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static org.sharedhealth.mci.domain.util.DateUtil.SIMPLE_DATE_WITH_SECS_FORMAT;
 import static org.sharedhealth.mci.domain.util.DateUtil.toDateString;
 import static org.sharedhealth.mci.domain.util.JsonMapper.writeValueAsString;
@@ -58,7 +60,7 @@ public class HealthIdService {
         for (long i = start; i <= end; i++) {
             numberOfValidHIDs = saveIfValidMciHID(numberOfValidHIDs, i);
         }
-        return saveGeneratedBlock(start, end, numberOfValidHIDs, MCI_ORG_CODE, userInfo);
+        return saveGeneratedBlock(start, end, numberOfValidHIDs, MCI_ORG_CODE, userInfo, timeBased());
     }
 
     public GeneratedHIDBlock generateBlock(long start, long totalHIDs, UserInfo userInfo) {
@@ -74,10 +76,11 @@ public class HealthIdService {
             numberOfValidHIDs = saveIfValidMciHID(numberOfValidHIDs, possibleHID);
         }
         long end = startForBlock + i - 1;
-        return saveGeneratedBlock(startForBlock, end, numberOfValidHIDs, MCI_ORG_CODE, userInfo);
+        return saveGeneratedBlock(startForBlock, end, numberOfValidHIDs, MCI_ORG_CODE, userInfo, timeBased());
     }
 
     public GeneratedHIDBlock generateBlockForOrg(long start, long totalHIDs, String orgCode, UserInfo userInfo) {
+        UUID generatedAt = timeBased();
         long numberOfValidHIDs = 0L;
         long seriesNo = identifySeriesNo(start);
         long startForBlock = identifyStartInSeries(seriesNo);
@@ -89,9 +92,9 @@ public class HealthIdService {
             if (!isPartOfSeries(seriesNo, possibleHID)) {
                 break;
             }
-            numberOfValidHIDs = saveIfValidOrgHID(orgCode, numberOfValidHIDs, hidFile, possibleHID);
+            numberOfValidHIDs = saveIfValidOrgHID(orgCode, numberOfValidHIDs, hidFile, possibleHID, generatedAt);
         }
-        return saveGeneratedBlock(startForBlock, startForBlock + i - 1, numberOfValidHIDs, orgCode, userInfo);
+        return saveGeneratedBlock(startForBlock, startForBlock + i - 1, numberOfValidHIDs, orgCode, userInfo, generatedAt);
     }
 
     public synchronized List<MciHealthId> getNextBlock() {
@@ -116,13 +119,13 @@ public class HealthIdService {
         return numberOfValidHids;
     }
 
-    private long saveIfValidOrgHID(String orgCode, long numberOfValidHIDs, File hidFile, long possibleHID) {
+    private long saveIfValidOrgHID(String orgCode, long numberOfValidHIDs, File hidFile, long possibleHID, UUID generatedAt) {
         String possibleHid = String.valueOf(possibleHID);
         if (!orgInvalidHidPattern.matcher(possibleHid).find()) {
             String newHealthId = possibleHid + checksumGenerator.generate(possibleHid.substring(1));
             if (shouldSaveHID(newHealthId)) {
                 numberOfValidHIDs += 1;
-                healthIdRepository.saveOrgHealthId(new OrgHealthId(newHealthId, orgCode, null));
+                healthIdRepository.saveOrgHealthId(new OrgHealthId(newHealthId, orgCode, generatedAt, null));
                 FileUtil.addHidToFile(hidFile, newHealthId);
             }
         }
@@ -142,10 +145,10 @@ public class HealthIdService {
         return FileUtil.createHIDFile(hidStorageDirPath, fileName);
     }
 
-    private GeneratedHIDBlock saveGeneratedBlock(Long start, Long end, Long numberOfValidHids, String orgCode, UserInfo userInfo) {
+    private GeneratedHIDBlock saveGeneratedBlock(Long start, Long end, Long numberOfValidHids, String orgCode, UserInfo userInfo, UUID generatedAt) {
         long seriesNo = identifySeriesNo(start);
         RequesterDetails requesterDetails = getRequesterDetails(userInfo);
-        GeneratedHIDBlock generatedHIDBlock = new GeneratedHIDBlock(seriesNo, orgCode, start, end, numberOfValidHids, writeValueAsString(requesterDetails));
+        GeneratedHIDBlock generatedHIDBlock = new GeneratedHIDBlock(seriesNo, orgCode, start, end, numberOfValidHids, writeValueAsString(requesterDetails), generatedAt);
         if (numberOfValidHids > 0) {
             generatedHidBlockService.saveGeneratedHidBlock(generatedHIDBlock);
         }

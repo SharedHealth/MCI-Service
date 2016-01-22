@@ -17,6 +17,7 @@ import org.springframework.data.cassandra.core.CassandraOperations;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -70,7 +71,7 @@ public class MCIHealthIdRepositoryTest {
     @Test
     public void shouldSaveOrgHidAsynchronously() {
         HealthIdRepository healthIdRepository = new HealthIdRepository(cqlTemplate);
-        healthIdRepository.saveOrgHealthId(new OrgHealthId("98015440161", "other-org", null));
+        healthIdRepository.saveOrgHealthId(new OrgHealthId("98015440161", "other-org", timeBased(), null));
         verify(cqlTemplate, times(1)).executeAsynchronously(any(Insert.class));
     }
 

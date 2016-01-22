@@ -1,6 +1,10 @@
 package org.sharedhealth.mci.web.service;
 
 import org.apache.tomcat.util.http.fileupload.FileUtils;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
+import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,11 +22,10 @@ import org.sharedhealth.mci.web.model.MciHealthId;
 import org.sharedhealth.mci.web.model.OrgHealthId;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
+import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
@@ -290,7 +293,7 @@ public class HealthIdServiceTest {
         testProperties.setMciInvalidHidPattern("^(105|104)\\d*$");
         testProperties.setOtherOrgInvalidHidPattern("^(1005|1004)\\d*$");
         testProperties.setHidStoragePath("test-hid");
-        GeneratedHIDBlock generatedHIDBlock = new GeneratedHIDBlock(1000L, MCI_ORG_CODE, 1000L, 1069L, 20L, null);
+        GeneratedHIDBlock generatedHIDBlock = new GeneratedHIDBlock(1000L, MCI_ORG_CODE, 1000L, 1069L, 20L, null, timeBased());
 
         when(generatedHidBlockService.getPreGeneratedHidBlocks(1000L)).thenReturn(asList(generatedHIDBlock));
         when(healthIdRepository.saveMciHealthId(any(MciHealthId.class))).thenReturn(MciHealthId.NULL_HID);
@@ -378,7 +381,7 @@ public class HealthIdServiceTest {
         testProperties.setOtherOrgInvalidHidPattern("^(1005|1004)\\d*$");
         testProperties.setHidStoragePath("test-hid");
 
-        GeneratedHIDBlock generatedHIDBlock = new GeneratedHIDBlock(1000L, MCI_ORG_CODE, 1000L, 1089L, 80L, null);
+        GeneratedHIDBlock generatedHIDBlock = new GeneratedHIDBlock(1000L, MCI_ORG_CODE, 1000L, 1089L, 80L, null, timeBased());
 
         when(generatedHidBlockService.getPreGeneratedHidBlocks(1000L)).thenReturn(asList(generatedHIDBlock));
         when(healthIdRepository.saveMciHealthId(any(MciHealthId.class))).thenReturn(MciHealthId.NULL_HID);
@@ -404,6 +407,9 @@ public class HealthIdServiceTest {
 
     @Test
     public void shouldGenerateHIDsForGivenOrganization() throws Exception {
+        final Date date = new DateTime().toDate();
+        org.joda.time.DateTimeUtils.setCurrentMillisFixed(date.getTime());
+
         long start = 10000;
         long totalHIDs = 100;
         String orgCode = "OTHER-ORG";
@@ -420,11 +426,23 @@ public class HealthIdServiceTest {
         verify(healthIdRepository, times(100)).saveOrgHealthId(any(OrgHealthId.class));
         verify(checksumGenerator, times(100)).generate(anyString());
 
-        verify(healthIdRepository, times(1)).saveOrgHealthId(new OrgHealthId("100001", orgCode, null));
-        verify(healthIdRepository, never()).saveOrgHealthId(new OrgHealthId("100401", orgCode, null));
-        verify(healthIdRepository, never()).saveOrgHealthId(new OrgHealthId("100501", orgCode, null));
-        verify(healthIdRepository, times(1)).saveOrgHealthId(new OrgHealthId("101191", orgCode, null));
+        verify(healthIdRepository, times(1)).saveOrgHealthId(argThat(orgHID("100001", orgCode)));
+        verify(healthIdRepository, never()).saveOrgHealthId(argThat(orgHID("100401", orgCode)));
+        verify(healthIdRepository, never()).saveOrgHealthId(argThat(orgHID("100501", orgCode)));
+        verify(healthIdRepository, times(1)).saveOrgHealthId(argThat(orgHID("101191", orgCode)));
     }
+
+    Matcher<OrgHealthId> orgHID(final String healthId, final String orgCode) {
+        return new TypeSafeMatcher<OrgHealthId>() {
+            public boolean matchesSafely(OrgHealthId orgHealthId) {
+                return healthId.equals(orgHealthId.getHealthId()) && orgCode.equals(orgHealthId.getAllocatedFor());
+            }
+            public void describeTo(Description description) {
+                description.appendText("a OrgHealthID with HID" + healthId);
+            }
+        };
+    }
+
 
     @Test
     public void shouldSaveTheGeneratedBlockForGivenOrganization() throws Exception {
@@ -465,7 +483,7 @@ public class HealthIdServiceTest {
         testProperties.setHidStoragePath("test-hid");
 
         when(checksumGenerator.generate(any(String.class))).thenReturn(1);
-        when(healthIdRepository.findOrgHealthId(anyString())).thenReturn(null, new OrgHealthId("100011", "XYZ", null), null);
+        when(healthIdRepository.findOrgHealthId(anyString())).thenReturn(null, new OrgHealthId("100011", "XYZ", any(UUID.class), null), null);
 
         HealthIdService healthIdService = new HealthIdService(testProperties, healthIdRepository, checksumGenerator, generatedHidBlockService);
         healthIdService.generateBlockForOrg(start, totalHIDs, orgCode, getUserInfo());
