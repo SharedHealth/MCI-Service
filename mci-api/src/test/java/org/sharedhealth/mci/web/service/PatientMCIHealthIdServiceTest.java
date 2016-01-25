@@ -116,7 +116,7 @@ public class PatientMCIHealthIdServiceTest {
             MciHealthIds.add(new MciHealthId(String.valueOf(1213000 + i)));
         }
         when(healthIdService.getNextBlock()).thenReturn(MciHealthIds);
-        doNothing().when(healthIdService).markUsed(any(MciHealthId.class));
+        doNothing().when(healthIdService).markMCIHealthIdUsed(any(MciHealthId.class));
         final PatientHealthIdService patientHealthIdService = new PatientHealthIdService(healthIdService, mciProperties);
         patientHealthIdService.replenishIfNeeded();
         int before = patientHealthIdService.getHealthIdBlockSize();
@@ -124,6 +124,6 @@ public class PatientMCIHealthIdServiceTest {
         patientHealthIdService.markUsed(nextMciHealthId);
         int after = patientHealthIdService.getHealthIdBlockSize();
         assertEquals(before, after + 1);
-        verify(healthIdService, times(1)).markUsed(any(MciHealthId.class));
+        verify(healthIdService, times(1)).markMCIHealthIdUsed(any(MciHealthId.class));
     }
 }

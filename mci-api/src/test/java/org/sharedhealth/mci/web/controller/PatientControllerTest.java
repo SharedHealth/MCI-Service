@@ -3,29 +3,27 @@ package org.sharedhealth.mci.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.sharedhealth.mci.domain.model.*;
-import org.sharedhealth.mci.domain.repository.PatientRepository;
-import org.sharedhealth.mci.domain.service.LocationService;
-import org.sharedhealth.mci.web.exception.HealthIdExistsException;
+import org.sharedhealth.mci.utils.HttpUtil;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.infrastructure.security.TokenAuthentication;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
 import org.sharedhealth.mci.web.infrastructure.security.UserProfile;
+import org.sharedhealth.mci.web.mapper.ProviderResponse;
 import org.sharedhealth.mci.web.service.PatientService;
-import org.sharedhealth.mci.web.service.SettingService;
+import org.sharedhealth.mci.web.service.ProviderService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
-import org.springframework.web.util.NestedServletException;
 
 import java.text.ParseException;
 import java.util.HashMap;
@@ -37,11 +35,13 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.domain.util.DateUtil.parseDate;
 import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.MCI_USER_GROUP;
+import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.PROVIDER_GROUP;
 import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -58,16 +58,9 @@ public class PatientControllerTest {
     @Mock
     private PatientService patientService;
     @Mock
-    private LocationService locationService;
-    @Mock
-    private SettingService settingService;
-    @Mock
-    private PatientRepository patientRepository;
-    @Mock
     private LocalValidatorFactoryBean localValidatorFactoryBean;
     @Mock
-    private SecurityContext securityContext;
-
+    private ProviderService providerService;
     private MockMvc mockMvc;
 
     @Before
@@ -91,30 +84,73 @@ public class PatientControllerTest {
         PatientData patient = buildPatient();
         String healthId = "healthId-100";
         MCIResponse mciResponse = new MCIResponse(healthId, CREATED);
-        when(locationService.findByGeoCode(patient.getAddress().getGeoCode())).thenReturn(new LocationData());
-        when(patientService.create(patient)).thenReturn(mciResponse);
+        when(patientService.createPatientForMCI(patient)).thenReturn(mciResponse);
 
         String json = new ObjectMapper().writeValueAsString(patient);
         mockMvc.perform(post(API_END_POINT).content(json).contentType(APPLICATION_JSON))
                 .andExpect(request().asyncResult(new ResponseEntity<>(mciResponse, CREATED)));
-        verify(patientService).create(patient);
+        verify(patientService).createPatientForMCI(patient);
     }
 
     @Test
-    public void shouldThrowExceptionIfHealthIdProvided() throws Exception {
-        PatientData patient = buildPatient();
-        patient.setHealthId("FUBAR");
-        String json = new ObjectMapper().writeValueAsString(patient);
+    public void shouldCreatePatientForGivenOrganization() throws Exception {
         String healthId = "healthId-100";
+        String clientIdKey = "12345";
+        PatientData patient = buildPatient();
+        patient.setHealthId(healthId);
         MCIResponse mciResponse = new MCIResponse(healthId, CREATED);
-        when(locationService.findByGeoCode(patient.getAddress().getGeoCode())).thenReturn(new LocationData());
-        when(patientService.create(patient)).thenReturn(mciResponse);
-        try {
-            mockMvc.perform(post(API_END_POINT).content(json).contentType(APPLICATION_JSON))
-                    .andExpect(request().asyncResult(new ResponseEntity<>(mciResponse, CREATED)));
-        } catch (NestedServletException e) {
-            assertEquals(HealthIdExistsException.class, e.getCause().getClass());
-        }
+        when(patientService.createPatientForOrg(patient, USER_INFO_FACILITY)).thenReturn(mciResponse);
+
+        String json = new ObjectMapper().writeValueAsString(patient);
+
+        mockMvc.perform(post(API_END_POINT)
+                .header(HttpUtil.CLIENT_ID_KEY, clientIdKey)
+                .content(json).contentType(APPLICATION_JSON))
+                .andExpect(request()
+                        .asyncResult(new ResponseEntity<>(mciResponse, CREATED)));
+
+        verify(patientService).createPatientForOrg(patient, USER_INFO_FACILITY);
+    }
+
+    @Test
+    @Ignore
+    public void shouldIdentifyFacilityForProvider() throws Exception {
+        String providerId = "11111";
+
+        UserProfile userProfile = new UserProfile("provider", providerId, null);
+        UserInfo userInfo = new UserInfo("102", "ABC", "abc@mail", 1, true, "111100", asList(PROVIDER_GROUP), asList(userProfile));
+        SecurityContextHolder.getContext().setAuthentication(new TokenAuthentication(userInfo, true));
+
+        String healthId = "healthId-100";
+        String clientIdKey = "12345";
+        PatientData patient = buildPatient();
+        patient.setHealthId(healthId);
+        MCIResponse mciResponse = new MCIResponse(healthId, CREATED);
+
+        when(patientService.createPatientForOrg(patient, USER_INFO_FACILITY)).thenReturn(mciResponse);
+        ProviderResponse response = getProviderResponse(providerId);
+        when(providerService.find(providerId)).thenReturn(response);
+
+        String json = new ObjectMapper().writeValueAsString(patient);
+
+        mockMvc.perform(post(API_END_POINT)
+                .header(HttpUtil.CLIENT_ID_KEY, clientIdKey)
+                .content(json).contentType(APPLICATION_JSON))
+                .andExpect(request()
+                        .asyncResult(new ResponseEntity<>(mciResponse, CREATED)));
+
+        verify(providerService, times(1)).find(providerId);
+        verify(patientService).createPatientForOrg(patient, "10012");
+    }
+
+    private ProviderResponse getProviderResponse(String providerId) {
+        ProviderResponse response = new ProviderResponse();
+        response.setId(providerId);
+        response.setName("ABC");
+        HashMap<String, String> organization = new HashMap<>();
+        organization.put("reference", "http://fr.com/10012.json");
+        response.setOrganization(organization);
+        return response;
     }
 
     @Test
@@ -183,7 +219,6 @@ public class PatientControllerTest {
         String json = new ObjectMapper().writeValueAsString(patient);
         String healthId = "healthId-100";
         MCIResponse mciResponse = new MCIResponse(healthId, ACCEPTED);
-        when(locationService.findByGeoCode(patient.getAddress().getGeoCode())).thenReturn(new LocationData());
         when(patientService.update(patient, healthId)).thenReturn(mciResponse);
 
         mockMvc.perform(put(buildEndPointWithHealthId(healthId), healthId)
@@ -268,7 +303,7 @@ public class PatientControllerTest {
         PatientData patient = buildPatient();
         String healthId = "healthId-100";
         MCIResponse mciResponse = new MCIResponse(healthId, OK);
-        when(patientService.create(patient)).thenReturn(mciResponse);
+        when(patientService.createPatientForMCI(patient)).thenReturn(mciResponse);
 
         String json = writeValueAsString(patient);
         MvcResult mvcResult = mockMvc.perform(post(API_END_POINT).content(json)
@@ -280,7 +315,7 @@ public class PatientControllerTest {
                 .andExpect(status().isOk());
 
         ArgumentCaptor<PatientData> argument = ArgumentCaptor.forClass(PatientData.class);
-        verify(patientService).create(argument.capture());
+        verify(patientService).createPatientForMCI(argument.capture());
 
         Requester requester = argument.getValue().getRequester();
         assertNotNull(requester);

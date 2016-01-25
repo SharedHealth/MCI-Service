@@ -105,8 +105,11 @@ public class HealthIdService {
         return healthIdRepository.getNextBlock(blockSize);
     }
 
-    public void markUsed(MciHealthId nextMciHealthId) {
+    public void markMCIHealthIdUsed(MciHealthId nextMciHealthId) {
         healthIdRepository.removedUsedHid(nextMciHealthId);
+        OrgHealthId orgHealthId = new OrgHealthId(nextMciHealthId.getHid(), MCI_ORG_CODE, null, timeBased());
+        orgHealthId.markUsed();
+        healthIdRepository.saveOrgHealthId(orgHealthId);
     }
 
     private long saveIfValidMciHID(long numberOfValidHids, long currentNumber) {
@@ -133,7 +136,7 @@ public class HealthIdService {
     }
 
     private boolean shouldSaveHID(String newHealthId) {
-        return healthIdRepository.findOrgHealthId(newHealthId) == null;
+        return findOrgHealthId(newHealthId) == null;
     }
 
     private File createFileForOrg(String orgCode) {
@@ -183,5 +186,14 @@ public class HealthIdService {
         String startPrefix = startAsText.substring(0, DIGITS_FOR_BLOCK_SEPARATION);
         String startSuffix = startAsText.substring(DIGITS_FOR_BLOCK_SEPARATION, startAsText.length());
         return Long.parseLong(String.valueOf(startPrefix + startSuffix.replaceAll(".", "0")));
+    }
+
+    public OrgHealthId findOrgHealthId(String healthId) {
+        return healthIdRepository.findOrgHealthId(healthId);
+    }
+
+    public void markOrgHealthIdUsed(OrgHealthId orgHealthId) {
+        orgHealthId.markUsed();
+        healthIdRepository.saveOrgHealthId(orgHealthId);
     }
 }

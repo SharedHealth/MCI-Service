@@ -44,13 +44,13 @@ public class HealthIdRepository extends BaseRepository {
 
     public OrgHealthId saveOrgHealthId(OrgHealthId orgHealthId) {
         Insert insertQuery = getInsertQuery(orgHealthId);
-        cassandraOps.executeAsynchronously(insertQuery.ifNotExists());
+        cassandraOps.executeAsynchronously(insertQuery);
         return orgHealthId;
     }
 
     public OrgHealthId saveOrgHealthIdSync(OrgHealthId orgHealthId) {
         Insert insertQuery = getInsertQuery(orgHealthId);
-        cassandraOps.execute(insertQuery.ifNotExists());
+        cassandraOps.execute(insertQuery);
         return orgHealthId;
     }
 

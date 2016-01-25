@@ -2,6 +2,7 @@ package org.sharedhealth.mci.web.service;
 
 import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.sharedhealth.mci.web.model.MciHealthId;
+import org.sharedhealth.mci.web.model.OrgHealthId;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -45,11 +46,18 @@ public class PatientHealthIdService {
     }
 
     public void markUsed(MciHealthId nextMciHealthId) {
-        healthIdService.markUsed(nextMciHealthId);
+        healthIdService.markMCIHealthIdUsed(nextMciHealthId);
     }
 
     public int getHealthIdBlockSize() {
         return MciHealthIds.size();
     }
 
+    public OrgHealthId findOrgHealthId(String healthId) {
+        return healthIdService.findOrgHealthId(healthId);
+    }
+
+    public void markOrgHealthIdUsed(OrgHealthId orgHealthId) {
+        healthIdService.markOrgHealthIdUsed(orgHealthId);
+    }
 }

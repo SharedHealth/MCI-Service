@@ -4,12 +4,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.sharedhealth.mci.domain.model.*;
 import org.sharedhealth.mci.domain.repository.PatientFeedRepository;
 import org.sharedhealth.mci.domain.repository.PatientRepository;
 import org.sharedhealth.mci.web.exception.InsufficientPrivilegeException;
 import org.sharedhealth.mci.web.mapper.PendingApprovalListResponse;
 import org.sharedhealth.mci.web.model.MciHealthId;
+import org.sharedhealth.mci.web.model.OrgHealthId;
+import org.springframework.http.HttpStatus;
 
 import java.util.*;
 
@@ -36,19 +39,21 @@ public class PatientServiceTest {
     @Mock
     PatientHealthIdService patientHealthIdService;
     @Mock
-    MCIResponse mciResponse;
+    private MCIProperties mciProperties;
+    @Mock
+    private MCIResponse mciResponse;
 
     private PatientService patientService;
 
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-        patientService = new PatientService(patientRepository, feedRepository, settingService, patientHealthIdService);
+        patientService = new PatientService(patientRepository, feedRepository, settingService, patientHealthIdService, mciProperties);
     }
 
     @Test
     public void shouldCreateNewPatient() throws Exception {
-        PatientData existingPatient = new PatientData();
+        PatientData patient = new PatientData();
         MciHealthId MciHealthId = new MciHealthId("FUBAR");
         when(patientHealthIdService.getNextHealthId()).thenReturn(MciHealthId);
         SearchQuery searchByNidQuery = new SearchQuery();
@@ -59,17 +64,17 @@ public class PatientServiceTest {
         searchByBrnQuery.setBin_brn("brn-100");
         when(patientRepository.findAllByQuery(searchByBrnQuery)).thenReturn(new ArrayList<PatientData>());
 
-        existingPatient.setNationalId("nid-100");
-        existingPatient.setBirthRegistrationNumber("brn-100");
+        patient.setNationalId("nid-100");
+        patient.setBirthRegistrationNumber("brn-100");
 
         when(mciResponse.getHttpStatus()).thenReturn(201);
-        when(patientRepository.create(existingPatient)).thenReturn(mciResponse);
+        when(patientRepository.create(patient)).thenReturn(mciResponse);
 
-        patientService.create(existingPatient);
+        patientService.createPatientForMCI(patient);
         InOrder inOrder = inOrder(patientRepository);
         inOrder.verify(patientRepository).findAllByQuery(searchByNidQuery);
         inOrder.verify(patientRepository).findAllByQuery(searchByBrnQuery);
-        inOrder.verify(patientRepository).create(existingPatient);
+        inOrder.verify(patientRepository).create(patient);
 
         verify(patientHealthIdService).getNextHealthId();
     }
@@ -93,7 +98,7 @@ public class PatientServiceTest {
         when(mciResponse.getHttpStatus()).thenReturn(201);
         when(patientRepository.create(existingPatient)).thenReturn(mciResponse);
 
-        patientService.create(existingPatient);
+        patientService.createPatientForMCI(existingPatient);
         InOrder inOrder = inOrder(patientRepository);
         inOrder.verify(patientRepository).findAllByQuery(searchByNidQuery);
         inOrder.verify(patientRepository).findAllByQuery(searchByBrnQuery);
@@ -123,7 +128,7 @@ public class PatientServiceTest {
         when(mciResponse.getHttpStatus()).thenReturn(403);
         when(patientRepository.create(existingPatient)).thenReturn(mciResponse);
 
-        patientService.create(existingPatient);
+        patientService.createPatientForMCI(existingPatient);
         InOrder inOrder = inOrder(patientRepository);
         inOrder.verify(patientRepository).findAllByQuery(searchByNidQuery);
         inOrder.verify(patientRepository).findAllByQuery(searchByBrnQuery);
@@ -153,12 +158,187 @@ public class PatientServiceTest {
         requestData.setNationalId("nid-100");
         requestData.setBirthRegistrationNumber("brn-100");
 
-        patientService.create(requestData);
+        patientService.createPatientForMCI(requestData);
         InOrder inOrder = inOrder(patientRepository);
         inOrder.verify(patientRepository).findAllByQuery(searchByNidQuery);
         inOrder.verify(patientRepository).findAllByQuery(searchByBrnQuery);
         inOrder.verify(patientRepository).update(requestData, "hid-100");
         inOrder.verify(patientRepository, never()).create(any(PatientData.class));
+    }
+
+    @Test
+    public void shouldCreatePatientForGivenOrganization() throws Exception {
+        String clientId = "12345";
+        String healthId = "hid-1";
+        PatientData patient = new PatientData();
+
+        SearchQuery searchByNidQuery = new SearchQuery();
+        searchByNidQuery.setNid("nid-100");
+        when(patientRepository.findAllByQuery(searchByNidQuery)).thenReturn(new ArrayList<PatientData>());
+
+        SearchQuery searchByBrnQuery = new SearchQuery();
+        searchByBrnQuery.setBin_brn("brn-100");
+        when(patientRepository.findAllByQuery(searchByBrnQuery)).thenReturn(new ArrayList<PatientData>());
+
+        patient.setNationalId("nid-100");
+        patient.setBirthRegistrationNumber("brn-100");
+        patient.setHealthId(healthId);
+
+        when(mciProperties.getOtherOrgInvalidHidPattern()).thenReturn("");
+        mciResponse = new MCIResponse(healthId, HttpStatus.CREATED);
+        when(patientRepository.create(patient)).thenReturn(mciResponse);
+        OrgHealthId orgHealthId = new OrgHealthId(healthId, clientId, timeBased(), null);
+        when(patientHealthIdService.findOrgHealthId(healthId)).thenReturn(orgHealthId);
+
+        MCIResponse mciResponse = patientService.createPatientForOrg(patient, clientId);
+
+        assertEquals(healthId, mciResponse.getId());
+        assertEquals(HttpStatus.CREATED.value(), mciResponse.getHttpStatus());
+        InOrder inOrder = inOrder(patientRepository, patientHealthIdService);
+        inOrder.verify(patientRepository).findAllByQuery(searchByNidQuery);
+        inOrder.verify(patientRepository).findAllByQuery(searchByBrnQuery);
+        inOrder.verify(patientHealthIdService).findOrgHealthId(healthId);
+        inOrder.verify(patientRepository).create(patient);
+        inOrder.verify(patientHealthIdService).markOrgHealthIdUsed(orgHealthId);
+    }
+
+    @Test
+    public void shouldNotCreatePatientWhenNotAValidOrganizationHealthId() throws Exception {
+        String clientId = "12345";
+        String healthId = "hid-1";
+        PatientData patient = new PatientData();
+
+        SearchQuery searchByNidQuery = new SearchQuery();
+        searchByNidQuery.setNid("nid-100");
+        when(patientRepository.findAllByQuery(searchByNidQuery)).thenReturn(new ArrayList<PatientData>());
+
+        SearchQuery searchByBrnQuery = new SearchQuery();
+        searchByBrnQuery.setBin_brn("brn-100");
+        when(patientRepository.findAllByQuery(searchByBrnQuery)).thenReturn(new ArrayList<PatientData>());
+
+        patient.setNationalId("nid-100");
+        patient.setBirthRegistrationNumber("brn-100");
+        patient.setHealthId(healthId);
+
+        when(mciProperties.getOtherOrgInvalidHidPattern()).thenReturn(".*");
+
+        MCIResponse mciResponse = patientService.createPatientForOrg(patient, clientId);
+
+        assertEquals("The HealthId for patient is not valid", mciResponse.getId());
+        assertEquals(HttpStatus.BAD_REQUEST.value(), mciResponse.getHttpStatus());
+
+        InOrder inOrder = inOrder(patientRepository, patientHealthIdService);
+        inOrder.verify(patientRepository).findAllByQuery(searchByNidQuery);
+        inOrder.verify(patientRepository).findAllByQuery(searchByBrnQuery);
+        inOrder.verify(patientHealthIdService, never()).findOrgHealthId(healthId);
+        inOrder.verify(patientRepository, never()).create(patient);
+        inOrder.verify(patientHealthIdService, never()).markOrgHealthIdUsed(any(OrgHealthId.class));
+    }
+
+    @Test
+    public void shouldNotCreatePatientWhenGivenHIDIsNotPresent() throws Exception {
+        String clientId = "12345";
+        String healthId = "hid-1";
+        PatientData patient = new PatientData();
+
+        SearchQuery searchByNidQuery = new SearchQuery();
+        searchByNidQuery.setNid("nid-100");
+        when(patientRepository.findAllByQuery(searchByNidQuery)).thenReturn(new ArrayList<PatientData>());
+
+        SearchQuery searchByBrnQuery = new SearchQuery();
+        searchByBrnQuery.setBin_brn("brn-100");
+        when(patientRepository.findAllByQuery(searchByBrnQuery)).thenReturn(new ArrayList<PatientData>());
+
+        patient.setNationalId("nid-100");
+        patient.setBirthRegistrationNumber("brn-100");
+        patient.setHealthId(healthId);
+
+        when(mciProperties.getOtherOrgInvalidHidPattern()).thenReturn("");
+        when(patientHealthIdService.findOrgHealthId(healthId)).thenReturn(null);
+
+        MCIResponse mciResponse = patientService.createPatientForOrg(patient, clientId);
+
+        assertEquals("The HealthId is not present", mciResponse.getId());
+        assertEquals(HttpStatus.BAD_REQUEST.value(), mciResponse.getHttpStatus());
+
+        InOrder inOrder = inOrder(patientRepository, patientHealthIdService);
+        inOrder.verify(patientRepository).findAllByQuery(searchByNidQuery);
+        inOrder.verify(patientRepository).findAllByQuery(searchByBrnQuery);
+        inOrder.verify(patientHealthIdService).findOrgHealthId(healthId);
+        inOrder.verify(patientRepository, never()).create(patient);
+        inOrder.verify(patientHealthIdService, never()).markOrgHealthIdUsed(any(OrgHealthId.class));
+    }
+
+    @Test
+    public void shouldNotCreatePatientWhenGivenHIDIsAlreadyUsed() throws Exception {
+        String clientId = "12345";
+        String healthId = "hid-1";
+        PatientData patient = new PatientData();
+
+        SearchQuery searchByNidQuery = new SearchQuery();
+        searchByNidQuery.setNid("nid-100");
+        when(patientRepository.findAllByQuery(searchByNidQuery)).thenReturn(new ArrayList<PatientData>());
+
+        SearchQuery searchByBrnQuery = new SearchQuery();
+        searchByBrnQuery.setBin_brn("brn-100");
+        when(patientRepository.findAllByQuery(searchByBrnQuery)).thenReturn(new ArrayList<PatientData>());
+
+        patient.setNationalId("nid-100");
+        patient.setBirthRegistrationNumber("brn-100");
+        patient.setHealthId(healthId);
+
+        when(mciProperties.getOtherOrgInvalidHidPattern()).thenReturn("");
+        OrgHealthId orgHealthId = new OrgHealthId(healthId, clientId, timeBased(), null);
+        orgHealthId.markUsed();
+        when(patientHealthIdService.findOrgHealthId(healthId)).thenReturn(orgHealthId);
+
+        MCIResponse mciResponse = patientService.createPatientForOrg(patient, clientId);
+
+        assertEquals("The HealthId is already used", mciResponse.getId());
+        assertEquals(HttpStatus.BAD_REQUEST.value(), mciResponse.getHttpStatus());
+
+        InOrder inOrder = inOrder(patientRepository, patientHealthIdService);
+        inOrder.verify(patientRepository).findAllByQuery(searchByNidQuery);
+        inOrder.verify(patientRepository).findAllByQuery(searchByBrnQuery);
+        inOrder.verify(patientHealthIdService).findOrgHealthId(healthId);
+        inOrder.verify(patientRepository, never()).create(patient);
+        inOrder.verify(patientHealthIdService, never()).markOrgHealthIdUsed(any(OrgHealthId.class));
+    }
+
+    @Test
+    public void shouldNotCreatePatientWhenGivenHIDDoesNotBelongToClient() throws Exception {
+        String clientId = "12345";
+        String healthId = "hid-1";
+        PatientData patient = new PatientData();
+
+        SearchQuery searchByNidQuery = new SearchQuery();
+        searchByNidQuery.setNid("nid-100");
+        when(patientRepository.findAllByQuery(searchByNidQuery)).thenReturn(new ArrayList<PatientData>());
+
+        SearchQuery searchByBrnQuery = new SearchQuery();
+        searchByBrnQuery.setBin_brn("brn-100");
+        when(patientRepository.findAllByQuery(searchByBrnQuery)).thenReturn(new ArrayList<PatientData>());
+
+        patient.setNationalId("nid-100");
+        patient.setBirthRegistrationNumber("brn-100");
+        patient.setHealthId(healthId);
+
+        when(mciProperties.getOtherOrgInvalidHidPattern()).thenReturn("");
+        OrgHealthId orgHealthId = new OrgHealthId(healthId, "other", timeBased(), null);
+
+        when(patientHealthIdService.findOrgHealthId(healthId)).thenReturn(orgHealthId);
+
+        MCIResponse mciResponse = patientService.createPatientForOrg(patient, clientId);
+
+        assertEquals("The HealthId is not for given organization", mciResponse.getId());
+        assertEquals(HttpStatus.BAD_REQUEST.value(), mciResponse.getHttpStatus());
+
+        InOrder inOrder = inOrder(patientRepository, patientHealthIdService);
+        inOrder.verify(patientRepository).findAllByQuery(searchByNidQuery);
+        inOrder.verify(patientRepository).findAllByQuery(searchByBrnQuery);
+        inOrder.verify(patientHealthIdService).findOrgHealthId(healthId);
+        inOrder.verify(patientRepository, never()).create(patient);
+        inOrder.verify(patientHealthIdService, never()).markOrgHealthIdUsed(any(OrgHealthId.class));
     }
 
     @Test

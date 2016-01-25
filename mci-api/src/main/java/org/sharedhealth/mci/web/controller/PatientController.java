@@ -10,7 +10,6 @@ import org.sharedhealth.mci.domain.model.PatientSummaryData;
 import org.sharedhealth.mci.domain.model.SearchQuery;
 import org.sharedhealth.mci.domain.validation.group.RequiredGroup;
 import org.sharedhealth.mci.domain.validation.group.RequiredOnUpdateGroup;
-import org.sharedhealth.mci.web.exception.HealthIdExistsException;
 import org.sharedhealth.mci.web.exception.SearchQueryParameterException;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
@@ -29,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.groups.Default;
 import java.util.ArrayList;
@@ -36,7 +36,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import static java.lang.String.format;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.sharedhealth.mci.domain.constant.ErrorConstants.ERROR_CODE_INVALID;
 import static org.sharedhealth.mci.domain.constant.JsonConstants.HID;
 import static org.springframework.http.HttpStatus.OK;
@@ -57,14 +56,9 @@ public class PatientController extends MciController {
 
     @PreAuthorize("hasAnyRole('ROLE_PROVIDER', 'ROLE_FACILITY')")
     @RequestMapping(method = POST, consumes = {APPLICATION_JSON_VALUE})
-    public DeferredResult<ResponseEntity<MCIResponse>> create(
-            @RequestBody @Validated({RequiredGroup.class, Default.class}) PatientData patient,
-            BindingResult bindingResult) throws InterruptedException {
-
-        if (!isBlank(patient.getHealthId())) {
-            bindingResult.addError(new FieldError("patient", "hid", "3001"));
-            throw new HealthIdExistsException(bindingResult);
-        }
+    public DeferredResult<ResponseEntity<MCIResponse>> create(HttpServletRequest request,
+                                                              @RequestBody @Validated({RequiredGroup.class, Default.class}) PatientData patient,
+                                                              BindingResult bindingResult) throws InterruptedException {
 
         UserInfo userInfo = getUserInfo();
         logAccessDetails(userInfo, format("Creating a new patient : %s %s", patient.getGender(), patient.getSurName()));
@@ -86,7 +80,13 @@ public class PatientController extends MciController {
             throw new ValidationException(bindingResult);
         }
 
-        MCIResponse mciResponse = patientService.create(patient);
+        MCIResponse mciResponse;
+        if (StringUtils.isNotBlank(patient.getHealthId())) {
+            String facilityId = userInfo.getProperties().getFacilityId();
+            mciResponse = patientService.createPatientForOrg(patient, facilityId);
+        } else {
+            mciResponse = patientService.createPatientForMCI(patient);
+        }
         deferredResult.setResult(new ResponseEntity<>(mciResponse, mciResponse.httpStatusObject));
         return deferredResult;
     }

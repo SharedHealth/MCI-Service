@@ -47,4 +47,13 @@ public class MCIResponse {
     public void setId(String id) {
         this.id = id;
     }
+
+    @Override
+    public String toString() {
+        return "MCIResponse{" +
+                "httpStatus=" + httpStatus +
+                ", id='" + id + '\'' +
+                ", httpStatusObject=" + httpStatusObject +
+                '}';
+    }
 }

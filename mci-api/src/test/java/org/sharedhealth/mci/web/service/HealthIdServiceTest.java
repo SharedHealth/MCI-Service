@@ -443,7 +443,6 @@ public class HealthIdServiceTest {
         };
     }
 
-
     @Test
     public void shouldSaveTheGeneratedBlockForGivenOrganization() throws Exception {
         long start = 10000;
@@ -495,12 +494,37 @@ public class HealthIdServiceTest {
     }
 
     @Test
-    public void shouldMarkHidUsed() {
-        MciHealthId MciHealthId = new MciHealthId("898998");
+    public void shouldMarkMCIHidUsed() {
+        String hid = "898998";
+        MciHealthId MciHealthId = new MciHealthId(hid);
         doNothing().when(healthIdRepository).removedUsedHid(any(MciHealthId.class));
         HealthIdService healthIdService = new HealthIdService(mciProperties, healthIdRepository, checksumGenerator, generatedHidBlockService);
-        healthIdService.markUsed(MciHealthId);
+        healthIdService.markMCIHealthIdUsed(MciHealthId);
         verify(healthIdRepository).removedUsedHid(MciHealthId);
+
+        ArgumentCaptor<OrgHealthId> captor = ArgumentCaptor.forClass(OrgHealthId.class);
+        verify(healthIdRepository, times(1)).saveOrgHealthId(captor.capture());
+
+        OrgHealthId captorValue = captor.getValue();
+        assertEquals(hid, captorValue.getHealthId());
+        assertEquals(MCI_ORG_CODE, captorValue.getAllocatedFor());
+        assertTrue(captorValue.isUsed());
+    }
+
+    @Test
+    public void shouldMarkOrgHIDAsUsed() throws Exception {
+        OrgHealthId orgHealthId = new OrgHealthId("1234", "OTHER", timeBased(), null);
+        HealthIdService healthIdService = new HealthIdService(mciProperties, healthIdRepository, checksumGenerator, generatedHidBlockService);
+
+        assertFalse(orgHealthId.isUsed());
+        assertNull(orgHealthId.getUsedAt());
+        healthIdService.markOrgHealthIdUsed(orgHealthId);
+
+        ArgumentCaptor<OrgHealthId> captor = ArgumentCaptor.forClass(OrgHealthId.class);
+        verify(healthIdRepository, times(1)).saveOrgHealthId(captor.capture());
+
+        assertTrue(orgHealthId.isUsed());
+        assertNotNull(orgHealthId.getUsedAt());
     }
 
     private UserInfo getUserInfo() {

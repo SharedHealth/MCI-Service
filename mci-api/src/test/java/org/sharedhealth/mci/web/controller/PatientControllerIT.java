@@ -14,6 +14,7 @@ import org.sharedhealth.mci.searchmapping.repository.PatientSearchMappingReposit
 import org.sharedhealth.mci.web.dummy.InvalidPatient;
 import org.sharedhealth.mci.web.handler.ErrorHandler;
 import org.sharedhealth.mci.web.handler.MCIError;
+import org.sharedhealth.mci.web.model.OrgHealthId;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,11 +31,11 @@ import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static org.junit.Assert.*;
+import static org.sharedhealth.mci.domain.repository.TestUtil.setupApprovalsConfig;
+import static org.sharedhealth.mci.domain.repository.TestUtil.setupLocation;
 import static org.sharedhealth.mci.domain.util.DateUtil.parseDate;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
 import static org.sharedhealth.mci.utils.HttpUtil.*;
-import static org.sharedhealth.mci.domain.repository.TestUtil.setupApprovalsConfig;
-import static org.sharedhealth.mci.domain.repository.TestUtil.setupLocation;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -230,11 +231,8 @@ public class PatientControllerIT extends BaseControllerTest {
 
     @Test
     public void shouldNotReturnBadRequestForInvalidDataProperty() throws Exception {
-
         String json = mapper.writeValueAsString(this.patientData);
-
         final InvalidPatient patientData = mapper.readValue(json, InvalidPatient.class);
-
         patientData.invalidProperty = "some value";
 
         MvcResult result = mockMvc.perform(post(API_END_POINT_FOR_PATIENT)
@@ -266,7 +264,6 @@ public class PatientControllerIT extends BaseControllerTest {
 
     @Test
     public void shouldReturnNotFindResponseWhenSearchBy_ID_IfPatientNotExist() throws Exception {
-
         MvcResult result = mockMvc.perform(get(API_END_POINT_FOR_PATIENT + "/random-1000")
                 .header(AUTH_TOKEN_KEY, validAccessToken)
                 .header(FROM_KEY, validEmail)
@@ -299,8 +296,10 @@ public class PatientControllerIT extends BaseControllerTest {
     }
 
     @Test
-    public void shouldReturnErrorResponseIfHealthIdGivenWhileCreateApiCall() throws Exception {
+    public void shouldCreateAPatientForGivenOrganization() throws Exception {
         String json = asString("jsons/patient/payload_with_hid.json");
+
+        insertOrgHID("97000416912", "10000002");
 
         MvcResult mvcResult = mockMvc.perform(post(API_END_POINT_FOR_PATIENT)
                 .header(AUTH_TOKEN_KEY, validAccessToken)
@@ -308,10 +307,18 @@ public class PatientControllerIT extends BaseControllerTest {
                 .header(CLIENT_ID_KEY, validClientId)
                 .accept(APPLICATION_JSON).content(json).contentType
                         (APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isOk())
                 .andReturn();
-        String content = mvcResult.getResponse().getContentAsString();
-        JSONAssert.assertEquals(asString("jsons/response/error_hid.json"), content, JSONCompareMode.STRICT);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(APPLICATION_JSON_UTF8));
+    }
+
+    private void insertOrgHID(String healthId, String clientId) {
+        cassandraOps.insert(new OrgHealthId(healthId, clientId, timeBased(), null));
     }
 
     @Test

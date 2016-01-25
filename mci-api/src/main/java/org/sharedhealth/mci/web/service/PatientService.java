@@ -1,6 +1,7 @@
 package org.sharedhealth.mci.web.service;
 
 
+import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.sharedhealth.mci.domain.exception.Forbidden;
 import org.sharedhealth.mci.domain.model.*;
 import org.sharedhealth.mci.domain.repository.PatientFeedRepository;
@@ -8,6 +9,7 @@ import org.sharedhealth.mci.domain.repository.PatientRepository;
 import org.sharedhealth.mci.web.exception.InsufficientPrivilegeException;
 import org.sharedhealth.mci.web.mapper.PendingApprovalListResponse;
 import org.sharedhealth.mci.web.model.MciHealthId;
+import org.sharedhealth.mci.web.model.OrgHealthId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,19 +40,21 @@ public class PatientService {
     private PatientFeedRepository feedRepository;
     private SettingService settingService;
     private PatientHealthIdService patientHealthIdService;
+    private MCIProperties mciProperties;
 
     @Autowired
     public PatientService(PatientRepository patientRepository,
                           PatientFeedRepository feedRepository,
                           SettingService settingService,
-                          PatientHealthIdService patientHealthIdService) {
+                          PatientHealthIdService patientHealthIdService, MCIProperties mciProperties) {
         this.patientRepository = patientRepository;
         this.feedRepository = feedRepository;
         this.settingService = settingService;
         this.patientHealthIdService = patientHealthIdService;
+        this.mciProperties = mciProperties;
     }
 
-    public MCIResponse create(PatientData patient) throws InterruptedException {
+    public MCIResponse createPatientForMCI(PatientData patient) throws InterruptedException {
         logger.debug("Create patient");
         PatientData existingPatient = findPatientByMultipleIds(patient);
         if (existingPatient != null) {
@@ -72,6 +76,44 @@ public class PatientService {
             mciResponse = new MCIResponse("Can not create patient as there is no hid available in MCI to assign", BAD_REQUEST);
         }
         return mciResponse;
+    }
+
+    public MCIResponse createPatientForOrg(PatientData patient, String facilityId) {
+        String healthId = patient.getHealthId();
+        logger.debug(String.format("Creating patient for Organization [%s] with HealthID [%s]", facilityId, healthId));
+        PatientData existingPatient = findPatientByMultipleIds(patient);
+        if (existingPatient != null) {
+            return this.update(patient, existingPatient.getHealthId());
+        }
+        if (isInvalidOrgHID(healthId)) {
+            return new MCIResponse("The HealthId for patient is not valid", BAD_REQUEST);
+        }
+        OrgHealthId orgHealthId = patientHealthIdService.findOrgHealthId(healthId);
+        MCIResponse validationResponse = validateHealthId(orgHealthId, facilityId);
+        if (null != validationResponse) {
+            return validationResponse;
+        }
+        MCIResponse mciResponse = patientRepository.create(patient);
+        patientHealthIdService.markOrgHealthIdUsed(orgHealthId);
+        return mciResponse;
+    }
+
+    private boolean isInvalidOrgHID(String healthId) {
+        String hidWithoutChecksum = healthId.substring(0, healthId.length() - 1);
+        return hidWithoutChecksum.matches(mciProperties.getOtherOrgInvalidHidPattern());
+    }
+
+    private MCIResponse validateHealthId(OrgHealthId orgHealthId, String facilityId) {
+        if (null == orgHealthId) {
+            return new MCIResponse("The HealthId is not present", BAD_REQUEST);
+        }
+        if (orgHealthId.isUsed()) {
+            return new MCIResponse("The HealthId is already used", BAD_REQUEST);
+        }
+        if (!facilityId.equals(orgHealthId.getAllocatedFor())) {
+            return new MCIResponse("The HealthId is not for given organization", BAD_REQUEST);
+        }
+        return null;
     }
 
     private void setHealthIdAssignor(PatientData patient) {
@@ -227,6 +269,7 @@ public class PatientService {
         }
     }
 
+
     private void verifyPendingApprovalDetails(PatientData patient, PatientData existingPatient) {
         if (isEmpty(existingPatient.getPendingApprovals())) {
             throw new IllegalArgumentException(MESSAGE_INVALID_PENDING_APPROVALS);
@@ -250,6 +293,4 @@ public class PatientService {
             throw new IllegalArgumentException(MESSAGE_PENDING_APPROVALS_MISMATCH);
         }
     }
-
-
 }
