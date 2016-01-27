@@ -13,7 +13,9 @@ import org.sharedhealth.mci.domain.validation.group.RequiredOnUpdateGroup;
 import org.sharedhealth.mci.web.exception.SearchQueryParameterException;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
+import org.sharedhealth.mci.web.mapper.ProviderResponse;
 import org.sharedhealth.mci.web.service.PatientService;
+import org.sharedhealth.mci.web.service.ProviderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,7 @@ import javax.validation.groups.Default;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static java.lang.String.format;
 import static org.sharedhealth.mci.domain.constant.ErrorConstants.ERROR_CODE_INVALID;
@@ -46,12 +49,15 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
 @RequestMapping("/patients")
 public class PatientController extends MciController {
     private static final Logger logger = LoggerFactory.getLogger(PatientController.class);
+    private final String PROVIDER_RESPONSE_ORG_REFERENCE_KEY = "reference";
 
     private PatientService patientService;
+    private ProviderService providerService;
 
     @Autowired
-    public PatientController(PatientService patientService) {
+    public PatientController(PatientService patientService, ProviderService providerService) {
         this.patientService = patientService;
+        this.providerService = providerService;
     }
 
     @PreAuthorize("hasAnyRole('ROLE_PROVIDER', 'ROLE_FACILITY')")
@@ -82,13 +88,27 @@ public class PatientController extends MciController {
 
         MCIResponse mciResponse;
         if (StringUtils.isNotBlank(patient.getHealthId())) {
-            String facilityId = userInfo.getProperties().getFacilityId();
+            String facilityId = identifyFacility(properties);
             mciResponse = patientService.createPatientForOrg(patient, facilityId);
         } else {
             mciResponse = patientService.createPatientForMCI(patient);
         }
         deferredResult.setResult(new ResponseEntity<>(mciResponse, mciResponse.httpStatusObject));
         return deferredResult;
+    }
+
+    private String identifyFacility(UserInfo.UserInfoProperties properties) {
+        String facilityId = properties.getFacilityId();
+        if (facilityId != null) return facilityId;
+        String providerId = properties.getProviderId();
+        if (providerId != null) {
+            ProviderResponse response = providerService.find(providerId);
+            Map<String, String> organization = response.getOrganization();
+            String orgReference = organization.get(PROVIDER_RESPONSE_ORG_REFERENCE_KEY);
+            String lastUriPart = StringUtils.substringAfterLast(orgReference, "/");
+            return StringUtils.substringBefore(lastUriPart, ".json");
+        }
+        return null;
     }
 
     @PreAuthorize("hasAnyRole('ROLE_PROVIDER', 'ROLE_FACILITY', 'ROLE_PATIENT', " +

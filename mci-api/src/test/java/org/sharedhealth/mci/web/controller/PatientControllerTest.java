@@ -3,7 +3,6 @@ package org.sharedhealth.mci.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -26,6 +25,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -35,13 +35,10 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.domain.util.DateUtil.parseDate;
 import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.MCI_USER_GROUP;
-import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.PROVIDER_GROUP;
 import static org.sharedhealth.mci.web.utils.JsonMapper.writeValueAsString;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -67,7 +64,7 @@ public class PatientControllerTest {
     public void setup() throws ParseException {
         initMocks(this);
         mockMvc = MockMvcBuilders
-                .standaloneSetup(new PatientController(patientService))
+                .standaloneSetup(new PatientController(patientService, providerService))
                 .setValidator(localValidatorFactoryBean)
                 .build();
 
@@ -113,21 +110,23 @@ public class PatientControllerTest {
     }
 
     @Test
-    @Ignore
     public void shouldIdentifyFacilityForProvider() throws Exception {
         String providerId = "11111";
-
-        UserProfile userProfile = new UserProfile("provider", providerId, null);
-        UserInfo userInfo = new UserInfo("102", "ABC", "abc@mail", 1, true, "111100", asList(PROVIDER_GROUP), asList(userProfile));
-        SecurityContextHolder.getContext().setAuthentication(new TokenAuthentication(userInfo, true));
-
+        String facilityId = "10012";
         String healthId = "healthId-100";
         String clientIdKey = "12345";
         PatientData patient = buildPatient();
         patient.setHealthId(healthId);
+
+        UserProfile userProfile = new UserProfile("provider", providerId, null);
+        List<String> groups = new ArrayList<>();
+        groups.add(MCI_USER_GROUP);
+        UserInfo userInfo = new UserInfo("102", "ABC", "abc@mail", 1, true, "111100", groups, asList(userProfile));
+        SecurityContextHolder.getContext().setAuthentication(new TokenAuthentication(userInfo, true));
+
         MCIResponse mciResponse = new MCIResponse(healthId, CREATED);
 
-        when(patientService.createPatientForOrg(patient, USER_INFO_FACILITY)).thenReturn(mciResponse);
+        when(patientService.createPatientForOrg(patient, facilityId)).thenReturn(mciResponse);
         ProviderResponse response = getProviderResponse(providerId);
         when(providerService.find(providerId)).thenReturn(response);
 
@@ -140,7 +139,7 @@ public class PatientControllerTest {
                         .asyncResult(new ResponseEntity<>(mciResponse, CREATED)));
 
         verify(providerService, times(1)).find(providerId);
-        verify(patientService).createPatientForOrg(patient, "10012");
+        verify(patientService).createPatientForOrg(patient, facilityId);
     }
 
     private ProviderResponse getProviderResponse(String providerId) {

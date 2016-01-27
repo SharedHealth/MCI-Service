@@ -317,6 +317,45 @@ public class PatientControllerIT extends BaseControllerTest {
                 .andExpect(content().contentType(APPLICATION_JSON_UTF8));
     }
 
+    @Test
+    public void shouldIdentifyFacilityOfProviderToCreatePatientForOrganization() throws Exception {
+        String providerClientId = "18556";
+        String providerID = "113068";
+        String providerEmail = "provider@gmail.com";
+        String providerAccessToken = "40214a6c-e27c-4223-981c-1f837be90f03";
+
+        insertOrgHID("97000416912", "10019842");
+
+        givenThat(get(urlEqualTo("/token/" + providerAccessToken))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(asString("jsons/userDetails/userDetailForProvider.json"))));
+
+        givenThat(get(urlEqualTo("/api/1.0/providers/" + providerID + ".json"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(asString("jsons/provider.json"))));
+
+        String json = asString("jsons/patient/payload_with_hid.json");
+
+        MvcResult mvcResult = mockMvc.perform(post(API_END_POINT_FOR_PATIENT)
+                .header(AUTH_TOKEN_KEY, providerAccessToken)
+                .header(FROM_KEY, providerEmail)
+                .header(CLIENT_ID_KEY, providerClientId)
+                .accept(APPLICATION_JSON).content(json).contentType
+                        (APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(APPLICATION_JSON_UTF8));
+    }
+
     private void insertOrgHID(String healthId, String clientId) {
         cassandraOps.insert(new OrgHealthId(healthId, clientId, timeBased(), null));
     }
