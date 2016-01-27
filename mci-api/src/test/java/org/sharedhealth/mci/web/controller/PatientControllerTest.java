@@ -127,7 +127,7 @@ public class PatientControllerTest {
         MCIResponse mciResponse = new MCIResponse(healthId, CREATED);
 
         when(patientService.createPatientForOrg(patient, facilityId)).thenReturn(mciResponse);
-        ProviderResponse response = getProviderResponse(providerId);
+        ProviderResponse response = getProviderResponse(providerId, "ABC", "http://fr.com/10012.json");
         when(providerService.find(providerId)).thenReturn(response);
 
         String json = new ObjectMapper().writeValueAsString(patient);
@@ -140,16 +140,6 @@ public class PatientControllerTest {
 
         verify(providerService, times(1)).find(providerId);
         verify(patientService).createPatientForOrg(patient, facilityId);
-    }
-
-    private ProviderResponse getProviderResponse(String providerId) {
-        ProviderResponse response = new ProviderResponse();
-        response.setId(providerId);
-        response.setName("ABC");
-        HashMap<String, String> organization = new HashMap<>();
-        organization.put("reference", "http://fr.com/10012.json");
-        response.setOrganization(organization);
-        return response;
     }
 
     @Test
@@ -371,6 +361,16 @@ public class PatientControllerTest {
 
         patientData.setAddress(address);
         return patientData;
+    }
+
+    private ProviderResponse getProviderResponse(String providerId, String abc, String reference) {
+        ProviderResponse response = new ProviderResponse();
+        response.setId(providerId);
+        response.setName(abc);
+        HashMap<String, String> organization = new HashMap<>();
+        organization.put("reference", reference);
+        response.setOrganization(organization);
+        return response;
     }
 
     private String buildEndPointWithHealthId(String healthId) {

@@ -169,7 +169,7 @@ public class PatientServiceTest {
     @Test
     public void shouldCreatePatientForGivenOrganization() throws Exception {
         String clientId = "12345";
-        String healthId = "hid-1";
+        String healthId = "12312";
         PatientData patient = new PatientData();
 
         SearchQuery searchByNidQuery = new SearchQuery();
@@ -205,7 +205,7 @@ public class PatientServiceTest {
     @Test
     public void shouldNotCreatePatientWhenNotAValidOrganizationHealthId() throws Exception {
         String clientId = "12345";
-        String healthId = "hid-1";
+        String healthId = "12312";
         PatientData patient = new PatientData();
 
         SearchQuery searchByNidQuery = new SearchQuery();
@@ -238,7 +238,7 @@ public class PatientServiceTest {
     @Test
     public void shouldNotCreatePatientWhenGivenHIDIsNotPresent() throws Exception {
         String clientId = "12345";
-        String healthId = "hid-1";
+        String healthId = "12131";
         PatientData patient = new PatientData();
 
         SearchQuery searchByNidQuery = new SearchQuery();
@@ -272,7 +272,7 @@ public class PatientServiceTest {
     @Test
     public void shouldNotCreatePatientWhenGivenHIDIsAlreadyUsed() throws Exception {
         String clientId = "12345";
-        String healthId = "hid-1";
+        String healthId = "11231";
         PatientData patient = new PatientData();
 
         SearchQuery searchByNidQuery = new SearchQuery();
@@ -308,7 +308,7 @@ public class PatientServiceTest {
     @Test
     public void shouldNotCreatePatientWhenGivenHIDDoesNotBelongToClient() throws Exception {
         String clientId = "12345";
-        String healthId = "hid-1";
+        String healthId = "12312";
         PatientData patient = new PatientData();
 
         SearchQuery searchByNidQuery = new SearchQuery();

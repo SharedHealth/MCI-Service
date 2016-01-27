@@ -30,7 +30,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.groups.Default;
 import java.util.ArrayList;
@@ -62,8 +61,7 @@ public class PatientController extends MciController {
 
     @PreAuthorize("hasAnyRole('ROLE_PROVIDER', 'ROLE_FACILITY')")
     @RequestMapping(method = POST, consumes = {APPLICATION_JSON_VALUE})
-    public DeferredResult<ResponseEntity<MCIResponse>> create(HttpServletRequest request,
-                                                              @RequestBody @Validated({RequiredGroup.class, Default.class}) PatientData patient,
+    public DeferredResult<ResponseEntity<MCIResponse>> create(@RequestBody @Validated({RequiredGroup.class, Default.class}) PatientData patient,
                                                               BindingResult bindingResult) throws InterruptedException {
 
         UserInfo userInfo = getUserInfo();
@@ -89,26 +87,15 @@ public class PatientController extends MciController {
         MCIResponse mciResponse;
         if (StringUtils.isNotBlank(patient.getHealthId())) {
             String facilityId = identifyFacility(properties);
+            if (StringUtils.isBlank(facilityId)) {
+                throw new ValidationException("Not a valid facility");
+            }
             mciResponse = patientService.createPatientForOrg(patient, facilityId);
         } else {
             mciResponse = patientService.createPatientForMCI(patient);
         }
         deferredResult.setResult(new ResponseEntity<>(mciResponse, mciResponse.httpStatusObject));
         return deferredResult;
-    }
-
-    private String identifyFacility(UserInfo.UserInfoProperties properties) {
-        String facilityId = properties.getFacilityId();
-        if (facilityId != null) return facilityId;
-        String providerId = properties.getProviderId();
-        if (providerId != null) {
-            ProviderResponse response = providerService.find(providerId);
-            Map<String, String> organization = response.getOrganization();
-            String orgReference = organization.get(PROVIDER_RESPONSE_ORG_REFERENCE_KEY);
-            String lastUriPart = StringUtils.substringAfterLast(orgReference, "/");
-            return StringUtils.substringBefore(lastUriPart, ".json");
-        }
-        return null;
     }
 
     @PreAuthorize("hasAnyRole('ROLE_PROVIDER', 'ROLE_FACILITY', 'ROLE_PATIENT', " +
@@ -228,4 +215,19 @@ public class PatientController extends MciController {
         return inactivePatientSummaryData;
     }
 
+    private String identifyFacility(UserInfo.UserInfoProperties properties) {
+        String facilityId = properties.getFacilityId();
+        if (facilityId != null) return facilityId;
+        String providerId = properties.getProviderId();
+        if (providerId != null) {
+            ProviderResponse response = providerService.find(providerId);
+            Map<String, String> organization = response.getOrganization();
+            if (organization.isEmpty()) return null;
+            String orgReference = organization.get(PROVIDER_RESPONSE_ORG_REFERENCE_KEY);
+            if (StringUtils.isBlank(orgReference)) return null;
+            String lastUriPart = StringUtils.substringAfterLast(orgReference, "/");
+            return StringUtils.substringBefore(lastUriPart, ".json");
+        }
+        return null;
+    }
 }

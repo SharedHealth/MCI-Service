@@ -85,6 +85,9 @@ public class PatientService {
         if (existingPatient != null) {
             return this.update(patient, existingPatient.getHealthId());
         }
+        if (isMCIHealthId(healthId)) {
+            return new MCIResponse("The HealthId is not for given organization", BAD_REQUEST);
+        }
         if (isInvalidOrgHID(healthId)) {
             return new MCIResponse("The HealthId for patient is not valid", BAD_REQUEST);
         }
@@ -98,6 +101,12 @@ public class PatientService {
         return mciResponse;
     }
 
+    private boolean isMCIHealthId(String healthId) {
+        String hidWithoutChecksum = healthId.substring(0, healthId.length() - 1);
+        Long hidToCompare = Long.valueOf(hidWithoutChecksum);
+        return hidToCompare > mciProperties.getMciStartHid() && hidToCompare < mciProperties.getMciEndHid();
+    }
+
     private boolean isInvalidOrgHID(String healthId) {
         String hidWithoutChecksum = healthId.substring(0, healthId.length() - 1);
         return hidWithoutChecksum.matches(mciProperties.getOtherOrgInvalidHidPattern());
@@ -107,11 +116,11 @@ public class PatientService {
         if (null == orgHealthId) {
             return new MCIResponse("The HealthId is not present", BAD_REQUEST);
         }
-        if (orgHealthId.isUsed()) {
-            return new MCIResponse("The HealthId is already used", BAD_REQUEST);
-        }
         if (!facilityId.equals(orgHealthId.getAllocatedFor())) {
             return new MCIResponse("The HealthId is not for given organization", BAD_REQUEST);
+        }
+        if (orgHealthId.isUsed()) {
+            return new MCIResponse("The HealthId is already used", BAD_REQUEST);
         }
         return null;
     }
