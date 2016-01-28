@@ -358,9 +358,9 @@ public class PatientControllerIT extends BaseControllerTest {
 
     @Test
     public void shouldThrowAnErrorWhenTheUserIsNotAValidFacility() throws Exception {
-        String providerClientId = "18556";
-        String providerEmail = "provider@gmail.com";
-        String providerAccessToken = "40214a6c-e27c-4223-981c-1f837be90f03";
+        String providerClientId = "18660";
+        String providerEmail = "providerwithoutfacility@gmail.com";
+        String providerAccessToken = "40214a6c-e27c-145i-981c-1f837be90f03";
 
         String json = asString("jsons/patient/payload_with_hid.json");
 
@@ -368,7 +368,8 @@ public class PatientControllerIT extends BaseControllerTest {
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody(asString("jsons/userDetails/userDetailForProvider.json"))));
+                        .withBody(asString("jsons/userDetails/userDetailsProviderWithoutFacility.json"))));
+
 
         MvcResult mvcResult = mockMvc.perform(post(API_END_POINT_FOR_PATIENT)
                 .header(AUTH_TOKEN_KEY, providerAccessToken)
