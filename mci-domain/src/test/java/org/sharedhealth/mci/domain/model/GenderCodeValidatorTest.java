@@ -6,7 +6,7 @@ public class GenderCodeValidatorTest extends BaseCodeValidatorTest<PatientData> 
 
     @Test
     public void shouldPassForValidValues() throws Exception {
-        String[] validStatuses = {"M", "F", "O"};
+        String[] validStatuses = {"M", "F"};
         assertValidValues(validStatuses, "gender", PatientData.class);
     }
 

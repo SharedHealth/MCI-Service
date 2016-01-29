@@ -2,7 +2,7 @@ package org.sharedhealth.mci.validation.constraintvalidator;
 
 import org.junit.Test;
 import org.sharedhealth.mci.domain.model.SearchQuery;
-import org.sharedhealth.mci.web.mapper.ValidationAwareMapper;
+import org.sharedhealth.mci.domain.model.ValidationAwareMapper;
 
 import javax.validation.ConstraintViolation;
 import java.util.Set;

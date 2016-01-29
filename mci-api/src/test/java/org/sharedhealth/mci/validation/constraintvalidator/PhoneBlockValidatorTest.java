@@ -4,7 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.sharedhealth.mci.domain.model.PatientData;
 import org.sharedhealth.mci.domain.model.PhoneNumber;
-import org.sharedhealth.mci.web.mapper.ValidationAwareMapper;
+import org.sharedhealth.mci.domain.model.ValidationAwareMapper;
 
 import javax.validation.ConstraintViolation;
 import java.util.Set;

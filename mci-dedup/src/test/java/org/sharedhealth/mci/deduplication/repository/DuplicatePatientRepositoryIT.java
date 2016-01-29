@@ -10,6 +10,7 @@ import org.sharedhealth.mci.domain.model.Address;
 import org.sharedhealth.mci.domain.model.Catchment;
 import org.sharedhealth.mci.domain.model.PatientData;
 import org.sharedhealth.mci.domain.model.Requester;
+import org.sharedhealth.mci.domain.repository.BaseRepositoryIT;
 import org.sharedhealth.mci.domain.repository.MarkerRepository;
 import org.sharedhealth.mci.domain.repository.PatientRepository;
 import org.springframework.beans.factory.annotation.Autowired;

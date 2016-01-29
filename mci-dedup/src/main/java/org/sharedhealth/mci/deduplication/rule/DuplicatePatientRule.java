@@ -1,8 +1,8 @@
 package org.sharedhealth.mci.deduplication.rule;
 
 import org.apache.commons.collections4.Predicate;
+import org.sharedhealth.mci.deduplication.mapper.DuplicatePatientMapper;
 import org.sharedhealth.mci.deduplication.model.DuplicatePatientData;
-import org.sharedhealth.mci.deduplication.model.DuplicatePatientMapper;
 import org.sharedhealth.mci.domain.model.PatientData;
 import org.sharedhealth.mci.domain.model.SearchQuery;
 import org.sharedhealth.mci.domain.repository.PatientRepository;

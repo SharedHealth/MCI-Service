@@ -3,8 +3,8 @@ package org.sharedhealth.mci.deduplication.rule;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.sharedhealth.mci.deduplication.mapper.DuplicatePatientMapper;
 import org.sharedhealth.mci.deduplication.model.DuplicatePatientData;
-import org.sharedhealth.mci.deduplication.model.DuplicatePatientMapper;
 import org.sharedhealth.mci.domain.model.*;
 import org.sharedhealth.mci.domain.repository.PatientRepository;
 

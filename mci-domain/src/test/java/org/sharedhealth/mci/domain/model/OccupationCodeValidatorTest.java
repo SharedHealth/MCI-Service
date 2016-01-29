@@ -6,7 +6,7 @@ public class OccupationCodeValidatorTest extends BaseCodeValidatorTest<PatientDa
 
     @Test
     public void shouldPassForValidValues() throws Exception {
-        String[] validStatuses = {"01", "02", "03", "92"};
+        String[] validStatuses = {"02", "03"};
         assertValidValues(validStatuses, "occupation", PatientData.class);
     }
 

@@ -6,7 +6,7 @@ public class CountryCodeValidatorTest extends BaseCodeValidatorTest<Address> {
 
     @Test
     public void shouldPassForValidValues() throws Exception {
-        String[] validStatuses = {"004", "008", "050", "051"};
+        String[] validStatuses = {"050", "051"};
         assertValidValues(validStatuses, "countryCode", Address.class);
     }
 

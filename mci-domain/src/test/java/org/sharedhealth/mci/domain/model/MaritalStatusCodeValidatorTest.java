@@ -6,7 +6,7 @@ public class MaritalStatusCodeValidatorTest extends BaseCodeValidatorTest<Patien
 
     @Test
     public void shouldPassForValidValues() throws Exception {
-        String[] validStatuses = {"1", "2", "3", "4", "5"};
+        String[] validStatuses = {"1", "2"};
         assertValidValues(validStatuses, "maritalStatus", PatientData.class);
     }
 

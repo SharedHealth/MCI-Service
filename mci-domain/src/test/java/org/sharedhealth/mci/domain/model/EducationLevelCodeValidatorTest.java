@@ -6,7 +6,7 @@ public class EducationLevelCodeValidatorTest extends BaseCodeValidatorTest<Patie
 
     @Test
     public void shouldPassForValidValues() throws Exception {
-        String[] validStatuses = {"00", "01", "19"};
+        String[] validStatuses = {"02", "01"};
         assertValidValues(validStatuses, "educationLevel", PatientData.class);
     }
 

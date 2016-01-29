@@ -1,5 +1,7 @@
-package org.sharedhealth.mci.deduplication.model;
+package org.sharedhealth.mci.deduplication.mapper;
 
+import org.sharedhealth.mci.deduplication.model.DuplicatePatient;
+import org.sharedhealth.mci.deduplication.model.DuplicatePatientData;
 import org.sharedhealth.mci.domain.model.Catchment;
 import org.sharedhealth.mci.domain.model.PatientData;
 import org.sharedhealth.mci.domain.model.PatientMapper;
