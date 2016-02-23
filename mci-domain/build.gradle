@@ -71,7 +71,7 @@ configurations {
 
 jar {
     baseName = 'mci-domain'
-    version = '0.2-SNAPSHOT'
+    version = '2.2-SNAPSHOT'
 }
 
 
