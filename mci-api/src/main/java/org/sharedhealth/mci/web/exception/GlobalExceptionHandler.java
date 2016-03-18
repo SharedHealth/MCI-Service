@@ -52,7 +52,7 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public ErrorHandler handleValidationException(ValidationException e) {
 
-        logger.debug("Handling ValidationException. ", e);
+        logger.error("Handling ValidationException. ", e);
         ErrorHandler errorHandler = new ErrorHandler(BAD_REQUEST.value(),
                 ErrorHandler.VALIDATION_ERROR_CODE, MESSAGE_VALIDATION_ERROR);
 
@@ -63,7 +63,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     @ResponseBody
     public ErrorHandler handleHttpMessageNotReadableExceptionException(HttpMessageNotReadableException e) {
-        logger.debug("Handling HttpMessageNotReadableExceptionException. ", e);
+        logger.error("Handling HttpMessageNotReadableExceptionException. ", e);
 
         int code = BAD_REQUEST.value();
         String msg = MESSAGE_INVALID_REQUEST;
@@ -96,7 +96,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PatientNotFoundException.class)
     @ResponseBody
     public ErrorHandler handlePatientNotFoundException(PatientNotFoundException e) {
-        logger.debug("Handling PatientNotFoundException. ", e);
+        logger.error("Handling PatientNotFoundException. ", e);
         String message = MESSAGE_PATIENT_NOT_FOUND;
         if (StringUtils.isNotBlank(e.getMessage())) {
             message = e.getMessage();
@@ -108,7 +108,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InsufficientPrivilegeException.class)
     @ResponseBody
     public ErrorHandler handleInsufficientPrivilegeException(InsufficientPrivilegeException e) {
-        logger.debug("Handling InsufficientPrivilegeException. ", e);
+        logger.error("Handling InsufficientPrivilegeException. ", e);
         return new ErrorHandler(BAD_REQUEST.value(), MESSAGE_INSUFFICIENT_PRIVILEGE);
     }
 
@@ -116,7 +116,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NonUpdatableFieldUpdateException.class)
     @ResponseBody
     public ErrorHandler handleNonUpdatableFieldUpdateException(NonUpdatableFieldUpdateException e) {
-        logger.debug("Handling NonUpdatableFieldUpdateException. ", e);
+        logger.error("Handling NonUpdatableFieldUpdateException. ", e);
         return new ErrorHandler(BAD_REQUEST.value(), MESSAGE_NONUPDATABLE_FIELD);
     }
 
@@ -124,7 +124,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseBody
     public ErrorHandler handleIllegalArgumentException(IllegalArgumentException e) {
-        logger.debug("Handling IllegalArgumentException. ", e);
+        logger.error("Handling IllegalArgumentException. ", e);
         String message = format("%s. %s", MESSAGE_INVALID_PAYLOAD, e.getMessage());
         return new ErrorHandler(BAD_REQUEST.value(), message);
     }
@@ -133,7 +133,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidRequestException.class)
     @ResponseBody
     public ErrorHandler handleInvalidRequesterException(InvalidRequestException e) {
-        logger.debug("Handling InvalidRequesterException. ", e);
+        logger.error("Handling InvalidRequesterException. ", e);
         return new ErrorHandler(BAD_REQUEST.value(), e.getMessage());
     }
 
@@ -141,7 +141,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PatientAlreadyExistException.class)
     @ResponseBody
     public ErrorInfo handlePatientAlreadyExistException(PatientAlreadyExistException e) {
-        logger.debug("Handling PatientAlreadyExistException. ", e);
+        logger.error("Handling PatientAlreadyExistException. ", e);
         return new ErrorInfo(CONFLICT.value(), format(MESSAGE_PATIENT_ALREADY_EXIST_WITH_HEALTH_ID, e.getMessage()));
     }
 
@@ -149,7 +149,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HealthIdExistsException.class)
     @ResponseBody
     public ErrorHandler healthIDExistException(HealthIdExistsException e) {
-        logger.debug("Handling Health ID exist exception. ", e);
+        logger.error("Handling Health ID exist exception. ", e);
         int code;
         String msg, field;
         ErrorHandler errorHandler;
@@ -167,7 +167,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(SearchQueryParameterException.class)
     @ResponseBody
     public ErrorHandler searchQueryParameterException(SearchQueryParameterException e) {
-        logger.debug("Handling Search Query parameter exception. ", e);
+        logger.error("Handling Search Query parameter exception. ", e);
 
         ErrorHandler errorHandler;
 
@@ -189,7 +189,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseBody
     public ErrorInfo handleException(Exception e) {
-        logger.debug("Handling generic exception. ", e);
+        logger.error("Handling generic exception. ", e);
         return new ErrorInfo(INTERNAL_SERVER_ERROR.value(), MESSAGE_INTERNAL_SERVER_ERROR);
     }
 
@@ -197,6 +197,7 @@ public class GlobalExceptionHandler {
     @ResponseBody
     @ExceptionHandler(Unauthorized.class)
     public ErrorInfo unauthorized(Unauthorized unauthorized) {
+        logger.error(unauthorized.getErrorMessage());
         return new ErrorInfo(HttpStatus.UNAUTHORIZED.value(), unauthorized.getErrorMessage());
     }
 
@@ -204,7 +205,7 @@ public class GlobalExceptionHandler {
     @ResponseBody
     @ExceptionHandler(AccessDeniedException.class)
     public ErrorInfo accessDenied(AccessDeniedException accessDeniedException) {
-        logger.debug(accessDeniedException.getMessage());
+        logger.error(accessDeniedException.getMessage());
         return new ErrorInfo(HttpStatus.FORBIDDEN.value(), accessDeniedException.getMessage());
     }
 
@@ -212,7 +213,7 @@ public class GlobalExceptionHandler {
     @ResponseBody
     @ExceptionHandler(Forbidden.class)
     public ErrorInfo forbidden(Forbidden forbidden) {
-        logger.debug(forbidden.getMessage());
+        logger.error(forbidden.getMessage());
         return new ErrorInfo(HttpStatus.FORBIDDEN.value(), forbidden.getMessage());
     }
 
