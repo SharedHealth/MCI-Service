@@ -11,7 +11,7 @@
   "updated_at": "2015-04-09 12:03:09",
   "deleted_at": "1970-01-01 00:00:00",
   "groups": [
-    "MCI Admin"
+    "MCI Admin", "MCI User"
   ],
   "profiles": [
     {

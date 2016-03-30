@@ -98,7 +98,7 @@ public class CatchmentControllerTest {
         UserProfile adminProfile = new UserProfile("mci-supervisor", "102", asList("10"));
 
         return new UserInfo("102", "ABC", "abc@mail", 1, true, "111100",
-                new ArrayList<>(asList(MCI_USER_GROUP, MCI_ADMIN, MCI_APPROVER, FACILITY_GROUP, PROVIDER_GROUP)),
+                new ArrayList<>(asList(HRM_MCI_USER_GROUP, HRM_MCI_ADMIN, HRM_MCI_APPROVER, HRM_FACILITY_ADMIN_GROUP, HRM_PROVIDER_GROUP)),
                 asList(facilityProfile, providerProfile, adminProfile));
     }
 

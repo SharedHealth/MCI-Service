@@ -35,16 +35,24 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.domain.util.DateUtil.parseDate;
 import static org.sharedhealth.mci.domain.util.JsonMapper.writeValueAsString;
-import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.MCI_USER_GROUP;
-import static org.springframework.http.HttpStatus.*;
+import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.HRM_MCI_USER_GROUP;
+import static org.springframework.http.HttpStatus.ACCEPTED;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PatientControllerTest {
@@ -73,7 +81,7 @@ public class PatientControllerTest {
 
     private UserInfo getUserInfo() {
         UserProfile userProfile = new UserProfile("facility", USER_INFO_FACILITY, null);
-        return new UserInfo("102", "ABC", "abc@mail", 1, true, "111100", asList(MCI_USER_GROUP), asList(userProfile));
+        return new UserInfo("102", "ABC", "abc@mail", 1, true, "111100", asList(HRM_MCI_USER_GROUP), asList(userProfile));
     }
 
     @Test
@@ -120,7 +128,7 @@ public class PatientControllerTest {
 
         UserProfile userProfile = new UserProfile("provider", providerId, null);
         List<String> groups = new ArrayList<>();
-        groups.add(MCI_USER_GROUP);
+        groups.add(HRM_MCI_USER_GROUP);
         UserInfo userInfo = new UserInfo("102", "ABC", "abc@mail", 1, true, "111100", groups, asList(userProfile));
         SecurityContextHolder.getContext().setAuthentication(new TokenAuthentication(userInfo, true));
 

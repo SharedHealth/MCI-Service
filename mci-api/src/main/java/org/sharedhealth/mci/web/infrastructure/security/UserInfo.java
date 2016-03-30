@@ -1,11 +1,12 @@
 package org.sharedhealth.mci.web.infrastructure.security;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import static java.lang.String.format;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -19,6 +20,13 @@ public class UserInfo {
     public static final String SHR_SYSTEM_ADMIN_GROUP = ROLE_PREFIX + "SHR System Admin";
     public static final String MCI_ADMIN = ROLE_PREFIX + "MCI Admin";
     public static final String MCI_APPROVER = ROLE_PREFIX + "MCI Approver";
+    public static final String HRM_MCI_USER_GROUP = "MCI User";
+    public static final String HRM_PROVIDER_GROUP = "PROVIDER";
+    public static final String HRM_PATIENT_GROUP = "PATIENT";
+    public static final String HRM_FACILITY_ADMIN_GROUP = "Facility Admin";
+    public static final String HRM_SHR_SYSTEM_ADMIN_GROUP = "SHR System Admin";
+    public static final String HRM_MCI_ADMIN = "MCI Admin";
+    public static final String HRM_MCI_APPROVER = "MCI Approver";
 
     @JsonProperty("id")
     private String id;
@@ -36,6 +44,8 @@ public class UserInfo {
     private List<String> groups;
     @JsonProperty("profiles")
     private List<UserProfile> userProfiles;
+    @JsonIgnore
+    private List<String> userGroups;
 
     private UserInfoProperties instance;
 
@@ -48,9 +58,11 @@ public class UserInfo {
         this.accessToken = accessToken;
         this.groups = groups;
         this.userProfiles = userProfiles;
+        this.userGroups = new ArrayList<String>();
     }
 
     public UserInfo() {
+        this.userGroups = new ArrayList<String>();
     }
 
     @Override
@@ -108,8 +120,8 @@ public class UserInfo {
             return name;
         }
 
-        public List<String> getGroups() {
-            return groups;
+        public List<String> getUserGroups() {
+            return userGroups;
         }
 
         public String getId() {
@@ -174,17 +186,17 @@ public class UserInfo {
         }
 
         public void loadUserProperties() {
-            addRolePrefixToGroups();
-            if (containsCaseInsensitive(groups, MCI_USER_GROUP)) {
+            addDefaultUserGroups();
+            if (containsCaseInsensitive(groups, HRM_MCI_USER_GROUP)) {
                 addAddtionalUserGroupsBasedOnProfiles();
             }
-            if (!isEmpty(userProfiles) && (containsCaseInsensitive(groups, MCI_ADMIN)
-                    || containsCaseInsensitive(groups, MCI_APPROVER))) {
+            if (!isEmpty(userProfiles) && (containsCaseInsensitive(userGroups, MCI_ADMIN)
+                    || containsCaseInsensitive(userGroups, MCI_APPROVER))) {
                     for (UserProfile userProfile : userProfiles) {
                         loadAdminProperties(userProfile);
                     }
             }
-            if (containsCaseInsensitive(groups, SHR_SYSTEM_ADMIN_GROUP)) {
+            if (containsCaseInsensitive(userGroups, SHR_SYSTEM_ADMIN_GROUP)) {
                 isShrSystemAdmin = true;
             }
         }
@@ -205,10 +217,18 @@ public class UserInfo {
             }
         }
 
-        private void addRolePrefixToGroups() {
-            for (int index = 0; index < groups.size(); index++) {
-                String group = groups.get(index);
-                groups.set(index, group.startsWith(ROLE_PREFIX) ? group : format("%s%s", ROLE_PREFIX, group));
+        private void addDefaultUserGroups() {
+            if (containsCaseInsensitive(groups, HRM_MCI_USER_GROUP)) {
+                userGroups.add(MCI_USER_GROUP);
+            }
+            if (containsCaseInsensitive(groups, HRM_MCI_ADMIN)) {
+                userGroups.add(MCI_ADMIN);
+            }
+            if (containsCaseInsensitive(groups, HRM_MCI_APPROVER)) {
+                userGroups.add(MCI_APPROVER);
+            }
+            if (containsCaseInsensitive(groups, HRM_SHR_SYSTEM_ADMIN_GROUP)) {
+                userGroups.add(SHR_SYSTEM_ADMIN_GROUP);
             }
         }
 
@@ -219,13 +239,13 @@ public class UserInfo {
         }
 
         private void addGroupsBasedOnProfiles(UserProfile userProfile) {
-            if (userProfile.isFacility() && containsCaseInsensitive(groups, FACILITY_ADMIN_GROUP)
-                    && !containsCaseInsensitive(groups, SHR_SYSTEM_ADMIN_GROUP)) {
-                groups.add(FACILITY_GROUP);
-            }else if (userProfile.isProvider()) {
-                groups.add(PROVIDER_GROUP);
-            } else if (userProfile.isPatient()) {
-                groups.add(PATIENT_GROUP);
+            if (userProfile.isFacility() && containsCaseInsensitive(groups, HRM_FACILITY_ADMIN_GROUP)
+                    && !containsCaseInsensitive(groups, HRM_SHR_SYSTEM_ADMIN_GROUP)) {
+                userGroups.add(FACILITY_GROUP);
+            } else if (userProfile.isProvider() && containsCaseInsensitive(groups, HRM_PROVIDER_GROUP)) {
+                userGroups.add(PROVIDER_GROUP);
+            } else if (userProfile.isPatient() && containsCaseInsensitive(groups, HRM_PATIENT_GROUP)) {
+                userGroups.add(PATIENT_GROUP);
             }
         }
 
