@@ -65,7 +65,7 @@ public class MergePatientControllerTest {
     private UserInfo getUserInfo() {
         UserProfile userProfile = new UserProfile("facility", USER_INFO_FACILITY, null);
         return new UserInfo("102", "ABC", "abc@mail", 1, true, "111100",
-                new ArrayList<>(asList(MCI_USER_GROUP, MCI_ADMIN, MCI_APPROVER, FACILITY_GROUP, PROVIDER_GROUP)),
+                new ArrayList<>(asList(HRM_MCI_USER_GROUP, HRM_MCI_ADMIN, HRM_MCI_APPROVER, HRM_FACILITY_ADMIN_GROUP, HRM_PROVIDER_GROUP)),
                 asList(userProfile));
     }
 

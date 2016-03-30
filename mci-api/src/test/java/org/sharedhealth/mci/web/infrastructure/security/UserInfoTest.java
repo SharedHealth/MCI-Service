@@ -17,8 +17,8 @@ public class UserInfoTest {
         UserProfile userProfile = new UserProfile(FACILITY_TYPE, "100067", null);
 
         UserInfo userInfo = new UserInfo("102", "ABC", "abc@mail", 1, true, "111100",
-                new ArrayList<>(asList(FACILITY_ADMIN_GROUP)), asList(userProfile));
-        assertFalse(userInfo.getProperties().getGroups().contains(FACILITY_GROUP));
+                new ArrayList<>(asList(HRM_FACILITY_ADMIN_GROUP)), asList(userProfile));
+        assertFalse(userInfo.getProperties().getUserGroups().contains(FACILITY_GROUP));
     }
 
     @Test
@@ -26,8 +26,8 @@ public class UserInfoTest {
         UserProfile userProfile = new UserProfile(FACILITY_TYPE, "100067", null);
 
         UserInfo userInfo = new UserInfo("102", "ABC", "abc@mail", 1, true, "111100",
-                new ArrayList<>(asList(MCI_USER_GROUP, FACILITY_ADMIN_GROUP)), asList(userProfile));
-        assertTrue(userInfo.getProperties().getGroups().contains(FACILITY_GROUP));
+                new ArrayList<>(asList(HRM_MCI_USER_GROUP, HRM_FACILITY_ADMIN_GROUP)), asList(userProfile));
+        assertTrue(userInfo.getProperties().getUserGroups().contains(FACILITY_GROUP));
     }
 
     @Test
@@ -36,11 +36,11 @@ public class UserInfoTest {
 
         UserInfo userInfo = new UserInfo("102", "ABC", "abc@mail", 1, true, "111100",
                 new ArrayList<String>(), asList(userProfile));
-        assertFalse(userInfo.getProperties().getGroups().contains(FACILITY_GROUP));
+        assertFalse(userInfo.getProperties().getUserGroups().contains(FACILITY_GROUP));
 
         userInfo = new UserInfo("102", "ABC", "abc@mail", 1, true, "111100",
-                new ArrayList<>(asList(MCI_USER_GROUP, FACILITY_ADMIN_GROUP)), null);
-        assertFalse(userInfo.getProperties().getGroups().contains(FACILITY_GROUP));
+                new ArrayList<>(asList(HRM_MCI_USER_GROUP, HRM_FACILITY_ADMIN_GROUP)), null);
+        assertFalse(userInfo.getProperties().getUserGroups().contains(FACILITY_GROUP));
     }
 
     @Test
@@ -48,8 +48,8 @@ public class UserInfoTest {
         UserProfile userProfile = new UserProfile(FACILITY_TYPE, "100067", null);
 
         UserInfo userInfo = new UserInfo("102", "ABC", "abc@mail", 1, true, "111100",
-                new ArrayList<>(asList(FACILITY_ADMIN_GROUP, SHR_SYSTEM_ADMIN_GROUP)), asList(userProfile));
-        assertFalse(userInfo.getProperties().getGroups().contains(FACILITY_GROUP));
+                new ArrayList<>(asList(HRM_FACILITY_ADMIN_GROUP, HRM_SHR_SYSTEM_ADMIN_GROUP)), asList(userProfile));
+        assertFalse(userInfo.getProperties().getUserGroups().contains(FACILITY_GROUP));
     }
 
     @Test
@@ -57,12 +57,12 @@ public class UserInfoTest {
         UserProfile userProfile = new UserProfile("provider", "100067", null);
 
         UserInfo userInfo = new UserInfo("102", "ABC", "abc@mail", 1, true, "111100",
-                new ArrayList<>(asList(MCI_USER_GROUP)), asList(userProfile));
-        assertTrue(userInfo.getProperties().getGroups().contains(PROVIDER_GROUP));
+                new ArrayList<>(asList(HRM_MCI_USER_GROUP, HRM_PROVIDER_GROUP)), asList(userProfile));
+        assertTrue(userInfo.getProperties().getUserGroups().contains(PROVIDER_GROUP));
 
         userInfo = new UserInfo("102", "ABC", "abc@mail", 1, true, "111100",
-                new ArrayList<>(asList(MCI_USER_GROUP)), null);
-        assertFalse(userInfo.getProperties().getGroups().contains(PROVIDER_GROUP));
+                new ArrayList<>(asList(HRM_MCI_USER_GROUP)), null);
+        assertFalse(userInfo.getProperties().getUserGroups().contains(PROVIDER_GROUP));
     }
 
     @Test
@@ -70,12 +70,12 @@ public class UserInfoTest {
         UserProfile userProfile = new UserProfile("patient", "100067", null);
 
         UserInfo userInfo = new UserInfo("102", "ABC", "abc@mail", 1, true, "111100",
-                new ArrayList<>(asList(MCI_USER_GROUP)), asList(userProfile));
-        assertTrue(userInfo.getProperties().getGroups().contains(PATIENT_GROUP));
+                new ArrayList<>(asList(HRM_MCI_USER_GROUP, HRM_PATIENT_GROUP)), asList(userProfile));
+        assertTrue(userInfo.getProperties().getUserGroups().contains(PATIENT_GROUP));
 
         userInfo = new UserInfo("102", "ABC", "abc@mail", 1, true, "111100",
-                new ArrayList<>(asList(MCI_USER_GROUP)), null);
-        assertFalse(userInfo.getProperties().getGroups().contains(PATIENT_GROUP));
+                new ArrayList<>(asList(HRM_MCI_USER_GROUP)), null);
+        assertFalse(userInfo.getProperties().getUserGroups().contains(PATIENT_GROUP));
     }
 
     @Test
