@@ -36,13 +36,20 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.sharedhealth.mci.domain.constant.JsonConstants.*;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.AFTER;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.BEFORE;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.LAST_MARKER;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.SINCE;
 import static org.sharedhealth.mci.domain.util.DateUtil.parseDate;
-import static org.sharedhealth.mci.web.infrastructure.security.UserProfile.*;
+import static org.sharedhealth.mci.web.infrastructure.security.UserProfile.ADMIN_TYPE;
+import static org.sharedhealth.mci.web.infrastructure.security.UserProfile.FACILITY_TYPE;
+import static org.sharedhealth.mci.web.infrastructure.security.UserProfile.PROVIDER_TYPE;
 import static org.springframework.http.HttpStatus.ACCEPTED;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.web.bind.annotation.RequestMethod.*;
+import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 @RestController

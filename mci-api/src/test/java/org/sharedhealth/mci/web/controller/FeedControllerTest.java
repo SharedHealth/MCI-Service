@@ -13,7 +13,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
 
 import static junit.framework.Assert.assertEquals;
-import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class FeedControllerTest {
@@ -39,25 +38,22 @@ public class FeedControllerTest {
 
     @Test
     public void shouldBuildServerUrl() throws Exception {
-        String serverUrl = "https://mci.dghs.com";
-        when(properties.getServerUrl()).thenReturn(serverUrl);
+        HttpServletRequest request = buildHttpRequest("https", "mci.dghs.com", null, "/api/v1/catchments/102030/patients");
+        String url = feedController.buildUrl(request);
+        assertEquals("https://mci.dghs.com/api/v1/catchments/102030/patients", url);
 
-        HttpServletRequest request = buildHttpRequest("mci.dghs.com");
-        String url = feedController.buildServerUrl(request);
-        assertEquals(serverUrl, url);
-
-        request = buildHttpRequest("www.test.com");
-        url = feedController.buildServerUrl(request);
-        assertEquals("http://www.test.com:8088", url);
+        request = buildHttpRequest("http", "www.test.com", 8088, "/api/v1/catchments/102030/patients");
+        url = feedController.buildUrl(request);
+        assertEquals("http://www.test.com:8088/api/v1/catchments/102030/patients", url);
     }
 
-    private MockHttpServletRequest buildHttpRequest(String host) throws Exception {
+    private MockHttpServletRequest buildHttpRequest(String scheme, String host, Integer port, String uri) throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest();
-        request.setScheme("http");
+        request.setScheme(scheme);
         request.setServerName(host);
-        request.setServerPort(8088);
+        if (port != null) request.setServerPort(port);
         request.setMethod("GET");
-        request.setRequestURI("/api/v1/catchments/102030/patients");
+        request.setRequestURI(uri);
         return request;
     }
 }

@@ -13,10 +13,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
-import static java.lang.String.format;
-import static org.sharedhealth.mci.domain.constant.JsonConstants.*;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.AFTER;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.BEFORE;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.NEXT;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.PREVIOUS;
+import static org.sharedhealth.mci.web.utils.UrlUtil.formServerUrl;
 import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 public class MciController {
@@ -85,16 +87,7 @@ public class MciController {
     }
 
     protected String buildUrl(HttpServletRequest request) {
-        return format("%s%s", buildServerUrl(request), request.getRequestURI());
-    }
-
-    protected String buildServerUrl(HttpServletRequest request) {
-        String url = getProperties().getServerUrl();
-        String host = fromHttpUrl(url).build().getHost();
-        if (host.equals(request.getServerName())) {
-            return url;
-        }
-        return format("%s://%s:%s", request.getScheme(), request.getServerName(), request.getServerPort());
+        return formServerUrl(request, request.getRequestURI());
     }
 
     protected MCIProperties getProperties() {

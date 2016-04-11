@@ -3,6 +3,7 @@ package org.sharedhealth.mci.web.controller;
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.sharedhealth.mci.web.service.PatientService;
+import org.sharedhealth.mci.web.utils.UrlUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -29,8 +30,8 @@ public class FeedController extends MciController {
     }
 
     protected String buildPatientLink(String healthId, HttpServletRequest request) {
-        String patientUrl = format("%s/patients", buildPatientRequestUri(request));
-        return format("%s%s/%s", buildServerUrl(request), patientUrl, healthId);
+        String patientUrl = format("%s/patients/%s", buildPatientRequestUri(request), healthId);
+        return UrlUtil.formServerUrl(request, patientUrl);
     }
 
     private String buildPatientRequestUri(HttpServletRequest request) {

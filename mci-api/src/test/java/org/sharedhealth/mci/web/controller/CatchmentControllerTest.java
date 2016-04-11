@@ -52,16 +52,19 @@ import static org.sharedhealth.mci.domain.util.DateUtil.parseDate;
 import static org.sharedhealth.mci.domain.util.JsonMapper.writeValueAsString;
 import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 public class CatchmentControllerTest {
 
     private static final String API_END_POINT = "catchments";
     private static final int MAX_PAGE_SIZE = 3;
-    private static final String SERVER_URL = "https://mci.dghs.com";
     private static final String REQUEST_URL = "http://mci.dghs.com:8081";
 
     private static final String FACILITY_ID = "100067";
@@ -88,7 +91,6 @@ public class CatchmentControllerTest {
 
         SecurityContextHolder.getContext().setAuthentication(new TokenAuthentication(getUserInfo(), true));
 
-        when(properties.getServerUrl()).thenReturn(SERVER_URL);
         when(patientService.getPerPageMaximumLimit()).thenReturn(MAX_PAGE_SIZE);
     }
 
@@ -141,7 +143,7 @@ public class CatchmentControllerTest {
             pendingApprovals.add(buildPendingApprovalListResponse(x));
         }
 
-        String nextUrl = fromUriString(format(SERVER_URL + "/%s/%s/approvals", API_END_POINT, "102030"))
+        String nextUrl = fromUriString(format(REQUEST_URL + "/%s/%s/approvals", API_END_POINT, "102030"))
                 .queryParam("after", pendingApprovals.get(2).getLastUpdated()).build().toString();
 
         when(patientService.findPendingApprovalList(catchment, null, null, MAX_PAGE_SIZE + 1)).thenReturn(pendingApprovals);
@@ -198,7 +200,7 @@ public class CatchmentControllerTest {
             pendingApprovals.add(buildPendingApprovalListResponse(x));
         }
 
-        String previousUrl = fromUriString(format("%s/%s/%s/approvals", SERVER_URL, API_END_POINT, "102030"))
+        String previousUrl = fromUriString(format("%s/%s/%s/approvals", REQUEST_URL, API_END_POINT, "102030"))
                 .queryParam("before", pendingApprovals.get(0).getLastUpdated()).build().toString();
 
         when(patientService.findPendingApprovalList(catchment, after, null, MAX_PAGE_SIZE + 1)).thenReturn(pendingApprovals);
@@ -242,7 +244,7 @@ public class CatchmentControllerTest {
         }
         when(patientService.findPendingApprovalList(catchment, null, before, MAX_PAGE_SIZE + 1)).thenReturn(pendingApprovals);
 
-        String nextUrl = fromUriString(format("%s/%s/%s/approvals", SERVER_URL, API_END_POINT, "102030"))
+        String nextUrl = fromUriString(format("%s/%s/%s/approvals", REQUEST_URL, API_END_POINT, "102030"))
                 .queryParam("after", pendingApprovals.get(3).getLastUpdated()).build().toString();
 
         String url = buildPendingApprovalUrl("102030");
@@ -384,7 +386,7 @@ public class CatchmentControllerTest {
 
         String requestUrl = format("%s/%s/%s/patients?" + LAST_MARKER + "=123", REQUEST_URL, API_END_POINT, catchmentId);
 
-        String feedUrl = format("%s/%s/%s/patients?" + LAST_MARKER + "=123", SERVER_URL, API_END_POINT, catchmentId);
+        String feedUrl = format("%s/%s/%s/patients?" + LAST_MARKER + "=123", REQUEST_URL, API_END_POINT, catchmentId);
 
         MvcResult mvcResult = mockMvc.perform(get(requestUrl).contentType(APPLICATION_JSON).headers(headers))
                 .andExpect(request().asyncStarted())
@@ -423,7 +425,7 @@ public class CatchmentControllerTest {
         headers.add(FACILITY_ID, facilityId);
 
         String requestUrl = format("%s/%s/%s/patients", REQUEST_URL, API_END_POINT, catchmentId);
-        String feedUrl = format("%s/%s/%s/patients", SERVER_URL, API_END_POINT, catchmentId);
+        String feedUrl = format("%s/%s/%s/patients", REQUEST_URL, API_END_POINT, catchmentId);
 
         String nextUrl = fromUriString(feedUrl)
                 .queryParam(SINCE, encode(patients.get(2).getUpdatedAtAsString(), "UTF-8"))
@@ -445,7 +447,7 @@ public class CatchmentControllerTest {
                 .andExpect(jsonPath("$.entries.[0].id", is(patients.get(0).getUpdatedAt().toString())))
                 .andExpect(jsonPath("$.entries.[0].publishedDate", is(patients.get(0).getUpdatedAtAsString())))
                 .andExpect(jsonPath("$.entries.[0].title", is("Patient in Catchment: h100")))
-                .andExpect(jsonPath("$.entries.[0].link", is(SERVER_URL + "/patients/h100")))
+                .andExpect(jsonPath("$.entries.[0].link", is(REQUEST_URL + "/patients/h100")))
                 .andExpect(jsonPath("$.entries.[0].categories[0]", is("patient")))
                 .andExpect(jsonPath("$.entries.[0].content.hid", is("h100")))
 
@@ -467,7 +469,7 @@ public class CatchmentControllerTest {
         headers.add(FACILITY_ID, facilityId);
 
         String requestUrl = format("%s/%s/%s/patients", REQUEST_URL, API_END_POINT, catchmentId);
-        String feedUrl = format("%s/%s/%s/patients", SERVER_URL, API_END_POINT, catchmentId);
+        String feedUrl = format("%s/%s/%s/patients", REQUEST_URL, API_END_POINT, catchmentId);
 
         MvcResult mvcResult = mockMvc.perform(get(requestUrl).contentType(APPLICATION_JSON).headers(headers))
                 .andExpect(request().asyncStarted())
@@ -502,11 +504,11 @@ public class CatchmentControllerTest {
                 .queryParam(SINCE, since)
                 .build().toString();
 
-        String feedUrl = fromUriString(format("%s/%s/%s/patients", SERVER_URL, API_END_POINT, catchmentId))
+        String feedUrl = fromUriString(format("%s/%s/%s/patients", REQUEST_URL, API_END_POINT, catchmentId))
                 .queryParam(SINCE, since)
                 .build().toString();
 
-        String nextUrl = fromUriString(format("%s/%s/%s/patients", SERVER_URL, API_END_POINT, catchmentId))
+        String nextUrl = fromUriString(format("%s/%s/%s/patients", REQUEST_URL, API_END_POINT, catchmentId))
                 .queryParam(SINCE, encode(patients.get(2).getUpdatedAtAsString(), "UTF-8"))
                 .queryParam(LAST_MARKER, encode(patients.get(2).getUpdatedAt().toString(), "UTF-8")).build().toString();
 
@@ -550,12 +552,12 @@ public class CatchmentControllerTest {
                 .queryParam(LAST_MARKER, lastMarker)
                 .build().toString();
 
-        String feedUrl = fromUriString(format("%s/%s/%s/patients", SERVER_URL, API_END_POINT, catchmentId))
+        String feedUrl = fromUriString(format("%s/%s/%s/patients", REQUEST_URL, API_END_POINT, catchmentId))
                 .queryParam(SINCE, since)
                 .queryParam(LAST_MARKER, lastMarker)
                 .build().toString();
 
-        String nextUrl = fromUriString(format("%s/%s/%s/patients", SERVER_URL, API_END_POINT, catchmentId))
+        String nextUrl = fromUriString(format("%s/%s/%s/patients", REQUEST_URL, API_END_POINT, catchmentId))
                 .queryParam(SINCE, encode(patients.get(2).getUpdatedAtAsString(), "UTF-8"))
                 .queryParam(LAST_MARKER, encode(patients.get(2).getUpdatedAt().toString(), "UTF-8")).build().toString();
 
@@ -687,7 +689,7 @@ public class CatchmentControllerTest {
         assertEquals(patient.getUpdatedAt(), entry.getId());
         assertEquals(patient.getUpdatedAtAsString(), entry.getPublishedDate());
         assertEquals("Patient in Catchment: " + healthId, entry.getTitle());
-        assertEquals(SERVER_URL + "/patients/" + healthId, entry.getLink());
+        assertEquals(REQUEST_URL + "/patients/" + healthId, entry.getLink());
         assertNotNull(entry.getCategories());
         assertEquals(1, entry.getCategories().length);
         assertEquals("patient", entry.getCategories()[0]);
@@ -705,7 +707,7 @@ public class CatchmentControllerTest {
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();
         assertTrue(additionalInfo != null && additionalInfo.size() == 1);
-        assertEquals(SERVER_URL + "/catchments/201915/approvals?after=" + approvalListResponse.get(2).getLastUpdated(),
+        assertEquals(REQUEST_URL + "/catchments/201915/approvals?after=" + approvalListResponse.get(2).getLastUpdated(),
                 additionalInfo.get(NEXT));
     }
 
@@ -721,7 +723,7 @@ public class CatchmentControllerTest {
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();
         assertTrue(additionalInfo != null && additionalInfo.size() == 1);
-        assertEquals(SERVER_URL + "/catchments/201915/approvals?before=" + approvalListResponse.get(0).getLastUpdated(),
+        assertEquals(REQUEST_URL + "/catchments/201915/approvals?before=" + approvalListResponse.get(0).getLastUpdated(),
                 additionalInfo.get(PREVIOUS));
     }
 
@@ -737,9 +739,9 @@ public class CatchmentControllerTest {
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();
         assertTrue(additionalInfo != null && additionalInfo.size() == 2);
-        assertEquals(SERVER_URL + "/catchments/201915/approvals?before=" + approvalListResponse.get(0).getLastUpdated(),
+        assertEquals(REQUEST_URL + "/catchments/201915/approvals?before=" + approvalListResponse.get(0).getLastUpdated(),
                 additionalInfo.get(PREVIOUS));
-        assertEquals(SERVER_URL + "/catchments/201915/approvals?after=" + approvalListResponse.get(2).getLastUpdated(),
+        assertEquals(REQUEST_URL + "/catchments/201915/approvals?after=" + approvalListResponse.get(2).getLastUpdated(),
                 additionalInfo.get(NEXT));
     }
 
@@ -767,7 +769,7 @@ public class CatchmentControllerTest {
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();
         assertTrue(additionalInfo != null && additionalInfo.size() == 1);
-        assertEquals(SERVER_URL + "/catchments/201915/approvals?after=" + approvalListResponse.get(2).getLastUpdated(),
+        assertEquals(REQUEST_URL + "/catchments/201915/approvals?after=" + approvalListResponse.get(2).getLastUpdated(),
                 additionalInfo.get(NEXT));
     }
 
@@ -796,7 +798,7 @@ public class CatchmentControllerTest {
         assertEquals(response.getHttpStatus(), 200);
         HashMap additionalInfo = response.getAdditionalInfo();
         assertTrue(additionalInfo != null && additionalInfo.size() == 1);
-        assertEquals(SERVER_URL + "/catchments/201915/approvals?after=" + approvalListResponse.get(2).getLastUpdated(),
+        assertEquals(REQUEST_URL + "/catchments/201915/approvals?after=" + approvalListResponse.get(2).getLastUpdated(),
                 additionalInfo.get(NEXT));
     }
 
