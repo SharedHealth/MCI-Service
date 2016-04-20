@@ -25,7 +25,7 @@ def mainClassName = "org.sharedhealth.mci.web.launch.Migrations"
 jar {
     baseName = 'mci-schema'
 //    release = project.release ?: '1'
-    version = '2.2-SNAPSHOT'
+    version = '2.3-SNAPSHOT'
     from {
         configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
     }

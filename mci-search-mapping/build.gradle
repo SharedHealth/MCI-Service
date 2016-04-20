@@ -74,7 +74,7 @@ configurations {
 
 jar {
     baseName = 'mci-search-mapping'
-    version = '2.2-SNAPSHOT'
+    version = '2.3-SNAPSHOT'
 }
 
 
