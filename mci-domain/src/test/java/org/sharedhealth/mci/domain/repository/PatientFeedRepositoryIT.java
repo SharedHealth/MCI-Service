@@ -73,7 +73,7 @@ public class PatientFeedRepositoryIT extends BaseRepositoryIT {
 
     @Test
     public void shouldCreateUpdateLogsWhenPatientIsUpdated() {
-        String healthId = patientRepository.create(data).getId();
+        String healthId = patientRepository.create(data).toBlocking().first().getId();
         Date since = new Date();
 
         assertUpdateLogEntry(healthId, since, false);
@@ -83,7 +83,7 @@ public class PatientFeedRepositoryIT extends BaseRepositoryIT {
         updateRequest.setGivenName("Harry");
         updateRequest.setAddress(new Address("99", "88", "77"));
         updateRequest.setRequester("Bahmni", "Dr. Monika");
-        patientRepository.update(updateRequest, healthId);
+        patientRepository.update(updateRequest, healthId).toBlocking().first();
 
         assertUpdateLogEntry(healthId, since, true);
     }
@@ -91,13 +91,13 @@ public class PatientFeedRepositoryIT extends BaseRepositoryIT {
     @Test
     public void shouldCreateCreateLogsWhenPatientIsCreated() {
         Date since = new Date();
-        String healthId = patientRepository.create(data).getId();
+        String healthId = patientRepository.create(data).toBlocking().first().getId();
         assertUpdateLogEntry(healthId, since, true);
     }
 
     @Test
     public void shouldCreateUpdateLogsWhenAnyFieldIsUpdated() {
-        String healthId = patientRepository.create(data).getId();
+        String healthId = patientRepository.create(data).toBlocking().first().getId();
         Date since = new Date();
         assertUpdateLogEntry(healthId, since, false);
 
@@ -105,7 +105,7 @@ public class PatientFeedRepositoryIT extends BaseRepositoryIT {
         updateRequest1.setHealthId(healthId);
         updateRequest1.setEducationLevel("02");
         updateRequest1.setRequester("Bahmni", "Dr. Monika");
-        patientRepository.update(updateRequest1, healthId);
+        patientRepository.update(updateRequest1, healthId).toBlocking().first();
         assertUpdateLogEntry(healthId, since, true);
 
         PatientData updateRequest2 = new PatientData();
@@ -116,7 +116,7 @@ public class PatientFeedRepositoryIT extends BaseRepositoryIT {
         Address newAddress = new Address("99", "88", "77");
         updateRequest2.setAddress(newAddress);
         updateRequest2.setRequester("Bahmni", "Dr. Monika");
-        patientRepository.update(updateRequest2, healthId);
+        patientRepository.update(updateRequest2, healthId).toBlocking().first();
 
         PatientData acceptRequest = new PatientData();
         acceptRequest.setHealthId(healthId);
@@ -165,7 +165,7 @@ public class PatientFeedRepositoryIT extends BaseRepositoryIT {
 
     @Test
     public void shouldCreateUpdateLogWhenPresentAddressIsMarkedForApprovalAndUpdatedAfterApproval() {
-        String healthId = patientRepository.create(data).getId();
+        String healthId = patientRepository.create(data).toBlocking().first().getId();
         Date since = new Date();
 
         assertUpdateLogEntry(healthId, since, false);
@@ -174,7 +174,7 @@ public class PatientFeedRepositoryIT extends BaseRepositoryIT {
         Address newAddress = new Address("99", "88", "77");
         updateRequest.setAddress(newAddress);
         updateRequest.setRequester("Bahmni", "Dr. Monika");
-        patientRepository.update(updateRequest, healthId);
+        patientRepository.update(updateRequest, healthId).toBlocking().first();
 
         assertUpdateLogEntry(healthId, since, false);
 
@@ -208,7 +208,7 @@ public class PatientFeedRepositoryIT extends BaseRepositoryIT {
 
     @Test
     public void shouldFindUpdateLogsUpdatedSince() {
-        String healthId = patientRepository.create(data).getId();
+        String healthId = patientRepository.create(data).toBlocking().first().getId();
         Date since = new Date();
         final int limit = 20;
 
@@ -219,9 +219,9 @@ public class PatientFeedRepositoryIT extends BaseRepositoryIT {
         updateRequest.setHealthId(healthId);
         updateRequest.setGivenName("Update1");
         updateRequest.setRequester("Bahmni", "Dr. Monika");
-        patientRepository.update(updateRequest, healthId);
+        patientRepository.update(updateRequest, healthId).toBlocking().first();
         updateRequest.setGivenName("Update2");
-        patientRepository.update(updateRequest, healthId);
+        patientRepository.update(updateRequest, healthId).toBlocking().first();
 
         patientUpdateLogs = feedRepository.findPatientsUpdatedSince(since, limit, null);
         assertEquals(2, patientUpdateLogs.size());
@@ -230,7 +230,7 @@ public class PatientFeedRepositoryIT extends BaseRepositoryIT {
 
     @Test
     public void shouldFindUpdateLogsUpdatedAfterLastMarker() {
-        String healthId = patientRepository.create(data).getId();
+        String healthId = patientRepository.create(data).toBlocking().first().getId();
         Date since = new Date();
         final int limit = 20;
 
@@ -241,7 +241,7 @@ public class PatientFeedRepositoryIT extends BaseRepositoryIT {
         updateRequest.setHealthId(healthId);
         updateRequest.setGivenName("Update1");
         updateRequest.setRequester("Bahmni", "Dr. Monika");
-        patientRepository.update(updateRequest, healthId);
+        patientRepository.update(updateRequest, healthId).toBlocking().first();
 
         patientUpdateLogs = feedRepository.findPatientsUpdatedSince(since, limit, null);
         assertEquals(1, patientUpdateLogs.size());
@@ -250,9 +250,9 @@ public class PatientFeedRepositoryIT extends BaseRepositoryIT {
         final UUID marker = patientUpdateLogs.get(0).getEventId();
 
         updateRequest.setGivenName("Update2");
-        patientRepository.update(updateRequest, healthId);
+        patientRepository.update(updateRequest, healthId).toBlocking().first();
         updateRequest.setGivenName("Update3");
-        patientRepository.update(updateRequest, healthId);
+        patientRepository.update(updateRequest, healthId).toBlocking().first();
 
         patientUpdateLogs = feedRepository.findPatientsUpdatedSince(since, limit, null);
         assertEquals(3, patientUpdateLogs.size());

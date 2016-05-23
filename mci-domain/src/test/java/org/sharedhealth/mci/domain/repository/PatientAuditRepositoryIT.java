@@ -37,23 +37,23 @@ public class PatientAuditRepositoryIT extends BaseRepositoryIT {
         String facility = "CHW";
         String provider = "Dr. Monika";
         PatientData patientCreateData = buildPatient();
-        String healthId = patientRepository.create(patientCreateData).getId();
+        String healthId = patientRepository.create(patientCreateData).toBlocking().first().getId();
 
         PatientData updateRequest = new PatientData();
         updateRequest.setGivenName("John");
         updateRequest.setRequester(facility, provider);
-        patientRepository.update(updateRequest, healthId);
+        patientRepository.update(updateRequest, healthId).toBlocking().first();
 
         updateRequest = new PatientData();
         updateRequest.setEducationLevel("02");
         updateRequest.setRequester(facility, provider);
-        patientRepository.update(updateRequest, healthId);
+        patientRepository.update(updateRequest, healthId).toBlocking().first();
 
         updateRequest = new PatientData();
         Address address = new Address("10", "20", "31");
         updateRequest.setPermanentAddress(address);
         updateRequest.setRequester(facility, provider);
-        patientRepository.update(updateRequest, healthId);
+        patientRepository.update(updateRequest, healthId).toBlocking().first();
 
         List<PatientAuditLogData> logs = auditRepository.findByHealthId(healthId);
         assertNotNull(logs);

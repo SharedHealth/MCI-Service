@@ -6,6 +6,7 @@ import org.sharedhealth.mci.domain.exception.Forbidden;
 import org.sharedhealth.mci.domain.model.*;
 import org.sharedhealth.mci.domain.repository.PatientFeedRepository;
 import org.sharedhealth.mci.domain.repository.PatientRepository;
+import org.sharedhealth.mci.domain.util.RxMap;
 import org.sharedhealth.mci.web.exception.InsufficientPrivilegeException;
 import org.sharedhealth.mci.web.mapper.PendingApprovalListResponse;
 import org.sharedhealth.mci.web.model.MciHealthId;
@@ -14,6 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import rx.Observable;
+import rx.functions.Func1;
 
 import java.util.*;
 
@@ -54,31 +57,29 @@ public class PatientService {
         this.mciProperties = mciProperties;
     }
 
-    public MCIResponse createPatientForMCI(PatientData patient) throws InterruptedException {
+    public Observable<MCIResponse> createPatientForMCI(PatientData patient) throws InterruptedException {
         logger.debug("Create patient");
         PatientData existingPatient = findPatientByMultipleIds(patient);
         if (existingPatient != null) {
             return this.update(patient, existingPatient.getHealthId());
         }
 
-        MCIResponse mciResponse;
+        Observable<MCIResponse> createPatientObservable;
+        setHealthIdAssignor(patient);
+        MciHealthId nextMciHealthId = null;
         try {
-            setHealthIdAssignor(patient);
-            MciHealthId nextMciHealthId = patientHealthIdService.getNextHealthId();
-            patient.setHealthId(nextMciHealthId.getHid());
-            mciResponse = patientRepository.create(patient);
-            if (CREATED == mciResponse.getHttpStatus()) {
-                patientHealthIdService.markUsed(nextMciHealthId);
-            } else {
-                patientHealthIdService.putBackHealthId(nextMciHealthId);
-            }
+            nextMciHealthId = patientHealthIdService.getNextHealthId();
         } catch (NoSuchElementException e) {
-            mciResponse = new MCIResponse("Can not create patient as there is no hid available in MCI to assign", BAD_REQUEST);
+            MCIResponse mciResponse = new MCIResponse("Can not create patient as there is no hid available in MCI to assign", BAD_REQUEST);
+            return Observable.just(mciResponse);
         }
-        return mciResponse;
+        patient.setHealthId(nextMciHealthId.getHid());
+        createPatientObservable = patientRepository.create(patient);
+        return createPatientObservable.flatMap(createMCIPatientCallback(nextMciHealthId),
+                RxMap.<MCIResponse>logAndForwardError(logger), RxMap.<MCIResponse>completeResponds());
     }
 
-    public MCIResponse createPatientForOrg(PatientData patient, String facilityId) {
+    public Observable<MCIResponse> createPatientForOrg(PatientData patient, String facilityId) {
         String healthId = patient.getHealthId();
         logger.debug(String.format("Creating patient for Organization [%s] with HealthID [%s]", facilityId, healthId));
         PatientData existingPatient = findPatientByMultipleIds(patient);
@@ -86,19 +87,40 @@ public class PatientService {
             return this.update(patient, existingPatient.getHealthId());
         }
         if (isMCIHealthId(healthId)) {
-            return new MCIResponse("The HealthId is not for given organization", BAD_REQUEST);
+            MCIResponse mciResponse = new MCIResponse("The HealthId is not for given organization", BAD_REQUEST);
+            return Observable.just(mciResponse);
         }
         if (isInvalidOrgHID(healthId)) {
-            return new MCIResponse("The HealthId for patient is not valid", BAD_REQUEST);
+            MCIResponse mciResponse = new MCIResponse("The HealthId for patient is not valid", BAD_REQUEST);
+            return Observable.just(mciResponse);
         }
-        OrgHealthId orgHealthId = patientHealthIdService.findOrgHealthId(healthId);
+        final OrgHealthId orgHealthId = patientHealthIdService.findOrgHealthId(healthId);
         MCIResponse validationResponse = validateHealthId(orgHealthId, facilityId);
         if (null != validationResponse) {
-            return validationResponse;
+            return Observable.just(validationResponse);
         }
-        MCIResponse mciResponse = patientRepository.create(patient);
-        patientHealthIdService.markOrgHealthIdUsed(orgHealthId);
-        return mciResponse;
+        Observable<MCIResponse> createPatientObservable = patientRepository.create(patient);
+        return createPatientObservable.flatMap(new Func1<MCIResponse, Observable<MCIResponse>>() {
+            @Override
+            public Observable<MCIResponse> call(MCIResponse mciResponse) {
+                patientHealthIdService.markOrgHealthIdUsed(orgHealthId);
+                return Observable.just(mciResponse);
+            }
+        }, RxMap.<MCIResponse>logAndForwardError(logger), RxMap.<MCIResponse>completeResponds());
+    }
+
+    private Func1<MCIResponse, Observable<MCIResponse>> createMCIPatientCallback(final MciHealthId nextMciHealthId) {
+        return new Func1<MCIResponse, Observable<MCIResponse>>() {
+            @Override
+            public Observable<MCIResponse> call(MCIResponse mciResponse) {
+                if (CREATED == mciResponse.getHttpStatus()) {
+                    patientHealthIdService.markUsed(nextMciHealthId);
+                } else {
+                    patientHealthIdService.putBackHealthId(nextMciHealthId);
+                }
+                return Observable.just(mciResponse);
+            }
+        };
     }
 
     private boolean isMCIHealthId(String healthId) {
@@ -178,7 +200,7 @@ public class PatientService {
         return count > 1;
     }
 
-    public MCIResponse update(PatientData patient, String healthId) {
+    public Observable<MCIResponse> update(PatientData patient, String healthId) {
         return patientRepository.update(patient, healthId);
     }
 

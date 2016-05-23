@@ -29,6 +29,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
+import rx.Observable;
+import rx.functions.Action1;
 
 import javax.validation.Valid;
 import javax.validation.groups.Default;
@@ -84,17 +86,17 @@ public class PatientController extends MciController {
             throw new ValidationException(bindingResult);
         }
 
-        MCIResponse mciResponse;
+        Observable<MCIResponse> patientSaveObservable;
         if (StringUtils.isNotBlank(patient.getHealthId())) {
             String facilityId = identifyFacility(properties);
             if (StringUtils.isBlank(facilityId)) {
                 throw new ValidationException("Not a valid facility");
             }
-            mciResponse = patientService.createPatientForOrg(patient, facilityId);
+            patientSaveObservable = patientService.createPatientForOrg(patient, facilityId);
         } else {
-            mciResponse = patientService.createPatientForMCI(patient);
+            patientSaveObservable = patientService.createPatientForMCI(patient);
         }
-        deferredResult.setResult(new ResponseEntity<>(mciResponse, mciResponse.httpStatusObject));
+        patientSaveObservable.subscribe(patientSaveSuccessCallback(deferredResult), errorCallback(deferredResult));
         return deferredResult;
     }
 
@@ -179,7 +181,7 @@ public class PatientController extends MciController {
         }
 
         final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
-        MCIResponse mciResponse = patientService.update(patient, healthId);
+        MCIResponse mciResponse = patientService.update(patient, healthId).toBlocking().first();
         deferredResult.setResult(new ResponseEntity<>(mciResponse, mciResponse.httpStatusObject));
         return deferredResult;
     }
@@ -229,5 +231,23 @@ public class PatientController extends MciController {
             return StringUtils.substringBefore(lastUriPart, ".json");
         }
         return null;
+    }
+
+    private Action1<MCIResponse> patientSaveSuccessCallback(final DeferredResult<ResponseEntity<MCIResponse>> deferredResult) {
+        return new Action1<MCIResponse>() {
+            @Override
+            public void call(MCIResponse mciResponse) {
+                deferredResult.setResult(new ResponseEntity<>(mciResponse, mciResponse.httpStatusObject));
+            }
+        };
+    }
+
+    private Action1<Throwable> errorCallback(final DeferredResult<ResponseEntity<MCIResponse>> deferredResult) {
+        return new Action1<Throwable>() {
+            @Override
+            public void call(Throwable error) {
+                deferredResult.setErrorResult(error);
+            }
+        };
     }
 }

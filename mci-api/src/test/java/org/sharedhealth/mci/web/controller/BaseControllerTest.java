@@ -9,16 +9,16 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
+import org.sharedhealth.mci.domain.config.EnvironmentMock;
 import org.sharedhealth.mci.domain.exception.Forbidden;
 import org.sharedhealth.mci.domain.model.MCIResponse;
 import org.sharedhealth.mci.domain.model.PatientData;
 import org.sharedhealth.mci.domain.model.PatientSummaryData;
 import org.sharedhealth.mci.domain.model.Relation;
 import org.sharedhealth.mci.domain.repository.PatientRepository;
-import org.sharedhealth.mci.domain.config.EnvironmentMock;
+import org.sharedhealth.mci.domain.repository.TestUtil;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.infrastructure.persistence.HealthIdRepository;
-import org.sharedhealth.mci.domain.repository.TestUtil;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.model.MciHealthId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -115,7 +115,7 @@ public class BaseControllerTest {
     protected MCIResponse createPatient(PatientData patient) throws Exception {
         if (null == patient.getHealthId())
             patient.setHealthId(String.valueOf(new Date().getTime()));
-        return patientRepository.create(patient);
+        return patientRepository.create(patient).toBlocking().first();
     }
 
     protected MCIResponse createPatient(String json) throws Exception {
@@ -130,7 +130,7 @@ public class BaseControllerTest {
         PatientData data = getPatientObjectFromString(json);
         data.setHealthId(healthId);
         data.setRequester(FACILITY_ID, null);
-        return patientRepository.update(data, data.getHealthId());
+        return patientRepository.update(data, data.getHealthId()).toBlocking().first();
     }
 
     protected MCIMultiResponse getMciMultiResponse(MvcResult result) {

@@ -225,9 +225,9 @@ public class DuplicatePatientRepositoryIT extends BaseRepositoryIT {
         patientData2.setBloodGroup("B");
         patientData2.setCreatedBy(new Requester("f111"));
 
-        String healthId1 = patientRepository.create(patientData1).getId();
-        String healthId2 = patientRepository.create(patientData2).getId();
-        String healthId3 = patientRepository.create(patientData1).getId();
+        String healthId1 = patientRepository.create(patientData1).toBlocking().first().getId();
+        String healthId2 = patientRepository.create(patientData2).toBlocking().first().getId();
+        String healthId3 = patientRepository.create(patientData1).toBlocking().first().getId();
         patientData1.setHealthId(healthId1);
         patientData2.setHealthId(healthId2);
         patientData3.setHealthId(healthId3);
@@ -311,11 +311,11 @@ public class DuplicatePatientRepositoryIT extends BaseRepositoryIT {
     @Test
     public void shouldRetirePatientAndUpdateMarker() {
         PatientData patient1 = buildPatient("h001", new Address("10", "11", "12"));
-        String healthId1 = patientRepository.create(patient1).getId();
+        String healthId1 = patientRepository.create(patient1).toBlocking().first().getId();
         PatientData patient2 = buildPatient("h002", new Address("20", "21", "22"));
-        String healthId2 = patientRepository.create(patient2).getId();
+        String healthId2 = patientRepository.create(patient2).toBlocking().first().getId();
         PatientData patient3 = buildPatient("h003", new Address("30", "31", "32"));
-        String healthId3 = patientRepository.create(patient3).getId();
+        String healthId3 = patientRepository.create(patient3).toBlocking().first().getId();
         Set<String> reasons = asSet("nid");
         DuplicatePatient duplicate1 = new DuplicatePatient(patient1.getCatchment().getId(), healthId1, healthId2, reasons, timeBased());
         DuplicatePatient duplicate2 = new DuplicatePatient(patient2.getCatchment().getId(), healthId2, healthId1, reasons, timeBased());
@@ -339,13 +339,13 @@ public class DuplicatePatientRepositoryIT extends BaseRepositoryIT {
     @Test
     public void shouldUpdatePatientAndUpdateMarker() {
         PatientData patient1 = buildPatient("h001", new Address("10", "11", "12"));
-        String healthId1 = patientRepository.create(patient1).getId();
+        String healthId1 = patientRepository.create(patient1).toBlocking().first().getId();
         PatientData patient2 = buildPatient("h002", new Address("20", "21", "22"));
-        String healthId2 = patientRepository.create(patient2).getId();
+        String healthId2 = patientRepository.create(patient2).toBlocking().first().getId();
         PatientData patient3 = buildPatient("h003", new Address("30", "31", "32"));
-        String healthId3 = patientRepository.create(patient3).getId();
+        String healthId3 = patientRepository.create(patient3).toBlocking().first().getId();
         PatientData patient4 = buildPatient("h004", new Address("40", "41", "42"));
-        String healthId4 = patientRepository.create(patient4).getId();
+        String healthId4 = patientRepository.create(patient4).toBlocking().first().getId();
         Set<String> reasons = asSet("nid");
 
         duplicatePatientRepository.create(asList(

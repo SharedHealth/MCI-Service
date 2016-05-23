@@ -13,8 +13,14 @@ import org.sharedhealth.mci.web.mapper.PendingApprovalListResponse;
 import org.sharedhealth.mci.web.model.MciHealthId;
 import org.sharedhealth.mci.web.model.OrgHealthId;
 import org.springframework.http.HttpStatus;
+import rx.Observable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.UUID;
 
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
@@ -68,7 +74,7 @@ public class PatientServiceTest {
         patient.setBirthRegistrationNumber("brn-100");
 
         when(mciResponse.getHttpStatus()).thenReturn(201);
-        when(patientRepository.create(patient)).thenReturn(mciResponse);
+        when(patientRepository.create(patient)).thenReturn(Observable.just(mciResponse));
 
         patientService.createPatientForMCI(patient);
         InOrder inOrder = inOrder(patientRepository);
@@ -96,9 +102,9 @@ public class PatientServiceTest {
         existingPatient.setBirthRegistrationNumber("brn-100");
 
         when(mciResponse.getHttpStatus()).thenReturn(201);
-        when(patientRepository.create(existingPatient)).thenReturn(mciResponse);
+        when(patientRepository.create(existingPatient)).thenReturn(Observable.just(mciResponse));
 
-        patientService.createPatientForMCI(existingPatient);
+        patientService.createPatientForMCI(existingPatient).toBlocking().first();
         InOrder inOrder = inOrder(patientRepository);
         inOrder.verify(patientRepository).findAllByQuery(searchByNidQuery);
         inOrder.verify(patientRepository).findAllByQuery(searchByBrnQuery);
@@ -126,9 +132,9 @@ public class PatientServiceTest {
         existingPatient.setBirthRegistrationNumber("brn-100");
 
         when(mciResponse.getHttpStatus()).thenReturn(403);
-        when(patientRepository.create(existingPatient)).thenReturn(mciResponse);
+        when(patientRepository.create(existingPatient)).thenReturn(Observable.just(mciResponse));
 
-        patientService.createPatientForMCI(existingPatient);
+        patientService.createPatientForMCI(existingPatient).toBlocking().first();
         InOrder inOrder = inOrder(patientRepository);
         inOrder.verify(patientRepository).findAllByQuery(searchByNidQuery);
         inOrder.verify(patientRepository).findAllByQuery(searchByBrnQuery);
@@ -186,11 +192,11 @@ public class PatientServiceTest {
 
         when(mciProperties.getOtherOrgInvalidHidPattern()).thenReturn("");
         mciResponse = new MCIResponse(healthId, HttpStatus.CREATED);
-        when(patientRepository.create(patient)).thenReturn(mciResponse);
+        when(patientRepository.create(patient)).thenReturn(Observable.just(mciResponse));
         OrgHealthId orgHealthId = new OrgHealthId(healthId, clientId, timeBased(), null);
         when(patientHealthIdService.findOrgHealthId(healthId)).thenReturn(orgHealthId);
 
-        MCIResponse mciResponse = patientService.createPatientForOrg(patient, clientId);
+        MCIResponse mciResponse = patientService.createPatientForOrg(patient, clientId).toBlocking().first();
 
         assertEquals(healthId, mciResponse.getId());
         assertEquals(HttpStatus.CREATED.value(), mciResponse.getHttpStatus());
@@ -222,7 +228,7 @@ public class PatientServiceTest {
 
         when(mciProperties.getOtherOrgInvalidHidPattern()).thenReturn(".*");
 
-        MCIResponse mciResponse = patientService.createPatientForOrg(patient, clientId);
+        MCIResponse mciResponse = patientService.createPatientForOrg(patient, clientId).toBlocking().first();
 
         assertEquals("The HealthId for patient is not valid", mciResponse.getId());
         assertEquals(HttpStatus.BAD_REQUEST.value(), mciResponse.getHttpStatus());
@@ -256,7 +262,7 @@ public class PatientServiceTest {
         when(mciProperties.getOtherOrgInvalidHidPattern()).thenReturn("");
         when(patientHealthIdService.findOrgHealthId(healthId)).thenReturn(null);
 
-        MCIResponse mciResponse = patientService.createPatientForOrg(patient, clientId);
+        MCIResponse mciResponse = patientService.createPatientForOrg(patient, clientId).toBlocking().first();
 
         assertEquals("The HealthId is not present", mciResponse.getId());
         assertEquals(HttpStatus.BAD_REQUEST.value(), mciResponse.getHttpStatus());
@@ -292,7 +298,7 @@ public class PatientServiceTest {
         orgHealthId.markUsed();
         when(patientHealthIdService.findOrgHealthId(healthId)).thenReturn(orgHealthId);
 
-        MCIResponse mciResponse = patientService.createPatientForOrg(patient, clientId);
+        MCIResponse mciResponse = patientService.createPatientForOrg(patient, clientId).toBlocking().first();
 
         assertEquals("The HealthId is already used", mciResponse.getId());
         assertEquals(HttpStatus.BAD_REQUEST.value(), mciResponse.getHttpStatus());
@@ -328,7 +334,7 @@ public class PatientServiceTest {
 
         when(patientHealthIdService.findOrgHealthId(healthId)).thenReturn(orgHealthId);
 
-        MCIResponse mciResponse = patientService.createPatientForOrg(patient, clientId);
+        MCIResponse mciResponse = patientService.createPatientForOrg(patient, clientId).toBlocking().first();
 
         assertEquals("The HealthId is not for given organization", mciResponse.getId());
         assertEquals(HttpStatus.BAD_REQUEST.value(), mciResponse.getHttpStatus());

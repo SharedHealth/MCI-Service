@@ -23,6 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import rx.Observable;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -35,9 +36,7 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.domain.util.DateUtil.parseDate;
 import static org.sharedhealth.mci.domain.util.JsonMapper.writeValueAsString;
@@ -46,13 +45,9 @@ import static org.springframework.http.HttpStatus.ACCEPTED;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PatientControllerTest {
@@ -89,7 +84,7 @@ public class PatientControllerTest {
         PatientData patient = buildPatient();
         String healthId = "healthId-100";
         MCIResponse mciResponse = new MCIResponse(healthId, CREATED);
-        when(patientService.createPatientForMCI(patient)).thenReturn(mciResponse);
+        when(patientService.createPatientForMCI(patient)).thenReturn(Observable.just(mciResponse));
 
         String json = new ObjectMapper().writeValueAsString(patient);
         mockMvc.perform(post(API_END_POINT).content(json).contentType(APPLICATION_JSON))
@@ -104,7 +99,7 @@ public class PatientControllerTest {
         PatientData patient = buildPatient();
         patient.setHealthId(healthId);
         MCIResponse mciResponse = new MCIResponse(healthId, CREATED);
-        when(patientService.createPatientForOrg(patient, USER_INFO_FACILITY)).thenReturn(mciResponse);
+        when(patientService.createPatientForOrg(patient, USER_INFO_FACILITY)).thenReturn(Observable.just(mciResponse));
 
         String json = new ObjectMapper().writeValueAsString(patient);
 
@@ -134,7 +129,7 @@ public class PatientControllerTest {
 
         MCIResponse mciResponse = new MCIResponse(healthId, CREATED);
 
-        when(patientService.createPatientForOrg(patient, facilityId)).thenReturn(mciResponse);
+        when(patientService.createPatientForOrg(patient, facilityId)).thenReturn(Observable.just(mciResponse));
         ProviderResponse response = getProviderResponse(providerId, "ABC", "http://fr.com/10012.json");
         when(providerService.find(providerId)).thenReturn(response);
 
@@ -216,7 +211,7 @@ public class PatientControllerTest {
         String json = new ObjectMapper().writeValueAsString(patient);
         String healthId = "healthId-100";
         MCIResponse mciResponse = new MCIResponse(healthId, ACCEPTED);
-        when(patientService.update(patient, healthId)).thenReturn(mciResponse);
+        when(patientService.update(patient, healthId)).thenReturn(Observable.just(mciResponse));
 
         mockMvc.perform(put(buildEndPointWithHealthId(healthId), healthId)
                 .content(json).contentType(APPLICATION_JSON))
@@ -300,7 +295,7 @@ public class PatientControllerTest {
         PatientData patient = buildPatient();
         String healthId = "healthId-100";
         MCIResponse mciResponse = new MCIResponse(healthId, OK);
-        when(patientService.createPatientForMCI(patient)).thenReturn(mciResponse);
+        when(patientService.createPatientForMCI(patient)).thenReturn(Observable.just(mciResponse));
 
         String json = writeValueAsString(patient);
         MvcResult mvcResult = mockMvc.perform(post(API_END_POINT).content(json)
@@ -326,7 +321,7 @@ public class PatientControllerTest {
         String json = writeValueAsString(patient);
         String healthId = "healthId-100";
         MCIResponse mciResponse = new MCIResponse(healthId, ACCEPTED);
-        when(patientService.update(patient, healthId)).thenReturn(mciResponse);
+        when(patientService.update(patient, healthId)).thenReturn(Observable.just(mciResponse));
 
         MvcResult mvcResult = mockMvc.perform(put(buildEndPointWithHealthId(healthId), healthId).content(json)
                 .contentType(APPLICATION_JSON))

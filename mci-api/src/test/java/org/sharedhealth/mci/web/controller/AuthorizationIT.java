@@ -1,6 +1,8 @@
 package org.sharedhealth.mci.web.controller;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,8 +12,9 @@ import org.sharedhealth.mci.domain.model.PatientData;
 import org.sharedhealth.mci.domain.model.PhoneNumber;
 import org.sharedhealth.mci.web.infrastructure.persistence.HealthIdRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.web.servlet.MvcResult;
 
 import java.text.ParseException;
 import java.util.UUID;
@@ -21,13 +24,12 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static java.lang.String.format;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.domain.constant.JsonConstants.LAST_MARKER;
+import static org.sharedhealth.mci.domain.repository.TestUtil.setupApprovalsConfig;
+import static org.sharedhealth.mci.domain.repository.TestUtil.setupLocation;
 import static org.sharedhealth.mci.domain.util.DateUtil.parseDate;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
 import static org.sharedhealth.mci.utils.HttpUtil.*;
-import static org.sharedhealth.mci.domain.repository.TestUtil.setupApprovalsConfig;
-import static org.sharedhealth.mci.domain.repository.TestUtil.setupLocation;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -545,16 +547,14 @@ public class AuthorizationIT extends BaseControllerTest {
 
     @Test
     public void mciApproverShouldGetAllApprovalsForItsCatchmentOnly() throws Exception {
-        MvcResult mvcResult = mockMvc.perform(get("/catchments/3026/approvals")
+        mockMvc.perform(get("/catchments/3026/approvals")
                 .header(AUTH_TOKEN_KEY, mciApproverAccessToken)
                 .header(FROM_KEY, mciApproverEmail)
                 .header(CLIENT_ID_KEY, mciApproverClientId))
                 .andExpect(status().isOk())
                 .andExpect(request().asyncStarted())
+                .andExpect(status().isOk())
                 .andReturn();
-
-        mockMvc.perform(asyncDispatch(mvcResult))
-                .andExpect(status().isOk());
 
         mockMvc.perform(get("/catchments/1030/approvals")
                 .header(AUTH_TOKEN_KEY, mciApproverAccessToken)
@@ -577,16 +577,14 @@ public class AuthorizationIT extends BaseControllerTest {
         MCIResponse mciResponse = createPatient(patientData);
         String healthId = mciResponse.getId();
 
-        MvcResult mvcResult = mockMvc.perform(get("/catchments/3026/approvals/" + healthId)
+        mockMvc.perform(get("/catchments/3026/approvals/" + healthId)
                 .header(AUTH_TOKEN_KEY, mciApproverAccessToken)
                 .header(FROM_KEY, mciApproverEmail)
                 .header(CLIENT_ID_KEY, mciApproverClientId))
                 .andExpect(status().isOk())
                 .andExpect(request().asyncStarted())
+                .andExpect(status().isOk())
                 .andReturn();
-
-        mockMvc.perform(asyncDispatch(mvcResult))
-                .andExpect(status().isOk());
 
         mockMvc.perform(get("/catchments/1030/approvals/" + healthId)
                 .header(AUTH_TOKEN_KEY, mciApproverAccessToken)
@@ -612,7 +610,7 @@ public class AuthorizationIT extends BaseControllerTest {
         String healthId = mciResponse.getId();
         updatePatient(asString("jsons/patient/payload_with_address.json"), healthId);
 
-        MvcResult mvcResult = mockMvc.perform(put("/catchments/3026/approvals/" + healthId)
+        mockMvc.perform(put("/catchments/3026/approvals/" + healthId)
                 .content(asString("jsons/patient/pending_approval_address_accept.json"))
                 .contentType(APPLICATION_JSON)
                 .header(AUTH_TOKEN_KEY, mciApproverAccessToken)
@@ -620,9 +618,9 @@ public class AuthorizationIT extends BaseControllerTest {
                 .header(CLIENT_ID_KEY, mciApproverClientId))
                 .andExpect(status().isOk())
                 .andExpect(request().asyncStarted())
+                .andExpect(status().isOk())
+                .andExpect(request().asyncResult(mciResponseResultMatcher(HttpStatus.ACCEPTED)))
                 .andReturn();
-        mockMvc.perform(asyncDispatch(mvcResult))
-                .andExpect(status().isAccepted());
 
         mockMvc.perform(put("/catchments/1030/approvals/" + healthId)
                 .content(asString("jsons/patient/pending_approval_address_accept.json"))
@@ -652,7 +650,7 @@ public class AuthorizationIT extends BaseControllerTest {
         String healthId = mciResponse.getId();
         updatePatient(asString("jsons/patient/payload_with_address.json"), healthId);
 
-        MvcResult mvcResult = mockMvc.perform(delete("/catchments/3026/approvals/" + healthId)
+        mockMvc.perform(delete("/catchments/3026/approvals/" + healthId)
                 .content(asString("jsons/patient/pending_approval_address_accept.json"))
                 .contentType(APPLICATION_JSON)
                 .header(AUTH_TOKEN_KEY, mciApproverAccessToken)
@@ -660,9 +658,9 @@ public class AuthorizationIT extends BaseControllerTest {
                 .header(CLIENT_ID_KEY, mciApproverClientId))
                 .andExpect(status().isOk())
                 .andExpect(request().asyncStarted())
+                .andExpect(status().isOk())
+                .andExpect(request().asyncResult(mciResponseResultMatcher(HttpStatus.ACCEPTED)))
                 .andReturn();
-        mockMvc.perform(asyncDispatch(mvcResult))
-                .andExpect(status().isAccepted());
 
         mockMvc.perform(delete("/catchments/1030/approvals/" + healthId)
                 .content(asString("jsons/patient/pending_approval_address_accept.json"))
@@ -795,4 +793,25 @@ public class AuthorizationIT extends BaseControllerTest {
         patientData.setPermanentAddress(permanentAddress);
         patientData.setRequester("Bahmni", null);
     }
+
+    private Matcher<ResponseEntity> mciResponseResultMatcher(final HttpStatus httpStatus) {
+        return new Matcher<ResponseEntity>() {
+            @Override
+            public boolean matches(Object item) {
+                ResponseEntity responseEntity = (ResponseEntity) item;
+                return httpStatus.equals(responseEntity.getStatusCode());
+            }
+
+            @Override
+            public void _dont_implement_Matcher___instead_extend_BaseMatcher_() {
+
+            }
+
+            @Override
+            public void describeTo(Description description) {
+
+            }
+        };
+    }
+
 }

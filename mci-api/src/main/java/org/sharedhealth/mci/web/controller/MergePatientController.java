@@ -65,7 +65,7 @@ public class MergePatientController extends MciController {
             throw new Forbidden(format(ERROR_MSG_MERGE_WITH_ITSELF));
         }
 
-        MCIResponse mciResponse = patientService.update(patient, healthId);
+        MCIResponse mciResponse = patientService.update(patient, healthId).toBlocking().first();
         deferredResult.setResult(new ResponseEntity<>(mciResponse, mciResponse.httpStatusObject));
         return deferredResult;
     }

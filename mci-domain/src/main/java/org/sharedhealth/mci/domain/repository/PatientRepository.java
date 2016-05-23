@@ -1,5 +1,6 @@
 package org.sharedhealth.mci.domain.repository;
 
+import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.Delete;
 import com.datastax.driver.core.querybuilder.Insert;
@@ -8,6 +9,7 @@ import org.sharedhealth.mci.domain.exception.InvalidRequestException;
 import org.sharedhealth.mci.domain.exception.PatientNotFoundException;
 import org.sharedhealth.mci.domain.model.*;
 import org.sharedhealth.mci.domain.service.PendingApprovalFilter;
+import org.sharedhealth.mci.domain.util.RxMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,8 @@ import org.springframework.data.cassandra.convert.CassandraConverter;
 import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import rx.Observable;
+import rx.schedulers.Schedulers;
 
 import java.util.*;
 
@@ -32,6 +36,7 @@ import static org.sharedhealth.mci.domain.constant.RepositoryConstants.*;
 import static org.sharedhealth.mci.domain.repository.PatientAuditLogQueryBuilder.buildCreateAuditLogStmt;
 import static org.sharedhealth.mci.domain.repository.PatientQueryBuilder.*;
 import static org.sharedhealth.mci.domain.repository.PatientUpdateLogQueryBuilder.buildCreateUpdateLogStmt;
+import static org.sharedhealth.mci.domain.util.RxMap.respondOnNext;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createDeleteQuery;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
 
@@ -55,7 +60,7 @@ public class PatientRepository extends BaseRepository {
         this.pendingApprovalFilter = pendingApprovalFilter;
     }
 
-    public MCIResponse create(PatientData patientData) {
+    public Observable<MCIResponse> create(PatientData patientData) {
         logger.debug(String.format("Create patient: %s", patientData.toString()));
 
         Patient patient = mapper.map(patientData, new PatientData());
@@ -87,15 +92,19 @@ public class PatientRepository extends BaseRepository {
         buildCreateAuditLogStmt(patientData, requestedBy, converter, batch);
         addToPatientUpdateLogStmt(patient, requestedBy, converter, batch);
 
-        cassandraOps.execute(batch);
-        return new MCIResponse(patient.getHealthId(), HttpStatus.CREATED);
+        Observable<ResultSet> patientSaveObservable = Observable.from(cassandraOps.executeAsynchronously(batch),
+                Schedulers.io());
+
+        final MCIResponse mciResponse = new MCIResponse(patient.getHealthId(), HttpStatus.CREATED);
+        return patientSaveObservable.flatMap(respondOnNext(mciResponse), RxMap.<MCIResponse>logAndForwardError(logger), RxMap.<MCIResponse>completeResponds());
     }
 
-    public MCIResponse update(PatientData updateRequest, String healthId) {
+    public Observable<MCIResponse> update(PatientData updateRequest, String healthId) {
         Batch batch = batch();
         buildUpdateProcessBatch(updateRequest, healthId, batch);
-        cassandraOps.execute(batch);
-        return new MCIResponse(healthId, HttpStatus.ACCEPTED);
+        Observable<ResultSet> patinetUpdateObservable = Observable.from(cassandraOps.executeAsynchronously(batch), Schedulers.io());
+        MCIResponse mciResponse = new MCIResponse(healthId, HttpStatus.ACCEPTED);
+        return patinetUpdateObservable.flatMap(respondOnNext(mciResponse), RxMap.<MCIResponse>logAndForwardError(logger), RxMap.<MCIResponse>completeResponds());
     }
 
     public void buildUpdateProcessBatch(PatientData updateRequest, String healthId, Batch batch) {

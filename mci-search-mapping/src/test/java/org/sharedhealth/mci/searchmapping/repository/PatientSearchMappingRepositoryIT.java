@@ -47,7 +47,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
     public void shouldGetTheLatestMarker() throws Exception {
         assertNull(searchMappingRepository.findLatestMarker());
         PatientData patientData = buildPatient();
-        patientRepository.create(patientData).getId();
+        patientRepository.create(patientData).toBlocking().first().getId();
 
         searchMappingService.map();
 
@@ -56,7 +56,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
 
     @Test
     public void shouldCreateMappingsForPatientSearch() throws Exception {
-        String healthId = patientRepository.create(buildPatient()).getId();
+        String healthId = patientRepository.create(buildPatient()).toBlocking().first().getId();
 
         searchMappingRepository.saveMappings(patientRepository.findByHealthId(healthId));
 
@@ -76,7 +76,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
             patientData.setAddress(address);
             String healthId = String.valueOf(new Date().getTime());
             patientData.setHealthId(healthId);
-            healthIds.add(patientRepository.create(patientData).getId());
+            healthIds.add(patientRepository.create(patientData).toBlocking().first().getId());
 
             searchMappingRepository.saveMappings(patientRepository.findByHealthId(healthId));
             Thread.sleep(0, 10);
@@ -109,7 +109,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
             address.setUnionOrUrbanWardId("5" + i);
             address.setRuralWardId("6" + i);
             patientData.setAddress(address);
-            String healthId = patientRepository.create(patientData).getId();
+            String healthId = patientRepository.create(patientData).toBlocking().first().getId();
             healthIds.add(healthId);
 
             searchMappingRepository.saveMappings(patientRepository.findByHealthId(healthId));
@@ -149,7 +149,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
         patient.setReligion("01");
         patient.setAddress(createAddress("10", "20", "30"));
         patient.setPhoneNumber(phoneNumber);
-        String healthId = patientRepository.create(patient).getId();
+        String healthId = patientRepository.create(patient).toBlocking().first().getId();
 
         searchMappingRepository.saveMappings(patientRepository.findByHealthId(healthId));
         assertNotNull(healthId);
@@ -160,7 +160,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
         PatientData updateRequest = initPatientData();
         updateRequest.setHealthId(healthId);
         updateRequest.setReligion("02");
-        patientRepository.update(updateRequest, healthId);
+        patientRepository.update(updateRequest, healthId).toBlocking().first();
 
         assertEquals(1, getNidMappings(nid, healthId).size());
         assertEquals(1, getBrnMappings(brn, healthId).size());
@@ -188,7 +188,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
         patient.setReligion(existingReligion);
         patient.setAddress(createAddress("10", "20", "30"));
         patient.setPhoneNumber(existingPhoneNumber);
-        String healthId = patientRepository.create(patient).getId();
+        String healthId = patientRepository.create(patient).toBlocking().first().getId();
 
         searchMappingRepository.saveMappings(patientRepository.findByHealthId(healthId));
         assertNotNull(healthId);
@@ -210,7 +210,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
         updateRequest.setBirthRegistrationNumber(newBrn);
         updateRequest.setUid(newUid);
         updateRequest.setPhoneNumber(newPhoneNumber);
-        patientRepository.update(updateRequest, healthId);
+        patientRepository.update(updateRequest, healthId).toBlocking().first();
 
         PatientData updatedPatient = patientRepository.findByHealthId(healthId);
         assertNotNull(updatedPatient);
@@ -249,7 +249,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
         patient.setReligion(existingReligion);
         patient.setAddress(createAddress("10", "20", "30"));
         patient.setPhoneNumber(existingPhoneNumber);
-        String healthId = patientRepository.create(patient).getId();
+        String healthId = patientRepository.create(patient).toBlocking().first().getId();
 
         searchMappingRepository.saveMappings(patientRepository.findByHealthId(healthId));
         assertNotNull(healthId);
@@ -271,7 +271,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
         updateRequest.setBirthRegistrationNumber(newBrn);
         updateRequest.setUid(newUid);
         updateRequest.setPhoneNumber(newPhoneNumber);
-        patientRepository.update(updateRequest, healthId);
+        patientRepository.update(updateRequest, healthId).toBlocking().first();
 
         PatientData updatedPatient = patientRepository.findByHealthId(healthId);
         assertNotNull(updatedPatient);
@@ -305,7 +305,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
         patient.setUid(uid1);
         patient.setAddress(createAddress("10", "20", "30"));
         patient.setPhoneNumber(phoneNumber1);
-        String healthId1 = patientRepository.create(patient).getId();
+        String healthId1 = patientRepository.create(patient).toBlocking().first().getId();
 
         searchMappingRepository.saveMappings(patientRepository.findByHealthId(healthId1));
         assertNotNull(healthId1);
@@ -313,7 +313,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
         patient.setGivenName("Jane");
 
         patient.setHealthId(String.valueOf(new Date().getTime()));
-        String healthId2 = patientRepository.create(patient).getId();
+        String healthId2 = patientRepository.create(patient).toBlocking().first().getId();
 
         searchMappingRepository.saveMappings(patientRepository.findByHealthId(healthId2));
         assertNotNull(healthId2);
@@ -331,7 +331,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
         updateRequest.setBirthRegistrationNumber(brn2);
         updateRequest.setUid(uid2);
         updateRequest.setPhoneNumber(phoneNumber2);
-        patientRepository.update(updateRequest, healthId2);
+        patientRepository.update(updateRequest, healthId2).toBlocking().first();
 
         PatientData approvalRequest = initPatientData();
         approvalRequest.setHealthId(healthId2);
@@ -365,20 +365,20 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
         patient.setSurName("Doe");
         Address address = createAddress("10", "20", "30");
         patient.setAddress(address);
-        String healthId1 = patientRepository.create(patient).getId();
+        String healthId1 = patientRepository.create(patient).toBlocking().first().getId();
 
         searchMappingRepository.saveMappings(patientRepository.findByHealthId(healthId1));
         assertNotNull(healthId1);
 
         patient.setHealthId(String.valueOf(new Date().getTime()));
-        String healthId2 = patientRepository.create(patient).getId();
+        String healthId2 = patientRepository.create(patient).toBlocking().first().getId();
 
         searchMappingRepository.saveMappings(patientRepository.findByHealthId(healthId2));
         assertNotNull(healthId2);
 
         PatientData updateRequest = initPatientData();
         updateRequest.setGivenName("Jane");
-        patientRepository.update(updateRequest, healthId2);
+        patientRepository.update(updateRequest, healthId2).toBlocking().first();
 
         assertSearchByNameAndAddressExists("John", "102030", healthId1);
         assertSearchByNameAndAddressExists("Jane", "102030", healthId2);
@@ -387,7 +387,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
     @Test
     public void shouldUpdateCatchmentMappingWhenPresentAddressIsMarkedForApprovalAndUpdatedAfterApproval() {
         PatientData patientData = buildPatient();
-        String healthId = patientRepository.create(patientData).getId();
+        String healthId = patientRepository.create(patientData).toBlocking().first().getId();
         searchMappingRepository.saveMappings(patientRepository.findByHealthId(healthId));
 
 
@@ -400,7 +400,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
         Address newAddress = createAddress("01", "04", "09");
         updateRequest.setAddress(newAddress);
         updateRequest.setGender("O");
-        patientRepository.update(updateRequest, healthId);
+        patientRepository.update(updateRequest, healthId).toBlocking().first();
 
         assertTrue(isNotEmpty(patientRepository.findAllByCatchment(patientData.getCatchment(), null, null, 100)));
         assertTrue(isEmpty(patientRepository.findAllByCatchment(updateRequest.getCatchment(), null, null, 100)));
@@ -426,7 +426,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
         patient.setSurName("Doe");
         patient.setHouseholdCode(existingHouseholdCode);
         patient.setAddress(createAddress("10", "20", "30"));
-        String healthId = patientRepository.create(patient).getId();
+        String healthId = patientRepository.create(patient).toBlocking().first().getId();
 
         searchMappingRepository.saveMappings(patientRepository.findByHealthId(healthId));
         assertNotNull(healthId);
@@ -439,7 +439,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
         PatientData updateRequest = initPatientData();
         updateRequest.setReligion(newReligion);
         updateRequest.setHouseholdCode(newHouseholdCode);
-        patientRepository.update(updateRequest, healthId);
+        patientRepository.update(updateRequest, healthId).toBlocking().first();
 
         PatientData updatedPatient = patientRepository.findByHealthId(healthId);
         assertNotNull(updatedPatient);
@@ -458,7 +458,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
         patient.setSurName("Doe");
         patient.setHouseholdCode(existingHouseholdCode);
         patient.setAddress(createAddress("10", "20", "30"));
-        String healthId = patientRepository.create(patient).getId();
+        String healthId = patientRepository.create(patient).toBlocking().first().getId();
 
         searchMappingRepository.saveMappings(patientRepository.findByHealthId(healthId));
         assertNotNull(healthId);
@@ -471,7 +471,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
         PatientData updateRequest = initPatientData();
         updateRequest.setReligion(newReligion);
         updateRequest.setHouseholdCode(newHouseholdCode);
-        patientRepository.update(updateRequest, healthId);
+        patientRepository.update(updateRequest, healthId).toBlocking().first();
 
         PatientData updatedPatient = patientRepository.findByHealthId(healthId);
         assertNotNull(updatedPatient);
@@ -503,7 +503,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
         patient.setReligion(existingReligion);
         patient.setAddress(createAddress("10", "20", "30"));
         patient.setPhoneNumber(existingPhoneNumber);
-        String healthId = patientRepository.create(patient).getId();
+        String healthId = patientRepository.create(patient).toBlocking().first().getId();
 
         searchMappingRepository.saveMappings(patientRepository.findByHealthId(healthId));
         assertNotNull(healthId);
@@ -529,7 +529,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
         updateRequest.setBirthRegistrationNumber(newBrn);
         updateRequest.setUid(newUid);
         updateRequest.setPhoneNumber(newPhoneNumber);
-        patientRepository.update(updateRequest, healthId);
+        patientRepository.update(updateRequest, healthId).toBlocking().first();
 
         PatientData approvalRequest = initPatientData();
         approvalRequest.setHealthId(healthId);
@@ -567,7 +567,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
         patient.setReligion(existingReligion);
         patient.setAddress(createAddress("10", "20", "30"));
         patient.setPhoneNumber(existingPhoneNumber);
-        String healthId = patientRepository.create(patient).getId();
+        String healthId = patientRepository.create(patient).toBlocking().first().getId();
 
         searchMappingRepository.saveMappings(patientRepository.findByHealthId(healthId));
         assertNotNull(healthId);
@@ -593,7 +593,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
         updateRequest.setBirthRegistrationNumber(newBrn);
         updateRequest.setUid(newUid);
         updateRequest.setPhoneNumber(newPhoneNumber);
-        patientRepository.update(updateRequest, healthId);
+        patientRepository.update(updateRequest, healthId).toBlocking().first();
 
         PatientData approvalRequest = initPatientData();
         approvalRequest.setHealthId(healthId);

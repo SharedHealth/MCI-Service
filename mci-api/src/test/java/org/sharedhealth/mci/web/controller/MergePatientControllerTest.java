@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import rx.Observable;
 
 import java.util.ArrayList;
 
@@ -74,7 +75,8 @@ public class MergePatientControllerTest {
         PatientData patient = new PatientData();
         patient.setActive(false);
         patient.setMergedWith("HID2");
-        when(patientService.update(patient, "HID1")).thenReturn(new MCIResponse(OK));
+        MCIResponse mciResponse = new MCIResponse(OK);
+        when(patientService.update(patient, "HID1")).thenReturn(Observable.just(mciResponse));
 
         String content = writeValueAsString(patient);
 
