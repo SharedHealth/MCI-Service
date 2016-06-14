@@ -1,0 +1,2 @@
+INSERT INTO settings ("key", "settings") VALUES ('PER_PAGE_MAXIMUM_LIMIT', '25');
+INSERT INTO settings ("key", "settings") VALUES ('PER_PAGE_MAXIMUM_LIMIT_NOTE', 'There are more record for this search criteria. Please narrow down your search');

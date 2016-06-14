@@ -34,6 +34,7 @@ dependencies {
             libraries.spring_security, libraries.rome, libraries.joda_time, libraries.ehcache_core
 
     testCompile project(":schema")
+    testCompile project(":schema").sourceSets.test.output
     
     testCompile(testLibraries.netty) {
         force = 'true'

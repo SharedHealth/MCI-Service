@@ -44,6 +44,7 @@ dependencies {
     compile project(":mci-search-mapping")
 
     testCompile project(":schema")
+    testCompile project(":schema").sourceSets.test.output
 
     testCompile project(":mci-domain").sourceSets.test.output
 

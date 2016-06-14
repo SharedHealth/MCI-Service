@@ -6,7 +6,7 @@ public class BloodGroupCodeValidatorTest extends BaseCodeValidatorTest<PatientDa
 
     @Test
     public void shouldPassForValidValues() throws Exception {
-        String[] validStatuses = {"1", "2"};
+        String[] validStatuses = {"5", "6"};
         assertValidValues(validStatuses, "bloodGroup", PatientData.class);
     }
 

@@ -12,6 +12,40 @@ import static org.sharedhealth.mci.domain.constant.RepositoryConstants.*;
 
 public class TestUtil {
 
+    public static void insertMasterData(CassandraOperations cassandraOps){
+        cassandraOps.execute("INSERT INTO master_data (\"type\", \"key\", \"value\") VALUES ('gender', 'M', 'Male');");
+        cassandraOps.execute("INSERT INTO master_data (\"type\", \"key\", \"value\") VALUES ('gender', 'F', 'Female');");
+
+        cassandraOps.execute("INSERT INTO master_data (\"type\", \"key\", \"value\") VALUES ('education_level', '01', '১ম শ্রেনী');");
+        cassandraOps.execute("INSERT INTO master_data (\"type\", \"key\", \"value\") VALUES ('education_level', '02', '২য় শ্রেনী');");
+
+        cassandraOps.execute("INSERT INTO master_data (\"type\", \"key\", \"value\") VALUES ('occupation', '02', 'ইঞ্জিনিয়ারিং ও স্থপতি');");
+        cassandraOps.execute("INSERT INTO master_data (\"type\", \"key\", \"value\") VALUES ('occupation', '03', 'ইঞ্জিনিয়ারিং ও স্থপতি সম্পর্কিত টেকনিশিয়ান');");
+
+        cassandraOps.execute("INSERT INTO master_data (\"type\", \"key\", \"value\") VALUES ('marital_status', '1', 'un-married');");
+        cassandraOps.execute("INSERT INTO master_data (\"type\", \"key\", \"value\") VALUES ('marital_status', '2', 'married');");
+
+        cassandraOps.execute("INSERT INTO master_data (\"type\", \"key\", \"value\") VALUES ('country_code', '050', 'Bangladesh');");
+        cassandraOps.execute("INSERT INTO master_data (\"type\", \"key\", \"value\") VALUES ('country_code', '051', 'Armenia');");
+
+        cassandraOps.execute("INSERT INTO master_data (\"type\", \"key\", \"value\") VALUES ('relations', 'FTH', 'father');");
+        cassandraOps.execute("INSERT INTO master_data (\"type\", \"key\", \"value\") VALUES ('relations', 'SPS', 'spouse');");
+
+        cassandraOps.execute("INSERT INTO master_data (\"type\", \"key\", \"value\") VALUES ('religion', '1', 'islam');");
+        cassandraOps.execute("INSERT INTO master_data (\"type\", \"key\", \"value\") VALUES ('religion', '2', 'hindu');");
+
+        cassandraOps.execute("INSERT INTO master_data (\"type\", \"key\", \"value\") VALUES ('blood_group', '5', 'B+');");
+        cassandraOps.execute("INSERT INTO master_data (\"type\", \"key\", \"value\") VALUES ('blood_group', '6', 'B-');");
+
+        cassandraOps.execute("INSERT INTO master_data (\"type\", \"key\", \"value\") VALUES ('disability', '0', 'সমস্যা নেই');");
+        cassandraOps.execute("INSERT INTO master_data (\"type\", \"key\", \"value\") VALUES ('disability', '1', 'বাক');");
+
+        cassandraOps.execute("INSERT INTO master_data (\"type\", \"key\", \"value\") VALUES ('status', '1', 'Alive');");
+        cassandraOps.execute("INSERT INTO master_data (\"type\", \"key\", \"value\") VALUES ('status', '2', 'Deceased');");
+        cassandraOps.execute("INSERT INTO master_data (\"type\", \"key\", \"value\") VALUES ('status', '3', 'Unknown');");
+
+    }
+
     public static void setupLocation(CassandraOperations cassandraOps) {
         cassandraOps.execute("TRUNCATE " + CF_LOCATIONS);
         cassandraOps.execute("INSERT INTO locations (\"code\", \"name\", \"parent\") VALUES ('01', 'Union X', '20134942')");
