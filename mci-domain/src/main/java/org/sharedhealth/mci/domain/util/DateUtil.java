@@ -53,7 +53,7 @@ public class DateUtil {
         try {
             return DateUtils.parseDate(date, formats);
         } catch (IllegalArgumentException | ParseException e) {
-            logger.debug("Invalid date:" + date, e);
+            logger.error("Invalid date:" + date, e);
         }
         return null;
     }

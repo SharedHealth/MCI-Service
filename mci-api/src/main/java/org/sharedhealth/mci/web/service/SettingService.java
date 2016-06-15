@@ -20,18 +20,12 @@ public class SettingService {
     }
 
     public String getSettingAsStringByKey(String key) {
-        logger.debug(String.format("Get setting as string for key: %s",key));
-
         Setting setting = findByKey(key);
-
         return setting != null ? setting.getValue() : null;
     }
 
     public Integer getSettingAsIntegerByKey(String key) {
-        logger.debug(String.format("Get setting as integer for key: %s",key));
-
         Setting setting = findByKey(key);
-
         return setting != null ? Integer.parseInt(setting.getValue()) : null;
     }
 

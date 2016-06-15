@@ -17,7 +17,7 @@ public class FileUtil {
         try {
             return Resources.toString(Resources.getResource(path), Charsets.UTF_8);
         } catch (IOException e) {
-            logger.error(String.format("Could not read file %s, reason : %s", path, e.getMessage()));
+            logger.error("Could not read file");
             throw new RuntimeException("File not found", e);
         }
     }
@@ -27,7 +27,7 @@ public class FileUtil {
             String hidToWrite = hid + System.getProperty("line.separator");
             Files.append(hidToWrite, file, Charsets.UTF_8);
         } catch (IOException e) {
-            logger.error(String.format("Can not write to file HID %s to file %s", hid, file));
+            logger.error("Can not write HID to file");
             e.printStackTrace();
         }
     }

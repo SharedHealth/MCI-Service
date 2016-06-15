@@ -78,7 +78,6 @@ public class HealthIdServiceIT {
     }
 
     private void createHealthIds(long prefix) {
-        logger.debug("generating health Id for test");
         for (int i = 0; i < 200; i++) {
             healthIdRepository.saveMciHealthIdSync(new MciHealthId(String.valueOf(prefix + i)));
         }

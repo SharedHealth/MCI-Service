@@ -51,7 +51,7 @@ public class PatientAuditController extends MciController {
         UserInfo userInfo = getUserInfo();
         logAccessDetails(userInfo, String.format("Find audit details of patient by health id : %s", healthId));
 
-        logger.debug("Trying to find audit details of patient by health id [" + healthId + "]");
+        logger.info("Find audit details of patient by health id [" + healthId + "]");
 
         final DeferredResult<ResponseEntity<Map<String, Object>>> deferredResult = new DeferredResult<>();
 

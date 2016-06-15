@@ -74,9 +74,9 @@ public class DuplicatePatientController extends MciController {
 
         if (!userInfo.getProperties().hasCatchmentForProfileType(catchmentId, asList(ADMIN_TYPE))) {
             String errorMessage = format("Access is denied to user %s for catchment %s",
-                    userInfo.getProperties().getId(), catchmentId);
+                    userInfo.getProperties().getEmail(), catchmentId);
             deferredResult.setErrorResult(new Forbidden(errorMessage));
-            logger.debug(errorMessage);
+            logger.error(errorMessage);
             return deferredResult;
         }
         List<DuplicatePatientData> response = duplicatePatientService.findAllByCatchment
@@ -102,13 +102,13 @@ public class DuplicatePatientController extends MciController {
             BindingResult bindingResult) {
 
         UserInfo userInfo = getUserInfo();
-        String message = format("Merging duplicate patients. HIDs: %s and %s. Action: %s",
+        String message = format("Duplicate patients. HIDs: %s and %s. Action: %s",
                 data.getPatient1().getHealthId(), data.getPatient2().getHealthId(), data.getAction());
         logAccessDetails(userInfo, message);
-        logger.debug(message);
+        logger.info(message);
 
         if (bindingResult.hasErrors()) {
-            logger.debug("ValidationException while merging duplicate patients");
+            logger.error("ValidationException while merging duplicate patients");
             throw new ValidationException(bindingResult);
         }
 

@@ -243,7 +243,6 @@ public class DuplicatePatientServiceTest {
     @Test
     public void shouldNotRetainPatientsIfPatient1IsRetired() {
         expectedEx.expect(IllegalArgumentException.class);
-        expectedEx.expectMessage("Patient 1 [hid: 100] and/or patient 2 [hid: 200] are/is retired. Cannot retain.");
 
         PatientData patient1 = new PatientData();
         patient1.setHealthId("100");
@@ -257,7 +256,6 @@ public class DuplicatePatientServiceTest {
     @Test
     public void shouldNotRetainPatientsIfPatient2IsRetired() {
         expectedEx.expect(IllegalArgumentException.class);
-        expectedEx.expectMessage("Patient 1 [hid: 100] and/or patient 2 [hid: 200] are/is retired. Cannot retain.");
 
         PatientData patient1 = new PatientData();
         patient1.setHealthId("100");

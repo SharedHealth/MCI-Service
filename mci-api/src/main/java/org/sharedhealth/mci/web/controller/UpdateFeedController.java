@@ -61,7 +61,7 @@ public class UpdateFeedController extends FeedController {
             @RequestParam(value = LAST_MARKER, required = false) String last,
             HttpServletRequest request) {
         UserInfo userInfo = getUserInfo();
-        logAccessDetails(userInfo, String.format("Find all patients  updated since [%s] given last marker [%s]", since, last));
+        logAccessDetails(userInfo, "Find all patients using updated since date and last marker");
 
         Date date = isNotBlank(since) ? parseDate(since) : null;
         logger.debug("Find all patients  updated since [" + since + "] ");

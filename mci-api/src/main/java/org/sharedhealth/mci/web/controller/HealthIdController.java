@@ -47,10 +47,10 @@ public class HealthIdController extends MciController {
     public DeferredResult<String> generate() {
         UserInfo userInfo = getUserInfo();
 
-        logAccessDetails(userInfo, "Generating new hids");
+        logAccessDetails(userInfo, "Generating new hids for MCI");
         GeneratedHIDBlock generatedHIDBlock = healthIdService.generateAll(userInfo);
         final DeferredResult<String> deferredResult = new DeferredResult<>();
-        String message = String.format("Generated %s HIDs.", generatedHIDBlock.getTotalHIDs());
+        String message = String.format("Generated %s HIDs for MCI.", generatedHIDBlock.getTotalHIDs());
         deferredResult.setResult(message);
         logger.info(message);
         return deferredResult;
@@ -64,7 +64,7 @@ public class HealthIdController extends MciController {
             throw new InvalidRequestException(String.format("%s not for MCI", start));
         }
         UserInfo userInfo = getUserInfo();
-        logAccessDetails(userInfo, "Generating new hids");
+        logAccessDetails(userInfo, "Generating new hids for MCI");
         GeneratedHIDBlock generatedHIDBlock = healthIdService.generateBlock(start, totalHIDs, userInfo);
         return getResult(generatedHIDBlock, totalHIDs);
     }

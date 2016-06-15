@@ -35,7 +35,7 @@ public class ProviderRegistryClient extends WebClient<ProviderResponse> {
             return getResponse(url);
 
         } catch (RestClientException | InterruptedException | ExecutionException e) {
-            logger.debug("No provider found with URL: " + url, e);
+            logger.error("No provider found with URL: " + url, e);
             return null;
         }
     }

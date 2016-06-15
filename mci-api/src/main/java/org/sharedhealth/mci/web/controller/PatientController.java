@@ -65,22 +65,22 @@ public class PatientController extends MciController {
                                                               BindingResult bindingResult) throws InterruptedException {
 
         UserInfo userInfo = getUserInfo();
-        logAccessDetails(userInfo, format("Creating a new patient : %s %s", patient.getGender(), patient.getSurName()));
+        logAccessDetails(userInfo, "Creating a new patient");
 
         UserInfo.UserInfoProperties properties = userInfo.getProperties();
         patient.setRequester(
                 properties.getFacilityId(), properties.getProviderId(), properties.getAdminId()
                 , properties.getName());
 
-        logger.debug("Trying to create patient.");
+        logger.info("Create patient Request.");
         final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
 
         if (null != patient.getMergedWith()) {
-            throw new InvalidRequestException(format("Cannot merge with another patient on creation"));
+            throw new InvalidRequestException("Cannot merge with another patient on creation");
         }
 
         if (bindingResult.hasErrors()) {
-            logger.debug("Validation error while trying to create patient.");
+            logger.error("Validation error while trying to create patient.");
             throw new ValidationException(bindingResult);
         }
 
@@ -112,7 +112,7 @@ public class PatientController extends MciController {
             return deferredResult;
         }
         logAccessDetails(userInfo, format("Find patient given (healthId) : %s", healthId));
-        logger.debug("Trying to find patient by health id [" + healthId + "]");
+        logger.info("Find patient by health id [" + healthId + "]");
 
         PatientData result = formatResponse(patientService.findByHealthId(healthId));
 
@@ -126,13 +126,13 @@ public class PatientController extends MciController {
             @Valid SearchQuery searchQuery,
             BindingResult bindingResult) {
         UserInfo userInfo = getUserInfo();
-        logAccessDetails(userInfo, format("Find patients matching query : %s", searchQuery));
+        logAccessDetails(userInfo, "Find patients matching search query.");
 
         if (bindingResult.hasErrors()) {
-            logger.debug("Validation error while finding all patients by search query");
+            logger.error("Validation error while finding all patients by search query");
             throw new SearchQueryParameterException(bindingResult);
         }
-        logger.debug("Find all patients  by search query");
+        logger.info("Find all patients by search query");
         final DeferredResult<ResponseEntity<MCIMultiResponse>> deferredResult = new DeferredResult<>();
         final int limit = patientService.getPerPageMaximumLimit();
         final String note = patientService.getPerPageMaximumLimitNote();
@@ -163,18 +163,20 @@ public class PatientController extends MciController {
         }
 
         UserInfo userInfo = getUserInfo();
-        logAccessDetails(userInfo, format("Updating patient (healthId): %s", healthId));
+        String message = format("Updating patient (healthId): %s", healthId);
+        logAccessDetails(userInfo, message);
+        logger.info(message);
 
         UserInfo.UserInfoProperties properties = userInfo.getProperties();
         patient.setRequester(properties.getFacilityId(), properties.getProviderId(),
                 properties.getAdminId(), properties.getName());
 
         if (null != patient.isActive() || null != patient.getMergedWith()) {
-            throw new InvalidRequestException(format("Cannot update active field or merge with other patient"));
+            throw new InvalidRequestException("Cannot update active field or merge with other patient");
         }
 
         if (bindingResult.hasErrors()) {
-            logger.debug(format("Validation error while updating patient (healthId): %s", healthId));
+            logger.error(format("Validation error while updating patient (healthId): %s", healthId));
             throw new ValidationException(bindingResult);
         }
 

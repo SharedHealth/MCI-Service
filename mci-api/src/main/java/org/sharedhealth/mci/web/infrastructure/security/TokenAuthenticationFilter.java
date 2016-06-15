@@ -39,14 +39,14 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        logger.debug("Authenticating for client : {} with token: {} and email : {}", clientId, token, email);
+        logger.debug("Authenticating for client with email {}", email);
         try {
             SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
             processTokenAuthentication(clientId, email, token);
             filterChain.doFilter(httpRequest, httpResponse);
 
         } catch (AuthenticationException ex) {
-            logger.debug(String.format("Access to user=%s with email=%s is denied.", clientId, email));
+            logger.error(String.format("Access to user with email %s is denied.", email));
             SecurityContextHolder.clearContext();
             httpResponse.sendError(SC_UNAUTHORIZED, ex.getMessage());
         }
@@ -59,7 +59,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new BadCredentialsException("Unable to authenticate user");
         }
-        logger.debug("User successfully authenticated");
+        logger.info("User successfully authenticated");
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 }

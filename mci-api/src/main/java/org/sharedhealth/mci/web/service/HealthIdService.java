@@ -85,7 +85,7 @@ public class HealthIdService {
         long seriesNo = identifySeriesNo(start);
         long startForBlock = identifyStartInSeries(seriesNo);
         File hidFile = createFileForOrg(orgCode);
-        logger.info(String.format("Saving HIDs to file %s ", hidFile.getAbsolutePath()));
+        logger.info("Saving HIDs to file. ");
         long i;
         for (i = 0; numberOfValidHIDs < totalHIDs; i++) {
             long possibleHID = startForBlock + i;

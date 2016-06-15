@@ -57,7 +57,7 @@ public class DuplicatePatientService {
         String healthId2 = patient2.getHealthId();
 
         if (patient1.isRetired() || patient2.isRetired()) {
-            handleIllegalArgument(format("Patient 1 [hid: %s] and/or patient 2 [hid: %s] are/is retired. Cannot retain.",
+            handleIllegalArgument(format("Patient 1 [hid: %s] or patient 2 [hid: %s] are retired. Cannot retain.",
                     healthId1, healthId2));
         }
     }

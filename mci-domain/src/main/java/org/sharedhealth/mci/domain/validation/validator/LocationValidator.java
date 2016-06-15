@@ -42,7 +42,6 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
 
     @Override
     public boolean isValid(Address value, ConstraintValidatorContext context) {
-
         boolean isValid = true;
 
         if (value == null) return true;
@@ -148,12 +147,9 @@ public class LocationValidator implements ConstraintValidator<Location, Address>
     }
 
     private boolean isExistInLocationRegistry(String geoCode) {
-        logger.debug("Validation testing for code : [" + geoCode + "]");
-
+        logger.debug("Finding location for geocode%s : [" + geoCode + "]");
         LocationData location = locationService.findByGeoCode(geoCode);
-
         return location != null;
-
     }
 
     private void addConstraintViolation(ConstraintValidatorContext context, String code, String field) {

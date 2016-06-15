@@ -60,7 +60,7 @@ public class HealthIdControllerTest {
         GeneratedHIDBlock hidBlock = new GeneratedHIDBlock(1000L, "MCI", 1000L, 1099L, 100L, "", timeBased());
         when(healthIdService.generateAll(any(UserInfo.class))).thenReturn(hidBlock);
         HealthIdController healthIdController = new HealthIdController(healthIdService, facilityService, mciProperties);
-        assertEquals("Generated 100 HIDs.", healthIdController.generate().getResult());
+        assertEquals("Generated 100 HIDs for MCI.", healthIdController.generate().getResult());
         verify(healthIdService, times(1)).generateAll(any(UserInfo.class));
     }
 

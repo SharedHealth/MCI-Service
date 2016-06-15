@@ -35,7 +35,7 @@ public class FacilityRegistryClient extends WebClient<FacilityResponse> {
             return getResponse(url);
 
         } catch (RestClientException | InterruptedException | ExecutionException e) {
-            logger.debug("No facility found with URL: " + url, e);
+            logger.error("No facility found with URL: " + url, e);
             return null;
         }
     }

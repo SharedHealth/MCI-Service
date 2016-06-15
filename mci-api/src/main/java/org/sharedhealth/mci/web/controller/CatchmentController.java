@@ -85,7 +85,7 @@ public class CatchmentController extends FeedController {
             deferredResult.setErrorResult(new Forbidden
                     (format("Access is denied to user %s for catchment %s",
                             userInfo.getProperties().getId(), catchmentId)));
-            logger.debug(format("Access is denied to user %s for catchment %s", userInfo.getProperties().getId(), catchmentId));
+            logger.error(format("Access is denied to user %s for catchment %s", userInfo.getProperties().getEmail(), catchmentId));
             return deferredResult;
         }
 
@@ -121,7 +121,7 @@ public class CatchmentController extends FeedController {
             deferredResult.setErrorResult(new Forbidden
                     (format("Access is denied to user %s for catchment %s",
                             userInfo.getProperties().getId(), catchmentId)));
-            logger.debug(format("Access is denied to user %s for catchment %s", userInfo.getProperties().getId(), catchmentId));
+            logger.error(format("Access is denied to user %s for catchment %s", userInfo.getProperties().getEmail(), catchmentId));
             return deferredResult;
         }
 
@@ -148,14 +148,14 @@ public class CatchmentController extends FeedController {
             BindingResult bindingResult) {
 
         UserInfo userInfo = getUserInfo();
-        logAccessDetails(userInfo, String.format("Accepting (PUT) pending approval for patient (Health Id) : %s, catchment: %s",
+        logAccessDetails(userInfo, String.format("Accepting pending approval for patient (Health Id) : %s, catchment: %s",
                 healthId, catchmentId));
 
         UserInfo.UserInfoProperties properties = userInfo.getProperties();
         patient.setRequester(properties.getFacilityId(), properties.getProviderId(),
                 properties.getAdminId(), properties.getName());
 
-        logger.debug("Accepting pending approvals. Health ID : " + healthId);
+        logger.info("Accepting pending approvals. Health ID : " + healthId);
         return processPendingApprovals(catchmentId, healthId, patient, userInfo, bindingResult, true);
     }
 
@@ -168,14 +168,14 @@ public class CatchmentController extends FeedController {
             BindingResult bindingResult) {
 
         UserInfo userInfo = getUserInfo();
-        logAccessDetails(userInfo, String.format("Accepting(DELETE) pending approval for patient (Health Id) : %s, catchment: %s",
+        logAccessDetails(userInfo, String.format("Rejecting pending approval for patient (Health Id) : %s, catchment: %s",
                 healthId, catchmentId));
 
         UserInfo.UserInfoProperties properties = userInfo.getProperties();
         patient.setRequester(properties.getFacilityId(), properties.getProviderId(),
                 properties.getAdminId(), properties.getName());
-        
-        logger.debug("Accepting pending approvals. Health ID : " + healthId);
+
+        logger.info("Rejecting pending approvals. Health ID : " + healthId);
         return processPendingApprovals(catchmentId, healthId, patient, userInfo, bindingResult, false);
     }
 
@@ -196,12 +196,12 @@ public class CatchmentController extends FeedController {
         if (!userInfo.getProperties().hasCatchmentForProfileType(catchmentId, asList(FACILITY_TYPE, PROVIDER_TYPE))) {
             deferredResult.setErrorResult(new Forbidden
                     (format("Access is denied to user %s for catchment %s",
-                            userInfo.getProperties().getId(), catchmentId)));
-            logger.debug(format("Access is denied to user %s for catchment %s",userInfo.getProperties().getId(),catchmentId));
+                            userInfo.getProperties().getEmail(), catchmentId)));
+            logger.error(format("Access is denied to user %s for catchment %s", userInfo.getProperties().getEmail(), catchmentId));
             return deferredResult;
         }
         Catchment catchment = new Catchment(catchmentId);
-        logger.debug(format("Find all patients by catchment. Catchment ID: %s, since: %s, last marker: %s", catchment, since, lastMarker));
+        logger.debug(format("Find all patients by catchment. Catchment ID: %s", catchment));
 
         Date date = isNotBlank(since) ? parseDate(since) : null;
         List<PatientData> patients = patientService.findAllByCatchment(catchment, date, lastMarker);
@@ -211,10 +211,11 @@ public class CatchmentController extends FeedController {
     }
 
     private DeferredResult<ResponseEntity<MCIResponse>> processPendingApprovals(
-            String catchmentId, String healthId, PatientData patient, UserInfo userInfo, BindingResult bindingResult, boolean shouldAccept) {
+            String catchmentId, String healthId, PatientData patient, UserInfo userInfo,
+            BindingResult bindingResult, boolean shouldAccept) {
 
         if (bindingResult.hasErrors()) {
-            logger.debug("ValidationException while processing pending approvals");
+            logger.error("ValidationException while processing pending approvals");
             throw new ValidationException(bindingResult);
         }
 
@@ -227,8 +228,11 @@ public class CatchmentController extends FeedController {
             return deferredResult;
         }
 
+
         Catchment catchment = new Catchment(catchmentId);
         patient.setHealthId(healthId);
+        logger.info(format("process pending approval for healthId: %s and for catchment: %s", healthId, catchment
+                .toString()));
         String hid = patientService.processPendingApprovals(patient, catchment, shouldAccept);
 
         MCIResponse mciResponse = new MCIResponse(hid, ACCEPTED);

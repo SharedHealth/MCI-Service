@@ -28,8 +28,6 @@ public class PatientHealthIdService {
     }
 
     public MciHealthId getNextHealthId() throws InterruptedException {
-        logger.debug("get: block size :" + MciHealthIds.size());
-        logger.debug(" object id : " + this);
         return MciHealthIds.remove();
     }
 
@@ -38,8 +36,7 @@ public class PatientHealthIdService {
     }
 
     public void replenishIfNeeded() {
-        logger.debug("replenish: block size :" + MciHealthIds.size());
-        logger.debug("replenish: object id : " + this);
+        logger.debug("Replenish, Remaining Health IDs :" + MciHealthIds.size());
         if (MciHealthIds.size() < mciProperties.getHealthIdBlockSizeThreshold()) {
             MciHealthIds.addAll(healthIdService.getNextBlock());
         }

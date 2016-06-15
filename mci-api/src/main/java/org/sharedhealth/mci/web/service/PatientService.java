@@ -80,7 +80,7 @@ public class PatientService {
 
     public MCIResponse createPatientForOrg(PatientData patient, String facilityId) {
         String healthId = patient.getHealthId();
-        logger.debug(String.format("Creating patient for Organization [%s] with HealthID [%s]", facilityId, healthId));
+        logger.debug(String.format("Creating patient for Organization [%s]", facilityId));
         PatientData existingPatient = findPatientByMultipleIds(patient);
         if (existingPatient != null) {
             return this.update(patient, existingPatient.getHealthId());
@@ -257,8 +257,6 @@ public class PatientService {
     }
 
     public String processPendingApprovals(PatientData requestData, Catchment catchment, boolean shouldAccept) {
-        logger.debug(format("process pending approval for healthId: %s and for catchment: %s", requestData.getHealthId(), catchment
-                .toString()));
         PatientData existingPatient = this.findByHealthId(requestData.getHealthId());
         if (null != existingPatient.isActive() && !existingPatient.isActive()) {
             throw new Forbidden("patient is already marked inactive");

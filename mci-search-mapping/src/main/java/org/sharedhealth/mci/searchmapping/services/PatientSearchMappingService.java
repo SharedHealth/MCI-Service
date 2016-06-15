@@ -77,7 +77,7 @@ public class PatientSearchMappingService {
                 failedEventsRepository.deleteFailedEvent(FAILURE_TYPE_SEARCH_MAPPING, failedEvent.getEventId());
             } catch (Exception e) {
                 failedEventsRepository.writeToFailedEvents(FAILURE_TYPE_SEARCH_MAPPING, patientUpdateLog.getEventId(), e.toString());
-                logger.error(String.format("Failed to create search Mappings for patient %s", patientUpdateLog.getHealthId()));
+                logger.error(String.format("Failed to create search Mappings from failed event for patient %s", patientUpdateLog.getHealthId()));
             }
         }
     }

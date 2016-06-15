@@ -56,8 +56,6 @@ public class PatientRepository extends BaseRepository {
     }
 
     public MCIResponse create(PatientData patientData) {
-        logger.debug(String.format("Create patient: %s", patientData.toString()));
-
         Patient patient = mapper.map(patientData, new PatientData());
         patient.setCreatedAt(timeBased());
         patient.setUpdatedAt(timeBased());

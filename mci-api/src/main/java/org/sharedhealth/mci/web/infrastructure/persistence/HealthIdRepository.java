@@ -95,12 +95,12 @@ public class HealthIdRepository extends BaseRepository {
     }
 
     private Insert getInsertQuery(MciHealthId mciHealthId) {
-        logger.debug(String.format("Inserting new hid for MCI :%s", mciHealthId.getHid()));
+        logger.debug("Inserting new hid for MCI");
         return createInsertQuery(CF_MCI_HEALTH_ID, mciHealthId, null, cassandraOps.getConverter());
     }
 
     private Insert getInsertQuery(OrgHealthId orgHealthId) {
-        logger.debug(String.format("Inserting new hid for organization %s :%s", orgHealthId.getAllocatedFor(), orgHealthId.getHealthId()));
+        logger.debug(String.format("Inserting new hid for organization %s ", orgHealthId.getAllocatedFor()));
         return createInsertQuery(CF_ORG_HEALTH_ID, orgHealthId, null, cassandraOps.getConverter());
     }
 
@@ -108,5 +108,6 @@ public class HealthIdRepository extends BaseRepository {
     public OrgHealthId findOrgHealthId(String healthId) {
         Select selectHealthId = QueryBuilder.select().from(CF_ORG_HEALTH_ID).where(QueryBuilder.eq(HEALTH_ID, healthId)).limit(1);
         List<OrgHealthId> orgHealthIds = cassandraOps.select(selectHealthId, OrgHealthId.class);
-        return orgHealthIds.isEmpty() ? null : orgHealthIds.get(0);    }
+        return orgHealthIds.isEmpty() ? null : orgHealthIds.get(0);
+    }
 }
