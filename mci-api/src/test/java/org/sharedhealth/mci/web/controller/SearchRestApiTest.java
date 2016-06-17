@@ -17,24 +17,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.web.context.WebApplicationContext;
 
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static junit.framework.Assert.assertEquals;
+import static org.sharedhealth.mci.domain.repository.TestUtil.setupLocation;
 import static org.sharedhealth.mci.domain.util.DateUtil.parseDate;
 import static org.sharedhealth.mci.utils.FileUtil.asString;
 import static org.sharedhealth.mci.utils.HttpUtil.*;
-import static org.sharedhealth.mci.domain.repository.TestUtil.setupLocation;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 public class SearchRestApiTest extends BaseControllerTest {
-    @Autowired
-    protected WebApplicationContext webApplicationContext;
-
     @Autowired
     private PatientSearchMappingRepository searchMappingRepository;
 

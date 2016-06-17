@@ -218,7 +218,7 @@ public class PatientQueryBuilder {
     }
 
     public static Update buildUpdateStmt(Patient patient, CassandraConverter converter) {
-        return toUpdateQuery(CF_PATIENT, patient, null, converter);
+        return createUpdateQuery(CF_PATIENT, patient, null, converter);
     }
 
     public static String buildFindByCatchmentStmt(Catchment catchment, Date since, UUID lastMarker, int limit) {
