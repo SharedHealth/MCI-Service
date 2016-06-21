@@ -84,7 +84,7 @@ configurations {
 
 jar {
     baseName = 'mci-dedup'
-    version = '2.4-SNAPSHOT'
+    version = '2.5-SNAPSHOT'
 }
 
 private Properties loadConfig() {
