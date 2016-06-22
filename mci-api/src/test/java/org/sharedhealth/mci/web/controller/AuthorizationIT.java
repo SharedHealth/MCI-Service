@@ -442,6 +442,9 @@ public class AuthorizationIT extends BaseControllerTest {
     @Test
     public void mciAdminShouldUpdatePatient() throws Exception {
         String healthId = "HID";
+        
+        when(locationService.findByGeoCode("302618")).thenReturn(new LocationData());
+        when(locationService.findByGeoCode("1004092006")).thenReturn(new LocationData());
         when(patientService.update(patientData, healthId)).thenReturn(new MCIResponse(healthId, HttpStatus.ACCEPTED));
 
         mockMvc.perform(put(API_END_POINT_FOR_PATIENT + "/" + healthId)
