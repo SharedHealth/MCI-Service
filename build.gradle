@@ -63,7 +63,7 @@ ext.libraries = [
         spring_security      : "org.springframework.security:spring-security-web:3.2.5.RELEASE",
         spring_boot_security : "org.springframework.boot:spring-boot-starter-security:1.1.8.RELEASE",
         rome                 : "rome:rome:1.0",
-        netty                : "io.netty:netty:3.9.0.Final",
+        netty                : "io.netty:netty-all:4.0.37.Final",
         ehcache_core         : "net.sf.ehcache:ehcache-core:2.6.10",
 ]
 
