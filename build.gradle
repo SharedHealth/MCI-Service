@@ -63,12 +63,12 @@ ext.libraries = [
         spring_security      : "org.springframework.security:spring-security-web:3.2.5.RELEASE",
         spring_boot_security : "org.springframework.boot:spring-boot-starter-security:1.1.8.RELEASE",
         rome                 : "rome:rome:1.0",
+        netty                : "io.netty:netty:3.9.0.Final",
         ehcache_core         : "net.sf.ehcache:ehcache-core:2.6.10",
 ]
 
 ext.testLibraries = [
         junit      : "junit:junit:4.10",
-        netty         : "io.netty:netty:3.9.0.Final",
         mockito    : "org.mockito:mockito-all:1.8.4",
         http_client: "org.apache.httpcomponents:httpclient:4.3.3",
         spring_test: "org.springframework:spring-test:4.1.6.RELEASE",
