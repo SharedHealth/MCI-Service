@@ -3,12 +3,13 @@ package org.sharedhealth.mci.domain.repository;
 import org.junit.After;
 import org.junit.Test;
 import org.sharedhealth.mci.domain.model.Marker;
+import org.sharedhealth.mci.domain.util.BaseRepositoryIT;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.sharedhealth.mci.domain.repository.TestUtil.truncateAllColumnFamilies;
+import static org.sharedhealth.mci.domain.util.TestUtil.truncateAllColumnFamilies;
 
 public class MarkerRepositoryIT extends BaseRepositoryIT {
 

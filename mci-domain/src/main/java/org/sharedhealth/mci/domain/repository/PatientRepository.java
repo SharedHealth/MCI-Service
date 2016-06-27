@@ -89,14 +89,34 @@ public class PatientRepository extends BaseRepository {
         return new MCIResponse(patient.getHealthId(), HttpStatus.CREATED);
     }
 
-    public MCIResponse update(PatientData updateRequest, String healthId) {
-        Batch batch = batch();
-        buildUpdateProcessBatch(updateRequest, healthId, batch);
-        cassandraOps.execute(batch);
-        return new MCIResponse(healthId, HttpStatus.ACCEPTED);
+    public MCIResponse update(PatientData newPatientData, PatientData existingPatient, Requester requestedBy) {
+        Batch batch = buildUpdateProcessBatch(newPatientData, existingPatient, requestedBy);
+        if (batch != null) {
+            cassandraOps.execute(batch);
+        }
+        return new MCIResponse(existingPatient.getHealthId(), HttpStatus.ACCEPTED);
     }
 
-    public void buildUpdateProcessBatch(PatientData updateRequest, String healthId, Batch batch) {
+    public Batch buildUpdateProcessBatch(PatientData patientDataToBeUpdated, PatientData existingPatientData, Requester requester) {
+        Batch batch = batch();
+        Patient newPatient = mapper.map(patientDataToBeUpdated, existingPatientData);
+
+        newPatient.setHealthId(existingPatientData.getHealthId());
+        newPatient.setUpdatedAt(timeBased());
+        newPatient.setUpdatedBy(requester);
+
+        clearPendingApprovalsIfRequired(patientDataToBeUpdated, existingPatientData, batch);
+        buildUpdatePendingApprovalsBatch(newPatient, existingPatientData, batch);
+        buildUpdateBatch(newPatient, existingPatientData, cassandraOps.getConverter(), batch);
+        Map<String, Set<Requester>> requestedBy = new HashMap<>();
+        buildRequestedBy(requestedBy, ALL_FIELDS, requester);
+        buildCreateUpdateLogStmt(patientDataToBeUpdated, existingPatientData, requestedBy, null, cassandraOps.getConverter(), batch);
+        PatientAuditLogQueryBuilder.buildUpdateAuditLogStmt(patientDataToBeUpdated, existingPatientData, requestedBy, null, cassandraOps
+                .getConverter(), batch);
+        return batch;
+    }
+
+    public Batch buildUpdateProcessBatch(PatientData updateRequest, String healthId, Batch batch) {
         logger.debug(String.format("Update patient: %s", healthId));
         updateRequest.setHealthId(healthId);
         Requester requester = updateRequest.getRequester();
@@ -125,6 +145,7 @@ public class PatientRepository extends BaseRepository {
         buildCreateUpdateLogStmt(newPatientData, existingPatientData, requestedBy, null, cassandraOps.getConverter(), batch);
         PatientAuditLogQueryBuilder.buildUpdateAuditLogStmt(newPatientData, existingPatientData, requestedBy, null, cassandraOps
                 .getConverter(), batch);
+        return batch;
     }
 
     private void clearPendingApprovalsIfRequired(PatientData updateRequest, PatientData existingPatientData, Batch batch) {
@@ -134,7 +155,6 @@ public class PatientRepository extends BaseRepository {
         existingPatientData.setPendingApprovals(new TreeSet<PendingApproval>());
         buildDeletePendingApprovalMappingStmt(existingPatientData.getHealthId(), batch, new Date().getTime());
     }
-
 
     private boolean checkIfTryingToMergeWithNonExistingOrInactiveHid(String mergedWith) {
         if (null == mergedWith) {

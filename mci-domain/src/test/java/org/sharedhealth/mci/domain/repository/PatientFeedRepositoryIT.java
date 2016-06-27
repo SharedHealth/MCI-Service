@@ -6,6 +6,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.sharedhealth.mci.domain.constant.JsonConstants;
 import org.sharedhealth.mci.domain.model.*;
+import org.sharedhealth.mci.domain.util.BaseRepositoryIT;
+import org.sharedhealth.mci.domain.util.TestUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
@@ -17,11 +19,11 @@ import static org.sharedhealth.mci.domain.constant.JsonConstants.NEW_VALUE;
 import static org.sharedhealth.mci.domain.constant.JsonConstants.OLD_VALUE;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.CF_PATIENT_UPDATE_LOG;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.EVENT_TYPE_CREATED;
-import static org.sharedhealth.mci.domain.repository.TestUtil.setupApprovalsConfig;
-import static org.sharedhealth.mci.domain.repository.TestUtil.truncateAllColumnFamilies;
 import static org.sharedhealth.mci.domain.util.DateUtil.parseDate;
 import static org.sharedhealth.mci.domain.util.JsonMapper.readValue;
 import static org.sharedhealth.mci.domain.util.JsonMapper.writeValueAsString;
+import static org.sharedhealth.mci.domain.util.TestUtil.setupApprovalsConfig;
+import static org.sharedhealth.mci.domain.util.TestUtil.truncateAllColumnFamilies;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
 
 public class PatientFeedRepositoryIT extends BaseRepositoryIT {
@@ -74,7 +76,9 @@ public class PatientFeedRepositoryIT extends BaseRepositoryIT {
     @Test
     public void shouldCreateUpdateLogsWhenPatientIsUpdated() {
         String healthId = patientRepository.create(data).getId();
+
         Date since = new Date();
+
 
         assertUpdateLogEntry(healthId, since, false);
 
@@ -82,8 +86,12 @@ public class PatientFeedRepositoryIT extends BaseRepositoryIT {
         updateRequest.setHealthId(healthId);
         updateRequest.setGivenName("Harry");
         updateRequest.setAddress(new Address("99", "88", "77"));
-        updateRequest.setRequester("Bahmni", "Dr. Monika");
-        patientRepository.update(updateRequest, healthId);
+
+        String facilityId = "Bahmni";
+        String providerId = "Dr. Monika";
+        Requester requester = new Requester(facilityId, providerId);
+        updateRequest.setRequester(facilityId, providerId);
+        patientRepository.update(updateRequest, patientRepository.findByHealthId(healthId), requester);
 
         assertUpdateLogEntry(healthId, since, true);
     }
@@ -104,8 +112,11 @@ public class PatientFeedRepositoryIT extends BaseRepositoryIT {
         PatientData updateRequest1 = new PatientData();
         updateRequest1.setHealthId(healthId);
         updateRequest1.setEducationLevel("02");
-        updateRequest1.setRequester("Bahmni", "Dr. Monika");
-        patientRepository.update(updateRequest1, healthId);
+        String facilityId = "Bahmni";
+        String providerId = "Dr. Monika";
+        Requester requester = new Requester(facilityId, providerId);
+        updateRequest1.setRequester(facilityId, providerId);
+        patientRepository.update(updateRequest1, patientRepository.findByHealthId(healthId), requester);
         assertUpdateLogEntry(healthId, since, true);
 
         PatientData updateRequest2 = new PatientData();
@@ -115,16 +126,14 @@ public class PatientFeedRepositoryIT extends BaseRepositoryIT {
         updateRequest2.setGender("F");
         Address newAddress = new Address("99", "88", "77");
         updateRequest2.setAddress(newAddress);
-        updateRequest2.setRequester("Bahmni", "Dr. Monika");
-        patientRepository.update(updateRequest2, healthId);
+        updateRequest2.setRequester(facilityId, providerId);
+        patientRepository.update(updateRequest2, patientRepository.findByHealthId(healthId), requester);
 
         PatientData acceptRequest = new PatientData();
         acceptRequest.setHealthId(healthId);
         acceptRequest.setGender("F");
         acceptRequest.setAddress(newAddress);
         acceptRequest.setRequester("Bahmni", "Dr. Monika");
-        PatientData existingPatient = patientRepository.findByHealthId(healthId);
-        patientRepository.processPendingApprovals(acceptRequest, existingPatient, true);
 
         List<PatientUpdateLog> patientUpdateLogs = feedRepository.findPatientsUpdatedSince(null, 25, null);
         assertEquals(4, patientUpdateLogs.size());
@@ -148,23 +157,11 @@ public class PatientFeedRepositoryIT extends BaseRepositoryIT {
         assertChangeSet(changeSet3, JsonConstants.PRESENT_ADDRESS, data.getAddress(), newAddress);
     }
 
-    private Map<String, Map<String, Object>> getChangeSet(PatientUpdateLog log) {
-        return readValue(log.getChangeSet(), new TypeReference<Map<String, Map<String, Object>>>() {
-        });
-    }
-
-    private void assertChangeSet(Map<String, Map<String, Object>> changeSet, String fieldName, String oldValue, String newValue) {
-        assertEquals(oldValue, changeSet.get(fieldName).get(OLD_VALUE));
-        assertEquals(newValue, changeSet.get(fieldName).get(NEW_VALUE));
-    }
-
-    private void assertChangeSet(Map<String, Map<String, Object>> changeSet, String fieldName, Address oldValue, Address newValue) {
-        assertEquals(writeValueAsString(oldValue), writeValueAsString(changeSet.get(fieldName).get(OLD_VALUE)));
-        assertEquals(writeValueAsString(newValue), writeValueAsString(changeSet.get(fieldName).get(NEW_VALUE)));
-    }
 
     @Test
     public void shouldCreateUpdateLogWhenPresentAddressIsMarkedForApprovalAndUpdatedAfterApproval() {
+        TestUtil.setupApprovalsConfig(cassandraOps);
+
         String healthId = patientRepository.create(data).getId();
         Date since = new Date();
 
@@ -173,8 +170,12 @@ public class PatientFeedRepositoryIT extends BaseRepositoryIT {
         PatientData updateRequest = new PatientData();
         Address newAddress = new Address("99", "88", "77");
         updateRequest.setAddress(newAddress);
-        updateRequest.setRequester("Bahmni", "Dr. Monika");
-        patientRepository.update(updateRequest, healthId);
+        String facilityId = "Bahmni";
+        String providerId = "Dr. Monika";
+        Requester requester = new Requester(facilityId, providerId);
+        updateRequest.setRequester(facilityId, providerId);
+
+        patientRepository.update(updateRequest, patientRepository.findByHealthId(healthId), requester);
 
         assertUpdateLogEntry(healthId, since, false);
 
@@ -187,27 +188,8 @@ public class PatientFeedRepositoryIT extends BaseRepositoryIT {
         assertEquals(writeValueAsString(new Requester("Bahmni", "Dr. Monika")), patientUpdateLogs.get(0).getApprovedBy());
     }
 
-    private void assertUpdateLogEntry(String healthId, Date since, boolean shouldFind) {
-        List<PatientUpdateLog> patientUpdateLogs = feedRepository.findPatientsUpdatedSince(since, 1, null);
-
-        if (shouldFind) {
-            assertEquals(healthId, patientUpdateLogs.get(0).getHealthId());
-            assertEquals(buildRequestedBy(), patientUpdateLogs.get(0).getRequestedBy());
-        } else {
-            assertEquals(0, patientUpdateLogs.size());
-        }
-    }
-
-    private String buildRequestedBy() {
-        Map<String, Set<Requester>> requestedBy = new HashMap<>();
-        Set<Requester> requester = new HashSet<>();
-        requester.add(new Requester("Bahmni", "Dr. Monika"));
-        requestedBy.put("ALL_FIELDS", requester);
-        return writeValueAsString(requestedBy);
-    }
-
     @Test
-    public void shouldFindUpdateLogsUpdatedSince() {
+    public void shouldFindUpdateLogsUsingUpdatedSinceAndLastMarker() {
         String healthId = patientRepository.create(data).getId();
         Date since = new Date();
         final int limit = 20;
@@ -218,41 +200,24 @@ public class PatientFeedRepositoryIT extends BaseRepositoryIT {
         PatientData updateRequest = new PatientData();
         updateRequest.setHealthId(healthId);
         updateRequest.setGivenName("Update1");
-        updateRequest.setRequester("Bahmni", "Dr. Monika");
-        patientRepository.update(updateRequest, healthId);
-        updateRequest.setGivenName("Update2");
-        patientRepository.update(updateRequest, healthId);
+        String facilityId = "Bahmni";
+        String providerId = "Dr. Monika";
+        Requester requester = new Requester(facilityId, providerId);
+        updateRequest.setRequester(facilityId, providerId);
 
-        patientUpdateLogs = feedRepository.findPatientsUpdatedSince(since, limit, null);
-        assertEquals(2, patientUpdateLogs.size());
-        assertTrue(healthId.equals(patientUpdateLogs.get(0).getHealthId()));
-    }
-
-    @Test
-    public void shouldFindUpdateLogsUpdatedAfterLastMarker() {
-        String healthId = patientRepository.create(data).getId();
-        Date since = new Date();
-        final int limit = 20;
-
-        List<PatientUpdateLog> patientUpdateLogs = feedRepository.findPatientsUpdatedSince(since, limit, null);
-        assertEquals(0, patientUpdateLogs.size());
-
-        PatientData updateRequest = new PatientData();
-        updateRequest.setHealthId(healthId);
-        updateRequest.setGivenName("Update1");
-        updateRequest.setRequester("Bahmni", "Dr. Monika");
-        patientRepository.update(updateRequest, healthId);
-
-        patientUpdateLogs = feedRepository.findPatientsUpdatedSince(since, limit, null);
-        assertEquals(1, patientUpdateLogs.size());
-        assertTrue(healthId.equals(patientUpdateLogs.get(0).getHealthId()));
+        patientRepository.update(updateRequest, patientRepository.findByHealthId(healthId), requester);
 
         final UUID marker = patientUpdateLogs.get(0).getEventId();
 
         updateRequest.setGivenName("Update2");
-        patientRepository.update(updateRequest, healthId);
+        patientRepository.update(updateRequest, patientRepository.findByHealthId(healthId), requester);
+
         updateRequest.setGivenName("Update3");
-        patientRepository.update(updateRequest, healthId);
+        patientRepository.update(updateRequest, patientRepository.findByHealthId(healthId), requester);
+
+        patientUpdateLogs = feedRepository.findPatientsUpdatedSince(since, limit, null);
+        assertEquals(2, patientUpdateLogs.size());
+        assertTrue(healthId.equals(patientUpdateLogs.get(0).getHealthId()));
 
         patientUpdateLogs = feedRepository.findPatientsUpdatedSince(since, limit, null);
         assertEquals(3, patientUpdateLogs.size());
@@ -284,6 +249,40 @@ public class PatientFeedRepositoryIT extends BaseRepositoryIT {
         assertEquals(healthId, logByEventId.getHealthId());
         assertEquals(changeSet, logByEventId.getChangeSet());
         assertEquals(approvedBy, logByEventId.getApprovedBy());
+    }
+
+    private Map<String, Map<String, Object>> getChangeSet(PatientUpdateLog log) {
+        return readValue(log.getChangeSet(), new TypeReference<Map<String, Map<String, Object>>>() {
+        });
+    }
+
+    private void assertChangeSet(Map<String, Map<String, Object>> changeSet, String fieldName, String oldValue, String newValue) {
+        assertEquals(oldValue, changeSet.get(fieldName).get(OLD_VALUE));
+        assertEquals(newValue, changeSet.get(fieldName).get(NEW_VALUE));
+    }
+
+    private void assertChangeSet(Map<String, Map<String, Object>> changeSet, String fieldName, Address oldValue, Address newValue) {
+        assertEquals(writeValueAsString(oldValue), writeValueAsString(changeSet.get(fieldName).get(OLD_VALUE)));
+        assertEquals(writeValueAsString(newValue), writeValueAsString(changeSet.get(fieldName).get(NEW_VALUE)));
+    }
+
+    private void assertUpdateLogEntry(String healthId, Date since, boolean shouldFind) {
+        List<PatientUpdateLog> patientUpdateLogs = feedRepository.findPatientsUpdatedSince(since, 1, null);
+
+        if (shouldFind) {
+            assertEquals(healthId, patientUpdateLogs.get(0).getHealthId());
+            assertEquals(buildRequestedBy(), patientUpdateLogs.get(0).getRequestedBy());
+        } else {
+            assertEquals(0, patientUpdateLogs.size());
+        }
+    }
+
+    private String buildRequestedBy() {
+        Map<String, Set<Requester>> requestedBy = new HashMap<>();
+        Set<Requester> requester = new HashSet<>();
+        requester.add(new Requester("Bahmni", "Dr. Monika"));
+        requestedBy.put("ALL_FIELDS", requester);
+        return writeValueAsString(requestedBy);
     }
 
     @After

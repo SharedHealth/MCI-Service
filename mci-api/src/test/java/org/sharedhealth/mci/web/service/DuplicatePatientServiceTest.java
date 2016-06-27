@@ -31,7 +31,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.domain.constant.MCIConstants.DUPLICATION_ACTION_MERGE;
 import static org.sharedhealth.mci.domain.constant.MCIConstants.DUPLICATION_ACTION_RETAIN_ALL;
-import static org.sharedhealth.mci.domain.repository.TestUtil.asSet;
+import static org.sharedhealth.mci.domain.util.TestUtil.asSet;
 
 public class DuplicatePatientServiceTest {
 

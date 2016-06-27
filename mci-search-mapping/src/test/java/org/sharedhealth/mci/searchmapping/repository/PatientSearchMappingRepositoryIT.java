@@ -4,9 +4,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.sharedhealth.mci.domain.model.*;
-import org.sharedhealth.mci.domain.repository.BaseRepositoryIT;
 import org.sharedhealth.mci.domain.repository.PatientRepository;
-import org.sharedhealth.mci.domain.repository.TestUtil;
+import org.sharedhealth.mci.domain.util.BaseRepositoryIT;
+import org.sharedhealth.mci.domain.util.TestUtil;
 import org.sharedhealth.mci.searchmapping.services.PatientSearchMappingService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -160,7 +160,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
         PatientData updateRequest = initPatientData();
         updateRequest.setHealthId(healthId);
         updateRequest.setReligion("02");
-        patientRepository.update(updateRequest, healthId);
+        patientRepository.update(updateRequest, patientRepository.findByHealthId(healthId), new Requester());
 
         assertEquals(1, getNidMappings(nid, healthId).size());
         assertEquals(1, getBrnMappings(brn, healthId).size());
@@ -210,7 +210,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
         updateRequest.setBirthRegistrationNumber(newBrn);
         updateRequest.setUid(newUid);
         updateRequest.setPhoneNumber(newPhoneNumber);
-        patientRepository.update(updateRequest, healthId);
+        patientRepository.update(updateRequest, patientRepository.findByHealthId(healthId), new Requester());
 
         PatientData updatedPatient = patientRepository.findByHealthId(healthId);
         assertNotNull(updatedPatient);
@@ -271,7 +271,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
         updateRequest.setBirthRegistrationNumber(newBrn);
         updateRequest.setUid(newUid);
         updateRequest.setPhoneNumber(newPhoneNumber);
-        patientRepository.update(updateRequest, healthId);
+        patientRepository.update(updateRequest, patientRepository.findByHealthId(healthId), new Requester());
 
         PatientData updatedPatient = patientRepository.findByHealthId(healthId);
         assertNotNull(updatedPatient);
@@ -331,7 +331,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
         updateRequest.setBirthRegistrationNumber(brn2);
         updateRequest.setUid(uid2);
         updateRequest.setPhoneNumber(phoneNumber2);
-        patientRepository.update(updateRequest, healthId2);
+        patientRepository.update(updateRequest, patientRepository.findByHealthId(healthId2), new Requester());
 
         PatientData approvalRequest = initPatientData();
         approvalRequest.setHealthId(healthId2);
@@ -378,7 +378,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
 
         PatientData updateRequest = initPatientData();
         updateRequest.setGivenName("Jane");
-        patientRepository.update(updateRequest, healthId2);
+        patientRepository.update(updateRequest, patientRepository.findByHealthId(healthId2), new Requester());
 
         assertSearchByNameAndAddressExists("John", "102030", healthId1);
         assertSearchByNameAndAddressExists("Jane", "102030", healthId2);
@@ -400,7 +400,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
         Address newAddress = createAddress("01", "04", "09");
         updateRequest.setAddress(newAddress);
         updateRequest.setGender("O");
-        patientRepository.update(updateRequest, healthId);
+        patientRepository.update(patientData, patientRepository.findByHealthId(healthId), new Requester());
 
         assertTrue(isNotEmpty(patientRepository.findAllByCatchment(patientData.getCatchment(), null, null, 100)));
         assertTrue(isEmpty(patientRepository.findAllByCatchment(updateRequest.getCatchment(), null, null, 100)));
@@ -439,7 +439,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
         PatientData updateRequest = initPatientData();
         updateRequest.setReligion(newReligion);
         updateRequest.setHouseholdCode(newHouseholdCode);
-        patientRepository.update(updateRequest, healthId);
+        patientRepository.update(updateRequest, patientRepository.findByHealthId(healthId), new Requester());
 
         PatientData updatedPatient = patientRepository.findByHealthId(healthId);
         assertNotNull(updatedPatient);
@@ -471,7 +471,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
         PatientData updateRequest = initPatientData();
         updateRequest.setReligion(newReligion);
         updateRequest.setHouseholdCode(newHouseholdCode);
-        patientRepository.update(updateRequest, healthId);
+        patientRepository.update(updateRequest, patientRepository.findByHealthId(healthId), new Requester());
 
         PatientData updatedPatient = patientRepository.findByHealthId(healthId);
         assertNotNull(updatedPatient);
@@ -529,7 +529,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
         updateRequest.setBirthRegistrationNumber(newBrn);
         updateRequest.setUid(newUid);
         updateRequest.setPhoneNumber(newPhoneNumber);
-        patientRepository.update(updateRequest, healthId);
+        patientRepository.update(updateRequest, patientRepository.findByHealthId(healthId), new Requester());
 
         PatientData approvalRequest = initPatientData();
         approvalRequest.setHealthId(healthId);
@@ -593,7 +593,7 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
         updateRequest.setBirthRegistrationNumber(newBrn);
         updateRequest.setUid(newUid);
         updateRequest.setPhoneNumber(newPhoneNumber);
-        patientRepository.update(updateRequest, healthId);
+        patientRepository.update(updateRequest, patientRepository.findByHealthId(healthId), new Requester());
 
         PatientData approvalRequest = initPatientData();
         approvalRequest.setHealthId(healthId);

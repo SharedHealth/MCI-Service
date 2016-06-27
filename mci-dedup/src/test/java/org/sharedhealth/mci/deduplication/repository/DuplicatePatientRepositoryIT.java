@@ -10,9 +10,9 @@ import org.sharedhealth.mci.domain.model.Address;
 import org.sharedhealth.mci.domain.model.Catchment;
 import org.sharedhealth.mci.domain.model.PatientData;
 import org.sharedhealth.mci.domain.model.Requester;
-import org.sharedhealth.mci.domain.repository.BaseRepositoryIT;
 import org.sharedhealth.mci.domain.repository.MarkerRepository;
 import org.sharedhealth.mci.domain.repository.PatientRepository;
+import org.sharedhealth.mci.domain.util.BaseRepositoryIT;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.cassandra.core.CassandraOperations;
@@ -28,7 +28,9 @@ import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.junit.Assert.*;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.*;
-import static org.sharedhealth.mci.domain.repository.TestUtil.*;
+import static org.sharedhealth.mci.domain.util.TestUtil.asSet;
+import static org.sharedhealth.mci.domain.util.TestUtil.buildTimeUuids;
+import static org.sharedhealth.mci.domain.util.TestUtil.truncateAllColumnFamilies;
 
 public class DuplicatePatientRepositoryIT extends BaseRepositoryIT {
 

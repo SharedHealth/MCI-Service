@@ -17,7 +17,7 @@ public class PendingApproval implements Comparable<PendingApproval> {
     private Object currentValue;
 
     @JsonProperty(FIELD_DETAILS)
-    TreeMap<UUID, PendingApprovalFieldDetails> fieldDetails;
+    private TreeMap<UUID, PendingApprovalFieldDetails> fieldDetails;
 
     public PendingApproval() {
         fieldDetails = new TreeMap<>(new Comparator<UUID>() {

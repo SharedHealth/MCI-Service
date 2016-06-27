@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sharedhealth.mci.domain.config.EnvironmentMock;
 import org.sharedhealth.mci.domain.constant.RepositoryConstants;
-import org.sharedhealth.mci.domain.repository.TestUtil;
+import org.sharedhealth.mci.domain.util.TestUtil;
 import org.sharedhealth.mci.web.exception.HealthIdExhaustedException;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.model.MciHealthId;

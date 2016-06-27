@@ -3,6 +3,7 @@ package org.sharedhealth.mci.domain.repository;
 import org.junit.Before;
 import org.junit.Test;
 import org.sharedhealth.mci.domain.model.MasterData;
+import org.sharedhealth.mci.domain.util.BaseRepositoryIT;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.concurrent.ExecutionException;

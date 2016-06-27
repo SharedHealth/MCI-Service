@@ -21,7 +21,7 @@ import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static java.util.Arrays.asList;
 import static junit.framework.Assert.assertEquals;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.CF_GENERATED_HID_BLOCKS;
-import static org.sharedhealth.mci.domain.repository.TestUtil.truncateAllColumnFamilies;
+import static org.sharedhealth.mci.domain.util.TestUtil.truncateAllColumnFamilies;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration

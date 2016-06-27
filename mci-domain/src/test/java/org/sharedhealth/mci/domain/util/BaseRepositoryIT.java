@@ -1,4 +1,4 @@
-package org.sharedhealth.mci.domain.repository;
+package org.sharedhealth.mci.domain.util;
 
 import org.junit.runner.RunWith;
 import org.sharedhealth.mci.domain.config.EnvironmentMock;

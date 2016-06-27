@@ -607,7 +607,8 @@ public class PatientData implements Diffable<PatientData> {
             return false;
         if (bloodGroup != null ? !bloodGroup.equals(that.bloodGroup) : that.bloodGroup != null) return false;
         if (confidential != null ? !confidential.equals(that.confidential) : that.confidential != null) return false;
-        if (dateOfBirth != null ? !DateUtil.isEqualTo(getDateOfBirth(), that.getDateOfBirth()) : that.dateOfBirth != null) return false;
+        if (dateOfBirth != null ? !DateUtil.isEqualTo(getDateOfBirth(), that.getDateOfBirth()) : that.dateOfBirth != null)
+            return false;
         if (dobType != null ? !dobType.equals(that.dobType) : that.dobType != null) return false;
         if (disability != null ? !disability.equals(that.disability) : that.disability != null) return false;
         if (educationLevel != null ? !educationLevel.equals(that.educationLevel) : that.educationLevel != null)

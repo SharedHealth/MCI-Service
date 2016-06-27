@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.sharedhealth.mci.domain.model.LocationData;
 import org.sharedhealth.mci.domain.model.LocationRepositoryMarker;
+import org.sharedhealth.mci.domain.util.BaseRepositoryIT;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;

@@ -6,6 +6,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sharedhealth.mci.domain.config.EnvironmentMock;
+import org.sharedhealth.mci.domain.util.TestUtil;
 import org.sharedhealth.mci.web.infrastructure.persistence.HealthIdRepository;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.model.MciHealthId;
@@ -50,7 +51,7 @@ public class HealthIdServiceIT {
 
     @After
     public void tearDown() throws Exception {
-        cqlTemplate.execute("truncate mci_healthId");
+        TestUtil.truncateAllColumnFamilies(cqlTemplate);
     }
 
     @Ignore

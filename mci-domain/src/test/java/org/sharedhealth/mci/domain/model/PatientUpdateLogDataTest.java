@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static org.junit.Assert.assertEquals;
-import static org.sharedhealth.mci.domain.repository.TestUtil.buildAddressChangeSet;
+import static org.sharedhealth.mci.domain.util.TestUtil.buildAddressChangeSet;
 
 public class PatientUpdateLogDataTest {
 

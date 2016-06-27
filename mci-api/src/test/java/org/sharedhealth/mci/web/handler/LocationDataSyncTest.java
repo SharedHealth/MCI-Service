@@ -8,6 +8,7 @@ import org.junit.runner.RunWith;
 import org.sharedhealth.mci.domain.model.LocationData;
 import org.sharedhealth.mci.domain.service.LocationService;
 import org.sharedhealth.mci.domain.config.EnvironmentMock;
+import org.sharedhealth.mci.domain.util.TestUtil;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -170,13 +171,6 @@ public class LocationDataSyncTest {
 
     @After
     public void teardown() {
-        cqlTemplate.execute("truncate lr_markers");
-        cqlTemplate.execute("delete from locations where code = '80' and parent='00'");
-        cqlTemplate.execute("update locations set active='1' where parent='00' and code='60';");
-        cqlTemplate.execute("delete from locations where code = '80' and parent='30'");
-        cqlTemplate.execute("delete from locations where code = '80' and parent='1004'");
-        cqlTemplate.execute("delete from locations where code = '80' and parent='100428'");
-        cqlTemplate.execute("delete from locations where code = '80' and parent='10040920'");
-        cqlTemplate.execute("delete from locations where code = '80' and parent='1004099913'");
+        TestUtil.truncateAllColumnFamilies(cqlTemplate);
     }
 }

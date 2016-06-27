@@ -16,9 +16,9 @@ import org.sharedhealth.mci.domain.model.PatientSummaryData;
 import org.sharedhealth.mci.domain.model.Relation;
 import org.sharedhealth.mci.domain.repository.PatientRepository;
 import org.sharedhealth.mci.domain.config.EnvironmentMock;
+import org.sharedhealth.mci.domain.util.TestUtil;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.infrastructure.persistence.HealthIdRepository;
-import org.sharedhealth.mci.domain.repository.TestUtil;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.model.MciHealthId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -130,7 +130,9 @@ public class BaseControllerTest {
         PatientData data = getPatientObjectFromString(json);
         data.setHealthId(healthId);
         data.setRequester(FACILITY_ID, null);
-        return patientRepository.update(data, data.getHealthId());
+        //TODO : IMPORTANT
+//        return patientRepository.update(data, data.getHealthId());
+        return null;
     }
 
     protected MCIMultiResponse getMciMultiResponse(MvcResult result) {

@@ -6,6 +6,8 @@ import com.datastax.driver.core.utils.UUIDs;
 import org.junit.After;
 import org.junit.Test;
 import org.sharedhealth.mci.domain.model.FailedEvent;
+import org.sharedhealth.mci.domain.util.BaseRepositoryIT;
+import org.sharedhealth.mci.domain.util.TestUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;

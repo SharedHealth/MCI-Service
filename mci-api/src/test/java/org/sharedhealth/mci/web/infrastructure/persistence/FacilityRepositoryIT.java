@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sharedhealth.mci.domain.config.EnvironmentMock;
+import org.sharedhealth.mci.domain.util.TestUtil;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.model.Facility;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +53,7 @@ public class FacilityRepositoryIT {
 
     @After
     public void teardown() {
-        cqlTemplate.execute("truncate facilities");
+        TestUtil.truncateAllColumnFamilies(cqlTemplate);
     }
 
     @Test

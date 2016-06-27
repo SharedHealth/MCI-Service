@@ -3,9 +3,12 @@ package org.sharedhealth.mci.web.service;
 
 import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.sharedhealth.mci.domain.exception.Forbidden;
+import org.sharedhealth.mci.domain.exception.InvalidRequestException;
+import org.sharedhealth.mci.domain.exception.PatientNotFoundException;
 import org.sharedhealth.mci.domain.model.*;
 import org.sharedhealth.mci.domain.repository.PatientFeedRepository;
 import org.sharedhealth.mci.domain.repository.PatientRepository;
+import org.sharedhealth.mci.domain.service.PendingApprovalFilter;
 import org.sharedhealth.mci.web.exception.InsufficientPrivilegeException;
 import org.sharedhealth.mci.web.mapper.PendingApprovalListResponse;
 import org.sharedhealth.mci.web.model.MciHealthId;
@@ -41,17 +44,19 @@ public class PatientService {
     private SettingService settingService;
     private PatientHealthIdService patientHealthIdService;
     private MCIProperties mciProperties;
+    private PendingApprovalFilter pendingApprovalFilter;
 
     @Autowired
     public PatientService(PatientRepository patientRepository,
                           PatientFeedRepository feedRepository,
                           SettingService settingService,
-                          PatientHealthIdService patientHealthIdService, MCIProperties mciProperties) {
+                          PatientHealthIdService patientHealthIdService, MCIProperties mciProperties, PendingApprovalFilter pendingApprovalFilter) {
         this.patientRepository = patientRepository;
         this.feedRepository = feedRepository;
         this.settingService = settingService;
         this.patientHealthIdService = patientHealthIdService;
         this.mciProperties = mciProperties;
+        this.pendingApprovalFilter = pendingApprovalFilter;
     }
 
     public MCIResponse createPatientForMCI(PatientData patient) throws InterruptedException {
@@ -178,8 +183,22 @@ public class PatientService {
         return count > 1;
     }
 
-    public MCIResponse update(PatientData patient, String healthId) {
-        return patientRepository.update(patient, healthId);
+    public MCIResponse update(PatientData patientData, String healthId) {
+        logger.debug(String.format("Update patient: %s", healthId));
+        patientData.setHealthId(healthId);
+        Requester requester = patientData.getRequester();
+
+        PatientData existingPatientData = patientRepository.findByHealthId(healthId);
+        if (Boolean.FALSE.equals(existingPatientData.isActive())) {
+            String mergedWith = existingPatientData.getMergedWith();
+            String errorMessage = mergedWith != null ? String.format("Cannot update inactive patient, already merged with %s", mergedWith) : "Cannot update inactive patient";
+            throw new InvalidRequestException(errorMessage);
+        }
+
+        checkIfTryingToMergeWithNonExistingOrInactiveHid(patientData.getMergedWith());
+        PatientData newPatientData = pendingApprovalFilter.filter(existingPatientData, patientData);
+
+        return patientRepository.update(newPatientData, existingPatientData, requester);
     }
 
     public PatientData findByHealthId(String healthId) {
@@ -300,4 +319,21 @@ public class PatientService {
             throw new IllegalArgumentException(MESSAGE_PENDING_APPROVALS_MISMATCH);
         }
     }
+
+    private boolean checkIfTryingToMergeWithNonExistingOrInactiveHid(String mergedWith) {
+        if (null == mergedWith) {
+            return false;
+        }
+        PatientData targetPatient;
+        try {
+            targetPatient = this.findByHealthId(mergedWith);
+        } catch (PatientNotFoundException e) {
+            throw new PatientNotFoundException("Merge_with patient not found with health id: " + mergedWith);
+        }
+        if (!targetPatient.isActive()) {
+            throw new Forbidden("Cannot merge with inactive patient");
+        }
+        return false;
+    }
+
 }

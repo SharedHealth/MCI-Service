@@ -21,8 +21,8 @@ import static java.util.UUID.randomUUID;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.sharedhealth.mci.domain.repository.TestUtil.buildAddressChangeSet;
 import static org.sharedhealth.mci.domain.util.JsonMapper.readValue;
+import static org.sharedhealth.mci.domain.util.TestUtil.buildAddressChangeSet;
 
 public class DuplicatePatientUpdateEventProcessorTest {
 

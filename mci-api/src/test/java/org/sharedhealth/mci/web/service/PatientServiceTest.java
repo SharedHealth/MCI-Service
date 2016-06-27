@@ -8,6 +8,7 @@ import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.sharedhealth.mci.domain.model.*;
 import org.sharedhealth.mci.domain.repository.PatientFeedRepository;
 import org.sharedhealth.mci.domain.repository.PatientRepository;
+import org.sharedhealth.mci.domain.service.PendingApprovalFilter;
 import org.sharedhealth.mci.web.exception.InsufficientPrivilegeException;
 import org.sharedhealth.mci.web.mapper.PendingApprovalListResponse;
 import org.sharedhealth.mci.web.model.MciHealthId;
@@ -42,13 +43,15 @@ public class PatientServiceTest {
     private MCIProperties mciProperties;
     @Mock
     private MCIResponse mciResponse;
+    @Mock
+    private PendingApprovalFilter pendingApprovalFilter;
 
     private PatientService patientService;
 
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-        patientService = new PatientService(patientRepository, feedRepository, settingService, patientHealthIdService, mciProperties);
+        patientService = new PatientService(patientRepository, feedRepository, settingService, patientHealthIdService, mciProperties, pendingApprovalFilter);
     }
 
     @Test
@@ -162,7 +165,7 @@ public class PatientServiceTest {
         InOrder inOrder = inOrder(patientRepository);
         inOrder.verify(patientRepository).findAllByQuery(searchByNidQuery);
         inOrder.verify(patientRepository).findAllByQuery(searchByBrnQuery);
-        inOrder.verify(patientRepository).update(requestData, "hid-100");
+        inOrder.verify(patientRepository).update(requestData, new PatientData(), new Requester());
         inOrder.verify(patientRepository, never()).create(any(PatientData.class));
     }
 
