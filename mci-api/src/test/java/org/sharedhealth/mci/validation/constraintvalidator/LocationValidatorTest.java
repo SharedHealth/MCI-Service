@@ -1,15 +1,16 @@
 package org.sharedhealth.mci.validation.constraintvalidator;
 
+import net.sf.ehcache.CacheManager;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sharedhealth.mci.domain.model.Address;
 import org.sharedhealth.mci.domain.model.PatientData;
-import org.sharedhealth.mci.domain.config.EnvironmentMock;
+import org.sharedhealth.mci.domain.util.BaseIntegrationTest;
+import org.sharedhealth.mci.domain.util.TestUtil;
 import org.sharedhealth.mci.web.config.WebMvcConfigTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -21,14 +22,10 @@ import java.util.Set;
 import static org.junit.Assert.assertEquals;
 import static org.sharedhealth.mci.domain.util.TestUtil.setupLocation;
 
-@RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
-@ContextConfiguration(initializers = EnvironmentMock.class, classes = {WebMvcConfigTest.class})
-public class LocationValidatorTest {
-
-    @Autowired
-    @Qualifier("MCICassandraTemplate")
-    private CassandraOperations cassandraOps;
+@ContextConfiguration(classes = {WebMvcConfigTest.class})
+@RunWith(SpringJUnit4ClassRunner.class)
+public class LocationValidatorTest extends BaseIntegrationTest {
 
     @Autowired
     private Validator validator;
@@ -39,6 +36,12 @@ public class LocationValidatorTest {
     public void setup() {
         initAddressObject();
         setupLocation(cassandraOps);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        TestUtil.truncateAllColumnFamilies(cassandraOps);
+        CacheManager.getInstance().clearAll();
     }
 
     private void initAddressObject() {

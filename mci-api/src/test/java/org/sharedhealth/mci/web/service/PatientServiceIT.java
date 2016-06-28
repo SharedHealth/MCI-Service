@@ -1,16 +1,13 @@
 package org.sharedhealth.mci.web.service;
 
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.sharedhealth.mci.domain.config.EnvironmentMock;
 import org.sharedhealth.mci.domain.model.*;
+import org.sharedhealth.mci.domain.repository.PatientFeedRepository;
 import org.sharedhealth.mci.domain.repository.PatientRepository;
-import org.sharedhealth.mci.domain.util.BaseRepositoryIT;
+import org.sharedhealth.mci.domain.util.BaseIntegrationTest;
 import org.sharedhealth.mci.domain.util.TestUtil;
-import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
@@ -25,13 +22,12 @@ import static org.junit.Assert.*;
 import static org.sharedhealth.mci.domain.constant.JsonConstants.PHONE_NUMBER;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.*;
 import static org.sharedhealth.mci.domain.util.DateUtil.parseDate;
+import static org.sharedhealth.mci.domain.util.JsonMapper.writeValueAsString;
 import static org.sharedhealth.mci.domain.util.TestUtil.setupApprovalsConfig;
-import static org.sharedhealth.mci.domain.util.TestUtil.truncateAllColumnFamilies;
 
-@RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
-@ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
-public class PatientServiceIT extends BaseRepositoryIT {
+@RunWith(SpringJUnit4ClassRunner.class)
+public class PatientServiceIT extends BaseIntegrationTest {
 
     private static final String FACILITY = "Bahmni";
 
@@ -48,14 +44,10 @@ public class PatientServiceIT extends BaseRepositoryIT {
 
     @Autowired
     private PatientService patientService;
-
     @Autowired
     private PatientRepository patientRepository;
-
-    @After
-    public void tearDown() {
-        truncateAllColumnFamilies(cassandraOps);
-    }
+    @Autowired
+    private PatientFeedRepository feedRepository;
 
     @Test
     public void shouldUpdatePatient() throws Exception {
@@ -583,8 +575,6 @@ public class PatientServiceIT extends BaseRepositoryIT {
 
     @Test
     public void shouldBeAbleToAcceptPendingApprovalsWhenPatientHasBlockPendingApprovals() {
-        TestUtil.setupApprovalsConfig(cassandraOps);
-
         PatientData data = buildPatient();
         String healthId = processPendingApprovalsWhenPatientHasBlockPendingApprovals(data, true);
 
@@ -612,6 +602,7 @@ public class PatientServiceIT extends BaseRepositoryIT {
         assertTrue(isEmpty(patient.getPendingApprovals()));
         assertEquals(0, findAllPendingApprovalMappings().size());
     }
+
     @Test
     public void shouldUpdatePendingApprovalMappingWhenUpdateAddressRequestIsApproved() throws Exception {
         TestUtil.setupApprovalsConfig(cassandraOps);
@@ -636,7 +627,7 @@ public class PatientServiceIT extends BaseRepositoryIT {
         PatientData approvalRequest = initPatientData();
         approvalRequest.setHealthId(healthId);
         approvalRequest.setAddress(newAddress);
-        patientRepository.processPendingApprovals(approvalRequest, patientRepository.findByHealthId(healthId), true);
+        patientService.processPendingApprovals(approvalRequest, new Catchment("10", "20", "30"), true);
 
         PatientData updatedPatient = patientRepository.findByHealthId(healthId);
         assertNotNull(updatedPatient);
@@ -669,13 +660,44 @@ public class PatientServiceIT extends BaseRepositoryIT {
         PatientData approvalRequest = initPatientData();
         approvalRequest.setHealthId(healthId);
         approvalRequest.setAddress(newAddress);
-        patientRepository.processPendingApprovals(approvalRequest, patientRepository.findByHealthId(healthId), false);
+        patientService.processPendingApprovals(approvalRequest, new Catchment("10", "20", "30"), false);
 
         PatientData updatedPatient = patientRepository.findByHealthId(healthId);
         assertNotNull(updatedPatient);
         assertEquals(existingAddress, updatedPatient.getAddress());
         assertPendingApprovalMappings(existingPatient.getCatchment().getAllIds());
     }
+
+    @Test
+    public void shouldCreateUpdateLogWhenPresentAddressIsMarkedForApprovalAndUpdatedAfterApproval() {
+        TestUtil.setupApprovalsConfig(cassandraOps);
+
+        PatientData data = buildPatient();
+        String healthId = patientRepository.create(data).getId();
+        Date since = new Date();
+
+        assertUpdateLogEntry(healthId, since, false);
+
+        PatientData updateRequest = new PatientData();
+        Address newAddress = new Address("99", "88", "77");
+        updateRequest.setAddress(newAddress);
+        String facilityId = "Bahmni";
+        String providerId = "Dr. Monika";
+        updateRequest.setRequester(facilityId, providerId);
+
+        patientService.update(updateRequest, healthId);
+
+        assertUpdateLogEntry(healthId, since, false);
+
+        PatientData updatedPatient = patientRepository.findByHealthId(healthId);
+        updateRequest.setRequester("Bahmni", "Dr. Monika");
+        patientRepository.processPendingApprovals(updateRequest, updatedPatient, true);
+
+        List<PatientUpdateLog> patientUpdateLogs = feedRepository.findPatientsUpdatedSince(since, 1, null);
+        assertEquals(healthId, patientUpdateLogs.get(0).getHealthId());
+        assertEquals(writeValueAsString(new Requester("Bahmni", "Dr. Monika")), patientUpdateLogs.get(0).getApprovedBy());
+    }
+
 
 //
 //    @Test
@@ -730,18 +752,6 @@ public class PatientServiceIT extends BaseRepositoryIT {
 //        assertNotNull(updatedPatient.getUpdatedAt());
 //
 //        assertEquals(updatedPatient.getUpdatedAt(), savedPatient.getUpdatedAt());
-//    }
-//
-//    private void assertPendingApprovalMappings(List<String> catchmentIds) {
-//        List<PendingApprovalMapping> mappings = findAllPendingApprovalMappings();
-//        assertEquals(catchmentIds.size(), mappings.size());
-//        for (PendingApprovalMapping mapping : mappings) {
-//            assertTrue(catchmentIds.contains(mapping.getCatchmentId()));
-//        }
-//    }
-//
-//    private void assertHouseholdCodeMappingEmpty() {
-//        assertTrue(isEmpty(cassandraOps.select(select().from(CF_HOUSEHOLD_CODE_MAPPING).toString(), HouseholdCodeMapping.class)));
 //    }
 
     private PatientData initPatientData() {
@@ -955,11 +965,11 @@ public class PatientServiceIT extends BaseRepositoryIT {
         patientData.setHealthId(healthId);
         patientData.setGender("F");
         patientData.setPhoneNumber(phoneNumber);
-        PatientData existingPatientData = patientRepository.findByHealthId(healthId);
-        return patientRepository.processPendingApprovals(patientData, existingPatientData, shouldAccept);
+        return patientService.processPendingApprovals(patientData, new Catchment(divisionId, districtId, upazilaId), shouldAccept);
     }
 
     private String processPendingApprovalsWhenPatientHasBlockPendingApprovals(PatientData data, boolean shouldAccept) {
+        TestUtil.setupApprovalsConfig(cassandraOps);
         PhoneNumber phoneNo = new PhoneNumber();
         phoneNo.setCountryCode("91");
         phoneNo.setAreaCode("080");
@@ -986,8 +996,7 @@ public class PatientServiceIT extends BaseRepositoryIT {
         patientData = initPatientData();
         patientData.setHealthId(healthId);
         patientData.setPhoneNumber(phoneNumber);
-        PatientData existingPatientData = patientRepository.findByHealthId(healthId);
-        return patientRepository.processPendingApprovals(patientData, existingPatientData, shouldAccept);
+        return patientService.processPendingApprovals(patientData, new Catchment(divisionId, districtId, upazilaId), shouldAccept);
     }
 
     private String processPendingApprovalsWhenPatientHasMultiplePendingApprovalsForMultipleFields(PatientData data, boolean shouldAccept) throws Exception {
@@ -1022,9 +1031,26 @@ public class PatientServiceIT extends BaseRepositoryIT {
         patientData = initPatientData();
         patientData.setHealthId(healthId);
         patientData.setGender("F");
-        PatientData existingPatientData = patientRepository.findByHealthId(healthId);
-        return patientRepository.processPendingApprovals(patientData, existingPatientData, shouldAccept);
+        return patientService.processPendingApprovals(patientData, new Catchment(divisionId, districtId, upazilaId), shouldAccept);
     }
 
+    private void assertUpdateLogEntry(String healthId, Date since, boolean shouldFind) {
+        List<PatientUpdateLog> patientUpdateLogs = feedRepository.findPatientsUpdatedSince(since, 1, null);
+
+        if (shouldFind) {
+            assertEquals(healthId, patientUpdateLogs.get(0).getHealthId());
+            assertEquals(buildRequestedBy(), patientUpdateLogs.get(0).getRequestedBy());
+        } else {
+            assertEquals(0, patientUpdateLogs.size());
+        }
+    }
+
+    private String buildRequestedBy() {
+        Map<String, Set<Requester>> requestedBy = new HashMap<>();
+        Set<Requester> requester = new HashSet<>();
+        requester.add(new Requester("Bahmni", "Dr. Monika"));
+        requestedBy.put("ALL_FIELDS", requester);
+        return writeValueAsString(requestedBy);
+    }
 
 }

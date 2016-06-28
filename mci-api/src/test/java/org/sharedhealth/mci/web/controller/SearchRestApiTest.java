@@ -34,7 +34,6 @@ public class SearchRestApiTest extends BaseControllerTest {
     @Autowired
     private PatientSearchMappingRepository searchMappingRepository;
 
-
     private static final String PER_PAGE_MAXIMUM_LIMIT_NOTE = "There are more record for this search criteria. Please" +
             " narrow down your search";
     private static final int PER_PAGE_MAXIMUM_LIMIT = 25;

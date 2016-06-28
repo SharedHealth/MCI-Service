@@ -1,19 +1,17 @@
 package org.sharedhealth.mci.domain.repository;
 
 import com.datastax.driver.core.querybuilder.Batch;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.sharedhealth.mci.domain.exception.PatientNotFoundException;
 import org.sharedhealth.mci.domain.model.*;
-import org.sharedhealth.mci.domain.util.BaseRepositoryIT;
+import org.sharedhealth.mci.domain.util.BaseIntegrationTest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.Date;
 import java.util.List;
-import java.util.TreeSet;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.batch;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
@@ -25,10 +23,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.junit.Assert.*;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.*;
 import static org.sharedhealth.mci.domain.util.DateUtil.parseDate;
-import static org.sharedhealth.mci.domain.util.TestUtil.truncateAllColumnFamilies;
 
-
-public class PatientRepositoryIT extends BaseRepositoryIT {
+@RunWith(SpringJUnit4ClassRunner.class)
+public class PatientRepositoryIT extends BaseIntegrationTest {
     private static final String FACILITY = "Bahmni";
 
     public String surname = "Tiger";
@@ -45,11 +42,6 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
 
     @Autowired
     private PatientRepository patientRepository;
-
-    @After
-    public void tearDown() {
-        truncateAllColumnFamilies(cassandraOps);
-    }
 
     private PatientData buildPatient() {
         PatientData data = initPatientData();
@@ -273,33 +265,6 @@ public class PatientRepositoryIT extends BaseRepositoryIT {
         assertEquals(data.getEducationLevel(), savedPatient.getEducationLevel());
         assertNotNull(savedPatient.getUpdatedAt());
         assertNotNull(savedPatient.getCreatedAt());
-    }
-
-    private void assertPendingApprovalMappings(String healthId, Address address, TreeSet<PendingApproval> pendingApprovals) {
-        Catchment catchment = buildCatchment(address);
-        List<String> catchmentIds = catchment.getAllIds();
-
-        List<PendingApprovalMapping> mappings = findAllPendingApprovalMappings();
-        assertEquals(catchmentIds.size(), mappings.size());
-
-        UUID uuid = patientRepository.findLatestUuid(pendingApprovals);
-        for (PendingApprovalMapping mapping : mappings) {
-            assertTrue(catchmentIds.contains(mapping.getCatchmentId()));
-            assertEquals(healthId, mapping.getHealthId());
-            assertEquals(uuid, mapping.getLastUpdated());
-        }
-    }
-
-    private List<PendingApprovalMapping> findAllPendingApprovalMappings() {
-        return cassandraOps.select(select().from(CF_PENDING_APPROVAL_MAPPING), PendingApprovalMapping.class);
-    }
-
-    private Catchment buildCatchment(Address address) {
-        Catchment catchment = new Catchment(address.getDivisionId(), address.getDistrictId(), address.getUpazilaId());
-        catchment.setCityCorpId(address.getCityCorporationId());
-        catchment.setUnionOrUrbanWardId(address.getUnionOrUrbanWardId());
-        catchment.setRuralWardId(address.getRuralWardId());
-        return catchment;
     }
 
     private PendingApprovalMapping buildPendingApprovalMapping(String upazilaId, String healthId) throws InterruptedException {

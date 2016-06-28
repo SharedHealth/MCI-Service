@@ -1,17 +1,11 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.sharedhealth.mci.domain.config.EnvironmentMock;
-import org.sharedhealth.mci.domain.util.TestUtil;
-import org.sharedhealth.mci.web.launch.WebMvcConfig;
+import org.sharedhealth.mci.domain.util.BaseIntegrationTest;
 import org.sharedhealth.mci.web.model.Facility;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.cassandra.core.CassandraOperations;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
@@ -23,23 +17,17 @@ import static org.junit.Assert.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
-@ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
-public class FacilityRepositoryIT {
+public class FacilityRepositoryIT extends BaseIntegrationTest {
 
     private final String facilityName = "DMC";
     private final String facilityType = "DIST";
     private final String catchments = "101010";
     private final String location = "101010";
-    @SuppressWarnings("SpringJavaAutowiringInspection")
-    @Autowired
-    @Qualifier("MCICassandraTemplate")
-    private CassandraOperations cqlTemplate;
+    private Facility facility;
+    private String facilityId = "12345";
 
     @Autowired
     private FacilityRepository facilityRepository;
-
-    private Facility facility;
-    private String facilityId = "12345";
 
     @Before
     public void setUp() throws ExecutionException, InterruptedException {
@@ -49,11 +37,6 @@ public class FacilityRepositoryIT {
         facility.setType(facilityType);
         facility.setCatchments(catchments);
         facility.setLocation(location);
-    }
-
-    @After
-    public void teardown() {
-        TestUtil.truncateAllColumnFamilies(cqlTemplate);
     }
 
     @Test

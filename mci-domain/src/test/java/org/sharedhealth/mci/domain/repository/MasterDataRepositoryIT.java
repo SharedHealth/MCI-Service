@@ -2,15 +2,18 @@ package org.sharedhealth.mci.domain.repository;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.sharedhealth.mci.domain.model.MasterData;
-import org.sharedhealth.mci.domain.util.BaseRepositoryIT;
+import org.sharedhealth.mci.domain.util.BaseIntegrationTest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.*;
 
-public class MasterDataRepositoryIT extends BaseRepositoryIT {
+@RunWith(SpringJUnit4ClassRunner.class)
+public class MasterDataRepositoryIT extends BaseIntegrationTest {
 
     @Autowired
     private MasterDataRepository masterDataRepository;

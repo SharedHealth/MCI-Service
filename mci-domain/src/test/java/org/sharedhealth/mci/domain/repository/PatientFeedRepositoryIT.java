@@ -1,14 +1,14 @@
 package org.sharedhealth.mci.domain.repository;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.sharedhealth.mci.domain.constant.JsonConstants;
 import org.sharedhealth.mci.domain.model.*;
-import org.sharedhealth.mci.domain.util.BaseRepositoryIT;
-import org.sharedhealth.mci.domain.util.TestUtil;
+import org.sharedhealth.mci.domain.util.BaseIntegrationTest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -23,10 +23,10 @@ import static org.sharedhealth.mci.domain.util.DateUtil.parseDate;
 import static org.sharedhealth.mci.domain.util.JsonMapper.readValue;
 import static org.sharedhealth.mci.domain.util.JsonMapper.writeValueAsString;
 import static org.sharedhealth.mci.domain.util.TestUtil.setupApprovalsConfig;
-import static org.sharedhealth.mci.domain.util.TestUtil.truncateAllColumnFamilies;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
 
-public class PatientFeedRepositoryIT extends BaseRepositoryIT {
+@RunWith(SpringJUnit4ClassRunner.class)
+public class PatientFeedRepositoryIT extends BaseIntegrationTest {
 
     @Autowired
     private PatientRepository patientRepository;
@@ -157,37 +157,6 @@ public class PatientFeedRepositoryIT extends BaseRepositoryIT {
         assertChangeSet(changeSet3, JsonConstants.PRESENT_ADDRESS, data.getAddress(), newAddress);
     }
 
-
-    @Test
-    public void shouldCreateUpdateLogWhenPresentAddressIsMarkedForApprovalAndUpdatedAfterApproval() {
-        TestUtil.setupApprovalsConfig(cassandraOps);
-
-        String healthId = patientRepository.create(data).getId();
-        Date since = new Date();
-
-        assertUpdateLogEntry(healthId, since, false);
-
-        PatientData updateRequest = new PatientData();
-        Address newAddress = new Address("99", "88", "77");
-        updateRequest.setAddress(newAddress);
-        String facilityId = "Bahmni";
-        String providerId = "Dr. Monika";
-        Requester requester = new Requester(facilityId, providerId);
-        updateRequest.setRequester(facilityId, providerId);
-
-        patientRepository.update(updateRequest, patientRepository.findByHealthId(healthId), requester);
-
-        assertUpdateLogEntry(healthId, since, false);
-
-        PatientData updatedPatient = patientRepository.findByHealthId(healthId);
-        updateRequest.setRequester("Bahmni", "Dr. Monika");
-        patientRepository.processPendingApprovals(updateRequest, updatedPatient, true);
-
-        List<PatientUpdateLog> patientUpdateLogs = feedRepository.findPatientsUpdatedSince(since, 1, null);
-        assertEquals(healthId, patientUpdateLogs.get(0).getHealthId());
-        assertEquals(writeValueAsString(new Requester("Bahmni", "Dr. Monika")), patientUpdateLogs.get(0).getApprovedBy());
-    }
-
     @Test
     public void shouldFindUpdateLogsUsingUpdatedSinceAndLastMarker() {
         String healthId = patientRepository.create(data).getId();
@@ -283,10 +252,5 @@ public class PatientFeedRepositoryIT extends BaseRepositoryIT {
         requester.add(new Requester("Bahmni", "Dr. Monika"));
         requestedBy.put("ALL_FIELDS", requester);
         return writeValueAsString(requestedBy);
-    }
-
-    @After
-    public void tearDown() {
-        truncateAllColumnFamilies(cassandraOps);
     }
 }

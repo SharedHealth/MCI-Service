@@ -145,7 +145,8 @@ public class PatientServiceTest {
     @Test
     public void shouldUpdateInsteadOfCreatingWhenMatchingPatientExists() throws Exception {
         PatientData existingPatient = new PatientData();
-        existingPatient.setHealthId("hid-100");
+        String healthId = "hid-100";
+        existingPatient.setHealthId(healthId);
         existingPatient.setNationalId("nid-100");
         existingPatient.setBirthRegistrationNumber("brn-100");
 
@@ -161,11 +162,17 @@ public class PatientServiceTest {
         requestData.setNationalId("nid-100");
         requestData.setBirthRegistrationNumber("brn-100");
 
+        when(patientRepository.findByHealthId(healthId)).thenReturn(existingPatient);
+
+        PatientData newPatientData = new PatientData();
+        when(pendingApprovalFilter.filter(existingPatient, requestData)).thenReturn(newPatientData);
+
         patientService.createPatientForMCI(requestData);
         InOrder inOrder = inOrder(patientRepository);
         inOrder.verify(patientRepository).findAllByQuery(searchByNidQuery);
         inOrder.verify(patientRepository).findAllByQuery(searchByBrnQuery);
-        inOrder.verify(patientRepository).update(requestData, new PatientData(), new Requester());
+        inOrder.verify(patientRepository).findByHealthId(healthId);
+        inOrder.verify(patientRepository).update(eq(newPatientData), eq(existingPatient), any(Requester.class));
         inOrder.verify(patientRepository, never()).create(any(PatientData.class));
     }
 

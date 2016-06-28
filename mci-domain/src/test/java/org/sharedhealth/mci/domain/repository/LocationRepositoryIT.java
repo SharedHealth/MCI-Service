@@ -3,10 +3,12 @@ package org.sharedhealth.mci.domain.repository;
 import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.sharedhealth.mci.domain.model.LocationData;
 import org.sharedhealth.mci.domain.model.LocationRepositoryMarker;
-import org.sharedhealth.mci.domain.util.BaseRepositoryIT;
+import org.sharedhealth.mci.domain.util.BaseIntegrationTest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,8 +16,8 @@ import java.util.concurrent.ExecutionException;
 
 import static junit.framework.Assert.assertEquals;
 
-
-public class LocationRepositoryIT extends BaseRepositoryIT {
+@RunWith(SpringJUnit4ClassRunner.class)
+public class LocationRepositoryIT extends BaseIntegrationTest {
 
     @Autowired
     private LocationRepository locationRepository;

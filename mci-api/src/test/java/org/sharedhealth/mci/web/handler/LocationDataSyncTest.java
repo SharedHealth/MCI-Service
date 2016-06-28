@@ -1,19 +1,13 @@
 package org.sharedhealth.mci.web.handler;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
-import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sharedhealth.mci.domain.model.LocationData;
 import org.sharedhealth.mci.domain.service.LocationService;
-import org.sharedhealth.mci.domain.config.EnvironmentMock;
-import org.sharedhealth.mci.domain.util.TestUtil;
-import org.sharedhealth.mci.web.launch.WebMvcConfig;
+import org.sharedhealth.mci.domain.util.BaseIntegrationTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.cassandra.core.CassandraOperations;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
@@ -24,12 +18,9 @@ import static org.sharedhealth.mci.utils.FileUtil.asString;
 import static org.sharedhealth.mci.utils.HttpUtil.AUTH_TOKEN_KEY;
 import static org.sharedhealth.mci.utils.HttpUtil.CLIENT_ID_KEY;
 
-@RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
-@ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
-public class LocationDataSyncTest {
-
-
+@RunWith(SpringJUnit4ClassRunner.class)
+public class LocationDataSyncTest extends BaseIntegrationTest {
     private static final int DEFAULT_LIMIT = 100;
     private static final int INITIAL_OFFSET = 0;
     private static final String INITIAL_UPDATED_SINCE = "0000-00-00";
@@ -39,9 +30,6 @@ public class LocationDataSyncTest {
     public static final String LR_PAURASAVAS_JSON = "jsons/lr/lr-paurasavas.json";
     public static final String LR_UNIONS_JSON = "jsons/lr/lr-unions.json";
     public static final String LR_WARDS_JSON = "jsons/lr/lr-wards.json";
-    @Autowired
-    @Qualifier("MCICassandraTemplate")
-    protected CassandraOperations cqlTemplate;
 
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(9997);
@@ -167,10 +155,5 @@ public class LocationDataSyncTest {
     private String getCompleteUrl(String type) {
         return "/api/1.0/locations/list/" + type + "?offset=" + INITIAL_OFFSET +
                 "&limit=" + DEFAULT_LIMIT + "&updatedSince=" + INITIAL_UPDATED_SINCE;
-    }
-
-    @After
-    public void teardown() {
-        TestUtil.truncateAllColumnFamilies(cqlTemplate);
     }
 }

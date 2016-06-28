@@ -3,12 +3,12 @@ package org.sharedhealth.mci.domain.repository;
 import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.Select;
 import com.datastax.driver.core.utils.UUIDs;
-import org.junit.After;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.sharedhealth.mci.domain.model.FailedEvent;
-import org.sharedhealth.mci.domain.util.BaseRepositoryIT;
-import org.sharedhealth.mci.domain.util.TestUtil;
+import org.sharedhealth.mci.domain.util.BaseIntegrationTest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.List;
 import java.util.UUID;
@@ -21,7 +21,8 @@ import static org.junit.Assert.*;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.*;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
 
-public class FailedEventsRepositoryIT extends BaseRepositoryIT {
+@RunWith(SpringJUnit4ClassRunner.class)
+public class FailedEventsRepositoryIT extends BaseIntegrationTest {
     @Autowired
     private FailedEventsRepository failedEventsRepository;
 
@@ -104,10 +105,5 @@ public class FailedEventsRepositoryIT extends BaseRepositoryIT {
             batch.add(createInsertQuery(CF_FAILED_EVENTS, failedEvent, null, cassandraOps.getConverter()));
         }
         cassandraOps.execute(batch);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        TestUtil.truncateAllColumnFamilies(cassandraOps);
     }
 }

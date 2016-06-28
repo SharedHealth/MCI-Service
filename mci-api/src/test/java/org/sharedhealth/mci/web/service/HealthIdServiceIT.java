@@ -1,23 +1,14 @@
 package org.sharedhealth.mci.web.service;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.sharedhealth.mci.domain.config.EnvironmentMock;
-import org.sharedhealth.mci.domain.util.TestUtil;
+import org.sharedhealth.mci.domain.util.BaseIntegrationTest;
 import org.sharedhealth.mci.web.infrastructure.persistence.HealthIdRepository;
-import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.model.MciHealthId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.cassandra.core.CassandraOperations;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.util.HashSet;
 import java.util.List;
@@ -27,15 +18,7 @@ import java.util.concurrent.*;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@WebAppConfiguration
-@ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
-public class HealthIdServiceIT {
-    private static final Logger logger = LoggerFactory.getLogger(HealthIdServiceIT.class);
-
-    @SuppressWarnings("SpringJavaAutowiringInspection")
-    @Autowired
-    @Qualifier("MCICassandraTemplate")
-    private CassandraOperations cqlTemplate;
+public class HealthIdServiceIT extends BaseIntegrationTest {
 
     @Autowired
     private HealthIdRepository healthIdRepository;
@@ -45,13 +28,8 @@ public class HealthIdServiceIT {
 
     @Before
     public void setUp() throws ExecutionException, InterruptedException {
-        cqlTemplate.execute("truncate mci_healthId");
+        cassandraOps.execute("truncate mci_healthId");
         healthIdRepository.resetLastReservedHealthId();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        TestUtil.truncateAllColumnFamilies(cqlTemplate);
     }
 
     @Ignore

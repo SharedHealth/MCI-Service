@@ -1,17 +1,18 @@
 package org.sharedhealth.mci.domain.repository;
 
-import org.junit.After;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.sharedhealth.mci.domain.model.Marker;
-import org.sharedhealth.mci.domain.util.BaseRepositoryIT;
+import org.sharedhealth.mci.domain.util.BaseIntegrationTest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.sharedhealth.mci.domain.util.TestUtil.truncateAllColumnFamilies;
 
-public class MarkerRepositoryIT extends BaseRepositoryIT {
+@RunWith(SpringJUnit4ClassRunner.class)
+public class MarkerRepositoryIT extends BaseIntegrationTest {
 
     @Autowired
     private MarkerRepository markerRepository;
@@ -29,10 +30,5 @@ public class MarkerRepositoryIT extends BaseRepositoryIT {
         String value = markerRepository.find(type);
         assertNotNull(value);
         assertEquals("marker_1", value);
-    }
-
-    @After
-    public void tearDown() {
-        truncateAllColumnFamilies(cassandraOps);
     }
 }

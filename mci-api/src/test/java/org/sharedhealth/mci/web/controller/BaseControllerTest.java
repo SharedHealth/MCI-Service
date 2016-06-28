@@ -10,20 +10,14 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.sharedhealth.mci.domain.exception.Forbidden;
-import org.sharedhealth.mci.domain.model.MCIResponse;
-import org.sharedhealth.mci.domain.model.PatientData;
-import org.sharedhealth.mci.domain.model.PatientSummaryData;
-import org.sharedhealth.mci.domain.model.Relation;
+import org.sharedhealth.mci.domain.model.*;
 import org.sharedhealth.mci.domain.repository.PatientRepository;
-import org.sharedhealth.mci.domain.config.EnvironmentMock;
-import org.sharedhealth.mci.domain.util.TestUtil;
+import org.sharedhealth.mci.domain.util.BaseIntegrationTest;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.infrastructure.persistence.HealthIdRepository;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.model.MciHealthId;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -45,17 +39,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @WebAppConfiguration
-@ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
+@ContextConfiguration(classes = WebMvcConfig.class)
 @TestPropertySource(properties = {"HEALTH_ID_REPLENISH_INITIAL_DELAY = 0",
         "HEALTH_ID_REPLENISH_DELAY = 1",
         "HEALTH_ID_BLOCK_SIZE = 1",
         "HEALTH_ID_BLOCK_SIZE_THRESHOLD=1"})
 @CassandraUnit
-public class BaseControllerTest {
+public class BaseControllerTest extends BaseIntegrationTest {
     protected static final String FACILITY_ID = "1111111";
     protected static final String PROVIDER_ID = "222222";
     protected static final String ADMIN_ID = "333333";
-
 
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(9997);
@@ -66,10 +59,6 @@ public class BaseControllerTest {
 
     @Autowired
     private PatientRepository patientRepository;
-
-    @Autowired
-    @Qualifier("MCICassandraTemplate")
-    protected CassandraOperations cassandraOps;
 
     @Autowired
     private Filter springSecurityFilterChain;
@@ -130,9 +119,8 @@ public class BaseControllerTest {
         PatientData data = getPatientObjectFromString(json);
         data.setHealthId(healthId);
         data.setRequester(FACILITY_ID, null);
-        //TODO : IMPORTANT
-//        return patientRepository.update(data, data.getHealthId());
-        return null;
+        Requester requestedBy = new Requester(FACILITY_ID, PROVIDER_ID);
+        return patientRepository.update(data, patientRepository.findByHealthId(healthId), requestedBy);
     }
 
     protected MCIMultiResponse getMciMultiResponse(MvcResult result) {
@@ -187,7 +175,6 @@ public class BaseControllerTest {
     @After
     public void teardownBase() {
         healthIdRepository.resetLastReservedHealthId();
-        TestUtil.truncateAllColumnFamilies(cassandraOps);
     }
 
     protected PatientData getPatientMapperObjectByHealthId(String healthId) throws Exception {

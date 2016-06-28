@@ -1,14 +1,15 @@
 package org.sharedhealth.mci.searchmapping.repository;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.sharedhealth.mci.domain.model.*;
 import org.sharedhealth.mci.domain.repository.PatientRepository;
-import org.sharedhealth.mci.domain.util.BaseRepositoryIT;
+import org.sharedhealth.mci.domain.util.BaseIntegrationTest;
 import org.sharedhealth.mci.domain.util.TestUtil;
 import org.sharedhealth.mci.searchmapping.services.PatientSearchMappingService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -24,7 +25,8 @@ import static org.junit.Assert.*;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.*;
 import static org.sharedhealth.mci.domain.util.DateUtil.parseDate;
 
-public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
+@RunWith(SpringJUnit4ClassRunner.class)
+public class PatientSearchMappingRepositoryIT extends BaseIntegrationTest {
     public static final String FACILITY = "Bahmni";
 
 
@@ -695,11 +697,5 @@ public class PatientSearchMappingRepositoryIT extends BaseRepositoryIT {
         address.setCountryCode("050");
 
         return address;
-    }
-
-
-    @After
-    public void tearDown() throws InterruptedException {
-        TestUtil.truncateAllColumnFamilies(cassandraOps);
     }
 }

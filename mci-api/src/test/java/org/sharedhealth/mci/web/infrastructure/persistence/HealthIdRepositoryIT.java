@@ -1,20 +1,14 @@
 package org.sharedhealth.mci.web.infrastructure.persistence;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.sharedhealth.mci.domain.config.EnvironmentMock;
 import org.sharedhealth.mci.domain.constant.RepositoryConstants;
-import org.sharedhealth.mci.domain.util.TestUtil;
+import org.sharedhealth.mci.domain.util.BaseIntegrationTest;
 import org.sharedhealth.mci.web.exception.HealthIdExhaustedException;
-import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.model.MciHealthId;
 import org.sharedhealth.mci.web.model.OrgHealthId;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.cassandra.core.CassandraOperations;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
@@ -29,26 +23,14 @@ import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
-@ContextConfiguration(initializers = EnvironmentMock.class, classes = WebMvcConfig.class)
-public class HealthIdRepositoryIT {
-
-    @SuppressWarnings("SpringJavaAutowiringInspection")
-    @Autowired
-    @Qualifier("MCICassandraTemplate")
-    private CassandraOperations cqlTemplate;
-
+public class HealthIdRepositoryIT extends BaseIntegrationTest {
     @Autowired
     private HealthIdRepository healthIdRepository;
 
     @Before
     public void setUp() throws ExecutionException, InterruptedException {
-        cqlTemplate.execute("truncate mci_healthId");
+        cassandraOps.execute("truncate mci_healthId");
         healthIdRepository.resetLastReservedHealthId();
-    }
-
-    @After
-    public void tearDown() {
-        TestUtil.truncateAllColumnFamilies(cqlTemplate);
     }
 
     private List<MciHealthId> createHealthIds(long prefix) {
@@ -111,7 +93,7 @@ public class HealthIdRepositoryIT {
         healthIdRepository.saveOrgHealthIdSync(orgHealthId);
 
         String select = select().all().from(RepositoryConstants.CF_ORG_HEALTH_ID).toString();
-        List<OrgHealthId> insertedHIDs = cqlTemplate.select(select, OrgHealthId.class);
+        List<OrgHealthId> insertedHIDs = cassandraOps.select(select, OrgHealthId.class);
         assertEquals(1, insertedHIDs.size());
         assertEquals(orgHealthId, insertedHIDs.get(0));
     }
@@ -119,7 +101,7 @@ public class HealthIdRepositoryIT {
     @Test
     public void shouldFindOrgHIDByGivenHID() throws Exception {
         OrgHealthId hid = new OrgHealthId("1234", "XYZ", timeBased(), null);
-        cqlTemplate.insert(asList(hid, new OrgHealthId("1134", "ABC", timeBased(), null)));
+        cassandraOps.insert(asList(hid, new OrgHealthId("1134", "ABC", timeBased(), null)));
 
         OrgHealthId orgHealthId = healthIdRepository.findOrgHealthId("1234");
         assertEquals(hid, orgHealthId);

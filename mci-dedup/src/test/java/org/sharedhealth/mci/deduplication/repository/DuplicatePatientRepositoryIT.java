@@ -1,9 +1,9 @@
 package org.sharedhealth.mci.deduplication.repository;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.sharedhealth.mci.deduplication.model.DuplicatePatient;
 import org.sharedhealth.mci.deduplication.model.DuplicatePatientIgnored;
 import org.sharedhealth.mci.domain.model.Address;
@@ -12,10 +12,11 @@ import org.sharedhealth.mci.domain.model.PatientData;
 import org.sharedhealth.mci.domain.model.Requester;
 import org.sharedhealth.mci.domain.repository.MarkerRepository;
 import org.sharedhealth.mci.domain.repository.PatientRepository;
-import org.sharedhealth.mci.domain.util.BaseRepositoryIT;
+import org.sharedhealth.mci.domain.util.BaseIntegrationTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.cassandra.core.CassandraOperations;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.*;
 
@@ -30,9 +31,9 @@ import static org.junit.Assert.*;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.*;
 import static org.sharedhealth.mci.domain.util.TestUtil.asSet;
 import static org.sharedhealth.mci.domain.util.TestUtil.buildTimeUuids;
-import static org.sharedhealth.mci.domain.util.TestUtil.truncateAllColumnFamilies;
 
-public class DuplicatePatientRepositoryIT extends BaseRepositoryIT {
+@RunWith(SpringJUnit4ClassRunner.class)
+public class DuplicatePatientRepositoryIT extends BaseIntegrationTest {
 
     @Autowired
     @Qualifier("MCICassandraTemplate")
@@ -351,8 +352,8 @@ public class DuplicatePatientRepositoryIT extends BaseRepositoryIT {
         Set<String> reasons = asSet("nid");
 
         duplicatePatientRepository.create(asList(
-                        new DuplicatePatient(patient1.getCatchment().getId(), healthId1, healthId2, reasons, timeBased()),
-                        new DuplicatePatient(patient2.getCatchment().getId(), healthId2, healthId1, reasons, timeBased())),
+                new DuplicatePatient(patient1.getCatchment().getId(), healthId1, healthId2, reasons, timeBased()),
+                new DuplicatePatient(patient2.getCatchment().getId(), healthId2, healthId1, reasons, timeBased())),
                 randomUUID());
 
         cassandraOps.insert(new DuplicatePatientIgnored(healthId1, healthId4, reasons));
@@ -383,10 +384,5 @@ public class DuplicatePatientRepositoryIT extends BaseRepositoryIT {
 
     private List<DuplicatePatient> findAllDuplicates() {
         return cassandraOps.select(select().from(CF_PATIENT_DUPLICATE), DuplicatePatient.class);
-    }
-
-    @After
-    public void tearDown() {
-        truncateAllColumnFamilies(cassandraOps);
     }
 }
