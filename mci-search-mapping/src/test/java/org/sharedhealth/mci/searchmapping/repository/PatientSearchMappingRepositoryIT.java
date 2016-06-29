@@ -1,13 +1,10 @@
 package org.sharedhealth.mci.searchmapping.repository;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sharedhealth.mci.domain.model.*;
 import org.sharedhealth.mci.domain.repository.PatientRepository;
 import org.sharedhealth.mci.domain.util.BaseIntegrationTest;
-import org.sharedhealth.mci.domain.util.TestUtil;
-import org.sharedhealth.mci.searchmapping.services.PatientSearchMappingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -16,7 +13,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
@@ -27,39 +25,16 @@ import static org.sharedhealth.mci.domain.util.DateUtil.parseDate;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 public class PatientSearchMappingRepositoryIT extends BaseIntegrationTest {
-    public static final String FACILITY = "Bahmni";
-
+    private static final String FACILITY = "Bahmni";
 
     @Autowired
     private PatientSearchMappingRepository searchMappingRepository;
-
-    @Autowired
-    private PatientSearchMappingService searchMappingService;
-
     @Autowired
     private PatientRepository patientRepository;
-
-
-    @Before
-    public void setUp() throws Exception {
-        TestUtil.setupApprovalsConfig(cassandraOps);
-    }
-
-    @Test
-    public void shouldGetTheLatestMarker() throws Exception {
-        assertNull(searchMappingRepository.findLatestMarker());
-        PatientData patientData = buildPatient();
-        patientRepository.create(patientData).getId();
-
-        searchMappingService.map();
-
-        assertNotNull(searchMappingRepository.findLatestMarker());
-    }
 
     @Test
     public void shouldCreateMappingsForPatientSearch() throws Exception {
         String healthId = patientRepository.create(buildPatient()).getId();
-
         searchMappingRepository.saveMappings(patientRepository.findByHealthId(healthId));
 
         assertNotNull(getNidMappings("1234567890123", healthId).get(0));
@@ -83,7 +58,6 @@ public class PatientSearchMappingRepositoryIT extends BaseIntegrationTest {
             searchMappingRepository.saveMappings(patientRepository.findByHealthId(healthId));
             Thread.sleep(0, 10);
         }
-
 
         Catchment catchment = new Catchment("10", "20", "30");
         catchment.setCityCorpId("40");
@@ -117,7 +91,6 @@ public class PatientSearchMappingRepositoryIT extends BaseIntegrationTest {
             searchMappingRepository.saveMappings(patientRepository.findByHealthId(healthId));
             Thread.sleep(0, 10);
         }
-
 
         Catchment catchment = new Catchment("10", "20", "30");
         catchment.setCityCorpId("40");
@@ -166,129 +139,6 @@ public class PatientSearchMappingRepositoryIT extends BaseIntegrationTest {
 
         assertEquals(1, getNidMappings(nid, healthId).size());
         assertEquals(1, getBrnMappings(brn, healthId).size());
-
-    }
-
-    @Test
-    public void shouldNotUpdateIdAndPhoneNumberMappingsWhenExistingValueIsNotEmptyAndNewValueIsNotEmptyAndBothValuesAreSame() {
-        String existingNid = "1000000000000";
-        String existingBrn = "10000000000000000";
-        String existingUid = "10000000000";
-        String existingReligion = "01";
-        PhoneNumber existingPhoneNumber = new PhoneNumber();
-        existingPhoneNumber.setCountryCode("91");
-        existingPhoneNumber.setAreaCode("80");
-        existingPhoneNumber.setNumber("10002000");
-        existingPhoneNumber.setExtension("");
-
-        PatientData patient = initPatientData();
-        patient.setGivenName("John");
-        patient.setSurName("Doe");
-        patient.setNationalId(existingNid);
-        patient.setBirthRegistrationNumber(existingBrn);
-        patient.setUid(existingUid);
-        patient.setReligion(existingReligion);
-        patient.setAddress(createAddress("10", "20", "30"));
-        patient.setPhoneNumber(existingPhoneNumber);
-        String healthId = patientRepository.create(patient).getId();
-
-        searchMappingRepository.saveMappings(patientRepository.findByHealthId(healthId));
-        assertNotNull(healthId);
-
-        assertThat(getNidMappings(existingNid, healthId).size(), is(1));
-        assertThat(getBrnMappings(existingBrn, healthId).size(), is(1));
-        assertThat(getUidMappings(existingUid, healthId).size(), is(1));
-        assertThat(getPatientsByPhoneNumber(existingPhoneNumber).size(), is(1));
-
-        String newNid = existingNid;
-        String newBrn = existingBrn;
-        String newUid = existingUid;
-        String newReligion = "02";
-        PhoneNumber newPhoneNumber = existingPhoneNumber;
-
-        PatientData updateRequest = initPatientData();
-        updateRequest.setReligion(newReligion);
-        updateRequest.setNationalId(newNid);
-        updateRequest.setBirthRegistrationNumber(newBrn);
-        updateRequest.setUid(newUid);
-        updateRequest.setPhoneNumber(newPhoneNumber);
-        patientRepository.update(updateRequest, patientRepository.findByHealthId(healthId), new Requester());
-
-        PatientData updatedPatient = patientRepository.findByHealthId(healthId);
-        assertNotNull(updatedPatient);
-        assertEquals(newReligion, updatedPatient.getReligion());
-        assertEquals(newNid, updatedPatient.getNationalId());
-        assertEquals(newBrn, updatedPatient.getBirthRegistrationNumber());
-        assertEquals(newUid, updatedPatient.getUid());
-        assertTrue(isEmpty(updatedPatient.getPendingApprovals()));
-
-        assertTrue(isEmpty(cassandraOps.select(select().from(CF_PENDING_APPROVAL_MAPPING).toString(), PendingApprovalMapping.class)));
-
-        assertThat(getNidMappings(existingNid, healthId).size(), is(1));
-        assertThat(getBrnMappings(existingBrn, healthId).size(), is(1));
-        assertThat(getUidMappings(existingUid, healthId).size(), is(1));
-        assertThat(getPatientsByPhoneNumber(existingPhoneNumber).size(), is(1));
-    }
-
-    @Test
-    public void shouldNotUpdateIdAndPhoneNumberMappingsWhenExistingValueIsNotEmptyAndNewValueIsNull() {
-        String existingNid = "1000000000000";
-        String existingBrn = "10000000000000000";
-        String existingUid = "10000000000";
-        String existingReligion = "01";
-        PhoneNumber existingPhoneNumber = new PhoneNumber();
-        existingPhoneNumber.setCountryCode("91");
-        existingPhoneNumber.setAreaCode("80");
-        existingPhoneNumber.setNumber("10002000");
-        existingPhoneNumber.setExtension("");
-
-        PatientData patient = initPatientData();
-        patient.setGivenName("John");
-        patient.setSurName("Doe");
-        patient.setNationalId(existingNid);
-        patient.setBirthRegistrationNumber(existingBrn);
-        patient.setUid(existingUid);
-        patient.setReligion(existingReligion);
-        patient.setAddress(createAddress("10", "20", "30"));
-        patient.setPhoneNumber(existingPhoneNumber);
-        String healthId = patientRepository.create(patient).getId();
-
-        searchMappingRepository.saveMappings(patientRepository.findByHealthId(healthId));
-        assertNotNull(healthId);
-
-        assertThat(getNidMappings(existingNid, healthId).size(), is(1));
-        assertThat(getBrnMappings(existingBrn, healthId).size(), is(1));
-        assertThat(getUidMappings(existingUid, healthId).size(), is(1));
-        assertThat(getPatientsByPhoneNumber(existingPhoneNumber).size(), is(1));
-
-        String newNid = null;
-        String newBrn = null;
-        String newUid = null;
-        String newReligion = "02";
-        PhoneNumber newPhoneNumber = null;
-
-        PatientData updateRequest = initPatientData();
-        updateRequest.setReligion(newReligion);
-        updateRequest.setNationalId(newNid);
-        updateRequest.setBirthRegistrationNumber(newBrn);
-        updateRequest.setUid(newUid);
-        updateRequest.setPhoneNumber(newPhoneNumber);
-        patientRepository.update(updateRequest, patientRepository.findByHealthId(healthId), new Requester());
-
-        PatientData updatedPatient = patientRepository.findByHealthId(healthId);
-        assertNotNull(updatedPatient);
-        assertEquals(newReligion, updatedPatient.getReligion());
-        assertEquals(existingNid, updatedPatient.getNationalId());
-        assertEquals(existingBrn, updatedPatient.getBirthRegistrationNumber());
-        assertEquals(existingUid, updatedPatient.getUid());
-        assertTrue(isEmpty(updatedPatient.getPendingApprovals()));
-
-        assertTrue(isEmpty(cassandraOps.select(select().from(CF_PENDING_APPROVAL_MAPPING).toString(), PendingApprovalMapping.class)));
-
-        assertThat(getNidMappings(existingNid, healthId).size(), is(1));
-        assertThat(getBrnMappings(existingBrn, healthId).size(), is(1));
-        assertThat(getUidMappings(existingUid, healthId).size(), is(1));
-        assertThat(getPatientsByPhoneNumber(existingPhoneNumber).size(), is(1));
     }
 
     @Test
@@ -334,11 +184,6 @@ public class PatientSearchMappingRepositoryIT extends BaseIntegrationTest {
         updateRequest.setUid(uid2);
         updateRequest.setPhoneNumber(phoneNumber2);
         patientRepository.update(updateRequest, patientRepository.findByHealthId(healthId2), new Requester());
-
-        PatientData approvalRequest = initPatientData();
-        approvalRequest.setHealthId(healthId2);
-        approvalRequest.setPhoneNumber(phoneNumber2);
-        patientRepository.processPendingApprovals(approvalRequest, patientRepository.findByHealthId(healthId2), true);
 
         PatientData patient2 = patientRepository.findByHealthId(healthId2);
         assertNotNull(patient2);
@@ -387,71 +232,6 @@ public class PatientSearchMappingRepositoryIT extends BaseIntegrationTest {
     }
 
     @Test
-    public void shouldUpdateCatchmentMappingWhenPresentAddressIsMarkedForApprovalAndUpdatedAfterApproval() {
-        PatientData patientData = buildPatient();
-        String healthId = patientRepository.create(patientData).getId();
-        searchMappingRepository.saveMappings(patientRepository.findByHealthId(healthId));
-
-
-        List<PatientData> patients = patientRepository.findAllByCatchment(patientData.getCatchment(), null, null, 100);
-        assertTrue(isNotEmpty(patients));
-        assertEquals(1, patients.size());
-        assertEquals(healthId, patients.get(0).getHealthId());
-
-        PatientData updateRequest = initPatientData();
-        Address newAddress = createAddress("01", "04", "09");
-        updateRequest.setAddress(newAddress);
-        updateRequest.setGender("O");
-        patientRepository.update(patientData, patientRepository.findByHealthId(healthId), new Requester());
-
-        assertTrue(isNotEmpty(patientRepository.findAllByCatchment(patientData.getCatchment(), null, null, 100)));
-        assertTrue(isEmpty(patientRepository.findAllByCatchment(updateRequest.getCatchment(), null, null, 100)));
-
-        PatientData updatedPatient = patientRepository.findByHealthId(healthId);
-        patientRepository.processPendingApprovals(updateRequest, updatedPatient, true);
-
-        assertTrue(isEmpty(patientRepository.findAllByCatchment(patientData.getCatchment(), null, null, 100)));
-
-        List<CatchmentMapping> catchmentMappings = cassandraOps.select
-                (buildFindCatchmentMappingsStmt(patientRepository.findByHealthId(healthId)), CatchmentMapping.class);
-        assertTrue(isNotEmpty(catchmentMappings));
-        assertEquals(2, catchmentMappings.size());
-        assertEquals(healthId, catchmentMappings.iterator().next().getHealthId());
-    }
-
-    @Test
-    public void shouldUpdateHouseholdCodeMappingsWhenExistingValueIsNotEmptyAndNewValueIsEmpty() {
-        String existingHouseholdCode = "12345";
-
-        PatientData patient = initPatientData();
-        patient.setGivenName("John");
-        patient.setSurName("Doe");
-        patient.setHouseholdCode(existingHouseholdCode);
-        patient.setAddress(createAddress("10", "20", "30"));
-        String healthId = patientRepository.create(patient).getId();
-
-        searchMappingRepository.saveMappings(patientRepository.findByHealthId(healthId));
-        assertNotNull(healthId);
-
-        assertThat(getHouseholdCodeMappings(existingHouseholdCode, healthId).size(), is(1));
-
-        String newHouseholdCode = "";
-        final String newReligion = "02";
-
-        PatientData updateRequest = initPatientData();
-        updateRequest.setReligion(newReligion);
-        updateRequest.setHouseholdCode(newHouseholdCode);
-        patientRepository.update(updateRequest, patientRepository.findByHealthId(healthId), new Requester());
-
-        PatientData updatedPatient = patientRepository.findByHealthId(healthId);
-        assertNotNull(updatedPatient);
-        assertEquals(newReligion, updatedPatient.getReligion());
-        assertEquals(newHouseholdCode, updatedPatient.getHouseholdCode());
-
-        assertTrue(isEmpty(getHouseholdCodeMappings(existingHouseholdCode, healthId)));
-    }
-
-    @Test
     public void shouldUpdateHouseholdCodeMappingsWhenExistingValueIsNotEmptyAndNewValueIsNotEmptyAndBothValuesAreDifferent() {
         String existingHouseholdCode = "12345";
 
@@ -483,152 +263,6 @@ public class PatientSearchMappingRepositoryIT extends BaseIntegrationTest {
         assertTrue(isEmpty(getHouseholdCodeMappings(existingHouseholdCode, healthId)));
         assertThat(getHouseholdCodeMappings(newHouseholdCode, healthId).size(), is(1));
     }
-
-    @Test
-    public void shouldUpdateIdAndPhoneNumberMappingsWhenExistingValueIsNotEmptyAndNewValueIsEmpty() {
-        String existingNid = "1000000000000";
-        String existingBrn = "10000000000000000";
-        String existingUid = "10000000000";
-        String existingReligion = "01";
-        PhoneNumber existingPhoneNumber = new PhoneNumber();
-        existingPhoneNumber.setCountryCode("91");
-        existingPhoneNumber.setAreaCode("80");
-        existingPhoneNumber.setNumber("10002000");
-        existingPhoneNumber.setExtension("");
-
-        PatientData patient = initPatientData();
-        patient.setGivenName("John");
-        patient.setSurName("Doe");
-        patient.setNationalId(existingNid);
-        patient.setBirthRegistrationNumber(existingBrn);
-        patient.setUid(existingUid);
-        patient.setReligion(existingReligion);
-        patient.setAddress(createAddress("10", "20", "30"));
-        patient.setPhoneNumber(existingPhoneNumber);
-        String healthId = patientRepository.create(patient).getId();
-
-        searchMappingRepository.saveMappings(patientRepository.findByHealthId(healthId));
-        assertNotNull(healthId);
-
-        assertThat(getNidMappings(existingNid, healthId).size(), is(1));
-        assertThat(getBrnMappings(existingBrn, healthId).size(), is(1));
-        assertThat(getUidMappings(existingUid, healthId).size(), is(1));
-        assertThat(getPatientsByPhoneNumber(existingPhoneNumber).size(), is(1));
-
-        String newNid = "";
-        String newBrn = "";
-        String newUid = "";
-        String newReligion = "02";
-        PhoneNumber newPhoneNumber = new PhoneNumber();
-        newPhoneNumber.setCountryCode("");
-        newPhoneNumber.setAreaCode("");
-        newPhoneNumber.setNumber("");
-        newPhoneNumber.setExtension("");
-
-        PatientData updateRequest = initPatientData();
-        updateRequest.setReligion(newReligion);
-        updateRequest.setNationalId(newNid);
-        updateRequest.setBirthRegistrationNumber(newBrn);
-        updateRequest.setUid(newUid);
-        updateRequest.setPhoneNumber(newPhoneNumber);
-        patientRepository.update(updateRequest, patientRepository.findByHealthId(healthId), new Requester());
-
-        PatientData approvalRequest = initPatientData();
-        approvalRequest.setHealthId(healthId);
-        approvalRequest.setPhoneNumber(newPhoneNumber);
-        patientRepository.processPendingApprovals(approvalRequest, patientRepository.findByHealthId(healthId), true);
-
-        PatientData updatedPatient = patientRepository.findByHealthId(healthId);
-        assertNotNull(updatedPatient);
-        assertEquals(newReligion, updatedPatient.getReligion());
-        assertEquals(newNid, updatedPatient.getNationalId());
-        assertEquals(newBrn, updatedPatient.getBirthRegistrationNumber());
-        assertEquals(newUid, updatedPatient.getUid());
-
-        assertTrue(isEmpty(getPatientsByPhoneNumber(existingPhoneNumber)));
-    }
-
-    @Test
-    public void shouldUpdateIdAndPhoneNumberMappingsWhenExistingValueIsNotEmptyAndNewValueIsNotEmptyAndBothValuesAreDifferent() {
-        String existingNid = "1000000000000";
-        String existingBrn = "10000000000000000";
-        String existingUid = "10000000000";
-        String existingReligion = "01";
-        PhoneNumber existingPhoneNumber = new PhoneNumber();
-        existingPhoneNumber.setCountryCode("91");
-        existingPhoneNumber.setAreaCode("80");
-        existingPhoneNumber.setNumber("10002000");
-        existingPhoneNumber.setExtension("");
-
-        PatientData patient = initPatientData();
-        patient.setGivenName("John");
-        patient.setSurName("Doe");
-        patient.setNationalId(existingNid);
-        patient.setBirthRegistrationNumber(existingBrn);
-        patient.setUid(existingUid);
-        patient.setReligion(existingReligion);
-        patient.setAddress(createAddress("10", "20", "30"));
-        patient.setPhoneNumber(existingPhoneNumber);
-        String healthId = patientRepository.create(patient).getId();
-
-        searchMappingRepository.saveMappings(patientRepository.findByHealthId(healthId));
-        assertNotNull(healthId);
-
-        assertThat(getNidMappings(existingNid, healthId).size(), is(1));
-        assertThat(getBrnMappings(existingBrn, healthId).size(), is(1));
-        assertThat(getUidMappings(existingUid, healthId).size(), is(1));
-        assertThat(getPatientsByPhoneNumber(existingPhoneNumber).size(), is(1));
-
-        String newNid = "2000000000000";
-        String newBrn = "20000000000000000";
-        String newUid = "20000000000";
-        String newReligion = "02";
-        PhoneNumber newPhoneNumber = new PhoneNumber();
-        newPhoneNumber.setCountryCode("91");
-        newPhoneNumber.setAreaCode("80");
-        newPhoneNumber.setNumber("90008000");
-        newPhoneNumber.setExtension("1200");
-
-        PatientData updateRequest = initPatientData();
-        updateRequest.setReligion(newReligion);
-        updateRequest.setNationalId(newNid);
-        updateRequest.setBirthRegistrationNumber(newBrn);
-        updateRequest.setUid(newUid);
-        updateRequest.setPhoneNumber(newPhoneNumber);
-        patientRepository.update(updateRequest, patientRepository.findByHealthId(healthId), new Requester());
-
-        PatientData approvalRequest = initPatientData();
-        approvalRequest.setHealthId(healthId);
-        approvalRequest.setPhoneNumber(newPhoneNumber);
-        patientRepository.processPendingApprovals(approvalRequest, patientRepository.findByHealthId(healthId), true);
-
-        PatientData updatedPatient = patientRepository.findByHealthId(healthId);
-        assertNotNull(updatedPatient);
-        assertEquals(newReligion, updatedPatient.getReligion());
-        assertEquals(newNid, updatedPatient.getNationalId());
-        assertEquals(newBrn, updatedPatient.getBirthRegistrationNumber());
-        assertEquals(newUid, updatedPatient.getUid());
-        assertEquals(newPhoneNumber, updatedPatient.getPhoneNumber());
-
-        assertThat(getNidMappings(existingNid, healthId).size(), is(0));
-        assertThat(getBrnMappings(existingBrn, healthId).size(), is(0));
-        assertThat(getUidMappings(existingUid, healthId).size(), is(0));
-        assertThat(getPatientsByPhoneNumber(existingPhoneNumber).size(), is(0));
-
-        assertThat(getNidMappings(newNid, healthId).size(), is(1));
-        assertThat(getBrnMappings(newBrn, healthId).size(), is(1));
-        assertThat(getUidMappings(newUid, healthId).size(), is(1));
-        assertThat(getPatientsByPhoneNumber(newPhoneNumber).size(), is(1));
-    }
-
-    private String buildFindCatchmentMappingsStmt(PatientData patient) {
-        List<String> catchmentIds = patient.getCatchment().getAllIds();
-        return select().from(CF_CATCHMENT_MAPPING)
-                .where(in(CATCHMENT_ID, catchmentIds.toArray(((Object[]) new String[catchmentIds.size()]))))
-                .and(eq(LAST_UPDATED, patient.getUpdatedAt()))
-                .and(eq(HEALTH_ID, patient.getHealthId())).toString();
-    }
-
 
     private void assertSearchByNameAndAddressExists(String givenName, String address, String healthId) {
         SearchQuery query = new SearchQuery();
@@ -695,7 +329,6 @@ public class PatientSearchMappingRepositoryIT extends BaseIntegrationTest {
     private Address createAddress(String division, String district, String upazila) {
         Address address = new Address(division, district, upazila);
         address.setCountryCode("050");
-
         return address;
     }
 }

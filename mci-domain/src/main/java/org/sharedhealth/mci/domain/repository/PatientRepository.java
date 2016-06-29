@@ -433,7 +433,6 @@ public class PatientRepository extends BaseRepository {
         } else {
             buildDeletePendingApprovalMappingStmt(healthId, batch, new Date().getTime());
         }
-
         cassandraOps.execute(batch);
         return healthId;
     }
