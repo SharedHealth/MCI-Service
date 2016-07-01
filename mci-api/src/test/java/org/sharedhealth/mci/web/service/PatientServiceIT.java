@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sharedhealth.mci.domain.constant.JsonConstants;
+import org.sharedhealth.mci.domain.constant.MCIConstants;
 import org.sharedhealth.mci.domain.model.*;
 import org.sharedhealth.mci.domain.repository.PatientFeedRepository;
 import org.sharedhealth.mci.domain.repository.PatientRepository;
@@ -22,6 +23,7 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.junit.Assert.*;
 import static org.sharedhealth.mci.domain.constant.JsonConstants.*;
+import static org.sharedhealth.mci.domain.constant.MCIConstants.COUNTRY_CODE_BANGLADESH;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.CATCHMENT_ID;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.*;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.GENDER;
@@ -387,7 +389,7 @@ public class PatientServiceIT extends BaseIntegrationTest {
     }
 
     @Test
-    public void shouldAddPendingApprovalInPatientAndApprovalMappingTables_IfPatientHasAnyPendingApproval() throws Exception {
+    public void shouldAddAnotherPendingApprovalIfItHasDifferentValue() throws Exception {
         setupApprovalsConfig(cassandraOps);
 
         PatientData data = buildPatient();
@@ -417,14 +419,11 @@ public class PatientServiceIT extends BaseIntegrationTest {
         assertNotNull(fieldDetailsMap);
         assertEquals(2, fieldDetailsMap.size());
 
-        Iterator<PendingApprovalFieldDetails> fieldDetailsIterator = fieldDetailsMap.values().iterator();
-        PendingApprovalFieldDetails fieldDetails1 = fieldDetailsIterator.next();
-        assertEquals("O", fieldDetails1.getValue());
-        assertEquals(new Requester(FACILITY, "Dr. Seuss"), fieldDetails1.getRequestedBy());
+        Requester requester = new Requester(FACILITY, "Dr. Monika");
+        assertTrue(containsFieldDetails(fieldDetailsMap, "F", requester));
 
-        PendingApprovalFieldDetails fieldDetails2 = fieldDetailsIterator.next();
-        assertEquals("F", fieldDetails2.getValue());
-        assertEquals(new Requester(FACILITY, "Dr. Monika"), fieldDetails2.getRequestedBy());
+        requester = new Requester(FACILITY, "Dr. Seuss");
+        assertTrue(containsFieldDetails(fieldDetailsMap, "O", requester));
 
         List<PendingApprovalMapping> mappings = findAllPendingApprovalMappings();
         List<String> catchmentIds = buildCatchment(data.getAddress()).getAllIds();
@@ -492,7 +491,6 @@ public class PatientServiceIT extends BaseIntegrationTest {
         assertPendingApprovalMappings(healthId, data.getAddress(), pendingApprovals);
     }
 
-
     @Test
     public void shouldBeAbleToRejectPendingApprovalsWhenPatientHasOnePendingApprovalEachForMultipleFields() {
         TestUtil.setupApprovalsConfig(cassandraOps);
@@ -518,6 +516,7 @@ public class PatientServiceIT extends BaseIntegrationTest {
 
         assertPendingApprovalMappings(healthId, data.getAddress(), pendingApprovals);
     }
+
 
     @Test
     public void shouldBeAbleToAcceptPendingApprovalsWhenPatientHasMultiplePendingApprovalsForMultipleFields() throws Exception {
@@ -583,6 +582,8 @@ public class PatientServiceIT extends BaseIntegrationTest {
 
     @Test
     public void shouldBeAbleToAcceptPendingApprovalsWhenPatientHasBlockPendingApprovals() {
+        TestUtil.setupApprovalsConfig(cassandraOps);
+
         PatientData data = buildPatient();
         String healthId = processPendingApprovalsWhenPatientHasBlockPendingApprovals(data, true);
 
@@ -598,6 +599,7 @@ public class PatientServiceIT extends BaseIntegrationTest {
 
     @Test
     public void shouldBeAbleToRejectPendingApprovalsWhenPatientHasBlockPendingApprovals() {
+        TestUtil.setupApprovalsConfig(cassandraOps);
         PatientData data = buildPatient();
         String healthId = processPendingApprovalsWhenPatientHasBlockPendingApprovals(data, false);
 
@@ -795,61 +797,112 @@ public class PatientServiceIT extends BaseIntegrationTest {
         assertChangeSet(changeSet3, JsonConstants.PRESENT_ADDRESS, data.getAddress(), newAddress);
     }
 
+    @Test
+    public void shouldNotUpdatePatientIfThereAreNoDifferenceInPatientData() throws Exception {
+        Address existingAddress = createAddress("10", "20", "30");
+        existingAddress.setCityCorporationId("40");
+        PatientData patient = initPatientData();
+        patient.setGivenName("John");
+        patient.setSurName("Doe");
+        patient.setOccupation("01");
+        patient.setAddress(existingAddress);
+        String healthId = patientRepository.create(patient).getId();
+        assertNotNull(healthId);
 
-//
-//    @Test
-//    public void shouldNotUpdatePatientIfThereAreNoDifferenceInPatientData() throws Exception {
-//        Address existingAddress = createAddress("10", "20", "30");
-//        existingAddress.setCityCorporationId("40");
-//        PatientData patient = initPatientData();
-//        patient.setGivenName("John");
-//        patient.setSurName("Doe");
-//        patient.setOccupation("01");
-//        patient.setAddress(existingAddress);
-//        String healthId = patientRepository.create(patient).getId();
-//        assertNotNull(healthId);
-//
-//        Patient savedPatient = cassandraOps.selectOneById(Patient.class, healthId);
-//        assertNotNull(savedPatient.getUpdatedAt());
-//
-//        patientRepository.update(patient, healthId);
-//
-//        Patient updatedPatient = cassandraOps.selectOneById(Patient.class, healthId);
-//        assertNotNull(updatedPatient.getUpdatedAt());
-//
-//        assertEquals(updatedPatient.getUpdatedAt(), savedPatient.getUpdatedAt());
-//    }
-//
-//    @Test
-//    public void shouldNotUpdatePatientIfExistingAndNewPatientDataHasDefaultValues() throws Exception {
-//        Address existingAddress = createAddress("10", "20", "30");
-//        existingAddress.setCityCorporationId("40");
-//        PatientData patient = initPatientData();
-//        patient.setGivenName("John");
-//        patient.setSurName("Doe");
-//        patient.setOccupation("01");
-//        patient.setAddress(existingAddress);
-//        String healthId = patientRepository.create(patient).getId();
-//        assertNotNull(healthId);
-//
-//        Patient savedPatient = cassandraOps.selectOneById(Patient.class, healthId);
-//        assertNotNull(savedPatient.getUpdatedAt());
-//
-//        PatientStatus patientStatus = new PatientStatus();
-//        patientStatus.setType(MCIConstants.PATIENT_STATUS_ALIVE);
-//        patient.setPatientStatus(patientStatus);
-//        patient.setDobType(PatientMapper.DEFAULT_DOB_TYPE);
-//        patient.setConfidential(MCIConstants.STRING_NO);
-//
-//        patient.getAddress().setCountryCode(null);
-//
-//        patientRepository.update(patient, healthId);
-//
-//        Patient updatedPatient = cassandraOps.selectOneById(Patient.class, healthId);
-//        assertNotNull(updatedPatient.getUpdatedAt());
-//
-//        assertEquals(updatedPatient.getUpdatedAt(), savedPatient.getUpdatedAt());
-//    }
+        Patient savedPatient = cassandraOps.selectOneById(Patient.class, healthId);
+        assertNotNull(savedPatient.getUpdatedAt());
+
+        patientService.update(patient, healthId);
+
+        Patient updatedPatient = cassandraOps.selectOneById(Patient.class, healthId);
+        assertNotNull(updatedPatient.getUpdatedAt());
+
+        assertEquals(updatedPatient.getUpdatedAt(), savedPatient.getUpdatedAt());
+    }
+
+    @Test
+    public void shouldNotAddApprovalsIfThereIsNoDifferenceFromPendingApprovals() throws Exception {
+        TestUtil.setupApprovalsConfig(cassandraOps);
+
+        Address existingAddress = createAddress("10", "20", "30");
+        existingAddress.setCityCorporationId("40");
+        PatientData patient = initPatientData();
+        patient.setGivenName("John");
+        patient.setSurName("Doe");
+        patient.setOccupation("01");
+        patient.setAddress(existingAddress);
+        String healthId = patientRepository.create(patient).getId();
+        assertNotNull(healthId);
+
+        String facilityId = "Bahmni";
+        String providerId = "Dr. Monika";
+        PatientData updateRequest = new PatientData();
+        Address newAddress = new Address("99", "88", "77");
+        updateRequest.setAddress(newAddress);
+        updateRequest.setRequester(facilityId, providerId);
+        patientService.update(updateRequest, healthId);
+
+        Patient firstUpdate = cassandraOps.selectOneById(Patient.class, healthId);
+        assertNotNull(firstUpdate.getUpdatedAt());
+
+        patientService.update(updateRequest, healthId);
+
+        Patient secondUpdate = cassandraOps.selectOneById(Patient.class, healthId);
+        assertNotNull(secondUpdate.getUpdatedAt());
+        assertEquals(firstUpdate.getUpdatedAt(), secondUpdate.getUpdatedAt());
+
+        TreeSet<PendingApproval> firstUpdatePendingApprovals = firstUpdate.getPendingApprovals();
+        TreeSet<PendingApproval> secondUpdatePendingApprovals = secondUpdate.getPendingApprovals();
+
+        assertEquals(firstUpdatePendingApprovals.size(), secondUpdatePendingApprovals.size());
+        PendingApproval firstPendingApproval = firstUpdatePendingApprovals.iterator().next();
+        PendingApproval secondPendingApproval = secondUpdatePendingApprovals.iterator().next();
+
+        Collection<PendingApprovalFieldDetails> firstApprovalDetails = firstPendingApproval.getFieldDetails().values();
+        Collection<PendingApprovalFieldDetails> secondApprovalDetails = secondPendingApproval.getFieldDetails().values();
+
+        assertEquals(firstApprovalDetails.size(), secondApprovalDetails.size());
+        assertEquals(firstApprovalDetails.iterator().next().getValue(),
+                secondApprovalDetails.iterator().next().getValue());
+        assertEquals(firstApprovalDetails.iterator().next().getCreatedAt(),
+                secondApprovalDetails.iterator().next().getCreatedAt());
+    }
+
+    @Test
+    public void shouldNotUpdatePatientIfExistingAndNewPatientDataHasDefaultValues() throws Exception {
+        Address existingAddress = createAddress("10", "20", "30");
+        existingAddress.setCityCorporationId("40");
+        PatientData patient = initPatientData();
+        patient.setGivenName("John");
+        patient.setSurName("Doe");
+        patient.setOccupation("01");
+        patient.setAddress(existingAddress);
+        String healthId = patientRepository.create(patient).getId();
+        assertNotNull(healthId);
+
+        Patient savedPatient = cassandraOps.selectOneById(Patient.class, healthId);
+        assertNotNull(savedPatient.getUpdatedAt());
+
+        PatientStatus patientStatus = new PatientStatus();
+        patientStatus.setType(MCIConstants.PATIENT_STATUS_ALIVE);
+        patient.setPatientStatus(patientStatus);
+        patient.setDobType(PatientMapper.DEFAULT_DOB_TYPE);
+        patient.setConfidential(MCIConstants.STRING_NO);
+
+        patient.getAddress().setCountryCode(null);
+        patientService.update(patient, healthId);
+
+        Patient updatedPatient = cassandraOps.selectOneById(Patient.class, healthId);
+        assertNotNull(updatedPatient.getUpdatedAt());
+        assertEquals(updatedPatient.getUpdatedAt(), savedPatient.getUpdatedAt());
+
+        patient.getAddress().setCountryCode(COUNTRY_CODE_BANGLADESH);
+        patientService.update(patient, healthId);
+
+        updatedPatient = cassandraOps.selectOneById(Patient.class, healthId);
+        assertNotNull(updatedPatient.getUpdatedAt());
+        assertEquals(updatedPatient.getUpdatedAt(), savedPatient.getUpdatedAt());
+    }
 
     private PatientData initPatientData() {
         PatientData patient = new PatientData();
@@ -1038,8 +1091,6 @@ public class PatientServiceIT extends BaseIntegrationTest {
     }
 
     private String processPendingApprovalsWhenPatientHasOnePendingApprovalEachForMultipleFields(PatientData data, boolean shouldAccept) {
-        TestUtil.setupApprovalsConfig(cassandraOps);
-
         String healthId = patientRepository.create(data).getId();
 
         PatientData patientData = initPatientData();
@@ -1066,7 +1117,6 @@ public class PatientServiceIT extends BaseIntegrationTest {
     }
 
     private String processPendingApprovalsWhenPatientHasBlockPendingApprovals(PatientData data, boolean shouldAccept) {
-        TestUtil.setupApprovalsConfig(cassandraOps);
         PhoneNumber phoneNo = new PhoneNumber();
         phoneNo.setCountryCode("91");
         phoneNo.setAreaCode("080");
@@ -1097,8 +1147,6 @@ public class PatientServiceIT extends BaseIntegrationTest {
     }
 
     private String processPendingApprovalsWhenPatientHasMultiplePendingApprovalsForMultipleFields(PatientData data, boolean shouldAccept) throws Exception {
-        TestUtil.setupApprovalsConfig(cassandraOps);
-
         String healthId = patientRepository.create(data).getId();
 
         PatientData patientData = initPatientData();
@@ -1173,5 +1221,11 @@ public class PatientServiceIT extends BaseIntegrationTest {
                 .and(eq(HEALTH_ID, patient.getHealthId())).toString();
     }
 
-
+    private boolean containsFieldDetails(TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap, Object value, Requester requester) {
+        for (Map.Entry<UUID, PendingApprovalFieldDetails> entry : fieldDetailsMap.entrySet()) {
+            if (entry.getValue().getValue().equals(value) && entry.getValue().getRequestedBy().equals(requester))
+                return true;
+        }
+        return false;
+    }
 }

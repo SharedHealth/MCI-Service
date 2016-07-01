@@ -72,7 +72,7 @@ public class PendingApproval implements Comparable<PendingApproval> {
         return fieldDetails;
     }
 
-    public void setFieldDetails(TreeMap<UUID, PendingApprovalFieldDetails> fieldDetails) {
+    public void addFieldDetails(TreeMap<UUID, PendingApprovalFieldDetails> fieldDetails) {
         this.fieldDetails.putAll(fieldDetails);
     }
 

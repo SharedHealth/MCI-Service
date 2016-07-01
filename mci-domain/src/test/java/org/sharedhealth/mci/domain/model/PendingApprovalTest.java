@@ -28,7 +28,7 @@ public class PendingApprovalTest {
         // 2015-02-13T05:45:27.533Z  MSB: -8984107514685353500
         String uuidString2 = "835209d0-b343-11e4-8b78-238d247bf04a";
         fieldDetails.put(fromString(uuidString2), null);
-        pendingApproval.setFieldDetails(fieldDetails);
+        pendingApproval.addFieldDetails(fieldDetails);
 
         // Added to the map in descending order of UUID's unix timestamps
         Iterator<UUID> iterator = pendingApproval.getFieldDetails().keySet().iterator();
@@ -53,7 +53,7 @@ public class PendingApprovalTest {
         for (int i = 0; i < 5; i++) {
             fieldDetails.put(timeBased(), null);
         }
-        pendingApproval.setFieldDetails(fieldDetails);
+        pendingApproval.addFieldDetails(fieldDetails);
         assertEquals(5, pendingApproval.getFieldDetails().size());
 
         Date date1 = null;
@@ -86,7 +86,7 @@ public class PendingApprovalTest {
         Address address2 = new Address("1", "2", "3");
         fieldDetailsMap.put(UUIDs.timeBased(), buildFieldDetails(address2));
 
-        pendingApproval.setFieldDetails(fieldDetailsMap);
+        pendingApproval.addFieldDetails(fieldDetailsMap);
 
         assertTrue(pendingApproval.contains(address1));
         assertTrue(pendingApproval.contains(address2));

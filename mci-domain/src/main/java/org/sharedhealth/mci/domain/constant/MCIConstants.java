@@ -4,6 +4,8 @@ public class MCIConstants {
     public static final String PATIENT_STATUS_ALIVE = "1";
     public static final String PATIENT_STATUS_DEAD = "2";
     public static final String RELATION_SPOUSE = "SPS";
+    public static final String RELATION_FATHER = "FTH";
+    public static final String RELATION_MOTHER = "MTH";
     public static final String MARITAL_STATUS_UNMARRIED = "1";
     public static final String COUNTRY_CODE_BANGLADESH = "050";
     public static final String STRING_YES = "Yes";

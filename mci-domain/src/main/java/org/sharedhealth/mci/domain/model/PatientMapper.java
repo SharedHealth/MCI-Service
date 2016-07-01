@@ -8,11 +8,7 @@ import org.sharedhealth.mci.domain.exception.InvalidRequestException;
 import org.sharedhealth.mci.domain.util.DateUtil;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -423,7 +419,7 @@ public class PatientMapper {
     }
 
     private void prepareFathersInfo(PatientData data, Patient patient) {
-        Relation father = data.getRelationOfType("FTH");
+        Relation father = data.getRelationOfType(RELATION_FATHER);
         if (father != null) {
             patient.setFathersNameBangla(StringUtils.trim(father.getNameBangla()));
             patient.setFathersGivenName(StringUtils.trim(father.getGivenName()));
@@ -442,7 +438,7 @@ public class PatientMapper {
     }
 
     private void prepareMothersInfo(PatientData data, Patient patient) {
-        Relation mother = data.getRelationOfType("MTH");
+        Relation mother = data.getRelationOfType(RELATION_MOTHER);
 
         if (mother != null) {
             patient.setMothersNameBangla(StringUtils.trim(mother.getNameBangla()));
@@ -461,7 +457,7 @@ public class PatientMapper {
         }
     }
 
-//    This is a temporary fix so that client can send the relation id while create.
+    //    This is a temporary fix so that client can send the relation id while create.
 //    Please DO NOT REMOVE THIS UNUSED FUNCTION
     private Boolean isValidRelationBlock(List<Relation> relations, List<Relation> existing) {
         for (Relation relation : relations) {

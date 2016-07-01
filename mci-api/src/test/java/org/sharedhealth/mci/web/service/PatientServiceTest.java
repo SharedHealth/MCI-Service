@@ -165,13 +165,14 @@ public class PatientServiceTest {
         when(patientRepository.findByHealthId(healthId)).thenReturn(existingPatient);
 
         PatientData newPatientData = new PatientData();
+        newPatientData.setHouseholdCode("1234");
         when(pendingApprovalFilter.filter(existingPatient, requestData)).thenReturn(newPatientData);
 
         patientService.createPatientForMCI(requestData);
         InOrder inOrder = inOrder(patientRepository);
         inOrder.verify(patientRepository).findAllByQuery(searchByNidQuery);
         inOrder.verify(patientRepository).findAllByQuery(searchByBrnQuery);
-        inOrder.verify(patientRepository).findByHealthId(healthId);
+        inOrder.verify(patientRepository, times(2)).findByHealthId(healthId);
         inOrder.verify(patientRepository).update(eq(newPatientData), eq(existingPatient), any(Requester.class));
         inOrder.verify(patientRepository, never()).create(any(PatientData.class));
     }
@@ -561,7 +562,7 @@ public class PatientServiceTest {
         details3.setCreatedAt(unixTimestamp(uuids.get(2)));
         detailsMap.put(uuids.get(2), details3);
 
-        pendingApproval.setFieldDetails(detailsMap);
+        pendingApproval.addFieldDetails(detailsMap);
         return pendingApproval;
     }
 
@@ -577,7 +578,7 @@ public class PatientServiceTest {
         details.setCreatedAt(unixTimestamp(uuid));
         detailsMap.put(uuid, details);
 
-        fieldDetails.setFieldDetails(detailsMap);
+        fieldDetails.addFieldDetails(detailsMap);
         return fieldDetails;
     }
 
@@ -737,7 +738,7 @@ public class PatientServiceTest {
         PendingApprovalFieldDetails fieldDetails = new PendingApprovalFieldDetails();
         fieldDetails.setValue(value);
         fieldDetailsMap.put(timeBased(), fieldDetails);
-        pendingApproval.setFieldDetails(fieldDetailsMap);
+        pendingApproval.addFieldDetails(fieldDetailsMap);
         return pendingApproval;
     }
 

@@ -213,7 +213,7 @@ public class PendingApprovalFilter {
         UUID uuid = timeBased();
         fieldDetails.setCreatedAt(unixTimestamp(uuid));
         fieldDetailsMap.put(uuid, fieldDetails);
-        pendingApproval.setFieldDetails(fieldDetailsMap);
+        pendingApproval.addFieldDetails(fieldDetailsMap);
 
         return pendingApproval;
     }

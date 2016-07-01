@@ -143,8 +143,8 @@ public class BaseControllerTest extends BaseIntegrationTest {
         return mapper.readValue(json, PatientSummaryData.class);
     }
 
-    protected boolean isRelationsEqual(List<Relation> original, List<Relation> patient) {
-        return original.containsAll(patient) && patient.containsAll(original);
+    protected boolean isRelationsEqual(List<Relation> original, List<Relation> updated) {
+        return original.containsAll(updated) && updated.containsAll(original);
     }
 
     protected void assertPatientEquals(PatientData original, PatientData patient) {

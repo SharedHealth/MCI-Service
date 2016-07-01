@@ -1115,7 +1115,7 @@ public class Patient {
             } else {
                 for (PendingApproval p : pendingApprovals) {
                     if (p.equals(pendingApproval)) {
-                        p.setFieldDetails(pendingApproval.getFieldDetails());
+                        p.addFieldDetails(pendingApproval.getFieldDetails());
                     }
                 }
             }

@@ -52,7 +52,6 @@ public class PendingApprovalFieldDetails {
 
         PendingApprovalFieldDetails that = (PendingApprovalFieldDetails) o;
 
-        if (!createdAt.equals(that.createdAt)) return false;
         if (!value.equals(that.value)) return false;
 
         return true;

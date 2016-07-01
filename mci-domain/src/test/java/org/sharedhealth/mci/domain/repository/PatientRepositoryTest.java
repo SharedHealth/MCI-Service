@@ -34,7 +34,7 @@ public class PatientRepositoryTest {
 
             TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap = new TreeMap<>();
             fieldDetailsMap.put(uuid, new PendingApprovalFieldDetails());
-            pendingApproval.setFieldDetails(fieldDetailsMap);
+            pendingApproval.addFieldDetails(fieldDetailsMap);
 
             pendingApprovals.add(pendingApproval);
             Thread.sleep(0, 10);
@@ -147,7 +147,7 @@ public class PatientRepositoryTest {
         fieldDetails.setRequestedBy(new Requester("Bahmni", "Dr. Monika"));
         fieldDetailsMap.put(timeBased(), fieldDetails);
 
-        pendingApproval.setFieldDetails(fieldDetailsMap);
+        pendingApproval.addFieldDetails(fieldDetailsMap);
         return pendingApproval;
     }
 
@@ -172,7 +172,7 @@ public class PatientRepositoryTest {
         fieldDetails2.setRequestedBy(new Requester("CHW", "Dr. Monika"));
         fieldDetailsMap.put(timeBased(), fieldDetails2);
 
-        pendingApproval.setFieldDetails(fieldDetailsMap);
+        pendingApproval.addFieldDetails(fieldDetailsMap);
         return pendingApproval;
     }
 
@@ -356,7 +356,7 @@ public class PatientRepositoryTest {
             fieldDetails.setRequestedBy(new Requester("Bahmni" + i, "Dr. Monika" + i));
             fieldDetailsMap.put(timeBased(), fieldDetails);
         }
-        pendingApproval.setFieldDetails(fieldDetailsMap);
+        pendingApproval.addFieldDetails(fieldDetailsMap);
         return pendingApproval;
     }
 
@@ -369,7 +369,7 @@ public class PatientRepositoryTest {
         fieldDetails.setValue("F");
         fieldDetails.setRequestedBy(new Requester("Bahmni", "Dr. Monika"));
         fieldDetailsMap.put(timeBased(), fieldDetails);
-        pendingApproval.setFieldDetails(fieldDetailsMap);
+        pendingApproval.addFieldDetails(fieldDetailsMap);
         return pendingApproval;
     }
 }

@@ -1,6 +1,7 @@
 package org.sharedhealth.mci.web.service;
 
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.sharedhealth.mci.domain.exception.Forbidden;
 import org.sharedhealth.mci.domain.exception.InvalidRequestException;
@@ -16,6 +17,7 @@ import org.sharedhealth.mci.web.model.OrgHealthId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -197,7 +199,9 @@ public class PatientService {
 
         checkIfTryingToMergeWithNonExistingOrInactiveHid(patientData.getMergedWith());
         PatientData newPatientData = pendingApprovalFilter.filter(existingPatientData, patientData);
-
+        if (!checkUpdateNeeded(newPatientData, healthId)) {
+            return new MCIResponse(healthId, HttpStatus.ACCEPTED);
+        }
         return patientRepository.update(newPatientData, existingPatientData, requester);
     }
 
@@ -336,4 +340,37 @@ public class PatientService {
         return false;
     }
 
+    private boolean checkUpdateNeeded(PatientData newPatientData, String healthId) {
+        TreeSet<PendingApproval> newPendingApprovals = newPatientData.getPendingApprovals();
+        PatientData existingPatientData = patientRepository.findByHealthId(healthId);
+        boolean isSamePatientData = existingPatientData.equals(newPatientData);
+        if (CollectionUtils.isEmpty(newPendingApprovals) && isSamePatientData) return false;
+        TreeSet<PendingApproval> existingPendingApprovals = existingPatientData.getPendingApprovals();
+        if (isSamePatientData && CollectionUtils.isNotEmpty(newPendingApprovals) && CollectionUtils.isNotEmpty(existingPendingApprovals)) {
+            for (PendingApproval newPendingApproval : newPendingApprovals) {
+                if (matchingApprovalNotPresent(newPendingApproval, existingPendingApprovals)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        return true;
+    }
+
+    private boolean matchingApprovalNotPresent(PendingApproval newPendingApproval, TreeSet<PendingApproval> existingPendingApprovals) {
+        for (PendingApproval existingPendingApproval : existingPendingApprovals) {
+            if (existingPendingApproval.equals(newPendingApproval)) {
+                return matchingFieldValueNotPresent(existingPendingApproval, newPendingApproval);
+            }
+        }
+        return true;
+    }
+
+    private boolean matchingFieldValueNotPresent(PendingApproval existingPendingApproval, PendingApproval newPendingApproval) {
+        for (Map.Entry<UUID, PendingApprovalFieldDetails> entry : newPendingApproval.getFieldDetails().entrySet()) {
+            if (!existingPendingApproval.getFieldDetails().containsValue(entry.getValue()))
+                return true;
+        }
+        return false;
+    }
 }

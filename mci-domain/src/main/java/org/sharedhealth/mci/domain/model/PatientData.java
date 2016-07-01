@@ -2,6 +2,7 @@ package org.sharedhealth.mci.domain.model;
 
 import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.constraints.NotBlank;
 import org.sharedhealth.mci.domain.diff.DiffBuilder;
@@ -531,7 +532,7 @@ public class PatientData implements Diffable<PatientData> {
         } else {
             for (PendingApproval p : pendingApprovals) {
                 if (p.equals(pendingApproval)) {
-                    p.setFieldDetails(pendingApproval.getFieldDetails());
+                    p.addFieldDetails(pendingApproval.getFieldDetails());
                 }
             }
         }
@@ -635,7 +636,8 @@ public class PatientData implements Diffable<PatientData> {
             return false;
         if (primaryContactNumber != null ? !primaryContactNumber.equals(that.primaryContactNumber) : that.primaryContactNumber != null)
             return false;
-        if (relations != null ? !relations.equals(that.relations) : that.relations != null) return false;
+        if (CollectionUtils.isNotEmpty(relations) ? !relations.equals(that.relations) : CollectionUtils.isNotEmpty(that.relations))
+            return false;
         if (religion != null ? !religion.equals(that.religion) : that.religion != null) return false;
         if (surName != null ? !surName.equals(that.surName) : that.surName != null) return false;
         if (uid != null ? !uid.equals(that.uid) : that.uid != null) return false;

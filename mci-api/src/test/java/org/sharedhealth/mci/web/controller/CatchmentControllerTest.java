@@ -287,7 +287,7 @@ public class CatchmentControllerTest {
         approvalFieldDetails.setValue("some value");
         approvalFieldDetails.setCreatedAt(unixTimestamp(timeuuid));
         fieldDetailsMap.put(timeuuid, approvalFieldDetails);
-        pendingApproval.setFieldDetails(fieldDetailsMap);
+        pendingApproval.addFieldDetails(fieldDetailsMap);
 
         TreeSet<PendingApproval> pendingApprovals = new TreeSet<>();
         pendingApprovals.add(pendingApproval);
