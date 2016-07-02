@@ -10,13 +10,17 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.sharedhealth.mci.domain.exception.Forbidden;
-import org.sharedhealth.mci.domain.model.*;
+import org.sharedhealth.mci.domain.model.MCIResponse;
+import org.sharedhealth.mci.domain.model.PatientData;
+import org.sharedhealth.mci.domain.model.PatientSummaryData;
+import org.sharedhealth.mci.domain.model.Relation;
 import org.sharedhealth.mci.domain.repository.PatientRepository;
 import org.sharedhealth.mci.domain.util.BaseIntegrationTest;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.infrastructure.persistence.HealthIdRepository;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.model.MciHealthId;
+import org.sharedhealth.mci.web.service.PatientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
@@ -56,9 +60,10 @@ public class BaseControllerTest extends BaseIntegrationTest {
     private HealthIdRepository healthIdRepository;
     @Autowired
     protected WebApplicationContext webApplicationContext;
-
     @Autowired
     private PatientRepository patientRepository;
+    @Autowired
+    protected PatientService patientService;
 
     @Autowired
     private Filter springSecurityFilterChain;
@@ -119,8 +124,7 @@ public class BaseControllerTest extends BaseIntegrationTest {
         PatientData data = getPatientObjectFromString(json);
         data.setHealthId(healthId);
         data.setRequester(FACILITY_ID, null);
-        Requester requestedBy = new Requester(FACILITY_ID, PROVIDER_ID);
-        return patientRepository.update(data, patientRepository.findByHealthId(healthId), requestedBy);
+        return patientService.update(data, healthId);
     }
 
     protected MCIMultiResponse getMciMultiResponse(MvcResult result) {
