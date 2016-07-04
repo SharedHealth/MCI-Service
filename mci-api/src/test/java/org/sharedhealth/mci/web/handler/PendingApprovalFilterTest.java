@@ -179,7 +179,7 @@ public class PendingApprovalFilterTest {
         assertEquals(existingPatient.getPermanentAddress(), newPatient.getPermanentAddress());
     }
 
-        @Test(expected = NonUpdatableFieldUpdateException.class)
+    @Test(expected = NonUpdatableFieldUpdateException.class)
     public void shouldThrowExceptionWhenTryingToUpdateNonUpdatableField() throws ParseException {
         setUpApprovalFieldServiceFor(DATE_OF_BIRTH, "NU");
 
@@ -355,7 +355,7 @@ public class PendingApprovalFilterTest {
         PatientData existingPatient = buildPatientData();
 
         PatientData updateRequest = buildPatientData();
-        updateRequest.setRelations(getRelations());
+        updateRequest.setRelations(asList(createRelation("SPS", "Mehzabin")));
         updateRequest.setRequester("Bahmni", "Dr. Monika");
 
         PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
@@ -370,7 +370,7 @@ public class PendingApprovalFilterTest {
         PatientData existingPatient = buildPatientData();
 
         PatientData updateRequest = buildPatientData();
-        updateRequest.setRelations(getRelations());
+        updateRequest.setRelations(asList(createRelation("SPS", "Mehzabin")));
         updateRequest.setRequester("Bahmni", "Dr. Monika");
 
         PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
@@ -378,7 +378,7 @@ public class PendingApprovalFilterTest {
         assertPendingApprovals(existingPatient, newPatient, 1, updateRequest.getRequester());
 
         updateRequest = buildPatientData();
-        updateRequest.setRelations(getRelations());
+        updateRequest.setRelations(asList(createRelation("FTH", "Kareem")));
 
         newPatient = pendingApprovalFilter.filter(newPatient, updateRequest);
         TreeSet<PendingApproval> pendingApprovals = newPatient.getPendingApprovals();
@@ -392,12 +392,18 @@ public class PendingApprovalFilterTest {
         assertNotNull(fieldDetailsMap);
         assertEquals(2, fieldDetailsMap.size());
 
-        PendingApprovalFieldDetails fieldDetails = fieldDetailsMap.values().iterator().next();
-        List<Relation> relations = (List<Relation>) fieldDetails.getValue();
-
-        assertEquals("SPS", relations.get(0).getType());
+        assertTrue(containsRelationFieldDetails(fieldDetailsMap, "SPS", "Mehzabin"));
+        assertTrue(containsRelationFieldDetails(fieldDetailsMap, "FTH", "Kareem"));
 
         verify(approvalFieldService, Mockito.times(2)).getProperty(RELATIONS);
+    }
+
+    private boolean containsRelationFieldDetails(TreeMap<UUID, PendingApprovalFieldDetails> relations, String type, String givenName) {
+        for (PendingApprovalFieldDetails pendingApprovalFieldDetails : relations.values()) {
+            List<Relation> relationList = (List<Relation>) pendingApprovalFieldDetails.getValue();
+            if (createRelation(type, givenName).equals(relationList.get(0))) return true;
+        }
+        return false;
     }
 
     private void assertRelationFieldDetails(TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap, Relation value, Requester requestedBy) {
@@ -412,21 +418,17 @@ public class PendingApprovalFilterTest {
         assertEquals(toIsoMillisFormat(expectedCreatedAt), fieldDetails.getCreatedAt());
     }
 
-    private List<Relation> getRelations() {
+    private Relation createRelation(String type, String givenName) {
         Relation relation = new Relation();
-        relation.setType("SPS");
+        relation.setType(type);
         relation.setNameBangla("মেহজাবীন খান");
-        relation.setGivenName("Mehzabin");
+        relation.setGivenName(givenName);
         relation.setSurName("Khan");
         relation.setNationalId("1990567890163");
         relation.setUid("38761111111");
         relation.setBirthRegistrationNumber("52345678901633456");
         relation.setMarriageId("12345678");
         relation.setRelationalStatus("3");
-
-        List<Relation> relations = new ArrayList<>();
-        relations.add(relation);
-        return relations;
+        return relation;
     }
-
 }

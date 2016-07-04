@@ -73,7 +73,10 @@ public class PendingApproval implements Comparable<PendingApproval> {
     }
 
     public void addFieldDetails(TreeMap<UUID, PendingApprovalFieldDetails> fieldDetails) {
-        this.fieldDetails.putAll(fieldDetails);
+        for (Map.Entry<UUID, PendingApprovalFieldDetails> entry : fieldDetails.entrySet()) {
+            if (!this.fieldDetails.containsValue(entry.getValue()))
+                this.fieldDetails.put(entry.getKey(), entry.getValue());
+        }
     }
 
     @Override

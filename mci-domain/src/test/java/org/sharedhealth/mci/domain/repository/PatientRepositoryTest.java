@@ -119,39 +119,30 @@ public class PatientRepositoryTest {
         assertEquals(2, requesters.size());
 
         assertNotNull(requesters.get(GIVEN_NAME));
-        assertEquals(3, requesters.get(GIVEN_NAME).size());
-        assertTrue(requesters.get(GIVEN_NAME).containsAll(asList(new Requester("Bahmni1", "Dr. Seuss1"),
-                new Requester("Bahmni2", "Dr. Seuss2"),
-                new Requester("Bahmni3", "Dr. Seuss3"))));
+        assertEquals(1, requesters.get(GIVEN_NAME).size());
+        assertTrue(requesters.get(GIVEN_NAME).contains(new Requester("Bahmni1", "Dr. Seuss1")));
 
         assertNotNull(requesters.get(PRESENT_ADDRESS));
-        assertEquals(3, requesters.get(PRESENT_ADDRESS).size());
-        assertTrue(requesters.get(PRESENT_ADDRESS).containsAll(asList(new Requester("CHW1", "Dr. Monika1"),
-                new Requester("CHW2", "Dr. Monika2"),
-                new Requester("CHW3", "Dr. Monika3"))));
+        assertEquals(1, requesters.get(PRESENT_ADDRESS).size());
+        assertTrue(requesters.get(PRESENT_ADDRESS).contains(new Requester("CHW1", "Dr. Monika1")));
     }
 
-    public PendingApproval buildPendingApprovalForGivenName() {
+    private PendingApproval buildPendingApprovalForGivenName() {
         PendingApproval pendingApproval = new PendingApproval();
         pendingApproval.setName(GIVEN_NAME);
         pendingApproval.setCurrentValue("Harry");
         TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap = new TreeMap<>();
-        for (int i = 1; i <= 3; i++) {
-            PendingApprovalFieldDetails fieldDetails = new PendingApprovalFieldDetails();
-            fieldDetails.setValue("John");
-            fieldDetails.setRequestedBy(new Requester("Bahmni" + i, "Dr. Seuss" + i));
-            fieldDetailsMap.put(timeBased(), fieldDetails);
-        }
+
         PendingApprovalFieldDetails fieldDetails = new PendingApprovalFieldDetails();
-        fieldDetails.setValue("Joe");
-        fieldDetails.setRequestedBy(new Requester("Bahmni", "Dr. Monika"));
+        fieldDetails.setValue("John");
+        fieldDetails.setRequestedBy(new Requester("Bahmni1", "Dr. Seuss1"));
         fieldDetailsMap.put(timeBased(), fieldDetails);
 
         pendingApproval.addFieldDetails(fieldDetailsMap);
         return pendingApproval;
     }
 
-    public PendingApproval buildPendingApprovalForAddress() {
+    private PendingApproval buildPendingApprovalForAddress() {
         PendingApproval pendingApproval = new PendingApproval();
         pendingApproval.setName(PRESENT_ADDRESS);
         pendingApproval.setCurrentValue("Harry");
@@ -166,11 +157,6 @@ public class PatientRepositoryTest {
         fieldDetails1.setValue(new Address("10", "20", "30"));
         fieldDetails1.setRequestedBy(new Requester("CHW1", "Dr. Monika1"));
         fieldDetailsMap.put(timeBased(), fieldDetails1);
-
-        PendingApprovalFieldDetails fieldDetails2 = new PendingApprovalFieldDetails();
-        fieldDetails2.setValue(new Address("10", "20", "31"));
-        fieldDetails2.setRequestedBy(new Requester("CHW", "Dr. Monika"));
-        fieldDetailsMap.put(timeBased(), fieldDetails2);
 
         pendingApproval.addFieldDetails(fieldDetailsMap);
         return pendingApproval;
