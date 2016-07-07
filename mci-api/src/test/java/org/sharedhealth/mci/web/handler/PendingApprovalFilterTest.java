@@ -1,5 +1,6 @@
 package org.sharedhealth.mci.web.handler;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -10,7 +11,10 @@ import org.sharedhealth.mci.domain.service.ApprovalFieldService;
 import org.sharedhealth.mci.domain.service.PendingApprovalFilter;
 
 import java.text.ParseException;
-import java.util.*;
+import java.util.List;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.UUID;
 
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static java.util.Arrays.asList;
@@ -20,6 +24,8 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.domain.constant.JsonConstants.*;
+import static org.sharedhealth.mci.domain.constant.MCIConstants.RELATION_FATHER;
+import static org.sharedhealth.mci.domain.constant.MCIConstants.RELATION_MOTHER;
 import static org.sharedhealth.mci.domain.util.DateUtil.parseDate;
 import static org.sharedhealth.mci.domain.util.DateUtil.toIsoMillisFormat;
 
@@ -396,6 +402,96 @@ public class PendingApprovalFilterTest {
         assertTrue(containsRelationFieldDetails(fieldDetailsMap, "FTH", "Kareem"));
 
         verify(approvalFieldService, Mockito.times(2)).getProperty(RELATIONS);
+    }
+
+    @Test
+    public void shouldNotAddEmptyRelationsToNewPatientData() throws Exception {
+        PatientData existingPatient = buildPatientData();
+
+        UUID motherRelationId = UUID.randomUUID();
+        UUID fatherRelationId = UUID.randomUUID();
+
+        PatientData updateRequest = buildPatientData();
+
+        Relation motherRelation = new Relation();
+        motherRelation.setId(motherRelationId.toString());
+        motherRelation.setType(RELATION_MOTHER);
+
+        Relation fatherRelation = new Relation();
+        fatherRelation.setId(fatherRelationId.toString());
+        fatherRelation.setType(RELATION_FATHER);
+
+        updateRequest.setRelations(asList(motherRelation, fatherRelation));
+        updateRequest.setRequester("Bahmni", "Dr. Monika");
+
+        PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
+
+        assertTrue(CollectionUtils.isEmpty(newPatient.getRelations()));
+    }
+
+    @Test
+    public void shouldAddEmptyRelationsWhenThereSameRelationAlreadyExist() throws Exception {
+        PatientData existingPatient = buildPatientData();
+        String motherRelationId = UUID.randomUUID().toString();
+        String fatherRelationId = UUID.randomUUID().toString();
+
+        Relation existingMotherRelation = createRelation(RELATION_MOTHER, "Nagma");
+        existingMotherRelation.setId(motherRelationId);
+        Relation existingFatherRelation = createRelation(RELATION_FATHER, "Nagmo");
+        existingFatherRelation.setId(fatherRelationId);
+        existingPatient.setRelations(asList(existingMotherRelation, existingFatherRelation));
+
+        PatientData updateRequest = new PatientData();
+
+        Relation motherRelation = new Relation();
+        motherRelation.setId(motherRelationId);
+        motherRelation.setType(RELATION_MOTHER);
+
+        Relation fatherRelation = new Relation();
+        fatherRelation.setId(fatherRelationId);
+        fatherRelation.setType(RELATION_FATHER);
+
+        updateRequest.setRelations(asList(motherRelation, fatherRelation));
+        updateRequest.setRequester("Bahmni", "Dr. Monika");
+
+        PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
+
+        List<Relation> relations = newPatient.getRelations();
+        assertEquals(2, relations.size());
+        assertTrue(relations.get(0).isEmpty());
+        assertTrue(relations.get(1).isEmpty());
+    }
+
+    @Test
+    public void shouldAddRelationsWhenThereIsAnUpdate() throws Exception {
+        PatientData existingPatient = buildPatientData();
+        String motherRelationId = UUID.randomUUID().toString();
+        String fatherRelationId = UUID.randomUUID().toString();
+
+        Relation existingMotherRelation = createRelation(RELATION_MOTHER, "Nagma");
+        existingMotherRelation.setId(motherRelationId);
+        Relation existingFatherRelation = createRelation(RELATION_FATHER, "Nazmul");
+        existingFatherRelation.setId(fatherRelationId);
+        existingPatient.setRelations(asList(existingMotherRelation, existingFatherRelation));
+
+        PatientData updateRequest = new PatientData();
+
+        Relation motherRelation = createRelation(RELATION_MOTHER, "Pogo");
+        motherRelation.setId(motherRelationId);
+        motherRelation.setType(RELATION_MOTHER);
+
+        Relation fatherRelation = createRelation(RELATION_FATHER, "Ramlal");
+        fatherRelation.setId(fatherRelationId);
+        fatherRelation.setType(RELATION_FATHER);
+
+        updateRequest.setRelations(asList(motherRelation, fatherRelation));
+        updateRequest.setRequester("Bahmni", "Dr. Monika");
+
+        PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
+
+        assertEquals(2, newPatient.getRelations().size());
+        assertEquals(fatherRelation, newPatient.getRelationById(fatherRelationId));
+        assertEquals(motherRelation, newPatient.getRelationById(motherRelationId));
     }
 
     private boolean containsRelationFieldDetails(TreeMap<UUID, PendingApprovalFieldDetails> relations, String type, String givenName) {

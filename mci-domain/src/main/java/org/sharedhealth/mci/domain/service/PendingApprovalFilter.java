@@ -6,10 +6,7 @@ import org.sharedhealth.mci.domain.util.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-import java.util.List;
-import java.util.TreeMap;
-import java.util.UUID;
+import java.util.*;
 
 import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
@@ -80,7 +77,7 @@ public class PendingApprovalFilter {
                 newPatient));
         newPatient.setPhoneNumber(processPhoneNumber(PHONE_NUMBER, existingPatient.getPhoneNumber(), updateRequest.getPhoneNumber(),
                 requestedBy, newPatient));
-        newPatient.setRelations(processRelations(RELATIONS, existingPatient.getRelations(), updateRequest.getRelations(), requestedBy,
+        newPatient.setRelations(processRelations(RELATIONS, existingPatient, updateRequest, requestedBy,
                 newPatient));
         newPatient.setPatientStatus(processPatientStatus(STATUS, existingPatient.getPatientStatus(), updateRequest.getPatientStatus(),
                 requestedBy, newPatient));
@@ -104,11 +101,24 @@ public class PendingApprovalFilter {
         return date == null ? null : (Date) date;
     }
 
-    private List<Relation> processRelations(String key, List<Relation> oldRelations, List<Relation> newRelations, Requester requester,
+    private List<Relation> processRelations(String key, PatientData existingData, PatientData updateRequest, Requester requester,
                                             PatientData newPatient) {
-
-        Object relations = process(key, oldRelations, newRelations, requester, newPatient);
+        List<Relation> newRelations = handleEmptyRelations(existingData, updateRequest.getRelations());
+        Object relations = process(key, existingData.getRelations(), newRelations, requester, newPatient);
         return relations == null ? null : (List<Relation>) relations;
+    }
+
+    private List<Relation> handleEmptyRelations(PatientData existingData, List<Relation> newRelations) {
+        if (null == newRelations) return null;
+        ArrayList<Relation> relationArrayList = new ArrayList<>(newRelations);
+        ArrayList<Relation> relationsToRemove = new ArrayList<>();
+        for (Relation newRelation : relationArrayList) {
+            if (newRelation.isEmpty() && null == existingData.getRelationById(newRelation.getId())) {
+                relationsToRemove.add(newRelation);
+            }
+        }
+        relationArrayList.removeAll(relationsToRemove);
+        return relationArrayList;
     }
 
     private PhoneNumber processPhoneNumber(String key, PhoneNumber oldValue, PhoneNumber newValue, Requester requester, PatientData
