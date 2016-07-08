@@ -197,20 +197,21 @@ public class Relation {
 
         Relation relation = (Relation) o;
 
-        if (birthRegistrationNumber != null ? !birthRegistrationNumber.equals(relation.birthRegistrationNumber) : relation.birthRegistrationNumber != null)
-            return false;
-        if (givenName != null ? !givenName.equals(relation.givenName) : relation.givenName != null) return false;
-        if (healthId != null ? !healthId.equals(relation.healthId) : relation.healthId != null) return false;
-        if (marriageId != null ? !marriageId.equals(relation.marriageId) : relation.marriageId != null) return false;
-        if (nameBangla != null ? !nameBangla.equals(relation.nameBangla) : relation.nameBangla != null) return false;
-        if (nationalId != null ? !nationalId.equals(relation.nationalId) : relation.nationalId != null) return false;
-        if (relationalStatus != null ? !relationalStatus.equals(relation.relationalStatus) : relation.relationalStatus != null)
-            return false;
-        if (surName != null ? !surName.equals(relation.surName) : relation.surName != null) return false;
-        if (type != null ? !type.equals(relation.type) : relation.type != null) return false;
-        if (uid != null ? !uid.equals(relation.uid) : relation.uid != null) return false;
-
+        if (notEqualStrings(birthRegistrationNumber, relation.birthRegistrationNumber)) return false;
+        if (notEqualStrings(givenName, relation.givenName)) return false;
+        if (notEqualStrings(healthId, relation.healthId)) return false;
+        if (notEqualStrings(marriageId, relation.marriageId)) return false;
+        if (notEqualStrings(nameBangla, relation.nameBangla)) return false;
+        if (notEqualStrings(nationalId, relation.nationalId)) return false;
+        if (notEqualStrings(relationalStatus, relation.relationalStatus)) return false;
+        if (notEqualStrings(surName, relation.surName)) return false;
+        if (notEqualStrings(type, relation.type)) return false;
+        if (notEqualStrings(uid, relation.uid)) return false;
         return true;
+    }
+
+    private boolean notEqualStrings(String currentFieldValue, String otherFieldValue) {
+        return StringUtils.isNotEmpty(currentFieldValue) ? !currentFieldValue.equals(otherFieldValue) : StringUtils.isNotEmpty(otherFieldValue);
     }
 
     @JsonIgnore
