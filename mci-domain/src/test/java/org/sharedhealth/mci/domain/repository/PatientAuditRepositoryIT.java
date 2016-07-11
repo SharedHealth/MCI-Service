@@ -7,12 +7,12 @@ import org.junit.runner.RunWith;
 import org.sharedhealth.mci.domain.model.*;
 import org.sharedhealth.mci.domain.util.BaseIntegrationTest;
 import org.sharedhealth.mci.domain.util.JsonMapper;
+import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.*;
 
-import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static java.util.Arrays.asList;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
@@ -64,7 +64,7 @@ public class PatientAuditRepositoryIT extends BaseIntegrationTest {
     public void shouldUpdateAuditLogsIfPrimaryKeyExists() {
         PatientAuditLog log1 = new PatientAuditLog();
         log1.setHealthId("h100");
-        log1.setEventId(timeBased());
+        log1.setEventId(TimeUuidUtil.uuidForDate(new Date()));
         log1.setRequestedBy(buildRequestedBy());
         auditRepository.saveOrUpdate(asList(log1));
 

@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sharedhealth.mci.domain.constant.RepositoryConstants;
 import org.sharedhealth.mci.domain.util.BaseIntegrationTest;
+import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.sharedhealth.mci.web.exception.HealthIdExhaustedException;
 import org.sharedhealth.mci.web.model.MciHealthId;
 import org.sharedhealth.mci.web.model.OrgHealthId;
@@ -13,11 +14,11 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
-import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
 
@@ -88,7 +89,7 @@ public class HealthIdRepositoryIT extends BaseIntegrationTest {
 
     @Test
     public void shouldSaveAHIDForGivenOrganization() throws Exception {
-        OrgHealthId orgHealthId = new OrgHealthId("9110", "OTHER-ORG", timeBased(), null);
+        OrgHealthId orgHealthId = new OrgHealthId("9110", "OTHER-ORG", TimeUuidUtil.uuidForDate(new Date()), null);
 
         healthIdRepository.saveOrgHealthIdSync(orgHealthId);
 
@@ -100,8 +101,8 @@ public class HealthIdRepositoryIT extends BaseIntegrationTest {
 
     @Test
     public void shouldFindOrgHIDByGivenHID() throws Exception {
-        OrgHealthId hid = new OrgHealthId("1234", "XYZ", timeBased(), null);
-        cassandraOps.insert(asList(hid, new OrgHealthId("1134", "ABC", timeBased(), null)));
+        OrgHealthId hid = new OrgHealthId("1234", "XYZ", TimeUuidUtil.uuidForDate(new Date()), null);
+        cassandraOps.insert(asList(hid, new OrgHealthId("1134", "ABC", TimeUuidUtil.uuidForDate(new Date()), null)));
 
         OrgHealthId orgHealthId = healthIdRepository.findOrgHealthId("1234");
         assertEquals(hid, orgHealthId);

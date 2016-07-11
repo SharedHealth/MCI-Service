@@ -5,6 +5,7 @@ import org.junit.runner.RunWith;
 import org.sharedhealth.mci.domain.model.*;
 import org.sharedhealth.mci.domain.repository.PatientRepository;
 import org.sharedhealth.mci.domain.util.BaseIntegrationTest;
+import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -15,7 +16,6 @@ import java.util.UUID;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
-import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.hamcrest.Matchers.is;
@@ -56,7 +56,6 @@ public class PatientSearchMappingRepositoryIT extends BaseIntegrationTest {
             healthIds.add(patientRepository.create(patientData).getId());
 
             searchMappingRepository.saveMappings(patientRepository.findByHealthId(healthId));
-            Thread.sleep(0, 10);
         }
 
         Catchment catchment = new Catchment("10", "20", "30");
@@ -87,9 +86,7 @@ public class PatientSearchMappingRepositoryIT extends BaseIntegrationTest {
             patientData.setAddress(address);
             String healthId = patientRepository.create(patientData).getId();
             healthIds.add(healthId);
-
             searchMappingRepository.saveMappings(patientRepository.findByHealthId(healthId));
-            Thread.sleep(0, 10);
         }
 
         Catchment catchment = new Catchment("10", "20", "30");
@@ -97,7 +94,7 @@ public class PatientSearchMappingRepositoryIT extends BaseIntegrationTest {
         UUID updatedAt = cassandraOps.selectOneById(Patient.class, healthIds.get(0)).getUpdatedAt();
         assertNotNull(updatedAt);
         int limit = 3;
-        Date since = new Date(unixTimestamp(updatedAt));
+        Date since = new Date(TimeUuidUtil.getTimeFromUUID(updatedAt));
         List<PatientData> patients = patientRepository.findAllByCatchment(catchment, since, null, limit);
 
         assertTrue(isNotEmpty(patients));
@@ -106,7 +103,7 @@ public class PatientSearchMappingRepositoryIT extends BaseIntegrationTest {
         assertEquals(healthIds.get(1), patients.get(1).getHealthId());
         assertEquals(healthIds.get(2), patients.get(2).getHealthId());
     }
-
+    
     @Test
     public void shouldNotDeleteMappingsWhenOtherFieldsAreUpdated() {
         String nid = "1000000000000";

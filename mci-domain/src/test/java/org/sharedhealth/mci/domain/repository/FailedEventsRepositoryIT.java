@@ -2,19 +2,19 @@ package org.sharedhealth.mci.domain.repository;
 
 import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.Select;
-import com.datastax.driver.core.utils.UUIDs;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sharedhealth.mci.domain.model.FailedEvent;
 import org.sharedhealth.mci.domain.util.BaseIntegrationTest;
+import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
-import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
@@ -29,7 +29,7 @@ public class FailedEventsRepositoryIT extends BaseIntegrationTest {
     @Test
     public void shouldWriteToFailedEvents() throws Exception {
         String errorMessage = "message";
-        UUID eventId = timeBased();
+        UUID eventId = TimeUuidUtil.uuidForDate(new Date());
         failedEventsRepository.writeToFailedEvents(FAILURE_TYPE_SEARCH_MAPPING, eventId, errorMessage);
 
         List<FailedEvent> failedEvents = getSearchMappingFailedEvents();
@@ -51,7 +51,7 @@ public class FailedEventsRepositoryIT extends BaseIntegrationTest {
     @Test
     public void shouldIncreaseRetriesByOneIfEventAlreadyExist() throws Exception {
         String errorMessage = "message";
-        UUID eventId = timeBased();
+        UUID eventId = TimeUuidUtil.uuidForDate(new Date());
 
         failedEventsRepository.writeToFailedEvents(FAILURE_TYPE_SEARCH_MAPPING, eventId, errorMessage);
 
@@ -100,7 +100,7 @@ public class FailedEventsRepositoryIT extends BaseIntegrationTest {
         Batch batch = batch();
         for (int i = 0; i < limit; i++) {
             String errorMessage = "message" + i;
-            UUID eventId = UUIDs.timeBased();
+            UUID eventId = TimeUuidUtil.uuidForDate(new Date());
             FailedEvent failedEvent = new FailedEvent(FAILURE_TYPE_SEARCH_MAPPING, eventId, errorMessage);
             batch.add(createInsertQuery(CF_FAILED_EVENTS, failedEvent, null, cassandraOps.getConverter()));
         }

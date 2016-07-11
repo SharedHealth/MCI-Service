@@ -8,7 +8,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static java.util.Calendar.YEAR;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -59,7 +58,7 @@ public class DateUtil {
     }
 
     public static String toIsoMillisFormat(UUID uuid) {
-        return toIsoMillisFormat(unixTimestamp(uuid));
+        return toIsoMillisFormat(TimeUuidUtil.getTimeFromUUID(uuid));
     }
 
     public static String toIsoMillisFormat(long date) {
@@ -97,7 +96,7 @@ public class DateUtil {
 
     public static int getYearOf(UUID uuid) {
         Calendar cal = Calendar.getInstance();
-        cal.setTimeInMillis(unixTimestamp(uuid));
+        cal.setTimeInMillis(TimeUuidUtil.getTimeFromUUID(uuid));
         return cal.get(YEAR);
     }
 

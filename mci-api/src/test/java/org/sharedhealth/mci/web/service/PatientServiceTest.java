@@ -9,6 +9,7 @@ import org.sharedhealth.mci.domain.model.*;
 import org.sharedhealth.mci.domain.repository.PatientFeedRepository;
 import org.sharedhealth.mci.domain.repository.PatientRepository;
 import org.sharedhealth.mci.domain.service.PendingApprovalFilter;
+import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.sharedhealth.mci.web.exception.InsufficientPrivilegeException;
 import org.sharedhealth.mci.web.mapper.PendingApprovalListResponse;
 import org.sharedhealth.mci.web.model.MciHealthId;
@@ -17,8 +18,6 @@ import org.springframework.http.HttpStatus;
 
 import java.util.*;
 
-import static com.datastax.driver.core.utils.UUIDs.timeBased;
-import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
 import static org.junit.Assert.*;
@@ -198,7 +197,7 @@ public class PatientServiceTest {
         when(mciProperties.getOtherOrgInvalidHidPattern()).thenReturn("");
         mciResponse = new MCIResponse(healthId, HttpStatus.CREATED);
         when(patientRepository.create(patient)).thenReturn(mciResponse);
-        OrgHealthId orgHealthId = new OrgHealthId(healthId, clientId, timeBased(), null);
+        OrgHealthId orgHealthId = new OrgHealthId(healthId, clientId, TimeUuidUtil.uuidForDate(new Date()), null);
         when(patientHealthIdService.findOrgHealthId(healthId)).thenReturn(orgHealthId);
 
         MCIResponse mciResponse = patientService.createPatientForOrg(patient, clientId);
@@ -299,7 +298,7 @@ public class PatientServiceTest {
         patient.setHealthId(healthId);
 
         when(mciProperties.getOtherOrgInvalidHidPattern()).thenReturn("");
-        OrgHealthId orgHealthId = new OrgHealthId(healthId, clientId, timeBased(), null);
+        OrgHealthId orgHealthId = new OrgHealthId(healthId, clientId, TimeUuidUtil.uuidForDate(new Date()), null);
         orgHealthId.markUsed();
         when(patientHealthIdService.findOrgHealthId(healthId)).thenReturn(orgHealthId);
 
@@ -335,7 +334,7 @@ public class PatientServiceTest {
         patient.setHealthId(healthId);
 
         when(mciProperties.getOtherOrgInvalidHidPattern()).thenReturn("");
-        OrgHealthId orgHealthId = new OrgHealthId(healthId, "other", timeBased(), null);
+        OrgHealthId orgHealthId = new OrgHealthId(healthId, "other", TimeUuidUtil.uuidForDate(new Date()), null);
 
         when(patientHealthIdService.findOrgHealthId(healthId)).thenReturn(orgHealthId);
 
@@ -379,7 +378,7 @@ public class PatientServiceTest {
     public void shouldFindPatientsByCatchment() {
         Catchment catchment = new Catchment("30", "26", "18");
         Date since = new Date();
-        UUID lastMarker = timeBased();
+        UUID lastMarker = TimeUuidUtil.uuidForDate(new Date());
         int limit = 25;
         PatientData patient = new PatientData();
         String healthId = "h101";
@@ -401,7 +400,7 @@ public class PatientServiceTest {
     @Test
     public void shouldFindPendingApprovalListByCatchment() throws Exception {
         Catchment catchment = new Catchment("10", "20", "30");
-        UUID after = timeBased();
+        UUID after = TimeUuidUtil.uuidForDate(new Date());
 
         List<PendingApprovalMapping> mappings = asList(buildPendingApprovalMapping("hid-100"),
                 buildPendingApprovalMapping("hid-200"),
@@ -438,8 +437,7 @@ public class PatientServiceTest {
         Catchment catchment = new Catchment("10", "20");
         catchment.setUpazilaId("30");
         mapping.setCatchmentId(catchment.getId());
-        mapping.setLastUpdated(timeBased());
-        Thread.sleep(0, 10);
+        mapping.setLastUpdated(TimeUuidUtil.uuidForDate(new Date()));
         return mapping;
     }
 
@@ -531,8 +529,7 @@ public class PatientServiceTest {
     private List<UUID> generateUUIDs() throws Exception {
         List<UUID> uuids = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
-            uuids.add(timeBased());
-            Thread.sleep(0, 10);
+            uuids.add(TimeUuidUtil.uuidForDate(new Date()));
         }
         return uuids;
     }
@@ -547,19 +544,19 @@ public class PatientServiceTest {
         PendingApprovalFieldDetails details1 = new PendingApprovalFieldDetails();
         details1.setRequestedBy(new Requester("facility-1", "provider-1"));
         details1.setValue("A." + name);
-        details1.setCreatedAt(unixTimestamp(uuids.get(0)));
+        details1.setCreatedAt(TimeUuidUtil.getTimeFromUUID(uuids.get(0)));
         detailsMap.put(uuids.get(0), details1);
 
         PendingApprovalFieldDetails details2 = new PendingApprovalFieldDetails();
         details2.setRequestedBy(new Requester("facility-2", "provider-2"));
         details2.setValue("B." + name);
-        details2.setCreatedAt(unixTimestamp(uuids.get(1)));
+        details2.setCreatedAt(TimeUuidUtil.getTimeFromUUID(uuids.get(1)));
         detailsMap.put(uuids.get(1), details2);
 
         PendingApprovalFieldDetails details3 = new PendingApprovalFieldDetails();
         details3.setRequestedBy(new Requester("facility-3", "provider-3"));
         details3.setValue("C." + name);
-        details3.setCreatedAt(unixTimestamp(uuids.get(2)));
+        details3.setCreatedAt(TimeUuidUtil.getTimeFromUUID(uuids.get(2)));
         detailsMap.put(uuids.get(2), details3);
 
         pendingApproval.addFieldDetails(detailsMap);
@@ -575,7 +572,7 @@ public class PatientServiceTest {
         PendingApprovalFieldDetails details = new PendingApprovalFieldDetails();
         details.setRequestedBy(requester);
         details.setValue(value);
-        details.setCreatedAt(unixTimestamp(uuid));
+        details.setCreatedAt(TimeUuidUtil.getTimeFromUUID(uuid));
         detailsMap.put(uuid, details);
 
         fieldDetails.addFieldDetails(detailsMap);
@@ -737,7 +734,7 @@ public class PatientServiceTest {
         TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap = new TreeMap<>();
         PendingApprovalFieldDetails fieldDetails = new PendingApprovalFieldDetails();
         fieldDetails.setValue(value);
-        fieldDetailsMap.put(timeBased(), fieldDetails);
+        fieldDetailsMap.put(TimeUuidUtil.uuidForDate(new Date()), fieldDetails);
         pendingApproval.addFieldDetails(fieldDetailsMap);
         return pendingApproval;
     }
@@ -935,8 +932,8 @@ public class PatientServiceTest {
 
     @Test
     public void shouldFindUpdateLogsUpdatedSince() {
-        UUID eventId = timeBased();
-        Date since = new Date(unixTimestamp(eventId));
+        UUID eventId = TimeUuidUtil.uuidForDate(new Date());
+        Date since = new Date(TimeUuidUtil.getTimeFromUUID(eventId));
         int limit = 25;
         PatientUpdateLog patientLog = new PatientUpdateLog();
         patientLog.setHealthId("h101");
@@ -957,7 +954,7 @@ public class PatientServiceTest {
 
     @Test
     public void shouldFindUpdateLogsUpdatedAfterLastMarker() {
-        UUID eventId = timeBased();
+        UUID eventId = TimeUuidUtil.uuidForDate(new Date());
         int limit = 25;
         PatientUpdateLog patientLog = new PatientUpdateLog();
         patientLog.setHealthId("h101");

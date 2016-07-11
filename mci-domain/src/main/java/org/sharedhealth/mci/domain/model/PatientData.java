@@ -10,6 +10,7 @@ import org.sharedhealth.mci.domain.diff.DiffResult;
 import org.sharedhealth.mci.domain.diff.Diffable;
 import org.sharedhealth.mci.domain.util.DateStringDeserializer;
 import org.sharedhealth.mci.domain.util.DateUtil;
+import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.sharedhealth.mci.domain.util.WhiteSpaceRemovalDeserializer;
 import org.sharedhealth.mci.domain.validation.constraints.*;
 import org.sharedhealth.mci.domain.validation.group.RequiredGroup;
@@ -24,7 +25,6 @@ import java.util.List;
 import java.util.TreeSet;
 import java.util.UUID;
 
-import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static java.lang.String.valueOf;
 import static org.apache.commons.lang3.StringUtils.*;
@@ -457,7 +457,7 @@ public class PatientData implements Diffable<PatientData> {
     @JsonProperty(CREATED)
     @JsonInclude(NON_EMPTY)
     public String getCreatedAtAsString() {
-        return this.createdAt != null ? DateUtil.toIsoMillisFormat(unixTimestamp(this.createdAt)) : null;
+        return this.createdAt != null ? DateUtil.toIsoMillisFormat(TimeUuidUtil.getTimeFromUUID(this.createdAt)) : null;
     }
 
     @JsonProperty(CREATED)
@@ -478,7 +478,7 @@ public class PatientData implements Diffable<PatientData> {
     @JsonProperty(MODIFIED)
     @JsonInclude(NON_EMPTY)
     public String getUpdatedAtAsString() {
-        return this.updatedAt != null ? DateUtil.toIsoMillisFormat(unixTimestamp(this.updatedAt)) : null;
+        return this.updatedAt != null ? DateUtil.toIsoMillisFormat(TimeUuidUtil.getTimeFromUUID(this.updatedAt)) : null;
     }
 
     @JsonProperty(MODIFIED)

@@ -13,16 +13,17 @@ import org.sharedhealth.mci.domain.repository.PatientRepository;
 import org.sharedhealth.mci.searchmapping.repository.PatientSearchMappingRepository;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static java.util.Arrays.asList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.*;
+import static org.sharedhealth.mci.domain.util.TimeUuidUtil.uuidForDate;
 
 public class PatientSearchMappingServiceTest {
     @Mock
@@ -48,7 +49,7 @@ public class PatientSearchMappingServiceTest {
     public void shouldCreateSearchMappings() throws Exception {
         String healthId = "h100";
         UUID marker = UUID.randomUUID();
-        PatientUpdateLog patientUpdateLog = getPatientUpdateLog(healthId, EVENT_TYPE_CREATED, timeBased());
+        PatientUpdateLog patientUpdateLog = getPatientUpdateLog(healthId, EVENT_TYPE_CREATED, uuidForDate(new Date()));
         List<PatientUpdateLog> updateLogs = asList(patientUpdateLog);
         PatientData patientData = new PatientData();
 
@@ -89,7 +90,7 @@ public class PatientSearchMappingServiceTest {
         String healthId1 = "h100";
         String healthId2 = "h101";
         UUID marker = UUID.randomUUID();
-        List<PatientUpdateLog> updateLogs = asList(getPatientUpdateLog(healthId1, EVENT_TYPE_CREATED, timeBased()), getPatientUpdateLog(healthId2, EVENT_TYPE_CREATED, timeBased()));
+        List<PatientUpdateLog> updateLogs = asList(getPatientUpdateLog(healthId1, EVENT_TYPE_CREATED, uuidForDate(new Date())), getPatientUpdateLog(healthId2, EVENT_TYPE_CREATED, uuidForDate(new Date())));
 
         when(mciProperties.getMaxFailedEvents()).thenReturn(2);
         when(searchMappingRepository.findLatestMarker()).thenReturn(marker);
@@ -110,7 +111,7 @@ public class PatientSearchMappingServiceTest {
         String healthId1 = "h101";
         String healthId2 = "h102";
         UUID marker = UUID.randomUUID();
-        List<PatientUpdateLog> updateLogs = asList(getPatientUpdateLog(healthId1, EVENT_TYPE_UPDATED, timeBased()), getPatientUpdateLog(healthId2, EVENT_TYPE_CREATED, timeBased()));
+        List<PatientUpdateLog> updateLogs = asList(getPatientUpdateLog(healthId1, EVENT_TYPE_UPDATED, uuidForDate(new Date())), getPatientUpdateLog(healthId2, EVENT_TYPE_CREATED, uuidForDate(new Date())));
         PatientData patientData = new PatientData();
 
         when(mciProperties.getMaxFailedEvents()).thenReturn(2);
@@ -134,8 +135,8 @@ public class PatientSearchMappingServiceTest {
         String healthId1 = "h101";
         String healthId2 = "h102";
         UUID marker = UUID.randomUUID();
-        List<PatientUpdateLog> updateLogs = asList(getPatientUpdateLog(healthId1, EVENT_TYPE_UPDATED, timeBased()),
-                                            getPatientUpdateLog(healthId2, EVENT_TYPE_UPDATED, timeBased()));
+        List<PatientUpdateLog> updateLogs = asList(getPatientUpdateLog(healthId1, EVENT_TYPE_UPDATED, uuidForDate(new Date())),
+                getPatientUpdateLog(healthId2, EVENT_TYPE_UPDATED, uuidForDate(new Date())));
         PatientData patientData = new PatientData();
 
         when(mciProperties.getMaxFailedEvents()).thenReturn(2);
@@ -159,7 +160,7 @@ public class PatientSearchMappingServiceTest {
     public void shouldWriteToFailedEventsIfFailsToMap() throws Exception {
         String healthId = "h100";
         UUID marker = UUID.randomUUID();
-        UUID eventId = timeBased();
+        UUID eventId = uuidForDate(new Date());
         PatientUpdateLog patientUpdateLog = getPatientUpdateLog(healthId, EVENT_TYPE_CREATED, eventId);
         List<PatientUpdateLog> updateLogs = asList(patientUpdateLog);
         PatientData patientData = new PatientData();
@@ -183,7 +184,7 @@ public class PatientSearchMappingServiceTest {
     @Test
     public void shouldMapAFailedEvent() throws Exception {
         String healthId = "h100";
-        UUID eventId = timeBased();
+        UUID eventId = uuidForDate(new Date());
         FailedEvent failedEvent = new FailedEvent(FAILURE_TYPE_SEARCH_MAPPING, eventId, "Some Error");
         PatientData patientData = new PatientData();
 
@@ -204,8 +205,8 @@ public class PatientSearchMappingServiceTest {
 
     @Test
     public void shouldMapAllFailedEvent() throws Exception {
-        FailedEvent failedEvent1 = new FailedEvent(FAILURE_TYPE_SEARCH_MAPPING, timeBased(), "Some Error");
-        FailedEvent failedEvent2 = new FailedEvent(FAILURE_TYPE_SEARCH_MAPPING, timeBased(), "Some Error");
+        FailedEvent failedEvent1 = new FailedEvent(FAILURE_TYPE_SEARCH_MAPPING, uuidForDate(new Date()), "Some Error");
+        FailedEvent failedEvent2 = new FailedEvent(FAILURE_TYPE_SEARCH_MAPPING, uuidForDate(new Date()), "Some Error");
 
         when(mciProperties.getMaxFailedEvents()).thenReturn(2);
         when(mciProperties.getFailedEventRetryLimit()).thenReturn(2);
@@ -225,7 +226,7 @@ public class PatientSearchMappingServiceTest {
     @Test
     public void shouldReWriteToFailedEventsIfFailsToMapAFailedEvent() throws Exception {
         String healthId = "h100";
-        UUID eventId = timeBased();
+        UUID eventId = uuidForDate(new Date());
         FailedEvent failedEvent = new FailedEvent(FAILURE_TYPE_SEARCH_MAPPING, eventId, "Some Error");
         PatientData patientData = new PatientData();
 
@@ -248,7 +249,7 @@ public class PatientSearchMappingServiceTest {
     @Test
     public void shouldNotRetryIfRetriesHasReachedTheLimit() throws Exception {
         String healthId = "h100";
-        UUID eventId = timeBased();
+        UUID eventId = uuidForDate(new Date());
         PatientData patientData = new PatientData();
 
         when(mciProperties.getMaxFailedEvents()).thenReturn(2);
@@ -277,7 +278,7 @@ public class PatientSearchMappingServiceTest {
     public void shouldNotMapIfFailedEventsReachedItsLimit() throws Exception {
         String healthId = "h100";
         UUID marker = UUID.randomUUID();
-        PatientUpdateLog patientUpdateLog = getPatientUpdateLog(healthId, EVENT_TYPE_CREATED, timeBased());
+        PatientUpdateLog patientUpdateLog = getPatientUpdateLog(healthId, EVENT_TYPE_CREATED, uuidForDate(new Date()));
         List<PatientUpdateLog> updateLogs = asList(patientUpdateLog);
         PatientData patientData = new PatientData();
 

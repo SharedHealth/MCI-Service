@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.sharedhealth.mci.domain.model.PatientUpdateLog;
 import org.sharedhealth.mci.domain.util.DateUtil;
+import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.sharedhealth.mci.web.handler.FeedMessageConverter;
 import org.sharedhealth.mci.web.infrastructure.security.TokenAuthentication;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
@@ -31,7 +32,6 @@ import java.net.URI;
 import java.text.ParseException;
 import java.util.*;
 
-import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static java.lang.String.format;
 import static java.net.URLEncoder.encode;
 import static java.util.Arrays.asList;
@@ -91,9 +91,9 @@ public class UpdateFeedControllerTest {
 
     @Test
     public void shouldFindPatientUpdatedSince() throws Exception {
-        UUID uuid1 = timeBased();
-        UUID uuid2 = timeBased();
-        UUID uuid3 = timeBased();
+        UUID uuid1 = TimeUuidUtil.uuidForDate(new Date());
+        UUID uuid2 = TimeUuidUtil.uuidForDate(new Date());
+        UUID uuid3 = TimeUuidUtil.uuidForDate(new Date());
 
         Date startDate = parseDate("2010-01-01T10:20:30Z");
 
@@ -133,9 +133,9 @@ public class UpdateFeedControllerTest {
 
     @Test
     public void shouldFindPatientUpdatedAfterLastMarker() throws Exception {
-        UUID uuid1 = timeBased();
-        UUID uuid2 = timeBased();
-        UUID uuid3 = timeBased();
+        UUID uuid1 = TimeUuidUtil.uuidForDate(new Date());
+        UUID uuid2 = TimeUuidUtil.uuidForDate(new Date());
+        UUID uuid3 = TimeUuidUtil.uuidForDate(new Date());
 
         when(patientService.findPatientsUpdatedSince(null, uuid1)).thenReturn(
                 asList(buildPatientLog("h200", uuid2),
@@ -225,9 +225,9 @@ public class UpdateFeedControllerTest {
 
     @Test
     public void shouldBuildFeedResponseWithQueryParam() throws Exception {
-        UUID uuid1 = timeBased();
-        UUID uuid2 = timeBased();
-        UUID uuid3 = timeBased();
+        UUID uuid1 = TimeUuidUtil.uuidForDate(new Date());
+        UUID uuid2 = TimeUuidUtil.uuidForDate(new Date());
+        UUID uuid3 = TimeUuidUtil.uuidForDate(new Date());
 
         final String dateString = "2010-01-01T10:20:30Z";
 
@@ -271,8 +271,8 @@ public class UpdateFeedControllerTest {
 
     @Test
     public void shouldCreateCategoryArrayWithOnlyPatientIfChangeSetIsNull() throws Exception {
-        UUID uuid1 = timeBased();
-        UUID uuid2 = timeBased();
+        UUID uuid1 = TimeUuidUtil.uuidForDate(new Date());
+        UUID uuid2 = TimeUuidUtil.uuidForDate(new Date());
 
         when(patientService.findPatientsUpdatedSince(null, null)).thenReturn(
                 asList(buildPatientLog("h100", uuid1, null), buildPatientLog("h200", uuid2))
@@ -348,8 +348,8 @@ public class UpdateFeedControllerTest {
 
     @Test
     public void shouldGiveFeedInAtomXMLFormat() throws Exception {
-        UUID uuid1 = timeBased();
-        UUID uuid2 = timeBased();
+        UUID uuid1 = TimeUuidUtil.uuidForDate(new Date());
+        UUID uuid2 = TimeUuidUtil.uuidForDate(new Date());
 
         List<PatientUpdateLog> patients = asList(buildPatientLog("h100", uuid1),
                 buildPatientLog("h200", uuid2));

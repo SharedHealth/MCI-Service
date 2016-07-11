@@ -3,13 +3,12 @@ package org.sharedhealth.mci.domain.service;
 import org.sharedhealth.mci.domain.exception.NonUpdatableFieldUpdateException;
 import org.sharedhealth.mci.domain.model.*;
 import org.sharedhealth.mci.domain.util.DateUtil;
+import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
 
-import static com.datastax.driver.core.utils.UUIDs.timeBased;
-import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static java.lang.String.valueOf;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -220,8 +219,8 @@ public class PendingApprovalFilter {
         PendingApprovalFieldDetails fieldDetails = new PendingApprovalFieldDetails();
         fieldDetails.setValue(newValue);
         fieldDetails.setRequestedBy(requester);
-        UUID uuid = timeBased();
-        fieldDetails.setCreatedAt(unixTimestamp(uuid));
+        UUID uuid = TimeUuidUtil.uuidForDate(new Date());
+        fieldDetails.setCreatedAt(TimeUuidUtil.getTimeFromUUID(uuid));
         fieldDetailsMap.put(uuid, fieldDetails);
         pendingApproval.addFieldDetails(fieldDetailsMap);
 

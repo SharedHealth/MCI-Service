@@ -8,15 +8,16 @@ import org.sharedhealth.mci.domain.model.Address;
 import org.sharedhealth.mci.domain.model.MCIResponse;
 import org.sharedhealth.mci.domain.model.PatientData;
 import org.sharedhealth.mci.domain.model.PhoneNumber;
+import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.sharedhealth.mci.web.infrastructure.persistence.HealthIdRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.text.ParseException;
+import java.util.Date;
 import java.util.UUID;
 
-import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static java.lang.String.format;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -442,7 +443,7 @@ public class AuthorizationIT extends BaseControllerTest {
 
     @Test
     public void facilityShouldAccessUpdateFeed() throws Exception {
-        UUID uuid1 = timeBased();
+        UUID uuid1 = TimeUuidUtil.uuidForDate(new Date());
 
         String requestUrl = format("%s/%s/patients", "https://mci.dghs.com", "feed") + "?"
                 + LAST_MARKER + "=" + uuid1.toString();
@@ -457,7 +458,7 @@ public class AuthorizationIT extends BaseControllerTest {
 
     @Test
     public void datasenseShouldAccessUpdateFeed() throws Exception {
-        UUID uuid1 = timeBased();
+        UUID uuid1 = TimeUuidUtil.uuidForDate(new Date());
 
         String requestUrl = format("%s/%s/patients", "https://mci.dghs.com", "feed") + "?"
                 + LAST_MARKER + "=" + uuid1.toString();
@@ -472,7 +473,7 @@ public class AuthorizationIT extends BaseControllerTest {
 
     @Test
     public void providerShouldNotAccessUpdateFeed() throws Exception {
-        UUID uuid1 = timeBased();
+        UUID uuid1 = TimeUuidUtil.uuidForDate(new Date());
 
         String requestUrl = format("%s/%s/patients", "https://mci.dghs.com", "feed") + "?"
                 + LAST_MARKER + "=" + uuid1.toString();

@@ -16,12 +16,13 @@ import org.sharedhealth.mci.domain.model.*;
 import org.sharedhealth.mci.domain.repository.MarkerRepository;
 import org.sharedhealth.mci.domain.repository.PatientFeedRepository;
 import org.sharedhealth.mci.domain.repository.PatientRepository;
+import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static java.util.Arrays.asList;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.junit.Assert.*;
@@ -91,9 +92,9 @@ public class DuplicatePatientServiceTest {
 
     private List<DuplicatePatient> buildDuplicatePatients() {
         List<DuplicatePatient> duplicatePatients = new ArrayList<>();
-        duplicatePatients.add(new DuplicatePatient("A102030", "99001", "99002", asSet("nid", "phoneNo"), timeBased()));
-        duplicatePatients.add(new DuplicatePatient("A102030", "99003", "99004", asSet("phoneNo"), timeBased()));
-        duplicatePatients.add(new DuplicatePatient("A102030", "99005", "99006", asSet("nid"), timeBased()));
+        duplicatePatients.add(new DuplicatePatient("A102030", "99001", "99002", asSet("nid", "phoneNo"), TimeUuidUtil.uuidForDate(new Date())));
+        duplicatePatients.add(new DuplicatePatient("A102030", "99003", "99004", asSet("phoneNo"), TimeUuidUtil.uuidForDate(new Date())));
+        duplicatePatients.add(new DuplicatePatient("A102030", "99005", "99006", asSet("nid"), TimeUuidUtil.uuidForDate(new Date())));
         return duplicatePatients;
     }
 

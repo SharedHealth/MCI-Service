@@ -5,14 +5,15 @@ import org.sharedhealth.mci.domain.diff.PatientDiffBuilder;
 import org.sharedhealth.mci.domain.model.PatientAuditLog;
 import org.sharedhealth.mci.domain.model.PatientData;
 import org.sharedhealth.mci.domain.model.Requester;
+import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.springframework.data.cassandra.convert.CassandraConverter;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
-import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.*;
 import static org.sharedhealth.mci.domain.repository.MarkerRepositoryQueryBuilder.buildUpdateMarkerBatch;
 import static org.sharedhealth.mci.domain.util.JsonMapper.writeValueAsString;
@@ -47,7 +48,7 @@ public class PatientAuditLogQueryBuilder {
         String changeSet = getChangeSet(patientDataToSave, existingPatientData);
 
         if (changeSet != null) {
-            patientAuditLog.setEventId(timeBased());
+            patientAuditLog.setEventId(TimeUuidUtil.uuidForDate(new Date()));
             patientAuditLog.setHealthId(existingPatientData.getHealthId());
             patientAuditLog.setChangeSet(changeSet);
             patientAuditLog.setRequestedBy(writeValueAsString(requestedBy));
@@ -63,7 +64,7 @@ public class PatientAuditLogQueryBuilder {
         String changeSet = getChangeSet(patientDataToSave, new PatientData());
 
         if (changeSet != null) {
-            patientAuditLog.setEventId(timeBased());
+            patientAuditLog.setEventId(TimeUuidUtil.uuidForDate(new Date()));
             patientAuditLog.setHealthId(patientDataToSave.getHealthId());
             patientAuditLog.setChangeSet(changeSet);
             patientAuditLog.setRequestedBy(writeValueAsString(requestedBy));

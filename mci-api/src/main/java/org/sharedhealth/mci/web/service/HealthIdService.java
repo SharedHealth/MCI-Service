@@ -4,6 +4,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.sharedhealth.mci.domain.model.RequesterDetails;
+import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.sharedhealth.mci.utils.FileUtil;
 import org.sharedhealth.mci.utils.LuhnChecksumGenerator;
 import org.sharedhealth.mci.web.infrastructure.persistence.HealthIdRepository;
@@ -22,7 +23,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static org.sharedhealth.mci.domain.util.DateUtil.SIMPLE_DATE_WITH_SECS_FORMAT;
 import static org.sharedhealth.mci.domain.util.DateUtil.toDateString;
 import static org.sharedhealth.mci.domain.util.JsonMapper.writeValueAsString;
@@ -60,7 +60,7 @@ public class HealthIdService {
         for (long i = start; i <= end; i++) {
             numberOfValidHIDs = saveIfValidMciHID(numberOfValidHIDs, i);
         }
-        return saveGeneratedBlock(start, end, numberOfValidHIDs, MCI_ORG_CODE, userInfo, timeBased());
+        return saveGeneratedBlock(start, end, numberOfValidHIDs, MCI_ORG_CODE, userInfo, TimeUuidUtil.uuidForDate(new Date()));
     }
 
     public GeneratedHIDBlock generateBlock(long start, long totalHIDs, UserInfo userInfo) {
@@ -76,11 +76,11 @@ public class HealthIdService {
             numberOfValidHIDs = saveIfValidMciHID(numberOfValidHIDs, possibleHID);
         }
         long end = startForBlock + i - 1;
-        return saveGeneratedBlock(startForBlock, end, numberOfValidHIDs, MCI_ORG_CODE, userInfo, timeBased());
+        return saveGeneratedBlock(startForBlock, end, numberOfValidHIDs, MCI_ORG_CODE, userInfo, TimeUuidUtil.uuidForDate(new Date()));
     }
 
     public GeneratedHIDBlock generateBlockForOrg(long start, long totalHIDs, String orgCode, UserInfo userInfo) {
-        UUID generatedAt = timeBased();
+        UUID generatedAt = TimeUuidUtil.uuidForDate(new Date());
         long numberOfValidHIDs = 0L;
         long seriesNo = identifySeriesNo(start);
         long startForBlock = identifyStartInSeries(seriesNo);
@@ -107,7 +107,7 @@ public class HealthIdService {
 
     public void markMCIHealthIdUsed(MciHealthId nextMciHealthId) {
         healthIdRepository.removedUsedHid(nextMciHealthId);
-        OrgHealthId orgHealthId = new OrgHealthId(nextMciHealthId.getHid(), MCI_ORG_CODE, null, timeBased());
+        OrgHealthId orgHealthId = new OrgHealthId(nextMciHealthId.getHid(), MCI_ORG_CODE, null, TimeUuidUtil.uuidForDate(new Date()));
         orgHealthId.markUsed();
         healthIdRepository.saveOrgHealthId(orgHealthId);
     }

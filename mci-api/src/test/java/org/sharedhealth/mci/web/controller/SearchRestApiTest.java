@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.sharedhealth.mci.domain.model.*;
+import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.sharedhealth.mci.searchmapping.repository.PatientSearchMappingRepository;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -18,7 +19,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MvcResult;
 
-import static com.datastax.driver.core.utils.UUIDs.timeBased;
+import java.util.Date;
+
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static junit.framework.Assert.assertEquals;
 import static org.sharedhealth.mci.domain.util.DateUtil.parseDate;
@@ -138,7 +140,7 @@ public class SearchRestApiTest extends BaseControllerTest {
 
         PatientData data = getPatientObjectFromString(json);
         data.setHealthId(getMciResponse(mvcResult).getId());
-        data.setUpdatedAt(timeBased());
+        data.setUpdatedAt(TimeUuidUtil.uuidForDate(new Date()));
         searchMappingRepository.saveMappings(data);
 
         assertEquals(mvcResult.getResponse().getStatus(), HttpStatus.OK.value());
@@ -172,7 +174,7 @@ public class SearchRestApiTest extends BaseControllerTest {
 
         PatientData data = getPatientObjectFromString(json);
         data.setHealthId(getMciResponse(mvcResult).getId());
-        data.setUpdatedAt(timeBased());
+        data.setUpdatedAt(TimeUuidUtil.uuidForDate(new Date()));
         searchMappingRepository.saveMappings(data);
 
         assertEquals(mvcResult.getResponse().getStatus(), HttpStatus.OK.value());
@@ -339,7 +341,7 @@ public class SearchRestApiTest extends BaseControllerTest {
     private MCIResponse createPatientAndMappings() throws Exception {
         MCIResponse patient = createPatient(patientData);
         patientData.setHealthId(patient.getId());
-        patientData.setUpdatedAt(timeBased());
+        patientData.setUpdatedAt(TimeUuidUtil.uuidForDate(new Date()));
         searchMappingRepository.saveMappings(patientData);
         return patient;
     }

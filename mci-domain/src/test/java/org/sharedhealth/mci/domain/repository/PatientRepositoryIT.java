@@ -6,6 +6,7 @@ import org.junit.runner.RunWith;
 import org.sharedhealth.mci.domain.exception.PatientNotFoundException;
 import org.sharedhealth.mci.domain.model.*;
 import org.sharedhealth.mci.domain.util.BaseIntegrationTest;
+import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -15,14 +16,13 @@ import java.util.UUID;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.batch;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
-import static com.datastax.driver.core.utils.UUIDs.timeBased;
-import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static java.util.Arrays.asList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.junit.Assert.*;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.*;
 import static org.sharedhealth.mci.domain.util.DateUtil.parseDate;
+import static org.sharedhealth.mci.domain.util.TimeUuidUtil.getTimeFromUUID;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 public class PatientRepositoryIT extends BaseIntegrationTest {
@@ -177,13 +177,20 @@ public class PatientRepositoryIT extends BaseIntegrationTest {
         assertEquals("h103", mapping2.getHealthId());
         assertEquals("h105", mapping3.getHealthId());
 
-        Date date1 = new Date(unixTimestamp(mapping1.getLastUpdated()));
-        Date date2 = new Date(unixTimestamp(mapping2.getLastUpdated()));
-        Date date3 = new Date(unixTimestamp(mapping3.getLastUpdated()));
-
-        assertTrue(date1.before(date2));
-        assertTrue(date2.before(date3));
+        assertTrue(isGraterUUID(mapping2.getLastUpdated(), mapping1.getLastUpdated()));
+        assertTrue(isGraterUUID(mapping3.getLastUpdated(), mapping2.getLastUpdated()));
     }
+
+    private boolean isGraterUUID(UUID uuid1, UUID uuid2) {
+        Long timeFromUUID = getTimeFromUUID(uuid1);
+        Long timeFromLatestUUID = getTimeFromUUID(uuid2);
+        int isGreater = timeFromUUID.compareTo(timeFromLatestUUID);
+        if (isGreater == 0) {
+            return uuid1.compareTo(uuid2) > 0;
+        }
+        return isGreater > 0;
+    }
+
 
     @Test
     public void shouldFindPendingApprovalMappingsBasedOnGivenTimes() throws Exception {
@@ -268,11 +275,10 @@ public class PatientRepositoryIT extends BaseIntegrationTest {
     }
 
     private PendingApprovalMapping buildPendingApprovalMapping(String upazilaId, String healthId) throws InterruptedException {
-        Thread.sleep(0, 10);
         PendingApprovalMapping mapping = new PendingApprovalMapping();
         mapping.setCatchmentId(new Catchment("10", "20", upazilaId).getId());
         mapping.setHealthId(healthId);
-        mapping.setLastUpdated(timeBased());
+        mapping.setLastUpdated(TimeUuidUtil.uuidForDate(new Date()));
         return mapping;
     }
 }

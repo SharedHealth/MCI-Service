@@ -1,15 +1,13 @@
 package org.sharedhealth.mci.domain.model;
 
-import com.datastax.driver.core.utils.UUIDs;
 import org.junit.Test;
+import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 
 import java.util.Date;
 import java.util.Iterator;
 import java.util.TreeMap;
 import java.util.UUID;
 
-import static com.datastax.driver.core.utils.UUIDs.timeBased;
-import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static java.util.UUID.fromString;
 import static org.junit.Assert.*;
 import static org.sharedhealth.mci.domain.constant.JsonConstants.PRESENT_ADDRESS;
@@ -40,8 +38,8 @@ public class PendingApprovalTest {
         assertEquals(-1, uuid1.compareTo(uuid2));
 
         // Timestamp of uuid1 is later than that of uuid2
-        Long timestamp1 = unixTimestamp(uuid1);
-        Long timestamp2 = unixTimestamp(uuid2);
+        Long timestamp1 = TimeUuidUtil.getTimeFromUUID(uuid1);
+        Long timestamp2 = TimeUuidUtil.getTimeFromUUID(uuid2);
         assertEquals(1, timestamp1.compareTo(timestamp2));
         assertTrue(new Date(timestamp1).after(new Date(timestamp2)));
     }
@@ -52,7 +50,7 @@ public class PendingApprovalTest {
         pendingApproval.setName("given_name");
         TreeMap<UUID, PendingApprovalFieldDetails> fieldDetails = new TreeMap<>();
         for (int i = 0; i < 5; i++) {
-            fieldDetails.put(timeBased(), buildFieldDetails(i));
+            fieldDetails.put(TimeUuidUtil.uuidForDate(new Date()), buildFieldDetails(i));
         }
         pendingApproval.addFieldDetails(fieldDetails);
         assertEquals(5, pendingApproval.getFieldDetails().size());
@@ -60,7 +58,7 @@ public class PendingApprovalTest {
         Date date1 = null;
         UUID uuid1 = null;
         for (UUID uuid2 : pendingApproval.getFieldDetails().keySet()) {
-            Date date2 = new Date(unixTimestamp(uuid2));
+            Date date2 = new Date(TimeUuidUtil.getTimeFromUUID(uuid2));
             if (uuid1 != null) {
                 if (date1.equals(date2)) {
                     assertEquals(1, uuid1.compareTo(uuid2));
@@ -82,10 +80,10 @@ public class PendingApprovalTest {
         TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap = new TreeMap<>();
 
         Address address1 = new Address("1", "2", "3");
-        fieldDetailsMap.put(UUIDs.timeBased(), buildFieldDetails(address1));
+        fieldDetailsMap.put(TimeUuidUtil.uuidForDate(new Date()), buildFieldDetails(address1));
 
         Address address2 = new Address("1", "2", "5");
-        fieldDetailsMap.put(UUIDs.timeBased(), buildFieldDetails(address2));
+        fieldDetailsMap.put(TimeUuidUtil.uuidForDate(new Date()), buildFieldDetails(address2));
 
         pendingApproval.addFieldDetails(fieldDetailsMap);
 
@@ -101,11 +99,11 @@ public class PendingApprovalTest {
         TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap = new TreeMap<>();
 
         Address address1 = new Address("1", "2", "3");
-        UUID createdAt = UUIDs.timeBased();
+        UUID createdAt = TimeUuidUtil.uuidForDate(new Date());
         fieldDetailsMap.put(createdAt, buildFieldDetails(address1));
 
         Address address2 = new Address("1", "2", "3");
-        fieldDetailsMap.put(UUIDs.timeBased(), buildFieldDetails(address2));
+        fieldDetailsMap.put(TimeUuidUtil.uuidForDate(new Date()), buildFieldDetails(address2));
 
         pendingApproval.addFieldDetails(fieldDetailsMap);
 

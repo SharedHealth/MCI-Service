@@ -13,6 +13,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.sharedhealth.mci.domain.config.MCIProperties;
+import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.sharedhealth.mci.utils.LuhnChecksumGenerator;
 import org.sharedhealth.mci.web.infrastructure.persistence.HealthIdRepository;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
@@ -25,7 +26,6 @@ import java.io.File;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
@@ -293,7 +293,7 @@ public class HealthIdServiceTest {
         testProperties.setMciInvalidHidPattern("^(105|104)\\d*$");
         testProperties.setOtherOrgInvalidHidPattern("^(1005|1004)\\d*$");
         testProperties.setHidStoragePath("test-hid");
-        GeneratedHIDBlock generatedHIDBlock = new GeneratedHIDBlock(1000L, MCI_ORG_CODE, 1000L, 1069L, 20L, null, timeBased());
+        GeneratedHIDBlock generatedHIDBlock = new GeneratedHIDBlock(1000L, MCI_ORG_CODE, 1000L, 1069L, 20L, null, TimeUuidUtil.uuidForDate(new Date()));
 
         when(generatedHidBlockService.getPreGeneratedHidBlocks(1000L)).thenReturn(asList(generatedHIDBlock));
         when(healthIdRepository.saveMciHealthId(any(MciHealthId.class))).thenReturn(MciHealthId.NULL_HID);
@@ -381,7 +381,7 @@ public class HealthIdServiceTest {
         testProperties.setOtherOrgInvalidHidPattern("^(1005|1004)\\d*$");
         testProperties.setHidStoragePath("test-hid");
 
-        GeneratedHIDBlock generatedHIDBlock = new GeneratedHIDBlock(1000L, MCI_ORG_CODE, 1000L, 1089L, 80L, null, timeBased());
+        GeneratedHIDBlock generatedHIDBlock = new GeneratedHIDBlock(1000L, MCI_ORG_CODE, 1000L, 1089L, 80L, null, TimeUuidUtil.uuidForDate(new Date()));
 
         when(generatedHidBlockService.getPreGeneratedHidBlocks(1000L)).thenReturn(asList(generatedHIDBlock));
         when(healthIdRepository.saveMciHealthId(any(MciHealthId.class))).thenReturn(MciHealthId.NULL_HID);
@@ -513,7 +513,7 @@ public class HealthIdServiceTest {
 
     @Test
     public void shouldMarkOrgHIDAsUsed() throws Exception {
-        OrgHealthId orgHealthId = new OrgHealthId("1234", "OTHER", timeBased(), null);
+        OrgHealthId orgHealthId = new OrgHealthId("1234", "OTHER", TimeUuidUtil.uuidForDate(new Date()), null);
         HealthIdService healthIdService = new HealthIdService(mciProperties, healthIdRepository, checksumGenerator, generatedHidBlockService);
 
         assertFalse(orgHealthId.isUsed());

@@ -8,6 +8,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.sharedhealth.mci.web.exception.HealthIdExhaustedException;
 import org.sharedhealth.mci.web.model.MciHealthId;
 import org.sharedhealth.mci.web.model.OrgHealthId;
@@ -15,9 +16,9 @@ import org.springframework.data.cassandra.convert.MappingCassandraConverter;
 import org.springframework.data.cassandra.core.CassandraOperations;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
-import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -71,7 +72,7 @@ public class MCIHealthIdRepositoryTest {
     @Test
     public void shouldSaveOrgHidAsynchronously() {
         HealthIdRepository healthIdRepository = new HealthIdRepository(cqlTemplate);
-        healthIdRepository.saveOrgHealthId(new OrgHealthId("98015440161", "other-org", timeBased(), null));
+        healthIdRepository.saveOrgHealthId(new OrgHealthId("98015440161", "other-org", TimeUuidUtil.uuidForDate(new Date()), null));
         verify(cqlTemplate, times(1)).executeAsynchronously(any(Insert.class));
     }
 

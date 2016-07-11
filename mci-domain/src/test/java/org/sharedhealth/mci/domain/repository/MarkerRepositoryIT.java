@@ -4,10 +4,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sharedhealth.mci.domain.model.Marker;
 import org.sharedhealth.mci.domain.util.BaseIntegrationTest;
+import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static com.datastax.driver.core.utils.UUIDs.timeBased;
+import java.util.Date;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -23,7 +25,7 @@ public class MarkerRepositoryIT extends BaseIntegrationTest {
 
         Marker marker = new Marker();
         marker.setType(type);
-        marker.setCreatedAt(timeBased());
+        marker.setCreatedAt(TimeUuidUtil.uuidForDate(new Date()));
         marker.setMarker("marker_1");
         cassandraOps.update(marker);
 

@@ -7,14 +7,14 @@ import org.sharedhealth.mci.domain.model.PatientData;
 import org.sharedhealth.mci.domain.model.PatientMapper;
 import org.sharedhealth.mci.domain.model.PatientSummaryData;
 import org.sharedhealth.mci.domain.repository.PatientRepository;
+import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
-
-import static com.datastax.driver.core.utils.UUIDs.timeBased;
 
 @Component
 public class DuplicatePatientMapper {
@@ -56,7 +56,7 @@ public class DuplicatePatientMapper {
     private void buildDuplicates(Catchment catchment, String healthId1, String healthId2, Set<String> reasons,
                                  List<DuplicatePatient> duplicates) {
         for (String catchmentId : catchment.getAllIds()) {
-            DuplicatePatient duplicate = new DuplicatePatient(catchmentId, healthId1, healthId2, reasons, timeBased());
+            DuplicatePatient duplicate = new DuplicatePatient(catchmentId, healthId1, healthId2, reasons, TimeUuidUtil.uuidForDate(new Date()));
             duplicates.add(duplicate);
         }
     }

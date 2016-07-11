@@ -3,12 +3,12 @@ package org.sharedhealth.mci.domain.repository;
 import org.junit.Before;
 import org.junit.Test;
 import org.sharedhealth.mci.domain.model.*;
+import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
-import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
 import static org.sharedhealth.mci.domain.constant.JsonConstants.*;
@@ -28,7 +28,7 @@ public class PatientRepositoryTest {
         TreeSet<PendingApproval> pendingApprovals = new TreeSet<>();
 
         for (int i = 0; i < 5; i++) {
-            uuid = timeBased();
+            uuid = TimeUuidUtil.uuidForDate(new Date());
             PendingApproval pendingApproval = new PendingApproval();
             pendingApproval.setName("name" + i);
 
@@ -37,7 +37,6 @@ public class PatientRepositoryTest {
             pendingApproval.addFieldDetails(fieldDetailsMap);
 
             pendingApprovals.add(pendingApproval);
-            Thread.sleep(0, 10);
         }
         assertEquals(uuid, patientRepository.findLatestUuid(pendingApprovals));
     }
@@ -136,7 +135,7 @@ public class PatientRepositoryTest {
         PendingApprovalFieldDetails fieldDetails = new PendingApprovalFieldDetails();
         fieldDetails.setValue("John");
         fieldDetails.setRequestedBy(new Requester("Bahmni1", "Dr. Seuss1"));
-        fieldDetailsMap.put(timeBased(), fieldDetails);
+        fieldDetailsMap.put(TimeUuidUtil.uuidForDate(new Date()), fieldDetails);
 
         pendingApproval.addFieldDetails(fieldDetailsMap);
         return pendingApproval;
@@ -151,12 +150,12 @@ public class PatientRepositoryTest {
             PendingApprovalFieldDetails fieldDetails = new PendingApprovalFieldDetails();
             fieldDetails.setValue(new Address("10", "20", "30"));
             fieldDetails.setRequestedBy(new Requester("CHW" + i, "Dr. Monika" + i));
-            fieldDetailsMap.put(timeBased(), fieldDetails);
+            fieldDetailsMap.put(TimeUuidUtil.uuidForDate(new Date()), fieldDetails);
         }
         PendingApprovalFieldDetails fieldDetails1 = new PendingApprovalFieldDetails();
         fieldDetails1.setValue(new Address("10", "20", "30"));
         fieldDetails1.setRequestedBy(new Requester("CHW1", "Dr. Monika1"));
-        fieldDetailsMap.put(timeBased(), fieldDetails1);
+        fieldDetailsMap.put(TimeUuidUtil.uuidForDate(new Date()), fieldDetails1);
 
         pendingApproval.addFieldDetails(fieldDetailsMap);
         return pendingApproval;
@@ -340,7 +339,7 @@ public class PatientRepositoryTest {
             PendingApprovalFieldDetails fieldDetails = new PendingApprovalFieldDetails();
             fieldDetails.setValue("0" + i);
             fieldDetails.setRequestedBy(new Requester("Bahmni" + i, "Dr. Monika" + i));
-            fieldDetailsMap.put(timeBased(), fieldDetails);
+            fieldDetailsMap.put(TimeUuidUtil.uuidForDate(new Date()), fieldDetails);
         }
         pendingApproval.addFieldDetails(fieldDetailsMap);
         return pendingApproval;
@@ -354,7 +353,7 @@ public class PatientRepositoryTest {
         PendingApprovalFieldDetails fieldDetails = new PendingApprovalFieldDetails();
         fieldDetails.setValue("F");
         fieldDetails.setRequestedBy(new Requester("Bahmni", "Dr. Monika"));
-        fieldDetailsMap.put(timeBased(), fieldDetails);
+        fieldDetailsMap.put(TimeUuidUtil.uuidForDate(new Date()), fieldDetails);
         pendingApproval.addFieldDetails(fieldDetailsMap);
         return pendingApproval;
     }

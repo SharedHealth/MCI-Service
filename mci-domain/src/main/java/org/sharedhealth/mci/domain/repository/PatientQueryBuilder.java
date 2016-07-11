@@ -5,6 +5,7 @@ import com.datastax.driver.core.querybuilder.Update;
 import com.datastax.driver.core.utils.UUIDs;
 import org.sharedhealth.mci.domain.diff.PatientDiffBuilder;
 import org.sharedhealth.mci.domain.model.*;
+import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.springframework.data.cassandra.convert.CassandraConverter;
 
 import java.util.Date;
@@ -14,7 +15,6 @@ import java.util.UUID;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
 import static com.datastax.driver.core.querybuilder.Select.Where;
-import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static org.apache.commons.lang3.StringUtils.*;
 import static org.sharedhealth.mci.domain.constant.JsonConstants.HOUSEHOLD_CODE;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.*;
@@ -39,7 +39,7 @@ public class PatientQueryBuilder {
         String changeSet = getChangeSet(patientDataWithHid, patientDataBlank);
 
         if (changeSet == null) return null;
-        patientUpdateLog.setEventId(timeBased());
+        patientUpdateLog.setEventId(TimeUuidUtil.uuidForDate(new Date()));
         patientUpdateLog.setHealthId(patient.getHealthId());
         patientUpdateLog.setChangeSet(changeSet);
         patientUpdateLog.setRequestedBy(writeValueAsString(requestedBy));

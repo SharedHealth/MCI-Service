@@ -10,10 +10,11 @@ import org.sharedhealth.mci.domain.model.PatientUpdateLog;
 import org.sharedhealth.mci.domain.model.PatientUpdateLogMapper;
 import org.sharedhealth.mci.domain.repository.MarkerRepository;
 import org.sharedhealth.mci.domain.repository.PatientFeedRepository;
+import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 
+import java.util.Date;
 import java.util.UUID;
 
-import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static java.util.UUID.randomUUID;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -47,7 +48,7 @@ public class DuplicatePatientFeedServiceTest {
         PatientUpdateLog log = new PatientUpdateLog();
         log.setHealthId("h100");
         log.setEventType(EVENT_TYPE_CREATED);
-        log.setEventId(timeBased());
+        log.setEventId(TimeUuidUtil.uuidForDate(new Date()));
         UUID marker = randomUUID();
         when(markerRepository.find(DUPLICATE_PATIENT_MARKER)).thenReturn(marker.toString());
         when(feedRepository.findPatientUpdateLog(marker)).thenReturn(log);

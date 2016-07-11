@@ -4,10 +4,12 @@ import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.Delete;
 import com.datastax.driver.core.querybuilder.Insert;
 import org.sharedhealth.mci.domain.model.Marker;
+import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.springframework.data.cassandra.convert.CassandraConverter;
 
+import java.util.Date;
+
 import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
-import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static java.lang.System.currentTimeMillis;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.CF_MARKER;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.TYPE;
@@ -27,7 +29,7 @@ public class MarkerRepositoryQueryBuilder {
 
         Marker newMarker = new Marker();
         newMarker.setType(type);
-        newMarker.setCreatedAt(timeBased());
+        newMarker.setCreatedAt(TimeUuidUtil.uuidForDate(new Date()));
         newMarker.setMarker(marker);
         Insert insert = createInsertQuery(CF_MARKER, newMarker, null, converter);
         insert.using(timestamp(timeInMicros + QUERY_EXEC_DELAY));

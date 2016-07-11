@@ -1,12 +1,13 @@
 package org.sharedhealth.mci.web.model;
 
+import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.springframework.data.cassandra.mapping.Column;
 import org.springframework.data.cassandra.mapping.PrimaryKeyColumn;
 import org.springframework.data.cassandra.mapping.Table;
 
+import java.util.Date;
 import java.util.UUID;
 
-import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.*;
 import static org.springframework.cassandra.core.PrimaryKeyType.PARTITIONED;
 
@@ -56,7 +57,7 @@ public class OrgHealthId {
 
     public void markUsed() {
         this.isUsed = Boolean.TRUE;
-        this.usedAt = timeBased();
+        this.usedAt = TimeUuidUtil.uuidForDate(new Date());
     }
 
     public void setUsedAt(UUID uuid) {

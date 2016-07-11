@@ -10,6 +10,7 @@ import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.sharedhealth.mci.domain.constant.JsonConstants;
 import org.sharedhealth.mci.domain.model.*;
 import org.sharedhealth.mci.domain.util.DateUtil;
+import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.infrastructure.security.TokenAuthentication;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
@@ -31,8 +32,6 @@ import java.net.URI;
 import java.text.ParseException;
 import java.util.*;
 
-import static com.datastax.driver.core.utils.UUIDs.timeBased;
-import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static java.lang.String.format;
 import static java.net.URLEncoder.encode;
 import static java.util.Arrays.asList;
@@ -173,7 +172,7 @@ public class CatchmentControllerTest {
     @Test
     public void shouldFindPendingApprovalsAfterGivenTime() throws Exception {
         Catchment catchment = new Catchment("10", "20", "30");
-        UUID after = timeBased();
+        UUID after = TimeUuidUtil.uuidForDate(new Date());
         when(patientService.findPendingApprovalList(catchment, after, null, MAX_PAGE_SIZE + 1)).thenReturn(new ArrayList<PendingApprovalListResponse>());
 
         String url = buildPendingApprovalUrl("102030");
@@ -190,7 +189,7 @@ public class CatchmentControllerTest {
     @Test
     public void shouldFindPendingApprovalsAfterGivenTimeWithPreviousUrlSet() throws Exception {
         Catchment catchment = new Catchment("10", "20", "30");
-        UUID after = timeBased();
+        UUID after = TimeUuidUtil.uuidForDate(new Date());
         List<PendingApprovalListResponse> pendingApprovals = new ArrayList<>();
         for (int x = 1; x <= MAX_PAGE_SIZE + 1; x++) {
             pendingApprovals.add(buildPendingApprovalListResponse(x));
@@ -216,7 +215,7 @@ public class CatchmentControllerTest {
     @Test
     public void shouldFindPendingApprovalsABeforeGivenTime() throws Exception {
         Catchment catchment = new Catchment("10", "20", "30");
-        UUID before = timeBased();
+        UUID before = TimeUuidUtil.uuidForDate(new Date());
         when(patientService.findPendingApprovalList(catchment, null, before, MAX_PAGE_SIZE + 1)).thenReturn(new ArrayList<PendingApprovalListResponse>());
 
         String url = buildPendingApprovalUrl("102030");
@@ -233,7 +232,7 @@ public class CatchmentControllerTest {
     @Test
     public void shouldFindPendingApprovalsABeforeGivenTimeWithNextUrlSet() throws Exception {
         Catchment catchment = new Catchment("10", "20", "30");
-        UUID before = timeBased();
+        UUID before = TimeUuidUtil.uuidForDate(new Date());
         List<PendingApprovalListResponse> pendingApprovals = new ArrayList<>();
         for (int x = 1; x <= MAX_PAGE_SIZE + 1; x++) {
             pendingApprovals.add(buildPendingApprovalListResponse(x));
@@ -258,8 +257,8 @@ public class CatchmentControllerTest {
     @Test
     public void shouldFindPendingApprovalsABetweenGivenTimes() throws Exception {
         Catchment catchment = new Catchment("10", "20", "30");
-        UUID after = timeBased();
-        UUID before = timeBased();
+        UUID after = TimeUuidUtil.uuidForDate(new Date());
+        UUID before = TimeUuidUtil.uuidForDate(new Date());
         when(patientService.findPendingApprovalList(catchment, after, before, MAX_PAGE_SIZE + 1)).thenReturn(null);
 
         String url = buildPendingApprovalUrl("102030");
@@ -281,11 +280,11 @@ public class CatchmentControllerTest {
         pendingApproval.setCurrentValue("curr val");
 
         TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap = new TreeMap<>();
-        UUID timeuuid = timeBased();
+        UUID timeuuid = TimeUuidUtil.uuidForDate(new Date());
         PendingApprovalFieldDetails approvalFieldDetails = new PendingApprovalFieldDetails();
         approvalFieldDetails.setRequestedBy(new Requester("facility-100", "provider-100"));
         approvalFieldDetails.setValue("some value");
-        approvalFieldDetails.setCreatedAt(unixTimestamp(timeuuid));
+        approvalFieldDetails.setCreatedAt(TimeUuidUtil.getTimeFromUUID(timeuuid));
         fieldDetailsMap.put(timeuuid, approvalFieldDetails);
         pendingApproval.addFieldDetails(fieldDetailsMap);
 
@@ -315,8 +314,8 @@ public class CatchmentControllerTest {
                 .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".requested_by.provider.name", is(nullValue())))
 
                 .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".value", is("some value")))
-                .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".created_at", is(DateUtil.toIsoMillisFormat(unixTimestamp
-                        (timeuuid)))));
+                .andExpect(jsonPath("$.results[0].field_details." + timeuuid + ".created_at", is(DateUtil.toIsoMillisFormat(
+                        TimeUuidUtil.getTimeFromUUID(timeuuid)))));
 
         verify(patientService).findPendingApprovalDetails(healthId, catchment);
     }
@@ -535,7 +534,7 @@ public class CatchmentControllerTest {
         String catchmentId = "102030405060";
         Catchment catchment = new Catchment(catchmentId);
         String since = "2010-01-01T10:20:30Z";
-        UUID lastMarker = timeBased();
+        UUID lastMarker = TimeUuidUtil.uuidForDate(new Date());
 
         List<PatientData> patients = asList(buildPatient("h100"), buildPatient("h200"), buildPatient("h300"));
         when(patientService.findAllByCatchment(catchment, parseDate(since), lastMarker)).thenReturn(patients);
@@ -654,8 +653,7 @@ public class CatchmentControllerTest {
     private PatientData buildPatient(String healthId) throws InterruptedException {
         PatientData patient = new PatientData();
         patient.setHealthId(healthId);
-        patient.setUpdatedAt(timeBased());
-        Thread.sleep(1, 10);
+        patient.setUpdatedAt(TimeUuidUtil.uuidForDate(new Date()));
         return patient;
     }
 
@@ -867,8 +865,7 @@ public class CatchmentControllerTest {
         pendingApproval.setHealthId("hid-" + suffix);
         pendingApproval.setGivenName("Scott-" + suffix);
         pendingApproval.setSurname("Tiger-" + suffix);
-        pendingApproval.setLastUpdated(timeBased());
-        Thread.sleep(0, 10);
+        pendingApproval.setLastUpdated(TimeUuidUtil.uuidForDate(new Date()));
         return pendingApproval;
     }
 

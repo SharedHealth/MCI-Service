@@ -9,6 +9,7 @@ import org.sharedhealth.mci.domain.exception.NonUpdatableFieldUpdateException;
 import org.sharedhealth.mci.domain.model.*;
 import org.sharedhealth.mci.domain.service.ApprovalFieldService;
 import org.sharedhealth.mci.domain.service.PendingApprovalFilter;
+import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 
 import java.text.ParseException;
 import java.util.List;
@@ -16,7 +17,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
 
-import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static java.util.Arrays.asList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.junit.Assert.*;
@@ -281,7 +281,7 @@ public class PendingApprovalFilterTest {
         PendingApprovalFieldDetails fieldDetails = fieldDetailsMap.values().iterator().next();
         assertEquals(value, fieldDetails.getValue());
         assertEquals(requestedBy, fieldDetails.getRequestedBy());
-        long expectedCreatedAt = unixTimestamp(fieldDetailsMap.keySet().iterator().next());
+        long expectedCreatedAt = TimeUuidUtil.getTimeFromUUID(fieldDetailsMap.keySet().iterator().next());
         assertEquals(toIsoMillisFormat(expectedCreatedAt), fieldDetails.getCreatedAt());
     }
 
@@ -510,7 +510,7 @@ public class PendingApprovalFilterTest {
 
         assertEquals(value.getType(), relations.get(0).getType());
         assertEquals(requestedBy, fieldDetails.getRequestedBy());
-        long expectedCreatedAt = unixTimestamp(fieldDetailsMap.keySet().iterator().next());
+        long expectedCreatedAt = TimeUuidUtil.getTimeFromUUID(fieldDetailsMap.keySet().iterator().next());
         assertEquals(toIsoMillisFormat(expectedCreatedAt), fieldDetails.getCreatedAt());
     }
 

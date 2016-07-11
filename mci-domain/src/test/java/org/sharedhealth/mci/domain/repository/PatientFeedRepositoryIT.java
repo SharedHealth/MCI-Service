@@ -5,13 +5,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sharedhealth.mci.domain.model.*;
 import org.sharedhealth.mci.domain.util.BaseIntegrationTest;
+import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
-import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static org.junit.Assert.*;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.CF_PATIENT_UPDATE_LOG;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.EVENT_TYPE_CREATED;
@@ -135,7 +135,7 @@ public class PatientFeedRepositoryIT extends BaseIntegrationTest {
 
     @Test
     public void shouldFindUpdateLogForGivenEventId() throws Exception {
-        UUID eventId = timeBased();
+        UUID eventId = TimeUuidUtil.uuidForDate(new Date());
         String healthId = "h100";
         String changeSet = "{}";
         String requestedBy = "requestedBy";

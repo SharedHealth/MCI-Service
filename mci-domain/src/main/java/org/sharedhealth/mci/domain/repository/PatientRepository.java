@@ -8,6 +8,7 @@ import org.sharedhealth.mci.domain.exception.InvalidRequestException;
 import org.sharedhealth.mci.domain.exception.PatientNotFoundException;
 import org.sharedhealth.mci.domain.model.*;
 import org.sharedhealth.mci.domain.service.PendingApprovalFilter;
+import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +21,6 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
-import static com.datastax.driver.core.utils.UUIDs.timeBased;
-import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static java.util.Collections.emptyList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
@@ -32,6 +31,7 @@ import static org.sharedhealth.mci.domain.constant.RepositoryConstants.*;
 import static org.sharedhealth.mci.domain.repository.PatientAuditLogQueryBuilder.buildCreateAuditLogStmt;
 import static org.sharedhealth.mci.domain.repository.PatientQueryBuilder.*;
 import static org.sharedhealth.mci.domain.repository.PatientUpdateLogQueryBuilder.buildCreateUpdateLogStmt;
+import static org.sharedhealth.mci.domain.util.TimeUuidUtil.getTimeFromUUID;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createDeleteQuery;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
 
@@ -57,8 +57,8 @@ public class PatientRepository extends BaseRepository {
 
     public MCIResponse create(PatientData patientData) {
         Patient patient = mapper.map(patientData, new PatientData());
-        patient.setCreatedAt(timeBased());
-        patient.setUpdatedAt(timeBased());
+        patient.setCreatedAt(TimeUuidUtil.uuidForDate(new Date()));
+        patient.setUpdatedAt(TimeUuidUtil.uuidForDate(new Date()));
 
         Requester requester = patientData.getRequester();
         patient.setCreatedBy(requester);
@@ -102,7 +102,7 @@ public class PatientRepository extends BaseRepository {
         Patient newPatient = mapper.map(patientDataToBeUpdated, existingPatientData);
 
         newPatient.setHealthId(existingPatientData.getHealthId());
-        newPatient.setUpdatedAt(timeBased());
+        newPatient.setUpdatedAt(TimeUuidUtil.uuidForDate(new Date()));
         newPatient.setUpdatedBy(requester);
 
         clearPendingApprovalsIfRequired(patientDataToBeUpdated, existingPatientData, batch);
@@ -135,7 +135,7 @@ public class PatientRepository extends BaseRepository {
 
         Patient newPatient = mapper.map(newPatientData, existingPatientData);
         newPatient.setHealthId(healthId);
-        newPatient.setUpdatedAt(timeBased());
+        newPatient.setUpdatedAt(TimeUuidUtil.uuidForDate(new Date()));
         newPatient.setUpdatedBy(requester);
 
         buildUpdatePendingApprovalsBatch(newPatient, existingPatientData, batch);
@@ -217,11 +217,21 @@ public class PatientRepository extends BaseRepository {
                 latest = uuid;
                 continue;
             }
-            if (unixTimestamp(uuid) > unixTimestamp(latest)) {
+            if (isGraterUUIDThanLatest(uuid, latest)) {
                 latest = uuid;
             }
         }
         return latest;
+    }
+
+    private boolean isGraterUUIDThanLatest(UUID uuid, UUID latest) {
+        Long timeFromUUID = getTimeFromUUID(uuid);
+        Long timeFromLatestUUID = getTimeFromUUID(latest);
+        int isGreater = timeFromUUID.compareTo(timeFromLatestUUID);
+        if (isGreater == 0) {
+            return uuid.compareTo(latest) > 0;
+        }
+        return isGreater > 0;
     }
 
     private List<PendingApprovalMapping> buildPendingApprovalMappings(Catchment catchment, String healthId, UUID uuid) {
@@ -376,10 +386,11 @@ public class PatientRepository extends BaseRepository {
             Collections.sort(result, new Comparator<PendingApprovalMapping>() {
                 @Override
                 public int compare(PendingApprovalMapping m1, PendingApprovalMapping m2) {
+
                     UUID uuid1 = m1.getLastUpdated();
                     UUID uuid2 = m2.getLastUpdated();
-                    Long t1 = unixTimestamp(uuid1);
-                    Long t2 = unixTimestamp(uuid2);
+                    Long t1 = getTimeFromUUID(uuid1);
+                    Long t2 = getTimeFromUUID(uuid2);
                     int result = t1.compareTo(t2);
                     if (result == 0) {
                         return uuid1.compareTo(uuid2);
@@ -408,7 +419,7 @@ public class PatientRepository extends BaseRepository {
             newPatient.setHealthId(requestData.getHealthId());
         }
 
-        newPatient.setUpdatedAt(timeBased());
+        newPatient.setUpdatedAt(TimeUuidUtil.uuidForDate(new Date()));
         newPatient.setUpdatedBy(approver);
         newPatient.setPendingApprovals(existingPendingApprovals);
 

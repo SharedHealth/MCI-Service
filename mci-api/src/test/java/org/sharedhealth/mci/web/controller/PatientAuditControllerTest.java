@@ -7,6 +7,7 @@ import org.sharedhealth.mci.domain.model.PatientAuditLogData;
 import org.sharedhealth.mci.domain.model.PatientData;
 import org.sharedhealth.mci.domain.model.Requester;
 import org.sharedhealth.mci.domain.model.RequesterDetails;
+import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.sharedhealth.mci.web.infrastructure.security.TokenAuthentication;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
 import org.sharedhealth.mci.web.infrastructure.security.UserProfile;
@@ -22,7 +23,6 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import java.text.ParseException;
 import java.util.*;
 
-import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -74,7 +74,7 @@ public class PatientAuditControllerTest {
         String healthId = "h100";
         PatientData patient = new PatientData();
         patient.setRequester("Bahmni", "Dr. Monika");
-        patient.setCreatedAt(timeBased());
+        patient.setCreatedAt(TimeUuidUtil.uuidForDate(new Date()));
         patient.setCreatedBy(new Requester(new RequesterDetails("r100", "CHW"), null, null));
         when(patientService.findByHealthId(healthId)).thenReturn(patient);
 

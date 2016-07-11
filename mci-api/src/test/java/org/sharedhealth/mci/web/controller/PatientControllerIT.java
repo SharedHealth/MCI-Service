@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.sharedhealth.mci.domain.model.*;
+import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.sharedhealth.mci.searchmapping.repository.PatientSearchMappingRepository;
 import org.sharedhealth.mci.web.dummy.InvalidPatient;
 import org.sharedhealth.mci.web.handler.ErrorHandler;
@@ -25,9 +26,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.text.ParseException;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
-import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static org.junit.Assert.*;
@@ -438,7 +439,7 @@ public class PatientControllerIT extends BaseControllerTest {
 
         PatientData patientData = getPatientObjectFromString(json);
         patientData.setHealthId(healthId);
-        patientData.setUpdatedAt(timeBased());
+        patientData.setUpdatedAt(TimeUuidUtil.uuidForDate(new Date()));
         searchMappingRepository.saveMappings(patientData);
 
         PatientData original = getPatientObjectFromString(json);
@@ -1034,7 +1035,7 @@ public class PatientControllerIT extends BaseControllerTest {
     }
 
     private void insertOrgHID(String healthId, String clientId) {
-        cassandraOps.insert(new OrgHealthId(healthId, clientId, timeBased(), null));
+        cassandraOps.insert(new OrgHealthId(healthId, clientId, TimeUuidUtil.uuidForDate(new Date()), null));
     }
 
 }

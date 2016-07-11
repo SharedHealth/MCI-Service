@@ -9,6 +9,7 @@ import org.sharedhealth.mci.deduplication.model.DuplicatePatientMergeData;
 import org.sharedhealth.mci.deduplication.service.DuplicatePatientService;
 import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.sharedhealth.mci.domain.model.*;
+import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.infrastructure.security.TokenAuthentication;
 import org.sharedhealth.mci.web.infrastructure.security.UserInfo;
@@ -22,12 +23,8 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
-import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static junit.framework.Assert.assertEquals;
@@ -221,7 +218,7 @@ public class DuplicatePatientControllerTest {
     @Test
     public void shouldFindPendingApprovalsAfterGivenTime() throws Exception {
         Catchment catchment = new Catchment("10", "20", "30");
-        UUID after = timeBased();
+        UUID after = TimeUuidUtil.uuidForDate(new Date());
         when(duplicatePatientService.findAllByCatchment(catchment, after, null, 6)).thenReturn(new ArrayList<DuplicatePatientData>());
 
         String url = buildPendingApprovalUrl("102030");
@@ -238,7 +235,7 @@ public class DuplicatePatientControllerTest {
     @Test
     public void shouldFindPendingApprovalsBeforeGivenTime() throws Exception {
         Catchment catchment = new Catchment("10", "20", "30");
-        UUID before = timeBased();
+        UUID before = TimeUuidUtil.uuidForDate(new Date());
         when(duplicatePatientService.findAllByCatchment(catchment, null, before, 6)).thenReturn(new ArrayList<DuplicatePatientData>());
 
         String url = buildPendingApprovalUrl("102030");
@@ -255,9 +252,8 @@ public class DuplicatePatientControllerTest {
     @Test
     public void shouldFindPendingApprovalsBeforeAndAfterGivenTime() throws Exception {
         Catchment catchment = new Catchment("10", "20", "30");
-        UUID after = timeBased();
-        Thread.sleep(10);
-        UUID before = timeBased();
+        UUID after = TimeUuidUtil.uuidForDate(new Date());
+        UUID before = TimeUuidUtil.uuidForDate(new Date());
         when(duplicatePatientService.findAllByCatchment(catchment, after, before, 6)).thenReturn(new ArrayList<DuplicatePatientData>());
 
         String url = buildPendingApprovalUrl("102030");

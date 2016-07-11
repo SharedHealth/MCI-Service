@@ -1,10 +1,10 @@
 package org.sharedhealth.mci.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 
 import java.util.*;
 
-import static com.datastax.driver.core.utils.UUIDs.unixTimestamp;
 import static org.sharedhealth.mci.domain.constant.JsonConstants.*;
 import static org.sharedhealth.mci.domain.util.JsonMapper.convertValue;
 
@@ -23,14 +23,13 @@ public class PendingApproval implements Comparable<PendingApproval> {
         fieldDetails = new TreeMap<>(new Comparator<UUID>() {
             @Override
             public int compare(UUID u1, UUID u2) {
-                Long t1 = unixTimestamp(u1);
-                Long t2 = unixTimestamp(u2);
+                Long t1 = TimeUuidUtil.getTimeFromUUID(u1);
+                Long t2 = TimeUuidUtil.getTimeFromUUID(u2);
                 int result = t2.compareTo(t1);
                 if (result == 0) {
                     return u2.compareTo(u1);
                 }
                 return result;
-
             }
         });
     }

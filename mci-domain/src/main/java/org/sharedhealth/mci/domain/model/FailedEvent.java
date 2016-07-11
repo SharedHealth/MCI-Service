@@ -1,12 +1,13 @@
 package org.sharedhealth.mci.domain.model;
 
+import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.springframework.data.cassandra.mapping.Column;
 import org.springframework.data.cassandra.mapping.PrimaryKeyColumn;
 import org.springframework.data.cassandra.mapping.Table;
 
+import java.util.Date;
 import java.util.UUID;
 
-import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.*;
 import static org.springframework.cassandra.core.PrimaryKeyType.CLUSTERED;
 import static org.springframework.cassandra.core.PrimaryKeyType.PARTITIONED;
@@ -41,7 +42,7 @@ public class FailedEvent {
         this.eventId = eventId;
         this.errorMessage = errorMessage;
         this.retries = retries;
-        this.failedAt = timeBased();
+        this.failedAt = TimeUuidUtil.uuidForDate(new Date());
     }
 
 

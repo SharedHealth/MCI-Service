@@ -13,6 +13,7 @@ import org.sharedhealth.mci.domain.model.Requester;
 import org.sharedhealth.mci.domain.repository.MarkerRepository;
 import org.sharedhealth.mci.domain.repository.PatientRepository;
 import org.sharedhealth.mci.domain.util.BaseIntegrationTest;
+import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.cassandra.core.CassandraOperations;
@@ -22,7 +23,6 @@ import java.util.*;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
-import static com.datastax.driver.core.utils.UUIDs.timeBased;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
@@ -238,9 +238,9 @@ public class DuplicatePatientRepositoryIT extends BaseIntegrationTest {
         patientData3.setAddress(address1);
 
         List<DuplicatePatient> duplicatePatients = new ArrayList<>();
-        duplicatePatients.add(new DuplicatePatient(patientData1.getCatchment().getId(), healthId1, healthId2, asSet("nid"), timeBased()));
-        duplicatePatients.add(new DuplicatePatient(patientData2.getCatchment().getId(), healthId2, healthId1, asSet("nid"), timeBased()));
-        duplicatePatients.add(new DuplicatePatient(patientData1.getCatchment().getId(), healthId1, healthId3, asSet("nid"), timeBased()));
+        duplicatePatients.add(new DuplicatePatient(patientData1.getCatchment().getId(), healthId1, healthId2, asSet("nid"), TimeUuidUtil.uuidForDate(new Date())));
+        duplicatePatients.add(new DuplicatePatient(patientData2.getCatchment().getId(), healthId2, healthId1, asSet("nid"), TimeUuidUtil.uuidForDate(new Date())));
+        duplicatePatients.add(new DuplicatePatient(patientData1.getCatchment().getId(), healthId1, healthId3, asSet("nid"), TimeUuidUtil.uuidForDate(new Date())));
         duplicatePatientRepository.create(duplicatePatients, randomUUID());
     }
 
@@ -280,7 +280,7 @@ public class DuplicatePatientRepositoryIT extends BaseIntegrationTest {
         String healthId1 = "111";
         String healthId2 = "110";
         Set<String> reasons = asSet("nid");
-        UUID createdAt = timeBased();
+        UUID createdAt = TimeUuidUtil.uuidForDate(new Date());
         UUID marker = randomUUID();
         createDuplicate(catchment, healthId1, healthId2, reasons, createdAt, marker);
 
@@ -320,12 +320,12 @@ public class DuplicatePatientRepositoryIT extends BaseIntegrationTest {
         PatientData patient3 = buildPatient("h003", new Address("30", "31", "32"));
         String healthId3 = patientRepository.create(patient3).getId();
         Set<String> reasons = asSet("nid");
-        DuplicatePatient duplicate1 = new DuplicatePatient(patient1.getCatchment().getId(), healthId1, healthId2, reasons, timeBased());
-        DuplicatePatient duplicate2 = new DuplicatePatient(patient2.getCatchment().getId(), healthId2, healthId1, reasons, timeBased());
-        DuplicatePatient duplicate3 = new DuplicatePatient(patient2.getCatchment().getId(), healthId2, healthId3, reasons, timeBased());
-        DuplicatePatient duplicate4 = new DuplicatePatient(patient3.getCatchment().getId(), healthId3, healthId2, reasons, timeBased());
-        DuplicatePatient duplicate5 = new DuplicatePatient(patient1.getCatchment().getId(), healthId1, healthId3, reasons, timeBased());
-        DuplicatePatient duplicate6 = new DuplicatePatient(patient3.getCatchment().getId(), healthId3, healthId1, reasons, timeBased());
+        DuplicatePatient duplicate1 = new DuplicatePatient(patient1.getCatchment().getId(), healthId1, healthId2, reasons, TimeUuidUtil.uuidForDate(new Date()));
+        DuplicatePatient duplicate2 = new DuplicatePatient(patient2.getCatchment().getId(), healthId2, healthId1, reasons, TimeUuidUtil.uuidForDate(new Date()));
+        DuplicatePatient duplicate3 = new DuplicatePatient(patient2.getCatchment().getId(), healthId2, healthId3, reasons, TimeUuidUtil.uuidForDate(new Date()));
+        DuplicatePatient duplicate4 = new DuplicatePatient(patient3.getCatchment().getId(), healthId3, healthId2, reasons, TimeUuidUtil.uuidForDate(new Date()));
+        DuplicatePatient duplicate5 = new DuplicatePatient(patient1.getCatchment().getId(), healthId1, healthId3, reasons, TimeUuidUtil.uuidForDate(new Date()));
+        DuplicatePatient duplicate6 = new DuplicatePatient(patient3.getCatchment().getId(), healthId3, healthId1, reasons, TimeUuidUtil.uuidForDate(new Date()));
         duplicatePatientRepository.create(asList(duplicate1, duplicate2, duplicate3, duplicate4, duplicate5, duplicate6), randomUUID());
 
         UUID marker = randomUUID();
@@ -352,8 +352,8 @@ public class DuplicatePatientRepositoryIT extends BaseIntegrationTest {
         Set<String> reasons = asSet("nid");
 
         duplicatePatientRepository.create(asList(
-                new DuplicatePatient(patient1.getCatchment().getId(), healthId1, healthId2, reasons, timeBased()),
-                new DuplicatePatient(patient2.getCatchment().getId(), healthId2, healthId1, reasons, timeBased())),
+                new DuplicatePatient(patient1.getCatchment().getId(), healthId1, healthId2, reasons, TimeUuidUtil.uuidForDate(new Date())),
+                new DuplicatePatient(patient2.getCatchment().getId(), healthId2, healthId1, reasons, TimeUuidUtil.uuidForDate(new Date()))),
                 randomUUID());
 
         cassandraOps.insert(new DuplicatePatientIgnored(healthId1, healthId4, reasons));
@@ -361,10 +361,10 @@ public class DuplicatePatientRepositoryIT extends BaseIntegrationTest {
 
         UUID marker = randomUUID();
         duplicatePatientRepository.update(healthId1, new Catchment("101112"), asList(
-                new DuplicatePatient(patient1.getCatchment().getId(), healthId1, healthId3, reasons, timeBased()),
-                new DuplicatePatient(patient3.getCatchment().getId(), healthId3, healthId1, reasons, timeBased()),
-                new DuplicatePatient(patient1.getCatchment().getId(), healthId1, healthId4, reasons, timeBased()),
-                new DuplicatePatient(patient4.getCatchment().getId(), healthId4, healthId1, reasons, timeBased())
+                new DuplicatePatient(patient1.getCatchment().getId(), healthId1, healthId3, reasons, TimeUuidUtil.uuidForDate(new Date())),
+                new DuplicatePatient(patient3.getCatchment().getId(), healthId3, healthId1, reasons, TimeUuidUtil.uuidForDate(new Date())),
+                new DuplicatePatient(patient1.getCatchment().getId(), healthId1, healthId4, reasons, TimeUuidUtil.uuidForDate(new Date())),
+                new DuplicatePatient(patient4.getCatchment().getId(), healthId4, healthId1, reasons, TimeUuidUtil.uuidForDate(new Date()))
         ), marker);
 
         List<DuplicatePatient> duplicates = findAllDuplicates();

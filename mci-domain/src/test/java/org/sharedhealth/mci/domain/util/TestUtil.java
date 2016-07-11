@@ -1,6 +1,5 @@
 package org.sharedhealth.mci.domain.util;
 
-import com.datastax.driver.core.utils.UUIDs;
 import org.springframework.data.cassandra.core.CassandraOperations;
 
 import java.util.*;
@@ -93,8 +92,7 @@ public class TestUtil {
     public static List<UUID> buildTimeUuids() throws InterruptedException {
         List<UUID> timeUuids = new ArrayList<>();
         for (int i = 1; i <= 20; i++) {
-            timeUuids.add(UUIDs.timeBased());
-            Thread.sleep(1);
+            timeUuids.add(TimeUuidUtil.uuidForDate(new Date()));
         }
         return unmodifiableList(timeUuids);
     }
