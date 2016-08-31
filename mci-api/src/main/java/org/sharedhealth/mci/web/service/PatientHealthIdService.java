@@ -18,12 +18,10 @@ public class PatientHealthIdService {
 
     private Queue<MciHealthId> MciHealthIds = new ConcurrentLinkedQueue<>();
 
-    private HealthIdService healthIdService;
     private final MCIProperties mciProperties;
 
     @Autowired
-    public PatientHealthIdService(HealthIdService healthIdService, MCIProperties mciProperties) {
-        this.healthIdService = healthIdService;
+    public PatientHealthIdService(MCIProperties mciProperties) {
         this.mciProperties = mciProperties;
     }
 
@@ -38,12 +36,10 @@ public class PatientHealthIdService {
     public void replenishIfNeeded() {
         logger.debug("Replenish, Remaining Health IDs :" + MciHealthIds.size());
         if (MciHealthIds.size() < mciProperties.getHealthIdBlockSizeThreshold()) {
-            MciHealthIds.addAll(healthIdService.getNextBlock());
         }
     }
 
     public void markUsed(MciHealthId nextMciHealthId) {
-        healthIdService.markMCIHealthIdUsed(nextMciHealthId);
     }
 
     public int getHealthIdBlockSize() {
@@ -51,10 +47,9 @@ public class PatientHealthIdService {
     }
 
     public OrgHealthId findOrgHealthId(String healthId) {
-        return healthIdService.findOrgHealthId(healthId);
+        return null;
     }
 
     public void markOrgHealthIdUsed(OrgHealthId orgHealthId) {
-        healthIdService.markOrgHealthIdUsed(orgHealthId);
     }
 }

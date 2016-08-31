@@ -16,14 +16,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class PatientMCIHealthIdServiceTest {
 
-    @Mock
-    private HealthIdService healthIdService;
+
     @Mock
     MCIProperties mciProperties;
 
@@ -37,18 +35,15 @@ public class PatientMCIHealthIdServiceTest {
     public void shouldReplenishIfNeeded() throws Exception {
         ArrayList<MciHealthId> MciHealthIds = new ArrayList<>();
         MciHealthIds.add(new MciHealthId("1213"));
-        when(healthIdService.getNextBlock()).thenReturn(MciHealthIds);
-        PatientHealthIdService patientHealthIdService = new PatientHealthIdService(healthIdService, mciProperties);
+        PatientHealthIdService patientHealthIdService = new PatientHealthIdService(mciProperties);
         patientHealthIdService.replenishIfNeeded();
-        verify(healthIdService).getNextBlock();
     }
 
     @Test
     public void shouldGetNextBlockIfNoHIDLeft() throws Exception {
         ArrayList<MciHealthId> MciHealthIds = new ArrayList<>();
         MciHealthIds.add(new MciHealthId("1213"));
-        when(healthIdService.getNextBlock()).thenReturn(MciHealthIds);
-        PatientHealthIdService patientHealthIdService = new PatientHealthIdService(healthIdService, mciProperties);
+        PatientHealthIdService patientHealthIdService = new PatientHealthIdService(mciProperties);
         patientHealthIdService.replenishIfNeeded();
         MciHealthId MciHealthId = patientHealthIdService.getNextHealthId();
         assertEquals("1213", MciHealthId.getHid());
@@ -57,8 +52,7 @@ public class PatientMCIHealthIdServiceTest {
     @Test(expected = NoSuchElementException.class)
     public void shouldThrowExceptionIfQueueIsEmpty() throws Exception {
         ArrayList<MciHealthId> MciHealthIds = new ArrayList<>();
-        when(healthIdService.getNextBlock()).thenReturn(MciHealthIds);
-        PatientHealthIdService patientHealthIdService = new PatientHealthIdService(healthIdService, mciProperties);
+        PatientHealthIdService patientHealthIdService = new PatientHealthIdService(mciProperties);
         patientHealthIdService.replenishIfNeeded();
         patientHealthIdService.getNextHealthId();
     }
@@ -69,8 +63,7 @@ public class PatientMCIHealthIdServiceTest {
         for (int i = 0; i < 10000; i++) {
             MciHealthIds.add(new MciHealthId(String.valueOf(1213000 + i)));
         }
-        when(healthIdService.getNextBlock()).thenReturn(MciHealthIds);
-        final PatientHealthIdService patientHealthIdService = new PatientHealthIdService(healthIdService, mciProperties);
+        final PatientHealthIdService patientHealthIdService = new PatientHealthIdService(mciProperties);
         patientHealthIdService.replenishIfNeeded();
 
         ExecutorService executor = Executors.newFixedThreadPool(100);
@@ -99,8 +92,7 @@ public class PatientMCIHealthIdServiceTest {
         for (int i = 0; i < 3; i++) {
             MciHealthIds.add(new MciHealthId(String.valueOf(1213000 + i)));
         }
-        when(healthIdService.getNextBlock()).thenReturn(MciHealthIds);
-        final PatientHealthIdService patientHealthIdService = new PatientHealthIdService(healthIdService, mciProperties);
+        final PatientHealthIdService patientHealthIdService = new PatientHealthIdService(mciProperties);
         patientHealthIdService.replenishIfNeeded();
         int before = patientHealthIdService.getHealthIdBlockSize();
         MciHealthId nextMciHealthId = patientHealthIdService.getNextHealthId();
@@ -115,15 +107,12 @@ public class PatientMCIHealthIdServiceTest {
         for (int i = 0; i < 3; i++) {
             MciHealthIds.add(new MciHealthId(String.valueOf(1213000 + i)));
         }
-        when(healthIdService.getNextBlock()).thenReturn(MciHealthIds);
-        doNothing().when(healthIdService).markMCIHealthIdUsed(any(MciHealthId.class));
-        final PatientHealthIdService patientHealthIdService = new PatientHealthIdService(healthIdService, mciProperties);
+        final PatientHealthIdService patientHealthIdService = new PatientHealthIdService(mciProperties);
         patientHealthIdService.replenishIfNeeded();
         int before = patientHealthIdService.getHealthIdBlockSize();
         MciHealthId nextMciHealthId = patientHealthIdService.getNextHealthId();
         patientHealthIdService.markUsed(nextMciHealthId);
         int after = patientHealthIdService.getHealthIdBlockSize();
         assertEquals(before, after + 1);
-        verify(healthIdService, times(1)).markMCIHealthIdUsed(any(MciHealthId.class));
     }
 }

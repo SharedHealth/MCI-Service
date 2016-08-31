@@ -17,9 +17,7 @@ import org.sharedhealth.mci.domain.model.Relation;
 import org.sharedhealth.mci.domain.repository.PatientRepository;
 import org.sharedhealth.mci.domain.util.BaseIntegrationTest;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
-import org.sharedhealth.mci.web.infrastructure.persistence.HealthIdRepository;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
-import org.sharedhealth.mci.web.model.MciHealthId;
 import org.sharedhealth.mci.web.service.PatientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -56,8 +54,7 @@ public class BaseControllerTest extends BaseIntegrationTest {
 
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(9997);
-    @Autowired
-    private HealthIdRepository healthIdRepository;
+
     @Autowired
     protected WebApplicationContext webApplicationContext;
     @Autowired
@@ -162,13 +159,11 @@ public class BaseControllerTest extends BaseIntegrationTest {
 
     @Before
     public void setupBase() throws Exception {
-        healthIdRepository.resetLastReservedHealthId();
         createHealthIds();
     }
 
     private void createHealthIds() {
         for (int i = 0; i < numberOfHealthIdsNeeded(); i++) {
-            healthIdRepository.saveMciHealthIdSync(new MciHealthId(String.valueOf(new Date().getTime() + i)));
         }
     }
 
@@ -178,7 +173,6 @@ public class BaseControllerTest extends BaseIntegrationTest {
 
     @After
     public void teardownBase() {
-        healthIdRepository.resetLastReservedHealthId();
     }
 
     protected PatientData getPatientMapperObjectByHealthId(String healthId) throws Exception {

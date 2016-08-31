@@ -9,8 +9,6 @@ import org.sharedhealth.mci.domain.model.MCIResponse;
 import org.sharedhealth.mci.domain.model.PatientData;
 import org.sharedhealth.mci.domain.model.PhoneNumber;
 import org.sharedhealth.mci.domain.util.TimeUuidUtil;
-import org.sharedhealth.mci.web.infrastructure.persistence.HealthIdRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -38,8 +36,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringJUnit4ClassRunner.class)
 public class AuthorizationIT extends BaseControllerTest {
-    @Autowired
-    private HealthIdRepository healthIdRepository;
 
     private final String patientClientId = "18558";
     private final String patientEmail = "patient@gmail.com";
