@@ -1,10 +1,10 @@
 package org.sharedhealth.mci.web.exception;
 
-public class Unauthorized extends RuntimeException {
+public class UnauthorizedException extends RuntimeException {
 
     private String errorMessage;
 
-    public Unauthorized(String errorMessage) {
+    public UnauthorizedException(String errorMessage) {
         super();
         this.errorMessage = errorMessage;
     }

@@ -4,11 +4,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import static java.lang.Boolean.valueOf;
+import static org.sharedhealth.mci.domain.util.StringUtil.ensureSuffix;
+import static org.sharedhealth.mci.domain.util.StringUtil.removePrefix;
 
 @Component
 public class MCIProperties {
 
     public static final String DIAGNOSTICS_SERVLET_PATH = "/diagnostics/health";
+    private final String URL_SEPARATOR = "/";
 
     @Value("${CASSANDRA_KEYSPACE}")
     private String cassandraKeySpace;
@@ -38,12 +41,20 @@ public class MCIProperties {
     private String LrUrl;
     @Value("${IDENTITY_SERVER_BASE_URL}")
     private String identityServerBaseUrl;
+    @Value("${IDENTITY_SERVER_SIGNIN_PATH}")
+    private String identityServerSignInPath;
+    @Value("${IDENTITY_SERVER_USER_INFO_PATH}")
+    private String identityServerUserInfoPath;
     @Value("${FR_CACHE_TTL}")
     private int frCacheTtl;
     @Value("${IDP_CLIENT_ID}")
     private String idpClientId;
     @Value("${IDP_AUTH_TOKEN}")
     private String idpAuthToken;
+    @Value("${IDP_CLIENT_EMAIL}")
+    private String idpClientEmail;
+    @Value("${IDP_CLIENT_PASSWORD}")
+    private String idpClientPassword;
     @Value("${WORKER_ID}")
     private String workerId;
     @Value("${SERVER_URL}")
@@ -69,6 +80,15 @@ public class MCIProperties {
     private String mciOrgCode;
     @Value("${MCI_INVALID_HID_PATTERN}")
     private String mciInvalidHidPattern;
+
+    @Value("${HID_SERVICE_BASE_URL}")
+    private String hidServiceBaseUrl;
+    @Value("${HID_SERVICE_NEXT_BLOCK_URL}")
+    private String hidServiceNextBlockPathPattern;
+    @Value("${HID_SERVICE_MARK_USED_URL}")
+    private String hidServiceMarkUsedPathPattern;
+    @Value("${HID_LOCAL_STORAGE_PATH}")
+    private String hidLocalStoragePath;
 
     @Value("${HEALTH_ID_BLOCK_SIZE}")
     private String healthIdBlockSize;
@@ -110,8 +130,12 @@ public class MCIProperties {
         return frUrl;
     }
 
-    public String getIdentityServerBaseUrl() {
-        return identityServerBaseUrl;
+    public String getIdentityServerUserInfoUrl() {
+        return ensureSuffix(identityServerBaseUrl, URL_SEPARATOR) + ensureSuffix(removePrefix(identityServerUserInfoPath, URL_SEPARATOR), URL_SEPARATOR);
+    }
+
+    public String getIdentityServerSignInUrl() {
+        return ensureSuffix(identityServerBaseUrl, URL_SEPARATOR) + removePrefix(identityServerSignInPath, URL_SEPARATOR);
     }
 
     public String getLocaitonRegistryUrl() {
@@ -128,6 +152,14 @@ public class MCIProperties {
 
     public String getIdpAuthToken() {
         return idpAuthToken;
+    }
+
+    public String getIdpClientEmail() {
+        return idpClientEmail;
+    }
+
+    public String getIdpClientPassword() {
+        return idpClientPassword;
     }
 
     public String getWorkerId() {
@@ -160,6 +192,20 @@ public class MCIProperties {
 
     public String getMciInvalidHidPattern() {
         return mciInvalidHidPattern;
+    }
+
+    public String getHidServiceNextBlockUrlPattern() {
+        return ensureSuffix(hidServiceBaseUrl, URL_SEPARATOR) +
+                removePrefix(hidServiceNextBlockPathPattern, URL_SEPARATOR);
+    }
+
+    public String getHidServiceMarkUsedUrlPattern() {
+        return ensureSuffix(hidServiceBaseUrl, URL_SEPARATOR) +
+                removePrefix(hidServiceMarkUsedPathPattern, URL_SEPARATOR);
+    }
+
+    public String getHidLocalStoragePath() {
+        return hidLocalStoragePath;
     }
 
     public Long getMciEndHid() {
@@ -217,6 +263,7 @@ public class MCIProperties {
     public void setOtherOrgInvalidHidPattern(String otherOrgInvalidHidPattern) {
         this.otherOrgInvalidHidPattern = otherOrgInvalidHidPattern;
     }
+
     public String getHidStoragePath() {
         return hidStoragePath;
     }
@@ -248,7 +295,6 @@ public class MCIProperties {
     public void setOtherOrgEndHid(String otherOrgEndHid) {
         this.otherOrgEndHid = otherOrgEndHid;
     }
-
 
 
 }

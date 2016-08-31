@@ -44,7 +44,7 @@ public class PatientService {
     private PatientRepository patientRepository;
     private PatientFeedRepository feedRepository;
     private SettingService settingService;
-    private PatientHealthIdService patientHealthIdService;
+    private HealthIdService healthIdService;
     private MCIProperties mciProperties;
     private PendingApprovalFilter pendingApprovalFilter;
 
@@ -52,11 +52,11 @@ public class PatientService {
     public PatientService(PatientRepository patientRepository,
                           PatientFeedRepository feedRepository,
                           SettingService settingService,
-                          PatientHealthIdService patientHealthIdService, MCIProperties mciProperties, PendingApprovalFilter pendingApprovalFilter) {
+                          HealthIdService healthIdService, MCIProperties mciProperties, PendingApprovalFilter pendingApprovalFilter) {
         this.patientRepository = patientRepository;
         this.feedRepository = feedRepository;
         this.settingService = settingService;
-        this.patientHealthIdService = patientHealthIdService;
+        this.healthIdService = healthIdService;
         this.mciProperties = mciProperties;
         this.pendingApprovalFilter = pendingApprovalFilter;
     }
@@ -71,13 +71,13 @@ public class PatientService {
         MCIResponse mciResponse;
         try {
             setHealthIdAssignor(patient);
-            MciHealthId nextMciHealthId = patientHealthIdService.getNextHealthId();
+            MciHealthId nextMciHealthId = healthIdService.getNextHealthId();
             patient.setHealthId(nextMciHealthId.getHid());
             mciResponse = patientRepository.create(patient);
             if (CREATED == mciResponse.getHttpStatus()) {
-                patientHealthIdService.markUsed(nextMciHealthId);
+                healthIdService.markUsed(nextMciHealthId);
             } else {
-                patientHealthIdService.putBackHealthId(nextMciHealthId);
+                healthIdService.putBackHealthId(nextMciHealthId);
             }
         } catch (NoSuchElementException e) {
             mciResponse = new MCIResponse("Can not create patient as there is no hid available in MCI to assign", BAD_REQUEST);
@@ -98,13 +98,13 @@ public class PatientService {
         if (isInvalidOrgHID(healthId)) {
             return new MCIResponse("The HealthId for patient is not valid", BAD_REQUEST);
         }
-        OrgHealthId orgHealthId = patientHealthIdService.findOrgHealthId(healthId);
+        OrgHealthId orgHealthId = healthIdService.findOrgHealthId(healthId);
         MCIResponse validationResponse = validateHealthId(orgHealthId, facilityId);
         if (null != validationResponse) {
             return validationResponse;
         }
         MCIResponse mciResponse = patientRepository.create(patient);
-        patientHealthIdService.markOrgHealthIdUsed(orgHealthId);
+        healthIdService.markOrgHealthIdUsed(orgHealthId);
         return mciResponse;
     }
 

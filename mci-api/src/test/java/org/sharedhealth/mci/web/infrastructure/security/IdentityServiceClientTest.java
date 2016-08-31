@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.sharedhealth.mci.domain.config.MCIProperties;
+import org.sharedhealth.mci.web.model.IdentityStore;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -30,11 +31,14 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 public class IdentityServiceClientTest {
     @Mock
-    AsyncRestTemplate asyncRestTemplate;
+    private AsyncRestTemplate asyncRestTemplate;
     @Mock
-    MCIProperties mciProperties;
+    private MCIProperties mciProperties;
+    @Mock
+    private IdentityStore identityStore;
     @Mock
     private ClientAuthenticator clientAuthenticator;
+    
     private HttpHeaders httpHeaders;
     private final String identityServerBaseUrl = "http://localhost:9997/token/";
 
@@ -55,13 +59,13 @@ public class IdentityServiceClientTest {
         String token = UUID.randomUUID().toString();
         UserAuthInfo userAuthInfo = new UserAuthInfo("123", "email@gmail.com");
 
-        when(mciProperties.getIdentityServerBaseUrl()).thenReturn(identityServerBaseUrl);
+        when(mciProperties.getIdentityServerUserInfoUrl()).thenReturn(identityServerBaseUrl);
         when(asyncRestTemplate.exchange(identityServerBaseUrl + token, GET, new HttpEntity(httpHeaders),
                 UserInfo.class)).thenReturn(createResponse(token, OK));
         when(clientAuthenticator.authenticate(userAuthInfo, token, userInfo(token))).thenReturn(true);
 
         TokenAuthentication tokenAuthentication = new IdentityServiceClient(asyncRestTemplate,
-                mciProperties, clientAuthenticator).authenticate(userAuthInfo, token);
+                mciProperties, clientAuthenticator, identityStore).authenticate(userAuthInfo, token);
 
         assertEquals(tokenAuthentication.getCredentials().toString(), token);
         UserInfo expectedUserInfo = userInfo(token);
@@ -81,11 +85,11 @@ public class IdentityServiceClientTest {
         String token = UUID.randomUUID().toString();
         UserAuthInfo userAuthInfo = new UserAuthInfo("123", "email@gmail.com");
 
-        when(mciProperties.getIdentityServerBaseUrl()).thenReturn(identityServerBaseUrl);
+        when(mciProperties.getIdentityServerUserInfoUrl()).thenReturn(identityServerBaseUrl);
         when(asyncRestTemplate.exchange(identityServerBaseUrl + token, GET, new HttpEntity(httpHeaders),
                 UserInfo.class)).thenReturn(createResponse(token, UNAUTHORIZED));
         new IdentityServiceClient(asyncRestTemplate,
-                mciProperties, clientAuthenticator).authenticate(userAuthInfo, token);
+                mciProperties, clientAuthenticator, identityStore).authenticate(userAuthInfo, token);
     }
 
     @Test
@@ -94,13 +98,13 @@ public class IdentityServiceClientTest {
         UserAuthInfo userAuthInfo = new UserAuthInfo("123", "email@gmail.com");
         UserInfo userInfo = userInfo(token);
 
-        when(mciProperties.getIdentityServerBaseUrl()).thenReturn(identityServerBaseUrl);
+        when(mciProperties.getIdentityServerUserInfoUrl()).thenReturn(identityServerBaseUrl);
         when(asyncRestTemplate.exchange(identityServerBaseUrl + token, GET, new HttpEntity(httpHeaders),
                 UserInfo.class)).thenReturn(createResponse(token, OK));
         when(clientAuthenticator.authenticate(userAuthInfo, token, userInfo)).thenReturn(true);
 
         new IdentityServiceClient(asyncRestTemplate,
-                mciProperties, clientAuthenticator).authenticate(userAuthInfo, token);
+                mciProperties, clientAuthenticator, identityStore).authenticate(userAuthInfo, token);
 
         verify(clientAuthenticator, times(1)).authenticate(eq(userAuthInfo), eq(token), any(UserInfo.class));
     }

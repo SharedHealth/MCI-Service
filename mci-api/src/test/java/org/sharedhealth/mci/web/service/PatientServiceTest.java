@@ -37,7 +37,7 @@ public class PatientServiceTest {
     @Mock
     SettingService settingService;
     @Mock
-    PatientHealthIdService patientHealthIdService;
+    HealthIdService healthIdService;
     @Mock
     private MCIProperties mciProperties;
     @Mock
@@ -50,14 +50,14 @@ public class PatientServiceTest {
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-        patientService = new PatientService(patientRepository, feedRepository, settingService, patientHealthIdService, mciProperties, pendingApprovalFilter);
+        patientService = new PatientService(patientRepository, feedRepository, settingService, healthIdService, mciProperties, pendingApprovalFilter);
     }
 
     @Test
     public void shouldCreateNewPatient() throws Exception {
         PatientData patient = new PatientData();
         MciHealthId MciHealthId = new MciHealthId("FUBAR");
-        when(patientHealthIdService.getNextHealthId()).thenReturn(MciHealthId);
+        when(healthIdService.getNextHealthId()).thenReturn(MciHealthId);
         SearchQuery searchByNidQuery = new SearchQuery();
         searchByNidQuery.setNid("nid-100");
         when(patientRepository.findAllByQuery(searchByNidQuery)).thenReturn(new ArrayList<PatientData>());
@@ -78,14 +78,14 @@ public class PatientServiceTest {
         inOrder.verify(patientRepository).findAllByQuery(searchByBrnQuery);
         inOrder.verify(patientRepository).create(patient);
 
-        verify(patientHealthIdService).getNextHealthId();
+        verify(healthIdService).getNextHealthId();
     }
 
     @Test
     public void shouldMarkHidUsedIfCretePatientIsSuccessful() throws Exception {
         PatientData existingPatient = new PatientData();
         MciHealthId MciHealthId = new MciHealthId("FUBAR");
-        when(patientHealthIdService.getNextHealthId()).thenReturn(MciHealthId);
+        when(healthIdService.getNextHealthId()).thenReturn(MciHealthId);
         SearchQuery searchByNidQuery = new SearchQuery();
         searchByNidQuery.setNid("nid-100");
         when(patientRepository.findAllByQuery(searchByNidQuery)).thenReturn(new ArrayList<PatientData>());
@@ -106,16 +106,16 @@ public class PatientServiceTest {
         inOrder.verify(patientRepository).findAllByQuery(searchByBrnQuery);
         inOrder.verify(patientRepository).create(existingPatient);
 
-        verify(patientHealthIdService).getNextHealthId();
-        verify(patientHealthIdService, times(1)).markUsed(any(MciHealthId.class));
-        verify(patientHealthIdService, times(0)).putBackHealthId(any(MciHealthId.class));
+        verify(healthIdService).getNextHealthId();
+        verify(healthIdService, times(1)).markUsed(any(MciHealthId.class));
+        verify(healthIdService, times(0)).putBackHealthId(any(MciHealthId.class));
     }
 
     @Test
     public void shouldReturnHidToHidBlockIfCretePatientFailed() throws Exception {
         PatientData existingPatient = new PatientData();
         MciHealthId MciHealthId = new MciHealthId("FUBAR");
-        when(patientHealthIdService.getNextHealthId()).thenReturn(MciHealthId);
+        when(healthIdService.getNextHealthId()).thenReturn(MciHealthId);
         SearchQuery searchByNidQuery = new SearchQuery();
         searchByNidQuery.setNid("nid-100");
         when(patientRepository.findAllByQuery(searchByNidQuery)).thenReturn(new ArrayList<PatientData>());
@@ -136,9 +136,9 @@ public class PatientServiceTest {
         inOrder.verify(patientRepository).findAllByQuery(searchByBrnQuery);
         inOrder.verify(patientRepository).create(existingPatient);
 
-        verify(patientHealthIdService).getNextHealthId();
-        verify(patientHealthIdService, times(0)).markUsed(any(MciHealthId.class));
-        verify(patientHealthIdService, times(1)).putBackHealthId(any(MciHealthId.class));
+        verify(healthIdService).getNextHealthId();
+        verify(healthIdService, times(0)).markUsed(any(MciHealthId.class));
+        verify(healthIdService, times(1)).putBackHealthId(any(MciHealthId.class));
     }
 
     @Test
@@ -198,18 +198,18 @@ public class PatientServiceTest {
         mciResponse = new MCIResponse(healthId, HttpStatus.CREATED);
         when(patientRepository.create(patient)).thenReturn(mciResponse);
         OrgHealthId orgHealthId = new OrgHealthId(healthId, clientId, TimeUuidUtil.uuidForDate(new Date()), null);
-        when(patientHealthIdService.findOrgHealthId(healthId)).thenReturn(orgHealthId);
+        when(healthIdService.findOrgHealthId(healthId)).thenReturn(orgHealthId);
 
         MCIResponse mciResponse = patientService.createPatientForOrg(patient, clientId);
 
         assertEquals(healthId, mciResponse.getId());
         assertEquals(HttpStatus.CREATED.value(), mciResponse.getHttpStatus());
-        InOrder inOrder = inOrder(patientRepository, patientHealthIdService);
+        InOrder inOrder = inOrder(patientRepository, healthIdService);
         inOrder.verify(patientRepository).findAllByQuery(searchByNidQuery);
         inOrder.verify(patientRepository).findAllByQuery(searchByBrnQuery);
-        inOrder.verify(patientHealthIdService).findOrgHealthId(healthId);
+        inOrder.verify(healthIdService).findOrgHealthId(healthId);
         inOrder.verify(patientRepository).create(patient);
-        inOrder.verify(patientHealthIdService).markOrgHealthIdUsed(orgHealthId);
+        inOrder.verify(healthIdService).markOrgHealthIdUsed(orgHealthId);
     }
 
     @Test
@@ -237,12 +237,12 @@ public class PatientServiceTest {
         assertEquals("The HealthId for patient is not valid", mciResponse.getId());
         assertEquals(HttpStatus.BAD_REQUEST.value(), mciResponse.getHttpStatus());
 
-        InOrder inOrder = inOrder(patientRepository, patientHealthIdService);
+        InOrder inOrder = inOrder(patientRepository, healthIdService);
         inOrder.verify(patientRepository).findAllByQuery(searchByNidQuery);
         inOrder.verify(patientRepository).findAllByQuery(searchByBrnQuery);
-        inOrder.verify(patientHealthIdService, never()).findOrgHealthId(healthId);
+        inOrder.verify(healthIdService, never()).findOrgHealthId(healthId);
         inOrder.verify(patientRepository, never()).create(patient);
-        inOrder.verify(patientHealthIdService, never()).markOrgHealthIdUsed(any(OrgHealthId.class));
+        inOrder.verify(healthIdService, never()).markOrgHealthIdUsed(any(OrgHealthId.class));
     }
 
     @Test
@@ -264,19 +264,19 @@ public class PatientServiceTest {
         patient.setHealthId(healthId);
 
         when(mciProperties.getOtherOrgInvalidHidPattern()).thenReturn("");
-        when(patientHealthIdService.findOrgHealthId(healthId)).thenReturn(null);
+        when(healthIdService.findOrgHealthId(healthId)).thenReturn(null);
 
         MCIResponse mciResponse = patientService.createPatientForOrg(patient, clientId);
 
         assertEquals("The HealthId is not present", mciResponse.getId());
         assertEquals(HttpStatus.BAD_REQUEST.value(), mciResponse.getHttpStatus());
 
-        InOrder inOrder = inOrder(patientRepository, patientHealthIdService);
+        InOrder inOrder = inOrder(patientRepository, healthIdService);
         inOrder.verify(patientRepository).findAllByQuery(searchByNidQuery);
         inOrder.verify(patientRepository).findAllByQuery(searchByBrnQuery);
-        inOrder.verify(patientHealthIdService).findOrgHealthId(healthId);
+        inOrder.verify(healthIdService).findOrgHealthId(healthId);
         inOrder.verify(patientRepository, never()).create(patient);
-        inOrder.verify(patientHealthIdService, never()).markOrgHealthIdUsed(any(OrgHealthId.class));
+        inOrder.verify(healthIdService, never()).markOrgHealthIdUsed(any(OrgHealthId.class));
     }
 
     @Test
@@ -300,19 +300,19 @@ public class PatientServiceTest {
         when(mciProperties.getOtherOrgInvalidHidPattern()).thenReturn("");
         OrgHealthId orgHealthId = new OrgHealthId(healthId, clientId, TimeUuidUtil.uuidForDate(new Date()), null);
         orgHealthId.markUsed();
-        when(patientHealthIdService.findOrgHealthId(healthId)).thenReturn(orgHealthId);
+        when(healthIdService.findOrgHealthId(healthId)).thenReturn(orgHealthId);
 
         MCIResponse mciResponse = patientService.createPatientForOrg(patient, clientId);
 
         assertEquals("The HealthId is already used", mciResponse.getId());
         assertEquals(HttpStatus.BAD_REQUEST.value(), mciResponse.getHttpStatus());
 
-        InOrder inOrder = inOrder(patientRepository, patientHealthIdService);
+        InOrder inOrder = inOrder(patientRepository, healthIdService);
         inOrder.verify(patientRepository).findAllByQuery(searchByNidQuery);
         inOrder.verify(patientRepository).findAllByQuery(searchByBrnQuery);
-        inOrder.verify(patientHealthIdService).findOrgHealthId(healthId);
+        inOrder.verify(healthIdService).findOrgHealthId(healthId);
         inOrder.verify(patientRepository, never()).create(patient);
-        inOrder.verify(patientHealthIdService, never()).markOrgHealthIdUsed(any(OrgHealthId.class));
+        inOrder.verify(healthIdService, never()).markOrgHealthIdUsed(any(OrgHealthId.class));
     }
 
     @Test
@@ -336,19 +336,19 @@ public class PatientServiceTest {
         when(mciProperties.getOtherOrgInvalidHidPattern()).thenReturn("");
         OrgHealthId orgHealthId = new OrgHealthId(healthId, "other", TimeUuidUtil.uuidForDate(new Date()), null);
 
-        when(patientHealthIdService.findOrgHealthId(healthId)).thenReturn(orgHealthId);
+        when(healthIdService.findOrgHealthId(healthId)).thenReturn(orgHealthId);
 
         MCIResponse mciResponse = patientService.createPatientForOrg(patient, clientId);
 
         assertEquals("The HealthId is not for given organization", mciResponse.getId());
         assertEquals(HttpStatus.BAD_REQUEST.value(), mciResponse.getHttpStatus());
 
-        InOrder inOrder = inOrder(patientRepository, patientHealthIdService);
+        InOrder inOrder = inOrder(patientRepository, healthIdService);
         inOrder.verify(patientRepository).findAllByQuery(searchByNidQuery);
         inOrder.verify(patientRepository).findAllByQuery(searchByBrnQuery);
-        inOrder.verify(patientHealthIdService).findOrgHealthId(healthId);
+        inOrder.verify(healthIdService).findOrgHealthId(healthId);
         inOrder.verify(patientRepository, never()).create(patient);
-        inOrder.verify(patientHealthIdService, never()).markOrgHealthIdUsed(any(OrgHealthId.class));
+        inOrder.verify(healthIdService, never()).markOrgHealthIdUsed(any(OrgHealthId.class));
     }
 
     @Test

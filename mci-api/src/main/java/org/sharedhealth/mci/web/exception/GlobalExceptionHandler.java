@@ -195,10 +195,10 @@ public class GlobalExceptionHandler {
 
     @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
     @ResponseBody
-    @ExceptionHandler(Unauthorized.class)
-    public ErrorInfo unauthorized(Unauthorized unauthorized) {
-        logger.error(unauthorized.getErrorMessage());
-        return new ErrorInfo(HttpStatus.UNAUTHORIZED.value(), unauthorized.getErrorMessage());
+    @ExceptionHandler(UnauthorizedException.class)
+    public ErrorInfo unauthorized(UnauthorizedException unauthorizedException) {
+        logger.error(unauthorizedException.getErrorMessage());
+        return new ErrorInfo(HttpStatus.UNAUTHORIZED.value(), unauthorizedException.getErrorMessage());
     }
 
     @ResponseStatus(value = HttpStatus.FORBIDDEN)
