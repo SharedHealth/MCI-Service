@@ -36,7 +36,7 @@ dependencies {
     compile libraries.spring_boot_logging, libraries.snappy, libraries.spring_context_support,
             libraries.spring_data_cassandra, libraries.hibernate_validator,
             libraries.apache_collections, libraries.apache_lang, libraries.netty,
-            libraries.apache_bean_utils, libraries.commons_codec, libraries.commons_validator,
+            libraries.apache_bean_utils, libraries.commons_codec,libraries.commons_io, libraries.commons_validator,
             libraries.spring_security, libraries.rome, libraries.joda_time, libraries.ehcache_core
 
     compile project(":mci-domain")

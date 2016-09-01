@@ -5,7 +5,6 @@ import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.sharedhealth.mci.web.exception.UnauthorizedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -30,9 +29,9 @@ public class HealthIdWebClient {
         this.restTemplate = restTemplate;
     }
 
-    public List getNextHealthIDs(String hidServiceNextBlockURL, HttpHeaders headers) throws Exception {
+    public List getNextHealthIDs(String hidServiceNextBlockURL, HttpEntity<Object> requestEntity) throws Exception {
         ListenableFuture<ResponseEntity<String>> future = restTemplate.exchange(hidServiceNextBlockURL,
-                HttpMethod.GET, new HttpEntity<>(headers), String.class);
+                HttpMethod.GET, requestEntity, String.class);
         ResponseEntity<String> responseEntity = future.get();
         if (UNAUTHORIZED.equals(responseEntity.getStatusCode())) {
             throw new UnauthorizedException("invalid token");
@@ -40,5 +39,18 @@ public class HealthIdWebClient {
         String content = responseEntity.getBody();
         Map map = new ObjectMapper().readValue(content, Map.class);
         return (List) map.get(HEALTH_ID_LIST_KEY);
+    }
+
+    public String markUsed(String markUsedUrl, HttpEntity<Map<String, String>> requestEntity) throws Exception {
+        ListenableFuture<ResponseEntity<String>> future = restTemplate.exchange(markUsedUrl,
+                HttpMethod.PUT, requestEntity, String.class);
+        ResponseEntity<String> responseEntity = future.get();
+        if (UNAUTHORIZED.equals(responseEntity.getStatusCode())) {
+            throw new UnauthorizedException("invalid token");
+        }
+        if(!responseEntity.getStatusCode().is2xxSuccessful()){
+            throw new Exception(String.format("Unexpected Response %s from HID Service", responseEntity.getStatusCode()));
+        }
+        return responseEntity.getBody();
     }
 }

@@ -43,6 +43,14 @@ task wrapper(type: Wrapper) {
     gradleVersion = '2.12'
 }
 
+
+ext.testLibraries = [
+        junit      : "junit:junit:4.10",
+        mockito    : "org.mockito:mockito-all:1.8.4",
+        http_client: "org.apache.httpcomponents:httpclient:4.3.3",
+        spring_test: "org.springframework:spring-test:4.1.6.RELEASE",
+        wiremock   : "com.github.tomakehurst:wiremock:1.58"
+]
 ext.libraries = [
         spring_boot_web      : "org.springframework.boot:spring-boot-starter-web:1.1.8.RELEASE",
         spring_boot_logging  : "org.springframework.boot:spring-boot-starter-log4j:1.2.0.RELEASE",
@@ -57,6 +65,7 @@ ext.libraries = [
         apache_collections   : "org.apache.commons:commons-collections4:4.0",
         apache_bean_utils    : "commons-beanutils:commons-beanutils:1.9.2",
         commons_codec        : "commons-codec:commons-codec:1.4",
+        commons_io           : "commons-io:commons-io:2.5",
         commons_validator    : "commons-validator:commons-validator:1.4.1",
         joda_time            : "joda-time:joda-time:2.7",
         apache_lang          : "org.apache.commons:commons-lang3:3.3.2",
@@ -66,12 +75,4 @@ ext.libraries = [
         netty                : "io.netty:netty-all:4.0.37.Final",
         ehcache_core         : "net.sf.ehcache:ehcache-core:2.6.10",
         hector_core          : "me.prettyprint:hector-core:1.0-5"
-]
-
-ext.testLibraries = [
-        junit      : "junit:junit:4.10",
-        mockito    : "org.mockito:mockito-all:1.8.4",
-        http_client: "org.apache.httpcomponents:httpclient:4.3.3",
-        spring_test: "org.springframework:spring-test:4.1.6.RELEASE",
-        wiremock   : "com.github.tomakehurst:wiremock:1.58"
 ]
