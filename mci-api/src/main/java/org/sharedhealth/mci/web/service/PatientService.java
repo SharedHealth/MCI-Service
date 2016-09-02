@@ -12,8 +12,6 @@ import org.sharedhealth.mci.domain.repository.PatientRepository;
 import org.sharedhealth.mci.domain.service.PendingApprovalFilter;
 import org.sharedhealth.mci.web.exception.InsufficientPrivilegeException;
 import org.sharedhealth.mci.web.mapper.PendingApprovalListResponse;
-import org.sharedhealth.mci.web.model.MciHealthId;
-import org.sharedhealth.mci.web.model.OrgHealthId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +25,8 @@ import static org.apache.commons.collections4.CollectionUtils.*;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.domain.constant.JsonConstants.HID;
 import static org.sharedhealth.mci.domain.constant.JsonConstants.RELATIONS;
+import static org.sharedhealth.mci.utils.HttpUtil.AVAILABILITY_KEY;
+import static org.sharedhealth.mci.utils.HttpUtil.REASON_KEY;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Component
@@ -71,13 +71,13 @@ public class PatientService {
         MCIResponse mciResponse;
         try {
             setHealthIdAssignor(patient);
-            MciHealthId nextMciHealthId = healthIdService.getNextHealthId();
-            patient.setHealthId(nextMciHealthId.getHid());
+            String healthId = healthIdService.getNextHealthId();
+            patient.setHealthId(healthId);
             mciResponse = patientRepository.create(patient);
             if (CREATED == mciResponse.getHttpStatus()) {
-                healthIdService.markUsed(nextMciHealthId);
+                healthIdService.markUsed(healthId);
             } else {
-                healthIdService.putBackHealthId(nextMciHealthId);
+                healthIdService.putBackHealthId(healthId);
             }
         } catch (NoSuchElementException e) {
             mciResponse = new MCIResponse("Can not create patient as there is no hid available in MCI to assign", BAD_REQUEST);
@@ -98,13 +98,14 @@ public class PatientService {
         if (isInvalidOrgHID(healthId)) {
             return new MCIResponse("The HealthId for patient is not valid", BAD_REQUEST);
         }
-        OrgHealthId orgHealthId = healthIdService.findOrgHealthId(healthId);
-        MCIResponse validationResponse = validateHealthId(orgHealthId, facilityId);
-        if (null != validationResponse) {
-            return validationResponse;
+        Map response = healthIdService.validateHIDForOrg(healthId, facilityId);
+        boolean isValid = Boolean.parseBoolean((String) response.get(AVAILABILITY_KEY));
+        if (!isValid) {
+            String reason = (String) response.get(REASON_KEY);
+            return new MCIResponse(reason, BAD_REQUEST);
         }
         MCIResponse mciResponse = patientRepository.create(patient);
-        healthIdService.markOrgHealthIdUsed(orgHealthId);
+        healthIdService.markUsed(healthId);
         return mciResponse;
     }
 
@@ -117,19 +118,6 @@ public class PatientService {
     private boolean isInvalidOrgHID(String healthId) {
         String hidWithoutChecksum = healthId.substring(0, healthId.length() - 1);
         return hidWithoutChecksum.matches(mciProperties.getOtherOrgInvalidHidPattern());
-    }
-
-    private MCIResponse validateHealthId(OrgHealthId orgHealthId, String facilityId) {
-        if (null == orgHealthId) {
-            return new MCIResponse("The HealthId is not present", BAD_REQUEST);
-        }
-        if (!facilityId.equals(orgHealthId.getAllocatedFor())) {
-            return new MCIResponse("The HealthId is not for given organization", BAD_REQUEST);
-        }
-        if (orgHealthId.isUsed()) {
-            return new MCIResponse("The HealthId is already used", BAD_REQUEST);
-        }
-        return null;
     }
 
     private void setHealthIdAssignor(PatientData patient) {

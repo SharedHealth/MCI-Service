@@ -71,7 +71,6 @@ public class MCIProperties {
     @Value("${OTHER_ORG_END_HID}")
     private String otherOrgEndHid;
 
-
     @Value("${MCI_START_HID}")
     private String mciStartHid;
     @Value("${MCI_END_HID}")
@@ -87,6 +86,8 @@ public class MCIProperties {
     private String hidServiceNextBlockPathPattern;
     @Value("${HID_SERVICE_MARK_USED_URL}")
     private String hidServiceMarkUsedPathPattern;
+    @Value("${HID_SERVICE_CHECK_HID_URL}")
+    private String checkHIDUrlPattern;
     @Value("${HID_LOCAL_STORAGE_PATH}")
     private String hidLocalStoragePath;
 
@@ -202,6 +203,11 @@ public class MCIProperties {
     public String getHidServiceMarkUsedUrlPattern() {
         return ensureSuffix(hidServiceBaseUrl, URL_SEPARATOR) +
                 removePrefix(hidServiceMarkUsedPathPattern, URL_SEPARATOR);
+    }
+
+    public String getHidServiceCheckHIDUrlPattern() {
+        return ensureSuffix(hidServiceBaseUrl, URL_SEPARATOR) +
+                removePrefix(checkHIDUrlPattern, URL_SEPARATOR);
     }
 
     public String getHidLocalStoragePath() {

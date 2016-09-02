@@ -6,16 +6,13 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sharedhealth.mci.domain.config.EnvironmentMock;
 import org.sharedhealth.mci.domain.config.MCIProperties;
-import org.sharedhealth.mci.web.infrastructure.registry.HealthIdWebClient;
 import org.sharedhealth.mci.web.infrastructure.security.IdentityServiceClient;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
-import org.sharedhealth.mci.web.model.MciHealthId;
 import org.sharedhealth.mci.web.model.MciHealthIdStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -28,6 +25,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -48,19 +46,14 @@ public class HealthIdServiceIT {
     private MCIProperties mciProperties;
     @Autowired
     private MciHealthIdStore mciHealthIdStore;
-    @Autowired
-    private HealthIdWebClient healthIdWebClient;
+
     @Rule
     public WireMockRule idpService = new WireMockRule(9997);
 
+    private String CHECK_HID_PATH = "/healthIds/checkAvailability/hid";
     private String NEXT_BLOCK_PATH = "/healthIds/nextBlock/mci";
     private final String SIGN_IN_PATH = "/signin";
     private final String MARK_USED_PATH = "/healthIds/markUsed/hid";
-
-
-    @Before
-    public void setUp() throws Exception {
-    }
 
     @After
     public void tearDown() throws Exception {
@@ -79,21 +72,22 @@ public class HealthIdServiceIT {
         mciHealthIdStore.addMciHealthIds(hidBlock);
         writeHIDBlockToFile(hidBlock);
 
-        MciHealthId nextHealthId = healthIdService.getNextHealthId();
+        String nextHealthId = healthIdService.getNextHealthId();
 
         assertNotNull(nextHealthId);
         assertEquals(1, mciHealthIdStore.noOfHIDsLeft());
-        assertFalse(mciHealthIdStore.getAll().contains(nextHealthId.getHid()));
+        assertFalse(mciHealthIdStore.getAll().contains(nextHealthId));
         List<String> hids = readHIDsFromFile();
         assertEquals(2, hids.size());
     }
 
     @Test
     public void shouldAskHIDServiceToMarkAsUsedHID() throws Exception {
-        MciHealthId hid = new MciHealthId("hid");
-        setupStub();
-
-        healthIdService.markUsed(hid);
+        UUID token = UUID.randomUUID();
+        String idpResponse = "{\"access_token\" : \"" + token.toString() + "\"}";
+        setUpIDPStub(idpResponse);
+        setUpMarkUsedStub(token);
+        healthIdService.markUsed("hid");
 
         verify(1, putRequestedFor(urlMatching(MARK_USED_PATH))
                 .withRequestBody(containing("\"used_at\":"))
@@ -105,7 +99,7 @@ public class HealthIdServiceIT {
         List<String> hidBlock = Lists.newArrayList("healthId1");
         mciHealthIdStore.addMciHealthIds(hidBlock);
 
-        healthIdService.putBackHealthId(new MciHealthId("healthId2"));
+        healthIdService.putBackHealthId("healthId2");
 
         assertEquals(2, mciHealthIdStore.noOfHIDsLeft());
         assertTrue(mciHealthIdStore.getAll().containsAll(asList("healthId1", "healthId2")));
@@ -116,7 +110,10 @@ public class HealthIdServiceIT {
         assertThat(mciHealthIdStore.noOfHIDsLeft(), is(0));
         assertFalse(new File(mciProperties.getHidLocalStoragePath()).exists());
 
-        setupStub();
+        UUID token = UUID.randomUUID();
+        String idpResponse = "{\"access_token\" : \"" + token.toString() + "\"}";
+        setUpIDPStub(idpResponse);
+        setupNextBlockStub(token);
         healthIdService.replenishIfNeeded();
 
         assertThat(mciHealthIdStore.noOfHIDsLeft(), is(mciProperties.getHealthIdBlockSize()));
@@ -147,7 +144,10 @@ public class HealthIdServiceIT {
         mciHealthIdStore.addMciHealthIds(healthIdBlock);
         writeHIDBlockToFile(healthIdBlock);
 
-        setupStub();
+        UUID token = UUID.randomUUID();
+        String idpResponse = "{\"access_token\" : \"" + token.toString() + "\"}";
+        setUpIDPStub(idpResponse);
+        setupNextBlockStub(token);
         healthIdService.replenishIfNeeded();
 
         assertThat(mciHealthIdStore.noOfHIDsLeft(), is(2 + mciProperties.getHealthIdBlockSize()));
@@ -172,18 +172,33 @@ public class HealthIdServiceIT {
         assertEquals(2, mciHealthIdStore.noOfHIDsLeft());
     }
 
-    private void setupStub() throws IOException {
+    @Test
+    public void shouldTellWhetherAOrgHealthIdIsValid() throws Exception {
         UUID token = UUID.randomUUID();
         String idpResponse = "{\"access_token\" : \"" + token.toString() + "\"}";
+        String checkHidResponse = "{\"availability\" : \"true\"}";
+        setUpIDPStub(idpResponse);
+        setupCheckHIDStub(token, checkHidResponse);
 
-        stubFor(post(urlMatching(SIGN_IN_PATH))
-                .withHeader(AUTH_TOKEN_KEY, equalTo(mciProperties.getIdpAuthToken()))
+        Map result = healthIdService.validateHIDForOrg("hid", "12345");
+        assertTrue(Boolean.parseBoolean((String) result.get("availability")));
+
+        verify(1, postRequestedFor(urlMatching(SIGN_IN_PATH)));
+        verify(1, getRequestedFor(urlPathMatching(CHECK_HID_PATH)));
+    }
+
+    private void setUpMarkUsedStub(UUID token) {
+        stubFor(put(urlPathMatching(MARK_USED_PATH))
+                .withHeader(AUTH_TOKEN_KEY, equalTo(token.toString()))
                 .withHeader(CLIENT_ID_KEY, equalTo(mciProperties.getIdpClientId()))
+                .withHeader(FROM_KEY, equalTo(mciProperties.getIdpClientEmail()))
                 .willReturn(aResponse()
                         .withStatus(HttpStatus.SC_OK)
-                        .withBody(idpResponse)
+                        .withBody("Accepted")
                 ));
+    }
 
+    private void setupNextBlockStub(UUID token) throws IOException {
         stubFor(get(urlPathMatching(NEXT_BLOCK_PATH))
                 .withHeader(AUTH_TOKEN_KEY, equalTo(token.toString()))
                 .withHeader(CLIENT_ID_KEY, equalTo(mciProperties.getIdpClientId()))
@@ -192,14 +207,26 @@ public class HealthIdServiceIT {
                         .withStatus(HttpStatus.SC_OK)
                         .withBody(getHidResponse())
                 ));
+    }
 
-        stubFor(put(urlPathMatching(MARK_USED_PATH))
+    private void setupCheckHIDStub(UUID token, String checkHidResponse) throws IOException {
+        stubFor(get(urlPathMatching(CHECK_HID_PATH))
                 .withHeader(AUTH_TOKEN_KEY, equalTo(token.toString()))
                 .withHeader(CLIENT_ID_KEY, equalTo(mciProperties.getIdpClientId()))
                 .withHeader(FROM_KEY, equalTo(mciProperties.getIdpClientEmail()))
                 .willReturn(aResponse()
                         .withStatus(HttpStatus.SC_OK)
-                        .withBody("Accepted")
+                        .withBody(checkHidResponse)
+                ));
+    }
+
+    private void setUpIDPStub(String idpResponse) {
+        stubFor(post(urlMatching(SIGN_IN_PATH))
+                .withHeader(AUTH_TOKEN_KEY, equalTo(mciProperties.getIdpAuthToken()))
+                .withHeader(CLIENT_ID_KEY, equalTo(mciProperties.getIdpClientId()))
+                .willReturn(aResponse()
+                        .withStatus(HttpStatus.SC_OK)
+                        .withBody(idpResponse)
                 ));
     }
 

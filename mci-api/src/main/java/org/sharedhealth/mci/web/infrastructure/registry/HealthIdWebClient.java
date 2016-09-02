@@ -48,9 +48,23 @@ public class HealthIdWebClient {
         if (UNAUTHORIZED.equals(responseEntity.getStatusCode())) {
             throw new UnauthorizedException("invalid token");
         }
-        if(!responseEntity.getStatusCode().is2xxSuccessful()){
+        if (!responseEntity.getStatusCode().is2xxSuccessful()) {
             throw new Exception(String.format("Unexpected Response %s from HID Service", responseEntity.getStatusCode()));
         }
         return responseEntity.getBody();
+    }
+
+    public Map validateHID(String checkHIDUrl, HttpEntity<Object> httpEntity) throws Exception {
+        ListenableFuture<ResponseEntity<String>> future = restTemplate.exchange(checkHIDUrl,
+                HttpMethod.GET, httpEntity, String.class);
+        ResponseEntity<String> responseEntity = future.get();
+        if (UNAUTHORIZED.equals(responseEntity.getStatusCode())) {
+            throw new UnauthorizedException("invalid token");
+        }
+        if (!responseEntity.getStatusCode().is2xxSuccessful()) {
+            throw new Exception(String.format("Unexpected Response %s from HID Service", responseEntity.getStatusCode()));
+        }
+        String content = responseEntity.getBody();
+        return new ObjectMapper().readValue(content, Map.class);
     }
 }

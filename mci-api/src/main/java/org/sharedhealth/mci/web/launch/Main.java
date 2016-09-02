@@ -6,6 +6,7 @@ import org.springframework.boot.context.embedded.ServletContextInitializer;
 import org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.servlet.DispatcherServlet;
 
 import javax.servlet.ServletContext;
@@ -20,6 +21,7 @@ import static java.lang.System.getenv;
 import static org.sharedhealth.mci.domain.config.MCIProperties.DIAGNOSTICS_SERVLET_PATH;
 import static org.sharedhealth.mci.web.config.MCIConfig.getSupportedServletMappings;
 
+@EnableScheduling
 @Import(WebMvcConfig.class)
 public class Main {
 

@@ -15,6 +15,9 @@ public class HttpUtil {
     public static final String PASSWORD_KEY = "password";
     public static final String ACCESS_TOKEN_KEY = "access_token";
 
+    public static final String AVAILABILITY_KEY = "availability";
+    public static final String REASON_KEY = "reason";
+
     public static HttpHeaders getHrmIdentityHeaders(MCIProperties mciProperties) {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add(CLIENT_ID_KEY, mciProperties.getIdpClientId());

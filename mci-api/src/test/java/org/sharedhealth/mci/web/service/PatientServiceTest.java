@@ -1,5 +1,6 @@
 package org.sharedhealth.mci.web.service;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -12,8 +13,6 @@ import org.sharedhealth.mci.domain.service.PendingApprovalFilter;
 import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.sharedhealth.mci.web.exception.InsufficientPrivilegeException;
 import org.sharedhealth.mci.web.mapper.PendingApprovalListResponse;
-import org.sharedhealth.mci.web.model.MciHealthId;
-import org.sharedhealth.mci.web.model.OrgHealthId;
 import org.springframework.http.HttpStatus;
 
 import java.util.*;
@@ -33,11 +32,9 @@ public class PatientServiceTest {
     @Mock
     private PatientFeedRepository feedRepository;
     @Mock
-    FacilityService facilityService;
+    private SettingService settingService;
     @Mock
-    SettingService settingService;
-    @Mock
-    HealthIdService healthIdService;
+    private HealthIdService healthIdService;
     @Mock
     private MCIProperties mciProperties;
     @Mock
@@ -56,26 +53,13 @@ public class PatientServiceTest {
     @Test
     public void shouldCreateNewPatient() throws Exception {
         PatientData patient = new PatientData();
-        MciHealthId MciHealthId = new MciHealthId("FUBAR");
-        when(healthIdService.getNextHealthId()).thenReturn(MciHealthId);
-        SearchQuery searchByNidQuery = new SearchQuery();
-        searchByNidQuery.setNid("nid-100");
-        when(patientRepository.findAllByQuery(searchByNidQuery)).thenReturn(new ArrayList<PatientData>());
-
-        SearchQuery searchByBrnQuery = new SearchQuery();
-        searchByBrnQuery.setBin_brn("brn-100");
-        when(patientRepository.findAllByQuery(searchByBrnQuery)).thenReturn(new ArrayList<PatientData>());
-
-        patient.setNationalId("nid-100");
-        patient.setBirthRegistrationNumber("brn-100");
+        when(healthIdService.getNextHealthId()).thenReturn("FUBAR");
 
         when(mciResponse.getHttpStatus()).thenReturn(201);
         when(patientRepository.create(patient)).thenReturn(mciResponse);
 
         patientService.createPatientForMCI(patient);
         InOrder inOrder = inOrder(patientRepository);
-        inOrder.verify(patientRepository).findAllByQuery(searchByNidQuery);
-        inOrder.verify(patientRepository).findAllByQuery(searchByBrnQuery);
         inOrder.verify(patientRepository).create(patient);
 
         verify(healthIdService).getNextHealthId();
@@ -84,61 +68,36 @@ public class PatientServiceTest {
     @Test
     public void shouldMarkHidUsedIfCretePatientIsSuccessful() throws Exception {
         PatientData existingPatient = new PatientData();
-        MciHealthId MciHealthId = new MciHealthId("FUBAR");
-        when(healthIdService.getNextHealthId()).thenReturn(MciHealthId);
-        SearchQuery searchByNidQuery = new SearchQuery();
-        searchByNidQuery.setNid("nid-100");
-        when(patientRepository.findAllByQuery(searchByNidQuery)).thenReturn(new ArrayList<PatientData>());
-
-        SearchQuery searchByBrnQuery = new SearchQuery();
-        searchByBrnQuery.setBin_brn("brn-100");
-        when(patientRepository.findAllByQuery(searchByBrnQuery)).thenReturn(new ArrayList<PatientData>());
-
-        existingPatient.setNationalId("nid-100");
-        existingPatient.setBirthRegistrationNumber("brn-100");
-
+        String hid = "FUBAR";
+        when(healthIdService.getNextHealthId()).thenReturn(hid);
         when(mciResponse.getHttpStatus()).thenReturn(201);
         when(patientRepository.create(existingPatient)).thenReturn(mciResponse);
 
         patientService.createPatientForMCI(existingPatient);
         InOrder inOrder = inOrder(patientRepository);
-        inOrder.verify(patientRepository).findAllByQuery(searchByNidQuery);
-        inOrder.verify(patientRepository).findAllByQuery(searchByBrnQuery);
         inOrder.verify(patientRepository).create(existingPatient);
 
         verify(healthIdService).getNextHealthId();
-        verify(healthIdService, times(1)).markUsed(any(MciHealthId.class));
-        verify(healthIdService, times(0)).putBackHealthId(any(MciHealthId.class));
+        verify(healthIdService, times(1)).markUsed(hid);
+        verify(healthIdService, times(0)).putBackHealthId(any(String.class));
     }
 
     @Test
     public void shouldReturnHidToHidBlockIfCretePatientFailed() throws Exception {
         PatientData existingPatient = new PatientData();
-        MciHealthId MciHealthId = new MciHealthId("FUBAR");
-        when(healthIdService.getNextHealthId()).thenReturn(MciHealthId);
-        SearchQuery searchByNidQuery = new SearchQuery();
-        searchByNidQuery.setNid("nid-100");
-        when(patientRepository.findAllByQuery(searchByNidQuery)).thenReturn(new ArrayList<PatientData>());
+        String hid = "FUBAR";
 
-        SearchQuery searchByBrnQuery = new SearchQuery();
-        searchByBrnQuery.setBin_brn("brn-100");
-        when(patientRepository.findAllByQuery(searchByBrnQuery)).thenReturn(new ArrayList<PatientData>());
-
-        existingPatient.setNationalId("nid-100");
-        existingPatient.setBirthRegistrationNumber("brn-100");
-
+        when(healthIdService.getNextHealthId()).thenReturn(hid);
         when(mciResponse.getHttpStatus()).thenReturn(403);
         when(patientRepository.create(existingPatient)).thenReturn(mciResponse);
 
         patientService.createPatientForMCI(existingPatient);
         InOrder inOrder = inOrder(patientRepository);
-        inOrder.verify(patientRepository).findAllByQuery(searchByNidQuery);
-        inOrder.verify(patientRepository).findAllByQuery(searchByBrnQuery);
         inOrder.verify(patientRepository).create(existingPatient);
 
         verify(healthIdService).getNextHealthId();
-        verify(healthIdService, times(0)).markUsed(any(MciHealthId.class));
-        verify(healthIdService, times(1)).putBackHealthId(any(MciHealthId.class));
+        verify(healthIdService, times(0)).markUsed(any(String.class));
+        verify(healthIdService, times(1)).putBackHealthId(hid);
     }
 
     @Test
@@ -181,35 +140,21 @@ public class PatientServiceTest {
         String clientId = "12345";
         String healthId = "12312";
         PatientData patient = new PatientData();
-
-        SearchQuery searchByNidQuery = new SearchQuery();
-        searchByNidQuery.setNid("nid-100");
-        when(patientRepository.findAllByQuery(searchByNidQuery)).thenReturn(new ArrayList<PatientData>());
-
-        SearchQuery searchByBrnQuery = new SearchQuery();
-        searchByBrnQuery.setBin_brn("brn-100");
-        when(patientRepository.findAllByQuery(searchByBrnQuery)).thenReturn(new ArrayList<PatientData>());
-
-        patient.setNationalId("nid-100");
-        patient.setBirthRegistrationNumber("brn-100");
         patient.setHealthId(healthId);
+        mciResponse = new MCIResponse(healthId, HttpStatus.CREATED);
 
         when(mciProperties.getOtherOrgInvalidHidPattern()).thenReturn("");
-        mciResponse = new MCIResponse(healthId, HttpStatus.CREATED);
         when(patientRepository.create(patient)).thenReturn(mciResponse);
-        OrgHealthId orgHealthId = new OrgHealthId(healthId, clientId, TimeUuidUtil.uuidForDate(new Date()), null);
-        when(healthIdService.findOrgHealthId(healthId)).thenReturn(orgHealthId);
+        when(healthIdService.validateHIDForOrg(healthId, clientId)).thenReturn(getAvailability("true", null));
 
         MCIResponse mciResponse = patientService.createPatientForOrg(patient, clientId);
 
         assertEquals(healthId, mciResponse.getId());
         assertEquals(HttpStatus.CREATED.value(), mciResponse.getHttpStatus());
         InOrder inOrder = inOrder(patientRepository, healthIdService);
-        inOrder.verify(patientRepository).findAllByQuery(searchByNidQuery);
-        inOrder.verify(patientRepository).findAllByQuery(searchByBrnQuery);
-        inOrder.verify(healthIdService).findOrgHealthId(healthId);
+        inOrder.verify(healthIdService).validateHIDForOrg(healthId, clientId);
         inOrder.verify(patientRepository).create(patient);
-        inOrder.verify(healthIdService).markOrgHealthIdUsed(orgHealthId);
+        inOrder.verify(healthIdService).markUsed(healthId);
     }
 
     @Test
@@ -217,17 +162,6 @@ public class PatientServiceTest {
         String clientId = "12345";
         String healthId = "12312";
         PatientData patient = new PatientData();
-
-        SearchQuery searchByNidQuery = new SearchQuery();
-        searchByNidQuery.setNid("nid-100");
-        when(patientRepository.findAllByQuery(searchByNidQuery)).thenReturn(new ArrayList<PatientData>());
-
-        SearchQuery searchByBrnQuery = new SearchQuery();
-        searchByBrnQuery.setBin_brn("brn-100");
-        when(patientRepository.findAllByQuery(searchByBrnQuery)).thenReturn(new ArrayList<PatientData>());
-
-        patient.setNationalId("nid-100");
-        patient.setBirthRegistrationNumber("brn-100");
         patient.setHealthId(healthId);
 
         when(mciProperties.getOtherOrgInvalidHidPattern()).thenReturn(".*");
@@ -238,11 +172,9 @@ public class PatientServiceTest {
         assertEquals(HttpStatus.BAD_REQUEST.value(), mciResponse.getHttpStatus());
 
         InOrder inOrder = inOrder(patientRepository, healthIdService);
-        inOrder.verify(patientRepository).findAllByQuery(searchByNidQuery);
-        inOrder.verify(patientRepository).findAllByQuery(searchByBrnQuery);
-        inOrder.verify(healthIdService, never()).findOrgHealthId(healthId);
+        inOrder.verify(healthIdService, never()).validateHIDForOrg("hid", healthId);
         inOrder.verify(patientRepository, never()).create(patient);
-        inOrder.verify(healthIdService, never()).markOrgHealthIdUsed(any(OrgHealthId.class));
+        inOrder.verify(healthIdService, never()).markUsed(any(String.class));
     }
 
     @Test
@@ -250,33 +182,21 @@ public class PatientServiceTest {
         String clientId = "12345";
         String healthId = "12131";
         PatientData patient = new PatientData();
-
-        SearchQuery searchByNidQuery = new SearchQuery();
-        searchByNidQuery.setNid("nid-100");
-        when(patientRepository.findAllByQuery(searchByNidQuery)).thenReturn(new ArrayList<PatientData>());
-
-        SearchQuery searchByBrnQuery = new SearchQuery();
-        searchByBrnQuery.setBin_brn("brn-100");
-        when(patientRepository.findAllByQuery(searchByBrnQuery)).thenReturn(new ArrayList<PatientData>());
-
-        patient.setNationalId("nid-100");
-        patient.setBirthRegistrationNumber("brn-100");
         patient.setHealthId(healthId);
+        String expectedMessage = "The HealthId is not present";
 
         when(mciProperties.getOtherOrgInvalidHidPattern()).thenReturn("");
-        when(healthIdService.findOrgHealthId(healthId)).thenReturn(null);
+        when(healthIdService.validateHIDForOrg(healthId, clientId)).thenReturn(getAvailability("false", expectedMessage));
 
         MCIResponse mciResponse = patientService.createPatientForOrg(patient, clientId);
 
-        assertEquals("The HealthId is not present", mciResponse.getId());
+        assertEquals(expectedMessage, mciResponse.getId());
         assertEquals(HttpStatus.BAD_REQUEST.value(), mciResponse.getHttpStatus());
 
         InOrder inOrder = inOrder(patientRepository, healthIdService);
-        inOrder.verify(patientRepository).findAllByQuery(searchByNidQuery);
-        inOrder.verify(patientRepository).findAllByQuery(searchByBrnQuery);
-        inOrder.verify(healthIdService).findOrgHealthId(healthId);
+        inOrder.verify(healthIdService).validateHIDForOrg(healthId, clientId);
         inOrder.verify(patientRepository, never()).create(patient);
-        inOrder.verify(healthIdService, never()).markOrgHealthIdUsed(any(OrgHealthId.class));
+        inOrder.verify(healthIdService, never()).markUsed(any(String.class));
     }
 
     @Test
@@ -284,35 +204,22 @@ public class PatientServiceTest {
         String clientId = "12345";
         String healthId = "11231";
         PatientData patient = new PatientData();
-
-        SearchQuery searchByNidQuery = new SearchQuery();
-        searchByNidQuery.setNid("nid-100");
-        when(patientRepository.findAllByQuery(searchByNidQuery)).thenReturn(new ArrayList<PatientData>());
-
-        SearchQuery searchByBrnQuery = new SearchQuery();
-        searchByBrnQuery.setBin_brn("brn-100");
-        when(patientRepository.findAllByQuery(searchByBrnQuery)).thenReturn(new ArrayList<PatientData>());
-
-        patient.setNationalId("nid-100");
-        patient.setBirthRegistrationNumber("brn-100");
         patient.setHealthId(healthId);
+        String expectedMessage = "The HealthId is already used";
+
 
         when(mciProperties.getOtherOrgInvalidHidPattern()).thenReturn("");
-        OrgHealthId orgHealthId = new OrgHealthId(healthId, clientId, TimeUuidUtil.uuidForDate(new Date()), null);
-        orgHealthId.markUsed();
-        when(healthIdService.findOrgHealthId(healthId)).thenReturn(orgHealthId);
+        when(healthIdService.validateHIDForOrg(healthId, clientId)).thenReturn(getAvailability("false", expectedMessage));
 
         MCIResponse mciResponse = patientService.createPatientForOrg(patient, clientId);
 
-        assertEquals("The HealthId is already used", mciResponse.getId());
+        assertEquals(expectedMessage, mciResponse.getId());
         assertEquals(HttpStatus.BAD_REQUEST.value(), mciResponse.getHttpStatus());
 
         InOrder inOrder = inOrder(patientRepository, healthIdService);
-        inOrder.verify(patientRepository).findAllByQuery(searchByNidQuery);
-        inOrder.verify(patientRepository).findAllByQuery(searchByBrnQuery);
-        inOrder.verify(healthIdService).findOrgHealthId(healthId);
+        inOrder.verify(healthIdService).validateHIDForOrg(healthId, clientId);
         inOrder.verify(patientRepository, never()).create(patient);
-        inOrder.verify(healthIdService, never()).markOrgHealthIdUsed(any(OrgHealthId.class));
+        inOrder.verify(healthIdService, never()).markUsed(any(String.class));
     }
 
     @Test
@@ -320,35 +227,21 @@ public class PatientServiceTest {
         String clientId = "12345";
         String healthId = "12312";
         PatientData patient = new PatientData();
-
-        SearchQuery searchByNidQuery = new SearchQuery();
-        searchByNidQuery.setNid("nid-100");
-        when(patientRepository.findAllByQuery(searchByNidQuery)).thenReturn(new ArrayList<PatientData>());
-
-        SearchQuery searchByBrnQuery = new SearchQuery();
-        searchByBrnQuery.setBin_brn("brn-100");
-        when(patientRepository.findAllByQuery(searchByBrnQuery)).thenReturn(new ArrayList<PatientData>());
-
-        patient.setNationalId("nid-100");
-        patient.setBirthRegistrationNumber("brn-100");
         patient.setHealthId(healthId);
+        String expectedMessage = "The HealthId is not for given organization";
 
         when(mciProperties.getOtherOrgInvalidHidPattern()).thenReturn("");
-        OrgHealthId orgHealthId = new OrgHealthId(healthId, "other", TimeUuidUtil.uuidForDate(new Date()), null);
-
-        when(healthIdService.findOrgHealthId(healthId)).thenReturn(orgHealthId);
+        when(healthIdService.validateHIDForOrg(healthId, clientId)).thenReturn(getAvailability("false", expectedMessage));
 
         MCIResponse mciResponse = patientService.createPatientForOrg(patient, clientId);
 
-        assertEquals("The HealthId is not for given organization", mciResponse.getId());
+        assertEquals(expectedMessage, mciResponse.getId());
         assertEquals(HttpStatus.BAD_REQUEST.value(), mciResponse.getHttpStatus());
 
         InOrder inOrder = inOrder(patientRepository, healthIdService);
-        inOrder.verify(patientRepository).findAllByQuery(searchByNidQuery);
-        inOrder.verify(patientRepository).findAllByQuery(searchByBrnQuery);
-        inOrder.verify(healthIdService).findOrgHealthId(healthId);
+        inOrder.verify(healthIdService).validateHIDForOrg(healthId, clientId);
         inOrder.verify(patientRepository, never()).create(patient);
-        inOrder.verify(healthIdService, never()).markOrgHealthIdUsed(any(OrgHealthId.class));
+        inOrder.verify(healthIdService, never()).markUsed(any(String.class));
     }
 
     @Test
@@ -431,24 +324,6 @@ public class PatientServiceTest {
         assertEquals(mappings.get(0).getLastUpdated(), pendingApproval.getLastUpdated());
     }
 
-    private PendingApprovalMapping buildPendingApprovalMapping(String healthId) throws InterruptedException {
-        PendingApprovalMapping mapping = new PendingApprovalMapping();
-        mapping.setHealthId(healthId);
-        Catchment catchment = new Catchment("10", "20");
-        catchment.setUpazilaId("30");
-        mapping.setCatchmentId(catchment.getId());
-        mapping.setLastUpdated(TimeUuidUtil.uuidForDate(new Date()));
-        return mapping;
-    }
-
-    private PatientData buildPatient(String healthId) {
-        PatientData patient = new PatientData();
-        patient.setHealthId(healthId);
-        patient.setGivenName("Scott-" + healthId);
-        patient.setSurName("Tiger-" + healthId);
-        return patient;
-    }
-
     @Test(expected = InsufficientPrivilegeException.class)
     public void shouldNotFindPendingApprovalDetailsThatDoesNotBelongToGivenCatchment() {
         String healthId = "healthId-100";
@@ -501,82 +376,6 @@ public class PatientServiceTest {
             PendingApproval rhs = actualResponse.iterator().next();
             assertTrue(reflectionEquals(lhs, rhs));
         }
-    }
-
-    private TreeSet<PendingApproval> buildPendingApprovalRequestMap(List<UUID> uuids, PhoneNumber phoneNumber, Address address) {
-        TreeSet<PendingApproval> pendingApprovals = new TreeSet<>();
-        pendingApprovals.add(buildPendingApprovalField(GIVEN_NAME, "Harry", uuids));
-        pendingApprovals.add(buildPendingApprovalField(SUR_NAME, "Potter", uuids));
-        pendingApprovals.add(buildPendingApprovalField(BLOOD_GROUP, "As if I care!", uuids));
-        Requester requester1 = new Requester("facility-4", "provider-4");
-        pendingApprovals.add(buildPendingApprovalField(OCCUPATION, "Wizard", uuids.get(3), requester1, "Jobless"));
-
-        PhoneNumber newPhoneNumber = new PhoneNumber();
-        newPhoneNumber.setCountryCode("91");
-        newPhoneNumber.setAreaCode("033");
-        newPhoneNumber.setNumber("30001234");
-        Requester requester2 = new Requester("facility-1", "provider-1");
-        pendingApprovals.add(buildPendingApprovalField(PHONE_NUMBER, phoneNumber, uuids.get(0), requester2, newPhoneNumber));
-
-        Address newAddress = new Address();
-        newAddress.setDivisionId("10");
-        newAddress.setDistrictId("21");
-        newAddress.setUpazilaId("31");
-        pendingApprovals.add(buildPendingApprovalField(PRESENT_ADDRESS, address, uuids.get(0), requester2, newAddress));
-        return pendingApprovals;
-    }
-
-    private List<UUID> generateUUIDs() throws Exception {
-        List<UUID> uuids = new ArrayList<>();
-        for (int i = 0; i < 4; i++) {
-            uuids.add(TimeUuidUtil.uuidForDate(new Date()));
-        }
-        return uuids;
-    }
-
-    private PendingApproval buildPendingApprovalField(String name, String currentValue, List<UUID> uuids) {
-        PendingApproval pendingApproval = new PendingApproval();
-        pendingApproval.setName(name);
-        pendingApproval.setCurrentValue(currentValue);
-
-        TreeMap<UUID, PendingApprovalFieldDetails> detailsMap = new TreeMap<>();
-
-        PendingApprovalFieldDetails details1 = new PendingApprovalFieldDetails();
-        details1.setRequestedBy(new Requester("facility-1", "provider-1"));
-        details1.setValue("A." + name);
-        details1.setCreatedAt(TimeUuidUtil.getTimeFromUUID(uuids.get(0)));
-        detailsMap.put(uuids.get(0), details1);
-
-        PendingApprovalFieldDetails details2 = new PendingApprovalFieldDetails();
-        details2.setRequestedBy(new Requester("facility-2", "provider-2"));
-        details2.setValue("B." + name);
-        details2.setCreatedAt(TimeUuidUtil.getTimeFromUUID(uuids.get(1)));
-        detailsMap.put(uuids.get(1), details2);
-
-        PendingApprovalFieldDetails details3 = new PendingApprovalFieldDetails();
-        details3.setRequestedBy(new Requester("facility-3", "provider-3"));
-        details3.setValue("C." + name);
-        details3.setCreatedAt(TimeUuidUtil.getTimeFromUUID(uuids.get(2)));
-        detailsMap.put(uuids.get(2), details3);
-
-        pendingApproval.addFieldDetails(detailsMap);
-        return pendingApproval;
-    }
-
-    private PendingApproval buildPendingApprovalField(String name, Object currentValue, UUID uuid, Requester requester, Object value) {
-        PendingApproval fieldDetails = new PendingApproval();
-        fieldDetails.setName(name);
-        fieldDetails.setCurrentValue(currentValue);
-
-        TreeMap<UUID, PendingApprovalFieldDetails> detailsMap = new TreeMap<>();
-        PendingApprovalFieldDetails details = new PendingApprovalFieldDetails();
-        details.setRequestedBy(requester);
-        details.setValue(value);
-        details.setCreatedAt(TimeUuidUtil.getTimeFromUUID(uuid));
-        detailsMap.put(uuid, details);
-
-        fieldDetails.addFieldDetails(detailsMap);
-        return fieldDetails;
     }
 
     @Test
@@ -972,4 +771,108 @@ public class PatientServiceTest {
         assertEquals(1, patientLogs.size());
         assertEquals(eventId, patientLog.getEventId());
     }
+
+    private PendingApprovalMapping buildPendingApprovalMapping(String healthId) throws InterruptedException {
+        PendingApprovalMapping mapping = new PendingApprovalMapping();
+        mapping.setHealthId(healthId);
+        Catchment catchment = new Catchment("10", "20");
+        catchment.setUpazilaId("30");
+        mapping.setCatchmentId(catchment.getId());
+        mapping.setLastUpdated(TimeUuidUtil.uuidForDate(new Date()));
+        return mapping;
+    }
+
+    private PatientData buildPatient(String healthId) {
+        PatientData patient = new PatientData();
+        patient.setHealthId(healthId);
+        patient.setGivenName("Scott-" + healthId);
+        patient.setSurName("Tiger-" + healthId);
+        return patient;
+    }
+
+    private TreeSet<PendingApproval> buildPendingApprovalRequestMap(List<UUID> uuids, PhoneNumber phoneNumber, Address address) {
+        TreeSet<PendingApproval> pendingApprovals = new TreeSet<>();
+        pendingApprovals.add(buildPendingApprovalField(GIVEN_NAME, "Harry", uuids));
+        pendingApprovals.add(buildPendingApprovalField(SUR_NAME, "Potter", uuids));
+        pendingApprovals.add(buildPendingApprovalField(BLOOD_GROUP, "As if I care!", uuids));
+        Requester requester1 = new Requester("facility-4", "provider-4");
+        pendingApprovals.add(buildPendingApprovalField(OCCUPATION, "Wizard", uuids.get(3), requester1, "Jobless"));
+
+        PhoneNumber newPhoneNumber = new PhoneNumber();
+        newPhoneNumber.setCountryCode("91");
+        newPhoneNumber.setAreaCode("033");
+        newPhoneNumber.setNumber("30001234");
+        Requester requester2 = new Requester("facility-1", "provider-1");
+        pendingApprovals.add(buildPendingApprovalField(PHONE_NUMBER, phoneNumber, uuids.get(0), requester2, newPhoneNumber));
+
+        Address newAddress = new Address();
+        newAddress.setDivisionId("10");
+        newAddress.setDistrictId("21");
+        newAddress.setUpazilaId("31");
+        pendingApprovals.add(buildPendingApprovalField(PRESENT_ADDRESS, address, uuids.get(0), requester2, newAddress));
+        return pendingApprovals;
+    }
+
+    private List<UUID> generateUUIDs() throws Exception {
+        List<UUID> uuids = new ArrayList<>();
+        for (int i = 0; i < 4; i++) {
+            uuids.add(TimeUuidUtil.uuidForDate(new Date()));
+        }
+        return uuids;
+    }
+
+    private PendingApproval buildPendingApprovalField(String name, String currentValue, List<UUID> uuids) {
+        PendingApproval pendingApproval = new PendingApproval();
+        pendingApproval.setName(name);
+        pendingApproval.setCurrentValue(currentValue);
+
+        TreeMap<UUID, PendingApprovalFieldDetails> detailsMap = new TreeMap<>();
+
+        PendingApprovalFieldDetails details1 = new PendingApprovalFieldDetails();
+        details1.setRequestedBy(new Requester("facility-1", "provider-1"));
+        details1.setValue("A." + name);
+        details1.setCreatedAt(TimeUuidUtil.getTimeFromUUID(uuids.get(0)));
+        detailsMap.put(uuids.get(0), details1);
+
+        PendingApprovalFieldDetails details2 = new PendingApprovalFieldDetails();
+        details2.setRequestedBy(new Requester("facility-2", "provider-2"));
+        details2.setValue("B." + name);
+        details2.setCreatedAt(TimeUuidUtil.getTimeFromUUID(uuids.get(1)));
+        detailsMap.put(uuids.get(1), details2);
+
+        PendingApprovalFieldDetails details3 = new PendingApprovalFieldDetails();
+        details3.setRequestedBy(new Requester("facility-3", "provider-3"));
+        details3.setValue("C." + name);
+        details3.setCreatedAt(TimeUuidUtil.getTimeFromUUID(uuids.get(2)));
+        detailsMap.put(uuids.get(2), details3);
+
+        pendingApproval.addFieldDetails(detailsMap);
+        return pendingApproval;
+    }
+
+    private PendingApproval buildPendingApprovalField(String name, Object currentValue, UUID uuid, Requester requester, Object value) {
+        PendingApproval fieldDetails = new PendingApproval();
+        fieldDetails.setName(name);
+        fieldDetails.setCurrentValue(currentValue);
+
+        TreeMap<UUID, PendingApprovalFieldDetails> detailsMap = new TreeMap<>();
+        PendingApprovalFieldDetails details = new PendingApprovalFieldDetails();
+        details.setRequestedBy(requester);
+        details.setValue(value);
+        details.setCreatedAt(TimeUuidUtil.getTimeFromUUID(uuid));
+        detailsMap.put(uuid, details);
+
+        fieldDetails.addFieldDetails(detailsMap);
+        return fieldDetails;
+    }
+
+    private Map getAvailability(String isAvailable, String reason) {
+        HashMap<String, String> map = new HashMap<>();
+        map.put("availability", isAvailable);
+        if (StringUtils.isNotEmpty(reason)) {
+            map.put("reason", reason);
+        }
+        return map;
+    }
+
 }

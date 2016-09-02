@@ -18,6 +18,8 @@ import org.sharedhealth.mci.domain.repository.PatientRepository;
 import org.sharedhealth.mci.domain.util.BaseIntegrationTest;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
+import org.sharedhealth.mci.web.model.IdentityStore;
+import org.sharedhealth.mci.web.model.MciHealthIdStore;
 import org.sharedhealth.mci.web.service.PatientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +34,7 @@ import javax.servlet.Filter;
 import java.util.Date;
 import java.util.List;
 
+import static java.util.Arrays.asList;
 import static org.sharedhealth.mci.utils.HttpUtil.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -61,9 +64,12 @@ public class BaseControllerTest extends BaseIntegrationTest {
     private PatientRepository patientRepository;
     @Autowired
     protected PatientService patientService;
-
     @Autowired
     private Filter springSecurityFilterChain;
+    @Autowired
+    private MciHealthIdStore mciHealthIdStore;
+    @Autowired
+    private IdentityStore identityStore;
 
     protected String validClientId;
     protected String validEmail;
@@ -74,12 +80,12 @@ public class BaseControllerTest extends BaseIntegrationTest {
     public static final String API_END_POINT_FOR_PATIENT = "/patients";
     public static final String API_END_POINT_FOR_MERGE_REQUEST = "/mergerequest";
     public static final String API_END_POINT_FOR_LOCATION = "/locations";
-    public static final String APPLICATION_JSON_UTF8 = "application/json;charset=UTF-8";
 
+    public static final String APPLICATION_JSON_UTF8 = "application/json;charset=UTF-8";
     protected final String facilityClientId = "18548";
     protected final String facilityEmail = "facility@gmail.com";
-    protected final String facilityAccessToken = "40214a6c-e27c-4223-981c-1f837be90f02";
 
+    protected final String facilityAccessToken = "40214a6c-e27c-4223-981c-1f837be90f02";
     protected final String mciApproverClientId = "18555";
     protected final String mciApproverEmail = "mciapprover@gmail.com";
     protected final String mciApproverAccessToken = "40214a6c-e27c-4223-981c-1f837be90f06";
@@ -159,20 +165,13 @@ public class BaseControllerTest extends BaseIntegrationTest {
 
     @Before
     public void setupBase() throws Exception {
-        createHealthIds();
-    }
-
-    private void createHealthIds() {
-        for (int i = 0; i < numberOfHealthIdsNeeded(); i++) {
-        }
-    }
-
-    protected int numberOfHealthIdsNeeded() {
-        return 10;
+        mciHealthIdStore.addMciHealthIds(asList("HID1", "HID2"));
     }
 
     @After
     public void teardownBase() {
+        identityStore.clearIdentityToken();
+        mciHealthIdStore.clear();
     }
 
     protected PatientData getPatientMapperObjectByHealthId(String healthId) throws Exception {

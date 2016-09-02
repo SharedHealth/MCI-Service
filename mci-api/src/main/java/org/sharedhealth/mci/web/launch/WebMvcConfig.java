@@ -13,7 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
@@ -28,7 +27,6 @@ import java.util.concurrent.Executors;
 @Configuration
 @Import({MCIConfig.class, MCISecurityConfig.class, ActuatorConfig.class})
 @EnableWebMvc
-@EnableScheduling
 @ComponentScan(basePackages = {"org.sharedhealth.mci.web.config",
         "org.sharedhealth.mci.web.controller",
         "org.sharedhealth.mci.web.exception",

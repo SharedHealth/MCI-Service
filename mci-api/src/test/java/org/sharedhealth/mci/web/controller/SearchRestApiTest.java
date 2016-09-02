@@ -40,11 +40,6 @@ public class SearchRestApiTest extends BaseControllerTest {
             " narrow down your search";
     private static final int PER_PAGE_MAXIMUM_LIMIT = 25;
 
-    @Override
-    protected int numberOfHealthIdsNeeded() {
-        return 50;
-    }
-
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -282,37 +277,6 @@ public class SearchRestApiTest extends BaseControllerTest {
         Assert.assertEquals(200, body.getHttpStatus());
     }
 
-    private void createPatientData() {
-        patientData = new PatientData();
-        patientData.setGivenName("Raju");
-        patientData.setSurName("Mazumder");
-        patientData.setGender("M");
-        patientData.setDateOfBirth(parseDate("2014-12-01"));
-        patientData.setEducationLevel("01");
-        patientData.setOccupation("02");
-        patientData.setMaritalStatus("1");
-        PhoneNumber phoneNumber = new PhoneNumber();
-        phoneNumber.setNumber("1716528608");
-        phoneNumber.setCountryCode("880");
-        phoneNumber.setExtension("02");
-        phoneNumber.setAreaCode("01");
-
-        patientData.setPhoneNumber(phoneNumber);
-        patientData.setPrimaryContactNumber(phoneNumber);
-
-        Address address = new Address();
-        address.setAddressLine("house-12");
-        address.setDivisionId("10");
-        address.setDistrictId("04");
-        address.setUpazilaId("09");
-        address.setCityCorporationId("20");
-        address.setVillage("10");
-        address.setUnionOrUrbanWardId("01");
-        address.setCountryCode("050");
-
-        patientData.setAddress(address);
-    }
-
     @Test
     public void shouldReturnAllTheCreatedPatientIfPhoneNumberMatchBySearch() throws Exception {
         String present_address = patientData.getAddress().getDivisionId() +
@@ -344,5 +308,36 @@ public class SearchRestApiTest extends BaseControllerTest {
         patientData.setUpdatedAt(TimeUuidUtil.uuidForDate(new Date()));
         searchMappingRepository.saveMappings(patientData);
         return patient;
+    }
+
+    private void createPatientData() {
+        patientData = new PatientData();
+        patientData.setGivenName("Raju");
+        patientData.setSurName("Mazumder");
+        patientData.setGender("M");
+        patientData.setDateOfBirth(parseDate("2014-12-01"));
+        patientData.setEducationLevel("01");
+        patientData.setOccupation("02");
+        patientData.setMaritalStatus("1");
+        PhoneNumber phoneNumber = new PhoneNumber();
+        phoneNumber.setNumber("1716528608");
+        phoneNumber.setCountryCode("880");
+        phoneNumber.setExtension("02");
+        phoneNumber.setAreaCode("01");
+
+        patientData.setPhoneNumber(phoneNumber);
+        patientData.setPrimaryContactNumber(phoneNumber);
+
+        Address address = new Address();
+        address.setAddressLine("house-12");
+        address.setDivisionId("10");
+        address.setDistrictId("04");
+        address.setUpazilaId("09");
+        address.setCityCorporationId("20");
+        address.setVillage("10");
+        address.setUnionOrUrbanWardId("01");
+        address.setCountryCode("050");
+
+        patientData.setAddress(address);
     }
 }

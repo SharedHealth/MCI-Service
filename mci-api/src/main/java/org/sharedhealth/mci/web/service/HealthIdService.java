@@ -8,9 +8,7 @@ import org.sharedhealth.mci.utils.HttpUtil;
 import org.sharedhealth.mci.web.exception.UnauthorizedException;
 import org.sharedhealth.mci.web.infrastructure.registry.HealthIdWebClient;
 import org.sharedhealth.mci.web.infrastructure.security.IdentityServiceClient;
-import org.sharedhealth.mci.web.model.MciHealthId;
 import org.sharedhealth.mci.web.model.MciHealthIdStore;
-import org.sharedhealth.mci.web.model.OrgHealthId;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -24,7 +22,7 @@ import java.io.IOException;
 import java.util.*;
 
 import static java.util.Arrays.asList;
-import static org.sharedhealth.mci.utils.HttpUtil.AUTH_TOKEN_KEY;
+import static org.sharedhealth.mci.utils.HttpUtil.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Component
@@ -53,12 +51,12 @@ public class HealthIdService {
         mciHealthIdStore.addMciHealthIds(healthIdBlock);
     }
 
-    public MciHealthId getNextHealthId() throws InterruptedException {
-        return new MciHealthId(mciHealthIdStore.getNextHealthId());
+    public String getNextHealthId() throws InterruptedException {
+        return mciHealthIdStore.getNextHealthId();
     }
 
-    public void putBackHealthId(MciHealthId mciHealthId) {
-        mciHealthIdStore.addMciHealthIds(asList(mciHealthId.getHid()));
+    public void putBackHealthId(String healthId) {
+        mciHealthIdStore.addMciHealthIds(asList(healthId));
     }
 
     public void replenishIfNeeded() throws IOException {
@@ -71,8 +69,8 @@ public class HealthIdService {
         }
     }
 
-    public void markUsed(MciHealthId nextMciHealthId) {
-        String markUsedUrl = String.format(mciProperties.getHidServiceMarkUsedUrlPattern(), nextMciHealthId.getHid());
+    public void markUsed(String healthId) {
+        String markUsedUrl = String.format(mciProperties.getHidServiceMarkUsedUrlPattern(), healthId);
         HttpHeaders headers = HttpUtil.getHIDServiceHeaders(mciProperties);
         try {
             headers.add(AUTH_TOKEN_KEY, identityServiceClient.getOrCreateToken());
@@ -82,7 +80,7 @@ public class HealthIdService {
 
             String response = healthIdWebClient.markUsed(markUsedUrl, httpEntity);
             if (ACCEPTED.equalsIgnoreCase(response)) return;
-            logger.error("HID service rejected this Health Id.");
+            logger.error(String.format("HID service rejected HealthId [%s].", healthId));
         } catch (UnauthorizedException e) {
             logger.info("Token expired");
             identityServiceClient.clearToken();
@@ -92,11 +90,24 @@ public class HealthIdService {
         }
     }
 
-    public OrgHealthId findOrgHealthId(String healthId) {
-        return null;
-    }
-
-    public void markOrgHealthIdUsed(OrgHealthId orgHealthId) {
+    public Map validateHIDForOrg(String hid, String orgCode) {
+        String message = String.format("Can not fetch information about HealthId [%s]", hid);
+        String checkHIDUrl = String.format(mciProperties.getHidServiceCheckHIDUrlPattern(), hid, orgCode);
+        HttpHeaders headers = HttpUtil.getHIDServiceHeaders(mciProperties);
+        try {
+            String token = identityServiceClient.getOrCreateToken();
+            headers.add(AUTH_TOKEN_KEY, token);
+            return healthIdWebClient.validateHID(checkHIDUrl, new HttpEntity<>(headers));
+        } catch (UnauthorizedException e) {
+            logger.info("Token expired");
+            identityServiceClient.clearToken();
+        } catch (Exception e) {
+            logger.error(message, e);
+        }
+        Map<String, String> map = new HashMap<>();
+        map.put(AVAILABILITY_KEY, Boolean.FALSE.toString());
+        map.put(REASON_KEY, message);
+        return map;
     }
 
     private List getNextBlockFromHidService() {

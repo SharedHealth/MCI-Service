@@ -31,6 +31,6 @@ public abstract class SimpleListenableFuture<T, S> extends FutureAdapter<T, S> i
                     callback.onFailure(e);
                 }
             }
-        }, MoreExecutors.sameThreadExecutor());
+        }, MoreExecutors.newDirectExecutorService());
     }
 }

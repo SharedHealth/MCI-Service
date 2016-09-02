@@ -3,19 +3,20 @@ package org.sharedhealth.mci.web.controller;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
+import org.apache.http.HttpStatus;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
+import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.sharedhealth.mci.domain.model.*;
 import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.sharedhealth.mci.searchmapping.repository.PatientSearchMappingRepository;
 import org.sharedhealth.mci.web.dummy.InvalidPatient;
 import org.sharedhealth.mci.web.handler.ErrorHandler;
 import org.sharedhealth.mci.web.handler.MCIError;
-import org.sharedhealth.mci.web.model.OrgHealthId;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,10 +25,12 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
@@ -49,6 +52,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class PatientControllerIT extends BaseControllerTest {
     @Autowired
     private PatientSearchMappingRepository searchMappingRepository;
+    @Autowired
+    private MCIProperties mciProperties;
+
+    private String CHECK_HID_PATH = "/healthIds/checkAvailability/97000416912";
+    private final String SIGN_IN_PATH = "/signin";
 
     @Before
     public void setup() throws ParseException {
@@ -299,8 +307,12 @@ public class PatientControllerIT extends BaseControllerTest {
     @Test
     public void shouldCreateAPatientForGivenOrganization() throws Exception {
         String json = asString("jsons/patient/payload_with_hid.json");
+        UUID token = UUID.randomUUID();
+        String checkHidResponse = "{\"availability\" : \"true\"}";
+        String idpResponse = "{\"access_token\" : \"" + token.toString() + "\"}";
 
-        insertOrgHID("97000416912", "10000002");
+        setUpIDPStub(idpResponse);
+        setupCheckHIDStub(token, checkHidResponse);
 
         MvcResult mvcResult = mockMvc.perform(post(API_END_POINT_FOR_PATIENT)
                 .header(AUTH_TOKEN_KEY, validAccessToken)
@@ -325,7 +337,12 @@ public class PatientControllerIT extends BaseControllerTest {
         String providerEmail = "provider@gmail.com";
         String providerAccessToken = "40214a6c-e27c-4223-981c-1f837be90f03";
 
-        insertOrgHID("97000416912", "10019842");
+        UUID token = UUID.randomUUID();
+        String checkHidResponse = "{\"availability\" : \"true\"}";
+        String idpResponse = "{\"access_token\" : \"" + token.toString() + "\"}";
+
+        setUpIDPStub(idpResponse);
+        setupCheckHIDStub(token, checkHidResponse);
 
         givenThat(get(urlEqualTo("/token/" + providerAccessToken))
                 .willReturn(aResponse()
@@ -1034,8 +1051,24 @@ public class PatientControllerIT extends BaseControllerTest {
         patientData.setPermanentAddress(permanentAddress);
     }
 
-    private void insertOrgHID(String healthId, String clientId) {
-        cassandraOps.insert(new OrgHealthId(healthId, clientId, TimeUuidUtil.uuidForDate(new Date()), null));
+    private void setupCheckHIDStub(UUID token, String checkHidResponse) throws IOException {
+        stubFor(get(urlPathMatching(CHECK_HID_PATH))
+                .withHeader(AUTH_TOKEN_KEY, equalTo(token.toString()))
+                .withHeader(CLIENT_ID_KEY, equalTo(mciProperties.getIdpClientId()))
+                .withHeader(FROM_KEY, equalTo(mciProperties.getIdpClientEmail()))
+                .willReturn(aResponse()
+                        .withStatus(HttpStatus.SC_OK)
+                        .withBody(checkHidResponse)
+                ));
     }
 
+    private void setUpIDPStub(String idpResponse) {
+        stubFor(WireMock.post(urlMatching(SIGN_IN_PATH))
+                .withHeader(AUTH_TOKEN_KEY, equalTo(mciProperties.getIdpAuthToken()))
+                .withHeader(CLIENT_ID_KEY, equalTo(mciProperties.getIdpClientId()))
+                .willReturn(aResponse()
+                        .withStatus(HttpStatus.SC_OK)
+                        .withBody(idpResponse)
+                ));
+    }
 }
