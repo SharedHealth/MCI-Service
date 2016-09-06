@@ -145,7 +145,7 @@ public class PatientServiceTest {
 
         when(mciProperties.getOtherOrgInvalidHidPattern()).thenReturn("");
         when(patientRepository.create(patient)).thenReturn(mciResponse);
-        when(healthIdService.validateHIDForOrg(healthId, clientId)).thenReturn(getAvailability("true", null));
+        when(healthIdService.validateHIDForOrg(healthId, clientId)).thenReturn(getAvailability(true, null));
 
         MCIResponse mciResponse = patientService.createPatientForOrg(patient, clientId);
 
@@ -186,7 +186,7 @@ public class PatientServiceTest {
         String expectedMessage = "The HealthId is not present";
 
         when(mciProperties.getOtherOrgInvalidHidPattern()).thenReturn("");
-        when(healthIdService.validateHIDForOrg(healthId, clientId)).thenReturn(getAvailability("false", expectedMessage));
+        when(healthIdService.validateHIDForOrg(healthId, clientId)).thenReturn(getAvailability(false, expectedMessage));
 
         MCIResponse mciResponse = patientService.createPatientForOrg(patient, clientId);
 
@@ -209,7 +209,7 @@ public class PatientServiceTest {
 
 
         when(mciProperties.getOtherOrgInvalidHidPattern()).thenReturn("");
-        when(healthIdService.validateHIDForOrg(healthId, clientId)).thenReturn(getAvailability("false", expectedMessage));
+        when(healthIdService.validateHIDForOrg(healthId, clientId)).thenReturn(getAvailability(false, expectedMessage));
 
         MCIResponse mciResponse = patientService.createPatientForOrg(patient, clientId);
 
@@ -231,7 +231,7 @@ public class PatientServiceTest {
         String expectedMessage = "The HealthId is not for given organization";
 
         when(mciProperties.getOtherOrgInvalidHidPattern()).thenReturn("");
-        when(healthIdService.validateHIDForOrg(healthId, clientId)).thenReturn(getAvailability("false", expectedMessage));
+        when(healthIdService.validateHIDForOrg(healthId, clientId)).thenReturn(getAvailability(false, expectedMessage));
 
         MCIResponse mciResponse = patientService.createPatientForOrg(patient, clientId);
 
@@ -866,8 +866,8 @@ public class PatientServiceTest {
         return fieldDetails;
     }
 
-    private Map getAvailability(String isAvailable, String reason) {
-        HashMap<String, String> map = new HashMap<>();
+    private Map getAvailability(boolean isAvailable, String reason) {
+        HashMap<String, Object> map = new HashMap<>();
         map.put("availability", isAvailable);
         if (StringUtils.isNotEmpty(reason)) {
             map.put("reason", reason);

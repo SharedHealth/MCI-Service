@@ -1,6 +1,9 @@
 package org.sharedhealth.mci.web.service;
 
+import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.querybuilder.Select;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.sharedhealth.mci.domain.util.TimeUuidUtil;
@@ -11,17 +14,27 @@ import org.sharedhealth.mci.web.infrastructure.security.IdentityServiceClient;
 import org.sharedhealth.mci.web.model.MciHealthIdStore;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.SpringApplication;
+import org.springframework.context.ApplicationContext;
+import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
 
+import static com.datastax.driver.core.querybuilder.QueryBuilder.in;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
 import static java.util.Arrays.asList;
+import static org.sharedhealth.mci.domain.constant.RepositoryConstants.CF_PATIENT;
+import static org.sharedhealth.mci.domain.constant.RepositoryConstants.HEALTH_ID;
 import static org.sharedhealth.mci.utils.HttpUtil.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -35,20 +48,41 @@ public class HealthIdService {
     private MciHealthIdStore mciHealthIdStore;
     private IdentityServiceClient identityServiceClient;
     private HealthIdWebClient healthIdWebClient;
-    private final MCIProperties mciProperties;
+    private MCIProperties mciProperties;
+    private CassandraOperations cqlTemplate;
+    private ApplicationContext applicationContext;
 
     @Autowired
-    public HealthIdService(MciHealthIdStore mciHealthIdStore, IdentityServiceClient identityServiceClient, HealthIdWebClient healthIdWebClient, MCIProperties mciProperties) {
+    public HealthIdService(MciHealthIdStore mciHealthIdStore, IdentityServiceClient identityServiceClient,
+                           HealthIdWebClient healthIdWebClient, MCIProperties mciProperties,
+                           @Qualifier("MCICassandraTemplate") CassandraOperations cassandraOperations, ApplicationContext applicationContext) {
         this.mciHealthIdStore = mciHealthIdStore;
         this.identityServiceClient = identityServiceClient;
         this.healthIdWebClient = healthIdWebClient;
         this.mciProperties = mciProperties;
+        this.cqlTemplate = cassandraOperations;
+        this.applicationContext = applicationContext;
     }
 
     @PostConstruct
     public void populateHidStore() throws IOException {
         List<String> healthIdBlock = getExistingHIDsFromFile();
+        Select selectHIDsQuery = select().column(HEALTH_ID).from(CF_PATIENT);
+        selectHIDsQuery.where(in(HEALTH_ID, healthIdBlock));
+
+        ResultSet resultSet = cqlTemplate.query(selectHIDsQuery);
+        while (!resultSet.isExhausted()) {
+            healthIdBlock.remove(resultSet.one().getString(HEALTH_ID));
+        }
         mciHealthIdStore.addMciHealthIds(healthIdBlock);
+    }
+
+    @PreDestroy
+    public void persistHIDsToFile() throws IOException {
+        if (mciHealthIdStore.noOfHIDsLeft() > 0) {
+            String hidsContent = new ObjectMapper().writeValueAsString(mciHealthIdStore.getAll());
+            IOUtils.write(hidsContent, new FileOutputStream(mciProperties.getHidLocalStoragePath()), CHARSET_ENCODING);
+        }
     }
 
     public String getNextHealthId() throws InterruptedException {
@@ -104,8 +138,8 @@ public class HealthIdService {
         } catch (Exception e) {
             logger.error(message, e);
         }
-        Map<String, String> map = new HashMap<>();
-        map.put(AVAILABILITY_KEY, Boolean.FALSE.toString());
+        Map<String, Object> map = new HashMap<>();
+        map.put(AVAILABILITY_KEY, Boolean.FALSE);
         map.put(REASON_KEY, message);
         return map;
     }
@@ -132,20 +166,15 @@ public class HealthIdService {
     }
 
     private List<String> getExistingHIDsFromFile() throws IOException {
+        if (!new File(mciProperties.getHidLocalStoragePath()).exists()) return new ArrayList<>();
         try {
             String content = IOUtils.toString(new FileInputStream(mciProperties.getHidLocalStoragePath()), "UTF-8");
             String[] hids = new ObjectMapper().readValue(content, String[].class);
-            return Arrays.asList(hids);
+            return Lists.newArrayList(hids);
         } catch (IOException e) {
             e.printStackTrace();
+            SpringApplication.exit(applicationContext);
         }
         return new ArrayList<>();
     }
-
-
-    private void persistHIDsToFile() throws IOException {
-        String hidsContent = new ObjectMapper().writeValueAsString(mciHealthIdStore.getAll());
-        IOUtils.write(hidsContent, new FileOutputStream(mciProperties.getHidLocalStoragePath()), CHARSET_ENCODING);
-    }
-
 }

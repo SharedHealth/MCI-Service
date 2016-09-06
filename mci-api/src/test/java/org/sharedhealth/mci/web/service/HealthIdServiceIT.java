@@ -11,10 +11,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.sharedhealth.mci.domain.config.EnvironmentMock;
 import org.sharedhealth.mci.domain.config.MCIProperties;
+import org.sharedhealth.mci.domain.model.Patient;
 import org.sharedhealth.mci.web.infrastructure.security.IdentityServiceClient;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
 import org.sharedhealth.mci.web.model.MciHealthIdStore;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -46,6 +49,9 @@ public class HealthIdServiceIT {
     private MCIProperties mciProperties;
     @Autowired
     private MciHealthIdStore mciHealthIdStore;
+    @Autowired
+    @Qualifier("MCICassandraTemplate")
+    private CassandraOperations cqlTemplate;
 
     @Rule
     public WireMockRule idpService = new WireMockRule(9997);
@@ -162,29 +168,59 @@ public class HealthIdServiceIT {
     }
 
     @Test
-    public void shouldInitializeHealthIdStoreWithFileContents() throws Exception {
-        List<String> healthIdBlock = Lists.newArrayList("healthId1", "healthId2");
+    public void shouldTellWhetherAOrgHealthIdIsValid() throws Exception {
+        UUID token = UUID.randomUUID();
+        String idpResponse = "{\"access_token\" : \"" + token.toString() + "\"}";
+        String checkHidResponse = "{\"availability\" : true}";
+        setUpIDPStub(idpResponse);
+        setupCheckHIDStub(token, checkHidResponse);
+
+        Map result = healthIdService.validateHIDForOrg("hid", "12345");
+        assertTrue((Boolean) result.get("availability"));
+
+        verify(1, postRequestedFor(urlMatching(SIGN_IN_PATH)));
+        verify(1, getRequestedFor(urlPathMatching(CHECK_HID_PATH)));
+    }
+
+    @Test
+    public void shouldInitializeHealthIdStoreWithUnusedHIDsFromFile() throws Exception {
+        String healthId1 = "healthId1";
+        String healthId2 = "healthId2";
+        String healthId3 = "healthId3";
+        String healthId4 = "healthId4";
+        List<String> healthIdBlock = Lists.newArrayList(healthId1, healthId2, healthId3, healthId4);
         writeHIDBlockToFile(healthIdBlock);
+
+        Patient patient = new Patient();
+        patient.setHealthId(healthId2);
+        cqlTemplate.insert(patient);
+        Patient patient2 = new Patient();
+        patient2.setHealthId(healthId3);
+        cqlTemplate.insert(patient2);
+
         assertEquals(0, mciHealthIdStore.noOfHIDsLeft());
 
         healthIdService.populateHidStore();
 
         assertEquals(2, mciHealthIdStore.noOfHIDsLeft());
+        assertTrue(Lists.newArrayList(healthId1, healthId4).containsAll(mciHealthIdStore.getAll()));
     }
 
     @Test
-    public void shouldTellWhetherAOrgHealthIdIsValid() throws Exception {
-        UUID token = UUID.randomUUID();
-        String idpResponse = "{\"access_token\" : \"" + token.toString() + "\"}";
-        String checkHidResponse = "{\"availability\" : \"true\"}";
-        setUpIDPStub(idpResponse);
-        setupCheckHIDStub(token, checkHidResponse);
+    public void shouldPersistRemainingHIDsToFileBeforeShutDown() throws Exception {
+        String healthId1 = "healthId1";
+        String healthId2 = "healthId2";
+        String healthId3 = "healthId3";
+        String healthId4 = "healthId4";
+        List<String> healthIdBlock = Lists.newArrayList(healthId1, healthId2, healthId3, healthId4);
+        writeHIDBlockToFile(healthIdBlock);
+        healthIdBlock.remove(healthId4);
+        mciHealthIdStore.addMciHealthIds(healthIdBlock);
 
-        Map result = healthIdService.validateHIDForOrg("hid", "12345");
-        assertTrue(Boolean.parseBoolean((String) result.get("availability")));
+        healthIdService.persistHIDsToFile();
 
-        verify(1, postRequestedFor(urlMatching(SIGN_IN_PATH)));
-        verify(1, getRequestedFor(urlPathMatching(CHECK_HID_PATH)));
+        List<String> strings = readHIDsFromFile();
+        assertEquals(3, strings.size());
     }
 
     private void setUpMarkUsedStub(UUID token) {

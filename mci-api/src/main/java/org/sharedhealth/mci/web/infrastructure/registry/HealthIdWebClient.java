@@ -51,7 +51,7 @@ public class HealthIdWebClient {
         if (!responseEntity.getStatusCode().is2xxSuccessful()) {
             throw new Exception(String.format("Unexpected Response %s from HID Service", responseEntity.getStatusCode()));
         }
-        return responseEntity.getBody();
+        return new ObjectMapper().readValue(responseEntity.getBody(), String.class);
     }
 
     public Map validateHID(String checkHIDUrl, HttpEntity<Object> httpEntity) throws Exception {

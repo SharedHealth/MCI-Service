@@ -308,7 +308,7 @@ public class PatientControllerIT extends BaseControllerTest {
     public void shouldCreateAPatientForGivenOrganization() throws Exception {
         String json = asString("jsons/patient/payload_with_hid.json");
         UUID token = UUID.randomUUID();
-        String checkHidResponse = "{\"availability\" : \"true\"}";
+        String checkHidResponse = "{\"availability\" : true}";
         String idpResponse = "{\"access_token\" : \"" + token.toString() + "\"}";
 
         setUpIDPStub(idpResponse);
@@ -338,7 +338,7 @@ public class PatientControllerIT extends BaseControllerTest {
         String providerAccessToken = "40214a6c-e27c-4223-981c-1f837be90f03";
 
         UUID token = UUID.randomUUID();
-        String checkHidResponse = "{\"availability\" : \"true\"}";
+        String checkHidResponse = "{\"availability\" : true}";
         String idpResponse = "{\"access_token\" : \"" + token.toString() + "\"}";
 
         setUpIDPStub(idpResponse);

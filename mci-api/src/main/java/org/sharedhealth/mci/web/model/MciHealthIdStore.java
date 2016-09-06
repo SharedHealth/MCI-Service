@@ -11,11 +11,11 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class MciHealthIdStore {
     private Queue<String> mciHealthIds = new ConcurrentLinkedQueue<>();
 
-    public void addMciHealthIds(Collection<String> mciHealthIds) {
+    public synchronized void addMciHealthIds(Collection<String> mciHealthIds) {
         this.mciHealthIds.addAll(mciHealthIds);
     }
 
-    public void clear() {
+    public synchronized void clear() {
         this.mciHealthIds.clear();
     }
 
@@ -23,7 +23,7 @@ public class MciHealthIdStore {
         return Collections.unmodifiableCollection(mciHealthIds);
     }
 
-    public String getNextHealthId() {
+    public synchronized String getNextHealthId() {
         return this.mciHealthIds.remove();
     }
 

@@ -99,7 +99,7 @@ public class PatientService {
             return new MCIResponse("The HealthId for patient is not valid", BAD_REQUEST);
         }
         Map response = healthIdService.validateHIDForOrg(healthId, facilityId);
-        boolean isValid = Boolean.parseBoolean((String) response.get(AVAILABILITY_KEY));
+        boolean isValid = (boolean) response.get(AVAILABILITY_KEY);
         if (!isValid) {
             String reason = (String) response.get(REASON_KEY);
             return new MCIResponse(reason, BAD_REQUEST);
