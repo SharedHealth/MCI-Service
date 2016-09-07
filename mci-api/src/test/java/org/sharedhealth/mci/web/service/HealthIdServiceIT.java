@@ -206,23 +206,6 @@ public class HealthIdServiceIT {
         assertTrue(Lists.newArrayList(healthId1, healthId4).containsAll(mciHealthIdStore.getAll()));
     }
 
-    @Test
-    public void shouldPersistRemainingHIDsToFileBeforeShutDown() throws Exception {
-        String healthId1 = "healthId1";
-        String healthId2 = "healthId2";
-        String healthId3 = "healthId3";
-        String healthId4 = "healthId4";
-        List<String> healthIdBlock = Lists.newArrayList(healthId1, healthId2, healthId3, healthId4);
-        writeHIDBlockToFile(healthIdBlock);
-        healthIdBlock.remove(healthId4);
-        mciHealthIdStore.addMciHealthIds(healthIdBlock);
-
-        healthIdService.persistHIDsToFile();
-
-        List<String> strings = readHIDsFromFile();
-        assertEquals(3, strings.size());
-    }
-
     private void setUpMarkUsedStub(UUID token) {
         stubFor(put(urlPathMatching(MARK_USED_PATH))
                 .withHeader(AUTH_TOKEN_KEY, equalTo(token.toString()))

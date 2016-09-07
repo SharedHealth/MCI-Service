@@ -23,7 +23,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -77,13 +76,6 @@ public class HealthIdService {
         mciHealthIdStore.addMciHealthIds(healthIdBlock);
     }
 
-    @PreDestroy
-    public void persistHIDsToFile() throws IOException {
-        if (mciHealthIdStore.noOfHIDsLeft() > 0) {
-            String hidsContent = new ObjectMapper().writeValueAsString(mciHealthIdStore.getAll());
-            IOUtils.write(hidsContent, new FileOutputStream(mciProperties.getHidLocalStoragePath()), CHARSET_ENCODING);
-        }
-    }
 
     public String getNextHealthId() throws InterruptedException {
         return mciHealthIdStore.getNextHealthId();
@@ -176,5 +168,10 @@ public class HealthIdService {
             SpringApplication.exit(applicationContext);
         }
         return new ArrayList<>();
+    }
+
+    private void persistHIDsToFile() throws IOException {
+        String hidsContent = new ObjectMapper().writeValueAsString(mciHealthIdStore.getAll());
+        IOUtils.write(hidsContent, new FileOutputStream(mciProperties.getHidLocalStoragePath()), CHARSET_ENCODING);
     }
 }
