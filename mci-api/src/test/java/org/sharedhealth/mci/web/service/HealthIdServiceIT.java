@@ -273,13 +273,11 @@ public class HealthIdServiceIT {
     private List<String> readHIDsFromFile() throws IOException {
         File hidLocalStorageFile = new File(mciProperties.getHidLocalStoragePath());
         assertTrue(hidLocalStorageFile.exists());
-        String content = IOUtils.toString(new FileInputStream(hidLocalStorageFile), "UTF-8");
-        return asList(new ObjectMapper().readValue(content, String[].class));
+        return IOUtils.readLines(new FileInputStream(hidLocalStorageFile), "UTF-8");
     }
 
     private void writeHIDBlockToFile(List<String> healthIdBlock) throws IOException {
-        String content = new ObjectMapper().writeValueAsString(healthIdBlock);
-        IOUtils.write(content, new FileOutputStream(new File(mciProperties.getHidLocalStoragePath())), "UTF-8");
+        IOUtils.writeLines(healthIdBlock, IOUtils.LINE_SEPARATOR_UNIX, new FileOutputStream(new File(mciProperties.getHidLocalStoragePath())), "UTF-8");
     }
 
 }

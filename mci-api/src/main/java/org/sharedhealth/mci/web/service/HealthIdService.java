@@ -2,8 +2,6 @@ package org.sharedhealth.mci.web.service;
 
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.querybuilder.Select;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.sharedhealth.mci.domain.util.TimeUuidUtil;
@@ -160,9 +158,7 @@ public class HealthIdService {
     private List<String> getExistingHIDsFromFile() throws IOException {
         if (!new File(mciProperties.getHidLocalStoragePath()).exists()) return new ArrayList<>();
         try {
-            String content = IOUtils.toString(new FileInputStream(mciProperties.getHidLocalStoragePath()), "UTF-8");
-            String[] hids = new ObjectMapper().readValue(content, String[].class);
-            return Lists.newArrayList(hids);
+            return IOUtils.readLines(new FileInputStream(mciProperties.getHidLocalStoragePath()), "UTF-8");
         } catch (IOException e) {
             e.printStackTrace();
             SpringApplication.exit(applicationContext);
@@ -171,7 +167,6 @@ public class HealthIdService {
     }
 
     private void persistHIDsToFile() throws IOException {
-        String hidsContent = new ObjectMapper().writeValueAsString(mciHealthIdStore.getAll());
-        IOUtils.write(hidsContent, new FileOutputStream(mciProperties.getHidLocalStoragePath()), CHARSET_ENCODING);
+        IOUtils.writeLines(mciHealthIdStore.getAll(), IOUtils.LINE_SEPARATOR_UNIX, new FileOutputStream(mciProperties.getHidLocalStoragePath()), CHARSET_ENCODING);
     }
 }
