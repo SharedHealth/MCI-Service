@@ -105,6 +105,7 @@ public class HealthIdService {
             String response = healthIdWebClient.markUsed(markUsedUrl, httpEntity);
             if (ACCEPTED.equalsIgnoreCase(response)) return;
             logger.error(String.format("HID service rejected HealthId [%s].", healthId));
+            //move to failed events
         } catch (UnauthorizedException e) {
             logger.info("Token expired");
             identityServiceClient.clearToken();

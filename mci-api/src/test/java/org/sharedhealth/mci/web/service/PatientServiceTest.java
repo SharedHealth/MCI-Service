@@ -5,7 +5,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mock;
-import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.sharedhealth.mci.domain.model.*;
 import org.sharedhealth.mci.domain.repository.PatientFeedRepository;
 import org.sharedhealth.mci.domain.repository.PatientRepository;
@@ -36,18 +35,17 @@ public class PatientServiceTest {
     @Mock
     private HealthIdService healthIdService;
     @Mock
-    private MCIProperties mciProperties;
-    @Mock
     private MCIResponse mciResponse;
     @Mock
     private PendingApprovalFilter pendingApprovalFilter;
 
     private PatientService patientService;
+    private String expectedMessage;
 
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-        patientService = new PatientService(patientRepository, feedRepository, settingService, healthIdService, mciProperties, pendingApprovalFilter);
+        patientService = new PatientService(patientRepository, feedRepository, settingService, healthIdService, pendingApprovalFilter);
     }
 
     @Test
@@ -143,7 +141,6 @@ public class PatientServiceTest {
         patient.setHealthId(healthId);
         mciResponse = new MCIResponse(healthId, HttpStatus.CREATED);
 
-        when(mciProperties.getOtherOrgInvalidHidPattern()).thenReturn("");
         when(patientRepository.create(patient)).thenReturn(mciResponse);
         when(healthIdService.validateHIDForOrg(healthId, clientId)).thenReturn(getAvailability(true, null));
 
@@ -158,81 +155,14 @@ public class PatientServiceTest {
     }
 
     @Test
-    public void shouldNotCreatePatientWhenNotAValidOrganizationHealthId() throws Exception {
-        String clientId = "12345";
-        String healthId = "12312";
-        PatientData patient = new PatientData();
-        patient.setHealthId(healthId);
-
-        when(mciProperties.getOtherOrgInvalidHidPattern()).thenReturn(".*");
-
-        MCIResponse mciResponse = patientService.createPatientForOrg(patient, clientId);
-
-        assertEquals("The HealthId for patient is not valid", mciResponse.getId());
-        assertEquals(HttpStatus.BAD_REQUEST.value(), mciResponse.getHttpStatus());
-
-        InOrder inOrder = inOrder(patientRepository, healthIdService);
-        inOrder.verify(healthIdService, never()).validateHIDForOrg("hid", healthId);
-        inOrder.verify(patientRepository, never()).create(patient);
-        inOrder.verify(healthIdService, never()).markUsed(any(String.class));
-    }
-
-    @Test
-    public void shouldNotCreatePatientWhenGivenHIDIsNotPresent() throws Exception {
-        String clientId = "12345";
-        String healthId = "12131";
-        PatientData patient = new PatientData();
-        patient.setHealthId(healthId);
-        String expectedMessage = "The HealthId is not present";
-
-        when(mciProperties.getOtherOrgInvalidHidPattern()).thenReturn("");
-        when(healthIdService.validateHIDForOrg(healthId, clientId)).thenReturn(getAvailability(false, expectedMessage));
-
-        MCIResponse mciResponse = patientService.createPatientForOrg(patient, clientId);
-
-        assertEquals(expectedMessage, mciResponse.getId());
-        assertEquals(HttpStatus.BAD_REQUEST.value(), mciResponse.getHttpStatus());
-
-        InOrder inOrder = inOrder(patientRepository, healthIdService);
-        inOrder.verify(healthIdService).validateHIDForOrg(healthId, clientId);
-        inOrder.verify(patientRepository, never()).create(patient);
-        inOrder.verify(healthIdService, never()).markUsed(any(String.class));
-    }
-
-    @Test
-    public void shouldNotCreatePatientWhenGivenHIDIsAlreadyUsed() throws Exception {
-        String clientId = "12345";
-        String healthId = "11231";
-        PatientData patient = new PatientData();
-        patient.setHealthId(healthId);
-        String expectedMessage = "The HealthId is already used";
-
-
-        when(mciProperties.getOtherOrgInvalidHidPattern()).thenReturn("");
-        when(healthIdService.validateHIDForOrg(healthId, clientId)).thenReturn(getAvailability(false, expectedMessage));
-
-        MCIResponse mciResponse = patientService.createPatientForOrg(patient, clientId);
-
-        assertEquals(expectedMessage, mciResponse.getId());
-        assertEquals(HttpStatus.BAD_REQUEST.value(), mciResponse.getHttpStatus());
-
-        InOrder inOrder = inOrder(patientRepository, healthIdService);
-        inOrder.verify(healthIdService).validateHIDForOrg(healthId, clientId);
-        inOrder.verify(patientRepository, never()).create(patient);
-        inOrder.verify(healthIdService, never()).markUsed(any(String.class));
-    }
-
-    @Test
-    public void shouldNotCreatePatientWhenGivenHIDDoesNotBelongToClient() throws Exception {
+    public void shouldNotCreatePatientWhenHIDServiceGivesUnavailable() throws Exception {
         String clientId = "12345";
         String healthId = "12312";
         PatientData patient = new PatientData();
         patient.setHealthId(healthId);
         String expectedMessage = "The HealthId is not for given organization";
 
-        when(mciProperties.getOtherOrgInvalidHidPattern()).thenReturn("");
         when(healthIdService.validateHIDForOrg(healthId, clientId)).thenReturn(getAvailability(false, expectedMessage));
-
         MCIResponse mciResponse = patientService.createPatientForOrg(patient, clientId);
 
         assertEquals(expectedMessage, mciResponse.getId());

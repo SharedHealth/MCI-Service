@@ -2,7 +2,6 @@ package org.sharedhealth.mci.web.service;
 
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.sharedhealth.mci.domain.exception.Forbidden;
 import org.sharedhealth.mci.domain.exception.InvalidRequestException;
 import org.sharedhealth.mci.domain.exception.PatientNotFoundException;
@@ -45,19 +44,17 @@ public class PatientService {
     private PatientFeedRepository feedRepository;
     private SettingService settingService;
     private HealthIdService healthIdService;
-    private MCIProperties mciProperties;
     private PendingApprovalFilter pendingApprovalFilter;
 
     @Autowired
     public PatientService(PatientRepository patientRepository,
                           PatientFeedRepository feedRepository,
                           SettingService settingService,
-                          HealthIdService healthIdService, MCIProperties mciProperties, PendingApprovalFilter pendingApprovalFilter) {
+                          HealthIdService healthIdService, PendingApprovalFilter pendingApprovalFilter) {
         this.patientRepository = patientRepository;
         this.feedRepository = feedRepository;
         this.settingService = settingService;
         this.healthIdService = healthIdService;
-        this.mciProperties = mciProperties;
         this.pendingApprovalFilter = pendingApprovalFilter;
     }
 
@@ -92,12 +89,6 @@ public class PatientService {
         if (existingPatient != null) {
             return this.update(patient, existingPatient.getHealthId());
         }
-        if (isMCIHealthId(healthId)) {
-            return new MCIResponse("The HealthId is not for given organization", BAD_REQUEST);
-        }
-        if (isInvalidOrgHID(healthId)) {
-            return new MCIResponse("The HealthId for patient is not valid", BAD_REQUEST);
-        }
         Map response = healthIdService.validateHIDForOrg(healthId, facilityId);
         boolean isValid = (boolean) response.get(AVAILABILITY_KEY);
         if (!isValid) {
@@ -107,17 +98,6 @@ public class PatientService {
         MCIResponse mciResponse = patientRepository.create(patient);
         healthIdService.markUsed(healthId);
         return mciResponse;
-    }
-
-    private boolean isMCIHealthId(String healthId) {
-        String hidWithoutChecksum = healthId.substring(0, healthId.length() - 1);
-        Long hidToCompare = Long.valueOf(hidWithoutChecksum);
-        return hidToCompare > mciProperties.getMciStartHid() && hidToCompare < mciProperties.getMciEndHid();
-    }
-
-    private boolean isInvalidOrgHID(String healthId) {
-        String hidWithoutChecksum = healthId.substring(0, healthId.length() - 1);
-        return hidWithoutChecksum.matches(mciProperties.getOtherOrgInvalidHidPattern());
     }
 
     private void setHealthIdAssignor(PatientData patient) {

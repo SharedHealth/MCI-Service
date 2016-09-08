@@ -13,10 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
-import static org.sharedhealth.mci.domain.constant.JsonConstants.AFTER;
-import static org.sharedhealth.mci.domain.constant.JsonConstants.BEFORE;
-import static org.sharedhealth.mci.domain.constant.JsonConstants.NEXT;
-import static org.sharedhealth.mci.domain.constant.JsonConstants.PREVIOUS;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.*;
 import static org.sharedhealth.mci.web.utils.UrlUtil.formServerUrl;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;

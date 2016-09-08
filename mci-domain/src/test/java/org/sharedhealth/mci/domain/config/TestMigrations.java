@@ -28,7 +28,7 @@ public class TestMigrations extends Migrations {
                 .withClusterName(env.get("CASSANDRA_KEYSPACE"))
                 .withLoadBalancingPolicy(new RoundRobinPolicy())
                 .withPoolingOptions(poolingOptions)
-                .withProtocolVersion(Integer.parseInt(env.get("CASSANDRA_VERSION")))
+                .withProtocolVersion(ProtocolVersion.fromInt(Integer.parseInt(env.get("CASSANDRA_VERSION"))))
                 .withQueryOptions(queryOptions)
                 .withReconnectionPolicy(new ConstantReconnectionPolicy(ONE_MINUTE))
                 .addContactPoint(env.get("CASSANDRA_HOST"));
