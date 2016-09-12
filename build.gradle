@@ -49,13 +49,14 @@ ext.testLibraries = [
         mockito    : "org.mockito:mockito-all:1.8.4",
         http_client: "org.apache.httpcomponents:httpclient:4.3.3",
         spring_test: "org.springframework:spring-test:4.1.6.RELEASE",
+        netty      : "io.netty:netty:3.9.0.Final",
         wiremock   : "com.github.tomakehurst:wiremock:1.58"
 ]
 ext.libraries = [
         spring_boot_web      : "org.springframework.boot:spring-boot-starter-web:1.1.8.RELEASE",
         spring_boot_logging  : "org.springframework.boot:spring-boot-starter-log4j:1.2.0.RELEASE",
         spring_boot_actuator : "org.springframework.boot:spring-boot-starter-actuator:1.2.0.RELEASE",
-        spring_data_cassandra: "org.springframework.data:spring-data-cassandra:1.4.+",
+        spring_data_cassandra: "org.springframework.data:spring-data-cassandra:1.2.+",
         spring_context_support : "org.springframework:spring-context-support:4.1.3.RELEASE",
         mutagen              : "com.toddfast.mutagen:mutagen:0.3.0",
         mutagen_cassandra    : "com.toddfast.mutagen:mutagen-cassandra-0.4.2-SNAPSHOT",
@@ -72,7 +73,6 @@ ext.libraries = [
         spring_security      : "org.springframework.security:spring-security-web:3.2.5.RELEASE",
         spring_boot_security : "org.springframework.boot:spring-boot-starter-security:1.1.8.RELEASE",
         rome                 : "rome:rome:1.0",
-        netty                : "io.netty:netty-all:4.0.37.Final",
         ehcache_core         : "net.sf.ehcache:ehcache-core:2.6.10",
         hector_core          : "me.prettyprint:hector-core:1.0-5"
 ]

@@ -29,13 +29,17 @@ dependencies {
 
     compile libraries.spring_boot_logging, libraries.snappy, libraries.spring_context_support,
             libraries.spring_data_cassandra, libraries.hibernate_validator,
-            libraries.apache_collections, libraries.apache_lang, libraries.netty,
+            libraries.apache_collections, libraries.apache_lang,
             libraries.apache_bean_utils, libraries.commons_codec, libraries.commons_validator,
             libraries.spring_security, libraries.rome, libraries.joda_time, libraries.ehcache_core,
             libraries.hector_core
 
     testCompile project(":schema")
     testCompile project(":schema").sourceSets.test.output
+
+    testCompile(testLibraries.netty) {
+        force = 'true'
+    }
 
     testCompile('org.cassandraunit:cassandra-unit-spring:2.0.2.2') {
         exclude group: 'com.datastax.cassandra', module: 'cassandra-driver-core'
