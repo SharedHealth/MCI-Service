@@ -91,6 +91,7 @@ public class HealthIdService {
         if (null != hidBlock) {
             mciHealthIdStore.addMciHealthIds(hidBlock);
             persistHIDsToFile();
+            logger.info("Replenished {} healthIds from HID service", hidBlock.size());
         }
     }
 
