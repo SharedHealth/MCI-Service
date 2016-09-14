@@ -12,8 +12,8 @@ import org.junit.runner.RunWith;
 import org.sharedhealth.mci.domain.config.EnvironmentMock;
 import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.sharedhealth.mci.domain.model.Patient;
-import org.sharedhealth.mci.web.infrastructure.security.IdentityServiceClient;
 import org.sharedhealth.mci.web.launch.WebMvcConfig;
+import org.sharedhealth.mci.web.model.IdentityStore;
 import org.sharedhealth.mci.web.model.MciHealthIdStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -44,11 +44,13 @@ public class HealthIdServiceIT {
     @Autowired
     private HealthIdService healthIdService;
     @Autowired
-    private IdentityServiceClient identityServiceClient;
+    private IdentityStore identityStore;
     @Autowired
     private MCIProperties mciProperties;
     @Autowired
     private MciHealthIdStore mciHealthIdStore;
+    @Autowired
+    private MciHealthIdStore id;
     @Autowired
     @Qualifier("MCICassandraTemplate")
     private CassandraOperations cqlTemplate;
@@ -63,7 +65,7 @@ public class HealthIdServiceIT {
 
     @After
     public void tearDown() throws Exception {
-        identityServiceClient.clearToken();
+        identityStore.clearIdentityToken();
         mciHealthIdStore.clear();
         File file = new File(mciProperties.getHidLocalStoragePath());
         if (file.exists()) {
@@ -165,6 +167,25 @@ public class HealthIdServiceIT {
         expectedHIDs.addAll(healthIdBlock);
         assertEquals(hids.size(), expectedHIDs.size());
         assertTrue(hids.containsAll(expectedHIDs));
+    }
+
+    @Test
+    public void shouldClearTheTokenWhenUnauthorized() throws Exception {
+        UUID token = UUID.randomUUID();
+        String idpResponse = "{\"access_token\" : \"" + token.toString() + "\"}";
+        setUpIDPStub(idpResponse);
+
+        assertEquals(0, mciHealthIdStore.noOfHIDsLeft());
+
+        stubFor(get(urlPathMatching(NEXT_BLOCK_PATH))
+                .willReturn(aResponse()
+                        .withStatus(HttpStatus.SC_UNAUTHORIZED))
+        );
+
+        healthIdService.replenishIfNeeded();
+
+        assertEquals(0, mciHealthIdStore.noOfHIDsLeft());
+        assertFalse(identityStore.hasIdentityToken());
     }
 
     @Test

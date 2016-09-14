@@ -3,10 +3,10 @@ package org.sharedhealth.mci.web.service;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.querybuilder.Select;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpStatus;
 import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.sharedhealth.mci.utils.HttpUtil;
-import org.sharedhealth.mci.web.exception.UnauthorizedException;
 import org.sharedhealth.mci.web.infrastructure.registry.HealthIdWebClient;
 import org.sharedhealth.mci.web.infrastructure.security.IdentityServiceClient;
 import org.sharedhealth.mci.web.model.MciHealthIdStore;
@@ -19,6 +19,7 @@ import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
@@ -106,9 +107,8 @@ public class HealthIdService {
             if (ACCEPTED.equalsIgnoreCase(response)) return;
             logger.error(String.format("HID service rejected HealthId [%s].", healthId));
             //move to failed events
-        } catch (UnauthorizedException e) {
-            logger.info("Token expired");
-            identityServiceClient.clearToken();
+        } catch (HttpClientErrorException e) {
+            checkUnauthorized(e);
         } catch (Exception e) {
             logger.error("Can not mark helthID as used", e);
             //move to failed events
@@ -123,9 +123,8 @@ public class HealthIdService {
             String token = identityServiceClient.getOrCreateToken();
             headers.add(AUTH_TOKEN_KEY, token);
             return healthIdWebClient.validateHID(checkHIDUrl, new HttpEntity<>(headers));
-        } catch (UnauthorizedException e) {
-            logger.info("Token expired");
-            identityServiceClient.clearToken();
+        } catch (HttpClientErrorException e) {
+            checkUnauthorized(e);
         } catch (Exception e) {
             logger.error(message, e);
         }
@@ -135,15 +134,21 @@ public class HealthIdService {
         return map;
     }
 
+    private void checkUnauthorized(HttpClientErrorException e) {
+        if (HttpStatus.SC_UNAUTHORIZED == e.getStatusCode().value()) {
+            logger.info("Token expired");
+            identityServiceClient.clearToken();
+        }
+    }
+
     private List getNextBlockFromHidService() {
         HttpHeaders headers = HttpUtil.getHIDServiceHeaders(mciProperties);
         try {
             String token = identityServiceClient.getOrCreateToken();
             headers.add(AUTH_TOKEN_KEY, token);
             return healthIdWebClient.getNextHealthIDs(getHidServiceNextBlockURL(), new HttpEntity<>(headers));
-        } catch (UnauthorizedException e) {
-            logger.info("Token expired");
-            identityServiceClient.clearToken();
+        } catch (HttpClientErrorException e) {
+            checkUnauthorized(e);
         } catch (Exception e) {
             logger.error("Can not fetch next block of HIDs", e);
         }
