@@ -5,7 +5,6 @@ import com.datastax.driver.core.querybuilder.Select;
 import org.sharedhealth.mci.domain.model.Location;
 import org.sharedhealth.mci.domain.model.LocationData;
 import org.sharedhealth.mci.domain.model.LocationMapper;
-import org.sharedhealth.mci.domain.model.LocationRepositoryMarker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.cassandra.core.CassandraOperations;
@@ -31,7 +30,6 @@ public class LocationRepository extends BaseRepository {
     }
 
     public LocationData findByGeoCode(final String geoCode) {
-
         String code = geoCode.substring(geoCode.length() - 2, geoCode.length());
         String parent = geoCode.substring(0, geoCode.length() - 2);
 
@@ -93,34 +91,6 @@ public class LocationRepository extends BaseRepository {
 
         return true;
 
-    }
-
-
-    public LocationRepositoryMarker getLRMarkerData(String type) {
-
-        Select select = QueryBuilder.select().from("lr_markers");
-
-        select.where(QueryBuilder.eq("type", type));
-
-        LocationRepositoryMarker lrMapper = cassandraOps.selectOne(select, LocationRepositoryMarker.class);
-
-        if (lrMapper != null) {
-            return lrMapper;
-        }
-
-        return null;
-    }
-
-    public boolean saveOrUpdateLRMarkerData(String type, String lastSync) {
-        LocationRepositoryMarker oldLocationRepositoryMarker = getLRMarkerData(type);
-        if (oldLocationRepositoryMarker != null) {
-            oldLocationRepositoryMarker.setLastFeedUrl(lastSync);
-            cassandraOps.update(oldLocationRepositoryMarker);
-        } else {
-            LocationRepositoryMarker lrMapper = new LocationRepositoryMarker(type, lastSync);
-            cassandraOps.insert(lrMapper);
-        }
-        return true;
     }
 
 

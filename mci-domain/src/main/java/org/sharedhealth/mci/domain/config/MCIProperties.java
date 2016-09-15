@@ -39,8 +39,6 @@ public class MCIProperties {
 
     @Value("${FR_URL}")
     private String frUrl;
-    @Value("${LR_URL}")
-    private String LrUrl;
     @Value("${FR_CACHE_TTL}")
     private int frCacheTtl;
     @Value("${PR_URL}")
@@ -115,11 +113,7 @@ public class MCIProperties {
     public String getIdentityServerSignInUrl() {
         return ensureSuffix(identityServerBaseUrl, URL_SEPARATOR) + removePrefix(identityServerSignInPath, URL_SEPARATOR);
     }
-
-    public String getLocaitonRegistryUrl() {
-        return LrUrl;
-    }
-
+    
     public int getFrCacheTtl() {
         return frCacheTtl;
     }

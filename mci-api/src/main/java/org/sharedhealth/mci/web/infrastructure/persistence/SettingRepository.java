@@ -6,7 +6,6 @@ import org.sharedhealth.mci.domain.repository.BaseRepository;
 import org.sharedhealth.mci.web.model.Setting;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.cassandra.core.CassandraOperations;
 import org.springframework.stereotype.Component;
@@ -27,11 +26,6 @@ public class SettingRepository extends BaseRepository {
         select.where(QueryBuilder.eq("key", key));
 
         return cassandraOps.selectOne(select, Setting.class);
-    }
-
-    @CacheEvict(SETTINGS_CACHE)
-    public void save(Setting setting) {
-        cassandraOps.insert(setting);
     }
 
     @Cacheable(value = SETTINGS_CACHE, unless = "#result == null")

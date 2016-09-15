@@ -2,7 +2,6 @@ package org.sharedhealth.mci.domain.service;
 
 
 import org.sharedhealth.mci.domain.model.LocationData;
-import org.sharedhealth.mci.domain.model.LocationRepositoryMarker;
 import org.sharedhealth.mci.domain.repository.LocationCriteria;
 import org.sharedhealth.mci.domain.repository.LocationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,17 +25,5 @@ public class LocationService {
 
     public List<LocationData> findLocationsByParent(LocationCriteria locationCriteria) {
         return locationRepository.findLocationsByParent(locationCriteria);
-    }
-
-    public boolean saveOrUpdateLocationData(List<LocationData> locationDataList) {
-        return locationRepository.saveOrUpdateLocationData(locationDataList);
-    }
-
-    public LocationRepositoryMarker getLRMarkerData(String type) {
-        return locationRepository.getLRMarkerData(type);
-    }
-
-    public boolean saveOrUpdateLRMarkerData(String type, String lastSync) {
-        return locationRepository.saveOrUpdateLRMarkerData(type, lastSync);
     }
 }

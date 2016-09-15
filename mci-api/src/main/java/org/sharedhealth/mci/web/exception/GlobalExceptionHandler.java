@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import org.apache.commons.lang3.StringUtils;
-import org.sharedhealth.mci.domain.constant.JsonConstants;
 import org.sharedhealth.mci.domain.exception.*;
 import org.sharedhealth.mci.web.handler.ErrorHandler;
 import org.slf4j.Logger;
@@ -144,25 +143,6 @@ public class GlobalExceptionHandler {
         logger.error("Handling PatientAlreadyExistException. ", e);
         return new ErrorInfo(CONFLICT.value(), format(MESSAGE_PATIENT_ALREADY_EXIST_WITH_HEALTH_ID, e.getMessage()));
     }
-
-    @ResponseStatus(value = BAD_REQUEST)
-    @ExceptionHandler(HealthIdExistsException.class)
-    @ResponseBody
-    public ErrorHandler healthIDExistException(HealthIdExistsException e) {
-        logger.error("Handling Health ID exist exception. ", e);
-        int code;
-        String msg, field;
-        ErrorHandler errorHandler;
-
-        errorHandler = new ErrorHandler(BAD_REQUEST.value(),
-                ErrorHandler.PERMISSION_ERROR_CODE, MESSAGE_PERMISSION_ERROR);
-        code = ERROR_CODE_FIELD_NOT_PERMITTED;
-        msg = MESSAGE_HID_FIELD_IS_NOT_PERMITTED;
-        field = JsonConstants.HID;
-
-        return errorHandler.handleHealthIDExistError(errorHandler, code, msg, field);
-    }
-
     @ResponseStatus(value = BAD_REQUEST)
     @ExceptionHandler(SearchQueryParameterException.class)
     @ResponseBody
