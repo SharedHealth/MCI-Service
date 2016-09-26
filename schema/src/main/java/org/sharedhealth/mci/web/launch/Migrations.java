@@ -69,7 +69,7 @@ public class Migrations {
                 .withLoadBalancingPolicy(new RoundRobinPolicy())
                 .withPoolingOptions(new PoolingOptions())
                 .withAuthProvider(new PlainTextAuthProvider(env.get("CASSANDRA_USER"), env.get("CASSANDRA_PASSWORD")))
-                .withProtocolVersion(ProtocolVersion.fromInt(Integer.parseInt(env.get("CASSANDRA_VERSION"))))
+                .withProtocolVersion(Integer.parseInt(env.get("CASSANDRA_VERSION")))
                 .withQueryOptions(queryOptions)
                 .withReconnectionPolicy(new ConstantReconnectionPolicy(ONE_MINUTE))
                 .addContactPoint(env.get("CASSANDRA_HOST"));
