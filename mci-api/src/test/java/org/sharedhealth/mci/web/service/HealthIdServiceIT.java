@@ -90,19 +90,6 @@ public class HealthIdServiceIT {
     }
 
     @Test
-    public void shouldAskHIDServiceToMarkAsUsedHID() throws Exception {
-        UUID token = UUID.randomUUID();
-        String idpResponse = "{\"access_token\" : \"" + token.toString() + "\"}";
-        setUpIDPStub(idpResponse);
-        setUpMarkUsedStub(token);
-        healthIdService.markUsed("hid");
-
-        verify(1, putRequestedFor(urlMatching(MARK_USED_PATH))
-                .withRequestBody(containing("\"used_at\":"))
-        );
-    }
-
-    @Test
     public void shouldPutBackTheHIDToStoreAndFile() throws Exception {
         List<String> hidBlock = Lists.newArrayList("healthId1");
         mciHealthIdStore.addMciHealthIds(hidBlock);

@@ -5,7 +5,6 @@ import com.datastax.driver.core.querybuilder.Select;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
 import org.sharedhealth.mci.domain.config.MCIProperties;
-import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.sharedhealth.mci.utils.HttpUtil;
 import org.sharedhealth.mci.web.infrastructure.registry.HealthIdWebClient;
 import org.sharedhealth.mci.web.infrastructure.security.IdentityServiceClient;
@@ -26,7 +25,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.in;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
@@ -92,27 +94,6 @@ public class HealthIdService {
             mciHealthIdStore.addMciHealthIds(hidBlock);
             persistHIDsToFile();
             logger.info("Replenished {} healthIds from HID service", hidBlock.size());
-        }
-    }
-
-    public void markUsed(String healthId) {
-        String markUsedUrl = String.format(mciProperties.getHidServiceMarkUsedUrlPattern(), healthId);
-        HttpHeaders headers = HttpUtil.getHIDServiceHeaders(mciProperties);
-        try {
-            headers.add(AUTH_TOKEN_KEY, identityServiceClient.getOrCreateToken());
-            Map<String, String> map = new HashMap<>();
-            map.put(USED_AT_KEY, TimeUuidUtil.uuidForDate(new Date()).toString());
-            HttpEntity<Map<String, String>> httpEntity = new HttpEntity<>(map, headers);
-
-            String response = healthIdWebClient.markUsed(markUsedUrl, httpEntity);
-            if (ACCEPTED.equalsIgnoreCase(response)) return;
-            logger.error(String.format("HID service rejected HealthId [%s].", healthId));
-            //move to failed events
-        } catch (HttpClientErrorException e) {
-            checkUnauthorized(e);
-        } catch (Exception e) {
-            logger.error("Can not mark helthID as used", e);
-            //move to failed events
         }
     }
 

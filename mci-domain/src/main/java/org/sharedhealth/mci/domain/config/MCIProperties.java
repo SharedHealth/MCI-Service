@@ -63,8 +63,6 @@ public class MCIProperties {
     private String hidServiceBaseUrl;
     @Value("${HID_SERVICE_NEXT_BLOCK_URL}")
     private String hidServiceNextBlockPathPattern;
-    @Value("${HID_SERVICE_MARK_USED_URL}")
-    private String hidServiceMarkUsedPathPattern;
     @Value("${HID_SERVICE_CHECK_HID_URL}")
     private String checkHIDUrlPattern;
     @Value("${HID_LOCAL_STORAGE_PATH}")
@@ -165,11 +163,6 @@ public class MCIProperties {
     public String getHidServiceNextBlockUrlPattern() {
         return ensureSuffix(hidServiceBaseUrl, URL_SEPARATOR) +
                 removePrefix(hidServiceNextBlockPathPattern, URL_SEPARATOR);
-    }
-
-    public String getHidServiceMarkUsedUrlPattern() {
-        return ensureSuffix(hidServiceBaseUrl, URL_SEPARATOR) +
-                removePrefix(hidServiceMarkUsedPathPattern, URL_SEPARATOR);
     }
 
     public String getHidServiceCheckHIDUrlPattern() {

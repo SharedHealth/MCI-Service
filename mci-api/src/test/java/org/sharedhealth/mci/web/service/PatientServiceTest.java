@@ -76,7 +76,6 @@ public class PatientServiceTest {
         inOrder.verify(patientRepository).create(existingPatient);
 
         verify(healthIdService).getNextHealthId();
-        verify(healthIdService, times(1)).markUsed(hid);
         verify(healthIdService, times(0)).putBackHealthId(any(String.class));
     }
 
@@ -94,7 +93,6 @@ public class PatientServiceTest {
         inOrder.verify(patientRepository).create(existingPatient);
 
         verify(healthIdService).getNextHealthId();
-        verify(healthIdService, times(0)).markUsed(any(String.class));
         verify(healthIdService, times(1)).putBackHealthId(hid);
     }
 
@@ -151,7 +149,6 @@ public class PatientServiceTest {
         InOrder inOrder = inOrder(patientRepository, healthIdService);
         inOrder.verify(healthIdService).validateHIDForOrg(healthId, clientId);
         inOrder.verify(patientRepository).create(patient);
-        inOrder.verify(healthIdService).markUsed(healthId);
     }
 
     @Test
@@ -171,7 +168,6 @@ public class PatientServiceTest {
         InOrder inOrder = inOrder(patientRepository, healthIdService);
         inOrder.verify(healthIdService).validateHIDForOrg(healthId, clientId);
         inOrder.verify(patientRepository, never()).create(patient);
-        inOrder.verify(healthIdService, never()).markUsed(any(String.class));
     }
 
     @Test

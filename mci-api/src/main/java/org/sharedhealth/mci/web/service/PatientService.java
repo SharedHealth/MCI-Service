@@ -71,9 +71,7 @@ public class PatientService {
             String healthId = healthIdService.getNextHealthId();
             patient.setHealthId(healthId);
             mciResponse = patientRepository.create(patient);
-            if (CREATED == mciResponse.getHttpStatus()) {
-                healthIdService.markUsed(healthId);
-            } else {
+            if (CREATED != mciResponse.getHttpStatus()) {
                 healthIdService.putBackHealthId(healthId);
             }
         } catch (NoSuchElementException e) {
@@ -96,7 +94,6 @@ public class PatientService {
             return new MCIResponse(reason, BAD_REQUEST);
         }
         MCIResponse mciResponse = patientRepository.create(patient);
-        healthIdService.markUsed(healthId);
         return mciResponse;
     }
 
