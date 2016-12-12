@@ -140,7 +140,7 @@ public class HealthIdService {
 
     private String getHidServiceNextBlockURL() {
         return String.format(mciProperties.getHidServiceNextBlockUrlPattern(),
-                mciProperties.getIdpClientId(), mciProperties.getHealthIdBlockSize());
+                mciProperties.getMciOrgCode(), mciProperties.getHealthIdBlockSize());
     }
 
     private List<String> getExistingHIDsFromFile() throws IOException {

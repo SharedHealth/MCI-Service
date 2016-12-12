@@ -59,6 +59,9 @@ public class MCIProperties {
     @Value("${IDP_CLIENT_PASSWORD}")
     private String idpClientPassword;
 
+    @Value("${MCI_ORG_CODE}")
+    private String mciOrgCode;
+
     @Value("${HID_SERVICE_BASE_URL}")
     private String hidServiceBaseUrl;
     @Value("${HID_SERVICE_NEXT_BLOCK_URL}")
@@ -193,4 +196,9 @@ public class MCIProperties {
     public int getFailedEventRetryLimit() {
         return Integer.parseInt(failedEventRetryLimit);
     }
+
+    public String getMciOrgCode() {
+        return mciOrgCode;
+    }
+
 }
