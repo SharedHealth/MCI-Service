@@ -13,4 +13,8 @@ public class MCIConstants {
 
     public static final String DUPLICATION_ACTION_RETAIN_ALL = "RETAIN_ALL";
     public static final String DUPLICATION_ACTION_MERGE = "MERGE";
+
+    public static final String HID_CARD_STATUS_REGISTERED = "REGISTERED";
+    public static final String HID_CARD_STATUS_ISSUED = "ISSUED";
+
 }

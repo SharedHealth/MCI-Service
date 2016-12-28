@@ -812,11 +812,13 @@ public class PatientServiceIT extends BaseIntegrationTest {
         Patient savedPatient = cassandraOps.selectOneById(Patient.class, healthId);
         assertNotNull(savedPatient.getUpdatedAt());
 
+        patient.setHidCardStatus("");
         patientService.update(patient, healthId);
 
         Patient updatedPatient = cassandraOps.selectOneById(Patient.class, healthId);
         assertNotNull(updatedPatient.getUpdatedAt());
 
+        assertEquals(savedPatient.getHidCardStatus(), updatedPatient.getHidCardStatus());
         assertEquals(updatedPatient.getUpdatedAt(), savedPatient.getUpdatedAt());
     }
 

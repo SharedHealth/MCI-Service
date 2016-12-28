@@ -1,0 +1,1 @@
+ALTER TABLE patient ADD hid_card_status varchar;

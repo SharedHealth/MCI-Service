@@ -10,8 +10,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 import static java.lang.String.valueOf;
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.trim;
+import static org.apache.commons.lang3.StringUtils.*;
 import static org.sharedhealth.mci.domain.constant.JsonConstants.*;
 import static org.sharedhealth.mci.domain.constant.MCIConstants.COUNTRY_CODE_BANGLADESH;
 
@@ -91,6 +90,11 @@ public class PendingApprovalFilter {
         newPatient.setActive((Boolean) process(ACTIVE, existingPatient.isActive(), updateRequest.isActive(), requestedBy, newPatient));
         newPatient.setMergedWith(processString(MERGED_WITH, existingPatient.getMergedWith(), updateRequest.getMergedWith(), requestedBy,
                 newPatient));
+        if (isBlank(updateRequest.getHidCardStatus())) {
+            updateRequest.setHidCardStatus(null);
+        }
+        newPatient.setHidCardStatus(processString(HID_CARD_STATUS, existingPatient.getHidCardStatus(), updateRequest.getHidCardStatus(),
+                requestedBy, newPatient));
 
         return newPatient;
     }

@@ -113,35 +113,29 @@ public class RepositoryConstants {
     public static final String REQUESTED_BY = "requested_by";
     public static final String APPROVED_BY = "approved_by";
     public static final String PENDING_APPROVALS = "pending_approvals";
+    public static final String HID_CARD_STATUS = "hid_card_status";
+
     public static final String TYPE = "type";
     public static final String MARKER = "marker";
     public static final String CHANGE_SET = "change_set";
+
     public static final String YEAR = "year";
     public static final String EVENT_ID = "event_id";
     public static final String EVENT_TYPE = "event_type";
     public static final String EVENT_TYPE_CREATED = "created";
     public static final String EVENT_TYPE_UPDATED = "updated";
-    public static final String SERIES_NO = "series_no";
-    public static final String GENERATED_FOR = "generated_for";
-    public static final String GENERATED_AT = "generated_at";
-    public static final String BEGINS_AT = "begins_at";
-    public static final String ENDS_AT = "ends_at";
-    public static final String TOTAL_HIDS = "total_hids";
+
     public static final String FAILURE_TYPE = "failure_type";
     public static final String FAILURE_TYPE_SEARCH_MAPPING = "search_mapping_failure";
     public static final String ERROR_MESSAGE = "error_message";
     public static final String FAILED_AT = "failed_at";
     public static final String RETRIES = "retries";
-    public static final String ALLOCATED_FOR = "allocated_for";
-    public static final String IS_USED = "is_used";
-    public static final String USED_AT = "used_at";
 
     public static final String HEALTH_ID1 = "health_id1";
     public static final String HEALTH_ID2 = "health_id2";
     public static final String REASONS = "reasons";
 
     public static final String HID = "hid";
-    public static final String RESERVED_FOR = "reserved_for";
     public static final String DUPLICATE_PATIENT_MARKER = "duplicate_patient_marker";
 
     public static final String AUDIT_MARKER_TYPE = "audit_marker";

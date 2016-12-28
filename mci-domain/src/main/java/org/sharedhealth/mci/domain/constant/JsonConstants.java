@@ -34,6 +34,7 @@ public class JsonConstants {
     public static final String MODIFIED = "modified";
     public static final String ACTIVE = "active";
     public static final String MERGED_WITH = "merged_with";
+    public static final String HID_CARD_STATUS = "hid_card_status";
 
     public static final String CATCHMENT_ID = "catchment_id";
     public static final String ADDRESS_LINE = "address_line";

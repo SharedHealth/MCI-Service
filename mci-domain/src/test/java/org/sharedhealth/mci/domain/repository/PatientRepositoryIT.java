@@ -15,12 +15,11 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.batch;
-import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
 import static java.util.Arrays.asList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.junit.Assert.*;
-import static org.sharedhealth.mci.domain.constant.RepositoryConstants.*;
+import static org.sharedhealth.mci.domain.constant.MCIConstants.*;
 import static org.sharedhealth.mci.domain.util.DateUtil.parseDate;
 import static org.sharedhealth.mci.domain.util.TimeUuidUtil.getTimeFromUUID;
 
@@ -43,66 +42,6 @@ public class PatientRepositoryIT extends BaseIntegrationTest {
     @Autowired
     private PatientRepository patientRepository;
 
-    private PatientData buildPatient() {
-        PatientData data = initPatientData();
-        data.setHealthId(String.valueOf(new Date().getTime()));
-        data.setNationalId(nationalId);
-        data.setBirthRegistrationNumber(birthRegistrationNumber);
-        data.setUid(uid);
-        data.setGivenName(givenName);
-        data.setSurName(surname);
-        data.setDateOfBirth(parseDate("2014-12-01"));
-        data.setDobType("1");
-        data.setGender("M");
-        data.setOccupation("03");
-        data.setEducationLevel("BA");
-        PhoneNumber phone = new PhoneNumber();
-        phone.setNumber(phoneNumber);
-        data.setPhoneNumber(phone);
-        data.setHouseholdCode(householdCode);
-
-        Address address = createAddress(divisionId, districtId, upazilaId, "99", "01", "02");
-        data.setAddress(address);
-
-        data.setRequester(FACILITY, null);
-
-        return data;
-    }
-
-    private Address createAddress(String division, String district, String upazila, String cityCorp, String union, String ruralWard) {
-        Address address = new Address(division, district, upazila);
-        address.setAddressLine("house-10");
-        address.setCityCorporationId(cityCorp);
-        address.setUnionOrUrbanWardId(union);
-        address.setRuralWardId(ruralWard);
-        address.setCountryCode("050");
-
-        return address;
-    }
-
-    private Address createAddress(String division, String district, String upazila) {
-        Address address = new Address(division, district, upazila);
-        address.setCountryCode("050");
-
-        return address;
-    }
-
-    @Test
-    public void shouldNotCreateIdMappingsWhenPatientIsCreatedMappingFields() {
-        PatientData patient = initPatientData();
-        patient.setGivenName("John");
-        patient.setSurName("Doe");
-        patient.setAddress(createAddress("10", "20", "30"));
-
-        assertNotNull(patientRepository.create(patient).getId());
-        assertMappingsEmpty();
-    }
-
-    @Test(expected = PatientNotFoundException.class)
-    public void shouldThrowException_IfPatientDoesNotExistForGivenHealthId() {
-        patientRepository.findByHealthId(UUID.randomUUID().toString());
-    }
-
     @Test
     public void shouldCreateActivePatients() throws Exception {
         PatientData data = buildPatient();
@@ -113,6 +52,42 @@ public class PatientRepositoryIT extends BaseIntegrationTest {
         PatientData savedPatient = patientRepository.findByHealthId(healthId);
         assertPatient(savedPatient, data);
         assertTrue(savedPatient.isActive());
+    }
+
+    @Test(expected = PatientNotFoundException.class)
+    public void shouldThrowException_IfPatientDoesNotExistForGivenHealthId() {
+        patientRepository.findByHealthId(UUID.randomUUID().toString());
+    }
+
+    @Test
+    public void shouldSavePatientWithDefaultValuesIfNotGiven() throws Exception {
+        PatientData patientData = initPatientData();
+        patientData.setGender("M");
+        patientData.setGivenName("Murli");
+        patientData.setSurName("Dharan");
+
+        String healthId = patientRepository.create(patientData).getId();
+
+        Patient patient = cassandraOps.selectOneById(Patient.class, healthId);
+        assertNotNull(patient);
+        assertFalse(patient.getConfidential());
+        assertTrue(patient.isActive());
+        assertEquals(PATIENT_STATUS_ALIVE, patient.getStatus());
+        assertEquals(HID_CARD_STATUS_REGISTERED, patient.getHidCardStatus());
+    }
+
+    @Test
+    public void shouldFindPatientWithDefaultValuesIfNotPresent() throws Exception {
+        Patient patientToSave = new Patient();
+        String healthId = "HID";
+        patientToSave.setHealthId(healthId);
+        patientToSave.setCreatedBy(new Requester(FACILITY));
+        patientToSave.setUpdatedBy(new Requester(FACILITY));
+        cassandraOps.insert(patientToSave);
+
+        PatientData patient = patientRepository.findByHealthId(healthId);
+        assertNotNull(patient);
+        assertEquals(HID_CARD_STATUS_REGISTERED, patient.getHidCardStatus());
     }
 
     @Test
@@ -181,17 +156,6 @@ public class PatientRepositoryIT extends BaseIntegrationTest {
         assertTrue(isGraterUUID(mapping3.getLastUpdated(), mapping2.getLastUpdated()));
     }
 
-    private boolean isGraterUUID(UUID uuid1, UUID uuid2) {
-        Long timeFromUUID = getTimeFromUUID(uuid1);
-        Long timeFromLatestUUID = getTimeFromUUID(uuid2);
-        int isGreater = timeFromUUID.compareTo(timeFromLatestUUID);
-        if (isGreater == 0) {
-            return uuid1.compareTo(uuid2) > 0;
-        }
-        return isGreater > 0;
-    }
-
-
     @Test
     public void shouldFindPendingApprovalMappingsBasedOnGivenTimes() throws Exception {
         List<PendingApprovalMapping> entities = asList(buildPendingApprovalMapping("30", "h101"),
@@ -242,19 +206,49 @@ public class PatientRepositoryIT extends BaseIntegrationTest {
         assertEquals(3, mappings.size());
     }
 
+    private PatientData buildPatient() {
+        PatientData data = initPatientData();
+        data.setHealthId(String.valueOf(new Date().getTime()));
+        data.setNationalId(nationalId);
+        data.setBirthRegistrationNumber(birthRegistrationNumber);
+        data.setUid(uid);
+        data.setGivenName(givenName);
+        data.setSurName(surname);
+        data.setDateOfBirth(parseDate("2014-12-01"));
+        data.setDobType("1");
+        data.setGender("M");
+        data.setOccupation("03");
+        data.setEducationLevel("BA");
+        PhoneNumber phone = new PhoneNumber();
+        phone.setNumber(phoneNumber);
+        data.setPhoneNumber(phone);
+        data.setHouseholdCode(householdCode);
+        data.setHidCardStatus(HID_CARD_STATUS_REGISTERED);
+
+        Address address = createAddress(divisionId, districtId, upazilaId, "99", "01", "02");
+        data.setAddress(address);
+
+        data.setRequester(FACILITY, null);
+
+        return data;
+    }
+
+    private Address createAddress(String division, String district, String upazila, String cityCorp, String union, String ruralWard) {
+        Address address = new Address(division, district, upazila);
+        address.setAddressLine("house-10");
+        address.setCityCorporationId(cityCorp);
+        address.setUnionOrUrbanWardId(union);
+        address.setRuralWardId(ruralWard);
+        address.setCountryCode("050");
+
+        return address;
+    }
+
     private PatientData initPatientData() {
         PatientData patient = new PatientData();
         patient.setRequester(FACILITY, null);
         patient.setHealthId(String.valueOf(new Date().getTime()));
         return patient;
-    }
-
-    private void assertMappingsEmpty() {
-        assertTrue(isEmpty(cassandraOps.select(select().from(CF_NID_MAPPING).toString(), NidMapping.class)));
-        assertTrue(isEmpty(cassandraOps.select(select().from(CF_BRN_MAPPING).toString(), BrnMapping.class)));
-        assertTrue(isEmpty(cassandraOps.select(select().from(CF_UID_MAPPING).toString(), UidMapping.class)));
-        assertTrue(isEmpty(cassandraOps.select(select().from(CF_PHONE_NUMBER_MAPPING).toString(), PhoneNumberMapping.class)));
-        assertTrue(isEmpty(cassandraOps.select(select().from(CF_HOUSEHOLD_CODE_MAPPING).toString(), HouseholdCodeMapping.class)));
     }
 
     private void assertPatient(PatientData savedPatient, PatientData data) {
@@ -270,8 +264,19 @@ public class PatientRepositoryIT extends BaseIntegrationTest {
         assertEquals(data.getSurName(), savedPatient.getSurName());
         assertEquals(data.getOccupation(), savedPatient.getOccupation());
         assertEquals(data.getEducationLevel(), savedPatient.getEducationLevel());
+        assertEquals(data.getHidCardStatus(), savedPatient.getHidCardStatus());
         assertNotNull(savedPatient.getUpdatedAt());
         assertNotNull(savedPatient.getCreatedAt());
+    }
+
+    private boolean isGraterUUID(UUID uuid1, UUID uuid2) {
+        Long timeFromUUID = getTimeFromUUID(uuid1);
+        Long timeFromLatestUUID = getTimeFromUUID(uuid2);
+        int isGreater = timeFromUUID.compareTo(timeFromLatestUUID);
+        if (isGreater == 0) {
+            return uuid1.compareTo(uuid2) > 0;
+        }
+        return isGreater > 0;
     }
 
     private PendingApprovalMapping buildPendingApprovalMapping(String upazilaId, String healthId) throws InterruptedException {

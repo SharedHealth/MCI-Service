@@ -269,6 +269,9 @@ public class Patient {
     @Column(MERGED_WITH)
     private String mergedWith;
 
+    @Column(HID_CARD_STATUS)
+    private String hidCardStatus;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -392,8 +395,8 @@ public class Patient {
         if (updatedAt != null ? !updatedAt.equals(patient.updatedAt) : patient.updatedAt != null) return false;
         if (updatedBy != null ? !updatedBy.equals(patient.updatedBy) : patient.updatedBy != null) return false;
         if (village != null ? !village.equals(patient.village) : patient.village != null) return false;
-        if (householdCode != null ? !householdCode.equals(patient.householdCode) : patient.householdCode != null)
-            return false;
+        if (householdCode != null ? !householdCode.equals(patient.householdCode) : patient.householdCode != null) return false;
+        if (hidCardStatus != null ? !hidCardStatus.equals(patient.hidCardStatus) : patient.hidCardStatus != null) return false;
 
         return true;
     }
@@ -479,6 +482,7 @@ public class Patient {
         result = 31 * result + (pendingApprovals != null ? pendingApprovals.hashCode() : 0);
         result = 31 * result + (confidential != null ? confidential.hashCode() : 0);
         result = 31 * result + (householdCode != null ? householdCode.hashCode() : 0);
+        result = 31 * result + (hidCardStatus != null ? hidCardStatus.hashCode() : 0);
         return result;
     }
 
@@ -1070,6 +1074,14 @@ public class Patient {
 
     public void setPrimaryContactNumberExtension(String primaryContactNumberExtension) {
         this.primaryContactNumberExtension = primaryContactNumberExtension;
+    }
+
+    public String getHidCardStatus() {
+        return hidCardStatus;
+    }
+
+    public void setHidCardStatus(String hidCardStatus) {
+        this.hidCardStatus = hidCardStatus;
     }
 
     public Requester getCreatedBy() {

@@ -1,6 +1,7 @@
 package org.sharedhealth.mci.web.controller;
 
 import org.apache.commons.lang3.StringUtils;
+import org.sharedhealth.mci.domain.constant.MCIConstants;
 import org.sharedhealth.mci.domain.exception.Forbidden;
 import org.sharedhealth.mci.domain.exception.InvalidRequestException;
 import org.sharedhealth.mci.domain.exception.ValidationException;
@@ -40,6 +41,7 @@ import java.util.Map;
 import static java.lang.String.format;
 import static org.sharedhealth.mci.domain.constant.ErrorConstants.ERROR_CODE_INVALID;
 import static org.sharedhealth.mci.domain.constant.JsonConstants.HID;
+import static org.sharedhealth.mci.domain.constant.MCIConstants.HID_CARD_STATUS_REGISTERED;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.*;
@@ -77,6 +79,10 @@ public class PatientController extends MciController {
 
         if (null != patient.getMergedWith()) {
             throw new InvalidRequestException("Cannot merge with another patient on creation");
+        }
+
+        if (patient.getHidCardStatus() != null && !patient.getHidCardStatus().equalsIgnoreCase(HID_CARD_STATUS_REGISTERED)) {
+            throw new InvalidRequestException("A new patient must hast HID card status as " + MCIConstants.HID_CARD_STATUS_REGISTERED);
         }
 
         if (bindingResult.hasErrors()) {

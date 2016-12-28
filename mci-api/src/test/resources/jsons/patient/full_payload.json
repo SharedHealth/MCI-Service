@@ -82,5 +82,6 @@
   },
   "confidential": "No",
   "active": "true",
-  "household_code": "1234"
+  "household_code": "1234",
+  "hid_card_status":"REGISTERED"
 }

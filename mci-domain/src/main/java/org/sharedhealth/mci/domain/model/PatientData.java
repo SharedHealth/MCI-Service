@@ -219,6 +219,10 @@ public class PatientData implements Diffable<PatientData> {
     @JsonInclude(NON_EMPTY)
     private String mergedWith;
 
+    @JsonProperty(HID_CARD_STATUS)
+    @JsonInclude(NON_EMPTY)
+    private String hidCardStatus;
+
     @JsonIgnore
     private TreeSet<PendingApproval> pendingApprovals;
 
@@ -645,6 +649,7 @@ public class PatientData implements Diffable<PatientData> {
             return false;
         if (active != null ? !active.equals(that.active) : that.active != null) return false;
         if (mergedWith != null ? !mergedWith.equals(that.mergedWith) : that.mergedWith != null) return false;
+        if (hidCardStatus != null ? !hidCardStatus.equals(that.hidCardStatus) : that.hidCardStatus != null) return false;
 
         return true;
     }
@@ -684,6 +689,7 @@ public class PatientData implements Diffable<PatientData> {
         result = 31 * result + (householdCode != null ? householdCode.hashCode() : 0);
         result = 31 * result + (active != null ? active.hashCode() : 0);
         result = 31 * result + (mergedWith != null ? mergedWith.hashCode() : 0);
+        result = 31 * result + (hidCardStatus != null ? hidCardStatus.hashCode() : 0);
         return result;
     }
 
@@ -724,6 +730,7 @@ public class PatientData implements Diffable<PatientData> {
         sb.append(", requester='").append(requester).append('\'');
         sb.append(", active='").append(active).append('\'');
         sb.append(", mergedWith='").append(mergedWith).append('\'');
+        sb.append(", hidCardStatus='").append(hidCardStatus).append('\'');
         sb.append('}');
         return sb.toString();
     }
@@ -877,6 +884,15 @@ public class PatientData implements Diffable<PatientData> {
     public void setUpdatedBy(Requester updatedBy) {
         this.updatedBy = updatedBy;
     }
+
+    public String getHidCardStatus() {
+        return hidCardStatus;
+    }
+
+    public void setHidCardStatus(String hidCardStatus) {
+        this.hidCardStatus = hidCardStatus;
+    }
+
 
     @Override
     public DiffResult diff(PatientData that) {

@@ -77,6 +77,7 @@ public class PatientMapper {
         data.setNationality(patient.getNationality());
         data.setDisability(patient.getDisability());
         data.setEthnicity(patient.getEthnicity());
+        data.setHidCardStatus(patient.getHidCardStatus());
 
         PatientStatus patientStatus = new PatientStatus();
         patientStatus.setType(patient.getStatus());
@@ -90,6 +91,12 @@ public class PatientMapper {
 
         data.setActive(patient.isActive());
         data.setMergedWith(patient.getMergedWith());
+
+        if (StringUtils.isNotBlank(patient.getHidCardStatus())) {
+            data.setHidCardStatus(patient.getHidCardStatus());
+        } else {
+            data.setHidCardStatus(HID_CARD_STATUS_REGISTERED);
+        }
 
         if (patient.getConfidential() != null) {
             mapConfidentiality(patient, data);
@@ -195,6 +202,7 @@ public class PatientMapper {
         patient.setGender(data.getGender());
         patient.setOccupation(data.getOccupation());
         patient.setEducationLevel(data.getEducationLevel());
+        patient.setHidCardStatus(data.getHidCardStatus());
 
         patient.setUid(data.getUid());
         patient.setPlaceOfBirth(StringUtils.trim(data.getPlaceOfBirth()));

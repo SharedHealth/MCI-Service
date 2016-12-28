@@ -26,6 +26,7 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.sharedhealth.mci.domain.constant.MCIConstants.HID_CARD_STATUS_REGISTERED;
 import static org.sharedhealth.mci.domain.constant.MCIConstants.PATIENT_STATUS_ALIVE;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.*;
 import static org.sharedhealth.mci.domain.repository.PatientAuditLogQueryBuilder.buildCreateAuditLogStmt;
@@ -64,15 +65,10 @@ public class PatientRepository extends BaseRepository {
         patient.setCreatedBy(requester);
         patient.setUpdatedBy(requester);
 
-        if (isBlank(patient.getStatus())) {
-            patient.setStatus(PATIENT_STATUS_ALIVE);
-        }
-
-        if (patient.getConfidential() == null) {
-            patient.setConfidential(false);
-        }
-
         patient.setActive(true);
+        if (isBlank(patient.getStatus())) patient.setStatus(PATIENT_STATUS_ALIVE);
+        if (patient.getConfidential() == null) patient.setConfidential(false);
+        if (isBlank(patient.getHidCardStatus())) patient.setHidCardStatus(HID_CARD_STATUS_REGISTERED);
 
         Map<String, Set<Requester>> requestedBy = new HashMap<>();
         buildRequestedBy(requestedBy, ALL_FIELDS, requester);

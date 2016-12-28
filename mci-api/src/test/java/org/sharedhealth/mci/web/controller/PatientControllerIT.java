@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.sharedhealth.mci.domain.config.MCIProperties;
+import org.sharedhealth.mci.domain.constant.MCIConstants;
 import org.sharedhealth.mci.domain.model.*;
 import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.sharedhealth.mci.searchmapping.repository.PatientSearchMappingRepository;
@@ -27,10 +28,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
@@ -92,6 +90,56 @@ public class PatientControllerIT extends BaseControllerTest {
     }
 
     @Test
+    public void shouldCreateAPatient() throws Exception {
+        patientData.setHidCardStatus(MCIConstants.HID_CARD_STATUS_REGISTERED);
+        String json = mapper.writeValueAsString(patientData);
+
+        MvcResult result = mockMvc.perform(post(API_END_POINT_FOR_PATIENT)
+                .header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId)
+                .accept(APPLICATION_JSON)
+                .content(json)
+                .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        result = mockMvc.perform(asyncDispatch(result))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(APPLICATION_JSON_UTF8))
+                .andReturn();
+
+        Map<String, String> mciResponse = objectMapper.readValue(result.getResponse().getContentAsString(), Map.class);
+        Patient patient = cassandraOps.selectOneById(Patient.class, mciResponse.get("id"));
+        assertEquals(patient.getGivenName(), patientData.getGivenName());
+        assertEquals(patient.getSurName(), patientData.getSurName());
+        assertEquals(patient.getGender(), patientData.getGender());
+        assertEquals(patient.getDateOfBirth(), patientData.getDateOfBirth());
+        assertEquals(patient.getHidCardStatus(), patientData.getHidCardStatus());
+    }
+
+    @Test
+    public void shouldFailToCreateAPatientIfHidCardStatusCodeIsNotRegistered() throws Exception {
+        patientData.setHidCardStatus(MCIConstants.HID_CARD_STATUS_ISSUED);
+        String json = mapper.writeValueAsString(patientData);
+
+        MvcResult result = mockMvc.perform(post(API_END_POINT_FOR_PATIENT)
+                .header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId)
+                .accept(APPLICATION_JSON)
+                .content(json)
+                .contentType(APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        JSONAssert.assertEquals("{\"http_status\":400,\"message\":" +
+                "\"A new patient must hast HID card status as REGISTERED\",}", result.getResponse().getContentAsString(), JSONCompareMode.STRICT);
+    }
+
+    @Test
     public void shouldCreatePatientForAnyPostCodeWithPermanentAddressWhenCountryCodeIsNotBangladesh() throws Exception {
         patientData.getPermanentAddress().setCountryCode("051");
         patientData.getPermanentAddress().setPostCode("12345");
@@ -107,8 +155,6 @@ public class PatientControllerIT extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         mockMvc.perform(asyncDispatch(result))
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(APPLICATION_JSON_UTF8));
