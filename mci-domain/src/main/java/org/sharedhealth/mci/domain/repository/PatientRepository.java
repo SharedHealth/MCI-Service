@@ -74,9 +74,7 @@ public class PatientRepository extends BaseRepository {
         buildRequestedBy(requestedBy, ALL_FIELDS, requester);
 
         CassandraConverter converter = cassandraOps.getConverter();
-
         Batch batch = batch();
-
         batch.add(createInsertQuery(CF_PATIENT, patient, null, converter));
         buildCreateAuditLogStmt(patientData, requestedBy, converter, batch);
         addToPatientUpdateLogStmt(patient, requestedBy, converter, batch);

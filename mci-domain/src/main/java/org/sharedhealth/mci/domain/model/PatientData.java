@@ -30,10 +30,10 @@ import static java.lang.String.valueOf;
 import static org.apache.commons.lang3.StringUtils.*;
 import static org.sharedhealth.mci.domain.constant.ErrorConstants.*;
 import static org.sharedhealth.mci.domain.constant.JsonConstants.*;
-import static org.sharedhealth.mci.domain.constant.MCIConstants.COUNTRY_CODE_BANGLADESH;
+import static org.sharedhealth.mci.domain.constant.MCIConstants.*;
 
 @MaritalRelation(message = ERROR_CODE_DEPENDENT, field = "maritalStatus")
-@JsonIgnoreProperties(ignoreUnknown = true, value = {"created_at"})
+@JsonIgnoreProperties(ignoreUnknown = true, value = {"created_at" })
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility =
         JsonAutoDetect.Visibility.NONE)
 public class PatientData implements Diffable<PatientData> {
@@ -221,6 +221,7 @@ public class PatientData implements Diffable<PatientData> {
 
     @JsonProperty(HID_CARD_STATUS)
     @JsonInclude(NON_EMPTY)
+    @Pattern(regexp = "^(" + HID_CARD_STATUS_REGISTERED + "|" + HID_CARD_STATUS_ISSUED + ")$", message = ERROR_CODE_INVALID, flags = Flag.CASE_INSENSITIVE)
     private String hidCardStatus;
 
     @JsonIgnore
@@ -649,7 +650,8 @@ public class PatientData implements Diffable<PatientData> {
             return false;
         if (active != null ? !active.equals(that.active) : that.active != null) return false;
         if (mergedWith != null ? !mergedWith.equals(that.mergedWith) : that.mergedWith != null) return false;
-        if (hidCardStatus != null ? !hidCardStatus.equals(that.hidCardStatus) : that.hidCardStatus != null) return false;
+        if (hidCardStatus != null ? !hidCardStatus.equals(that.hidCardStatus) : that.hidCardStatus != null)
+            return false;
 
         return true;
     }
@@ -886,7 +888,7 @@ public class PatientData implements Diffable<PatientData> {
     }
 
     public String getHidCardStatus() {
-        return hidCardStatus;
+        return StringUtils.upperCase(hidCardStatus);
     }
 
     public void setHidCardStatus(String hidCardStatus) {
@@ -931,11 +933,8 @@ public class PatientData implements Diffable<PatientData> {
                 .append(RELATIONS, this.relations, that.relations)
                 .append(ACTIVE, this.active, that.active)
                 .append(MERGED_WITH, this.mergedWith, that.mergedWith)
+                .append(HID_CARD_STATUS, this.getHidCardStatus(), that.getHidCardStatus())
 
                 .build();
-    }
-
-    public void clearHealthId() {
-        this.healthId = null;
     }
 }

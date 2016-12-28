@@ -13,6 +13,7 @@ import static java.lang.String.valueOf;
 import static org.apache.commons.lang3.StringUtils.*;
 import static org.sharedhealth.mci.domain.constant.JsonConstants.*;
 import static org.sharedhealth.mci.domain.constant.MCIConstants.COUNTRY_CODE_BANGLADESH;
+import static org.sharedhealth.mci.domain.constant.MCIConstants.HID_CARD_STATUS_ISSUED;
 
 @Component
 public class PendingApprovalFilter {
@@ -90,11 +91,12 @@ public class PendingApprovalFilter {
         newPatient.setActive((Boolean) process(ACTIVE, existingPatient.isActive(), updateRequest.isActive(), requestedBy, newPatient));
         newPatient.setMergedWith(processString(MERGED_WITH, existingPatient.getMergedWith(), updateRequest.getMergedWith(), requestedBy,
                 newPatient));
-        if (isBlank(updateRequest.getHidCardStatus())) {
-            updateRequest.setHidCardStatus(null);
+        if (isBlank(updateRequest.getHidCardStatus()) || HID_CARD_STATUS_ISSUED.equals(existingPatient.getHidCardStatus())) {
+            newPatient.setHidCardStatus(existingPatient.getHidCardStatus());
+        } else {
+            newPatient.setHidCardStatus(processString(HID_CARD_STATUS, existingPatient.getHidCardStatus(), updateRequest.getHidCardStatus(),
+                    requestedBy, newPatient));
         }
-        newPatient.setHidCardStatus(processString(HID_CARD_STATUS, existingPatient.getHidCardStatus(), updateRequest.getHidCardStatus(),
-                requestedBy, newPatient));
 
         return newPatient;
     }

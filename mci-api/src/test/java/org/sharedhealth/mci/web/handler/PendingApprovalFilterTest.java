@@ -24,8 +24,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.domain.constant.JsonConstants.*;
-import static org.sharedhealth.mci.domain.constant.MCIConstants.RELATION_FATHER;
-import static org.sharedhealth.mci.domain.constant.MCIConstants.RELATION_MOTHER;
+import static org.sharedhealth.mci.domain.constant.MCIConstants.*;
 import static org.sharedhealth.mci.domain.util.DateUtil.parseDate;
 import static org.sharedhealth.mci.domain.util.DateUtil.toIsoMillisFormat;
 
@@ -236,101 +235,6 @@ public class PendingApprovalFilterTest {
         verify(approvalFieldService, atLeastOnce()).getProperty(Mockito.anyString());
     }
 
-    private void assertPendingApprovals(PatientData existingPatient, PatientData newPatient, int pendingApprovalsCount, Requester requestedBy) {
-        TreeSet<PendingApproval> pendingApprovals = newPatient.getPendingApprovals();
-        assertNotNull(pendingApprovals);
-        assertEquals(pendingApprovalsCount, pendingApprovals.size());
-
-        for (PendingApproval pendingApproval : pendingApprovals) {
-            if (GENDER.equals(pendingApproval.getName())) {
-                assertFieldDetails(pendingApproval.getFieldDetails(), "F", requestedBy);
-                assertEquals(existingPatient.getGender(), newPatient.getGender());
-
-            } else if (PHONE_NUMBER.equals(pendingApproval.getName())) {
-                PhoneNumber phoneNumber = new PhoneNumber();
-                phoneNumber.setNumber("123");
-                assertFieldDetails(pendingApproval.getFieldDetails(), phoneNumber, requestedBy);
-                assertEquals(existingPatient.getPhoneNumber(), newPatient.getPhoneNumber());
-
-            } else if (PRESENT_ADDRESS.equals(pendingApproval.getName())) {
-                assertFieldDetails(pendingApproval.getFieldDetails(), new Address("10", "20", "30"), requestedBy);
-                assertEquals(existingPatient.getAddress(), newPatient.getAddress());
-
-            } else if (PERMANENT_ADDRESS.equals(pendingApproval.getName())) {
-                assertFieldDetails(pendingApproval.getFieldDetails(), new Address("11", "22", "33"), requestedBy);
-                assertEquals(existingPatient.getPermanentAddress(), newPatient.getPermanentAddress());
-
-            } else if (RELIGION.equals(pendingApproval.getName())) {
-                assertFieldDetails(pendingApproval.getFieldDetails(), "2", requestedBy);
-                assertEquals(existingPatient.getReligion(), newPatient.getReligion());
-
-            } else if (RELATIONS.equals(pendingApproval.getName())) {
-                Relation relation = new Relation();
-                relation.setType("SPS");
-                assertRelationFieldDetails(pendingApproval.getFieldDetails(), relation, requestedBy);
-
-            } else {
-                fail("Invalid pending approval.");
-            }
-        }
-    }
-
-    private void assertFieldDetails(TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap, Object value, Requester requestedBy) {
-        assertNotNull(fieldDetailsMap);
-        assertEquals(1, fieldDetailsMap.size());
-        PendingApprovalFieldDetails fieldDetails = fieldDetailsMap.values().iterator().next();
-        assertEquals(value, fieldDetails.getValue());
-        assertEquals(requestedBy, fieldDetails.getRequestedBy());
-        long expectedCreatedAt = TimeUuidUtil.getTimeFromUUID(fieldDetailsMap.keySet().iterator().next());
-        assertEquals(toIsoMillisFormat(expectedCreatedAt), fieldDetails.getCreatedAt());
-    }
-
-    private PatientData buildPatientData() throws ParseException {
-        PatientData patient = new PatientData();
-        patient.setNationalId("1234567890123");
-        patient.setBirthRegistrationNumber("12345678901234567");
-        patient.setGivenName("Scott");
-        patient.setSurName("Tiger");
-        patient.setGender("M");
-        patient.setDateOfBirth(parseDate("2014-12-01"));
-
-        Address address = new Address();
-        address.setAddressLine("house-10");
-        address.setDivisionId("10");
-        address.setDistrictId("04");
-        address.setUpazilaId("09");
-        address.setCityCorporationId("20");
-        address.setVillage("10");
-        address.setRuralWardId("01");
-        address.setCountryCode("050");
-
-        patient.setAddress(address);
-
-        Address presentAddress = new Address();
-        presentAddress.setAddressLine("house-10");
-        presentAddress.setDivisionId("10");
-        presentAddress.setDistrictId("04");
-        presentAddress.setUpazilaId("09");
-        presentAddress.setCityCorporationId("20");
-        presentAddress.setVillage("10");
-        presentAddress.setRuralWardId("01");
-        presentAddress.setCountryCode("050");
-
-        patient.setPermanentAddress(presentAddress);
-
-        LocationData location = new LocationData();
-
-        location.setGeoCode("1004092001");
-        location.setDivisionId("10");
-        location.setDistrictId("04");
-        location.setUpazilaId("09");
-        location.setCityCorporationId("20");
-        location.setUnionOrUrbanWardId("01");
-
-        patient.setRequester("Bahmni", null);
-        return patient;
-    }
-
     @Test
     public void shouldNotAddFieldsToPendingApprovalsWhenMarkedForApprovalAndRequestByAdmin() throws ParseException {
         setUpApprovalFieldServiceFor(GENDER, "NA");
@@ -494,6 +398,44 @@ public class PendingApprovalFilterTest {
         assertEquals(motherRelation, newPatient.getRelationById(motherRelationId));
     }
 
+    @Test
+    public void shouldIgnoreUpdateRequestForHIDCardStatusIfEmpty() throws Exception {
+        PatientData existingPatient = new PatientData();
+        PatientData updateRequest = new PatientData();
+        updateRequest.setHidCardStatus("");
+
+        existingPatient.setHidCardStatus(HID_CARD_STATUS_REGISTERED);
+        PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
+        assertEquals(existingPatient.getHidCardStatus(), newPatient.getHidCardStatus());
+
+        existingPatient.setHidCardStatus(null);
+        newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
+        assertEquals(existingPatient.getHidCardStatus(), newPatient.getHidCardStatus());
+
+        existingPatient.setHidCardStatus(HID_CARD_STATUS_ISSUED);
+        newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
+        assertEquals(existingPatient.getHidCardStatus(), newPatient.getHidCardStatus());
+    }
+
+    @Test
+    public void shouldIgnoreUpdateRequestForHIDCardStatusIfExistingStatusIsIssued() throws Exception {
+        PatientData existingPatient = new PatientData();
+        existingPatient.setHidCardStatus(HID_CARD_STATUS_ISSUED);
+        PatientData updateRequest = new PatientData();
+
+        updateRequest.setHidCardStatus("");
+        PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
+        assertEquals(existingPatient.getHidCardStatus(), newPatient.getHidCardStatus());
+
+        updateRequest.setHidCardStatus(null);
+        newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
+        assertEquals(existingPatient.getHidCardStatus(), newPatient.getHidCardStatus());
+
+        updateRequest.setHidCardStatus(HID_CARD_STATUS_REGISTERED);
+        newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
+        assertEquals(existingPatient.getHidCardStatus(), newPatient.getHidCardStatus());
+    }
+
     private boolean containsRelationFieldDetails(TreeMap<UUID, PendingApprovalFieldDetails> relations, String type, String givenName) {
         for (PendingApprovalFieldDetails pendingApprovalFieldDetails : relations.values()) {
             List<Relation> relationList = (List<Relation>) pendingApprovalFieldDetails.getValue();
@@ -526,5 +468,100 @@ public class PendingApprovalFilterTest {
         relation.setMarriageId("12345678");
         relation.setRelationalStatus("3");
         return relation;
+    }
+
+    private void assertPendingApprovals(PatientData existingPatient, PatientData newPatient, int pendingApprovalsCount, Requester requestedBy) {
+        TreeSet<PendingApproval> pendingApprovals = newPatient.getPendingApprovals();
+        assertNotNull(pendingApprovals);
+        assertEquals(pendingApprovalsCount, pendingApprovals.size());
+
+        for (PendingApproval pendingApproval : pendingApprovals) {
+            if (GENDER.equals(pendingApproval.getName())) {
+                assertFieldDetails(pendingApproval.getFieldDetails(), "F", requestedBy);
+                assertEquals(existingPatient.getGender(), newPatient.getGender());
+
+            } else if (PHONE_NUMBER.equals(pendingApproval.getName())) {
+                PhoneNumber phoneNumber = new PhoneNumber();
+                phoneNumber.setNumber("123");
+                assertFieldDetails(pendingApproval.getFieldDetails(), phoneNumber, requestedBy);
+                assertEquals(existingPatient.getPhoneNumber(), newPatient.getPhoneNumber());
+
+            } else if (PRESENT_ADDRESS.equals(pendingApproval.getName())) {
+                assertFieldDetails(pendingApproval.getFieldDetails(), new Address("10", "20", "30"), requestedBy);
+                assertEquals(existingPatient.getAddress(), newPatient.getAddress());
+
+            } else if (PERMANENT_ADDRESS.equals(pendingApproval.getName())) {
+                assertFieldDetails(pendingApproval.getFieldDetails(), new Address("11", "22", "33"), requestedBy);
+                assertEquals(existingPatient.getPermanentAddress(), newPatient.getPermanentAddress());
+
+            } else if (RELIGION.equals(pendingApproval.getName())) {
+                assertFieldDetails(pendingApproval.getFieldDetails(), "2", requestedBy);
+                assertEquals(existingPatient.getReligion(), newPatient.getReligion());
+
+            } else if (RELATIONS.equals(pendingApproval.getName())) {
+                Relation relation = new Relation();
+                relation.setType("SPS");
+                assertRelationFieldDetails(pendingApproval.getFieldDetails(), relation, requestedBy);
+
+            } else {
+                fail("Invalid pending approval.");
+            }
+        }
+    }
+
+    private void assertFieldDetails(TreeMap<UUID, PendingApprovalFieldDetails> fieldDetailsMap, Object value, Requester requestedBy) {
+        assertNotNull(fieldDetailsMap);
+        assertEquals(1, fieldDetailsMap.size());
+        PendingApprovalFieldDetails fieldDetails = fieldDetailsMap.values().iterator().next();
+        assertEquals(value, fieldDetails.getValue());
+        assertEquals(requestedBy, fieldDetails.getRequestedBy());
+        long expectedCreatedAt = TimeUuidUtil.getTimeFromUUID(fieldDetailsMap.keySet().iterator().next());
+        assertEquals(toIsoMillisFormat(expectedCreatedAt), fieldDetails.getCreatedAt());
+    }
+
+    private PatientData buildPatientData() throws ParseException {
+        PatientData patient = new PatientData();
+        patient.setNationalId("1234567890123");
+        patient.setBirthRegistrationNumber("12345678901234567");
+        patient.setGivenName("Scott");
+        patient.setSurName("Tiger");
+        patient.setGender("M");
+        patient.setDateOfBirth(parseDate("2014-12-01"));
+
+        Address address = new Address();
+        address.setAddressLine("house-10");
+        address.setDivisionId("10");
+        address.setDistrictId("04");
+        address.setUpazilaId("09");
+        address.setCityCorporationId("20");
+        address.setVillage("10");
+        address.setRuralWardId("01");
+        address.setCountryCode("050");
+
+        patient.setAddress(address);
+
+        Address presentAddress = new Address();
+        presentAddress.setAddressLine("house-10");
+        presentAddress.setDivisionId("10");
+        presentAddress.setDistrictId("04");
+        presentAddress.setUpazilaId("09");
+        presentAddress.setCityCorporationId("20");
+        presentAddress.setVillage("10");
+        presentAddress.setRuralWardId("01");
+        presentAddress.setCountryCode("050");
+
+        patient.setPermanentAddress(presentAddress);
+
+        LocationData location = new LocationData();
+
+        location.setGeoCode("1004092001");
+        location.setDivisionId("10");
+        location.setDistrictId("04");
+        location.setUpazilaId("09");
+        location.setCityCorporationId("20");
+        location.setUnionOrUrbanWardId("01");
+
+        patient.setRequester("Bahmni", null);
+        return patient;
     }
 }

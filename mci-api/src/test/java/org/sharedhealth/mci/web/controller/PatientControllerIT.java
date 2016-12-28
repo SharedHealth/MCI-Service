@@ -136,7 +136,7 @@ public class PatientControllerIT extends BaseControllerTest {
                 .andReturn();
 
         JSONAssert.assertEquals("{\"http_status\":400,\"message\":" +
-                "\"A new patient must hast HID card status as REGISTERED\",}", result.getResponse().getContentAsString(), JSONCompareMode.STRICT);
+                "\"A new patient must have HID card status as REGISTERED\",}", result.getResponse().getContentAsString(), JSONCompareMode.STRICT);
     }
 
     @Test
@@ -569,9 +569,9 @@ public class PatientControllerIT extends BaseControllerTest {
         assertPatientEquals(original, patient);
     }
 
+
     @Test
     public void shouldUpdatePatientPartiallyForValidPartialData() throws Exception {
-
         String fullPayloadJson = asString("jsons/patient/full_payload.json");
         String nid = "9934677890120";
 
@@ -596,6 +596,30 @@ public class PatientControllerIT extends BaseControllerTest {
         PatientData patient = getPatientData(healthId);
         original.setNationalId(nid);
         assertPatientEquals(original, patient);
+    }
+
+    @Test
+    public void shouldFailToUpdateIfHealthIdCardStatusIsUnknown() throws Exception {
+        String fullPayloadJson = asString("jsons/patient/full_payload.json");
+        MvcResult createdResult = postPatient(fullPayloadJson);
+
+        final MCIResponse createdResponse = getMciResponse(createdResult);
+        String healthId = createdResponse.getId();
+        String hidCardStatusJson = "{\"hid_card_status\": \"" + "other" + "\"}";
+
+        MvcResult result = mockMvc.perform(put(API_END_POINT_FOR_PATIENT + "/" + healthId)
+                .header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId)
+
+                .accept(APPLICATION_JSON)
+                .content(hidCardStatusJson).contentType(APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        JSONAssert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\"," +
+                "\"errors\":[{\"code\":1004,\"field\":\"hid_card_status\",\"message\":\"invalid hid_card_status\"}]}", result
+                .getResponse().getContentAsString(), JSONCompareMode.STRICT);
     }
 
     @Test

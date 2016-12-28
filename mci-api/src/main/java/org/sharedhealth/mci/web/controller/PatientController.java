@@ -77,18 +77,19 @@ public class PatientController extends MciController {
         logger.info("Create patient Request.");
         final DeferredResult<ResponseEntity<MCIResponse>> deferredResult = new DeferredResult<>();
 
+        if (bindingResult.hasErrors()) {
+            logger.error("Validation error while trying to create patient.");
+            throw new ValidationException(bindingResult);
+        }
+
         if (null != patient.getMergedWith()) {
             throw new InvalidRequestException("Cannot merge with another patient on creation");
         }
 
         if (patient.getHidCardStatus() != null && !patient.getHidCardStatus().equalsIgnoreCase(HID_CARD_STATUS_REGISTERED)) {
-            throw new InvalidRequestException("A new patient must hast HID card status as " + MCIConstants.HID_CARD_STATUS_REGISTERED);
+            throw new InvalidRequestException("A new patient must have HID card status as " + MCIConstants.HID_CARD_STATUS_REGISTERED);
         }
 
-        if (bindingResult.hasErrors()) {
-            logger.error("Validation error while trying to create patient.");
-            throw new ValidationException(bindingResult);
-        }
 
         MCIResponse mciResponse;
         if (StringUtils.isNotBlank(patient.getHealthId())) {
