@@ -77,20 +77,6 @@ public class PatientRepositoryIT extends BaseIntegrationTest {
     }
 
     @Test
-    public void shouldFindPatientWithDefaultValuesIfNotPresent() throws Exception {
-        Patient patientToSave = new Patient();
-        String healthId = "HID";
-        patientToSave.setHealthId(healthId);
-        patientToSave.setCreatedBy(new Requester(FACILITY));
-        patientToSave.setUpdatedBy(new Requester(FACILITY));
-        cassandraOps.insert(patientToSave);
-
-        PatientData patient = patientRepository.findByHealthId(healthId);
-        assertNotNull(patient);
-        assertEquals(HID_CARD_STATUS_REGISTERED, patient.getHidCardStatus());
-    }
-
-    @Test
     public void shouldBuildUpdateProcessBatch() {
         PatientData patient = buildPatient();
         MCIResponse mciResponse = patientRepository.create(patient);

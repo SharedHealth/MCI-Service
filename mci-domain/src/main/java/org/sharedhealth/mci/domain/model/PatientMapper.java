@@ -91,12 +91,7 @@ public class PatientMapper {
 
         data.setActive(patient.isActive());
         data.setMergedWith(patient.getMergedWith());
-
-        if (StringUtils.isNotBlank(patient.getHidCardStatus())) {
-            data.setHidCardStatus(patient.getHidCardStatus());
-        } else {
-            data.setHidCardStatus(HID_CARD_STATUS_REGISTERED);
-        }
+        data.setHidCardStatus(patient.getHidCardStatus());
 
         if (patient.getConfidential() != null) {
             mapConfidentiality(patient, data);

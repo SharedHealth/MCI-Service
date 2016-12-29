@@ -399,41 +399,36 @@ public class PendingApprovalFilterTest {
     }
 
     @Test
-    public void shouldIgnoreUpdateRequestForHIDCardStatusIfEmpty() throws Exception {
-        PatientData existingPatient = new PatientData();
+    public void shouldIgnoreUpdateRequestForHIDCardStatusIfEmptyOrNull() throws Exception {
+        PatientData existingPatientRegistered = new PatientData();
+        existingPatientRegistered.setHidCardStatus(HID_CARD_STATUS_REGISTERED);
+        PatientData existingPatientIssued = new PatientData();
+        existingPatientIssued.setHidCardStatus(HID_CARD_STATUS_ISSUED);
         PatientData updateRequest = new PatientData();
+
         updateRequest.setHidCardStatus("");
+        assertEquals(existingPatientRegistered.getHidCardStatus(), pendingApprovalFilter.filter(existingPatientRegistered, updateRequest).getHidCardStatus());
+        assertEquals(existingPatientIssued.getHidCardStatus(), pendingApprovalFilter.filter(existingPatientIssued, updateRequest).getHidCardStatus());
 
-        existingPatient.setHidCardStatus(HID_CARD_STATUS_REGISTERED);
-        PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
-        assertEquals(existingPatient.getHidCardStatus(), newPatient.getHidCardStatus());
-
-        existingPatient.setHidCardStatus(null);
-        newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
-        assertEquals(existingPatient.getHidCardStatus(), newPatient.getHidCardStatus());
-
-        existingPatient.setHidCardStatus(HID_CARD_STATUS_ISSUED);
-        newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
-        assertEquals(existingPatient.getHidCardStatus(), newPatient.getHidCardStatus());
+        updateRequest.setHidCardStatus(null);
+        assertEquals(existingPatientRegistered.getHidCardStatus(), pendingApprovalFilter.filter(existingPatientRegistered, updateRequest).getHidCardStatus());
+        assertEquals(existingPatientIssued.getHidCardStatus(), pendingApprovalFilter.filter(existingPatientIssued, updateRequest).getHidCardStatus());
     }
 
     @Test
-    public void shouldIgnoreUpdateRequestForHIDCardStatusIfExistingStatusIsIssued() throws Exception {
+    public void shouldUpdateAHidCardStatusFromIssuedToRegisteredAndViceversa() throws Exception {
         PatientData existingPatient = new PatientData();
-        existingPatient.setHidCardStatus(HID_CARD_STATUS_ISSUED);
         PatientData updateRequest = new PatientData();
 
-        updateRequest.setHidCardStatus("");
-        PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
-        assertEquals(existingPatient.getHidCardStatus(), newPatient.getHidCardStatus());
-
-        updateRequest.setHidCardStatus(null);
-        newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
-        assertEquals(existingPatient.getHidCardStatus(), newPatient.getHidCardStatus());
-
+        existingPatient.setHidCardStatus(HID_CARD_STATUS_ISSUED);
         updateRequest.setHidCardStatus(HID_CARD_STATUS_REGISTERED);
+        PatientData newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
+        assertEquals(updateRequest.getHidCardStatus(), newPatient.getHidCardStatus());
+
+        existingPatient.setHidCardStatus(HID_CARD_STATUS_REGISTERED);
+        updateRequest.setHidCardStatus(HID_CARD_STATUS_ISSUED);
         newPatient = pendingApprovalFilter.filter(existingPatient, updateRequest);
-        assertEquals(existingPatient.getHidCardStatus(), newPatient.getHidCardStatus());
+        assertEquals(updateRequest.getHidCardStatus(), newPatient.getHidCardStatus());
     }
 
     private boolean containsRelationFieldDetails(TreeMap<UUID, PendingApprovalFieldDetails> relations, String type, String givenName) {

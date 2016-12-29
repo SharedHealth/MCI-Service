@@ -1,7 +1,6 @@
 package org.sharedhealth.mci.web.controller;
 
 import org.apache.commons.lang3.StringUtils;
-import org.sharedhealth.mci.domain.constant.MCIConstants;
 import org.sharedhealth.mci.domain.exception.Forbidden;
 import org.sharedhealth.mci.domain.exception.InvalidRequestException;
 import org.sharedhealth.mci.domain.exception.ValidationException;
@@ -66,7 +65,7 @@ public class PatientController extends MciController {
     public DeferredResult<ResponseEntity<MCIResponse>> create(@RequestBody @Validated({RequiredGroup.class, Default.class}) PatientData patient,
                                                               BindingResult bindingResult) throws InterruptedException {
 
-        UserInfo userInfo = getUserInfo();
+            UserInfo userInfo = getUserInfo();
         logAccessDetails(userInfo, "Creating a new patient");
 
         UserInfo.UserInfoProperties properties = userInfo.getProperties();
@@ -87,7 +86,7 @@ public class PatientController extends MciController {
         }
 
         if (patient.getHidCardStatus() != null && !patient.getHidCardStatus().equalsIgnoreCase(HID_CARD_STATUS_REGISTERED)) {
-            throw new InvalidRequestException("A new patient must have HID card status as " + MCIConstants.HID_CARD_STATUS_REGISTERED);
+            throw new InvalidRequestException("A new patient must have HID card status as " + HID_CARD_STATUS_REGISTERED);
         }
 
 
@@ -121,7 +120,11 @@ public class PatientController extends MciController {
         logAccessDetails(userInfo, format("Find patient given (healthId) : %s", healthId));
         logger.info("Find patient by health id [" + healthId + "]");
 
-        PatientData result = formatResponse(patientService.findByHealthId(healthId));
+        PatientData patient = patientService.findByHealthId(healthId);
+        if (null == patient.getHidCardStatus()) {
+            patient.setHidCardStatus(HID_CARD_STATUS_REGISTERED);
+        }
+        PatientData result = formatResponse(patient);
 
         deferredResult.setResult(new ResponseEntity<>(result, OK));
         return deferredResult;
