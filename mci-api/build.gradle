@@ -90,7 +90,7 @@ configurations {
 
 jar {
     baseName = 'mci-api'
-    version = '2.5-SNAPSHOT'
+    version = '2.6-SNAPSHOT'
 }
 
 private Properties loadConfig() {
@@ -118,7 +118,7 @@ task dist(dependsOn: [
         project(":mci-search-mapping").tasks.build,
         'exportProperties'], type: Rpm) {
     packageName = 'mci'
-    version = '2.5'
+    version = '2.6'
     release = project.hasProperty('release') ? project.release : '1'
     arch = NOARCH
     os = LINUX
