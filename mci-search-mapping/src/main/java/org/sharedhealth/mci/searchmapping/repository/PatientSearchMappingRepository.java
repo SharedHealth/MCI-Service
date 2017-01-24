@@ -55,7 +55,6 @@ public class PatientSearchMappingRepository extends BaseRepository {
         }
 
         buildCreateNameMappingStmt(patientData, converter, batch);
-        buildCreateCatchmentMappingsStmt(patientData.getCatchment(), patientData.getUpdatedAt(), patientData.getHealthId(), converter, batch);
 
         cassandraOps.execute(batch);
     }

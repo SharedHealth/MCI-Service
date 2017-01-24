@@ -190,8 +190,8 @@ public class PatientQueryBuilder {
         buildCreateNameMappingStmt(patient, converter, batch);
     }
 
-    private static void buildCreateCatchmentMappingsStmt(Catchment catchment, UUID lastUpdated, String healthId,
-                                                         CassandraConverter converter, Batch batch) {
+    public static void buildCreateCatchmentMappingsStmt(Catchment catchment, UUID lastUpdated, String healthId,
+                                                        CassandraConverter converter, Batch batch) {
         for (String catchmentId : catchment.getAllIds()) {
             CatchmentMapping mapping = new CatchmentMapping(catchmentId, lastUpdated, healthId);
             batch.add(createInsertQuery(CF_CATCHMENT_MAPPING, mapping, null, converter));

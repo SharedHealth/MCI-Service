@@ -5,14 +5,11 @@ import org.junit.runner.RunWith;
 import org.sharedhealth.mci.domain.model.*;
 import org.sharedhealth.mci.domain.repository.PatientRepository;
 import org.sharedhealth.mci.domain.util.BaseIntegrationTest;
-import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
@@ -39,69 +36,6 @@ public class PatientSearchMappingRepositoryIT extends BaseIntegrationTest {
 
         assertNotNull(getNidMappings("1234567890123", healthId).get(0));
         assertNotNull(getBrnMappings("12345678901234567", healthId).get(0));
-    }
-
-    @Test
-    public void shouldFindAllPatientsByCatchmentWithLastMarkerParam() throws Exception {
-        List<String> healthIds = new ArrayList<>();
-        for (int i = 1; i <= 5; i++) {
-            PatientData patientData = buildPatient();
-            Address address = createAddress("10", "20", "30");
-            address.setCityCorporationId("40");
-            address.setUnionOrUrbanWardId("5" + i);
-            address.setRuralWardId("6" + i);
-            patientData.setAddress(address);
-            String healthId = String.valueOf(new Date().getTime());
-            patientData.setHealthId(healthId);
-            healthIds.add(patientRepository.create(patientData).getId());
-
-            searchMappingRepository.saveMappings(patientRepository.findByHealthId(healthId));
-        }
-
-        Catchment catchment = new Catchment("10", "20", "30");
-        catchment.setCityCorpId("40");
-        UUID updatedAt = cassandraOps.selectOneById(Patient.class, healthIds.get(0)).getUpdatedAt();
-        assertNotNull(updatedAt);
-        int limit = 3;
-        List<PatientData> patients = patientRepository.findAllByCatchment(catchment, null, updatedAt, limit);
-
-        assertTrue(isNotEmpty(patients));
-        assertEquals(limit, patients.size());
-        assertEquals(healthIds.get(1), patients.get(0).getHealthId());
-        assertEquals(healthIds.get(2), patients.get(1).getHealthId());
-        assertEquals(healthIds.get(3), patients.get(2).getHealthId());
-    }
-
-    @Test
-    public void shouldFindAllPatientsByCatchmentWithSinceParam() throws Exception {
-        List<String> healthIds = new ArrayList<>();
-        for (int i = 1; i <= 5; i++) {
-            PatientData patientData = buildPatient();
-            Address address = createAddress("10", "20", "30");
-            address.setCityCorporationId("40");
-
-            patientData.setHealthId(String.valueOf(new Date().getTime()));
-            address.setUnionOrUrbanWardId("5" + i);
-            address.setRuralWardId("6" + i);
-            patientData.setAddress(address);
-            String healthId = patientRepository.create(patientData).getId();
-            healthIds.add(healthId);
-            searchMappingRepository.saveMappings(patientRepository.findByHealthId(healthId));
-        }
-
-        Catchment catchment = new Catchment("10", "20", "30");
-        catchment.setCityCorpId("40");
-        UUID updatedAt = cassandraOps.selectOneById(Patient.class, healthIds.get(0)).getUpdatedAt();
-        assertNotNull(updatedAt);
-        int limit = 3;
-        Date since = new Date(TimeUuidUtil.getTimeFromUUID(updatedAt));
-        List<PatientData> patients = patientRepository.findAllByCatchment(catchment, since, null, limit);
-
-        assertTrue(isNotEmpty(patients));
-        assertEquals(limit, patients.size());
-        assertEquals(healthIds.get(0), patients.get(0).getHealthId());
-        assertEquals(healthIds.get(1), patients.get(1).getHealthId());
-        assertEquals(healthIds.get(2), patients.get(2).getHealthId());
     }
     
     @Test
