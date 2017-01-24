@@ -41,6 +41,7 @@ import static org.sharedhealth.mci.domain.util.DateUtil.parseDate;
 import static org.sharedhealth.mci.web.infrastructure.security.UserProfile.*;
 import static org.springframework.http.HttpStatus.ACCEPTED;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.APPLICATION_ATOM_XML_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
@@ -173,7 +174,7 @@ public class CatchmentController extends FeedController {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_PROVIDER', 'ROLE_FACILITY', 'ROLE_SHR System Admin')")
-    @RequestMapping(value = "/{catchmentId}/patients", method = GET, produces = APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/{catchmentId}/patients", method = GET, produces = { APPLICATION_JSON_VALUE, APPLICATION_ATOM_XML_VALUE })
     public DeferredResult<Feed> findAllPatients(
             @PathVariable String catchmentId,
             @RequestParam(value = SINCE, required = false) String since,
