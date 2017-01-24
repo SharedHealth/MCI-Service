@@ -65,7 +65,7 @@ public class PatientRepositoryIT extends BaseIntegrationTest {
         patientData.setGender("M");
         patientData.setGivenName("Murli");
         patientData.setSurName("Dharan");
-
+        patientData.setAddress(createAddress(divisionId, districtId, upazilaId, "99", "01", "02"));
         String healthId = patientRepository.create(patientData).getId();
 
         Patient patient = cassandraOps.selectOneById(Patient.class, healthId);

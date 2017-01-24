@@ -58,8 +58,9 @@ public class PatientRepository extends BaseRepository {
 
     public MCIResponse create(PatientData patientData) {
         Patient patient = mapper.map(patientData, new PatientData());
-        patient.setCreatedAt(TimeUuidUtil.uuidForDate(new Date()));
-        patient.setUpdatedAt(TimeUuidUtil.uuidForDate(new Date()));
+        UUID createdAt = TimeUuidUtil.uuidForDate(new Date());
+        patient.setCreatedAt(createdAt);
+        patient.setUpdatedAt(createdAt);
 
         Requester requester = patientData.getRequester();
         patient.setCreatedBy(requester);
@@ -76,6 +77,7 @@ public class PatientRepository extends BaseRepository {
         CassandraConverter converter = cassandraOps.getConverter();
         Batch batch = batch();
         batch.add(createInsertQuery(CF_PATIENT, patient, null, converter));
+        buildCreateCatchmentMappingsStmt(patientData.getCatchment(), createdAt, patientData.getHealthId(), converter, batch);
         buildCreateAuditLogStmt(patientData, requestedBy, converter, batch);
         addToPatientUpdateLogStmt(patient, requestedBy, converter, batch);
 
