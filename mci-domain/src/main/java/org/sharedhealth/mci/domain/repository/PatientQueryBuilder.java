@@ -191,25 +191,15 @@ public class PatientQueryBuilder {
     }
 
     public static void buildCreateCatchmentMappingsStmt(Catchment catchment, UUID lastUpdated, String healthId,
-                                                        CassandraConverter converter, Batch batch) {
+                                                         CassandraConverter converter, Batch batch) {
         for (String catchmentId : catchment.getAllIds()) {
             CatchmentMapping mapping = new CatchmentMapping(catchmentId, lastUpdated, healthId);
             batch.add(createInsertQuery(CF_CATCHMENT_MAPPING, mapping, null, converter));
         }
     }
 
-    private static void buildDeleteCatchmentMappingsStmt(Catchment catchment, UUID lastUpdated, String healthId,
-                                                         CassandraConverter converter, Batch batch) {
-        for (String catchmentId : catchment.getAllIds()) {
-            CatchmentMapping mapping = new CatchmentMapping(catchmentId, lastUpdated, healthId);
-            batch.add(createDeleteQuery(CF_CATCHMENT_MAPPING, mapping, null, converter));
-        }
-    }
-
     static void buildUpdateCatchmentMappingsStmt(Patient newPatient, PatientData existingPatient, CassandraConverter converter,
                                                  Batch batch) {
-        buildDeleteCatchmentMappingsStmt(existingPatient.getCatchment(), existingPatient.getUpdatedAt(),
-                existingPatient.getHealthId(), converter, batch);
 
         Catchment catchment = newPatient.getCatchment() != null ? newPatient.getCatchment() : existingPatient.getCatchment();
 
