@@ -19,7 +19,8 @@ import static java.util.Arrays.asList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.junit.Assert.*;
-import static org.sharedhealth.mci.domain.constant.MCIConstants.*;
+import static org.sharedhealth.mci.domain.constant.MCIConstants.HID_CARD_STATUS_REGISTERED;
+import static org.sharedhealth.mci.domain.constant.MCIConstants.PATIENT_STATUS_ALIVE;
 import static org.sharedhealth.mci.domain.util.DateUtil.parseDate;
 import static org.sharedhealth.mci.domain.util.TimeUuidUtil.getTimeFromUUID;
 
@@ -52,6 +53,20 @@ public class PatientRepositoryIT extends BaseIntegrationTest {
         PatientData savedPatient = patientRepository.findByHealthId(healthId);
         assertPatient(savedPatient, data);
         assertTrue(savedPatient.isActive());
+    }
+
+    @Test
+    public void shouldCreateActivePatientsAndCheckIsLogAddedToCatchmentMapping() throws Exception {
+        PatientData data = buildPatient();
+        MCIResponse mciResponseForCreate = patientRepository.create(data);
+        assertEquals(201, mciResponseForCreate.getHttpStatus());
+
+        String healthId = mciResponseForCreate.getId();
+        PatientData savedPatient = patientRepository.findByHealthId(healthId);
+
+        List<PatientData> allByCatchment = patientRepository.findAllByCatchment(savedPatient.getCatchment(), null, null, 10);
+        assertEquals(allByCatchment.size(), 1);
+        assertEquals(allByCatchment.get(0), savedPatient);
     }
 
     @Test(expected = PatientNotFoundException.class)

@@ -699,13 +699,19 @@ public class PatientServiceIT extends BaseIntegrationTest {
         patientRepository.processPendingApprovals(updateRequest, updatedPatient, true);
 
         assertTrue(isNotEmpty(patientRepository.findAllByCatchment(updateRequest.getCatchment(), null, null, 100)));
-        assertTrue(isEmpty(patientRepository.findAllByCatchment(patientData.getCatchment(), null, null, 100)));
 
+        PatientData patientAfterApprovedAddress = patientRepository.findByHealthId(healthId);
         List<CatchmentMapping> catchmentMappings = cassandraOps.select
-                (buildFindCatchmentMappingsStmt(patientRepository.findByHealthId(healthId)), CatchmentMapping.class);
+                (buildFindCatchmentMappingsStmt(patientAfterApprovedAddress), CatchmentMapping.class);
         assertTrue(isNotEmpty(catchmentMappings));
         assertEquals(2, catchmentMappings.size());
         assertEquals(healthId, catchmentMappings.iterator().next().getHealthId());
+
+        List<CatchmentMapping> oldAddressCatchmentMappings = cassandraOps.select
+                (buildFindCatchmentMappingsStmt(patientData, patientAfterApprovedAddress.getCreatedAt()), CatchmentMapping.class);
+        assertTrue(isNotEmpty(oldAddressCatchmentMappings));
+        assertEquals(5, oldAddressCatchmentMappings.size());
+        assertEquals(healthId, oldAddressCatchmentMappings.iterator().next().getHealthId());
     }
 
     @Test
@@ -1216,10 +1222,14 @@ public class PatientServiceIT extends BaseIntegrationTest {
     }
 
     private String buildFindCatchmentMappingsStmt(PatientData patient) {
+        return buildFindCatchmentMappingsStmt(patient, patient.getUpdatedAt());
+    }
+
+    private String buildFindCatchmentMappingsStmt(PatientData patient, UUID lastUpdatedAt) {
         List<String> catchmentIds = patient.getCatchment().getAllIds();
         return select().from(CF_CATCHMENT_MAPPING)
                 .where(in(CATCHMENT_ID, catchmentIds.toArray(((Object[]) new String[catchmentIds.size()]))))
-                .and(eq(LAST_UPDATED, patient.getUpdatedAt()))
+                .and(eq(LAST_UPDATED, lastUpdatedAt))
                 .and(eq(HEALTH_ID, patient.getHealthId())).toString();
     }
 
