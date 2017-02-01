@@ -20,7 +20,10 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 import static java.lang.String.format;
-import static org.apache.commons.collections4.CollectionUtils.*;
+import static org.apache.commons.collections4.CollectionUtils.intersection;
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static org.apache.commons.collections4.CollectionUtils.union;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.domain.constant.JsonConstants.HID;
 import static org.sharedhealth.mci.domain.constant.JsonConstants.RELATIONS;
@@ -182,7 +185,7 @@ public class PatientService {
         return patientRepository.findAllSummaryByQuery(searchQuery);
     }
 
-    public List<PatientData> findAllByCatchment(Catchment catchment, Date since, UUID lastMarker) {
+    public List<Map<String, Object>> findAllByCatchment(Catchment catchment, Date since, UUID lastMarker) {
         return patientRepository.findAllByCatchment(catchment, since, lastMarker, getPerPageMaximumLimit());
     }
 

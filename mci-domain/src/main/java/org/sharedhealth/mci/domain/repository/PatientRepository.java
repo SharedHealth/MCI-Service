@@ -3,6 +3,8 @@ package org.sharedhealth.mci.domain.repository;
 import com.datastax.driver.core.querybuilder.Batch;
 import com.datastax.driver.core.querybuilder.Delete;
 import com.datastax.driver.core.querybuilder.Insert;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.Predicate;
 import org.sharedhealth.mci.domain.exception.Forbidden;
 import org.sharedhealth.mci.domain.exception.InvalidRequestException;
 import org.sharedhealth.mci.domain.exception.PatientNotFoundException;
@@ -20,7 +22,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
-import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.batch;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
+import static com.datastax.driver.core.querybuilder.QueryBuilder.timestamp;
 import static java.util.Collections.emptyList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
@@ -28,7 +33,9 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.domain.constant.MCIConstants.HID_CARD_STATUS_REGISTERED;
 import static org.sharedhealth.mci.domain.constant.MCIConstants.PATIENT_STATUS_ALIVE;
-import static org.sharedhealth.mci.domain.constant.RepositoryConstants.*;
+import static org.sharedhealth.mci.domain.constant.RepositoryConstants.CF_PATIENT;
+import static org.sharedhealth.mci.domain.constant.RepositoryConstants.CF_PENDING_APPROVAL_MAPPING;
+import static org.sharedhealth.mci.domain.constant.RepositoryConstants.HEALTH_ID;
 import static org.sharedhealth.mci.domain.repository.PatientAuditLogQueryBuilder.buildCreateAuditLogStmt;
 import static org.sharedhealth.mci.domain.repository.PatientQueryBuilder.*;
 import static org.sharedhealth.mci.domain.repository.PatientUpdateLogQueryBuilder.buildCreateUpdateLogStmt;
@@ -362,17 +369,41 @@ public class PatientRepository extends BaseRepository {
         return true;
     }
 
-    public List<PatientData> findAllByCatchment(Catchment catchment, Date since, UUID lastMarker, int limit) {
+    public List<Map<String, Object>> findAllByCatchment(Catchment catchment, Date since, UUID lastMarker, int limit) {
         List<CatchmentMapping> mappings = cassandraOps.select
                 (buildFindByCatchmentStmt(catchment, since, lastMarker, limit), CatchmentMapping.class);
         if (isEmpty(mappings)) {
             return emptyList();
         }
-        List<String> healthIds = new ArrayList<>();
+
+        Set<String> healthIds = new HashSet<>();
         for (CatchmentMapping mapping : mappings) {
             healthIds.add(mapping.getHealthId());
         }
-        return findByHealthId(healthIds);
+
+        ArrayList<String> healthIdList = new ArrayList<>();
+        healthIdList.addAll(healthIds);
+        List<PatientData> patients = findByHealthId(healthIdList);
+
+        List<Map<String, Object>> catchmentEvents = new ArrayList<>();
+        for (CatchmentMapping catchmentMapping : mappings) {
+
+            HashMap<String, Object> catchmentPatientMapper = new HashMap<>();
+            catchmentPatientMapper.put("eventId", catchmentMapping.getLastUpdated());
+            catchmentPatientMapper.put("patientData", fetchPatient(catchmentMapping.getHealthId(), patients));
+            catchmentEvents.add(catchmentPatientMapper);
+        }
+
+        return catchmentEvents;
+    }
+
+    private PatientData fetchPatient(final String healthId, final List<PatientData> patients) {
+        return CollectionUtils.find(patients, new Predicate<PatientData>() {
+            @Override
+            public boolean evaluate(PatientData patient) {
+                return patient.getHealthId().equals(healthId);
+            }
+        });
     }
 
     public List<PendingApprovalMapping> findPendingApprovalMapping(Catchment catchment, UUID after, UUID before, int limit) {

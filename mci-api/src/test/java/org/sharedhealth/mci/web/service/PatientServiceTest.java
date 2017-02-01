@@ -180,16 +180,19 @@ public class PatientServiceTest {
         String healthId = "h101";
         patient.setHealthId(healthId);
 
-        when(settingService.getSettingAsIntegerByKey("PER_PAGE_MAXIMUM_LIMIT")).thenReturn(limit);
-        when(patientRepository.findAllByCatchment(catchment, since, lastMarker, limit)).thenReturn(asList(patient));
+        HashMap<String, Object> catchmentEventMap = new HashMap<>();
+        catchmentEventMap.put("patientData", catchmentEventMap);
 
-        List<PatientData> patients = patientService.findAllByCatchment(catchment, since, lastMarker);
+        when(settingService.getSettingAsIntegerByKey("PER_PAGE_MAXIMUM_LIMIT")).thenReturn(limit);
+        when(patientRepository.findAllByCatchment(catchment, since, lastMarker, limit)).thenReturn(Arrays.<Map<String, Object>>asList(catchmentEventMap));
+
+        List<Map<String, Object>> catchmentsEvents = patientService.findAllByCatchment(catchment, since, lastMarker);
 
         verify(settingService).getSettingAsIntegerByKey("PER_PAGE_MAXIMUM_LIMIT");
         verify(patientRepository).findAllByCatchment(catchment, since, lastMarker, limit);
 
-        assertNotNull(patients);
-        assertEquals(1, patients.size());
+        assertNotNull(catchmentsEvents);
+        assertEquals(1, catchmentsEvents.size());
         assertEquals(healthId, patient.getHealthId());
     }
 
@@ -203,16 +206,19 @@ public class PatientServiceTest {
         String healthId = "h101";
         patient.setHealthId(healthId);
 
-        when(settingService.getSettingAsIntegerByKey("PER_PAGE_MAXIMUM_LIMIT")).thenReturn(limit);
-        when(patientRepository.findAllByCatchment(catchment, since, lastMarker, limit)).thenReturn(asList(patient));
+        HashMap<String, Object> catchmentEventMap = new HashMap<>();
+        catchmentEventMap.put("patientData", patient);
 
-        List<PatientData> patients = patientService.findAllByCatchment(catchment, since, lastMarker);
+        when(settingService.getSettingAsIntegerByKey("PER_PAGE_MAXIMUM_LIMIT")).thenReturn(limit);
+        when(patientRepository.findAllByCatchment(catchment, since, lastMarker, limit)).thenReturn(Arrays.<Map<String, Object>>asList(catchmentEventMap));
+
+        List<Map<String, Object>> catchmentEvents = patientService.findAllByCatchment(catchment, since, lastMarker);
 
         verify(settingService).getSettingAsIntegerByKey("PER_PAGE_MAXIMUM_LIMIT");
         verify(patientRepository).findAllByCatchment(catchment, since, lastMarker, limit);
 
-        assertNotNull(patients);
-        assertEquals(1, patients.size());
+        assertNotNull(catchmentEvents);
+        assertEquals(1, catchmentEvents.size());
         assertEquals(healthId, patient.getHealthId());
     }
 

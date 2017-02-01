@@ -12,6 +12,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.batch;
@@ -64,9 +65,9 @@ public class PatientRepositoryIT extends BaseIntegrationTest {
         String healthId = mciResponseForCreate.getId();
         PatientData savedPatient = patientRepository.findByHealthId(healthId);
 
-        List<PatientData> allByCatchment = patientRepository.findAllByCatchment(savedPatient.getCatchment(), null, null, 10);
-        assertEquals(allByCatchment.size(), 1);
-        assertEquals(allByCatchment.get(0), savedPatient);
+        List<Map<String, Object>> catchmentEvents = patientRepository.findAllByCatchment(savedPatient.getCatchment(), null, null, 10);
+        assertEquals(catchmentEvents.size(), 1);
+        assertEquals(catchmentEvents.get(0).get("patientData"), savedPatient);
     }
 
     @Test(expected = PatientNotFoundException.class)
@@ -129,9 +130,10 @@ public class PatientRepositoryIT extends BaseIntegrationTest {
     public void shouldReturnEmptyCollectionIfNoPatientFoundInCatchment() {
         Catchment catchment = new Catchment("10", "20", "30");
         catchment.setCityCorpId("40");
-        List<PatientData> patients = patientRepository.findAllByCatchment(catchment, new Date(), null, 100);
-        assertNotNull(patients);
-        assertTrue(isEmpty(patients));
+        List<Map<String, Object>> catchmentsEvents = patientRepository.findAllByCatchment(catchment, new Date(), null, 100);
+
+        assertNotNull(catchmentsEvents);
+        assertTrue(isEmpty(catchmentsEvents));
     }
 
     @Test

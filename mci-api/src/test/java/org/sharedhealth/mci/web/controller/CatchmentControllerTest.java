@@ -47,13 +47,18 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.sharedhealth.mci.domain.constant.JsonConstants.*;
+import static org.sharedhealth.mci.domain.util.DateUtil.convertToDateStringIsoMillisFormat;
 import static org.sharedhealth.mci.domain.util.DateUtil.parseDate;
 import static org.sharedhealth.mci.domain.util.JsonMapper.writeValueAsString;
 import static org.sharedhealth.mci.web.infrastructure.security.UserInfo.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 public class CatchmentControllerTest {
@@ -413,8 +418,9 @@ public class CatchmentControllerTest {
         String catchmentId = "102030405060";
         Catchment catchment = new Catchment(catchmentId);
 
-        List<PatientData> patients = asList(buildPatient("h100"), buildPatient("h200"), buildPatient("h300"));
-        when(patientService.findAllByCatchment(catchment, null, null)).thenReturn(patients);
+
+        List<Map<String, Object>> catchmentEvents = asList(buildCatchmentEvent("h100"), buildCatchmentEvent("h200"), buildCatchmentEvent("h300"));
+        when(patientService.findAllByCatchment(catchment, null, null)).thenReturn(catchmentEvents);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(FACILITY_ID, facilityId);
@@ -422,9 +428,10 @@ public class CatchmentControllerTest {
         String requestUrl = format("%s/%s/%s/patients", REQUEST_URL, API_END_POINT, catchmentId);
         String feedUrl = format("%s/%s/%s/patients", REQUEST_URL, API_END_POINT, catchmentId);
 
+        UUID eventId2 = (UUID) catchmentEvents.get(2).get("eventId");
         String nextUrl = fromUriString(feedUrl)
-                .queryParam(SINCE, encode(patients.get(2).getUpdatedAtAsString(), "UTF-8"))
-                .queryParam(LAST_MARKER, encode(patients.get(2).getUpdatedAt().toString(), "UTF-8")).build().toString();
+                .queryParam(SINCE, encode(convertToDateStringIsoMillisFormat(eventId2), "UTF-8"))
+                .queryParam(LAST_MARKER, encode(eventId2.toString(), "UTF-8")).build().toString();
 
 
         MvcResult mvcResult = mockMvc.perform(get(requestUrl).contentType(APPLICATION_JSON).headers(headers))
@@ -439,15 +446,15 @@ public class CatchmentControllerTest {
                 .andExpect(jsonPath("$.prevUrl", is(nullValue())))
                 .andExpect(jsonPath("$.nextUrl", is(nextUrl)))
 
-                .andExpect(jsonPath("$.entries.[0].id", is(patients.get(0).getUpdatedAt().toString())))
-                .andExpect(jsonPath("$.entries.[0].publishedDate", is(patients.get(0).getUpdatedAtAsString())))
+                .andExpect(jsonPath("$.entries.[0].id", is(catchmentEvents.get(0).get("eventId").toString())))
+                .andExpect(jsonPath("$.entries.[0].publishedDate", is(convertToDateStringIsoMillisFormat((UUID) catchmentEvents.get(2).get("eventId")))))
                 .andExpect(jsonPath("$.entries.[0].title", is("Patient in Catchment: h100")))
                 .andExpect(jsonPath("$.entries.[0].link", is(REQUEST_URL + "/patients/h100")))
                 .andExpect(jsonPath("$.entries.[0].categories[0]", is("patient")))
                 .andExpect(jsonPath("$.entries.[0].content.hid", is("h100")))
 
-                .andExpect(jsonPath("$.entries.[1].id", is(patients.get(1).getUpdatedAt().toString())))
-                .andExpect(jsonPath("$.entries.[2].id", is(patients.get(2).getUpdatedAt().toString())));
+                .andExpect(jsonPath("$.entries.[1].id", is(catchmentEvents.get(1).get("eventId").toString())))
+                .andExpect(jsonPath("$.entries.[2].id", is(catchmentEvents.get(2).get("eventId").toString())));
 
         verify(patientService).findAllByCatchment(catchment, null, null);
     }
@@ -489,8 +496,8 @@ public class CatchmentControllerTest {
         Catchment catchment = new Catchment(catchmentId);
         String since = "2000-01-01T10:20:30Z";
 
-        List<PatientData> patients = asList(buildPatient("h100"), buildPatient("h200"), buildPatient("h300"));
-        when(patientService.findAllByCatchment(catchment, parseDate(since), null)).thenReturn(patients);
+        List<Map<String, Object>> catchmentEvents = asList(buildCatchmentEvent("h100"), buildCatchmentEvent("h200"), buildCatchmentEvent("h300"));
+        when(patientService.findAllByCatchment(catchment, parseDate(since), null)).thenReturn(catchmentEvents);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(FACILITY_ID, facilityId);
@@ -504,8 +511,8 @@ public class CatchmentControllerTest {
                 .build().toString();
 
         String nextUrl = fromUriString(format("%s/%s/%s/patients", REQUEST_URL, API_END_POINT, catchmentId))
-                .queryParam(SINCE, encode(patients.get(2).getUpdatedAtAsString(), "UTF-8"))
-                .queryParam(LAST_MARKER, encode(patients.get(2).getUpdatedAt().toString(), "UTF-8")).build().toString();
+                .queryParam(SINCE, encode(convertToDateStringIsoMillisFormat((UUID) catchmentEvents.get(2).get("eventId")), "UTF-8"))
+                .queryParam(LAST_MARKER, encode(catchmentEvents.get(2).get("eventId").toString(), "UTF-8")).build().toString();
 
         MvcResult mvcResult = mockMvc.perform(get(requestUrl)
                 .contentType(APPLICATION_JSON)
@@ -521,9 +528,9 @@ public class CatchmentControllerTest {
                 .andExpect(jsonPath("$.prevUrl", is(nullValue())))
                 .andExpect(jsonPath("$.nextUrl", is(nextUrl)))
 
-                .andExpect(jsonPath("$.entries.[0].id", is(patients.get(0).getUpdatedAt().toString())))
-                .andExpect(jsonPath("$.entries.[1].id", is(patients.get(1).getUpdatedAt().toString())))
-                .andExpect(jsonPath("$.entries.[2].id", is(patients.get(2).getUpdatedAt().toString())));
+                .andExpect(jsonPath("$.entries.[0].id", is(catchmentEvents.get(0).get("eventId").toString())))
+                .andExpect(jsonPath("$.entries.[1].id", is(catchmentEvents.get(1).get("eventId").toString())))
+                .andExpect(jsonPath("$.entries.[2].id", is(catchmentEvents.get(2).get("eventId").toString())));
 
         verify(patientService).findAllByCatchment(catchment, parseDate(since), null);
     }
@@ -536,8 +543,8 @@ public class CatchmentControllerTest {
         String since = "2010-01-01T10:20:30Z";
         UUID lastMarker = TimeUuidUtil.uuidForDate(new Date());
 
-        List<PatientData> patients = asList(buildPatient("h100"), buildPatient("h200"), buildPatient("h300"));
-        when(patientService.findAllByCatchment(catchment, parseDate(since), lastMarker)).thenReturn(patients);
+        List<Map<String, Object>> catchmentEvents = asList(buildCatchmentEvent("h100"), buildCatchmentEvent("h200"), buildCatchmentEvent("h300"));
+        when(patientService.findAllByCatchment(catchment, parseDate(since), lastMarker)).thenReturn(catchmentEvents);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(FACILITY_ID, facilityId);
@@ -553,12 +560,13 @@ public class CatchmentControllerTest {
                 .build().toString();
 
         String nextUrl = fromUriString(format("%s/%s/%s/patients", REQUEST_URL, API_END_POINT, catchmentId))
-                .queryParam(SINCE, encode(patients.get(2).getUpdatedAtAsString(), "UTF-8"))
-                .queryParam(LAST_MARKER, encode(patients.get(2).getUpdatedAt().toString(), "UTF-8")).build().toString();
+                .queryParam(SINCE, encode(convertToDateStringIsoMillisFormat((UUID) catchmentEvents.get(2).get("eventId")), "UTF-8"))
+                .queryParam(LAST_MARKER, encode(catchmentEvents.get(2).get("eventId").toString(), "UTF-8")).build().toString();
 
         MvcResult mvcResult = mockMvc.perform(get(requestUrl).contentType(APPLICATION_JSON).headers(headers))
                 .andExpect(request().asyncStarted())
                 .andReturn();
+        
 
         mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk())
@@ -568,20 +576,24 @@ public class CatchmentControllerTest {
                 .andExpect(jsonPath("$.prevUrl", is(nullValue())))
                 .andExpect(jsonPath("$.nextUrl", is(nextUrl)))
 
-                .andExpect(jsonPath("$.entries.[0].id", is(patients.get(0).getUpdatedAt().toString())))
-                .andExpect(jsonPath("$.entries.[1].id", is(patients.get(1).getUpdatedAt().toString())))
-                .andExpect(jsonPath("$.entries.[2].id", is(patients.get(2).getUpdatedAt().toString())));
+                .andExpect(jsonPath("$.entries.[0].id", is(catchmentEvents.get(0).get("eventId").toString())))
+                .andExpect(jsonPath("$.entries.[1].id", is(catchmentEvents.get(1).get("eventId").toString())))
+                .andExpect(jsonPath("$.entries.[2].id", is(catchmentEvents.get(2).get("eventId").toString())));
 
         verify(patientService).findAllByCatchment(catchment, parseDate(since), lastMarker);
     }
 
     @Test
     public void shouldBuildFeedResponse() throws Exception {
-        List<PatientData> patients = asList(buildPatient("h100"), buildPatient("h200"), buildPatient("h300"));
+
+        Map<String, Object> catchmentEvent1 = buildCatchmentEvent("h100");
+        Map<String, Object> catchmentEvent2 = buildCatchmentEvent("h200");
+        Map<String, Object> catchmentEvent3 = buildCatchmentEvent("h300");
+        List<Map<String, Object>> catchmentEvents = asList(catchmentEvent1, catchmentEvent2, catchmentEvent3);
         MockHttpServletRequest request = buildCatchmentHttpRequest(null, null);
 
         String title = "Patients";
-        Feed feed = catchmentController.buildFeedResponse(patients, request);
+        Feed feed = catchmentController.buildFeedResponse(catchmentEvents, request);
 
         assertEquals("MCI", feed.getAuthor());
         assertEquals(title, feed.getTitle());
@@ -598,26 +610,30 @@ public class CatchmentControllerTest {
         List<NameValuePair> params = URLEncodedUtils.parse(new URI(nextUrl), "UTF-8");
         assertEquals(2, params.size());
         assertEquals(SINCE, params.get(0).getName());
-        assertEquals(patients.get(2).getUpdatedAtAsString(), params.get(0).getValue());
+        UUID eventId = (UUID) catchmentEvent3.get("eventId");
+        assertEquals(convertToDateStringIsoMillisFormat(eventId), params.get(0).getValue());
         assertEquals(LAST_MARKER, params.get(1).getName());
-        assertEquals(patients.get(2).getUpdatedAt().toString(), params.get(1).getValue());
+        assertEquals(eventId.toString(), params.get(1).getValue());
 
         List<FeedEntry> entries = feed.getEntries();
         assertNotNull(entries);
-        assertEquals(patients.size(), entries.size());
+        assertEquals(catchmentEvents.size(), entries.size());
 
-        assertFeedEntry(entries.get(0), patients.get(0));
-        assertFeedEntry(entries.get(1), patients.get(1));
-        assertFeedEntry(entries.get(2), patients.get(2));
+        assertFeedEntry(entries.get(0), catchmentEvent1);
+        assertFeedEntry(entries.get(1), catchmentEvent2);
+        assertFeedEntry(entries.get(2), catchmentEvent3);
     }
 
     @Test
     public void shouldBuildFeedResponseWithQueryParam() throws Exception {
-        List<PatientData> patients = asList(buildPatient("h100"), buildPatient("h200"), buildPatient("h300"));
+        Map<String, Object> catchmentEvent1 = buildCatchmentEvent("h100");
+        Map<String, Object> catchmentEvent2 = buildCatchmentEvent("h200");
+        Map<String, Object> catchmentEvent3 = buildCatchmentEvent("h300");
+        List<Map<String, Object>> catchmentEvents = asList(catchmentEvent1, catchmentEvent2, catchmentEvent3);
         MockHttpServletRequest request = buildCatchmentHttpRequest("2010-01-01T10:20:30Z", "h000");
 
         String title = "Patients";
-        Feed feed = catchmentController.buildFeedResponse(patients, request);
+        Feed feed = catchmentController.buildFeedResponse(catchmentEvents, request);
 
         assertEquals("MCI", feed.getAuthor());
         assertEquals(title, feed.getTitle());
@@ -637,17 +653,17 @@ public class CatchmentControllerTest {
         List<NameValuePair> params = URLEncodedUtils.parse(new URI(nextUrl), "UTF-8");
         assertEquals(2, params.size());
         assertEquals(SINCE, params.get(0).getName());
-        assertEquals(patients.get(2).getUpdatedAtAsString(), params.get(0).getValue());
+        assertEquals(convertToDateStringIsoMillisFormat((UUID) catchmentEvent3.get("eventId")), params.get(0).getValue());
         assertEquals(LAST_MARKER, params.get(1).getName());
-        assertEquals(patients.get(2).getUpdatedAt().toString(), params.get(1).getValue());
+        assertEquals(catchmentEvent3.get("eventId").toString(), params.get(1).getValue());
 
         List<FeedEntry> entries = feed.getEntries();
         assertNotNull(entries);
-        assertEquals(patients.size(), entries.size());
+        assertEquals(catchmentEvents.size(), entries.size());
 
-        assertFeedEntry(entries.get(0), patients.get(0));
-        assertFeedEntry(entries.get(1), patients.get(1));
-        assertFeedEntry(entries.get(2), patients.get(2));
+        assertFeedEntry(entries.get(0), catchmentEvent1);
+        assertFeedEntry(entries.get(1), catchmentEvent2);
+        assertFeedEntry(entries.get(2), catchmentEvent3);
     }
 
     private PatientData buildPatient(String healthId) throws InterruptedException {
@@ -655,6 +671,14 @@ public class CatchmentControllerTest {
         patient.setHealthId(healthId);
         patient.setUpdatedAt(TimeUuidUtil.uuidForDate(new Date()));
         return patient;
+    }
+
+    private Map<String, Object> buildCatchmentEvent(String healthId) throws InterruptedException {
+        Map<String, Object> catchmentEvent = new HashMap<>();
+        PatientData patientData = buildPatient(healthId);
+        catchmentEvent.put("eventId", patientData.getUpdatedAt());
+        catchmentEvent.put("patientData", patientData);
+        return catchmentEvent;
     }
 
     private MockHttpServletRequest buildCatchmentHttpRequest(String since, String lastMarker) throws UnsupportedEncodingException {
@@ -677,17 +701,18 @@ public class CatchmentControllerTest {
         return request;
     }
 
-    private void assertFeedEntry(FeedEntry entry, PatientData patient) {
+    private void assertFeedEntry(FeedEntry entry, Map<String, Object> catchmentEntry) {
         assertNotNull(entry);
-        String healthId = patient.getHealthId();
-        assertEquals(patient.getUpdatedAt(), entry.getId());
-        assertEquals(patient.getUpdatedAtAsString(), entry.getPublishedDate());
+        PatientData patientData = (PatientData) catchmentEntry.get("patientData");
+        String healthId = patientData.getHealthId();
+        assertEquals(catchmentEntry.get("eventId"), entry.getId());
+        assertEquals(convertToDateStringIsoMillisFormat((UUID) catchmentEntry.get("eventId")), entry.getPublishedDate());
         assertEquals("Patient in Catchment: " + healthId, entry.getTitle());
         assertEquals(REQUEST_URL + "/patients/" + healthId, entry.getLink());
         assertNotNull(entry.getCategories());
         assertEquals(1, entry.getCategories().length);
         assertEquals("patient", entry.getCategories()[0]);
-        assertEquals(patient, entry.getContent());
+        assertEquals(catchmentEntry.get("patientData"), entry.getContent());
     }
 
     @Test
