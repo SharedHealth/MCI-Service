@@ -1,5 +1,6 @@
 package org.sharedhealth.mci.web.controller;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.sharedhealth.mci.domain.exception.Forbidden;
 import org.sharedhealth.mci.domain.exception.ValidationException;
@@ -7,6 +8,8 @@ import org.sharedhealth.mci.domain.model.Catchment;
 import org.sharedhealth.mci.domain.model.MCIResponse;
 import org.sharedhealth.mci.domain.model.PatientData;
 import org.sharedhealth.mci.domain.model.PendingApproval;
+import org.sharedhealth.mci.domain.util.DateUtil;
+import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.sharedhealth.mci.domain.validation.group.RequiredOnUpdateGroup;
 import org.sharedhealth.mci.utils.TimeUid;
 import org.sharedhealth.mci.web.handler.MCIMultiResponse;
@@ -36,14 +39,22 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.sharedhealth.mci.domain.constant.JsonConstants.*;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.AFTER;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.BEFORE;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.LAST_MARKER;
+import static org.sharedhealth.mci.domain.constant.JsonConstants.SINCE;
+import static org.sharedhealth.mci.domain.util.DateUtil.convertToDateStringIsoMillisFormat;
 import static org.sharedhealth.mci.domain.util.DateUtil.parseDate;
-import static org.sharedhealth.mci.web.infrastructure.security.UserProfile.*;
+import static org.sharedhealth.mci.web.infrastructure.security.UserProfile.ADMIN_TYPE;
+import static org.sharedhealth.mci.web.infrastructure.security.UserProfile.FACILITY_TYPE;
+import static org.sharedhealth.mci.web.infrastructure.security.UserProfile.PROVIDER_TYPE;
 import static org.springframework.http.HttpStatus.ACCEPTED;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_ATOM_XML_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.web.bind.annotation.RequestMethod.*;
+import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 @RestController
@@ -174,7 +185,7 @@ public class CatchmentController extends FeedController {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_PROVIDER', 'ROLE_FACILITY', 'ROLE_SHR System Admin')")
-    @RequestMapping(value = "/{catchmentId}/patients", method = GET, produces = { APPLICATION_JSON_VALUE, APPLICATION_ATOM_XML_VALUE })
+    @RequestMapping(value = "/{catchmentId}/patients", method = GET, produces = {APPLICATION_JSON_VALUE, APPLICATION_ATOM_XML_VALUE})
     public DeferredResult<Feed> findAllPatients(
             @PathVariable String catchmentId,
             @RequestParam(value = SINCE, required = false) String since,
@@ -198,9 +209,9 @@ public class CatchmentController extends FeedController {
         logger.debug(format("Find all patients by catchment. Catchment ID: %s", catchment));
 
         Date date = isNotBlank(since) ? parseDate(since) : null;
-        List<PatientData> patients = patientService.findAllByCatchment(catchment, date, lastMarker);
+        List<Map<String, Object>> catchmentEvents = patientService.findAllByCatchment(catchment, date, lastMarker);
 
-        deferredResult.setResult(buildFeedResponse(patients, request));
+        deferredResult.setResult(buildFeedResponse(catchmentEvents, request));
         return deferredResult;
     }
 
@@ -234,27 +245,25 @@ public class CatchmentController extends FeedController {
         return deferredResult;
     }
 
-    Feed buildFeedResponse(List<PatientData> patients, HttpServletRequest request) {
+    Feed buildFeedResponse(List<Map<String, Object>> catchmentEvents, HttpServletRequest request) {
         try {
             Feed feed = new Feed();
             feed.setTitle(FEED_TITLE);
             feed.setFeedUrl(buildFeedUrl(request));
             feed.setPrevUrl(null);
-            feed.setNextUrl(buildNextUrl(patients, request));
-            feed.setEntries(buildFeedEntries(patients, request));
+            String nextUrl = CollectionUtils.isEmpty(catchmentEvents) ? null : buildNextUrl(catchmentEvents.get(catchmentEvents.size() - 1), request);
+            feed.setNextUrl(nextUrl);
+            feed.setEntries(buildFeedEntries(catchmentEvents, request));
             return feed;
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private String buildNextUrl(List<PatientData> patients, HttpServletRequest request) throws UnsupportedEncodingException {
-        if (isEmpty(patients)) {
-            return null;
-        }
-        PatientData lastPatient = patients.get(patients.size() - 1);
-        String since = encode(lastPatient.getUpdatedAtAsString(), "UTF-8");
-        String lastMarker = encode(lastPatient.getUpdatedAt().toString(), "UTF-8");
+    private String buildNextUrl(Map<String, Object> lastCatchmentEvent, HttpServletRequest request) throws UnsupportedEncodingException {
+        UUID lastEventId = (UUID) lastCatchmentEvent.get("eventId");
+        String since = encode(DateUtil.toIsoMillisFormat(convertToDateStringIsoMillisFormat(lastEventId)), "UTF-8");
+        String lastMarker = encode(lastEventId.toString(), "UTF-8");
 
         return fromUriString(buildUrl(request))
                 .queryParam(SINCE, since)
@@ -262,17 +271,19 @@ public class CatchmentController extends FeedController {
                 .build().toString();
     }
 
-    private List<FeedEntry> buildFeedEntries(List<PatientData> patients, HttpServletRequest request) {
-        if (isEmpty(patients)) {
+    private List<FeedEntry> buildFeedEntries(List<Map<String, Object>> catchmentEvents, HttpServletRequest request) {
+        if (isEmpty(catchmentEvents)) {
             return emptyList();
         }
         List<FeedEntry> entries = new ArrayList<>();
-        for (PatientData patient : patients) {
+        for (Map<String, Object> catchmentEvent : catchmentEvents) {
             FeedEntry entry = new FeedEntry();
+            PatientData patient = (PatientData) catchmentEvent.get("patientData");
             String healthId = patient.getHealthId();
-            entry.setId(patient.getUpdatedAt());
-            entry.setPublishedDate(patient.getUpdatedAtAsString());
-            entry.setTitle(ENTRY_TITLE + patient.getHealthId());
+            UUID eventId = (UUID) catchmentEvent.get("eventId");
+            entry.setId(eventId);
+            entry.setPublishedDate(DateUtil.toIsoMillisFormat(TimeUuidUtil.getDateFromUUID(eventId)));
+            entry.setTitle(ENTRY_TITLE + healthId);
             entry.setLink(buildPatientLink(healthId, request));
             entry.setCategories(new String[]{ENTRY_CATEGORY});
             entry.setContent(patient);

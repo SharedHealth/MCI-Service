@@ -79,6 +79,10 @@ public class DateUtil {
         return dateFormat.format(date);
     }
 
+    public static String convertToDateStringIsoMillisFormat(UUID timeUuid) {
+        return toIsoMillisFormat(TimeUuidUtil.getDateFromUUID(timeUuid));
+    }
+
     public static String toDateString(Date date, String format) {
         SimpleDateFormat dateFormat = new SimpleDateFormat(format);
         return dateFormat.format(date);
