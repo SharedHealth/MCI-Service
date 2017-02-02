@@ -130,7 +130,7 @@ public class PatientFeedRepositoryIT extends BaseIntegrationTest {
         assertEquals(3, patientUpdateLogs.size());
 
         patientUpdateLogs = feedRepository.findPatientsUpdatedSince(since, limit, marker);
-        assertEquals(2, patientUpdateLogs.size());
+        assertEquals(3, patientUpdateLogs.size());
     }
 
     @Test

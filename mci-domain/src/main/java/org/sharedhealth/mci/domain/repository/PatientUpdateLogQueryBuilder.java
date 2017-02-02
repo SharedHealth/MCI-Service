@@ -63,12 +63,12 @@ public class PatientUpdateLogQueryBuilder {
     }
 
     public static String buildFindUpdateLogStmt(Date since, int limit, UUID lastMarker) {
-        int year = getLastYearMarker(since, lastMarker);
+        int year = getYearOfMarker(since, lastMarker);
         Where where = select().from(CF_PATIENT_UPDATE_LOG)
                 .where(in(YEAR, getYearsSince(year).toArray()));
 
         if (lastMarker != null) {
-            where = where.and(gt(EVENT_ID, lastMarker));
+            where = where.and(gte(EVENT_ID, lastMarker));
         } else if (since != null) {
             where = where.and(gte(EVENT_ID, UUIDs.startOf(since.getTime())));
         }
@@ -76,13 +76,13 @@ public class PatientUpdateLogQueryBuilder {
         return where.limit(limit).toString();
     }
 
-    private static int getLastYearMarker(Date after, UUID lastMarker) {
+    private static int getYearOfMarker(Date since, UUID lastMarker) {
         if (lastMarker != null) {
             return getYearOf(lastMarker);
         }
 
-        if (after != null) {
-            return getYearOf(after);
+        if (since != null) {
+            return getYearOf(since);
         }
 
         return getCurrentYear();
