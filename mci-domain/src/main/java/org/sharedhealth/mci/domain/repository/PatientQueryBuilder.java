@@ -216,7 +216,7 @@ public class PatientQueryBuilder {
                 .where(eq(CATCHMENT_ID, catchment.getId()));
 
         if (lastMarker != null) {
-            where = where.and(gt(LAST_UPDATED, lastMarker));
+            where = where.and(gte(LAST_UPDATED, lastMarker));
         } else if (since != null) {
             where = where.and(gte(LAST_UPDATED, UUIDs.startOf(since.getTime())));
         }
