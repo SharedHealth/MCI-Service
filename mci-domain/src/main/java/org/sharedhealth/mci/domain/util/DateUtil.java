@@ -50,7 +50,7 @@ public class DateUtil {
     public static Date parseDate(String date, String... formats) {
         formats = formats == null || formats.length == 0 ? DATE_FORMATS : formats;
         try {
-            return DateUtils.parseDate(date, formats);
+            return DateUtils.parseDateStrictly(date, formats);
         } catch (IllegalArgumentException | ParseException e) {
             logger.error("Invalid date:" + date, e);
         }
