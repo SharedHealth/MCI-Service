@@ -68,7 +68,7 @@ public class PatientUpdateLogQueryBuilder {
                 .where(in(YEAR, getYearsSince(year).toArray()));
 
         if (lastMarker != null) {
-            where = where.and(gte(EVENT_ID, lastMarker));
+            where = where.and(gt(EVENT_ID, lastMarker));
         } else if (since != null) {
             where = where.and(gte(EVENT_ID, UUIDs.startOf(since.getTime())));
         }
