@@ -17,7 +17,7 @@ import static org.sharedhealth.mci.domain.constant.ErrorConstants.ERROR_CODE_PAT
 import static org.sharedhealth.mci.domain.constant.JsonConstants.*;
 import static org.sharedhealth.mci.domain.constant.MCIConstants.COUNTRY_CODE_BANGLADESH;
 
-@JsonIgnoreProperties(ignoreUnknown = true, value = {"geoCode"})
+@JsonIgnoreProperties(ignoreUnknown = false, value = {"geoCode"})
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class Address implements Diffable<Address> {
 

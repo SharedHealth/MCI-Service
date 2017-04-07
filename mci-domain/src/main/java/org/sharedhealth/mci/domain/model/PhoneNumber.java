@@ -12,7 +12,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.sharedhealth.mci.domain.constant.ErrorConstants.ERROR_CODE_PATTERN;
 import static org.sharedhealth.mci.domain.constant.JsonConstants.*;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonIgnoreProperties(ignoreUnknown = false)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class PhoneNumber implements Diffable<PhoneNumber> {
 

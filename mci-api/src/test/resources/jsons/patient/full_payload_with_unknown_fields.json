@@ -1,0 +1,91 @@
+{
+  "nid":"1234567890123",
+  "uid":"11111111111",
+  "bin_brn":"12345678901234567",
+  "name_bangla":"আয়মান",
+  "given_name":"Zaman",
+  "sur_name":"Aymaan",
+  "date_of_birth":"1990-02-27T18:00:00.000Z",
+  "dob_type":"1",
+  "gender":"M",
+  "occupation":"02",
+  "edu_level":"02",
+  "HID":"22112",
+  "place_of_birth":"Narayanganj",
+  "religion":"1",
+  "blood_group":"5",
+  "nationality":"bangladeshi",
+  "disability":"0",
+  "ethnicity":"11",
+  "marital_status":"2",
+  "phone_number":{
+    "somethingelse":"12314",
+    "country_code":"008",
+    "area_code":"02",
+    "number":"9678909",
+    "extension":"0984"
+  },
+  "primary_contact":"Zebin",
+  "primary_contact_number":{
+    "country_code":"008",
+    "area_code":"02",
+    "number":"123456789012",
+    "extension":"0984"
+  },
+  "relations":[
+    {
+      "somethingelse":"12314",
+      "type":"SPS",
+      "name_bangla":"মেহজাবীন খান",
+      "given_name":"Mehzabin",
+      "sur_name":"Khan",
+      "nid":"1990567890163",
+      "uid":"38761111111",
+      "bin_brn":"52345678901633456",
+      "hid":"59112767535",
+      "marriage_id":"12345678",
+      "relational_status":"3"
+    }
+  ],
+  "present_address": {
+    "address_line":"xyz",
+    "division_id":"30",
+    "district_id":"26",
+    "upazila_id":"18",
+    "city_corporation_id":null,
+    "union_or_urban_ward_id":null,
+    "rural_ward_id":null,
+    "area_mouja":"Dhanmondi",
+    "village":"Lalmatia",
+    "holding_number":"Level 2,Taj Garden,House no.4/k",
+    "street":"Plot 51,Satmasjid Road",
+    "post_office":"Mohammadpur",
+    "post_code":"1207",
+    "country_code":"050"
+  },
+  "permanent_address":{
+    "address_line":"xyz",
+    "division_id":"10",
+    "district_id":"04",
+    "upazila_id":"09",
+    "city_corporation_id":"20",
+    "union_or_urban_ward_id":"06",
+    "rural_ward_id":null,
+    "area_mouja":"Dhanmondi",
+    "village":"Lalmatia",
+    "holding_number":"2/KA Palace House",
+    "street":"Road no.27",
+    "post_office":"Mohammadpur",
+    "post_code":"1225",
+    "country_code":"050"
+  },
+    "status": {
+      "somethingelse":"12314",
+      "type": "1",
+        "date_of_death": null
+  },
+  "confidential": "No",
+  "active": "true",
+  "household_code": "1234",
+  "hid_card_status":"REGISTERED"
+}

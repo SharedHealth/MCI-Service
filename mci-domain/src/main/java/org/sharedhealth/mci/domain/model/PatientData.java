@@ -33,7 +33,7 @@ import static org.sharedhealth.mci.domain.constant.JsonConstants.*;
 import static org.sharedhealth.mci.domain.constant.MCIConstants.*;
 
 @MaritalRelation(message = ERROR_CODE_DEPENDENT, field = "maritalStatus")
-@JsonIgnoreProperties(ignoreUnknown = true, value = {"created_at" })
+@JsonIgnoreProperties(ignoreUnknown = false, value = {"created_at" })
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility =
         JsonAutoDetect.Visibility.NONE)
 public class PatientData implements Diffable<PatientData> {

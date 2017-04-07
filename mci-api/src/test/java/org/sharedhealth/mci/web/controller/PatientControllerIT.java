@@ -1075,6 +1075,25 @@ public class PatientControllerIT extends BaseControllerTest {
         assertPatientEquals(response, expected);
     }
 
+    @Test
+    public void shouldNotCreatePatientIfThereIsUnknownFieldsInPatientData() throws Exception {
+        String json = asString("jsons/patient/full_payload_with_unknown_fields.json");
+
+        MvcResult result = mockMvc.perform(post(API_END_POINT_FOR_PATIENT)
+                .header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId)
+                .accept(APPLICATION_JSON)
+                .content(json)
+                .contentType(APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+        JSONAssert.assertEquals("{\"message\":\"invalid.request\"," +
+                        "\"errors\":[{\"code\":2002,\"field\":\"HID\",\"message\":\"Unrecognized field: 'HID'\"}]," +
+                        "\"error_code\":2000,\"http_status\":400}",
+                result.getResponse().getContentAsString(), JSONCompareMode.STRICT);
+    }
+
     private void createPatientData() {
         patientData = new PatientData();
         patientData.setGivenName("Scott");
