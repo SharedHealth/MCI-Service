@@ -447,14 +447,16 @@ public class CatchmentControllerTest {
                 .andExpect(jsonPath("$.nextUrl", is(nextUrl)))
 
                 .andExpect(jsonPath("$.entries.[0].id", is(catchmentEvents.get(0).get("eventId").toString())))
-                .andExpect(jsonPath("$.entries.[0].publishedDate", is(convertToDateStringIsoMillisFormat((UUID) catchmentEvents.get(2).get("eventId")))))
+                .andExpect(jsonPath("$.entries.[0].publishedDate", is(convertToDateStringIsoMillisFormat((UUID) catchmentEvents.get(0).get("eventId")))))
                 .andExpect(jsonPath("$.entries.[0].title", is("Patient in Catchment: h100")))
                 .andExpect(jsonPath("$.entries.[0].link", is(REQUEST_URL + "/patients/h100")))
                 .andExpect(jsonPath("$.entries.[0].categories[0]", is("patient")))
                 .andExpect(jsonPath("$.entries.[0].content.hid", is("h100")))
 
                 .andExpect(jsonPath("$.entries.[1].id", is(catchmentEvents.get(1).get("eventId").toString())))
-                .andExpect(jsonPath("$.entries.[2].id", is(catchmentEvents.get(2).get("eventId").toString())));
+                .andExpect(jsonPath("$.entries.[1].publishedDate", is(convertToDateStringIsoMillisFormat((UUID) catchmentEvents.get(1).get("eventId")))))
+                .andExpect(jsonPath("$.entries.[2].id", is(catchmentEvents.get(2).get("eventId").toString())))
+                .andExpect(jsonPath("$.entries.[2].publishedDate", is(convertToDateStringIsoMillisFormat((UUID) catchmentEvents.get(2).get("eventId")))));
 
         verify(patientService).findAllByCatchment(catchment, null, null);
     }
