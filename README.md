@@ -1,58 +1,37 @@
-# Setting up the environment
+#MCI Service
+The Master Client Index (MCI) is a repository of the clients/patients in the health ecosystem.
+The MCI stores the client information and provides an unique Health ID to the client.
+This Health ID is referenced in all the other systems to uniquely related information regarding a client.
 
-Requisites
-------------
+## Setting up the environment
+
+###Prerequisites
+
 * [VirtualBox](https://www.virtualbox.org/)
 * [Vagrant](http://docs.vagrantup.com/v2/installation/index.html)
+* [Ansible](https://www.ansible.com/)
 
-
-To package the application
----------------------------
-cd into the project directory and run the following command
-```
-./gradlew clean dist
-```
-
-To run the application locally
-------------------------------
-```
-./gradlew runMCI
-```
-
-Properties
-----------
-* Since the application will be run using an embedded tomcat server, the configuration is read from environment variables.
-* Add or remove properties to the local.properties file
-* Grable will set environment variables using the properties specified in this file when running tests
-* If you install the rpm that is genereated gradlew dist in a redhat machine, you will be able to edit the configuration in the
-  /etc/default/mci file.
-
-
-Steps to setup environment on a VM and get MCI working with Stub Identity Server and sample locations
-------------------------------------------------------------------------------------------------------------------------
-### git checkout the following repositories (under a common parent directory)
+####Steps to setup environment on a VM and get MCI working with Stub Identity Server and sample locations
+##### Checkout the following repositories (under a common parent directory)
 * [FreeSHR-Playbooks](https://github.com/SharedHealth/FreeSHR-Playbooks)
 * [MCI-Service](https://github.com/SharedHealth/MCI-Service)
 * [Identity-Server](https://github.com/SharedHealth/Identity-Server)
 
-### Setup ansible group_vars
+##### Setup ansible group_vars
 * replace FreeSHR-Playbooks/group_vars/all with FreeSHR-Playbooks/group_vars/all_example
 * create a dummy ansible vault pass file in your user home folder.
 ```
 touch ~/.vaultpass.txt
 ```
 
-
-
-### Build Identity-Server
+##### Build Identity-Server
 * ./gradlew clean dist
 * cp build/distributions/identity-server-0.1-1.noarch.rpm /tmp/
 
 
-### Build MCI-Service
+##### Build MCI-Service
 * ./gradlew clean dist
-* cp mci-api/build/distributions/mci-0.1-1.noarch.rpm /tmp/
-* vagrant up | vagrant provision
+* cp mci-api/build/distributions/mci-2.6-1.noarch.rpm /tmp/
 
 Notes:
 - The above will provision and deploy, MCI and a Stub Identity Server in 192.168.33.19. Cassandra is installed as a single node cluster.
