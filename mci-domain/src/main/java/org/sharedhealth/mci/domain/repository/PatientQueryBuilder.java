@@ -17,6 +17,7 @@ import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
 import static com.datastax.driver.core.querybuilder.Select.Where;
 import static org.apache.commons.lang3.StringUtils.*;
 import static org.sharedhealth.mci.domain.constant.JsonConstants.HOUSEHOLD_CODE;
+import static org.sharedhealth.mci.domain.constant.MCIConstants.EMPTY_SUR_NAME;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.*;
 import static org.sharedhealth.mci.domain.util.JsonMapper.writeValueAsString;
 import static org.springframework.data.cassandra.core.CassandraTemplate.*;
@@ -129,9 +130,12 @@ public class PatientQueryBuilder {
         String upazilaId = patient.getUpazilaId();
         String givenName = patient.getGivenName();
         String surname = patient.getSurName();
+        if(null == surname){
+            surname = EMPTY_SUR_NAME;
+        }
 
         if (isNotBlank(healthId) && isNotBlank(divisionId) && isNotBlank(districtId) && isNotBlank(upazilaId)
-                && isNotBlank(givenName) && isNotBlank(surname)) {
+                && isNotBlank(givenName)) {
             NameMapping mapping = new NameMapping(divisionId, districtId, upazilaId, givenName.toLowerCase(),
                     surname.toLowerCase(), patient.getHealthId());
             batch.add(createInsertQuery(CF_NAME_MAPPING, mapping, null, converter));
@@ -147,9 +151,12 @@ public class PatientQueryBuilder {
         String upazilaId = address.getUpazilaId();
         String givenName = patient.getGivenName();
         String surname = patient.getSurName();
+        if(null == surname){
+            surname = EMPTY_SUR_NAME;
+        }
 
         if (isNotBlank(healthId) && isNotBlank(divisionId) && isNotBlank(districtId) && isNotBlank(upazilaId)
-                && isNotBlank(givenName) && isNotBlank(surname)) {
+                && isNotBlank(givenName)) {
             NameMapping mapping = new NameMapping(divisionId, districtId, upazilaId, givenName.toLowerCase(),
                     surname.toLowerCase(), patient.getHealthId());
             batch.add(createDeleteQuery(CF_NAME_MAPPING, mapping, null, converter));

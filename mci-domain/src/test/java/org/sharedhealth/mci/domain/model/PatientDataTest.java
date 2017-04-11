@@ -30,11 +30,10 @@ public class PatientDataTest extends ValidationAwareMapper {
     }
 
     @Test
-    public void shouldFailIfSurNameIsBlank() {
+    public void shouldNotFailIfSurNameIsBlank() {
         Set<ConstraintViolation<PatientData>> constraintViolations = validator.validateValue(PatientData.class, "surName", null,
                 RequiredGroup.class);
-        assertEquals(1, constraintViolations.size());
-        assertEquals("1001", constraintViolations.iterator().next().getMessage());
+        assertEquals(0, constraintViolations.size());
     }
 
     @Test

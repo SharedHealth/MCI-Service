@@ -17,4 +17,6 @@ public class MCIConstants {
     public static final String HID_CARD_STATUS_REGISTERED = "REGISTERED";
     public static final String HID_CARD_STATUS_ISSUED = "ISSUED";
 
+    public static final String EMPTY_SUR_NAME = "";
+
 }

@@ -17,6 +17,7 @@ import static com.datastax.driver.core.querybuilder.QueryBuilder.*;
 import static java.util.UUID.fromString;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.sharedhealth.mci.domain.constant.MCIConstants.EMPTY_SUR_NAME;
 import static org.sharedhealth.mci.domain.constant.RepositoryConstants.*;
 import static org.sharedhealth.mci.domain.repository.MarkerRepositoryQueryBuilder.buildUpdateMarkerBatch;
 import static org.springframework.data.cassandra.core.CassandraTemplate.createInsertQuery;
@@ -101,10 +102,12 @@ public class PatientSearchMappingRepository extends BaseRepository {
         String districtId = patientData.getAddress().getDistrictId();
         String upazilaId = patientData.getAddress().getUpazilaId();
         String givenName = patientData.getGivenName();
+
         String surname = patientData.getSurName();
+        if(null == surname) { surname= EMPTY_SUR_NAME; }
 
         if (isNotBlank(healthId) && isNotBlank(divisionId) && isNotBlank(districtId) && isNotBlank(upazilaId)
-                && isNotBlank(givenName) && isNotBlank(surname)) {
+                && isNotBlank(givenName)) {
             NameMapping mapping = new NameMapping(divisionId, districtId, upazilaId, givenName.toLowerCase(),
                     surname.toLowerCase(), patientData.getHealthId());
             batch.add(createInsertQuery(CF_NAME_MAPPING, mapping, null, converter));

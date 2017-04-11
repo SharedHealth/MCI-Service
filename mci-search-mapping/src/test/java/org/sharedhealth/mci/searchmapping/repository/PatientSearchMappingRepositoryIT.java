@@ -48,7 +48,6 @@ public class PatientSearchMappingRepositoryIT extends BaseIntegrationTest {
 
         PatientData patient = initPatientData();
         patient.setGivenName("John");
-        patient.setSurName("Doe");
         patient.setNationalId(nid);
         patient.setBirthRegistrationNumber(brn);
         patient.setUid(uid);
@@ -82,7 +81,6 @@ public class PatientSearchMappingRepositoryIT extends BaseIntegrationTest {
 
         PatientData patient = initPatientData();
         patient.setGivenName("John");
-        patient.setSurName("Doe");
         patient.setNationalId(nid1);
         patient.setBirthRegistrationNumber(brn1);
         patient.setUid(uid1);
@@ -137,16 +135,34 @@ public class PatientSearchMappingRepositoryIT extends BaseIntegrationTest {
     }
 
     @Test
-    public void shouldUpdateAppropriateNameMappingWhenMultiplePatientsWithSameNameAndAddressExist() {
+    public void shouldUpdateNameMappingWhenPatientIsUpdated()   {
         PatientData patient = initPatientData();
         patient.setGivenName("John");
-        patient.setSurName("Doe");
         Address address = createAddress("10", "20", "30");
         patient.setAddress(address);
         String healthId1 = patientRepository.create(patient).getId();
 
-        searchMappingRepository.saveMappings(patientRepository.findByHealthId(healthId1));
         assertNotNull(healthId1);
+        searchMappingRepository.saveMappings(patientRepository.findByHealthId(healthId1));
+        assertSearchByNameAndAddressExists("John", "102030", healthId1);
+
+        PatientData updateRequest = initPatientData();
+        updateRequest.setGivenName("Jane");
+        patientRepository.update(updateRequest, patientRepository.findByHealthId(healthId1), new Requester());
+        assertSearchByNameAndAddressExists("Jane", "102030", healthId1);
+        assertThat(getAllNameMappings().size(), is(1));
+    }
+
+    @Test
+    public void shouldUpdateAppropriateNameMappingWhenMultiplePatientsWithSameNameAndAddressExist() {
+        PatientData patient = initPatientData();
+        patient.setGivenName("John");
+        Address address = createAddress("10", "20", "30");
+        patient.setAddress(address);
+        String healthId1 = patientRepository.create(patient).getId();
+
+        assertNotNull(healthId1);
+        searchMappingRepository.saveMappings(patientRepository.findByHealthId(healthId1));
 
         patient.setHealthId(String.valueOf(new Date().getTime()));
         String healthId2 = patientRepository.create(patient).getId();
@@ -160,6 +176,9 @@ public class PatientSearchMappingRepositoryIT extends BaseIntegrationTest {
 
         assertSearchByNameAndAddressExists("John", "102030", healthId1);
         assertSearchByNameAndAddressExists("Jane", "102030", healthId2);
+
+        assertThat(getAllNameMappings().size(), is(2));
+
     }
 
     @Test
@@ -168,7 +187,6 @@ public class PatientSearchMappingRepositoryIT extends BaseIntegrationTest {
 
         PatientData patient = initPatientData();
         patient.setGivenName("John");
-        patient.setSurName("Doe");
         patient.setHouseholdCode(existingHouseholdCode);
         patient.setAddress(createAddress("10", "20", "30"));
         String healthId = patientRepository.create(patient).getId();
@@ -209,6 +227,10 @@ public class PatientSearchMappingRepositoryIT extends BaseIntegrationTest {
         return cassandraOps.select(select().from(CF_NID_MAPPING).where(eq(NATIONAL_ID, nid)).and(eq(HEALTH_ID, healthId)).toString(), NidMapping.class);
     }
 
+    private List<NameMapping> getAllNameMappings() {
+        return cassandraOps.selectAll(NameMapping.class);
+    }
+
     private List<BrnMapping> getBrnMappings(String brn, String healthId) {
         return cassandraOps.select(select().from(CF_BRN_MAPPING).where(eq(BIN_BRN, brn)).and(eq(HEALTH_ID, healthId)).toString(), BrnMapping.class);
     }
@@ -242,7 +264,6 @@ public class PatientSearchMappingRepositoryIT extends BaseIntegrationTest {
         patient.setBirthRegistrationNumber("12345678901234567");
         patient.setUid("12345678901");
         patient.setGivenName("Happy");
-        patient.setSurName("Rotter");
         patient.setDateOfBirth(parseDate("2014-12-01"));
         patient.setGender("M");
         patient.setOccupation("01");

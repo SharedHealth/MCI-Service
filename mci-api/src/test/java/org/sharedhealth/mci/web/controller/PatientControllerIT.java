@@ -179,7 +179,7 @@ public class PatientControllerIT extends BaseControllerTest {
 
     @Test
     public void shouldReturnBadRequestForInvalidRequestData() throws Exception {
-        patientData.setSurName(null);
+        patientData.setGivenName(null);
         String json = mapper.writeValueAsString(patientData);
 
         MvcResult result = mockMvc.perform(post(API_END_POINT_FOR_PATIENT)
@@ -192,13 +192,13 @@ public class PatientControllerIT extends BaseControllerTest {
                 .andExpect(status().isBadRequest())
                 .andReturn();
         JSONAssert.assertEquals("{\"error_code\":1000,\"http_status\":400,\"message\":\"validation error\"," +
-                "\"errors\":[{\"code\":1001,\"field\":\"sur_name\",\"message\":\"invalid " +
-                "sur_name\"}]}", result.getResponse().getContentAsString(), JSONCompareMode.STRICT);
+                "\"errors\":[{\"code\":1001,\"field\":\"given_name\",\"message\":\"invalid " +
+                "given_name\"}]}", result.getResponse().getContentAsString(), JSONCompareMode.STRICT);
     }
 
     @Test
     public void shouldReturnBadRequestWithErrorDetailsForMultipleInvalidRequestData() throws Exception {
-        patientData.setSurName(null);
+        patientData.setGivenName(null);
         patientData.setGender("0");
         String json = mapper.writeValueAsString(patientData);
 
@@ -1097,7 +1097,6 @@ public class PatientControllerIT extends BaseControllerTest {
     private void createPatientData() {
         patientData = new PatientData();
         patientData.setGivenName("Scott");
-        patientData.setSurName("Tiger");
         patientData.setGender("M");
         patientData.setDateOfBirth(parseDate("2014-12-01"));
         patientData.setEducationLevel("01");

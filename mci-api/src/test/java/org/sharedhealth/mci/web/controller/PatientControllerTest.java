@@ -215,17 +215,7 @@ public class PatientControllerTest {
                 .andExpect(request().asyncResult(new ResponseEntity<>(mciResponse, ACCEPTED)));
         verify(patientService).update(patient, healthId);
     }
-
-    @Test
-    public void shouldFindPatientsByAddressAndSurName() throws Exception {
-        String address = "102030";
-        PatientData patient = buildPatient();
-        SearchQuery searchQuery = new SearchQuery();
-        searchQuery.setPresent_address(address);
-        searchQuery.setSur_name(patient.getSurName());
-        assertFindAllBy(searchQuery, String.format("sur_name=%s&present_address=%s", patient.getSurName(), address));
-    }
-
+    
     @Test
     public void shouldFindPatientsByAddressAndGivenName() throws Exception {
         PatientData patient = buildPatient();
@@ -280,7 +270,6 @@ public class PatientControllerTest {
                 .andExpect(jsonPath("$.results[0]").exists())
                 .andExpect(jsonPath("$.results[0].nid", is(patient1.getNationalId())))
                 .andExpect(jsonPath("$.results[0].given_name", is(patient1.getGivenName())))
-                .andExpect(jsonPath("$.results[0].sur_name", is(patient1.getSurName())))
                 .andExpect(jsonPath("$.results[1]").doesNotExist())
                 .andExpect(jsonPath("$.additional_info.note", is(note)));
 
@@ -344,7 +333,6 @@ public class PatientControllerTest {
         patientData.setNationalId("1234567890123");
         patientData.setBirthRegistrationNumber("12345678901234567");
         patientData.setGivenName("Scott");
-        patientData.setSurName("Tiger");
         patientData.setGender("M");
         patientData.setDateOfBirth(parseDate("2014-12-01"));
         patientData.setHouseholdCode("1234");
