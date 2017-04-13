@@ -42,14 +42,12 @@ public class DuplicatePatientRuleEngineTest {
         String uid = "u000";
         String brn = "b000";
         String givenName = "John";
-        String surname = "Doe";
         PatientData patient1 = new PatientData();
         patient1.setNationalId(nid);
         patient1.setHealthId(healthId1);
         patient1.setUid(uid);
         patient1.setBirthRegistrationNumber(brn);
         patient1.setGivenName(givenName);
-        patient1.setSurName(surname);
         Address address1 = new Address("10", "11", "12");
         patient1.setAddress(address1);
         when(patientRepository.findByHealthId(healthId1)).thenReturn(patient1);
@@ -81,7 +79,6 @@ public class DuplicatePatientRuleEngineTest {
 
         SearchQuery nameAddressQuery = new SearchQuery();
         nameAddressQuery.setGiven_name(givenName);
-        nameAddressQuery.setSur_name(surname);
         nameAddressQuery.setPresent_address("101112");
         when(patientRepository.findAllByQuery(nameAddressQuery)).thenReturn(asList(patient2, patient4, patient5));
 
