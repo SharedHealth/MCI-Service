@@ -152,6 +152,24 @@ public class PatientServiceTest {
     }
 
     @Test
+    public void shouldNotCreatePatientsWithSameHealthID() throws Exception {
+        String clientId = "12345";
+        String healthId = "12312";
+        PatientData patient = new PatientData();
+        patient.setHealthId(healthId);
+
+        when(patientRepository.patientExists(healthId)).thenReturn(true);
+
+        MCIResponse mciResponse = patientService.createPatientForOrg(patient, clientId);
+
+        assertEquals(HttpStatus.CONFLICT.value(), mciResponse.getHttpStatus());
+        assertEquals("Patient with healthId " + healthId + " already exits." , mciResponse.getId());
+        verify(patientRepository, times(1)).patientExists(healthId);
+        verify(healthIdService, never()).validateHIDForOrg(healthId, clientId);
+        verify(patientRepository, never()).create(patient);
+    }
+
+    @Test
     public void shouldNotCreatePatientWhenHIDServiceGivesUnavailable() throws Exception {
         String clientId = "12345";
         String healthId = "12312";

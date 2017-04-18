@@ -377,6 +377,47 @@ public class PatientControllerIT extends BaseControllerTest {
     }
 
     @Test
+    public void shouldNotCreateAPatientTwiceWithSameHid() throws Exception {
+        String json = asString("jsons/patient/payload_with_hid.json");
+        UUID token = UUID.randomUUID();
+        String checkHidResponse = "{\"availability\" : true}";
+        String idpResponse = "{\"access_token\" : \"" + token.toString() + "\"}";
+
+        setUpIDPStub(idpResponse);
+        setupCheckHIDStub(token, checkHidResponse);
+
+        MvcResult mvcResult = mockMvc.perform(post(API_END_POINT_FOR_PATIENT)
+                .header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId)
+                .accept(APPLICATION_JSON).content(json).contentType
+                        (APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(APPLICATION_JSON_UTF8));
+
+
+        mvcResult = mockMvc.perform(post(API_END_POINT_FOR_PATIENT)
+                .header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId)
+                .accept(APPLICATION_JSON).content(json).contentType
+                        (APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isConflict())
+                .andExpect(content().contentType(APPLICATION_JSON_UTF8));
+    }
+
+    @Test
     public void shouldIdentifyFacilityOfProviderToCreatePatientForOrganization() throws Exception {
         String providerClientId = "18556";
         String providerID = "113068";

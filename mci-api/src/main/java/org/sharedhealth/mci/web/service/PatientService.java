@@ -20,16 +20,14 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 import static java.lang.String.format;
-import static org.apache.commons.collections4.CollectionUtils.intersection;
-import static org.apache.commons.collections4.CollectionUtils.isEmpty;
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-import static org.apache.commons.collections4.CollectionUtils.union;
+import static org.apache.commons.collections4.CollectionUtils.*;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.sharedhealth.mci.domain.constant.JsonConstants.HID;
 import static org.sharedhealth.mci.domain.constant.JsonConstants.RELATIONS;
 import static org.sharedhealth.mci.utils.HttpUtil.AVAILABILITY_KEY;
 import static org.sharedhealth.mci.utils.HttpUtil.REASON_KEY;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CONFLICT;
 
 @Component
 public class PatientService {
@@ -86,6 +84,9 @@ public class PatientService {
     public MCIResponse createPatientForOrg(PatientData patient, String facilityId) {
         String healthId = patient.getHealthId();
         logger.debug(String.format("Creating patient for Organization [%s]", facilityId));
+        if (patientRepository.patientExists(healthId)) {
+            return new MCIResponse("Patient with healthId " + healthId + " already exits.", CONFLICT);
+        }
         PatientData existingPatient = findPatientByMultipleIds(patient);
         if (existingPatient != null) {
             return this.update(patient, existingPatient.getHealthId());
