@@ -82,6 +82,9 @@ public class MCIProperties {
     @Value("${FAILED_EVENT_RETRY_LIMIT}")
     private String failedEventRetryLimit;
 
+    @Value("${IS_MCI_MASTER_NODE}")
+    private String isMCIMasterNode;
+
     public String getCassandraKeySpace() {
         return cassandraKeySpace;
     }
@@ -200,5 +203,10 @@ public class MCIProperties {
     public String getMciOrgCode() {
         return mciOrgCode;
     }
+
+    public boolean getIsMCIMasterNode() {
+        return Boolean.parseBoolean(isMCIMasterNode);
+    }
+
 
 }
