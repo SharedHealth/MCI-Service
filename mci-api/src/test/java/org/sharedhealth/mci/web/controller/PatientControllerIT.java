@@ -13,6 +13,7 @@ import org.mockito.MockitoAnnotations;
 import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.sharedhealth.mci.domain.constant.MCIConstants;
 import org.sharedhealth.mci.domain.model.*;
+import org.sharedhealth.mci.domain.util.StringUtil;
 import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.sharedhealth.mci.searchmapping.repository.PatientSearchMappingRepository;
 import org.sharedhealth.mci.web.dummy.InvalidPatient;
@@ -92,6 +93,8 @@ public class PatientControllerIT extends BaseControllerTest {
     @Test
     public void shouldCreateAPatient() throws Exception {
         patientData.setHidCardStatus(MCIConstants.HID_CARD_STATUS_REGISTERED);
+        patientData.setSurName("");
+
         String json = mapper.writeValueAsString(patientData);
 
         MvcResult result = mockMvc.perform(post(API_END_POINT_FOR_PATIENT)
@@ -114,7 +117,7 @@ public class PatientControllerIT extends BaseControllerTest {
         Map<String, String> mciResponse = objectMapper.readValue(result.getResponse().getContentAsString(), Map.class);
         Patient patient = cassandraOps.selectOneById(Patient.class, mciResponse.get("id"));
         assertEquals(patient.getGivenName(), patientData.getGivenName());
-        assertEquals(patient.getSurName(), patientData.getSurName());
+        assertNull(patient.getSurName());
         assertEquals(patient.getGender(), patientData.getGender());
         assertEquals(patient.getDateOfBirth(), patientData.getDateOfBirth());
         assertEquals(patient.getHidCardStatus(), patientData.getHidCardStatus());
@@ -548,8 +551,10 @@ public class PatientControllerIT extends BaseControllerTest {
 
         PatientData original = getPatientObjectFromString(json);
         original.setGivenName("Updated Given Name");
-
-        MvcResult result = postPatient(mapper.writeValueAsString(original));
+        String updateJson = mapper.writeValueAsString(original);
+        updateJson = StringUtil.removeSuffix(updateJson, "}");
+        updateJson = StringUtil.ensureSuffix(updateJson, ",\"sur_name\":\"\"}");
+        MvcResult result = postPatient(updateJson);
 
         final MCIResponse body = getMciResponse(result);
 
@@ -569,6 +574,7 @@ public class PatientControllerIT extends BaseControllerTest {
         PatientData patient = getPatientObjectFromResponse(asyncResult);
 
         Assert.assertEquals("Updated Given Name", patient.getGivenName());
+        Assert.assertEquals(patient.getSurName(), null);
     }
 
     @Test
@@ -764,6 +770,28 @@ public class PatientControllerIT extends BaseControllerTest {
         PatientData patient = getPatientData(healthId);
 
         assertEquals(patientData1.getPrimaryContactNumber(), patient.getPrimaryContactNumber());
+        assertNotNull(patient.getSurName());
+    }
+
+    @Test
+    public void shouldRemoveSurNameIfNotGiven() throws Exception {
+        String fullPayloadJson = asString("jsons/patient/full_payload.json");
+
+        final MCIResponse createdResponse = createPatient(fullPayloadJson);
+        String healthId = createdResponse.getId();
+        String noSurNameJson = "{\"sur_name\":\"\"}";
+
+        MvcResult updatedResult = mockMvc.perform(put(API_END_POINT_FOR_PATIENT + "/" + healthId)
+                .header(AUTH_TOKEN_KEY, validAccessToken)
+                .header(FROM_KEY, validEmail)
+                .header(CLIENT_ID_KEY, validClientId)
+                .accept(APPLICATION_JSON)
+                .content(noSurNameJson).contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        PatientData patient = getPatientData(healthId);
+        assertEquals("", patient.getSurName());
     }
 
     @Test
@@ -1186,8 +1214,8 @@ public class PatientControllerIT extends BaseControllerTest {
                 .withHeader(CLIENT_ID_KEY, equalTo(mciProperties.getIdpClientId()))
                 .withHeader(FROM_KEY, equalTo(mciProperties.getIdpClientEmail()))
                 .willReturn(aResponse()
-                        .withStatus(HttpStatus.SC_OK)
-                        .withBody(checkHidResponse)
+                                .withStatus(HttpStatus.SC_OK)
+                                .withBody(checkHidResponse)
                 ));
     }
 
@@ -1196,8 +1224,8 @@ public class PatientControllerIT extends BaseControllerTest {
                 .withHeader(AUTH_TOKEN_KEY, equalTo(mciProperties.getIdpAuthToken()))
                 .withHeader(CLIENT_ID_KEY, equalTo(mciProperties.getIdpClientId()))
                 .willReturn(aResponse()
-                        .withStatus(HttpStatus.SC_OK)
-                        .withBody(idpResponse)
+                                .withStatus(HttpStatus.SC_OK)
+                                .withBody(idpResponse)
                 ));
     }
 }

@@ -73,7 +73,7 @@ public class PatientData implements Diffable<PatientData> {
 
     @JsonProperty(SUR_NAME)
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^([A-Za-z0-9]{1,25})$", message = ERROR_CODE_PATTERN)
+    @Pattern(regexp = "^|([A-Za-z0-9]{1,25})$", message = ERROR_CODE_PATTERN)
     @JsonDeserialize(using = WhiteSpaceRemovalDeserializer.class)
     private String surName;
 
@@ -83,7 +83,7 @@ public class PatientData implements Diffable<PatientData> {
     @Length(min = 1, message = ERROR_CODE_PATTERN)
     @Date(message = ERROR_CODE_PATTERN)
     @JsonDeserialize(using = DateStringDeserializer.class)
-    private String dateOfBirth;
+    private String dateOfBirth; 
 
     @JsonProperty(DOB_TYPE)
     @JsonInclude(NON_EMPTY)
