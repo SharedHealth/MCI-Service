@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import org.apache.http.HttpStatus;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -13,8 +12,6 @@ import org.mockito.MockitoAnnotations;
 import org.sharedhealth.mci.domain.config.MCIProperties;
 import org.sharedhealth.mci.domain.constant.MCIConstants;
 import org.sharedhealth.mci.domain.model.*;
-import org.sharedhealth.mci.domain.util.StringUtil;
-import org.sharedhealth.mci.domain.util.TimeUuidUtil;
 import org.sharedhealth.mci.searchmapping.repository.PatientSearchMappingRepository;
 import org.sharedhealth.mci.web.dummy.InvalidPatient;
 import org.sharedhealth.mci.web.handler.ErrorHandler;
@@ -29,7 +26,10 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
@@ -534,47 +534,6 @@ public class PatientControllerIT extends BaseControllerTest {
         PatientData patient = getPatientObjectFromResponse(asyncResult);
 
         assertPatientEquals(original, patient);
-    }
-
-    @Test
-    public void shouldGoToUpdateFlowIfCreatePatientRequestWithSimilarPatientData() throws Exception {
-        String json = asString("jsons/patient/full_payload.json");
-        MvcResult firstTimeResponse = postPatient(json);
-
-        final MCIResponse body1 = getMciResponse(firstTimeResponse);
-        String healthId = body1.getId();
-
-        PatientData patientData = getPatientObjectFromString(json);
-        patientData.setHealthId(healthId);
-        patientData.setUpdatedAt(TimeUuidUtil.uuidForDate(new Date()));
-        searchMappingRepository.saveMappings(patientData);
-
-        PatientData original = getPatientObjectFromString(json);
-        original.setGivenName("Updated Given Name");
-        String updateJson = mapper.writeValueAsString(original);
-        updateJson = StringUtil.removeSuffix(updateJson, "}");
-        updateJson = StringUtil.ensureSuffix(updateJson, ",\"sur_name\":\"\"}");
-        MvcResult result = postPatient(updateJson);
-
-        final MCIResponse body = getMciResponse(result);
-
-        Assert.assertEquals(202, body.getHttpStatus());
-
-        MvcResult getResult = mockMvc.perform(get(API_END_POINT_FOR_PATIENT + "/" + healthId)
-                .header(AUTH_TOKEN_KEY, validAccessToken)
-                .header(FROM_KEY, validEmail)
-                .header(CLIENT_ID_KEY, validClientId)
-                .accept(APPLICATION_JSON)
-                .contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        final ResponseEntity asyncResult = (ResponseEntity<PatientData>) getResult.getAsyncResult();
-
-        PatientData patient = getPatientObjectFromResponse(asyncResult);
-
-        Assert.assertEquals("Updated Given Name", patient.getGivenName());
-        Assert.assertEquals(patient.getSurName(), null);
     }
 
     @Test

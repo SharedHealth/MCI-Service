@@ -20,8 +20,8 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 import static java.lang.String.format;
-import static org.apache.commons.collections4.CollectionUtils.*;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.sharedhealth.mci.domain.constant.JsonConstants.HID;
 import static org.sharedhealth.mci.domain.constant.JsonConstants.RELATIONS;
 import static org.sharedhealth.mci.utils.HttpUtil.AVAILABILITY_KEY;
@@ -61,10 +61,6 @@ public class PatientService {
 
     public MCIResponse createPatientForMCI(PatientData patient) throws InterruptedException {
         logger.debug("Create patient");
-        PatientData existingPatient = findPatientByMultipleIds(patient);
-        if (existingPatient != null) {
-            return this.update(patient, existingPatient.getHealthId());
-        }
 
         MCIResponse mciResponse;
         try {
@@ -87,10 +83,6 @@ public class PatientService {
         if (patientRepository.patientExists(healthId)) {
             return new MCIResponse("Patient with healthId " + healthId + " already exits.", CONFLICT);
         }
-        PatientData existingPatient = findPatientByMultipleIds(patient);
-        if (existingPatient != null) {
-            return this.update(patient, existingPatient.getHealthId());
-        }
         Map response = healthIdService.validateHIDForOrg(healthId, facilityId);
         boolean isValid = (boolean) response.get(AVAILABILITY_KEY);
         if (!isValid) {
@@ -107,52 +99,6 @@ public class PatientService {
         }
     }
 
-    PatientData findPatientByMultipleIds(PatientData patient) {
-        if (!this.containsMultipleIds(patient)) {
-            return null;
-        }
-
-        SearchQuery query = new SearchQuery();
-        query.setNid(patient.getNationalId());
-        List<PatientData> patientsByNid = findAllByQuery(query);
-
-        query = new SearchQuery();
-        query.setBin_brn(patient.getBirthRegistrationNumber());
-        List<PatientData> patientsByBrn = findAllByQuery(query);
-        if (isEmpty(patientsByNid) && isEmpty(patientsByBrn)) {
-            return null;
-        }
-
-        List<PatientData> matchingPatients = (List<PatientData>) intersection(patientsByNid, patientsByBrn);
-        if (isNotEmpty(matchingPatients)) {
-            return matchingPatients.get(0);
-        }
-        matchingPatients = (List<PatientData>) union(patientsByNid, patientsByBrn);
-
-        query = new SearchQuery();
-        query.setUid(patient.getUid());
-        List<PatientData> patientsByUid = findAllByQuery(query);
-
-        matchingPatients = (List<PatientData>) intersection(matchingPatients, patientsByUid);
-        if (isNotEmpty(matchingPatients)) {
-            return matchingPatients.get(0);
-        }
-        return null;
-    }
-
-    boolean containsMultipleIds(PatientData patient) {
-        int count = 0;
-        if (isNotBlank(patient.getNationalId())) {
-            count++;
-        }
-        if (isNotBlank(patient.getBirthRegistrationNumber())) {
-            count++;
-        }
-        if (isNotBlank(patient.getUid())) {
-            count++;
-        }
-        return count > 1;
-    }
 
     public MCIResponse update(PatientData patientData, String healthId) {
         logger.debug(String.format("Update patient: %s", healthId));
