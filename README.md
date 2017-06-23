@@ -12,6 +12,11 @@ This Health ID is referenced in all the other systems to uniquely related inform
 * [Ansible](https://www.ansible.com/)
 * You should have installed [Health-Id Service](https://github.com/SharedHealth/HealthId-Service).
 
+####Setup
+The MCI Server usage Cassandra Db, Identity-Sever and Health-Id Server.
+If you have already provisioned Health-ID server you will have everything which it needs.
+MCI-Server will be running installed on 192.168.33.20. 
+
 ####Steps to setup environment on a VM and get MCI working with Stub Identity Server and sample locations
 ##### Checkout the following repositories (under a common parent directory)
 * [FreeSHR-Playbooks](https://github.com/SharedHealth/FreeSHR-Playbooks)
@@ -77,15 +82,15 @@ INSERT INTO locations ("code", "name", "active","parent") VALUES ('33','Urban Wa
 Now you can create a patient. Before you can interact with MCI Service, you need to sign-in with the IdP and get an access token. You need to post as a correct user.
 Example steps:
 * Login to IdP and get a token:
-  >curl http://192.168.33.19:8084/signin -H "X-Auth-Token:local-user-auth-token" -H "client_id:18700" --form "email=local-user@test.com" --form "password=password"
+  >curl http://192.168.33.19:8084/signin -H "X-Auth-Token:local-facility-admin_auth_token" -H "client_id:18701" --form "email=local-facility-admin@test.com" --form "password=password"
   
 
 (The above should return you an access_token)
 
-* With the above token, now you can POST to http://192.168.33.19:8081/api/v1/patients a JSON content to create a patient, with the following headers
+* With the above token, now you can POST to http://192.168.33.20:8081/api/v1/patients a JSON content to create a patient, with the following headers
   * X-Auth-Token:{the token you received in the previous step}
-  * client_id:18700 { this is client id for the user who signed in}
-  * From: local-user@test.com
+  * client_id:18701 { this is client id for the user who signed in}
+  * From: local-facility-admin@test.com
   * Content-Type:application/json
 
 Sample json to create a patient:
@@ -114,11 +119,11 @@ The above should return you a HTTP 201 response with something like the below co
 }
 ```
 
-* To view the patient record you just created do a GET to `http://192.168.33.19:8081/api/v1/patients/98000173958` with the following headers
+* To view the patient record you just created do a GET to `http://192.168.33.20:8081/api/v1/patients/98000173958` with the following headers
   * X-Auth-Token:{the token you received in the previous step}
-  * client_id:18700 { this is client id for the user who signed in}
-  * From: local-user@test.com
-* You can also search by 'nid' parameter. `GET http://192.168.33.19:8081/api/v1/patients?nid=1666321725072
+  * client_id:18701 { this is client id for the user who signed in}
+  * From: local-facility-admin@test.com
+* You can also search by 'nid' parameter. `GET http://192.168.33.20:8081/api/v1/patients?nid=1666321725072
 
 The sub IdP doesn't expire the token unless the Identity-Service is restarted. So you can keep using the "access_token". In reality, the access_token is short-lived and also can be invalidated.
 
