@@ -1,23 +1,23 @@
-#MCI Service
+# MCI Service
 The Master Client Index (MCI) is a repository of the patients in the health ecosystem.
 The MCI stores the patient information and provides an unique Health ID to the patient.
 This Health ID is referenced in all the other systems to uniquely related information regarding a patient.
 
 ## Setting up the environment
 
-###Prerequisites
+### Prerequisites
 
 * [VirtualBox](https://www.virtualbox.org/)
 * [Vagrant](http://docs.vagrantup.com/v2/installation/index.html)
 * [Ansible](https://www.ansible.com/)
 * You should have installed [Health-Id Service](https://github.com/SharedHealth/HealthId-Service).
 
-####Setup
+#### Setup
 The MCI Server usage Cassandra Db, Identity-Sever and Health-Id Server.
 If you have already provisioned Health-ID server you will have everything which it needs.
 MCI-Server will be running installed on 192.168.33.20. 
 
-####Steps to setup environment on a VM and get MCI working with Stub Identity Server and sample locations
+#### Steps to setup environment on a VM and get MCI working with Stub Identity Server and sample locations
 ##### Checkout the following repositories (under a common parent directory)
 * [FreeSHR-Playbooks](https://github.com/SharedHealth/FreeSHR-Playbooks)
 * [MCI-Service](https://github.com/SharedHealth/MCI-Service)
