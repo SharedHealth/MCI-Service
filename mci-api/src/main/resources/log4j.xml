@@ -31,6 +31,7 @@
     <logger name="org.sharedhealth.mci" additivity="false">
         <level value="${MCI_LOG_LEVEL}"/>
         <appender-ref ref="VAR_LOG"/>
+        <appender-ref ref="CONSOLE"/>
     </logger>
 
     <logger name="org.sharedhealth.mci.web.controller">
