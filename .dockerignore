@@ -1,0 +1,4 @@
+**/**
+!Dockerfile
+!env/docker_mci
+!mci-api/build/distributions/mci-*.noarch.rpm
