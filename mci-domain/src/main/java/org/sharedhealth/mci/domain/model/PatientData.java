@@ -52,7 +52,7 @@ public class PatientData implements Diffable<PatientData> {
 
     @JsonProperty(NID)
     @JsonInclude(NON_EMPTY)
-    @Pattern(regexp = "^|[\\d]{13}|[\\d]{17}", message = ERROR_CODE_PATTERN)
+    @Pattern(regexp = "^|[\\d]{13}|[\\d]{17}|[\\d]{10}", message = ERROR_CODE_PATTERN)
     private String nationalId;
 
     @JsonProperty(BIN_BRN)
